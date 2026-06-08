@@ -16,7 +16,9 @@ export default class startProcess extends React.PureComponent {
   componentDidMount() {
     getStartProcess().then((res) => {
       if (res.data) {
-        this.setState({ processList: res.data.data });
+        this.setState({
+          processList: Array.isArray(res.data.data) ? res.data.data : []
+        });
       }
     });
     this.handleResize();
@@ -90,6 +92,14 @@ export default class startProcess extends React.PureComponent {
 
   render() {
     const { processList, columnNums } = this.state;
+    if (!processList.length) {
+      return (
+        <div className="sup-start-process">
+          <div className="sup-start-process-empty">暂无数据</div>
+        </div>
+      );
+    }
+
     const sortData = this.sortData(processList);
     const proportion = Math.floor(100 / columnNums);
     const processLayout = sortData.map((columns, index) => {
@@ -102,7 +112,7 @@ export default class startProcess extends React.PureComponent {
         >
           {columns.map((columnItem) => {
             return (
-              <div className="process-box">
+              <div className="process-box" key={columnItem.key || columnItem.name}>
                 <p className="pb-title">{columnItem.name} </p>
                 <ul className="pb-list">
                   {columnItem.items.map((e, i) => (

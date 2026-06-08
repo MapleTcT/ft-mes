@@ -1,5 +1,5 @@
 import { fetchModuleList, addIntl, createI18nKey } from 'root/services/intl';
-import { request } from 'sup-rc-utility';
+import { request } from 'root/services/request';
 import MockJS from 'mockjs';
 import { XLSX_TYPE } from './constant';
 

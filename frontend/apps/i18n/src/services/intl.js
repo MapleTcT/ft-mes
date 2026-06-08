@@ -1,4 +1,32 @@
-import { request } from 'sup-rc-utility';
+import { request } from './request';
+
+export const DEFAULT_INTL_LANGUAGES = [
+  {
+    id: 1,
+    languCode: 'zh_CN',
+    languType: '中文（简体）',
+    languName: '中文（简体）',
+    used: true
+  },
+  {
+    id: 2,
+    languCode: 'zh_HK',
+    languType: '中文（香港）',
+    languName: '中文（繁体）',
+    used: true
+  },
+  {
+    id: 3,
+    languCode: 'en_US',
+    languType: '英文（美国）',
+    languName: 'English',
+    used: true
+  }
+];
+
+export function normalizeIntlLanguages(list) {
+  return Array.isArray(list) && list.length ? list : DEFAULT_INTL_LANGUAGES;
+}
 
 // 国际化列表查询
 export function fetchIntlList(data) {
@@ -40,7 +68,13 @@ export function fetchIntlLans() {
   return request({
     method: 'GET',
     url: '/inter-api/i18n/v1/language/all'
-  });
+  }).then((res) => ({
+    ...res,
+    data: {
+      ...res.data,
+      list: normalizeIntlLanguages(res.data && res.data.list)
+    }
+  }));
 }
 
 // 国际化语言修改

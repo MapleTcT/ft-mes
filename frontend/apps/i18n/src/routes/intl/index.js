@@ -234,7 +234,7 @@ class IntlManage extends React.Component {
   render() {
     const { lanList } = this.state;
 
-    return lanList.length ? (
+    return (
       <Layout className={style.layout}>
         <Header className={style.topHeader}>
           {this.intl('intlSettingHeader')}
@@ -245,18 +245,33 @@ class IntlManage extends React.Component {
           {/* 国际化新增编辑 */}
           <IntlEditModal {...this.getIntlEditModalProps()} />
           {/* 国际化列表 */}
-          <IntlList
-            hasAuth={this.hasAuth}
-            ref={this.intlTable}
-            lanList={lanList}
-            handleIntlSetting={this.handleIntlSetting}
-            handleAddIntl={this.handleAddIntl}
-            handleEditIntl={this.handleEditIntl}
-            handleRemoveIntl={this.handleRemoveIntl}
-          />
+          {lanList.length ? (
+            <IntlList
+              hasAuth={this.hasAuth}
+              ref={this.intlTable}
+              lanList={lanList}
+              handleIntlSetting={this.handleIntlSetting}
+              handleAddIntl={this.handleAddIntl}
+              handleEditIntl={this.handleEditIntl}
+              handleRemoveIntl={this.handleRemoveIntl}
+            />
+          ) : (
+            <div
+              style={{
+                minHeight: 220,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#8c9cad',
+                fontSize: 14
+              }}
+            >
+              暂无数据
+            </div>
+          )}
         </Content>
       </Layout>
-    ) : null;
+    );
   }
 }
 

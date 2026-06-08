@@ -93,6 +93,14 @@ TARGETED_OVERRIDES = {
     "supfusion-baseApplications.properties": {
         "WebSocketUrl": f"{env('ADP_PUBLIC_HOST', '10.11.100.17')}:{env('ADP_HTTP_PORT', '18080')}",
         "bap.allow.empty.password": "false",
+        "mybatis-plus.mapper-locations[0]": "classpath*:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
+        "mybatis-plus.mapper-locations[1]": "classpath*:mappers/*.xml",
+        "mybatis-plus.mapper-locations[2]": "classpath*:mapper/*.xml",
+        "mybatis-plus.mapper-locations[3]": "classpath*:mappers/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
+    },
+    "supfusion-signature.properties": {
+        "mybatis-plus.mapper-locations[0]": "classpath*:mappers/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
+        "mybatis-plus.mapper-locations[1]": "classpath*:mappers/*.xml",
     },
     "supfusion-adp-lite.properties": {
         "supfusion.cloud.i18n.host": f"http://{env('I18N_HOST', 'i18n')}:{env('I18N_PORT', '8080')}",
@@ -102,7 +110,7 @@ TARGETED_OVERRIDES = {
     },
     "supfusion-jwt-common.properties": {
         "supfusion.cloud.jwt.tokenHead": "Bearer",
-        "supfusion.cloud.jwt.secret": env("SUPOS_JWT_SECRET", "adp-test-jwt-secret"),
+        "supfusion.cloud.jwt.secret": env("SUPOS_JWT_PUBLIC_KEY", env("SUPOS_JWT_SECRET", "adp-test-jwt-secret")),
     },
     "supfusion-gateway.properties": {
         "jwt.secret": env("SUPOS_JWT_SECRET", "adp-test-jwt-secret"),
@@ -117,6 +125,12 @@ TARGETED_OVERRIDES = {
     },
     "supfusion-configuration-services.properties": {
         "work.dir": "/opt/adp",
+    },
+    "supfusion-mybatis-common.properties": {
+        "mybatis-plus.mapper-locations[0]": "classpath*:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
+        "mybatis-plus.mapper-locations[1]": "classpath*:mappers/*.xml",
+        "mybatis-plus.mapper-locations[2]": "classpath*:mapper/*.xml",
+        "mybatis-plus.mapper-locations[3]": "classpath*:mappers/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
     },
 }
 

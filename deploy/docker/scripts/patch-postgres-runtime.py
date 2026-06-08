@@ -6,6 +6,8 @@ import io
 import json
 import re
 import shutil
+import subprocess
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Iterable
@@ -27,6 +29,13 @@ DBP_PATCH_CLASSES = (
     "com/supcon/supfusion/framework/scaffold/dbp/factory/populator/version/VersionTableProviderFactory.class",
     "com/supcon/supfusion/framework/scaffold/dbp/util/DataId.class",
     "com/supcon/supfusion/framework/scaffold/dbp/util/TenantUtils.class",
+)
+
+DEFAULT_DBP_OVERRIDE_CLASS_DIR = (
+    Path(__file__).resolve().parents[1]
+    / "patches"
+    / "scaffold-dbp-postgresql-url"
+    / "classes"
 )
 
 UNSUPPORTED_SQL_PATTERNS = (
@@ -493,6 +502,56 @@ def collect_donor_classes(jar_paths: Iterable[Path]) -> dict[str, bytes]:
     raise SystemExit("No scaffold-dbp donor with PostgreSQL classes was found.")
 
 
+def extract_scaffold_dbp_classpath(jar_paths: Iterable[Path]) -> Path:
+    for outer in jar_paths:
+        with zipfile.ZipFile(outer, "r") as zf:
+            for lib_name in zf.namelist():
+                if lib_name.startswith("BOOT-INF/lib/scaffold-dbp-") and lib_name.endswith(".jar"):
+                    tmp = Path(tempfile.mkdtemp(prefix="adp-dbp-classpath-")) / Path(lib_name).name
+                    tmp.write_bytes(zf.read(lib_name))
+                    return tmp
+    raise SystemExit("No scaffold-dbp nested JAR was found for compiling DBP patch overrides.")
+
+
+def compile_class_overrides(override_dir: Path | None, jar_paths: Iterable[Path]) -> None:
+    if override_dir is None:
+        return
+    source_dir = override_dir.parent / "src"
+    if not source_dir.exists():
+        return
+    missing_sources: list[Path] = []
+    for class_name in DBP_PATCH_CLASSES:
+        source_path = source_dir / class_name.removesuffix(".class")
+        source_path = source_path.with_suffix(".java")
+        if source_path.exists() and not (override_dir / class_name).exists():
+            missing_sources.append(source_path)
+    if not missing_sources:
+        return
+    javac = shutil.which("javac")
+    if javac is None:
+        raise SystemExit(
+            f"DBP patch override classes are missing under {override_dir}, "
+            "and javac is not available to compile them."
+        )
+    classpath = extract_scaffold_dbp_classpath(jar_paths)
+    override_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [javac, "-source", "8", "-target", "8", "-cp", str(classpath), "-d", str(override_dir)]
+        + [str(path) for path in missing_sources],
+        check=True,
+    )
+
+
+def apply_class_overrides(donor_classes: dict[str, bytes], override_dir: Path | None) -> dict[str, bytes]:
+    if override_dir is None:
+        return donor_classes
+    for class_name in DBP_PATCH_CLASSES:
+        override_path = override_dir / class_name
+        if override_path.exists():
+            donor_classes[class_name] = override_path.read_bytes()
+    return donor_classes
+
+
 def patch_nested_jar(
     nested_name: str,
     nested_data: bytes,
@@ -656,11 +715,18 @@ def main() -> None:
     parser.add_argument("--report", type=Path, required=True, help="JSON report output path")
     parser.add_argument("--backup-suffix", default=".pre-pgpatch.bak")
     parser.add_argument("--keep-oracle-drivers", action="store_true")
+    parser.add_argument(
+        "--patch-class-dir",
+        type=Path,
+        default=DEFAULT_DBP_OVERRIDE_CLASS_DIR,
+        help="Optional directory containing compiled DBP class overrides.",
+    )
     args = parser.parse_args()
 
     jars = sorted(args.base_server.glob("*/*.jar"))
     backup_jars = sorted(args.base_server.glob("*/*.jar" + args.backup_suffix))
-    donor_classes = collect_donor_classes(backup_jars + jars)
+    compile_class_overrides(args.patch_class_dir, backup_jars + jars)
+    donor_classes = apply_class_overrides(collect_donor_classes(backup_jars + jars), args.patch_class_dir)
     reports = [
         patch_outer_jar(jar, donor_classes, args.backup_suffix, not args.keep_oracle_drivers)
         for jar in jars
