@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>supfusion-orgmanagement</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>orgmanagement-rbac</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-openapi</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-webapi</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-service</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-dao</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-manager</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-common</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-resources</artifactId>
+            <version>${rbac.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>cloud-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>tenant-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-dbp</artifactId>
+        </dependency>
+    </dependencies>
+</project>

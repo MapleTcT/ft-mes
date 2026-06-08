@@ -1,0 +1,140 @@
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: ${MONITOR_ENABLED:true}
+    binders:
+      files:
+        enabled: ${MONITOR_ENABLED:true}
+      jvm:
+        enabled: ${MONITOR_ENABLED:true}
+      logback:
+        enabled: ${MONITOR_ENABLED:true}
+      processor:
+        enabled: ${MONITOR_ENABLED:true}
+      uptime:
+        enabled: ${MONITOR_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+    shutdown:
+      enabled: false
+  health:
+    db:
+      enabled: false
+      
+spring:
+  application:
+    name: printer
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  profiles:
+    active: prod
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SUPOS_KAFKA_BROKERS:kafka:9092}
+          auto-create-topics: true
+      bindings:
+        tenant-input:
+          destination: supOS_tenant
+          content-type: application/json
+          group: ${spring.application.name}
+    nacos:
+      config:
+        enabled: false
+  kafka:
+    jaas:
+      enabled: false
+server:
+  port: 8080
+  servlet:
+    context-path: /
+supfusion:
+  cloud:
+    jwt:
+      enabled: ${SUPOS_JWT_ENABLED:true}
+      header: ${SUPOS_JWT_HEADER:Authorization}
+      tokenHead: ${SUPOS_JWT_HEADER_TOKEN:Bearer}
+      symmetric: false
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+      expiration: 604800
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    config-center:
+      enabled: true
+      type: json
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+      partition: true
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    datasource:
+      connect:
+        use-system: ${SUPOS_SYSTEM_DB_USE:false}
+        system:
+          db-type: ${SUPOS_SYSTEM_DB_TYPE:mariadb}
+          db-name: ${SUPOS_SYSTEM_DB_NAME:supfusion}
+          host: ${SUPOS_SYSTEM_DB_HOST:mariadb}
+          port: ${SUPOS_SYSTEM_DB_PORT:3306}
+          username: ${SUPOS_SYSTEM_DB_USERNAME:root}
+          password: ${SUPOS_SYSTEM_DB_PASSWORD:123456}
+      druid:
+        init-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        min-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        max-pool-size: ${SUPOS_DS_MAX_POOL_SIZE:10}
+        idle-live-millis: ${SUPOS_DS_IDLE_TIME:30000}
+        max-live-millis: ${SUPOS_DS_LIVE_TIME:1800000}
+        connection-timeout: ${SUPOS_DS_CONN_TIME:15000}
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'
+    tenant:
+      sync-cache: ${SUPOS_TENANT_SYNC_CACHE:true}
+      init-getter: ${SUPOS_TENANT_INIT_GETTER:true}
+      register: ${SUPOS_TENANT_REGISTER:true}
+    i18n:
+      enabled: ${SUPOS_I18N_ENBALED:true}
+      host: http://i18n-service:8080
+      basename: i18n/
+      locale-modules:
+        - printer
+      module-versions:
+        - printer202104101548
+      modules:
+        - printer
+      use-get-all-module: true
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.printer.dao.po
+  configuration:
+    log-impl:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 12000
+  httpclient:
+    enabled: true

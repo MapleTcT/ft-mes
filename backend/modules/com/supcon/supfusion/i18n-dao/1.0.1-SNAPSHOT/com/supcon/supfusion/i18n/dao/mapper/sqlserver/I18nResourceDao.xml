@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nResourceDao">
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" id="supfusionI18nResourceMap">
+        <result property="id" column="id"/>
+        <result property="i18nKey" column="i18n_key"/>
+        <result property="i18nValue" column="i18n_value"/>
+        <result property="languCode" column="langu_code"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleVersionCode" column="module_version_code"/>
+        <result property="valid" column="valid"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+    </resultMap>
+
+
+
+    <insert id="insertByMyid" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        insert into supfusion_i18n_resource(
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time )
+        values(
+        #{id},
+        #{i18nKey},
+        #{i18nValue},
+        #{languCode},
+        #{moduleCode},
+        #{moduleVersionCode},
+        #{valid},
+        #{creator},
+        #{modifier},
+        #{createTime},
+        #{modifyTime}
+        )
+    </insert>
+
+    <insert id="saveBatch" parameterType="list">
+        insert into supfusion_i18n_resource (
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time )
+        values
+        <foreach collection="list" item="item" separator=",">
+            ( #{item.id},
+            #{item.i18nKey},
+            #{item.i18nValue},
+            #{item.languCode},
+            #{item.moduleCode},
+            #{item.moduleVersionCode},
+            #{item.valid},
+            #{item.creator},
+            #{item.modifier},
+            #{item.createTime},
+            #{item.modifyTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateByI18nKeyAndValidOne" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        update supfusion_i18n_resource
+        <set>
+            <if test="modifyTime != null">modify_time = #{modifyTime}</if>
+        </set>
+        where i18n_key = #{i18nKey} and valid = '1'
+    </update>
+
+    <!--查询语句-->
+    <!--按条件统计总条数-->
+    <select id="selectByKeyAndValueAndLanguageCount" resultType="int">
+        SELECT
+            count( t.i18n_key )
+        FROM (
+            SELECT
+                i18n_key
+            FROM supfusion_i18n_resource
+                WHERE  valid = '1'
+                <if test="i18n_key != null and i18n_key.trim() != ''">
+                    AND i18n_key LIKE '%${i18n_key}%'
+                </if>
+                <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+                    AND langu_code = #{langu_code} AND i18n_value LIKE '%${i18n_value}%'
+                </if>
+            group by i18n_key
+        )  t
+    </select>
+
+
+    <select id="selectKeyByKeyAndValueAndLanguage" resultType="string">
+        SELECT i18n_key
+        FROM (
+            <!--  按为分组创建行号     -->
+            SELECT
+                ROW_NUMBER() over(ORDER BY d.modify_time DESC,d.i18n_key DESC) ROW_NUM ,i18n_key
+            FROM (
+                 <!--  按条件查询并分组     -->
+                SELECT *
+                FROM (
+                    SELECT
+                        ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                        i18n_key,modify_time
+                    FROM
+                        supfusion_i18n_resource r
+                    WHERE
+                        valid = 1
+                        <if test="i18n_key != null and i18n_key.trim() != ''">
+                            AND i18n_key LIKE '%${i18n_key}%'
+                        </if>
+                        <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+                            AND langu_code = #{langu_code} AND i18n_value LIKE '%${i18n_value}%'
+                        </if>
+                ) t1
+                WHERE
+                    t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="selectByKeyOrValueCount" resultType="int">
+        SELECT
+            count( t.i18n_key )
+        FROM (
+            SELECT
+                i18n_key
+            FROM supfusion_i18n_resource
+            WHERE  valid = '1'
+                <if test="i18n_key != null and i18n_key.trim() != ''">
+                    AND i18n_key LIKE '%${i18n_key}%'
+                </if>
+                <if test=" i18n_value != null and i18n_value.trim() != '' ">
+                    AND i18n_value LIKE '%${i18n_value}%'
+                </if>
+        group by i18n_key
+        )  t
+    </select>
+
+
+    <select id="selectByKeyOrValue" resultType="string">
+        SELECT i18n_key
+        FROM (
+            <!--  按为分组创建行号     -->
+            SELECT
+                ROW_NUMBER() over(ORDER BY d.modify_time DESC,d.i18n_key DESC ) ROW_NUM ,i18n_key
+            FROM (
+                <!--  按条件查询并分组     -->
+                SELECT *
+                FROM (
+                    <!--  按条件查询，以i18n_key分组，modify_time组内排序，并创建组内行号     -->
+                    SELECT
+                        ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                        i18n_key,modify_time
+                    FROM
+                        supfusion_i18n_resource r
+                        WHERE
+                        valid = 1
+                        <if test="i18n_key != null and i18n_key.trim() != ''">
+                            AND i18n_key LIKE '%${i18n_key}%'
+                        </if>
+                        <if test="i18n_value != null and i18n_value.trim() != '' ">
+                            AND r.i18n_value LIKE '%${i18n_value}%'
+                        </if>
+                ) t1
+            WHERE
+                t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="selectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        SELECT
+            id ,
+            i18n_key ,
+            i18n_value ,
+            langu_code ,
+            module_code ,
+            module_version_code ,
+            valid ,
+            creator ,
+            modifier ,
+            create_time ,
+            modify_time
+        FROM
+            supfusion_i18n_resource
+        WHERE
+            valid = '1'
+            AND i18n_key in
+            <foreach item="i18n_key" collection="list" open="(" separator="," close=")">
+                #{i18n_key}
+            </foreach>
+    </select>
+
+    <select id="getAllNeedI18nKeyByModuleCodeAndLanguCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        SELECT
+            id ,
+            i18n_key ,
+            i18n_value ,
+            langu_code ,
+            module_code ,
+            module_version_code ,
+            valid
+        from supfusion_i18n_resource
+        WHERE 1=1
+            <if test="moduleCode != null and moduleCode.trim() != ''  and  languCode != null and languCode.trim() != ''">
+                AND module_code = #{moduleCode} and langu_code = #{languCode} and valid = '1'
+            </if>
+    </select>
+
+
+    <select id="selectByKeys" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM (
+            <!--  按为分组创建行号     -->
+            SELECT
+                ROW_NUMBER() over(ORDER BY d.modify_time DESC,d.i18n_key DESC) ROW_NUM ,i18n_key
+            FROM (
+                <!--  按条件查询并分组     -->
+                SELECT *
+                FROM (
+                    <!--  按条件查询，以i18n_key分组，modify_time组内排序，并创建组内行号     -->
+                    SELECT
+                        ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                        i18n_key,modify_time
+                    FROM
+                        supfusion_i18n_resource r
+                    WHERE
+                        valid = 1
+                        AND
+                        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="or" close=")">
+                            r.i18n_key LIKE '%${i18n_key}%'
+                        </foreach>
+                ) t1
+            WHERE
+                t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="selectByKeysCount" resultType="int" parameterType="map">
+
+        SELECT
+            count( t.i18n_key )
+        FROM (
+            SELECT
+                i18n_key
+            FROM supfusion_i18n_resource
+            WHERE  valid = '1'
+                AND
+                <foreach item="i18n_key" collection="i18nKeys" open="(" separator="or" close=")">
+                    i18n_key LIKE '%${i18n_key}%'
+                </foreach>
+            group by i18n_key
+        )  t
+    </select>
+
+
+    <select id="selectKeysByKeys" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM (
+            SELECT
+                ROW_NUMBER() over(ORDER BY d.modify_time DESC,d.i18n_key DESC) ROW_NUM ,i18n_key
+            FROM (
+                select *
+                FROM (
+                    select
+                        ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                            i18n_key,modify_time
+                    from
+                        supfusion_i18n_resource r
+                    WHERE
+                        valid = 1
+                        AND r.i18n_key in
+                        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="," close=")">
+                            #{i18n_key}
+                        </foreach>
+                ) t1
+                WHERE
+                    t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+    <select id="selectByOneKeyAndValues" resultType="java.lang.String" parameterType="map">
+        SELECT i18n_key
+        FROM (
+            <!--  按为分组创建行号     -->
+            SELECT
+                 ROW_NUMBER() over(ORDER BY d.modify_time DESC,d.i18n_key DESC) ROW_NUM ,i18n_key
+            FROM (
+                <!--  按条件查询并分组     -->
+                SELECT *
+                FROM (
+                    <!--  按条件查询，以i18n_key分组，modify_time组内排序，并创建组内行号     -->
+                    SELECT
+                    ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                    i18n_key,modify_time
+                    FROM
+                    supfusion_i18n_resource r
+                    WHERE
+                    valid = 1
+                    <if test="i18nKey != null and i18nKey.trim() != ''">
+                        AND i18n_key LIKE '%${i18nKey}%'
+                    </if>
+                    <if test="languCode != null and languCode.trim() != ''">
+                        AND langu_code = #{languCode}
+                    </if>
+                    AND
+                    <foreach item="i18n_value" collection="i18nValues" open="(" separator="or" close=")">
+                        i18n_value LIKE '%${i18n_value}%'
+                    </foreach>
+                ) t1
+            WHERE
+                t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="queryKeyByKeyCount" resultType="int" parameterType="map">
+        SELECT
+            count( t.i18n_key )
+        FROM (
+            SELECT
+                i18n_key
+            FROM supfusion_i18n_resource
+            WHERE  valid = '1'
+                AND i18n_key LIKE '%${i18n_key}%'
+            group by i18n_key
+        )  t
+    </select>
+
+
+    <select id="queryKeyByKey" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM (
+            <!--  按为分组创建行号     -->
+            SELECT
+       ROW_NUMBER() over( ORDER BY d.modify_time DESC,d.i18n_key DESC ) ROW_NUM ,i18n_key
+            FROM (
+                <!--  按条件查询并分组     -->
+                SELECT *
+                FROM (
+                <!--  按条件查询，以i18n_key分组，modify_time组内排序，并创建组内行号     -->
+                    SELECT
+                        ROW_NUMBER() over(partition by i18n_key ORDER BY r.modify_time DESC) ROW_ID,
+                        i18n_key,modify_time
+                        FROM
+                        supfusion_i18n_resource r
+                        WHERE
+                        valid = 1
+                        AND i18n_key LIKE '%${i18n_key}%'
+                    ) t1
+                    WHERE
+                        t1.ROW_ID = 1
+            ) d
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_NUM BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="queryValueByValueCount" resultType="int" parameterType="map">
+        SELECT
+            count( i18n_value )
+        FROM (
+            SELECT
+              i18n_value
+            FROM supfusion_i18n_resource
+            WHERE  valid = '1'
+                AND langu_code = #{langu_code}
+                AND i18n_value LIKE '%${i18n_value}%'
+        )  t
+    </select>
+
+
+    <select id="queryValueByValue" resultType="string" parameterType="map">
+        SELECT i18n_value
+        FROM (
+            SELECT
+                ROW_NUMBER() over(ORDER BY r.modify_time DESC) ROW_ID,
+                i18n_value,modify_time
+            FROM
+                supfusion_i18n_resource r
+            WHERE
+                valid = 1
+                AND langu_code = #{langu_code}
+                AND i18n_value LIKE '%${i18n_value}%'
+        ) t
+        where
+        <if test="offset != null and limit != null">
+            t.ROW_ID BETWEEN (${offset}) and (${offset} + ${limit})
+        </if>
+    </select>
+
+
+    <select id="selectByOneKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        select
+        id ,
+        i18n_key ,
+        langu_code ,
+        i18n_value
+        from supfusion_i18n_resource
+        WHERE 1=1
+        <if test="i18nKey != null ">
+            AND i18n_key = #{i18nKey} and valid = '1'
+        </if>
+    </select>
+
+
+    <select id="queryObjectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        select
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time
+        from supfusion_i18n_resource
+        WHERE 1=1
+        <if test="key != null and key.trim() != '' ">
+            AND i18n_key = #{key} and valid = '1'
+        </if>
+    </select>
+
+
+    <delete id="deleteOneByKeyAndLanguCode" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        delete from supfusion_i18n_resource
+        where
+        i18n_key = #{i18nKey}
+        and langu_code = #{languCode}
+    </delete>
+
+
+    <delete id="deleteByIdList" parameterType="list">
+        delete from supfusion_i18n_resource
+        where
+        id in (
+        <foreach collection="list" item="item" index="index" separator=",">
+           #{item}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="deleteListByKeyAndLanguage">
+        delete from supfusion_i18n_resource
+        where
+        i18n_key in (
+        <foreach collection="keys" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+        and langu_code = #{language}
+        and module_code = #{moduleCode}
+    </delete>
+
+</mapper>

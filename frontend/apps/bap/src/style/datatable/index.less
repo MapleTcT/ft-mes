@@ -1,0 +1,37 @@
+@pagination-btn-bg-color: #f5f5f5;
+
+.datagrid-wrapper {
+    * {
+        font-size: 12px;
+        box-sizing: content-box;// IE11 设置初始值bug
+    }
+
+    .paginatorbar:first-of-type {
+        background-color: @pagination-btn-bg-color;
+        border-color: @pagination-btn-bg-color;
+        border-bottom-color: @border-color;
+    }
+
+    .paginatorbar-lc,
+    .paginatorbar-rc {
+        border-color: @pagination-btn-bg-color;
+    }
+
+    .datagrid-hd,
+    .dg-hd-td-inner {
+        background: #fff;
+    }
+}
+
+.datagrid {
+    border-color: @border-color;
+
+    .datagrid-hd {
+        box-sizing: border-box;
+        border-bottom-color: @border-color;
+    }
+
+    .datagrid-ud {
+        height: 31px !important;
+    }
+}

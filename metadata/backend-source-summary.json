@@ -1,0 +1,3258 @@
+{
+  "mavenRepository": "bap-server/assembly/repository/maven",
+  "extractedSourceJars": 250,
+  "totalJavaFiles": 4807,
+  "totalXmlFiles": 398,
+  "modules": [
+    {
+      "group": "com.supcon.msgcenter",
+      "artifact": "msgcenter",
+      "version": "5.0.0.00",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/msgcenter/msgcenter/5.0.0.00/msgcenter-5.0.0.00-sources.jar",
+      "target": "backend/modules/com/supcon/msgcenter/msgcenter/5.0.0.00",
+      "files": {
+        "java": 9,
+        "xml": 2,
+        "properties": 2,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-api/1.0.0.RELEASE/auditlog-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-api/1.0.0.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-common",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-common/1.0.0.RELEASE/auditlog-common-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-common/1.0.0.RELEASE",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-dao",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-dao/1.0.0.RELEASE/auditlog-dao-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-dao/1.0.0.RELEASE",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-manager",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-manager/1.0.0.RELEASE/auditlog-manager-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-manager/1.0.0.RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-openapi",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-openapi/1.0.0.RELEASE/auditlog-openapi-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-openapi/1.0.0.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-service",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-service/1.0.0.RELEASE/auditlog-service-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-service/1.0.0.RELEASE",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auditlog-webapi",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auditlog-webapi/1.0.0.RELEASE/auditlog-webapi-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auditlog-webapi/1.0.0.RELEASE",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-api/1.0.0.RELEASE/auth-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-api/1.0.0.RELEASE",
+      "files": {
+        "java": 26,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-api",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-api/1.0.1.RELEASE/auth-api-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-api/1.0.1.RELEASE",
+      "files": {
+        "java": 32,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/auth-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 51,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/auth-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 26,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-keycloak",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-keycloak/1.0.0-SNAPSHOT/auth-keycloak-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-keycloak/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 29,
+        "xml": 2,
+        "properties": 2,
+        "other": 4
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-keycloak-client-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-keycloak-client-api/1.0.0.RELEASE/auth-keycloak-client-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-keycloak-client-api/1.0.0.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-keycloak-client-api",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-keycloak-client-api/1.0.1.RELEASE/auth-keycloak-client-api-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-keycloak-client-api/1.0.1.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-manager/1.0.0-SNAPSHOT/auth-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 25,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-openapi/1.0.0-SNAPSHOT/auth-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 31,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-resources/1.0.0-SNAPSHOT/auth-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-resources",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-resources/1.0.0.RELEASE/auth-resources-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-resources/1.0.0.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/auth-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 100,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-upgrade",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/auth-upgrade-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "auth-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/auth-webapi/1.0.0-SNAPSHOT/auth-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/auth-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 66,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "basicmanagement-auditlog",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/basicmanagement-auditlog/1.0-SNAPSHOT/basicmanagement-auditlog-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/basicmanagement-auditlog/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "basicmanagement-portal",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/basicmanagement-portal/1.0-SNAPSHOT/basicmanagement-portal-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/basicmanagement-portal/1.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "basicmanagement-printer",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/basicmanagement-printer/1.0-SNAPSHOT/basicmanagement-printer-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/basicmanagement-printer/1.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "basicmanagement-signature",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/basicmanagement-signature/1.0-SNAPSHOT/basicmanagement-signature-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/basicmanagement-signature/1.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "basicmanagement-theme",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/basicmanagement-theme/1.0-SNAPSHOT/basicmanagement-theme-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/basicmanagement-theme/1.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-api/1.0.0-SNAPSHOT/cloud-task-scheduler-server-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-api/1.0.0.RELEASE/cloud-task-scheduler-server-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-api/1.0.0.RELEASE",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-common/1.0.0-SNAPSHOT/cloud-task-scheduler-server-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-dao/1.0.0-SNAPSHOT/cloud-task-scheduler-server-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 9
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-manager/1.0.0-SNAPSHOT/cloud-task-scheduler-server-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-openapi/1.0.0-SNAPSHOT/cloud-task-scheduler-server-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-service/1.0.0-SNAPSHOT/cloud-task-scheduler-server-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 15,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "cloud-task-scheduler-server-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/cloud-task-scheduler-server-webapi/1.0.0-SNAPSHOT/cloud-task-scheduler-server-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/cloud-task-scheduler-server-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-api/1.0.0.RELEASE/configuration-services-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-api/1.0.0.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-base",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/configuration-services-base-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 158,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-dao/1.0.0-SNAPSHOT/configuration-services-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 165,
+        "xml": 1,
+        "properties": 1,
+        "other": 9
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-open-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/configuration-services-open-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 101,
+        "xml": 1,
+        "properties": 1,
+        "other": 316
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-project-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/configuration-services-project-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 16,
+        "xml": 1,
+        "properties": 1,
+        "other": 10
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-services-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/configuration-services-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 140,
+        "xml": 1,
+        "properties": 1,
+        "other": 6
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.configuration",
+      "artifact": "configuration-workflow",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/configuration-workflow-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 771,
+        "xml": 35,
+        "properties": 1,
+        "other": 374
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-api/1.0.0.RELEASE/counter-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-api/1.0.0.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-common/1.0.0-SNAPSHOT/counter-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 9,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-common",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-common/1.0.0.RELEASE/counter-common-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-common/1.0.0.RELEASE",
+      "files": {
+        "java": 9,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-dao/1.0.0-SNAPSHOT/counter-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-sdk",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-sdk/1.0.0-SNAPSHOT/counter-sdk-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-sdk/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-service/1.0.0-SNAPSHOT/counter-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "counter-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/counter-webapi/1.0.0-SNAPSHOT/counter-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/counter-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.custom.propertye",
+      "artifact": "custom-property-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom/propertye/custom-property-common/1.0.0-SNAPSHOT/custom-property-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom/propertye/custom-property-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 26,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.custom.propertye",
+      "artifact": "custom-property-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom/propertye/custom-property-dao/1.0.0-SNAPSHOT/custom-property-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom/propertye/custom-property-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 50,
+        "xml": 11,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.custom.propertye",
+      "artifact": "custom-property-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom/propertye/custom-property-service/1.0.0-SNAPSHOT/custom-property-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom/propertye/custom-property-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 41,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.custom.propertye",
+      "artifact": "custom-property-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom/propertye/custom-property-webapi/1.0.0-SNAPSHOT/custom-property-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom/propertye/custom-property-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 16,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "custom-property-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom-property-api/1.0.0-SNAPSHOT/custom-property-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom-property-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "custom-property-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom-property-common/1.0.0-SNAPSHOT/custom-property-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom-property-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 26,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "custom-property-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom-property-dao/1.0.0-SNAPSHOT/custom-property-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom-property-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 52,
+        "xml": 5,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "custom-property-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom-property-service/1.0.0-SNAPSHOT/custom-property-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom-property-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 43,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "custom-property-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/custom-property-webapi/1.0.0-SNAPSHOT/custom-property-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/custom-property-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 16,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-api/1.0.0.RELEASE/file-server-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-api/1.0.0.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/file-server-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 30,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-dao/1.0.0-SNAPSHOT/file-server-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 11,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-manager/1.0.0-SNAPSHOT/file-server-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-openapi/1.0.0-SNAPSHOT/file-server-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-service/1.0.0-SNAPSHOT/file-server-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 19,
+        "xml": 2,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "file-server-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/file-server-webapi/1.0.0-SNAPSHOT/file-server-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/file-server-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 125,
+        "other": 279
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-api",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-api/1.0.0-RELEASE/flow-api-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-api/1.0.0-RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-api/1.0.0.RELEASE/flow-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-api/1.0.0.RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-common",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE/flow-common-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE",
+      "files": {
+        "java": 146,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-dao",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/flow-dao-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE",
+      "files": {
+        "java": 11,
+        "xml": 8,
+        "properties": 1,
+        "other": 6
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-engine",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-engine/1.0.0-RELEASE/flow-engine-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-engine/1.0.0-RELEASE",
+      "files": {
+        "java": 25,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-openapi",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-openapi/1.0.0-RELEASE/flow-openapi-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-openapi/1.0.0-RELEASE",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-resources",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-resources/1.0.0-RELEASE/flow-resources-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-resources/1.0.0-RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "flow-webapi",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/flow-webapi/1.0.0-RELEASE/flow-webapi-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/flow-webapi/1.0.0-RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.flow",
+      "artifact": "task-center",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/flow/task-center/1.0.0-RELEASE/task-center-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/flow/task-center/1.0.0-RELEASE",
+      "files": {
+        "java": 57,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-auditlog-autoconfigure",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.4.RELEASE/scaffold-boot-auditlog-autoconfigure-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.4.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-auditlog-autoconfigure",
+      "version": "1.0.5.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.5.RELEASE/scaffold-boot-auditlog-autoconfigure-1.0.5.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.5.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-auditlog-autoconfigure",
+      "version": "1.0.6.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.6.RELEASE/scaffold-boot-auditlog-autoconfigure-1.0.6.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-auditlog-autoconfigure/1.0.6.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-kafka-autoconfigure",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-kafka-autoconfigure/1.0.3.RELEASE/scaffold-boot-kafka-autoconfigure-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-kafka-autoconfigure/1.0.3.RELEASE",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-redis-autoconfigure",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-redis-autoconfigure/1.0.3.RELEASE/scaffold-boot-redis-autoconfigure-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-redis-autoconfigure/1.0.3.RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-starter-auditlog",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.4.RELEASE/scaffold-boot-starter-auditlog-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.4.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-starter-auditlog",
+      "version": "1.0.5.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.5.RELEASE/scaffold-boot-starter-auditlog-1.0.5.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.5.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-starter-auditlog",
+      "version": "1.0.6.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.6.RELEASE/scaffold-boot-starter-auditlog-1.0.6.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-starter-auditlog/1.0.6.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-starter-kafka",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-starter-kafka/1.0.3.RELEASE/scaffold-boot-starter-kafka-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-starter-kafka/1.0.3.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework.boot",
+      "artifact": "scaffold-boot-starter-redis",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/boot/scaffold-boot-starter-redis/1.0.3.RELEASE/scaffold-boot-starter-redis-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/boot/scaffold-boot-starter-redis/1.0.3.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework",
+      "artifact": "scaffold-auditlog",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/scaffold-auditlog/1.0.4.RELEASE/scaffold-auditlog-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.4.RELEASE",
+      "files": {
+        "java": 31,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework",
+      "artifact": "scaffold-auditlog",
+      "version": "1.0.5.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/scaffold-auditlog/1.0.5.RELEASE/scaffold-auditlog-1.0.5.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.5.RELEASE",
+      "files": {
+        "java": 31,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework",
+      "artifact": "scaffold-auditlog",
+      "version": "1.0.6.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/scaffold-auditlog/1.0.6.RELEASE/scaffold-auditlog-1.0.6.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.6.RELEASE",
+      "files": {
+        "java": 34,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework",
+      "artifact": "scaffold-kafka",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/scaffold-kafka/1.0.3.RELEASE/scaffold-kafka-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/scaffold-kafka/1.0.3.RELEASE",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework",
+      "artifact": "scaffold-redis",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework/scaffold-redis/1.0.3.RELEASE/scaffold-redis-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework/scaffold-redis/1.0.3.RELEASE",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-auditlog-autoconfigure",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-auditlog-autoconfigure/1.0.4.RELEASE/scaffold-boot-auditlog-autoconfigure-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-auditlog-autoconfigure/1.0.4.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-kafka-autoconfigure",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-kafka-autoconfigure/1.0.3.RELEASE/scaffold-boot-kafka-autoconfigure-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-kafka-autoconfigure/1.0.3.RELEASE",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-redis-autoconfigure",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-redis-autoconfigure/1.0.3.RELEASE/scaffold-boot-redis-autoconfigure-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-redis-autoconfigure/1.0.3.RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 3
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-starter-auditlog",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-auditlog/1.0.4.RELEASE/scaffold-boot-starter-auditlog-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-auditlog/1.0.4.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-starter-kafka",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-kafka/1.0.3.RELEASE/scaffold-boot-starter-kafka-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-kafka/1.0.3.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1.boot",
+      "artifact": "scaffold-boot-starter-redis",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-redis/1.0.3.RELEASE/scaffold-boot-starter-redis-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/boot/scaffold-boot-starter-redis/1.0.3.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1",
+      "artifact": "scaffold-auditlog",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/scaffold-auditlog/1.0.4.RELEASE/scaffold-auditlog-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/scaffold-auditlog/1.0.4.RELEASE",
+      "files": {
+        "java": 31,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1",
+      "artifact": "scaffold-kafka",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/scaffold-kafka/1.0.3.RELEASE/scaffold-kafka-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/scaffold-kafka/1.0.3.RELEASE",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.framework1",
+      "artifact": "scaffold-redis",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/framework1/scaffold-redis/1.0.3.RELEASE/scaffold-redis-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/framework1/scaffold-redis/1.0.3.RELEASE",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-common",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-common/1.0.1-SNAPSHOT/i18n-common-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-common/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 20,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-dao",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/i18n-dao-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 17,
+        "xml": 25,
+        "properties": 1,
+        "other": 6
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-inter-api",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-inter-api/1.0.1-SNAPSHOT/i18n-inter-api-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-inter-api/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 10,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-manager",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-manager/1.0.1-SNAPSHOT/i18n-manager-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-manager/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-open-api",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-open-api/1.0.1-SNAPSHOT/i18n-open-api-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-open-api/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-resources",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-resources/1.0.1-SNAPSHOT/i18n-resources-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-resources/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 8,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-service",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/i18n-service-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 27,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-service-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-service-api/1.0.0.RELEASE/i18n-service-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-service-api/1.0.0.RELEASE",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "i18n-service-sdk",
+      "version": "1.0.1-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/i18n-service-sdk/1.0.1-SNAPSHOT/i18n-service-sdk-1.0.1-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/i18n-service-sdk/1.0.1-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-api",
+      "version": "1.0.2.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-api/1.0.2.RELEASE/iam-api-1.0.2.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-api/1.0.2.RELEASE",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-common",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-common/1.0.6-SNAPSHOT/iam-common-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-common/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-dao",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-dao/1.0.6-SNAPSHOT/iam-dao-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-dao/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-manager",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-manager/1.0.6-SNAPSHOT/iam-manager-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-manager/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-openapi",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-openapi/1.0.6-SNAPSHOT/iam-openapi-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-openapi/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-service",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-service/1.0.6-SNAPSHOT/iam-service-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-service/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "iam-webapi",
+      "version": "1.0.6-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/iam-webapi/1.0.6-SNAPSHOT/iam-webapi-1.0.6-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/iam-webapi/1.0.6-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-api/1.0.0.RELEASE/license-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-api/1.0.0.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/license-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-dao/1.0.0-SNAPSHOT/license-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-manager/1.0.0-SNAPSHOT/license-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-openapi/1.0.0-SNAPSHOT/license-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/license-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "license-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/license-webapi/1.0.0-SNAPSHOT/license-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/license-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-api/1.0.0.RELEASE/module-registry-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-api/1.0.0.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-api",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-api/1.0.1.RELEASE/module-registry-api-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-api/1.0.1.RELEASE",
+      "files": {
+        "java": 9,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-dao",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-dao/1.0.0-RELEASE/module-registry-dao-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-dao/1.0.0-RELEASE",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-dao",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-dao/1.0.1.RELEASE/module-registry-dao-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-dao/1.0.1.RELEASE",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-resources",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-resources/1.0.0-RELEASE/module-registry-resources-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-resources/1.0.0-RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-resources",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-resources/1.0.1.RELEASE/module-registry-resources-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-resources/1.0.1.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-server",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-server/1.0.0-RELEASE/module-registry-server-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-server/1.0.0-RELEASE",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-server",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-server/1.0.1.RELEASE/module-registry-server-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-server/1.0.1.RELEASE",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-webapi",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-webapi/1.0.0-RELEASE/module-registry-webapi-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-webapi/1.0.0-RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.module.registry",
+      "artifact": "module-registry-webapi",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/module/registry/module-registry-webapi/1.0.1.RELEASE/module-registry-webapi-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/module/registry/module-registry-webapi/1.0.1.RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-api/1.0.0-SNAPSHOT/admin-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-api",
+      "version": "1.0.3-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-api/1.0.3-RELEASE/admin-api-1.0.3-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-api/1.0.3-RELEASE",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-common/1.0.0-SNAPSHOT/admin-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/admin-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 32,
+        "xml": 13,
+        "properties": 1,
+        "other": 14
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-manager/1.0.0-SNAPSHOT/admin-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-openapi/1.0.0-SNAPSHOT/admin-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-resources/1.0.0-SNAPSHOT/admin-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/admin-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 49,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "admin-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/admin-webapi/1.0.0-SNAPSHOT/admin-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/admin-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 39,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-api",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-api/1.0.0-RELEASE/apiserver-api-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-api/1.0.0-RELEASE",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-api/1.0.0-SNAPSHOT/apiserver-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-api/1.0.0.RELEASE/apiserver-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-api/1.0.0.RELEASE",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-common/1.0.0-SNAPSHOT/apiserver-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 10,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-dao/1.0.0-SNAPSHOT/apiserver-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 18,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-manager/1.0.0-SNAPSHOT/apiserver-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-openapi/1.0.0-SNAPSHOT/apiserver-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-resources/1.0.0-SNAPSHOT/apiserver-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-service/1.0.0-SNAPSHOT/apiserver-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "apiserver-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/apiserver-webapi/1.0.0-SNAPSHOT/apiserver-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/apiserver-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-common",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-common/1.0.0-RELEASE/app-common-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-common/1.0.0-RELEASE",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-config",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-config/1.0.0-RELEASE/app-config-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-config/1.0.0-RELEASE",
+      "files": {
+        "java": 19,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-dao",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-dao/1.0.0-RELEASE/app-dao-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-dao/1.0.0-RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-manager",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-manager/1.0.0-RELEASE/app-manager-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-manager/1.0.0-RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-openapi",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-openapi/1.0.0-RELEASE/app-openapi-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-openapi/1.0.0-RELEASE",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-resources",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-resources/1.0.0-RELEASE/app-resources-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-resources/1.0.0-RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "app-service",
+      "version": "1.0.0-RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/app-service/1.0.0-RELEASE/app-service-1.0.0-RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/app-service/1.0.0-RELEASE",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "engine-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/engine-common/1.0.0-SNAPSHOT/engine-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/engine-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "engine-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/engine-dao/1.0.0-SNAPSHOT/engine-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/engine-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 10,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "engine-dispatcher",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/engine-dispatcher/1.0.0-SNAPSHOT/engine-dispatcher-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/engine-dispatcher/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-config",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-config/1.0.0-SNAPSHOT/mobile-config-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-config/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 20,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-dao/1.0.0-SNAPSHOT/mobile-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-manager/1.0.0-SNAPSHOT/mobile-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-openapi/1.0.0-SNAPSHOT/mobile-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-resources/1.0.0-SNAPSHOT/mobile-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "mobile-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/mobile-service/1.0.0-SNAPSHOT/mobile-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/mobile-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-common/1.0.0-SNAPSHOT/sms-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-config",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-config/1.0.0-SNAPSHOT/sms-config-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-config/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-dao/1.0.0-SNAPSHOT/sms-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-manager/1.0.0-SNAPSHOT/sms-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 44,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-openapi/1.0.0-SNAPSHOT/sms-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-resources/1.0.0-SNAPSHOT/sms-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.notification",
+      "artifact": "sms-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/notification/sms-service/1.0.0-SNAPSHOT/sms-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/notification/sms-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-api/1.0.0.RELEASE/organization-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-api/1.0.0.RELEASE",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-api",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-api/1.0.1.RELEASE/organization-api-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-api/1.0.1.RELEASE",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-api",
+      "version": "1.2.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-api/1.2.0-SNAPSHOT/organization-api-1.2.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-api/1.2.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-common",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-common/1.0.0.RELEASE/organization-common-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-common/1.0.0.RELEASE",
+      "files": {
+        "java": 24,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-dao",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/organization-dao-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE",
+      "files": {
+        "java": 52,
+        "xml": 25,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-manager",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-manager/1.0.0.RELEASE/organization-manager-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-manager/1.0.0.RELEASE",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-openapi",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-openapi/1.0.0.RELEASE/organization-openapi-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-openapi/1.0.0.RELEASE",
+      "files": {
+        "java": 72,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-resources",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-resources/1.0.0.RELEASE/organization-resources-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-resources/1.0.0.RELEASE",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-service",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-service/1.0.0.RELEASE/organization-service-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE",
+      "files": {
+        "java": 122,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "organization-webapi",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/organization-webapi/1.0.0.RELEASE/organization-webapi-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/organization-webapi/1.0.0.RELEASE",
+      "files": {
+        "java": 58,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "orgmanagement-auth",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/orgmanagement-auth/1.0-SNAPSHOT/orgmanagement-auth-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/orgmanagement-auth/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "orgmanagement-organization",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/orgmanagement-organization/1.0-SNAPSHOT/orgmanagement-organization-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/orgmanagement-organization/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "orgmanagement-rbac",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/orgmanagement-rbac/1.0-SNAPSHOT/orgmanagement-rbac-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/orgmanagement-rbac/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "portal-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/portal-common/1.0.0-SNAPSHOT/portal-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/portal-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "portal-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/portal-dao/1.0.0-SNAPSHOT/portal-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/portal-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "portal-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/portal-manager/1.0.0-SNAPSHOT/portal-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/portal-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 3,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "portal-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/portal-service/1.0.0-SNAPSHOT/portal-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/portal-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 12,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "portal-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/portal-webapi/1.0.0-SNAPSHOT/portal-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/portal-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-api/1.0.0.RELEASE/printer-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-api/1.0.0.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-common",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-common/1.0-SNAPSHOT/printer-common-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-common/1.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-dao",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-dao/1.0-SNAPSHOT/printer-dao-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-dao/1.0-SNAPSHOT",
+      "files": {
+        "java": 14,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-interapi",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-interapi/1.0-SNAPSHOT/printer-interapi-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-interapi/1.0-SNAPSHOT",
+      "files": {
+        "java": 24,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-openapi",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-openapi/1.0-SNAPSHOT/printer-openapi-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-openapi/1.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-resources",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-resources/1.0-SNAPSHOT/printer-resources-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-resources/1.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 3,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "printer-service",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/printer-service/1.0-SNAPSHOT/printer-service-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/printer-service/1.0-SNAPSHOT",
+      "files": {
+        "java": 48,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "protal-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/protal-resources/1.0.0-SNAPSHOT/protal-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/protal-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-api/1.0.0.RELEASE/rbac-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-api/1.0.0.RELEASE",
+      "files": {
+        "java": 41,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-api",
+      "version": "1.0.2.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-api/1.0.2.RELEASE/rbac-api-1.0.2.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-api/1.0.2.RELEASE",
+      "files": {
+        "java": 44,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-api",
+      "version": "1.0.3.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-api/1.0.3.RELEASE/rbac-api-1.0.3.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-api/1.0.3.RELEASE",
+      "files": {
+        "java": 52,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/rbac-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 26,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/rbac-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 152,
+        "xml": 13,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-manager/1.0.0-SNAPSHOT/rbac-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-openapi/1.0.0-SNAPSHOT/rbac-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 33,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-resources/1.0.0-SNAPSHOT/rbac-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 5,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/rbac-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 116,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-urlscan",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-urlscan/1.0.0-SNAPSHOT/rbac-urlscan-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-urlscan/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "rbac-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/rbac-webapi/1.0.0-SNAPSHOT/rbac-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/rbac-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 84,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-base",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-base/1.0.0-SNAPSHOT/signature-base-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-base/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 19,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/signature-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 78,
+        "xml": 9,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-inter-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-inter-api/1.0.0-SNAPSHOT/signature-inter-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-inter-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-resouces",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-resouces/1.0.0-SNAPSHOT/signature-resouces-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-resouces/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/signature-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 35,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion.signature",
+      "artifact": "signature-service-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/signature/signature-service-openapi/1.0.0-SNAPSHOT/signature-service-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/signature/signature-service-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "sysmanagement-counter",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/sysmanagement-counter/1.0-SNAPSHOT/sysmanagement-counter-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/sysmanagement-counter/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "sysmanagement-module-registry",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/sysmanagement-module-registry/1.0-SNAPSHOT/sysmanagement-module-registry-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/sysmanagement-module-registry/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "sysmanagement-systemcode",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/sysmanagement-systemcode/1.0-SNAPSHOT/sysmanagement-systemcode-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/sysmanagement-systemcode/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "sysmanagement-systemconfig",
+      "version": "1.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/sysmanagement-systemconfig/1.0-SNAPSHOT/sysmanagement-systemconfig-1.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/sysmanagement-systemconfig/1.0-SNAPSHOT",
+      "files": {
+        "java": 1,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-api/1.0.0-SNAPSHOT/system-config-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 15,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-api/1.0.0.RELEASE/system-config-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-api/1.0.0.RELEASE",
+      "files": {
+        "java": 16,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-api",
+      "version": "1.1.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-api/1.1.1.RELEASE/system-config-api-1.1.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-api/1.1.1.RELEASE",
+      "files": {
+        "java": 16,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-client",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-client/1.0.0-SNAPSHOT/system-config-client-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-client/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-common/1.0.0-SNAPSHOT/system-config-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 6,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-common",
+      "version": "1.1.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-common/1.1.1.RELEASE/system-config-common-1.1.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-common/1.1.1.RELEASE",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/system-config-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-manager/1.0.0-SNAPSHOT/system-config-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 3,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-openapi/1.0.0-SNAPSHOT/system-config-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-resources/1.0.0-SNAPSHOT/system-config-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-service/1.0.0-SNAPSHOT/system-config-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 24,
+        "xml": 1,
+        "properties": 1,
+        "other": 2
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "system-config-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/system-config-webapi/1.0.0-SNAPSHOT/system-config-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/system-config-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-api",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-api/1.0.0-SNAPSHOT/systemcode-api-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-api/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 10,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-api/1.0.0.RELEASE/systemcode-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-api/1.0.0.RELEASE",
+      "files": {
+        "java": 11,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-api",
+      "version": "1.0.1.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-api/1.0.1.RELEASE/systemcode-api-1.0.1.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-api/1.0.1.RELEASE",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-api",
+      "version": "1.0.4.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-api/1.0.4.RELEASE/systemcode-api-1.0.4.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-api/1.0.4.RELEASE",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-api",
+      "version": "1.0.5.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-api/1.0.5.RELEASE/systemcode-api-1.0.5.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-api/1.0.5.RELEASE",
+      "files": {
+        "java": 13,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-common/1.0.0-SNAPSHOT/systemcode-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/systemcode-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 7,
+        "xml": 1,
+        "properties": 1,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-manager",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-manager/1.0.0-SNAPSHOT/systemcode-manager-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-manager/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 2,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-openapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-openapi/1.0.0-SNAPSHOT/systemcode-openapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-openapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 10,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-resources",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-resources/1.0.0-SNAPSHOT/systemcode-resources-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-resources/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 0,
+        "xml": 1,
+        "properties": 4,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/systemcode-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 8,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "systemcode-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/systemcode-webapi/1.0.0-SNAPSHOT/systemcode-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/systemcode-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 15,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "theme-common",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/theme-common/1.0.0-SNAPSHOT/theme-common-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/theme-common/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "theme-dao",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/theme-dao/1.0.0-SNAPSHOT/theme-dao-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/theme-dao/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 4,
+        "other": 5
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "theme-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/theme-service/1.0.0-SNAPSHOT/theme-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/theme-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "theme-webapi",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/theme-webapi/1.0.0-SNAPSHOT/theme-webapi-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/theme-webapi/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 4,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "websocket-service",
+      "version": "1.0.0-SNAPSHOT",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/websocket-service/1.0.0-SNAPSHOT/websocket-service-1.0.0-SNAPSHOT-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/websocket-service/1.0.0-SNAPSHOT",
+      "files": {
+        "java": 34,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    },
+    {
+      "group": "com.supcon.supfusion",
+      "artifact": "websocket-service-api",
+      "version": "1.0.0.RELEASE",
+      "sourceJar": "bap-server/assembly/repository/maven/com/supcon/supfusion/websocket-service-api/1.0.0.RELEASE/websocket-service-api-1.0.0.RELEASE-sources.jar",
+      "target": "backend/modules/com/supcon/supfusion/websocket-service-api/1.0.0.RELEASE",
+      "files": {
+        "java": 5,
+        "xml": 1,
+        "properties": 1,
+        "other": 1
+      }
+    }
+  ]
+}

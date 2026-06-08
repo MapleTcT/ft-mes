@@ -1,0 +1,25 @@
+<included>
+    <root level="DEBUG">
+        <appender-ref ref="stdout"/>
+    </root>
+
+    <logger name="com.netflix" level="ERROR"/>
+    <logger name="com.zaxxer.hikari" level="ERROR"/>
+    <logger name="com.alibaba.nacos" level="ERROR" additivity="false"/>
+    <logger name="com.baomidou.mybatisplus" level="ERROR"/>
+
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl" level="ERROR"/>
+    <logger name="org.apache.http.wire" level="DEBUG"/>
+    <logger name="org.apache.http.headers" level="ERROR"/>
+    <logger name="org.apache.http.client.protocol" level="ERROR"/>
+    <logger name="org.apache.kafka" level="ERROR"/>
+    <logger name="org.mybatis" level="ERROR"/>
+    <logger name="org.apache.ibatis.logging.jdbc" level="ERROR"/>
+
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>
+
+    <logger name="springfox.documentation.schema" level="ERROR"/>
+</included>

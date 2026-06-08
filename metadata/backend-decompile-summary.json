@@ -1,0 +1,192 @@
+{
+  "decompiler": "CFR 0.152",
+  "serviceCount": 23,
+  "totalClasses": 324,
+  "totalJavaFiles": 259,
+  "services": [
+    {
+      "service": "auditlog",
+      "jar": "bap-server/base-Server/auditlog/supfusion-auditlog.jar",
+      "classCount": 3,
+      "resourceCount": 10,
+      "javaFiles": 3,
+      "status": "ok"
+    },
+    {
+      "service": "baseService",
+      "jar": "bap-server/base-Server/baseService/supfusion-baseservice.jar",
+      "classCount": 8,
+      "resourceCount": 13,
+      "javaFiles": 8,
+      "status": "ok"
+    },
+    {
+      "service": "basicmanagement",
+      "jar": "bap-server/base-Server/basicmanagement/supfusion-basicmanagement.jar",
+      "classCount": 1,
+      "resourceCount": 5,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "configuration",
+      "jar": "bap-server/base-Server/configuration/supfusion-configuration.jar",
+      "classCount": 1,
+      "resourceCount": 10,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "customProperty",
+      "jar": "bap-server/base-Server/customProperty/custom-property.jar",
+      "classCount": 1,
+      "resourceCount": 11,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "fileServer",
+      "jar": "bap-server/base-Server/fileServer/supfusion-file-server.jar",
+      "classCount": 1,
+      "resourceCount": 11,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "flow",
+      "jar": "bap-server/base-Server/flow/supfusion-flow.jar",
+      "classCount": 5,
+      "resourceCount": 7,
+      "javaFiles": 3,
+      "status": "ok"
+    },
+    {
+      "service": "gateway",
+      "jar": "bap-server/base-Server/gateway/supos-gateway.jar",
+      "classCount": 100,
+      "resourceCount": 7,
+      "javaFiles": 84,
+      "status": "ok"
+    },
+    {
+      "service": "i18n",
+      "jar": "bap-server/base-Server/i18n/supfusion-i18n.jar",
+      "classCount": 5,
+      "resourceCount": 8,
+      "javaFiles": 3,
+      "status": "ok"
+    },
+    {
+      "service": "iam",
+      "jar": "bap-server/base-Server/iam/supfusion-iam.jar",
+      "classCount": 1,
+      "resourceCount": 11,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "license",
+      "jar": "bap-server/base-Server/license/supfusion-license.jar",
+      "classCount": 1,
+      "resourceCount": 11,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-admin",
+      "jar": "bap-server/base-Server/notification-admin/notification-admin.jar",
+      "classCount": 1,
+      "resourceCount": 7,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-apiserver",
+      "jar": "bap-server/base-Server/notification-apiserver/notification-apiserver.jar",
+      "classCount": 1,
+      "resourceCount": 7,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-app",
+      "jar": "bap-server/base-Server/notification-app/notification-app.jar",
+      "classCount": 1,
+      "resourceCount": 6,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-engine",
+      "jar": "bap-server/base-Server/notification-engine/notification-engine.jar",
+      "classCount": 1,
+      "resourceCount": 7,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-mobile",
+      "jar": "bap-server/base-Server/notification-mobile/notification-mobile.jar",
+      "classCount": 1,
+      "resourceCount": 6,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "notification-sms-jincang",
+      "jar": "bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar",
+      "classCount": 2,
+      "resourceCount": 6,
+      "javaFiles": 2,
+      "status": "ok"
+    },
+    {
+      "service": "operatetools",
+      "jar": "bap-server/base-Server/operatetools/supfusion-operatetools.jar",
+      "classCount": 28,
+      "resourceCount": 7,
+      "javaFiles": 20,
+      "status": "ok"
+    },
+    {
+      "service": "orgmanagement",
+      "jar": "bap-server/base-Server/orgmanagement/supfusion-orgmanagement.jar",
+      "classCount": 2,
+      "resourceCount": 5,
+      "javaFiles": 2,
+      "status": "ok"
+    },
+    {
+      "service": "printer",
+      "jar": "bap-server/base-Server/printer/supfusion-printer.jar",
+      "classCount": 1,
+      "resourceCount": 10,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "sysmanagement",
+      "jar": "bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar",
+      "classCount": 1,
+      "resourceCount": 5,
+      "javaFiles": 1,
+      "status": "ok"
+    },
+    {
+      "service": "task-scheduler",
+      "jar": "bap-server/base-Server/task-scheduler/supfusion-task-scheduler-service.jar",
+      "classCount": 7,
+      "resourceCount": 10,
+      "javaFiles": 7,
+      "status": "ok"
+    },
+    {
+      "service": "websocket",
+      "jar": "bap-server/base-Server/websocket/supfusion-websocket.jar",
+      "classCount": 151,
+      "resourceCount": 0,
+      "javaFiles": 114,
+      "status": "ok"
+    }
+  ]
+}

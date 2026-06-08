@@ -1,0 +1,1982 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.organization.dao.mapper.person.PersonMapper">
+
+    <resultMap id="personBaseResultMap" type="com.supcon.supfusion.organization.dao.po.person.PersonBaseInfoPO">
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="valid" property="valid"/>
+        <result column="gender" property="genderCode"/>
+        <result column="status" property="statusCode"/>
+        <result column="mainPositionCode" property="mainPositionCode"/>
+        <result column="mainPositionName" property="mainPositionName"/>
+    </resultMap>
+
+    <resultMap id="personSynchronizationMap" type="com.supcon.supfusion.organization.dao.po.person.PersonSynchronizationInfoPO">
+        <result column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="valid" property="valid"/>
+        <result column="gender" property="genderCode"/>
+        <result column="status" property="statusCode"/>
+        <result column="modifyTime" property="modifyTime"/>
+        <result column="mainPositionCode" property="mainPositionCode"/>
+        <result column="mainPositionName" property="mainPositionName"/>
+    </resultMap>
+
+    <resultMap id="personMultiCompanyMap" type="com.supcon.supfusion.organization.dao.po.person.PersonCompanyPO">
+        <result column="companyId" property="companyId"/>
+        <result column="personId" property="personId"/>
+    </resultMap>
+
+    <resultMap id="loginPersonMap" type="com.supcon.supfusion.organization.dao.po.person.PersonLoginPO">
+        <result column="gender" property="gender"/>
+        <result column="avatarUrl" property="avatarUrl"/>
+    </resultMap>
+
+    <select id="getPersonsByDepartmentCode" resultMap="personBaseResultMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select DISTINCT op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName from org_person op
+            join org_person_department opd on op.id = opd.person_id
+            join org_department od on opd.dept_id = od.id
+            join org_position pos on op.main_position = pos.id
+            where od.code = #{departmentCode} and od.valid = 1 and op.valid = 1
+            order by op.modify_time desc
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select DISTINCT op.id, op.code, op.name, op.valid, op.gender, op.status,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, op.modify_time, pos.name as mainPositionName from org_person op
+            join org_person_department opd on op.id = opd.person_id
+            join org_department od on opd.dept_id = od.id
+            join org_position pos on op.main_position = pos.id
+            where od.code = #{departmentCode} and od.valid = 1 and op.valid = 1
+            order by op.modify_time desc) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;=  #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+               #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by modify_time desc) as tempId, * from (
+            select DISTINCT op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName from org_person op
+            join org_person_department opd on op.id = opd.person_id
+            join org_department od on opd.dept_id = od.id
+            join org_position pos on op.main_position = pos.id
+            where od.code = #{departmentCode} and od.valid = 1 and op.valid = 1
+            )as a )as a
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getPersonsCountByDepartmentCode" resultType="java.lang.Integer">
+        select count(distinct op.id) from org_person op
+        join org_person_department opd on op.id = opd.person_id
+        join org_department od on opd.dept_id = od.id
+        join org_position pos on op.main_position = pos.id
+        where od.code = #{departmentCode} and od.valid = 1 and op.valid = 1
+    </select>
+
+    <select id="getPersonsByPositionCode" resultMap="personBaseResultMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName  from org_person op
+            join org_person_position opp on op.id = opp.person_id
+            join org_position opos on opp.position_id = opos.id
+            join org_position pos on op.main_position = pos.id
+            where opos.code = #{positionCode} and opos.valid = 1 and op.valid = 1
+            order by op.modify_time desc
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName  from org_person op
+            join org_person_position opp on op.id = opp.person_id
+            join org_position opos on opp.position_id = opos.id
+            join org_position pos on op.main_position = pos.id
+            where opos.code = #{positionCode} and opos.valid = 1 and op.valid = 1
+            order by op.modify_time desc) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;=  #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType =='sqlserver'">
+            select * from (select ROW_NUMBER() over (order by modify_time desc) as tempId, * from (
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName  from org_person op
+            join org_person_position opp on op.id = opp.person_id
+            join org_position opos on opp.position_id = opos.id
+            join org_position pos on op.main_position = pos.id
+            where opos.code = #{positionCode} and opos.valid = 1 and op.valid = 1
+            )as a )as a
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getPersonsCountByPositionCode" resultType="java.lang.Integer">
+        select count(distinct op.id) from org_person op
+        left join org_person_position opp on op.id = opp.person_id
+        left join org_position opos on opp.position_id = opos.id
+        left join org_position pos on op.main_position = pos.id
+        where opos.code = #{positionCode} and opos.valid = 1 and op.valid = 1
+    </select>
+
+    <select id="getPersonsByCompanyCode" resultMap="personBaseResultMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName from org_person op
+            left join org_person_company opc on op.id = opc.person_id
+            left join org_company oc on opc.company_id = oc.id
+            left join org_position pos on op.main_position = pos.id
+            where oc.code = #{companyCode} and oc.valid = 1 and op.valid = 1
+            order by op.modify_time desc
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select distinct op.id, op.code, op.name, op.valid,
+            op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName from
+            org_person op
+            left join org_person_company opc on op.id = opc.person_id
+            left join org_company oc on opc.company_id = oc.id
+            left join org_position pos on op.main_position = pos.id
+            where oc.code = #{companyCode} and oc.valid = 1 and op.valid = 1
+            order by op.modify_time desc) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;= #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by modify_time desc) as tempId, * from (
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, pos.code as mainPositionCode, pos.name as mainPositionName  from org_person op
+            left join org_person_company opc on op.id = opc.person_id
+            left join org_company oc on opc.company_id = oc.id
+            left join org_position pos on op.main_position = pos.id
+            where oc.code = #{companyCode} and oc.valid = 1 and op.valid = 1
+            )as a )as a
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getPersonsCountByCompanyCode" resultType="java.lang.Integer">
+        select count(distinct op.id) from org_person op
+        left join org_person_company opc on op.id = opc.person_id
+        left join org_company oc on opc.company_id = oc.id
+        left join org_position pos on op.main_position = pos.id
+        where oc.code = #{companyCode} and oc.valid = 1 and op.valid = 1
+    </select>
+
+    <select id="getPersons" resultMap="personSynchronizationMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time as modifyTime,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, mainPos.code as mainPositionCode, mainPos.name as mainPositionName  from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id
+            <if test="modifyTime != null">
+                where op.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where op.valid = 1
+            </if>
+            order by op.modify_time desc
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, mainPos.code as mainPositionCode, mainPos.name as mainPositionName  from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id
+            <if test="modifyTime != null">
+                where to_char(op.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where op.valid = 1
+            </if>
+            order by op.modify_time desc) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;=  #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by modify_time desc) as tempId, * from (
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, mainPos.code as mainPositionCode, mainPos.name as mainPositionName  from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id
+            <if test="modifyTime != null">
+                where op.modify_time &gt; #{modifyTime} )as a )as a
+            </if>
+            <if test="modifyTime == null">
+                where op.valid = 1 )as a )as a
+            </if>
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getPersonCount" resultType="java.lang.Integer">
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb' or dbType == 'sqlserver'">
+            select count(*) from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id
+            <if test="modifyTime != null">
+                where op.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where op.valid = 1
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select count(*) from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id
+            <if test="modifyTime != null">
+                where to_char(op.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where op.valid = 1
+            </if>
+        </if>
+    </select>
+
+    <select id="getPersonByPersonCode" resultMap="personSynchronizationMap">
+            select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time as modifyTime,
+            op.entry_date as entryDate, op.title, op.qualification, op.education, op.major,
+            op.id_number as idNumber, mainPos.code as mainPositionCode, mainPos.name as mainPositionName from org_person op
+            left join org_position mainPos on op.main_position = mainPos.id where op.code = #{personCode} and op.valid = 1
+    </select>
+
+    <resultMap id="personSynchronizationPositionMap" type="com.supcon.supfusion.organization.dao.po.person.PersonSynchronizationPositionPO">
+        <result column="personId" property="personId"/>
+        <result column="positionCode" property="positionCode"/>
+        <result column="positionName" property="positionName"/>
+    </resultMap>
+    <select id="getPositionsByPersonIds" resultMap="personSynchronizationPositionMap">
+        select opp.person_id as personId, position.code as positionCode, position.name as positionName from org_person_position opp left join org_position position on opp.position_id = position.id
+        where opp.person_id in
+        <foreach collection="personIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getPositionByPersonId" resultMap="personSynchronizationPositionMap">
+        select opp.person_id as personId, position.code as positionCode, position.name as positionName from org_person_position opp left join org_position position on opp.position_id = position.id
+        where opp.valid = 1 and opp.person_id = #{personId}
+    </select>
+
+    <update id="saveOrUpdateUserByPersonId">
+        update org_person set user_id= #{userId},user_name= #{userName}
+        where id=#{personId}
+    </update>
+
+    <delete id="deleteUserByPersonId">
+        update org_person set user_id= null,user_name= null
+        where id in
+        <foreach collection="personIds" index="index" item='item' open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getCountOfUser" resultType="java.lang.Integer">
+        select count(1) from org_person where user_id is not null
+    </select>
+
+
+    <select id="queryUserOfDept" resultType="com.supcon.supfusion.organization.dao.po.department.DepartmentPersonPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select
+            distinct person.id personId,dept.dept_id deptId,person.modify_time
+            from
+            org_person_department dept
+            left join org_person person on
+            dept.person_id = person.id
+            where
+            person.valid=1
+            and dept.valid=1
+            and dept_id = #{departmentId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select
+            distinct person.id personId,dept.dept_id deptId,person.modify_time
+            from
+            org_person_department dept
+            left join org_person person on
+            dept.person_id = person.id
+            where
+            person.valid=1
+            and dept.valid=1
+            and dept_id = #{departmentId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select
+            distinct person.id personId,dept.dept_id deptId,person.modify_time
+            from
+            org_person_department dept
+            left join org_person person on
+            dept.person_id = person.id
+            where
+            person.valid=1
+            and dept.valid=1
+            and dept_id = #{departmentId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+    </select>
+
+
+    <select id="queryUserOfCompany"
+            resultType="com.supcon.supfusion.organization.dao.po.company.CompanyPersonPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and company.valid=1
+            and company.company_id = #{companyId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and company.valid=1
+            and company_id = #{companyId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="null !=onlyUser and true == onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and company.valid=1
+            and company_id = #{companyId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+
+    </select>
+
+
+    <select id="totalUserOfDept" resultType="java.lang.Integer">
+        select count(1) from
+        (select
+        distinct person.id
+        from
+        org_person_department dept
+        left join org_person person on
+        dept.person_id = person.id
+        where
+        person.valid=1
+        and dept.valid=1
+        and dept_id = #{departmentId}
+        <if test="null != keyword and '' != keyword">
+            and (person.user_name like #{keyword} or person.name like #{keyword})
+        </if>
+        <if test="onlyUser">
+            and person.user_id is not null
+        </if>) temp
+    </select>
+
+    <select id="totalUserOfCompany" resultType="java.lang.Integer">
+        select count(1) from
+        (select
+        distinct person.id
+        from
+        org_person_company company
+        left join org_person person on
+        company.person_id = person.id
+        where
+        person.valid=1
+        and company.valid=1
+        and company.company_id = #{companyId}
+        <if test="null != keyword and '' != keyword">
+            and (person.user_name like #{keyword} or person.name like #{keyword})
+        </if>
+        <if test="onlyUser">
+            and person.user_id is not null
+        </if>) temp
+    </select>
+
+
+    <select id="queryUserOfPosition"
+            resultType="com.supcon.supfusion.organization.dao.po.position.PositionPersonPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select
+            distinct person.id personId,position.position_id positionId,person.modify_time
+            from
+            org_person_position position
+            left join org_person person on
+            position.person_id = person.id
+            where
+            person.valid=1
+            and position.valid=1
+            and position_id = #{positionId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select
+            distinct person.id personId,position.position_id positionId,person.modify_time
+            from
+            org_person_position position
+            left join org_person person on
+            position.person_id = person.id
+            where
+            person.valid=1
+            and position.valid=1
+            and position_id = #{positionId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>
+            order by modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select
+            distinct person.id personId,position.position_id positionId,person.modify_time
+            from
+            org_person_position position
+            left join org_person person on
+            position.person_id = person.id
+            where
+            person.valid=1
+            and position.valid=1
+            and position_id = #{positionId}
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="onlyUser">
+                and person.user_id is not null
+            </if>) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+
+    </select>
+
+    <select id="totalUserOfPosition" resultType="java.lang.Integer">
+        select count(1) from
+        (select
+        distinct person.id
+        from
+        org_person_position position
+        left join org_person person on
+        position.person_id = person.id
+        where
+        person.valid=1
+        and position.valid=1
+        and position_id = #{positionId}
+        <if test="null != keyword and '' != keyword">
+            and (person.user_name like #{keyword} or person.name like #{keyword})
+        </if>
+        <if test="onlyUser">
+            and person.user_id is not null
+        </if>) temp
+    </select>
+
+    <select id="queryPersonOfCompany"
+            resultType="com.supcon.supfusion.organization.dao.po.company.CompanyPersonPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and person.sys_flag=0
+            and company.valid=1
+            <if test="null != companyId and '' != companyId">
+                and company.company_id = #{companyId}
+            </if>
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="null != onlyUser and onlyUser">
+                and person.user_name is not null
+            </if>
+            order by modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and person.sys_flag=0
+            and company.valid=1
+            <if test="null != companyId and '' != companyId">
+                and company.company_id = #{companyId}
+            </if>
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="null != onlyUser and onlyUser">
+                and person.user_name is not null
+            </if>
+            order by modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select
+            distinct person.id personId,company.company_id companyId,person.modify_time
+            from
+            org_person_company company
+            left join org_person person on
+            company.person_id = person.id
+            where
+            person.valid=1
+            and person.sys_flag=0
+            and company.valid=1
+            <if test="null != companyId and '' != companyId">
+                and company.company_id = #{companyId}
+            </if>
+            <if test="null != keyword and '' != keyword">
+                and (person.user_name like #{keyword} or person.name like #{keyword})
+            </if>
+            <if test="null != onlyUser and onlyUser">
+                and person.user_name is not null
+            </if>) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="totalPersonOfCompany" resultType="java.lang.Integer">
+        select count(1) from
+        (select
+        distinct person.id
+        from
+        org_person_company company
+        left join org_person person on
+        company.person_id = person.id
+        where
+        person.valid=1
+        and person.sys_flag=0
+        and company.valid=1
+        <if test="null != companyId and '' != companyId">
+            and company.company_id = #{companyId}
+        </if>
+        <if test="null != keyword and '' != keyword">
+            and (person.user_name like #{keyword} or person.name like #{keyword})
+        </if>
+        <if test="null != onlyUser and onlyUser">
+            and person.user_name is not null
+        </if>) temp
+    </select>
+
+    <select id="countPersonUser" resultType="java.lang.Integer">
+        select count(id) from org_person where user_id is not null and valid = 1
+    </select>
+
+    <select id="queryMultiCompanyPersonsByCompanyId" resultMap = "personMultiCompanyMap">
+        select src.company_id as companyId, src.person_id as personId from org_person_company src left join org_person_company target on src.person_id = target.person_id where target.company_id = #{companyId}
+    </select>
+
+    <select id="queryLoginPersonById" resultMap= "loginPersonMap">
+        select gender, avatar_url as avatarUrl from org_person where id = #{peronId} and valid = 1
+    </select>
+
+    <select id="queryPeronsByCompanyIdAndConditionCount" resultType="java.lang.Integer">
+        select count(1)
+        from org_person per
+        inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+        ON per.id = rel.pid
+        WHERE per.VALID = 1 and per.sys_flag = 0
+        <if test="null != keyword and '' != keyword">
+            <bind name="pattern" value="'%' + keyword + '%'"/>
+            and (per.code like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            or per.name like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            or per.phone like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            )
+        </if>
+        <if test="null != codes and codes.size() > 0">
+            and
+            <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + code + '%'"/>
+                per.code like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != names and names.size() > 0">
+            and
+            <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + name + '%'"/>
+                per.name like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != descriptions and descriptions.size() > 0">
+            and
+            <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + description + '%'"/>
+                per.description like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != emails and emails.size() > 0">
+            and
+            <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + email + '%'"/>
+                per.email like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != phones and phones.size() > 0">
+            and
+            <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + phone + '%'"/>
+                per.phone like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != genders and genders.size() > 0">
+            and per.gender in
+            <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                #{gender}
+            </foreach>
+        </if>
+        <if test="null != statuses and statuses.size() > 0">
+            and per.status in
+            <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        <if test="null == statuses or statuses.size() == 0">
+            and per.status != 'sys_person_status/offWork'
+        </if>
+    </select>
+
+    <select id="queryPeronsByCompanyIdAndCondition" resultType="com.supcon.supfusion.organization.dao.po.person.PersonAndLeaderPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern} ESCAPE '\'
+                or per.name like
+                #{pattern} ESCAPE '\'
+                or per.phone like
+                #{pattern} ESCAPE '\'
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            ) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="queryPeronsByPositionIdsAndCondition" resultType="com.supcon.supfusion.organization.dao.po.person.PersonAndLeaderPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern} ESCAPE '\'
+                or per.name like
+                #{pattern} ESCAPE '\'
+                or per.phone like
+                #{pattern} ESCAPE '\'
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            ) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="queryPeronsByPositionIdsAndConditionCount" resultType="java.lang.Integer">
+        select COUNT(1)
+        from org_person per
+        inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+        <if test="null != positionIds and positionIds.size() > 0">
+            and rel.position_id in
+            <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                #{posId}
+            </foreach>
+        </if>
+        <if test="null != keyword and '' != keyword">
+            <bind name="pattern" value="'%' + keyword + '%'"/>
+            and (per.code like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            or per.name like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            or per.phone like
+            <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+            <if test="dbType != 'oracle'">#{pattern}</if>
+            )
+        </if>
+        <if test="null != codes and codes.size() > 0">
+            and
+            <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + code + '%'"/>
+                per.code like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != names and names.size() > 0">
+            and
+            <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + name + '%'"/>
+                per.name like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != descriptions and descriptions.size() > 0">
+            and
+            <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + description + '%'"/>
+                per.description like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != emails and emails.size() > 0">
+            and
+            <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + email + '%'"/>
+                per.email like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != phones and phones.size() > 0">
+            and
+            <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                <bind name="pattern" value="'%' + phone + '%'"/>
+                per.phone like
+                <if test="dbType == 'oracle'">#{pattern} ESCAPE '\'</if>
+                <if test="dbType != 'oracle'">#{pattern}</if>
+            </foreach>
+        </if>
+        <if test="null != genders and genders.size() > 0">
+            and per.gender in
+            <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                #{gender}
+            </foreach>
+        </if>
+        <if test="null != statuses and statuses.size() > 0">
+            and per.status in
+            <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        <if test="null == statuses or statuses.size() == 0">
+            and per.status != 'sys_person_status/offWork'
+        </if>
+    </select>
+
+    <resultMap id="personSynchronizationCompanyMap" type="com.supcon.supfusion.organization.dao.po.person.PersonSynchronizationCompanyPO">
+        <result column="personId" property="personId"/>
+        <result column="companyCode" property="companyCode"/>
+        <result column="companyName" property="companyName"/>
+    </resultMap>
+    <select id="queryCompaniesByPersonIds" resultMap="personSynchronizationCompanyMap">
+        select opc.person_id as personId, company.code as companyCode, company.full_name as companyName from org_person_company opc left join org_company company on opc.company_id = company.id
+        where opc.person_id in
+        <foreach collection="personIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="queryCompaniesByPersonId" resultMap="personSynchronizationCompanyMap">
+        select opc.person_id as personId, company.code as companyCode, company.full_name as companyName from org_person_company opc left join org_company company on opc.company_id = company.id
+        where opc.valid = 1 and opc.person_id = #{personId}
+    </select>
+
+    <resultMap id="personSynchronizationDepartmentMap" type="com.supcon.supfusion.organization.dao.po.person.PersonSynchronizationDepartmentPO">
+        <result column="personId" property="personId"/>
+        <result column="departmentCode" property="departmentCode"/>
+        <result column="departmentName" property="departmentName"/>
+    </resultMap>
+    <select id="queryDepartmentsByPersonIds" resultMap="personSynchronizationDepartmentMap">
+        select opd.person_id as personId, department.code as departmentCode, department.name as departmentName from org_person_department opd left join org_department department on opd.dept_id = department.id
+        where opd.person_id in
+        <foreach collection="personIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="queryDepartmentsByPersonId" resultMap="personSynchronizationDepartmentMap">
+        select opd.person_id as personId, department.code as departmentCode, department.name as departmentName from org_person_department opd left join org_department department on opd.dept_id = department.id
+        where opd.valid = 1 and opd.person_id = #{personId}
+    </select>
+
+    <!--条件查询公司下人员的公司,部门,岗位信息-->
+    <select id="queryPeronsOrgDetailByCompanyIdAndCondition" resultType="com.supcon.supfusion.organization.dao.po.person.PersonDetailBetterPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+            ) orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select * from
+            (select temp.*,rownum row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern} ESCAPE '\'
+                or per.name like
+                #{pattern} ESCAPE '\'
+                or per.phone like
+                #{pattern} ESCAPE '\'
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+            )
+            orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join (select DISTINCT comRel.person_id as pid from org_person_company comRel WHERE comRel.valid = 1 and comRel.company_id = #{companyId}) rel
+            ON per.id = rel.pid
+            WHERE per.VALID = 1 and per.sys_flag = 0
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            ) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+            )
+            orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+    </select>
+
+    <!--条件查询岗位下人员的公司,部门,岗位信息-->
+    <select id="queryPeronsOrgDetailByPositionIdsAndCondition" resultType="com.supcon.supfusion.organization.dao.po.person.PersonDetailBetterPO">
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc
+            limit #{mysqlOffset},#{pageSize}
+            )
+            orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select * from
+            (select temp.*,rownum row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern} ESCAPE '\'
+                or per.name like
+                #{pattern} ESCAPE '\'
+                or per.phone like
+                #{pattern} ESCAPE '\'
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern} ESCAPE '\'
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            order by per.modify_time desc) temp)
+            where row_id between #{offset} and #{pointer}
+            )
+            orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select orgPerson.*,
+            orgPosition.id AS posId, orgPosition.full_path AS posFullPath, orgPosition.company_id AS companyId, orgPosition.code AS posCode, orgPosition.name AS posName,
+            orgPosition.parent_id AS posParentId, orgPosition.dep_id AS posDeptId, orgPosition.lay_rec AS posLayRec,
+            orgDept.id AS deptId, orgDept.full_path AS deptFullPath, orgDept.code AS deptCode, orgDept.name AS deptName, orgDept.parent_id AS deptParentId, orgDept.lay_rec AS deptLayRec,
+            orgCom.short_name AS comShortName, orgCom.full_path AS comFullPath
+            from (select * from
+            (select temp.*,row_number() over (order by modify_time desc) row_id from
+            (select per.*, directPer.name AS directLeaderName, grandPer.name AS grandLeaderName
+            from org_person per LEFT JOIN org_person directPer ON per.direct_leader_id = directPer.id LEFT JOIN org_person grandPer ON per.grand_leader_id = grandPer.id
+            inner join org_person_position rel ON per.id = rel.person_id WHERE per.VALID = 1 AND rel.VALID = 1 AND per.sys_flag = 0
+            <if test="null != positionIds and positionIds.size() > 0">
+                and rel.position_id in
+                <foreach collection="positionIds" index="index" item="posId" open="(" separator="," close=")">
+                    #{posId}
+                </foreach>
+            </if>
+            <if test="null != keyword and '' != keyword">
+                <bind name="pattern" value="'%' + keyword + '%'"/>
+                and (per.code like
+                #{pattern}
+                or per.name like
+                #{pattern}
+                or per.phone like
+                #{pattern}
+                )
+            </if>
+            <if test="null != codes and codes.size() > 0">
+                and
+                <foreach collection="codes" index="index" item="code" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + code + '%'"/>
+                    per.code like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != names and names.size() > 0">
+                and
+                <foreach collection="names" index="index" item="name" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + name + '%'"/>
+                    per.name like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != descriptions and descriptions.size() > 0">
+                and
+                <foreach collection="descriptions" index="index" item="description" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + description + '%'"/>
+                    per.description like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != emails and emails.size() > 0">
+                and
+                <foreach collection="emails" index="index" item="email" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + email + '%'"/>
+                    per.email like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != phones and phones.size() > 0">
+                and
+                <foreach collection="phones" index="index" item="phone" open="(" separator="or" close=")">
+                    <bind name="pattern" value="'%' + phone + '%'"/>
+                    per.phone like
+                    #{pattern}
+                </foreach>
+            </if>
+            <if test="null != genders and genders.size() > 0">
+                and per.gender in
+                <foreach collection="genders" index="index" item="gender" open="(" separator="," close=")">
+                    #{gender}
+                </foreach>
+            </if>
+            <if test="null != statuses and statuses.size() > 0">
+                and per.status in
+                <foreach collection="statuses" index="index" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="null == statuses or statuses.size() == 0">
+                and per.status != 'sys_person_status/offWork'
+            </if>
+            ) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+            )
+            orgPerson
+            LEFT JOIN org_person_position perPosRel ON orgPerson.id = perPosRel.person_id
+            LEFT JOIN org_position orgPosition ON orgPosition.id = perPosRel.position_id
+            LEFT JOIN org_department orgDept ON orgDept.id = orgPosition.dep_id
+            LEFT JOIN org_company orgCom ON orgCom.id = orgPosition.company_id
+            WHERE perPosRel.valid = 1
+            ORDER BY orgPerson.modify_time desc
+        </if>
+    </select>
+</mapper>

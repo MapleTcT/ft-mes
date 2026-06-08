@@ -1,0 +1,870 @@
+{
+  "serviceCount": 23,
+  "services": [
+    {
+      "service": "auditlog",
+      "jar": "bap-server/base-Server/auditlog/supfusion-auditlog.jar",
+      "jarSizeBytes": 113879991,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.auditlog.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/auditlog-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mongodb-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [],
+      "resolvedApplications": [],
+      "embeddedLibCount": 235,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "baseService",
+      "jar": "bap-server/base-Server/baseService/supfusion-baseservice.jar",
+      "jarSizeBytes": 148757389,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.greendill.BaseServiceApp",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.properties",
+        "BOOT-INF/classes/bootstrap.properties"
+      ],
+      "localConfigFiles": [
+        "bootstrap.properties"
+      ],
+      "nacosDataIds": [
+        "supfusion-baseApplications.properties",
+        "supfusion-baseService.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-environment.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-baseService.properties",
+          "port": "30020"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-baseService.properties",
+          "applicationName": "baseService"
+        }
+      ],
+      "embeddedLibCount": 358,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "basicmanagement",
+      "jar": "bap-server/base-Server/basicmanagement/supfusion-basicmanagement.jar",
+      "jarSizeBytes": 111267514,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.basicmanagement.BasicmanagementApp",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/basicmanagement-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.properties"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [],
+      "resolvedApplications": [],
+      "embeddedLibCount": 259,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "configuration",
+      "jar": "bap-server/base-Server/configuration/supfusion-configuration.jar",
+      "jarSizeBytes": 118518873,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.configuration.services.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion.configuration/configuration-services-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-configuration-services.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-configuration-services.properties",
+          "port": "30000"
+        }
+      ],
+      "resolvedApplications": [],
+      "embeddedLibCount": 246,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "customProperty",
+      "jar": "bap-server/base-Server/customProperty/custom-property.jar",
+      "jarSizeBytes": 92682184,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.custon.property.CoustomPropertyBootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "BOOT-INF/classes/bootstrap.yml",
+        "BOOT-INF/classes/application-dev.yml",
+        "META-INF/maven/com.supcon.supfusion/custom-property-bootstrap/pom.properties"
+      ],
+      "localConfigFiles": [
+        "application.yml",
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-coustom-property.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-coustom-property.properties",
+          "port": "30210"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-coustom-property.properties",
+          "applicationName": "customProperty"
+        }
+      ],
+      "embeddedLibCount": 220,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "fileServer",
+      "jar": "bap-server/base-Server/fileServer/supfusion-file-server.jar",
+      "jarSizeBytes": 190323545,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.file.server.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/application.yml",
+        "BOOT-INF/classes/bootstrap.yml",
+        "META-INF/maven/com.supcon.supfusion/file-server-bootstrap/pom.properties"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-config-center-system.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-file-server.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-file-server.properties",
+          "port": "30191"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-file-server.properties",
+          "applicationName": "file-server"
+        }
+      ],
+      "embeddedLibCount": 229,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "flow",
+      "jar": "bap-server/base-Server/flow/supfusion-flow.jar",
+      "jarSizeBytes": 111934057,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.flow.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "META-INF/maven/com.supcon.supfusion.flow/flow-bootstrap/pom.properties",
+        "BOOT-INF/classes/application.yml",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "logback-prod.xml"
+      ],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-flow.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-flow.properties",
+          "port": "30150"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-flow.properties",
+          "applicationName": "flow-service"
+        }
+      ],
+      "embeddedLibCount": 304,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "gateway",
+      "jar": "bap-server/base-Server/gateway/supos-gateway.jar",
+      "jarSizeBytes": 60438538,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supos.suposgateway.SuposGatewayApplication",
+      "springBootVersion": "2.1.12.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-gateway.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-gateway.properties",
+          "port": "8008"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-gateway.properties",
+          "applicationName": "supos-gateway"
+        }
+      ],
+      "embeddedLibCount": 166,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "i18n",
+      "jar": "bap-server/base-Server/i18n/supfusion-i18n.jar",
+      "jarSizeBytes": 118071310,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.i18n.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "META-INF/maven/com.supcon.supfusion/i18n-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml",
+        "BOOT-INF/classes/application.yml"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-config-center-system.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-i18n.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-i18n.properties",
+          "port": "30130"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-i18n.properties",
+          "applicationName": "i18n"
+        }
+      ],
+      "embeddedLibCount": 246,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "iam",
+      "jar": "bap-server/base-Server/iam/supfusion-iam.jar",
+      "jarSizeBytes": 95295441,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.iam.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/iam-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-iam.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-iam.properties",
+          "port": "30160"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-iam.properties",
+          "applicationName": "supos-iam"
+        }
+      ],
+      "embeddedLibCount": 227,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "license",
+      "jar": "bap-server/base-Server/license/supfusion-license.jar",
+      "jarSizeBytes": 92257207,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.license.bootstrap.LicenseApplication",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/license-bootstrap/pom.properties",
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-license.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-license.properties",
+          "port": "30035"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-license.properties",
+          "applicationName": "forceChange:supplant-license"
+        }
+      ],
+      "embeddedLibCount": 215,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-admin",
+      "jar": "bap-server/base-Server/notification-admin/notification-admin.jar",
+      "jarSizeBytes": 92440283,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.admin.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "META-INF/maven/com.supcon.supfusion.notification/admin-bootstrap/pom.properties",
+        "BOOT-INF/classes/application.yml",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-notification-admin.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-notification-admin.properties",
+          "port": "30102"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-notification-admin.properties",
+          "applicationName": "notification-admin"
+        }
+      ],
+      "embeddedLibCount": 228,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-apiserver",
+      "jar": "bap-server/base-Server/notification-apiserver/notification-apiserver.jar",
+      "jarSizeBytes": 96616059,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.apiserver.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion.notification/apiserver-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-notification-apiserver.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-notification-apiserver.properties",
+          "port": "30101"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-notification-apiserver.properties",
+          "applicationName": "notification-apiserver"
+        }
+      ],
+      "embeddedLibCount": 245,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-app",
+      "jar": "bap-server/base-Server/notification-app/notification-app.jar",
+      "jarSizeBytes": 59494048,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.app.bootstrap.NoticeAppBootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion.notification/app-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-notification-app.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-notification-app.properties",
+          "port": "forceChange:30235"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-notification-app.properties",
+          "applicationName": "forceChange:notification-app"
+        }
+      ],
+      "embeddedLibCount": 154,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-engine",
+      "jar": "bap-server/base-Server/notification-engine/notification-engine.jar",
+      "jarSizeBytes": 82307228,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.engine.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "META-INF/maven/com.supcon.supfusion.notification/engine-bootstrap/pom.properties",
+        "BOOT-INF/classes/application.yml",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-notification-engine.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-notification-engine.properties",
+          "port": "30100"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-notification-engine.properties",
+          "applicationName": "notification-engine"
+        }
+      ],
+      "embeddedLibCount": 205,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-mobile",
+      "jar": "bap-server/base-Server/notification-mobile/notification-mobile.jar",
+      "jarSizeBytes": 59511825,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.mobile.MobileBootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion.notification-mobile/mobile-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-notification-mobile.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-notification-mobile.properties",
+          "port": "forceChange:30230"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-notification-mobile.properties",
+          "applicationName": "forceChange:notification-mobile"
+        }
+      ],
+      "embeddedLibCount": 154,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "notification-sms-jincang",
+      "jar": "bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar",
+      "jarSizeBytes": 78785748,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.notification.sms.SmsBootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion.notification-sms-jincang/sms-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-mybatis-common.properties",
+        "supfusion-registry.properties",
+        "supfusion-sms-jincang.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-sms-jincang.properties",
+          "port": "30233"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-sms-jincang.properties",
+          "applicationName": "notification-sms-jincang"
+        }
+      ],
+      "embeddedLibCount": 200,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "operatetools",
+      "jar": "bap-server/base-Server/operatetools/supfusion-operatetools.jar",
+      "jarSizeBytes": 150244089,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.orchid.entityconf.MicroService",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/bootstrap.properties",
+        "BOOT-INF/classes/application.properties"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-baseApplications.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-entityconf.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mongodb-system.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-entityconf.properties",
+          "port": "30010"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-entityconf.properties",
+          "applicationName": "servicemanager"
+        }
+      ],
+      "embeddedLibCount": 354,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "orgmanagement",
+      "jar": "bap-server/base-Server/orgmanagement/supfusion-orgmanagement.jar",
+      "jarSizeBytes": 134187920,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.orgmanagement.OrgManagementApp",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/orgmanagement-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.properties"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties",
+        "supfusion-system-classified.properties"
+      ],
+      "resolvedPorts": [],
+      "resolvedApplications": [],
+      "embeddedLibCount": 323,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "printer",
+      "jar": "bap-server/base-Server/printer/supfusion-printer.jar",
+      "jarSizeBytes": 90852953,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.printer.bootstrap.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application-dev.yml",
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/printer-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-config-center-system.properties",
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-printer.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-printer.properties",
+          "port": "forceChange:30216"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-printer.properties",
+          "applicationName": "printer"
+        }
+      ],
+      "embeddedLibCount": 218,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "sysmanagement",
+      "jar": "bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar",
+      "jarSizeBytes": 97475532,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.sysmanagement.SysmanagementApp",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/bootstrap.properties",
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/sysmanagement-bootstrap/pom.properties"
+      ],
+      "localConfigFiles": [],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-kafka-system.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-redis-system.properties",
+        "supfusion-registry.properties"
+      ],
+      "resolvedPorts": [],
+      "resolvedApplications": [],
+      "embeddedLibCount": 253,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "task-scheduler",
+      "jar": "bap-server/base-Server/task-scheduler/supfusion-task-scheduler-service.jar",
+      "jarSizeBytes": 82477119,
+      "mainClass": "org.springframework.boot.loader.JarLauncher",
+      "startClass": "com.supcon.supfusion.scheduler.Bootstrap",
+      "springBootVersion": "2.1.5.RELEASE",
+      "localConfigEntries": [
+        "BOOT-INF/classes/application.yml",
+        "META-INF/maven/com.supcon.supfusion/cloud-task-scheduler-server-bootstrap/pom.properties",
+        "BOOT-INF/classes/bootstrap.yml"
+      ],
+      "localConfigFiles": [
+        "application.yml",
+        "bootstrap.yml"
+      ],
+      "nacosDataIds": [
+        "supfusion-datasource-system.properties",
+        "supfusion-i18n-system.properties",
+        "supfusion-jwt-common.properties",
+        "supfusion-mybatis-common.properties",
+        "supfusion-registry.properties",
+        "supfusion-task-scheduler.properties"
+      ],
+      "resolvedPorts": [
+        {
+          "config": "supfusion-task-scheduler.properties",
+          "port": "30195"
+        }
+      ],
+      "resolvedApplications": [
+        {
+          "config": "supfusion-task-scheduler.properties",
+          "applicationName": "task-scheduler"
+        }
+      ],
+      "embeddedLibCount": 194,
+      "classPackageRoots": [
+        "BOOT-INF/classes/com"
+      ]
+    },
+    {
+      "service": "websocket",
+      "jar": "bap-server/base-Server/websocket/supfusion-websocket.jar",
+      "jarSizeBytes": 21876371,
+      "mainClass": "com.supcon.supfusion.ws.Application",
+      "startClass": "",
+      "springBootVersion": "",
+      "localConfigEntries": [
+        "application.properties",
+        "META-INF/maven/com.supcon.supfusion/websocket-service-bootstrap/pom.properties"
+      ],
+      "localConfigFiles": [
+        "application.properties",
+        "ws-config.properties"
+      ],
+      "nacosDataIds": [],
+      "resolvedPorts": [],
+      "resolvedApplications": [],
+      "embeddedLibCount": 0,
+      "classPackageRoots": [
+        "com/alibaba/fastjson",
+        "com/alibaba/nacos",
+        "com/alibaba/ttl",
+        "com/fasterxml/classmate",
+        "com/fasterxml/jackson",
+        "com/google/common",
+        "com/google/errorprone",
+        "com/google/j2objc",
+        "com/google/thirdparty",
+        "com/supcon/supfusion"
+      ]
+    }
+  ]
+}

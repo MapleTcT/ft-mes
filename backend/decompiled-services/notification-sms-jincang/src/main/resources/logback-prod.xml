@@ -1,0 +1,31 @@
+<included>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logHome}/logs/notification-sms-jincang.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logHome}/notification-sms-jincang.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file"/>
+    </root>
+    <logger name="com.netflix" level="ERROR"/>
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl.conn" level="ERROR"/>
+    <logger name="com.alibaba.nacos.client.naming" level="ERROR" additivity="false"/>
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>
+    <!--    <logger name="com.netflix" level="ERROR"/>-->
+    <!--    <logger name="org.springframework" level="ERROR"/>-->
+    <!--    <logger name="org.hibernate.validator" level="ERROR"/>-->
+    <!--    <logger name="org.apache.ibatis" level="ERROR"/>-->
+    <!--    <logger name="org.apache.http.impl.conn" level="ERROR"/>-->
+    <!--    <logger name="io.fabric8.kubernetes" level="ERROR"/>-->
+</included>

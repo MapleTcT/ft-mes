@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.RolePDepartmentMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.RolePDepartmentPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="includeLower" column="INCLUDE_LOWER"/>
+        <result property="departmentId" column="DEPARTMENT_ID"/>
+        <result property="rolepermissionId" column="ROLEPERMISSION_ID"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,INCLUDE_LOWER,DEPARTMENT_ID,ROLEPERMISSION_ID
+    </sql>
+    <!-- condition -->
+    <sql id="base_where">
+        <where>
+            <if test="id != null">
+                ID = #{id}
+            </if>
+            <if test="version != null">
+                VERSION = #{version}
+            </if>
+            <if test="includeLower != null">
+                INCLUDE_LOWER = #{includeLower}
+            </if>
+            <if test="departmentId != null">
+                DEPARTMENT_ID = #{departmentId}
+            </if>
+            <if test="rolepermissionId != null">
+                ROLEPERMISSION_ID = #{rolepermissionId}
+            </if>
+        </where>
+    </sql>
+    <!-- select -->
+    <select id="findByRolePermissionId" parameterType="com.supcon.supfusion.rbac.dao.query.RolePDepartmentQuery" resultMap="base_map">
+        SELECT DEPARTMENT_ID,ROLEPERMISSION_ID FROM rbac_rolepdepartment upd WHERE upd.ROLEPERMISSION_ID IN <foreach
+            collection="rolePermissionIds" item="id" open="(" close=")" separator=",">
+        #{id}
+    </foreach>
+    </select>
+</mapper>

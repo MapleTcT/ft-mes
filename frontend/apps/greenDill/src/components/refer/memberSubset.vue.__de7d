@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"m_centerBox"},[_c('div',{staticClass:"m_box"},[_c('h3',{staticClass:"m_title"},[_vm._v(_vm._s(_vm.$t('refer.organisation.title')))]),_vm._v(" "),_c('ul',{staticClass:"m_list",attrs:{"id":"groupMenu"}},[_c('li',{on:{"click":function($event){return _vm.$emit('linkOther', {groupId: _vm.params.companyId, type:'department', isCompany:_vm.crossCompanyFlag, nameType: 2,isSingleCheck: _vm.isSingleCheck})}}},[_c('img',{staticClass:"ml_icon",attrs:{"src":require("@/assets/images/pic_zzjg.png"),"alt":""}}),_vm._v(" "),_c('span',{staticClass:"ml_text"},[_vm._v(_vm._s(_vm.$t('refer.nav.organisation')))])]),_vm._v(" "),_c('li',{on:{"click":function($event){return _vm.$emit('linkOther', {groupId: _vm.userGroup.id, type:'curDepartment', groupInfo: _vm.groupInfo, nameType: 2, isSingleCheck: _vm.isSingleCheck})}}},[_c('img',{staticClass:"ml_icon",attrs:{"src":require("@/assets/images/pic_bm.png"),"alt":""}}),_vm._v(" "),_c('span',{staticClass:"ml_text"},[_vm._v(_vm._s(_vm.userGroup.text))])])])]),_vm._v(" "),_c('div',{staticClass:"m_staffBoxWrap"},[_c('div',{staticClass:"ms_wrap"},[_c('h3',{staticClass:"m_box m_title"},[_vm._v(_vm._s(_vm.$t('refer.nav.topContacts')))]),_vm._v(" "),_c('groupSlideList',{attrs:{"propBind":_vm.propBind},on:{"updateChoooseList":this.params.updateChoooseList}})],1)])])}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-2d05089a","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/refer/memberSubset.vue
+// module id = null
+// module chunks = 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold-auditlog-parent</artifactId>
+        <groupId>com.supcon.supfusion.framework</groupId>
+        <version>1.0.6.RELEASE</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.supcon.supfusion.framework.boot</groupId>
+    <artifactId>scaffold-boot-auditlog-autoconfigure</artifactId>
+    <packaging>jar</packaging>
+    <name>supFusion-Framework-Scaffold-auditlog-AutoConfigure</name>
+    <description>supFusion的auditlog脚手架自动配置工程</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>scaffold-auditlog</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+</project>

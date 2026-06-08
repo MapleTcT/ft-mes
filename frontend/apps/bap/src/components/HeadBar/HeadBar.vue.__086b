@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (!_vm.hidden || _vm.isRefer)?_c('header',{staticClass:"m_head",style:({background: _vm.bgColor})},[_c('div',{staticClass:"m_hbox"},[_c('span',{staticClass:"head_arrow",on:{"click":_vm.pageBackFunc}},[_c('a',{staticClass:"m_arrow",attrs:{"href":"javascript:;"}})]),_vm._v(" "),_c('h2',{staticClass:"m_title"},[_vm._v(_vm._s(_vm.formName))]),_vm._v(" "),(!_vm.isRefer)?_c('div',{staticClass:"head_btn"},[_c('span',{staticClass:"head_refresh",on:{"click":_vm.refresh}},[_c('a',{staticClass:"m_refresh",attrs:{"href":"javascript:;"}})]),_vm._v(" "),_c('HeadBtn')],1):_vm._e()])]):_vm._e()}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-f3c7ba50","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/HeadBar/HeadBar.vue
+// module id = null
+// module chunks = 

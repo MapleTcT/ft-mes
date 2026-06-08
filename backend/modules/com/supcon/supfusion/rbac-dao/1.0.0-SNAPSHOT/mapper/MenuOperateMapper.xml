@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.MenuoperateMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.MenuOperatePO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="ROW_VERSION"/>
+        <result property="cid" column="CID"/>
+        <result property="isAllowProxy" column="IS_ALLOW_PROXY"/>
+        <result property="isHidden" column="IS_HIDDEN"/>
+        <result property="threeRole" column="THREE_ROLE"/>
+        <result property="viewCode" column="VIEW_CODE"/>
+        <result property="isQuery" column="IS_QUERY"/>
+        <result property="isOrrelation" column="IS_ORRELATION"/>
+        <result property="enableDataPermission" column="ENABLE_DATAPERMISSION"/>
+        <result property="enableCustomPermission" column="ENABLE_CUSTOMPERMISSION"/>
+        <result property="forFlowPermission" column="FOR_FLOW_PERMISSION"/>
+        <result property="enableNorestrict" column="ENABLE_NORESTRICT"/>
+        <result property="enableDealerpermission" column="ENABLE_DEALERPERMISSION"/>
+        <result property="enableAssignstaff" column="ENABLE_ASSIGNSTAFF"/>
+        <result property="enableAssignpos" column="ENABLE_ASSIGNPOS"/>
+        <result property="enablePosrestrict" column="ENABLE_POSRESTRICT"/>
+        <result property="enableAssignDept" column="ENABLE_ASSIGNDEPT"/>
+        <result property="enableDeptrict" column="ENABLE_DEPTRICT"/>
+        <result property="enableGrouprestrict" column="ENABLE_GROUPRESTRICT"/>
+        <result property="entityCode" column="ENTITY_CODE"/>
+        <result property="ignorePermission" column="IGNORE_PERMISSION"/>
+        <result property="powerFlag" column="POWER_FLAG"/>
+        <result property="flowVersion" column="FLOW_VERSION"/>
+        <result property="flowKey" column="FLOW_KEY"/>
+        <result property="msgAssembled" column="MSG_ASSEMBLED"/>
+        <result property="deploymentId" column="DEPLOYMENT_ID"/>
+        <result property="menuOperateType" column="MENUOPERATETYPE"/>
+        <result property="menuinfoId" column="MENUINFO_ID"/>
+        <result property="iconCls" column="ICON_CLS"/>
+        <result property="sort" column="SORT"/>
+        <result property="memo" column="MEMO"/>
+        <result property="target" column="TARGET"/>
+        <result property="action" column="ACTION_URL"/>
+        <result property="namespace" column="NAMESPACE"/>
+        <result property="url" column="URL"/>
+        <result property="nameZhCn" column="NAME_ZH_CN"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="app" column="APP"/>
+        <result property="defaultOperate" column="DEFAULT_OPERATE"/>
+        <result property="nameDisplay" column="NAME_DISPLAY"/>
+    </resultMap>
+
+    <resultMap id="getMenuOperatePage_map" type="com.supcon.supfusion.rbac.dao.po.MenuOperatePO">
+        <result property="id" column="ID"/>
+        <result property="version" column="ROW_VERSION"/>
+        <result property="cid" column="CID"/>
+        <result property="isAllowProxy" column="IS_ALLOW_PROXY"/>
+        <result property="isHidden" column="IS_HIDDEN"/>
+        <result property="threeRole" column="THREE_ROLE"/>
+        <result property="viewCode" column="VIEW_CODE"/>
+        <result property="isQuery" column="IS_QUERY"/>
+        <result property="isOrrelation" column="IS_ORRELATION"/>
+        <result property="enableDataPermission" column="ENABLE_DATAPERMISSION"/>
+        <result property="enableCustomPermission" column="ENABLE_CUSTOMPERMISSION"/>
+        <result property="forFlowPermission" column="FOR_FLOW_PERMISSION"/>
+        <result property="enableNorestrict" column="ENABLE_NORESTRICT"/>
+        <result property="enableDealerpermission" column="ENABLE_DEALERPERMISSION"/>
+        <result property="enableAssignstaff" column="ENABLE_ASSIGNSTAFF"/>
+        <result property="enableAssignpos" column="ENABLE_ASSIGNPOS"/>
+        <result property="enablePosrestrict" column="ENABLE_POSRESTRICT"/>
+        <result property="enableAssignDept" column="ENABLE_ASSIGNDEPT"/>
+        <result property="enableDeptrict" column="ENABLE_DEPTRICT"/>
+        <result property="enableGrouprestrict" column="ENABLE_GROUPRESTRICT"/>
+        <result property="entityCode" column="ENTITY_CODE"/>
+        <result property="ignorePermission" column="IGNORE_PERMISSION"/>
+        <result property="powerFlag" column="POWER_FLAG"/>
+        <result property="flowVersion" column="FLOW_VERSION"/>
+        <result property="flowKey" column="FLOW_KEY"/>
+        <result property="msgAssembled" column="MSG_ASSEMBLED"/>
+        <result property="deploymentId" column="DEPLOYMENT_ID"/>
+        <result property="menuOperateType" column="MENUOPERATETYPE"/>
+        <result property="menuinfoId" column="MENUINFO_ID"/>
+        <result property="iconCls" column="ICON_CLS"/>
+        <result property="sort" column="SORT"/>
+        <result property="memo" column="MEMO"/>
+        <result property="target" column="TARGET"/>
+        <result property="action" column="ACTION_URL"/>
+        <result property="namespace" column="NAMESPACE"/>
+        <result property="url" column="URL"/>
+        <result property="nameZhCn" column="NAME_ZH_CN"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="app" column="APP"/>
+        <result property="defaultOperate" column="DEFAULT_OPERATE"/>
+        <result property="nameDisplay" column="NAME_DISPLAY"/>
+        <association property="fullPathName" column="MENUINFO_ID" javaType="java.lang.String"
+                     select="com.supcon.supfusion.rbac.dao.MenuInfoMapper.findMenuInfoFullPathName"/>
+        <collection property="urls" ofType="com.supcon.supfusion.rbac.dao.po.MenuOperateCodeUrlRefPO" column="CODE"
+                    select="com.supcon.supfusion.rbac.dao.MenuOperateCodeUrlRefMapper.getUrlByOperateCode"/>
+    </resultMap>
+    <resultMap id="getOne_map" type="com.supcon.supfusion.rbac.dao.po.MenuOperatePO">
+        <result property="id" column="ID"/>
+        <result property="version" column="ROW_VERSION"/>
+        <result property="cid" column="CID"/>
+        <result property="isAllowProxy" column="IS_ALLOW_PROXY"/>
+        <result property="isHidden" column="IS_HIDDEN"/>
+        <result property="threeRole" column="THREE_ROLE"/>
+        <result property="viewCode" column="VIEW_CODE"/>
+        <result property="isQuery" column="IS_QUERY"/>
+        <result property="isOrrelation" column="IS_ORRELATION"/>
+        <result property="enableDataPermission" column="ENABLE_DATAPERMISSION"/>
+        <result property="enableCustomPermission" column="ENABLE_CUSTOMPERMISSION"/>
+        <result property="forFlowPermission" column="FOR_FLOW_PERMISSION"/>
+        <result property="enableNorestrict" column="ENABLE_NORESTRICT"/>
+        <result property="enableDealerpermission" column="ENABLE_DEALERPERMISSION"/>
+        <result property="enableAssignstaff" column="ENABLE_ASSIGNSTAFF"/>
+        <result property="enableAssignpos" column="ENABLE_ASSIGNPOS"/>
+        <result property="enablePosrestrict" column="ENABLE_POSRESTRICT"/>
+        <result property="enableAssignDept" column="ENABLE_ASSIGNDEPT"/>
+        <result property="enableDeptrict" column="ENABLE_DEPTRICT"/>
+        <result property="enableGrouprestrict" column="ENABLE_GROUPRESTRICT"/>
+        <result property="entityCode" column="ENTITY_CODE"/>
+        <result property="ignorePermission" column="IGNORE_PERMISSION"/>
+        <result property="powerFlag" column="POWER_FLAG"/>
+        <result property="flowVersion" column="FLOW_VERSION"/>
+        <result property="flowKey" column="FLOW_KEY"/>
+        <result property="msgAssembled" column="MSG_ASSEMBLED"/>
+        <result property="deploymentId" column="DEPLOYMENT_ID"/>
+        <result property="menuOperateType" column="MENUOPERATETYPE"/>
+        <result property="menuinfoId" column="MENUINFO_ID"/>
+        <result property="iconCls" column="ICON_CLS"/>
+        <result property="sort" column="SORT"/>
+        <result property="memo" column="MEMO"/>
+        <result property="target" column="TARGET"/>
+        <result property="action" column="ACTION_URL"/>
+        <result property="namespace" column="NAMESPACE"/>
+        <result property="url" column="URL"/>
+        <result property="nameZhCn" column="NAME_ZH_CN"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="app" column="APP"/>
+        <result property="defaultOperate" column="DEFAULT_OPERATE"/>
+        <result property="nameDisplay" column="NAME_DISPLAY"/>
+        <collection property="urls" ofType="com.supcon.supfusion.rbac.dao.po.MenuOperateCodeUrlRefPO" column="CODE"
+                    select="com.supcon.supfusion.rbac.dao.MenuOperateCodeUrlRefMapper.getUrlByOperateCode"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,ROW_VERSION,CID,IS_ALLOW_PROXY,IS_HIDDEN,THREE_ROLE,VIEW_CODE,IS_QUERY,IS_ORRELATION,ENABLE_DATAPERMISSION,ENABLE_CUSTOMPERMISSION,FOR_FLOW_PERMISSION,ENABLE_NORESTRICT,ENABLE_DEALERPERMISSION,ENABLE_ASSIGNSTAFF,ENABLE_ASSIGNPOS,ENABLE_POSRESTRICT,ENABLE_ASSIGNDEPT,ENABLE_DEPTRICT,ENABLE_GROUPRESTRICT,ENTITY_CODE,IGNORE_PERMISSION,POWER_FLAG,FLOW_VERSION,FLOW_KEY,MSG_ASSEMBLED,DEPLOYMENT_ID,MENUOPERATETYPE,MENUINFO_ID,ICON_CLS,SORT,MEMO,TARGET,ACTION_URL,NAMESPACE,URL,NAME_ZH_CN,NAME,CODE,APP,DEFAULT_OPERATE,NAME_DISPLAY
+    </sql>
+    <sql id="getMenuOperatePage_column">
+        mo.ID,mo.ROW_VERSION,mo.CID,mo.IS_ALLOW_PROXY,mo.IS_HIDDEN,mo.THREE_ROLE,mo.VIEW_CODE,mo.IS_QUERY,mo.IS_ORRELATION,mo.ENABLE_DATAPERMISSION,mo.ENABLE_CUSTOMPERMISSION,mo.FOR_FLOW_PERMISSION,mo.ENABLE_NORESTRICT,mo.ENABLE_DEALERPERMISSION,mo.ENABLE_ASSIGNSTAFF,mo.ENABLE_ASSIGNPOS,mo.ENABLE_POSRESTRICT,mo.ENABLE_ASSIGNDEPT,mo.ENABLE_DEPTRICT,mo.ENABLE_GROUPRESTRICT,mo.ENTITY_CODE,mo.IGNORE_PERMISSION,mo.POWER_FLAG,mo.FLOW_VERSION,mo.FLOW_KEY,mo.MSG_ASSEMBLED,mo.DEPLOYMENT_ID,mo.MENUOPERATETYPE,mo.MENUINFO_ID,mo.ICON_CLS,mo.SORT,mo.MEMO,mo.TARGET,mo.ACTION_URL,mo.NAMESPACE,mo.URL,mo.NAME_ZH_CN,mo.NAME,mo.CODE,mo.APP,mo.DEFAULT_OPERATE,mo.NAME_DISPLAY
+    </sql>
+    <sql id="getAssignedPermissionUser_column">
+        MI.ID AS MIID,MI.SORT,MI.LAY_NO,MI.PARENT_ID,MI.FULL_PATH,MI.NAME AS menuinfoName,MO.ID, MO.ACTION_URL,
+        MO.CODE,MO.DEPLOYMENT_ID,MO.FLOW_VERSION,MO.ICON_CLS,MO.ENABLE_DEPTRICT,MO.ENABLE_ASSIGNDEPT,
+        MO.MEMO,MO.MENUOPERATETYPE,MO.MSG_ASSEMBLED,MO.NAME,MO.NAMESPACE,MO.SORT,MO.TARGET,
+        MO.URL,MO.VALID,MO.ROW_VERSION,MO.CID,MO.MENUINFO_ID,MO.POWER_FLAG,MO.ENABLE_ASSIGNPOS,
+        MO.ENABLE_ASSIGNSTAFF,MO.ENABLE_GROUPRESTRICT,MO.ENABLE_NORESTRICT,MO.ENABLE_POSRESTRICT,
+        MO.ENABLE_DEALERPERMISSION,MO.IGNORE_PERMISSION,MO.ENABLE_CUSTOMPERMISSION,MO.ENABLE_DATAPERMISSION,
+        MO.VIEW_CODE,MO.IS_HIDDEN,MO.DEFAULT_OPERATE,MO.NAME_DISPLAY
+    </sql>
+    <sql id="getNoneDefaultOperateMenu_column">
+        mi.id,mi.code,mi.url,mi.cid
+    </sql>
+    <sql id="getMenuOperateWithoutRolePermission_column">
+        mo.ID,mo.CODE,mo.CID
+    </sql>
+    <sql id="findMenuOperateByMenuInfo_column">
+        mo.ID,mo.ROW_VERSION,mo.CID,mo.IS_ALLOW_PROXY,mo.IS_HIDDEN,mo.THREE_ROLE,mo.VIEW_CODE,mo.IS_QUERY,mo.IS_ORRELATION,mo.ENABLE_DATAPERMISSION,
+        mo.ENABLE_CUSTOMPERMISSION,mo.FOR_FLOW_PERMISSION,mo.ENABLE_NORESTRICT,mo.ENABLE_DEALERPERMISSION,mo.ENABLE_ASSIGNSTAFF,mo.ENABLE_ASSIGNPOS,
+        mo.ENABLE_POSRESTRICT,mo.ENABLE_ASSIGNDEPT,mo.ENABLE_DEPTRICT,mo.ENABLE_GROUPRESTRICT,mo.ENTITY_CODE,mo.IGNORE_PERMISSION,mo.POWER_FLAG,
+        mo.FLOW_VERSION,mo.FLOW_KEY,mo.MSG_ASSEMBLED,mo.DEPLOYMENT_ID,mo.MENUOPERATETYPE,mo.MENUINFO_ID,mo.ICON_CLS,mo.SORT,mo.MEMO,mo.TARGET,
+        mo.ACTION_URL,mo.NAMESPACE,mo.URL,mo.NAME_ZH_CN,mo.NAME,mo.CODE,mo.APP,mo.DEFAULT_OPERATE,mo.NAME_DISPLAY
+    </sql>
+    <!-- condition -->
+    <sql id="getMenuOperatePage_where">
+        <where>
+            mo.valid = 1 AND mi.valid = 1
+            <if test="menuOperateQuery.name != null">
+                <bind name="pattern_name" value="'%' + menuOperateQuery.name + '%'"/>
+                <bind name="pattern_code" value="'%' + menuOperateQuery.code + '%'"/>
+                <if test="dbType == 'oracle'">
+                    AND mm.MNE_CODE like #{pattern_name} ESCAPE '\'
+                    AND mo.CODE like #{pattern_code} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    AND mm.MNE_CODE like #{pattern_name}
+                    AND mo.CODE like #{pattern_code}
+                </if>
+            </if>
+            <if test="menuOperateQuery.menuinfoId != null">
+                AND mo.MENUINFO_ID = #{menuOperateQuery.menuinfoId}
+            </if>
+        </where>
+    </sql>
+    <sql id="getOne_where">
+        <where>
+            valid = 1
+            <if test="code != null">
+                AND code = #{code}
+            </if>
+        </where>
+    </sql>
+    <sql id="getAssignedPermissionRole_where">
+        <where>
+            MO.VALID = 1 AND MI.ENABLE = 1
+            <if test="menuinfoId != null">
+                AND MO.MENUINFO_ID = #{menuinfoId}
+            </if>
+            <if test="menuInfoIds != null">
+                AND MO.MENUINFO_ID IN
+                <foreach collection="menuInfoIds" item="mid" open="(" close=")" separator=",">
+                    #{mid}
+                </foreach>
+            </if>
+            <if test="cid != null">
+                AND MC.COMPANY_ID = #{cid}
+            </if>
+            <if test="roleId != null">
+                <if test="assign">
+                    AND (MO.ID IN (SELECT MENUOPERATE_ID FROM rbac_rolepermission rp1 WHERE rp1.ROLE_ID= #{roleId} and
+                    rp1.CID = #{cid})
+                    or MO.CODE IN (SELECT ACTIVITY_CODE FROM rbac_flow_permission fp WHERE fp.TYPE_ID= #{roleId} and
+                    fp.FLOW_PERMISSION_TYPE = 'ROLE')
+                    )
+                </if>
+                <if test="!assign">
+                    AND (MO.ID NOT IN (SELECT MENUOPERATE_ID FROM rbac_rolepermission rp1 WHERE rp1.ROLE_ID= #{roleId}
+                    and rp1.CID = #{cid})
+                    AND MO.CODE NOT IN (SELECT ACTIVITY_CODE FROM rbac_flow_permission fp WHERE fp.TYPE_ID= #{roleId}
+                    and fp.FLOW_PERMISSION_TYPE = 'ROLE')
+                    )
+                </if>
+            </if>
+        </where>
+    </sql>
+    <sql id="getNoneDefaultOperateMenu_where">
+        <where>
+            id NOT IN (
+            SELECT
+            mo.MENUINFO_ID
+            FROM
+            rbac_menuoperate mo
+            WHERE
+            mo.VALID = 1)
+            AND mi.id IN
+            <foreach collection="menuInfoIds" item="id" open="(" close=")" separator=",">
+                ${id}
+            </foreach>
+        </where>
+    </sql>
+    <sql id="getMenuOperateWithoutRolePermission_where">
+        <where>
+            <if test="menuOperateCodes != null">
+                mo.CODE in
+                <foreach collection="menuOperateCodes" separator="," open="(" close=")" item="code">
+                    #{code}
+                </foreach>
+            </if>
+            <if test="roleId != null">
+                AND NOT EXISTS (select 1 from rbac_rolepermission rr where rr.MENUOPERATE_ID = mo.ID and rr.ROLE_ID =
+                #{roleId})
+            </if>
+        </where>
+    </sql>
+
+    <sql id="findMenuOperateByMenuInfo_where">
+        <where>
+            mo.valid = 1
+            <if test="menuInfoCode != null">
+                AND mi.CODE = #{menuInfoCode}
+            </if>
+            <if test="cids != null">
+                AND mo.cid IN
+                <foreach collection="cids" item="cid" open="(" close=")" separator=",">
+                    #{cid}
+                </foreach>
+            </if>
+            <if test="menuinfoId != null">
+                AND mo.MENUINFO_ID = #{menuinfoId}
+            </if>
+        </where>
+    </sql>
+    <sql id="getAssignedPermissionUser_where">
+        <where>
+            <if test="menuinfoId != null">
+                MO.MENUINFO_ID = #{menuinfoId}
+            </if>
+            <if test="menuInfoIds != null">
+                AND MO.MENUINFO_ID IN
+                <foreach collection="menuInfoIds" item="mid" open="(" close=")" separator=",">
+                    #{mid}
+                </foreach>
+            </if>
+            <if test="cid != null">
+                AND (MC.COMPANY_ID IN (#{cid},-1))
+            </if>
+        </where>
+    </sql>
+    <!-- select -->
+    <!--    <select id="getMenuOperatePage" resultMap="getMenuOperatePage_map">-->
+    <!--        SELECT <include refid="getMenuOperatePage_column"/> FROM rbac_menuoperate mo LEFT JOIN rbac_menuinfo mi ON mi.ID = mo.MENUINFO_ID LEFT JOIN rbac_menu_mnecode mm ON mi.ID = mm.MENU_INFO-->
+    <!--        <include refid="getMenuOperatePage_where"/>-->
+    <!--        group by <include refid="getMenuOperatePage_column"/>-->
+    <!--    </select>-->
+
+    <!--    <select id="getOne" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery" resultMap="getOne_map">-->
+    <!--        SELECT <include refid="base_column"/> FROM rbac_menuoperate-->
+    <!--        <include refid="getOne_where"/>-->
+    <!--    </select>-->
+
+    <!--    <select id="findMenuOperate" resultMap="base_map">-->
+    <!--        SELECT <include refid="base_column"/> FROM rbac_menuoperate WHERE code = #{code}-->
+    <!--    </select>-->
+
+    <select id="getAssignedPermissionUser" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery"
+            resultType="com.supcon.supfusion.rbac.dao.bo.MenuOperatePermissionBO">
+        SELECT
+        <include refid="getAssignedPermissionUser_column"/>
+        FROM rbac_menuinfo MI
+        LEFT JOIN rbac_menuoperate MO ON MO.MENUINFO_ID = MI.ID
+        LEFT JOIN rbac_menuinfo_company_ref MC ON MC.MENUINFO_ID = MI.ID
+        <include refid="getAssignedPermissionUser_where"/>
+        AND MO.VALID = 1
+        AND MI.ENABLE = 1
+        ORDER BY MI.SORT
+    </select>
+
+    <!--    <select id="getAssignedPermissionRole" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery" resultType="com.supcon.supfusion.rbac.dao.bo.MenuOperatePermissionBO">-->
+    <!--        SELECT <include refid="getAssignedPermissionUser_column"/> from rbac_menuinfo MI-->
+    <!--        left join rbac_menuoperate MO on MO.MENUINFO_ID = MI.ID-->
+    <!--        left join rbac_menuinfo_company_ref MC on MC.MENUINFO_ID = MI.ID-->
+    <!--        <include refid="getAssignedPermissionRole_where"/>-->
+    <!--        order by MI.SORT,MI.PARENT_ID,MO.ID Asc-->
+    <!--    </select>-->
+
+    <!--    <select id="getNoneDefaultOperateMenu" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery" resultType="com.supcon.supfusion.rbac.dao.bo.NoneDefaultMenuBO">-->
+    <!--        SELECT <include refid="getNoneDefaultOperateMenu_column"/> FROM rbac_menuinfo mi-->
+    <!--        <include refid="getNoneDefaultOperateMenu_where"/>-->
+    <!--    </select>-->
+
+    <!--    <select id="getMenuOperateWithoutRolePermission" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery" resultMap="base_map">-->
+    <!--        SELECT <include refid="getMenuOperateWithoutRolePermission_column"/> FROM rbac_menuoperate mo-->
+    <!--        <include refid="getMenuOperateWithoutRolePermission_where"/>-->
+    <!--    </select>-->
+
+    <!--    <select id="findMenuOperateByMenuInfo" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery" resultMap="base_map">-->
+    <!--        SELECT <include refid="findMenuOperateByMenuInfo_column"/> FROM rbac_menuoperate mo LEFT JOIN rbac_menuinfo mi ON mo.MENUINFO_ID = mi.ID-->
+    <!--        <include refid="findMenuOperateByMenuInfo_where"/>-->
+    <!--    </select>-->
+
+    <!--    <select id="findAssignPermissionMenuInfoId" resultType="long">-->
+    <!--        SELECT mo.MENUINFO_ID FROM rbac_userpermission up LEFT JOIN rbac_menuoperate mo ON up.MENUOPERATE_ID = mo.ID GROUP BY MENUINFO_ID-->
+    <!--    </select>-->
+
+    <!--    <delete id="deleteByCodePhysics" parameterType="com.supcon.supfusion.rbac.dao.query.MenuOperateQuery">-->
+    <!--        DELETE FROM rbac_menuoperate ${ew.customSqlSegment}-->
+    <!--    </delete>-->
+</mapper>

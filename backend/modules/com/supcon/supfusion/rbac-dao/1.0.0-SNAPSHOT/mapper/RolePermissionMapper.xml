@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.RolePermissionMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.RolePermissionPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="cid" column="CID"/>
+        <result property="version" column="VERSION"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="menuOperateId" column="MENUOPERATE_ID"/>
+        <result property="positionFlag" column="POSITION_FLAG"/>
+        <result property="departmentFlag" column="DEPARTMENT_FLAG"/>
+        <result property="groupFlag" column="GROUP_FLAG"/>
+        <result property="assignStaffFlag" column="ASSIGN_STAFF_FLAG"/>
+        <result property="assignPosFlag" column="ASSIGN_POS_FLAG"/>
+        <result property="assignDeptFlag" column="ASSIGN_DEPT_FLAG"/>
+        <result property="dealerPermissionFlag" column="DEALER_PERMISSION_FLAG"/>
+        <result property="noRestrictFlag" column="NO_RESTRICT_FLAG"/>
+        <result property="assignDataPermissionFlag" column="ASSIGN_DATAPERMISSION_FLAG"/>
+        <result property="assignCustomPermissionFlag" column="ASSIGN_CUSTOMPERMISSION_FLAG"/>
+        <result property="urlPattern" column="URL_PATTERN"/>
+    </resultMap>
+
+    <resultMap id="getFlowPermissionList_map" type="com.supcon.supfusion.rbac.dao.bo.RolePermissionBO">
+        <result property="menuOperateId" column="MENUOPERATE_ID"/>
+        <result property="id" column="ID"/>
+        <result property="groupFlag" column="group_flag"/>
+        <result property="positionFlag" column="position_flag"/>
+        <result property="assignPosFlag" column="ASSIGN_POS_FLAG"/>
+        <result property="assignStaffFlag" column="ASSIGN_STAFF_FLAG"/>
+        <result property="noRestrictFlag" column="NO_RESTRICT_FLAG"/>
+        <result property="dealerPermissionFlag" column="DEALER_PERMISSION_FLAG"/>
+        <result property="assignCustomPermissionFlag" column="ASSIGN_CUSTOMPERMISSION_FLAG"/>
+        <result property="assignDataPermissionFlag" column="ASSIGN_DATAPERMISSION_FLAG"/>
+        <result property="typeFlag" column="TYPEFLAG"/>
+        <result property="departmentFlag" column="DEPARTMENT_FLAG"/>
+        <result property="assignDeptFlag" column="ASSIGN_DEPT_FLAG"/>
+        <result property="flowKey" column="FLOW_KEY"/>
+        <result property="role.name" column="ROLE_NAME"/>
+    </resultMap>
+
+    <resultMap id="getNewPermissionList_map" type="com.supcon.supfusion.rbac.dao.po.UserPermissionPO">
+        <result column="USER_ID" property="userId"/>
+        <result column="MENUOPERATE_ID" property="menuOperateId"/>
+        <result column="URL_PATTERN" property="urlPattern"/>
+        <result column="CODE" property="menuOperateCode"/>
+        <result column="GROUP_FLAG" property="groupFlag"/>
+        <result column="POSITION_FLAG" property="positionFlag"/>
+        <result column="ASSIGN_POS_FLAG" property="assignPosFlag"/>
+        <result column="ASSIGN_STAFF_FLAG" property="assignStaffFlag"/>
+        <result column="NO_RESTRICT_FLAG" property="noRestrictFlag"/>
+        <result column="DEALER_PERMISSION_FLAG" property="dealerPermissionFlag"/>
+        <result column="ASSIGN_DEPT_FLAG" property="assignDeptFlag"/>
+        <result column="DEPARTMENT_FLAG" property="departmentFlag"/>
+    </resultMap>
+
+    <resultMap id="menuInfoMap" type="com.supcon.supfusion.rbac.dao.po.MenuInfoPO">
+        <result column="SORT" property="sort"/>
+        <result column="NAME" property="name"/>
+        <result column="MEMO" property="memo"/>
+        <result column="MENU_TYPE" property="menuType"/>
+        <result column="CODE" property="code"/>
+        <result column="PARENT_ID" property="parentId"/>
+        <result column="IS_HIDE" property="isHide"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,CID,ROLE_ID,MENUOPERATE_ID,POSITION_FLAG,DEPARTMENT_FLAG,GROUP_FLAG,ASSIGN_STAFF_FLAG,ASSIGN_POS_FLAG,ASSIGN_DEPT_FLAG,DEALER_PERMISSION_FLAG,
+        NO_RESTRICT_FLAG,ASSIGN_DATAPERMISSION_FLAG,ASSIGN_CUSTOMPERMISSION_FLAG,URL_PATTERN
+    </sql>
+
+    <sql id="getFlowPermissionList_column">
+        FP.ID, MO.ID AS MENUOPERATE_ID, FP.TYPE_ID AS ROLE_ID, FP.GROUP_POWER_FLAG AS group_flag,
+        FP.POSITION_POWER_FLAG AS position_flag, ASSIGN_POS_FLAG AS ASSIGN_POS_FLAG,
+        ASSIGN_STAFF_FLAG AS ASSIGN_STAFF_FLAG, FP.UNLIMITED_POWER AS NO_RESTRICT_FLAG,0 as DEALER_PERMISSION_FLAG,
+        0 AS ASSIGN_CUSTOMPERMISSION_FLAG,0 AS ASSIGN_DATAPERMISSION_FLAG,0 as DEPARTMENT_FLAG,0 as ASSIGN_DEPT_FLAG,
+        0 as TYPEFLAG ,MO.FLOW_KEY
+    </sql>
+
+    <sql id="getRolePermissionList_column">
+        RP.ID, RP.MENUOPERATE_ID, RP.ROLE_ID, RP.GROUP_FLAG, RP.POSITION_FLAG, RP.ASSIGN_POS_FLAG,RP.DEPARTMENT_FLAG,RP.ASSIGN_DEPT_FLAG,
+        RP.ASSIGN_STAFF_FLAG, RP.NO_RESTRICT_FLAG,RP.DEALER_PERMISSION_FLAG,RP.ASSIGN_CUSTOMPERMISSION_FLAG,RP.ASSIGN_DATAPERMISSION_FLAG,
+        1 as TYPEFLAG ,MO.FLOW_KEY as FLOWKEY
+    </sql>
+
+    <sql id="getRolePermissionList_flow_column">
+        FP.ID, MO.ID AS MENUOPERATE_ID, FP.TYPE_ID AS ROLE_ID, FP.GROUP_POWER_FLAG AS group_flag, FP.POSITION_POWER_FLAG AS position_flag, ASSIGN_POS_FLAG AS ASSIGN_POS_FLAG,
+        0 AS DEPARTMENT_FLAG,0 AS ASSIGN_DEPT_FLAG,ASSIGN_STAFF_FLAG AS ASSIGN_STAFF_FLAG, FP.UNLIMITED_POWER AS NO_RESTRICT_FLAG,
+        0 as DEALER_PERMISSION_FLAG,0 AS ASSIGN_CUSTOMPERMISSION_FLAG,0 AS ASSIGN_DATAPERMISSION_FLAG,0 as TYPEFLAG ,MO.FLOW_KEY as FLOWKEY
+    </sql>
+
+    <sql id="getNewPermissionList_column">
+        ru.USER_ID,
+        rp.MENUOPERATE_ID,
+        rp.URL_PATTERN,
+        mo.CODE,
+        max(rp.GROUP_FLAG) as GROUP_FLAG,
+        max(rp.POSITION_FLAG) as POSITION_FLAG,
+        max(rp.ASSIGN_POS_FLAG) as ASSIGN_POS_FLAG,
+        max(rp.ASSIGN_STAFF_FLAG) as ASSIGN_STAFF_FLAG,
+        max(rp.NO_RESTRICT_FLAG) as NO_RESTRICT_FLAG,
+        max(rp.DEALER_PERMISSION_FLAG) as DEALER_PERMISSION_FLAG,
+        max(rp.ASSIGN_DEPT_FLAG) as ASSIGN_DEPT_FLAG,
+        max(rp.DEPARTMENT_FLAG) as DEPARTMENT_FLAG
+    </sql>
+    <!-- condition -->
+    <sql id="getFlowPermissionList_where">
+        <where>
+            FP.FLOW_PERMISSION_TYPE = 'ROLE'
+            AND FP.TYPE_ID = #{typeId}
+        </where>
+    </sql>
+
+    <sql id="getRolePermissionList_where">
+        <where>
+            ROLE_ID = #{roleId}
+        </where>
+    </sql>
+
+    <sql id="getNewPermissionList_where">
+        <where>
+
+        </where>
+    </sql>
+
+    <!-- select -->
+    <select id="findRolePermissionByUserId" resultMap="getFlowPermissionList_map">
+        SELECT r.name ROLE_NAME,rp.MENUOPERATE_ID FROM rbac_rolepermission rp
+        LEFT JOIN rbac_roleuser ru ON ru.ROLE_ID = rp.ROLE_ID
+        LEFT JOIN rbac_role r ON r.ID = ru.ROLE_ID
+        WHERE
+        ru.USER_ID = #{userId}
+        AND ru.valid = 1
+        union
+        SELECT r.name ROLE_NAME , rm.id as  MENUOPERATE_ID FROM rbac_flow_permission rp
+        INNER JOIN rbac_roleuser ru ON ru.ROLE_ID = rp.TYPE_ID
+        INNER JOIN rbac_role r ON r.ID = ru.ROLE_ID
+        INNER JOIN rbac_menuoperate rm ON rp.FLOW_KEY=rm.FLOW_KEY and rp.ACTIVITY_CODE = rm.CODE
+        WHERE
+        ru.USER_ID = #{userId}
+        AND ru.valid = 1
+        AND rm.VALID=1
+        AND r.VALID=1
+        AND rp.FLOW_PERMISSION_TYPE = 'ROLE'
+    </select>
+    <!--    <select id="getFlowPermissionList" resultMap="getFlowPermissionList_map" parameterType="com.supcon.supfusion.rbac.dao.query.FlowPermissionQuery">-->
+    <!--        SELECT <include refid="getFlowPermissionList_column"/> FROM rbac_flow_permission FP JOIN rbac_menuoperate MO ON FP.ACTIVITY_CODE = MO.CODE AND FP.FLOW_KEY = MO.FLOW_KEY-->
+    <!--        INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID-->
+    <!--        <include refid="getFlowPermissionList_where"/>-->
+    <!--    </select>-->
+
+        <select id="getRolePermissionList" parameterType="com.supcon.supfusion.rbac.dao.query.RolePermissionQuery" resultMap="getFlowPermissionList_map">
+            SELECT <include refid="getRolePermissionList_column"/> FROM rbac_rolepermission  RP
+            INNER JOIN rbac_menuoperate MO ON RP.MENUOPERATE_ID = MO.ID
+            INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID
+            <where>
+                ROLE_ID = #{roleId}
+            </where>
+            union
+            SELECT <include refid="getRolePermissionList_flow_column"/> FROM rbac_flow_permission FP
+            JOIN rbac_menuoperate MO ON FP.ACTIVITY_CODE = MO.CODE AND FP.FLOW_KEY = MO.FLOW_KEY
+            INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID
+            <where>
+                FP.FLOW_PERMISSION_TYPE = 'ROLE'
+                AND FP.TYPE_ID = #{roleId}
+            </where>
+        </select>
+
+
+    <select id="getRoleMenus" parameterType="long" resultMap="menuInfoMap">
+        SELECT MI.SORT, MI.NAME, MI.MEMO, MI.MENU_TYPE, MI.CODE, MI.PARENT_ID, MI.IS_HIDE
+        FROM rbac_rolepermission  RP
+        INNER JOIN rbac_menuoperate MO ON RP.MENUOPERATE_ID = MO.ID
+        INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID
+        WHERE RP.ROLE_ID = #{roleId} AND MI.VALID = 1
+    </select>
+
+    <!--    <select id="getNewPermissionList" resultMap="getNewPermissionList_map">-->
+    <!--        SELECT <include refid="getNewPermissionList_column"/> from rbac_rolepermission rp-->
+    <!--        left join rbac_roleuser ru on rp.ROLE_ID = ru.ROLE_ID-->
+    <!--        left join rbac_role r on rp.ROLE_ID = r.ID-->
+    <!--        left join rbac_menuoperate mo on mo.ID = rp.MENUOPERATE_ID-->
+    <!--        <include refid="getNewPermissionList_where"/>-->
+    <!--        group by ru.USER_ID, rp.MENUOPERATE_ID, rp.URL_PATTERN,mo.CODE-->
+    <!--    </select>-->
+</mapper>

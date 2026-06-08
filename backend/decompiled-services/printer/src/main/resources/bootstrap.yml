@@ -1,0 +1,61 @@
+spring:
+  profiles:
+    active: prod
+  cloud:
+    nacos:
+      config:
+        enabled: true
+        server-addr: http://${nacos:127.0.0.1}:8848
+        extension-configs:
+          - data-id: supfusion-printer.properties
+            group: ${spring.profiles.active:prod}
+            refresh: true
+          - data-id: supfusion-i18n-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-mybatis-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-registry.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-config-center-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-jwt-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-datasource-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+feign:
+  hystrix:
+    enabled: true  # 开启 Feign 对 Hystrix 的支持
+  compression:
+    request:
+      enabled: true   # 开启对 request 请求压缩
+      mime-types:
+        - text/xml
+        - application/xml
+        - application/json    # 指定压缩格式
+        - multipart/form-data
+      min-request-size: 2048  # 压缩的最小阀值，默认 2048，超过2048 （字节） 进行压缩。
+    response:
+      enabled: true  # 开启对 response 的压缩
+  client:
+    config:
+      file-server:
+        connectTimeout: 30000
+        readTimeout: 30000
+hystrix:
+  command:
+    file-server:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+      circuitBreaker:
+        sleepWindowInMilliseconds: 30000
+        forceClosed: true

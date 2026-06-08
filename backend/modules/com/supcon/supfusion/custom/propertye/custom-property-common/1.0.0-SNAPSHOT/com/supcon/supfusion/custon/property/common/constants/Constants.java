@@ -1,0 +1,71 @@
+package com.supcon.supfusion.custon.property.common.constants;
+
+/**
+ * @author zhang yafei
+ */
+public class Constants {
+    public static String EQ = "=";
+    public static String NE = "<>";
+    public static String NULL = "is null";
+    public static String NOT_NULL = "is not null";
+    public static String STR_CONTAINS = "like";
+    public static String STR_DOES_NOT_CONTAIN = "not like";
+    public static String DATE_ON_OR_AFTER = ">=";
+    public static String DATE_ON = "=";
+    public static String DATE_ON_OR_BEFORE = "<=";
+    public static String DATE_AFTER = ">";
+    public static String DATE_BEFORE = "<";
+    public static String NUM_GT = ">";
+    public static String NUM_GE = ">=";
+    public static String NUM_LT = "<";
+    public static String NUM_LE = "<=";
+    public static String SQL_KEYWORDS_SELECT = "select";
+    public static String SQL_KEYWORDS_FROM = "from";
+    public static String SQL_KEYWORDS_AND = "and";
+    public static String SQL_KEYWORDS_OR = "or";
+    public static String SQL_KEYWORDS_WHERE = "where";
+    public static String SQL_KEYWORDS_NOT = "not";
+    public static String SQL_KEYWORDS_EXISTS = "exists";
+    public static String SQL_KEYWORDS_TO_DATE = "to_date(?, 'yyyy-mm-dd')";
+    public static String SQL_KEYWORDS_TO_DATETIME = "to_date(?, 'yyyy-mm-dd HH24:mi:ss')";
+    public static String SQL_KEYWORDS_IN = "in";
+    public static String SQL_KEYWORDS_ESCAPE = "escape";
+    public static String SYMBOL_RIGHT_BRACKET = ")";
+    public static String SYMBOL_LEFT_BRACKET = "(";
+    public static String SYMBOL_QUESTION = "?";
+    public static String SYMBOL_COMMA = ",";
+    public static String SYMBOL_SINGLE_QUOTE = "'";
+    public static String SYMBOL_DOUBLE_QUOTE = "\"";
+    public static String SYMBOL_HALF_BLANK = " ";
+    public static String SYMBOL_FULL_BLANK = "　";
+    public static String SYMBOL_EMPTY = "";
+    public static String ANY_TIME = "anytime";
+    public static String X_MONTH_BEFORE = "Xmonthbefore";
+    public static String SYMBOL_HALF_POINT = ".";
+    public static String YESTERDAY = "yesterday";
+    public static String TODAY = "today";
+    public static String TOMORROW = "tomorrow";
+    public static String NEXT_SEVENDAYS = "nextsevendays";
+    public static String LAST_SEVENDAYS = "lastsevendays";
+    public static String NEXT_WEEK = "nextweek";
+    public static String LAST_WEEK = "lastweek";
+    public static String THIS_WEEK = "thisweek";
+    public static String NEXT_MONTH = "nextmonth";
+    public static String LAST_MONTH = "lastmonth";
+    public static String THIS_MONTH = "thismonth";
+    public static String NEXT_YEAR = "nextyear";
+    public static String LAST_YEAR = "lastyear";
+    public static String THIS_YEAR = "thisyear";
+    public static String LAST_X_HOUR = "lastXhour";
+    public static String NEXT_X_HOUR = "nextXhour";
+    public static String LAST_X_DAY = "lastXday";
+    public static String NEXT_X_DAY = "nextXday";
+    public static String LAST_X_WEEK = "lastXweek";
+    public static String NEXT_X_WEEK = "nextXweek";
+    public static String LAST_X_MONTH = "lastXmonth";
+    public static String NEXT_X_MONTH = "nextXmonth";
+    public static String LAST_X_YEAR = "lastXyear";
+    public static String NEXT_X_YEAR = "nextXyear";
+    public static String BEFORE_NOW = "beforeNow";
+    public static String AFTER_NOW = "afterNow";
+}

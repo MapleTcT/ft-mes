@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>counter</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>counter-common</artifactId>
+    <version>${counter-common.version}</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>cloud-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+         <!-- redisson -->
+         <dependency>
+             <groupId>org.redisson</groupId>
+             <artifactId>redisson</artifactId>
+         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>

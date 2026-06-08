@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.MenuInfoMapper">
+    <!-- map -->
+    <resultMap id="menu_info_simple" type="com.supcon.supfusion.rbac.dao.po.MenuInfoSimplePO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long" />
+            <arg column="parent_id" javaType="java.lang.Long" />
+            <arg column="sort" javaType="java.lang.Double" />
+            <arg column="lay_no" javaType="java.lang.Integer" />
+            <arg column="lay_rec" javaType="java.lang.String" />
+        </constructor>
+    </resultMap>
+
+    <resultMap id="base_map" type="com.supcon.supfusion.rbac.dao.po.MenuInfoPO">
+        <id property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="version" column="VERSION"/>
+        <result property="parentId" column="PARENT_ID"/>
+        <result property="layNo" column="LAY_NO"/>
+        <result property="layRec" column="LAY_REC"/>
+        <result property="sort" column="SORT"/>
+        <result property="cid" column="CID"/>
+        <result property="fullPath" column="FULL_PATH"/>
+        <result property="fullPathName" column="FULL_PATH_NAME"/>
+        <result property="securityClass" column="SECURITY_CLASS"/>
+        <result property="absoluteHidden" column="ABSOLUTE_HIDDEN"/>
+        <result property="threeRole" column="THREE_ROLE"/>
+        <result property="showType" column="SHOW_TYPE"/>
+        <result property="requestType" column="REQUEST_TYPE"/>
+        <result property="hiddenType" column="HIDDEN_TYPE"/>
+        <result property="menuType" column="MENU_TYPE"/>
+        <result property="isHide" column="IS_HIDE"/>
+        <result property="groupOnly" column="GROUP_ONLY"/>
+        <result property="source" column="SOURCE"/>
+        <result property="entityCode" column="ENTITY_CODE"/>
+        <result property="moduleCode" column="MODULE_CODE"/>
+        <result property="systemDefault" column="SYSTEM_DEFAULT"/>
+        <result property="cssClass" column="CSS_CLASS"/>
+        <result property="actionUrl" column="ACTION_URL"/>
+        <result property="namespace" column="NAMESPACE"/>
+        <result property="url" column="URL"/>
+        <result property="target" column="TARGET"/>
+        <result property="memo" column="MEMO"/>
+        <result property="enable" column="ENABLE"/>
+        <result property="leaf" column="LEAF"/>
+        <result property="edited" column="EDITED"/>
+        <result property="type" column="TYPE"/>
+        <result property="nameDisplay" column="NAME_DISPLAY"/>
+        <result property="app" column="APP"/>
+        <result property="noRestrict" column="NO_RESTRICT"/>
+        <result property="appId" column="appid"/>
+    </resultMap>
+
+    <resultMap id="menu_supos_po_map" type="com.supcon.supfusion.rbac.dao.po.MenuSuposPO">
+        <constructor>
+            <idArg column="id" javaType="java.lang.Long" />
+            <arg column="parent_id" javaType="java.lang.Long" />
+            <arg column="code" javaType="java.lang.String" />
+            <arg column="name" javaType="java.lang.String" />
+            <arg column="url" javaType="java.lang.String" />
+            <arg column="show_type" javaType="java.lang.Integer" />
+            <arg column="target" javaType="java.lang.String" />
+            <arg column="name_display" javaType="java.lang.String" />
+            <arg column="route" javaType="java.lang.String" />
+            <arg column="css_class" javaType="java.lang.String" />
+            <arg column="sort" javaType="java.lang.Double" />
+            <arg column="menu_type" javaType="java.lang.Integer" />
+            <arg column="lay_rec" javaType="java.lang.String" />
+        </constructor>
+    </resultMap>
+
+    <resultMap id="search_map" type="hashmap">
+        <result property="name" column="NAME" javaType="String"/>
+        <result property="code" column="CODE" javaType="String"/>
+        <result property="id" column="ID" javaType="Long"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,NAME,CODE,VERSION,PARENT_ID,LAY_NO,LAY_REC,SORT,CID,FULL_PATH,FULL_PATH_NAME,SECURITY_CLASS,ABSOLUTE_HIDDEN,THREE_ROLE,SHOW_TYPE,REQUEST_TYPE,HIDDEN_TYPE,MENU_TYPE,IS_HIDE,GROUP_ONLY,SOURCE,ENTITY_CODE,MODULE_CODE,SYSTEM_DEFAULT,CSS_CLASS,ACTION_URL,NAMESPACE,URL,TARGET,MEMO,ENABLE,LEAF,EDITED,TYPE,NAME_DISPLAY,APP,NO_RESTRICT
+    </sql>
+
+    <sql id="findUserMenus_column">
+        mi.ID,mi.LAY_REC,mi.PARENT_ID,mo.MENUINFO_ID,mi.CID,mi.CODE,mi.SORT,mi.memo,mi.name,mi.url,mi.route,mi.extra,mi.CSS_CLASS,mi.type,mi.target,mi.source,mi.STATUS,mi.show_Type,mi.menu_Type,mi.IS_HIDE
+    </sql>
+
+    <sql id="findMenus_column">
+        mi.ID,mi.CSS_CLASS,mi.SORT,mi.LAY_REC,mi.PARENT_ID,mi.CID,mi.CODE,mi.memo,mi.app,mi.name,mi.url,mi.route,mi.type,mi.target,mi.source,mi.show_Type,mi.menu_Type,mi.IS_HIDE,mi.appid
+    </sql>
+
+    <sql id="findMenusByKeyword_column">
+        mi.ID, mi.CODE CODE,mi.NAME NAME
+    </sql>
+
+    <sql id="search_column">
+        mi.ID, mi.CODE CODE,mi.NAME NAME
+    </sql>
+    <!-- condition -->
+    <sql id="base_where">
+        <where>
+            <if test="id != null">
+                ID = #{id}
+            </if>
+            <if test="name != null">
+                NAME = #{name}
+            </if>
+            <if test="code != null">
+                CODE = #{code}
+            </if>
+            <if test="version != null">
+                VERSION = #{version}
+            </if>
+            <if test="parentId != null">
+                PARENT_ID = #{parentId}
+            </if>
+            <if test="layNo != null">
+                LAY_NO = #{layNo}
+            </if>
+            <if test="layRec != null">
+                LAY_REC = #{layRec}
+            </if>
+            <if test="sort != null">
+                SORT = #{sort}
+            </if>
+            <if test="cid != null">
+                CID = #{cid}
+            </if>
+            <if test="fullPath != null">
+                FULL_PATH = #{fullPath}
+            </if>
+            <if test="fullPathName != null">
+                FULL_PATH_NAME = #{fullPathName}
+            </if>
+            <if test="fullPathName != null">
+                FULL_PATH_NAME = #{fullPathName}
+            </if>
+        </where>
+    </sql>
+    <sql id="findUserMenus_where">
+        <where>
+            <if test="userId != null">
+                up.USER_ID = #{userId}
+            </if>
+            <if test="cid != null">
+                AND up.CID = #{cid}
+            </if>
+            <if test="status != null">
+                AND mi.IS_HIDE = 0
+                AND mi.STATUS = #{status}
+            </if>
+            <if test="route != null">
+                AND mi.route = #{route}
+            </if>
+            <if test="isHide != null">
+                AND mi.IS_HIDE = #{isHide}
+            </if>
+            <if test="enable != null">
+                AND mi.ENABLE = #{enable}
+            </if>
+            <if test="operateCodes != null">
+                AND mo.code IN
+                <foreach collection="operateCodes" item="code" open="(" close=")" separator=",">
+                    #{code}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="findMenus_where">
+        <where>
+        	and mi.valid=1
+            <if test="parentId != null">
+                AND mi.PARENT_ID = #{parentId}
+            </if>
+            <if test="ids != null">
+                AND mi.ID IN
+                <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="refCompanyId != null">
+                AND (mc.COMPANY_ID IN (#{refCompanyId},-1))
+            </if>
+            <if test="layRec != null">
+                AND layRec like #{layRec}
+            </if>
+            <if test="enable != null">
+                AND ENABLE = #{enable}
+            </if>
+            <if test="noRestrict != null">
+                and NO_RESTRICT = #{noRestrict} 
+            </if>
+            <if test="status != null">
+                AND mi.STATUS = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <sql id="recoverMenuInfo_set">
+        <set>
+            valid = 1
+        </set>
+    </sql>
+
+    <sql id="recoverMenuInfo_where">
+        <where>
+            code = #{code}
+        </where>
+    </sql>
+
+    <sql id="updateMenuInfoByEntityCode_set">
+        <set>
+            t.PARENT_ID = NULL
+        </set>
+    </sql>
+
+    <sql id="updateMenuInfoByEntityCode_where">
+        <where>
+            ENTITY_CODE = #{entityCode} AND VALID = #{valid}
+        </where>
+    </sql>
+
+    <sql id="findMenusByKeyword_where">
+        <where>
+            mi.id != -1
+            <if test="menuInfoQuery.id != null">
+                AND mi.id = #{menuInfoQuery.id}
+            </if>
+            <if test="menuInfoQuery.enable != null">
+                AND mi.ENABLE = #{menuInfoQuery.enable}
+            </if>
+            <if test="menuInfoQuery.noRestrict != null">
+                AND mi.NO_RESTRICT = #{menuInfoQuery.noRestrict}
+            </if>
+            <if test="menuInfoQuery.name != null">
+                <bind name="pattern" value="'%' + menuInfoQuery.name + '%'"/>
+                <if test="dbType == 'oracle'">
+                    AND mm.MNE_CODE like #{pattern} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    AND mm.MNE_CODE like #{pattern}
+                </if>
+            </if>
+            AND mcf.COMPANY_ID = #{menuInfoQuery.cid}
+        </where>
+    </sql>
+
+    <sql id="findMenusByKeywordNoPage_where">
+        <where>
+            mi.id != -1
+            <if test="menuInfoQuery.id != null">
+                AND mi.id = #{menuInfoQuery.id}
+            </if>
+            <if test="menuInfoQuery.enable != null">
+                AND mi.ENABLE = #{menuInfoQuery.enable}
+            </if>
+            <if test="menuInfoQuery.name != null">
+                <bind name="pattern" value="'%' + menuInfoQuery.name + '%'"/>
+                <if test="dbType == 'oracle'">
+                    AND mm.MNE_CODE like #{pattern} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    AND mm.MNE_CODE like #{pattern}
+                </if>
+            </if>
+            AND mcf.COMPANY_ID = #{menuInfoQuery.cid}
+        </where>
+    </sql>
+
+    <sql id="search_where">
+        <where>
+            mne.LANGUAGE = #{menuInfoMneCodeQuery.language}
+            <if test="menuInfoMneCodeQuery.mneCode != null">
+                AND mne.MNE_CODE LIKE
+                <if test="dbType == 'oracle'">CONCAT('%',CONCAT(#{menuInfoMneCodeQuery.mneCode},'%')) ESCAPE '\'</if>
+                <if test="dbType == 'mysql'">concat('%',#{menuInfoMneCodeQuery.mneCode},'%')</if>
+                <if test="dbType == 'mariadb'">concat('%',#{menuInfoMneCodeQuery.mneCode},'%')</if>
+                <if test="dbType == 'sqlserver'">'%'+#{menuInfoMneCodeQuery.mneCode}+'%'</if>
+            </if>
+            AND mi.valid = 1
+        </where>
+    </sql>
+
+    <sql id="deletePhysics_where">
+        <where>
+            id in
+            <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </sql>
+
+    <!-- ================================================================================================= -->
+    <!-- select -->
+    <sql id="findUserMenus_sql" >
+        select distinct(rm.id) as menuinfo_id, rm.*
+        from rbac_userpermission ru
+        join rbac_menuoperate rmo on rmo.id = ru.menuoperate_id and rmo.valid = 1
+        join rbac_menuinfo rm on rm.id = rmo.menuinfo_id and rm.valid = 1
+        <where>
+            1 = 1
+            <if test="userId != null">
+                and ru.user_id = #{userId}
+            </if>
+            <if test="cid != null">
+                and ru.cid = #{cid}
+            </if>
+            <if test="status != null">
+                and rm.status = #{status}
+            </if>
+            <if test="status != null">
+                <choose>
+                    <when test="isHide != null">
+                        and rm.is_hide = #{isHide}
+                    </when>
+                    <otherwise>
+                        and rm.is_hide = 0
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="route != null">
+                and rm.route = #{route}
+            </if>
+            <if test="isHide != null and status == null">
+                and rm.is_hide = #{isHide}
+            </if>
+            <if test="enable != null">
+                and rm.enable = #{enable}
+            </if>
+            <if test="operateCodes != null">
+                and rmo.code in
+                <foreach collection="operateCodes" item="code" open="(" close=")" separator=",">
+                    #{code}
+                </foreach>
+            </if>
+            and rm.type = 0
+        </where>
+        order by rm.lay_no, rm.sort
+    </sql>
+    <select id="findUserMenus" resultMap="base_map" parameterType="com.supcon.supfusion.rbac.dao.query.MenuInfoQuery">
+        <include refid="findUserMenus_sql" />
+    </select>
+
+    <select id="findMenuByOperateCode" resultMap="base_map" parameterType="com.supcon.supfusion.rbac.dao.query.MenuInfoQuery">
+        SELECT
+        <include refid="findUserMenus_column"/>
+        FROM rbac_menuinfo mi
+        LEFT JOIN rbac_menuoperate mo ON mo.MENUINFO_ID = mi.ID
+        LEFT JOIN rbac_menuinfo_company_ref mc ON mi.ID = mc.MENUINFO_ID
+        <include refid="findUserMenus_where"/>
+        AND mo.valid = 1
+        AND mi.valid = 1
+    </select>
+
+    <select id="findMenus" resultMap="base_map" parameterType="com.supcon.supfusion.rbac.dao.query.MenuInfoQuery">
+        SELECT
+        <include refid="findMenus_column"/>
+        FROM  rbac_menuinfo_company_ref mc
+        LEFT JOIN  rbac_menuinfo mi ON mi.ID = mc.MENUINFO_ID
+        <include refid="findMenus_where"/>
+        <if test="id != null">
+            AND mi.ID != #{id}
+        </if>
+
+        order by mi.SORT
+    </select>
+
+    <!-- =================================================== 优化查询流程权限菜单 ========================================= -->
+    <sql id="findFlowActivityCodes">
+        select distinct(x.activity_code) from(
+            select rfp.activity_code
+            from rbac_flow_permission rfp
+            where rfp.type_id = #{userId} and rfp.flow_permission_type = 'USER'
+            union all
+            select rfp.activity_code
+            from rbac_flow_permission rfp
+            join rbac_roleuser rr on rr.role_id = rfp.type_id
+            where rr.user_id = #{userId} and rr.valid = 1 and rfp.flow_permission_type = 'ROLE'
+        ) x
+    </sql>
+    <sql id="findUserPermissionFlowMenuIds">
+        select distinct(rm.id)
+        from rbac_menuoperate rmo
+        join rbac_menuinfo rm on rm.id = rmo.menuinfo_id
+        where rmo.code in (
+          <include refid="findFlowActivityCodes" />
+        ) and rmo.valid = 1 and rm.valid = 1
+    </sql>
+    <select id="findUserPermissionFlowMenus" resultMap="base_map">
+        select mi.id as menuinfo_id,mi.*
+        from rbac_menuinfo mi
+        where  mi.id in (
+              <include refid="findUserPermissionFlowMenuIds" />
+        )
+        <if test="status != null">
+            and mi.status = #{status} and mi.is_hide = 0
+        </if>
+        and mi.valid = 1
+        order by mi.lay_no,mi.sort
+    </select>
+    <select id="findUserPermissionFlowMenuLayrecs" resultType="java.lang.String">
+        select mi.lay_rec
+        from rbac_menuinfo mi
+        where  mi.id in (
+            <include refid="findUserPermissionFlowMenuIds" />
+        )
+        <if test="status != null">
+            and mi.status = #{status} and mi.is_hide = 0
+        </if>
+        and mi.valid = 1
+    </select>
+    <!-- ============================================================================================================= -->
+
+    <!-- ============================================= 性能相关 ======================================================= -->
+    <select id="findMenusByIds" parameterType="list" resultMap="base_map">
+        select *
+        from rbac_menuinfo
+        <where>
+            id in
+            <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            and valid = 1
+        </where>
+        order by parent_id, lay_no, sort
+    </select>
+
+    <select id="findSuposMenusByIds" resultMap="menu_supos_po_map">
+        select id, parent_id, code, name, url, show_type, target, name_display, route, css_class, sort, menu_type, lay_rec
+        from rbac_menuinfo
+        <where>
+            id in
+            <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            and valid = 1
+        </where>
+        order by parent_id, lay_no, sort
+    </select>
+
+    <select id="findMenusByBatchIds" resultMap="base_map" parameterType="java.util.List">
+        select *
+        from rbac_menuinfo
+        <where>
+            <foreach collection="list" index="index" item="item" open="(" separator="or" close=")">
+                id in
+                <foreach collection="item" index="index2" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </foreach>
+            and valid = 1
+        </where>
+        order by parent_id, lay_no, sort
+    </select>
+
+    <select id="findSuposMenusByBatchIds" resultMap="menu_supos_po_map">
+        select id, parent_id, code, name, url, show_type, target, name_display, route, css_class, sort, menu_type, lay_rec
+        from rbac_menuinfo
+        <where>
+            <foreach collection="list" index="index" item="item" open="(" separator="or" close=")">
+                id in
+                <foreach collection="item" index="index2" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </foreach>
+            and valid = 1
+        </where>
+        order by parent_id, lay_no, sort
+    </select>
+
+    <select id="countUserPermissionMenus" resultType="java.lang.Integer">
+        select count(rm.id)
+        from rbac_userpermission ru
+        left join rbac_menuoperate rmo on rmo.id = ru.menuoperate_id
+        left join rbac_menuinfo rm on rm.id = rmo.menuinfo_id
+        where
+            ru.user_id = #{userId}
+            and ru.cid = #{cid}
+            and rm.status = 0
+            and rm.valid = 1
+            and rm.type = 0
+            and rm.enable = 1
+            and rm.is_hide = 0
+            and rmo.valid = 1
+    </select>
+
+    <select id="findSimpleMenusByIds" resultMap="menu_info_simple" parameterType="java.util.List">
+        select id, parent_id, sort, lay_no, lay_rec
+        from rbac_menuinfo
+        <where>
+            id in
+            <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            and valid = 1
+        </where>
+        order by parent_id, lay_no, sort
+    </select>
+    <select id="findUserPermissionFlowSimpleMenus" resultMap="menu_info_simple">
+        select id, parent_id, sort, lay_no, lay_rec
+        from rbac_menuinfo
+        where id in (
+            <include refid="findUserPermissionFlowMenuIds" />
+        )
+        <if test="status != null">
+            and status = #{status} and is_hide = 0
+        </if>
+        and valid = 1
+        order by parent_id, lay_no, sort
+    </select>
+    <select id="findUserSimpleMenus" resultMap="menu_info_simple" parameterType="com.supcon.supfusion.rbac.dao.query.MenuInfoQuery">
+        select distinct(rm.id) as menuinfo_id, rm.*
+        from rbac_userpermission ru
+        left join rbac_menuoperate rmo on rmo.id = ru.menuoperate_id
+        left join rbac_menuinfo rm on rm.id = rmo.menuinfo_id
+        <where>
+            ru.user_id = #{userId}
+            and ru.cid = #{cid}
+            <if test="status != null">
+                and rm.status = #{status}
+            </if>
+            and rm.valid = 1
+            and rm.type = 0
+            <if test="status != null">
+                <choose>
+                    <when test="isHide != null">
+                        and rm.is_hide = #{isHide}
+                    </when>
+                    <otherwise>
+                        and rm.is_hide = 0
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="isHide != null and status == null">
+                and rm.is_hide = #{isHide}
+            </if>
+            <if test="route != null">
+                and rm.route = #{route}
+            </if>
+            <if test="enable != null">
+                and rm.enable = #{enable}
+            </if>
+            and rmo.valid = 1
+            <if test="operateCodes != null">
+                and rmo.code in
+                <foreach collection="operateCodes" item="code" open="(" close=")" separator=",">
+                    #{code}
+                </foreach>
+            </if>
+        </where>
+        order by rm.parent_id, rm.lay_no, rm.sort
+    </select>
+    <select id="findUserMenusLayRecs" resultType="java.lang.String" parameterType="com.supcon.supfusion.rbac.dao.query.MenuInfoQuery">
+        select rm.lay_rec
+        from rbac_userpermission ru
+        left join rbac_menuoperate rmo on rmo.id = ru.menuoperate_id
+        left join rbac_menuinfo rm on rm.id = rmo.menuinfo_id
+        <where>
+            ru.user_id = #{userId}
+            and ru.cid = #{cid}
+            <if test="status != null">
+                and rm.status = #{status}
+            </if>
+            and rm.valid = 1
+            and rm.type = 0
+            <if test="status != null">
+                <choose>
+                    <when test="isHide != null">
+                        and rm.is_hide = #{isHide}
+                    </when>
+                    <otherwise>
+                        and rm.is_hide = 0
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="isHide != null and status == null">
+                and rm.is_hide = #{isHide}
+            </if>
+            <if test="route != null">
+                and rm.route = #{route}
+            </if>
+            <if test="enable != null">
+                and rm.enable = #{enable}
+            </if>
+            and rmo.valid = 1
+            <if test="operateCodes != null">
+                and rmo.code in
+                <foreach collection="operateCodes" item="code" open="(" close=")" separator=",">
+                    #{code}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <!-- ============================================================================================================= -->
+</mapper>

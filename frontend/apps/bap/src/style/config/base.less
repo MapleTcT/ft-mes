@@ -1,0 +1,42 @@
+// 基本信息编辑内容
+
+#ecContentDiv {
+
+    #ec_entity_edit_form_entity_entityName,
+    #ec_entity_edit_form_entity_prefix{
+        width: 100%;
+    }
+
+    #supplant-entity-configinfo{
+        width: 98%;
+        margin-top: 18px;
+
+        input[type="checkbox"]{
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        
+            &:disabled{
+                border: 1px solid #D9D9D9;
+            }
+        }
+
+        td {
+            padding: 8px 6px 8px 0;
+        }
+
+        .cui-noborder-input,
+        .cui-edit-field {
+            height: 32px;
+            line-height: normal;
+        }
+
+        &.infoTable td {
+            font-size: @font-size-text-config;
+        }
+
+        .fix-input-readonly {
+            border: none;
+        }
+    }
+}

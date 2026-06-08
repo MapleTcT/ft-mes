@@ -1,0 +1,109 @@
+#fast_query_setting_dlg,
+#adv_query_setting_dlg {
+    > div {
+        border: 1px solid @border-color !important;
+    }
+
+    #fast_select_elements,
+    #adv_select_elements {
+        height: 100%;
+
+        h2 {
+            background-color:@accordion-bg-color;
+            color: @text-color-secondary;
+            border: none;
+
+            &.current {
+                background-color:@accordion-active-bg-color;
+                color: @primary-color;
+            }
+        }
+    }
+}
+
+.sort-icon(@x: 0, @y: 0) {
+    background-image: url(@sort-icon-bg-url);
+    width: 32px;
+    height: 32px;
+    background-position: @x -1*@y;
+    cursor: pointer;
+}
+
+// 排序
+#fastContent,
+#advContent,
+#infoContent,
+#listContent {
+    background-color: #fff !important;
+
+    .ec-list-topbtn,
+    .topbtn {
+        .sort-icon(0, 128px);
+    }
+
+    .ec-list-dis-topbtn,
+    .disabletopbtn {
+        .sort-icon(0, 170px);
+    }
+
+    .ec-list-prevbtn,
+    .prevbtn {
+        .sort-icon(0, 212px);
+
+    }
+
+    .ec-list-dis-prevbtn,
+    .disableprevbtn {
+        .sort-icon(0, 254px);
+
+    }
+
+    .ec-list-nextbtn,
+    .nextbtn {
+        .sort-icon(0, 296px);
+
+    }
+
+    .ec-list-dis-nextbtn,
+    .disablenextbtn {
+        .sort-icon(0, 338px);
+
+    }
+
+    .ec-list-lastbtn,
+    .lastbtn {
+        .sort-icon(0, 380px);
+
+    }
+
+    .ec-list-dis-lastbtn,
+    .disablelastbtn {
+        .sort-icon(0, 422px);
+
+    }
+}
+
+#fastColOrder {
+    .sort-selected {
+        background-color: @sort-selected-bg-color
+    }
+
+    .even-num {
+        background: initial;
+    }
+
+    td {
+        border-bottom: 1px solid @border-color;
+        height: 35px;
+    }
+}
+
+#fastquery-tips {
+    color: #A2A2A2;
+}
+
+#fastQueryContentList,
+#advQueryContentList {
+    height: 98% !important;
+    width: 566px !important;
+}

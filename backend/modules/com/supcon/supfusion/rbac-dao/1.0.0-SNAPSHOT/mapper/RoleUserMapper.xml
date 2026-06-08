@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.RoleUserMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.RoleUserPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="positionFlag" column="POSITION_FLAG"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="endTime" column="END_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="personName" column="PERSON_NAME"/>
+        <result property="personCode" column="PERSON_CODE"/>
+        <result property="fromPosition" column="FROM_POSITION"/>
+    </resultMap>
+
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.RoleUserPO" id="getRoleUsersPage_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="positionFlag" column="POSITION_FLAG"/>
+        <result property="roleId" column="ROLE_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="endTime" column="END_TIME"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="personName" column="PERSON_NAME"/>
+        <result property="personCode" column="PERSON_CODE"/>
+        <result property="fromPosition" column="FROM_POSITION"/>
+        <association property="role" javaType="com.supcon.supfusion.rbac.dao.po.RolePO" column="role_id" select="com.supcon.supfusion.rbac.dao.RoleMapper.findParent"/>
+    </resultMap>
+
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,POSITION_FLAG,ROLE_ID,USER_ID,END_TIME,START_TIME,USER_NAME,PERSON_NAME,PERSON_CODE,FROM_POSITION
+    </sql>
+
+    <sql id="getRoleUsersPage_column">
+        roleUser.id,roleUser.FROM_POSITION,roleUser.role_id,roleUser.user_id,person_name,person_code,user_name
+    </sql>
+
+    <sql id="exportData_column">
+        ru.PERSON_NAME PERSONNAME,ru.PERSON_CODE PERSONCODE,ru.USER_NAME USERNAME
+    </sql>
+
+    <sql id="exportDataPage_column">
+        ru.PERSON_NAME PERSONNAME,ru.PERSON_CODE PERSONCODE,ru.USER_NAME USERNAME
+    </sql>
+    <!-- condition -->
+    <sql id="getRoleUsersPage_where">
+        <where>
+            roleUser.VALID = 1
+            <if test="roleUserQuery.code != null">
+                AND role.code = #{roleUserQuery.code}
+            </if>
+            <if test="roleUserQuery.cid != null">
+                AND role.cid = #{roleUserQuerycid}
+            </if>
+            <if test="roleUserQuery.userName != null">
+                <bind name="userName" value="'%' + roleUserQuery.userName + '%'"/>
+                <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
+                <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
+                AND (
+                <if test="dbType == 'oracle'">
+                    roleUser.USER_NAME like #{userName} ESCAPE '\'
+                    OR roleUser.PERSON_NAME like #{personName} ESCAPE '\'
+                    OR roleUser.PERSON_CODE like #{personCode} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    roleUser.USER_NAME like #{userName}
+                    OR roleUser.PERSON_NAME like #{personName}
+                    OR roleUser.PERSON_CODE like #{personCode}
+                </if>
+                )
+            </if>
+
+        </where>
+    </sql>
+
+    <sql id="exportData_where">
+        <where>
+            ru.valid = 1
+            <if test="roleUserQuery.ids != null">
+                AND ru.ID IN <foreach collection="roleUserQuery.ids" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+            </if>
+            <if test="roleUserQuery.roleId != null">
+                AND ru.ROLE_ID = #{roleUserQuery.roleId}
+            </if>
+            <if test="roleUserQuery.userName != null">
+                <bind name="userName" value="'%' + roleUserQuery.userName + '%'"/>
+                <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
+                <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
+                AND (
+                <if test="dbType == 'oracle'">
+                    ru.USER_NAME like #{userName} ESCAPE '\'
+                    OR ru.PERSON_NAME like #{personName} ESCAPE '\'
+                    OR ru.PERSON_CODE like #{personCode} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    ru.USER_NAME like #{userName}
+                    OR ru.PERSON_NAME like #{personName}
+                    OR ru.PERSON_CODE like #{personCode}
+                </if>
+                )
+            </if>
+        </where>
+    </sql>
+
+    <sql id="exportDataPage_where">
+        <where>
+            ru.valid = 1
+            <if test="roleUserQuery.roleId != null">
+                AND ru.ROLE_ID = #{roleUserQuery.roleId}
+            </if>
+            <if test="roleUserQuery.userName != null">
+                <bind name="userName" value="'%' + roleUserQuery.userName + '%'"/>
+                <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
+                <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
+                AND (
+                <if test="dbType == 'oracle'">
+                    ru.USER_NAME like #{userName} ESCAPE '\'
+                    OR ru.PERSON_NAME like #{personName} ESCAPE '\'
+                    OR ru.PERSON_CODE like #{personCode} ESCAPE '\'
+                </if>
+                <if test="dbType != 'oracle'">
+                    ru.USER_NAME like #{userName}
+                    OR ru.PERSON_NAME like #{personName}
+                    OR ru.PERSON_CODE like #{personCode}
+                </if>
+                )
+            </if>
+        </where>
+    </sql>
+
+    <sql id="findUserByRoleCode_where">
+        <where>
+            role.CODE IN <foreach collection="codes" separator="," close=")" open="(" item="code">
+            #{code}
+        </foreach>
+        </where>
+    </sql>
+
+    <!-- select  -->
+
+<!--    <select id="getRoleUsersPage" resultMap="getRoleUsersPage_map">-->
+<!--        SELECT <include refid="getRoleUsersPage_column"/> rbac_roleuser roleUser LEFT JOIN  rbac_role role ON roleUser.role_id = role.id-->
+<!--        <include refid="getRoleUsersPage_where"/>-->
+<!--    </select>-->
+
+<!--    <select id="exportData" resultType="map">-->
+<!--        SELECT <include refid="exportData_column"/> FROM rbac_roleuser ru LEFT JOIN rbac_role role ON ru.ROLE_ID = role.ID-->
+<!--        <include refid="exportData_where"/>-->
+<!--    </select>-->
+
+<!--    <select id="exportDataPage" resultType="map">-->
+<!--        SELECT <include refid="exportDataPage_column"/> FROM rbac_roleuser ru LEFT JOIN rbac_role role ON ru.ROLE_ID = role.ID-->
+<!--        <include refid="exportDataPage_where"/>-->
+<!--    </select>-->
+
+<!--    <select id="findUserByRoleCode" resultMap="base_map">-->
+<!--        SELECT <include refid="base_column"/> FROM rbac_roleuser ru LEFT JOIN rbac_role role ON ru.ROLE_ID = role.ID-->
+<!--        <include refid="findUserByRoleCode_where"/>-->
+<!--    </select>-->
+</mapper>

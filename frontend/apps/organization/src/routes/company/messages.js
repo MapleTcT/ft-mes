@@ -1,0 +1,33 @@
+import { defineMessages } from 'react-intl';
+
+export default defineMessages({
+  department: '部门',
+  post: '岗位',
+  delete: '删除',
+  deleteTip: '删除 {name} 吗？',
+  deleteSuccess: '删除成功',
+  selectCompany: '请选择公司',
+  search: '搜索',
+  baseInfo: '基本信息',
+  companyName: '公司名称',
+  shortName: '简称',
+  code: '编码',
+  mark: '标签',
+  desc: '描述',
+  addSuccess: '添加成功',
+  modifySuccess: '修改成功',
+  addCompany: '新增公司',
+  fullName: '公司全称',
+  enterFullName: '请输入公司全称',
+  enterShortName: '请输入简称',
+  enterCode: '请输入编码',
+  modelCodeRule: '仅支持英文/数字/下划线',
+  companyManage: '公司管理',
+  deleteConfirm: '请确认删除',
+  accountInfo: '帐号信息',
+  administrator: '系统管理员',
+  userSomeName: '（用户名:{name}）',
+  maxWord: '最大长度不能超过{num}',
+  companySearch: '输入 公司简称 搜索',
+  leftChoose: '请选择左侧对象'
+});

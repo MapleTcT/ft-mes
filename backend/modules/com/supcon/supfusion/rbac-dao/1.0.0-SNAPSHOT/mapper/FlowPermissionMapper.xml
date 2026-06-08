@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.FlowPermissionMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.FlowPermissionPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="entityCode" column="ENTITY_CODE"/>
+        <result property="purviewDistribution" column="PURVIEW_DISTRIBUTION"/>
+        <result property="purviewState" column="PURVIEW_STATE"/>
+        <result property="memo" column="MEMO"/>
+        <result property="unlimitedPower" column="UNLIMITED_POWER"/>
+        <result property="groupPowerFlag" column="GROUP_POWER_FLAG"/>
+        <result property="assignStaffFlag" column="ASSIGN_STAFF_FLAG"/>
+        <result property="assignPosFlag" column="ASSIGN_POS_FLAG"/>
+        <result property="positionPowerFlag" column="POSITION_POWER_FLAG"/>
+        <result property="flowPermissionType" column="FLOW_PERMISSION_TYPE"/>
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="activityCode" column="ACTIVITY_CODE"/>
+        <result property="flowVersion" column="FLOW_VERSION"/>
+        <result property="flowKey" column="FLOW_KEY"/>
+    </resultMap>
+    <resultMap type="com.supcon.supfusion.rbac.dao.bo.FlowPermissionBO" id="bo_map">
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="activityCode" column="ACTIVITY_CODE"/>
+        <result property="userId" column="USER_ID"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,ENTITY_CODE,PURVIEW_DISTRIBUTION,PURVIEW_STATE,MEMO,UNLIMITED_POWER,GROUP_POWER_FLAG,ASSIGN_STAFF_FLAG,ASSIGN_POS_FLAG,POSITION_POWER_FLAG,FLOW_PERMISSION_TYPE,TYPE_ID,ACTIVITY_CODE,FLOW_VERSION,FLOW_KEY
+    </sql>
+    <sql id="findFlowPermissionByUserId_user">
+        rfp.TYPE_ID, rfp.ACTIVITY_CODE, NULL AS USER_ID
+    </sql>
+    <sql id="findFlowPermissionByUserId_role">
+        rfp.TYPE_ID, rfp.ACTIVITY_CODE, ru.USER_ID
+    </sql>
+    <!-- condition -->
+    <sql id="base_where">
+        <where>
+            <if test="id != null">
+                ID = #{id}
+            </if>
+            <if test="version != null">
+                VERSION = #{version}
+            </if>
+            <if test="entityCode != null">
+                ENTITY_CODE = #{entityCode}
+            </if>
+            <if test="purviewDistribution != null">
+                PURVIEW_DISTRIBUTION = #{purviewDistribution}
+            </if>
+            <if test="purviewState != null">
+                PURVIEW_STATE = #{purviewState}
+            </if>
+            <if test="memo != null">
+                MEMO = #{memo}
+            </if>
+            <if test="unlimitedPower != null">
+                UNLIMITED_POWER = #{unlimitedPower}
+            </if>
+            <if test="groupPowerFlag != null">
+                GROUP_POWER_FLAG = #{groupPowerFlag}
+            </if>
+            <if test="assignStaffFlag != null">
+                ASSIGN_STAFF_FLAG = #{assignStaffFlag}
+            </if>
+            <if test="assignPosFlag != null">
+                ASSIGN_POS_FLAG = #{assignPosFlag}
+            </if>
+            <if test="positionPowerFlag != null">
+                POSITION_POWER_FLAG = #{positionPowerFlag}
+            </if>
+            <if test="flowPermissionType != null">
+                FLOW_PERMISSION_TYPE = #{flowPermissionType}
+            </if>
+            <if test="typeId != null">
+                TYPE_ID = #{typeId}
+            </if>
+            <if test="activityCode != null">
+                ACTIVITY_CODE = #{activityCode}
+            </if>
+            <if test="flowVersion != null">
+                FLOW_VERSION = #{flowVersion}
+            </if>
+            <if test="flowKey != null">
+                FLOW_KEY = #{flowKey}
+            </if>
+        </where>
+    </sql>
+    <sql id="findUserFlowPermissionOperateCode_where">
+        <where>
+            ((fp.TYPE_ID = #{typeId} AND fp.FLOW_PERMISSION_TYPE = 'USER')
+            OR (fp.FLOW_PERMISSION_TYPE = 'ROLE' AND fp.TYPE_ID = ru.ROLE_ID AND ru.USER_ID = #{typeId}))
+        </where>
+    </sql>
+    <!-- select -->
+    <select id="findUserFlowPermissionOperateCode" parameterType="com.supcon.supfusion.rbac.dao.query.FlowPermissionQuery" resultType="string">
+        select distinct(rfp.activity_code)
+        from rbac_flow_permission rfp
+        left join rbac_roleuser rr on rr.role_id = rfp.type_id
+        where (rfp.type_id = #{typeId} and rfp.flow_permission_type = 'USER') or (rr.user_id = #{typeId} and rfp.flow_permission_type = 'ROLE')
+    </select>
+
+    <select id="findFlowPermissionByUserId" parameterType="com.supcon.supfusion.rbac.dao.query.FlowPermissionQuery"
+            resultMap="bo_map">
+        SELECT <include refid="findFlowPermissionByUserId_user"/> FROM rbac_flow_permission rfp
+        <where>
+            rfp.TYPE_ID IN <foreach collection="typeIds" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+            AND rfp.FLOW_PERMISSION_TYPE = 'USER'
+        </where>
+        UNION
+        SELECT <include refid="findFlowPermissionByUserId_role"/> FROM RBAC_FLOW_PERMISSION rfp
+        LEFT JOIN RBAC_ROLEUSER ru ON ru.ROLE_ID = rfp.TYPE_ID
+        <where>
+            rfp.FLOW_PERMISSION_TYPE = 'ROLE'
+            AND ru.USER_ID IN <foreach collection="typeIds" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+        </where>
+    </select>
+</mapper>

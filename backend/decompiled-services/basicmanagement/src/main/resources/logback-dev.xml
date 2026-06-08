@@ -1,0 +1,28 @@
+<included>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logHome}/logs/supfusion-basicmanagement.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logHome}/supfusion-basicmanagement.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>200MB</maxFileSize>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file"/>
+    </root>
+
+    <logger name="com.netflix" level="ERROR"/>
+
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl.conn" level="ERROR"/>
+
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>
+</included>

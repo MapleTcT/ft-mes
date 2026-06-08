@@ -1,0 +1,29 @@
+/.DS_Store
+**/.DS_Store
+__pycache__/
+*.pyc
+/metadata/tmp/
+/metadata/tools/
+/metadata/*.log
+/metadata/*.cache
+
+# Keep the recovered repository source-focused.
+*.class
+*.jar
+*.war
+*.ear
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Runtime/package outputs should stay outside this repo.
+/logs/
+/data/
+/dist/
+/target/
+/node_modules/
+
+# Local Docker deployment overrides.
+/deploy/docker/.env
+/deploy/docker/nacos-rendered/

@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"m-layout"},[_c('UserInfo',{ref:"userInfo",attrs:{"params":{createTime:_vm.createTime,isReadOnly:_vm.isReadOnly,isWorkflow:_vm.params.isWorkflow}}}),_vm._v(" "),(_vm.layOutList && _vm.formData)?_c('Iform',{key:_vm.newKey,ref:"form",attrs:{"name":"form","params":Object.assign({}, _vm.params, {getUserInfo:_vm.getUserInfo}, _vm.requestParams,{onSaveEvent:_vm.onSaveEvent, setType:this.setType})}},[_c('tabComp',{key:_vm.newKey,ref:"tabComp",attrs:{"params":{isFileView:_vm.isFileView,layOutList:_vm.layOutList,params:Object.assign({}, _vm.params,{dtID: _vm.dtID}),formData:_vm.formData}}})],1):_vm._e(),_vm._v(" "),_c('input',{attrs:{"id":"operateType","hidden":"","type":"text"},domProps:{"value":_vm.operateType}}),_vm._v(" "),_c('input',{attrs:{"id":"workFlowVarStatus","hidden":"","type":"text","name":"workFlowVarStatus"},domProps:{"value":_vm.workFlowVarStatus}})],1)}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-33611d46","hasScoped":false,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/layout/index.vue
+// module id = null
+// module chunks = 

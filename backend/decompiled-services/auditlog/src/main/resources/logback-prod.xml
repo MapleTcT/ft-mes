@@ -1,0 +1,54 @@
+<included>
+    <appender name="normal" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logHome}/logs/system.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logHome}/system.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="normal"/>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="normal"/>
+    </root>
+
+    <logger name="com.netflix" level="ERROR"/>
+    <logger name="com.zaxxer.hikari" level="ERROR" />
+    <logger name="com.alibaba.nacos" level="ERROR" additivity="false" />
+    <logger name="com.baomidou.mybatisplus" level="ERROR" />
+
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl" level="ERROR" />
+    <logger name="org.apache.http.wire" level="ERROR"/>
+    <logger name="org.apache.http.headers" level="ERROR" />
+    <logger name="org.apache.http.client.protocol" level="ERROR" />
+    <logger name="org.apache.kafka" level="ERROR" />
+    <logger name="org.mybatis" level="ERROR" />
+    <logger name="org.apache.ibatis.logging.jdbc" level="ERROR" />
+
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>
+
+    <logger name="springfox.documentation.schema" level="ERROR" />
+
+<!--    <logger name="com.netflix" level="ERROR"/>
+
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl.conn" level="ERROR"/>
+
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>-->
+</included>

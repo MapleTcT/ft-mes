@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.signature.dao.mappers.SignatureLogMapper">
+
+    <select id="getSignaureLogsBylike" resultType="com.supcon.supfusion.signature.dao.entity.SignatureLog">
+        SELECT * FROM bap_signature_logs
+        WHERE 1=1
+        <if test="likeCondition != null">
+            and
+            <foreach collection="likeCondition" item="param" index="key" open="(" separator="and" close=")">
+                <if test="param != null">
+                    <foreach collection="param" item="p" open=" (" separator="or" close=" )">
+                        ${key} like '%${p}%'
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+        <if test="inCondition != null">
+            and
+            <foreach collection="inCondition" item="param" index="key"  separator="and" >
+                ${key} in
+                <if test="param != null">
+                    <foreach collection="param" item="p" open="(" separator="," close=" ) ">
+                        #{p}
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+        <if test="timeCondition != null">
+            and
+            <foreach collection="timeCondition" item="param" index="key" open="(" separator="and" close=")">
+                <if test="param != null">
+                    <foreach collection="param" item="value" index="k" open=" " separator="and" close=" ">
+                        <if test="k == 0 and value != null">
+                            ${key} &gt;= #{value}
+                        </if>
+                        <if test="k == 1 and value != null">
+                            ${key} &lt;= #{value}
+                        </if>
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+        ORDER BY FIRST_SIGN_TIME DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="signaureLogsBylikeCount" resultType="int">
+        select
+        count(1)
+        from bap_signature_logs
+        WHERE 1=1
+        <if test="likeCondition != null">
+            and
+            <foreach collection="likeCondition" item="param" index="key" open="(" separator="and" close=")">
+                <if test="param != null">
+                    <foreach collection="param" item="p" open=" (" separator="or" close=" )">
+                        ${key} like '%${p}%'
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+        <if test="inCondition != null">
+            <foreach collection="inCondition" item="param" index="key"  separator="and" >
+                and ${key} in
+                <if test="param != null">
+                    <foreach collection="param" item="p" open="(" separator="," close=" ) ">
+                        #{p}
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+        <if test="timeCondition != null">
+            and
+            <foreach collection="timeCondition" item="param" index="key" open="(" separator="and" close=")">
+                <if test="param != null">
+                    <foreach collection="param" item="value" index="k" open=" " separator="and" close=" ">
+                        <if test="k == 0 and value != null">
+                            ${key} &gt;= #{value}
+                        </if>
+                        <if test="k == 1 and value != null">
+                            ${key} &lt;= #{value}
+                        </if>
+                    </foreach>
+                </if>
+            </foreach>
+        </if>
+    </select>
+</mapper>

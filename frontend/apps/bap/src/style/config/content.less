@@ -1,0 +1,42 @@
+#ecContentDivWrap {
+    height: 100%;
+}
+
+#ecContentDiv {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+}
+
+#ec_model_manage_top {
+    border-bottom:  1px solid @border-color;
+
+    .cui-main-title {
+        background: none;
+        height: initial;
+        line-height: initial;
+        border: none;
+    }
+
+    .cui-main-title-l {
+        span {
+            color: @text-color-secondary;
+            font-size: 14px;
+            line-height: 39px;
+            padding-left: 16px;
+            font-weight: 400;
+        }
+    }
+}
+
+.ewc-dialog-blove #ec_model_manage_top {
+    display: none;
+}
+
+.ewc-dialog-blove #supplant-entity-configinfo {
+    width: 90%;
+    
+    tr:first-of-type td:first-child {
+        width: 20% !important;
+    }
+}

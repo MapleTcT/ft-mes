@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: prod
+  cloud:
+    nacos:
+      config:
+        server-addr: http://${SUPOS_NACOS_ADDRESS:127.0.0.1:8848}
+        extension-configs:
+          - data-id: supfusion-notification-app.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-i18n-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-registry.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-jwt-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false

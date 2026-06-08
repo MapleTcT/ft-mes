@@ -1,0 +1,20 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.supcon.supfusion.organization.common.config.OrganizationProperties",
+      "name": "supfusion.organization",
+      "type": "com.supcon.supfusion.organization.common.config.OrganizationProperties",
+      "description": "组织服务配置项"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.supcon.supfusion.organization.common.config.OrganizationProperties",
+      "name": "supfusion.organization.org-type",
+      "type": "java.lang.String",
+      "defaultValue": "single",
+      "description": "组织模式：单公司或多公司"
+    }
+  ]
+}

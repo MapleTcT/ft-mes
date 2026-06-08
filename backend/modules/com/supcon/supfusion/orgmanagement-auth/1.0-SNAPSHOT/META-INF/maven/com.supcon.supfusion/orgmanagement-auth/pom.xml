@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>supfusion-orgmanagement</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>orgmanagement-auth</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-webapi</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-openapi</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-api</artifactId>
+            <version>${auth-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-service</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-dao</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-manager</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-resources</artifactId>
+            <version>${auth.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,100 @@
+management:
+  health:
+    db:
+      enabled: false
+spring:
+  application:
+    name: ec
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  freemarker:
+    content-type: text/html
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+  servlet:
+    multipart:
+      max-file-size: 300MB
+      max-request-size: 300MB
+  messages:
+    basename: i18n
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 30000
+  servlet:
+    context-path: /
+supfusion:
+  cloud:
+    default-tenant-id: default
+    nacos:
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${CLOUD_DISCOVERY_GROUP:prod}
+    discovery:
+      enabled: true
+      group: ${CLOUD_DISCOVERY_GROUP:prod}
+    datasource:
+      connect:
+        use-system: true
+        system:
+          db-type: ${DB_TYPE:oracle}
+          db-name: ${DB_NAME:orcl}
+          host: ${DB_HOST:127.0.0.1}
+          port: ${DB_PORT:1521}
+          username: ${DB_USER_NAME:orcl}
+          password: ${DB_PASS_WORD:1}
+      script:
+        script-root-dirs: classpath*:META-INF/
+      druid:
+        validation-query-sql: SELECT 1 FROM DUAL
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 10
+    i18n:
+      enabled: true
+      host: http://${I18N_HOST:i18n-service}:${I18N_PORT:30130}
+      locale-modules:
+        - appConfig
+      module-versions:
+        - appConfig202010290000
+      basename: i18n/
+      modules:
+        - appConfig
+      useGetAllModule: true
+      heartbeat-seconds: 60
+    jwt:
+      enabled: true
+      header: Authorization
+      tokenHead: Bearer
+      symmetric: false
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+      expiration: 604800
+  swagger:
+    enable: false
+
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.framework.demo.server.dao.po
+  type-handlers-package: com.supcon.supfusion.framework.demo.server.dao.typehandler
+  configuration:
+    map-underscore-to-camel-case: true
+
+feign:
+  client:
+    config:
+      remote-service:
+        connectTimeout: 60000
+        readTimeout: 60000
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
+configuration-services:
+  workspace: ${CONFIGURATION_WORKSPACE:../../data}
+  uploadLogPath: ${work.dir}/appUpload

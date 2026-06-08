@@ -1,0 +1,25 @@
+## 1.0.0
+/*===================================================================*/
+/* Table: 授权信息表(license_info)                */
+/*===================================================================*/
+create TABLE LICENSE_INFO (
+  ID                NUMBER(20, 0) NOT NULL,
+  MODULE_CODE       VARCHAR(200) NOT NULL,
+  LICENSE_KEY       VARCHAR(256) NOT NULL,
+  VALUE            VARCHAR(50) NOT NULL,
+  DESCRIPTION      VARCHAR(256) DEFAULT NULL,
+  APPLICATION_NAME      VARCHAR(256) DEFAULT NULL,
+  APPLICATION_TYPE      VARCHAR(256) DEFAULT NULL,
+  TIME                VARCHAR(256) NOT NULL,
+  HASH_CODE          VARCHAR(256) NOT NULL,
+  VALID             NUMBER(1, 0) DEFAULT 1,
+  CREATOR            VARCHAR(32) DEFAULT NULL,
+  MODIFIER          VARCHAR(32) DEFAULT NULL,
+  CREATE_TIME        TIMESTAMP DEFAULT SYSDATE NOT NULL,
+  MODIFY_TIME       TIMESTAMP,
+  CREATE_STAFF_ID    NUMBER(20, 0) DEFAULT NULL,
+  MODIFY_STAFF_ID   NUMBER(20, 0) DEFAULT NULL,
+  PRIMARY KEY (ID)
+);
+create UNIQUE INDEX MODULE_KEY ON LICENSE_INFO(MODULE_CODE);
+COMMENT ON TABLE LICENSE_INFO  IS '授权信息表';

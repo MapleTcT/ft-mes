@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>auth-parent</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>auth-manager</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion.notification</groupId>
+            <artifactId>admin-api</artifactId>
+            <version>3.0.3.4-R1-M2-d8ee03c</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>organization-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>systemcode-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>websocket-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>tenant-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.notification</groupId>
+            <artifactId>apiserver-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.supcon.supos</groupId>
+            <artifactId>supos-license</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.flow</groupId>
+            <artifactId>flow-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>systemcode-api</artifactId>
+        </dependency>
+    </dependencies>
+</project>

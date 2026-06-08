@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.supcon.supfusion.module.registry</groupId>
+		<artifactId>module-registry-parent</artifactId>
+		<version>1.0.1.RELEASE</version>
+	</parent>
+	<artifactId>module-registry-webapi</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.supcon.supfusion.module.registry</groupId>
+			<artifactId>module-registry-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
+	</dependencies>
+</project>

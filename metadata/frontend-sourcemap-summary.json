@@ -1,0 +1,113 @@
+{
+  "source": "../bap-server/bap-workspace/bap-static",
+  "totalMapFiles": 366,
+  "recoveredFiles": 991,
+  "failedMapFiles": 0,
+  "apps": {
+    "auth": {
+      "mapFiles": 24,
+      "sourceEntries": 2734,
+      "recoveredFiles": 57,
+      "skippedEntries": 2604,
+      "duplicateEntries": 73
+    },
+    "bap": {
+      "mapFiles": 19,
+      "sourceEntries": 919,
+      "recoveredFiles": 185,
+      "skippedEntries": 595,
+      "duplicateEntries": 139
+    },
+    "greenDill": {
+      "mapFiles": 9,
+      "sourceEntries": 1397,
+      "recoveredFiles": 226,
+      "skippedEntries": 971,
+      "duplicateEntries": 200
+    },
+    "i18n": {
+      "mapFiles": 6,
+      "sourceEntries": 1804,
+      "recoveredFiles": 16,
+      "skippedEntries": 1783,
+      "duplicateEntries": 5
+    },
+    "menu": {
+      "mapFiles": 6,
+      "sourceEntries": 1761,
+      "recoveredFiles": 21,
+      "skippedEntries": 1734,
+      "duplicateEntries": 6
+    },
+    "notification": {
+      "mapFiles": 15,
+      "sourceEntries": 1625,
+      "recoveredFiles": 43,
+      "skippedEntries": 1547,
+      "duplicateEntries": 35
+    },
+    "organization": {
+      "mapFiles": 36,
+      "sourceEntries": 3261,
+      "recoveredFiles": 47,
+      "skippedEntries": 3197,
+      "duplicateEntries": 17
+    },
+    "print": {
+      "mapFiles": 24,
+      "sourceEntries": 2264,
+      "recoveredFiles": 78,
+      "skippedEntries": 2176,
+      "duplicateEntries": 10
+    },
+    "signature-static": {
+      "mapFiles": 10,
+      "sourceEntries": 2625,
+      "recoveredFiles": 19,
+      "skippedEntries": 2585,
+      "duplicateEntries": 21
+    },
+    "supplant": {
+      "mapFiles": 108,
+      "sourceEntries": 7399,
+      "recoveredFiles": 97,
+      "skippedEntries": 7137,
+      "duplicateEntries": 165
+    },
+    "supplant-test": {
+      "mapFiles": 88,
+      "sourceEntries": 5632,
+      "recoveredFiles": 87,
+      "skippedEntries": 5382,
+      "duplicateEntries": 163
+    },
+    "systemcode": {
+      "mapFiles": 6,
+      "sourceEntries": 2478,
+      "recoveredFiles": 26,
+      "skippedEntries": 2432,
+      "duplicateEntries": 20
+    },
+    "systemconfig": {
+      "mapFiles": 8,
+      "sourceEntries": 2519,
+      "recoveredFiles": 48,
+      "skippedEntries": 2434,
+      "duplicateEntries": 37
+    },
+    "taskscheduler": {
+      "mapFiles": 2,
+      "sourceEntries": 2516,
+      "recoveredFiles": 22,
+      "skippedEntries": 2472,
+      "duplicateEntries": 22
+    },
+    "theme": {
+      "mapFiles": 5,
+      "sourceEntries": 705,
+      "recoveredFiles": 19,
+      "skippedEntries": 686,
+      "duplicateEntries": 0
+    }
+  }
+}

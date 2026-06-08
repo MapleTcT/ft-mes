@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>organization-parent</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0.0.RELEASE</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>organization-manager</artifactId>
+
+    <dependencies>
+        <!--<dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>systemcode-api</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>-->
+       <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>auth-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>rbac-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>systemcode-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>tenant-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>file-server-api</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
+    </dependencies>
+</project>

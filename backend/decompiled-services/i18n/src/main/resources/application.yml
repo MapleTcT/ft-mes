@@ -1,0 +1,151 @@
+management:
+  health:
+    db:
+      enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "health"
+          - "info"
+          - "prometheus"
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    max-swallow-size: 100MB
+    max-connections: 300
+    max-threads: 300
+spring:
+  redis:
+    host: ${SUPOS_REDIS_HOST:redis}
+    port: ${SUPOS_REDIS_PORT:6379}
+  messages:
+    basename: i18n/i18n/i18n,i18n/sys/sys
+  application:
+    name: i18n
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  cloud:
+    nacos:
+      config:
+        enabled: false
+        refresh-enabled: false
+      server-addr: ${supfusion.cloud.nacos.server-addr}
+      username: ${supfusion.cloud.nacos.username}
+      password: ${supfusion.cloud.nacos.password}
+supfusion:
+  cloud:
+    i18n:
+      enabled: true
+      host: http://127.0.0.1:${server.port:8080}
+      locale-modules:
+        - i18n
+        - sys
+      module-versions:
+        - i18n202101081213
+        - sys202101081213
+      modules:
+        - i18n
+        - sys
+      basename: error/ # 故意填一个错的，目的是为了不使用SDK上载国际化资源
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    jwt:
+      enabled: true
+      header: Authorization
+      token-head: Bearer
+      symmetric: false
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+      expiration: 604800
+    config-center:
+      enabled: false
+      group: DEFAULT_GROUP
+      type: yaml
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    datasource:
+      connect:
+        use-system: ${SUPOS_SYSTEM_DB_USE:true}
+        system:
+          db-type: ${SUPOS_SYSTEM_DB_TYPE:mariadb}
+          db-name: ${SUPOS_SYSTEM_DB_NAME}
+          host: ${SUPOS_SYSTEM_DB_HOST}
+          port: ${SUPOS_SYSTEM_DB_PORT}
+          username: ${SUPOS_SYSTEM_DB_USERNAME}
+          password: ${SUPOS_SYSTEM_DB_PASSWORD}
+      druid:
+        init-pool-size: 5
+        min-pool-size: 5
+        max-pool-size: 50
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'
+    tenant:
+      sync-cache: ${SUPOS_TENANT_SYNC_CACHE:false}
+      init-getter: ${SUPOS_TENANT_INIT_GETTER:false}
+      register: ${SUPOS_TENANT_REGISTER:false}
+  swagger:
+    enable: false
+  i18n:
+    profiles: product
+    xlsx-upload-max-size: 15  #单个文件最大 值  单位 MB
+    i18n-key-length-num-defa: 255 #国际化key 字符长度限制
+    i18n-value-length-num-defa: 500 #国际化value 字符长度限制 (不超过多少字符)
+    i18n-resource-path: i18n/i18n/ #际化自己的国际化资源路径
+    i18n-resource-code: i18n
+    i18n-resource-version: i18n202008190930 # 国际化资源版本号
+    default-resource-path: i18n/sys/ #系统默认的国际化资源路径
+    default-resource-code: sys
+    default-resource-version: sys202007211025 #系统默认资源版本号
+    default-utc: UTC+8 # 设置系统默认的时区 UTC+8 代表 当前默认时间显示为东8区时间
+    default-language: zh_CN  #设置系统默认的语言 为中文 请求时如果没有传语言类型则默认为传输的是中文
+    file:
+      path: /app/resource  #国际化文件存储位置 非必填 默认项目根路径
+      
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.i18n.dao.po
+  mapper-locations:
+    - classpath:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml
+  global-config:
+    db-config:
+      id-type: ID_WORKER
+      field-strategy: NOT_EMPTY
+      db-type: ${supfusion.cloud.datasource.connect.system.db-type}
+      optimistic-lock-enabled: false
+      logic-delete-enabled: true
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 5000
+  httpclient:
+    enabled: true
+logging:
+  level:
+    com.supcon.supfusion.i18n.dao: info

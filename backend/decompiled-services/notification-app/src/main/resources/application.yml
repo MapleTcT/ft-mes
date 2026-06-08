@@ -1,0 +1,62 @@
+management:
+  health:
+    db:  
+      enabled: false
+spring:
+  messages:
+    basename: i18n/notificationSupplant
+  application:
+    name: notification-app
+server:
+  port: 8080
+  servlet:
+    context-path: /
+supfusion:
+  supos:
+    ak: ${SUPOS_APP_ACCOUNT_ID:9f0816c6598c0b9a3822cebcb675016a}
+    sk: ${SUPOS_APP_SECRET_KEY:0af37a42db057a1d1d6bd1150bcccc3f}
+    supos-host: ${SUPOS_ADDRESS:127.0.0.1:30235}
+    appId: ${SUPOS_APP_ID:605fd270fb5b3563411572db01634214}
+  cloud:
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_DISCOVERY_GROUP:DEFAULT_GROUP}
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos.default}:${NACOS_PORT:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    i18n:
+      enabled: true
+      host: http://${I18N_HOST:127.0.0.1}:${I18N_PORT:30130}
+      basename: i18n/
+      locale-module: notificationSupplant
+      module-version: notificationSupplant202102200001
+      modules:
+        - notificationSupplant
+  swagger:
+    enable: true
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 12000
+  httpclient:
+    enabled: true
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.notification.supplant.dao.po
+  configuration:
+    log-impl: 
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false

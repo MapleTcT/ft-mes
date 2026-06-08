@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>503</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content {
+            width: 225px;
+            height: 207px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .title {
+            margin: 0 auto;
+            margin-top: 40px;
+            color: #8d8d8d;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+
+        .btn {
+            margin: 0 auto;
+            width: 116px;
+            height: 42px;
+            margin-top: 30px;
+            line-height: 42px;
+            text-align: center;
+            border-radius: 21px;
+            border: 1px solid #15a1a3;
+            color: #15a1a3;
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn:active {
+            border: 1px solid#63ebec;
+            color: #63ebec;
+        }
+
+        .st0 {
+            fill: url(#SVGID_1_);
+        }
+
+        .st1 {
+            fill: #FBFBFB;
+        }
+
+        .st2 {
+            fill: #EFEFEF;
+        }
+
+        .st3 {
+            fill: #D1D1D1;
+        }
+
+        .st4 {
+            fill: #FFE3C2;
+        }
+
+        .st5 {
+            fill: #4B4B4B;
+        }
+
+        .st6 {
+            fill: #FFE2BF;
+        }
+
+        .st7 {
+            fill: #282828;
+        }
+
+        .st8 {
+            fill: #2AA8A5;
+        }
+
+        .st9 {
+            fill: url(#SVGID_2_);
+        }
+
+        .st10 {
+            fill: #AFAFAF;
+        }
+
+        .st11 {
+            fill: #A8A8A8;
+        }
+
+        .st12 {
+            fill: #C9C9C9;
+        }
+
+        .st13 {
+            fill: #C1C1C1;
+        }
+
+        .st14 {
+            fill: #BABABA;
+        }
+
+
+        .m_head {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            background: -webkit-linear-gradient(bottom, #2874d2, #2874d2);
+            background: linear-gradient(to top, #2874d2, #2874d2);
+            top: 0;
+            left: 0;
+        }
+        .m_head .m_hbox {
+            height: 100%;
+        }
+        .m_hbox .head_arrow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: inline-block;
+            width: 70px;
+            height: 50px;
+            line-height: 50px;
+        }
+        .m_hbox .m_arrow {
+            position: absolute;
+            left: 25px;
+            display: inline-block;
+            width: 23px;
+            height: 50px;
+        }
+        .m_hbox .m_arrow img {
+            width: 45%;
+            height: 35%;
+            position: absolute;
+            top: 50%;
+            margin-top: -35%;
+        }
+
+        .m_hbox .m_title {
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 70px;
+            margin-right: 70px;
+            display: block;
+        }
+        .icon_phone {
+            display: block;
+            position: absolute;
+            top: 27%;
+        }
+        .content_phone {
+            width:100%;
+            position: absolute;
+            top: 60%;
+        }
+    </style>
+</head>
+
+<body>
+<div class="m_head">
+    <div class="m_hbox">
+	<span onclick="pageBackFunc()" class="head_arrow">
+		<a href="javascript:;" class="m_arrow">
+			<img
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAdCAYAAACjbey/AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1MzY1MUFFNzkxMzFFOTExOTVERkFFQjdGMjdEOUZBOSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDNEQzQkQxNTM4Q0IxMUU5QTlGM0NGOUJFMDY4QjY5RCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDNEQzQkQxNDM4Q0IxMUU5QTlGM0NGOUJFMDY4QjY5RCIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjVDNDcxNTU0QzAzOEU5MTE5RkJGOUQzRjE0ODBFRTBBIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjUzNjUxQUU3OTEzMUU5MTE5NURGQUVCN0YyN0Q5RkE5Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+xfjHnQAAAS9JREFUeNqcldlOAkEQRfsZUQH9AmUZWURc4n8TngmgAlEWv8EFV9B3HoZbsTopyUxP10xyCDBzbqCrutqEYWhScAluQZBGvgA/4d/V0cotsGK5DzIa+Qx8szwAO/S9r9wEXyzTf9+193zkBvhk+Q7syftJck3IQ7C//YxLroIPlsdRsivgBLyzfB8nxwVUwILliUuOCiiDV5anIJ+0yPJDEbywPAMFnxLbN8fgmeU5OPBtMHo5Ak8sP4JDTXsbbg661rz6RhtQ3Pr5BW0AURIL6LX6UVWQJaT657QBRADeOOQhqYniOtG7jV17oZq0C312Y901B3znwakI+TeJNBOpKWbhDchqA+w0XoqBmtEGEOdipPdsSJoT6ZdDutpzwXIlQtom5dl4DUZU6o0AAwCm8bt+s/+PqQAAAABJRU5ErkJggg=="
+                    alt="" />
+		</a>
+	</span>
+        <h2 class="m_title"></h2>
+    </div>
+</div>
+<div class="icon">
+    <svg version="1.1" x="200px" y="300px" viewBox="0 0 257.5 193" width="261px" height="286px">
+        <g>
+            <g>
+                <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="154.3418" y1="88.2676"
+                                x2="154.3418" y2="8.2773">
+                    <stop offset="0" style="stop-color:#F2F2F2" />
+                    <stop offset="1" style="stop-color:#E0E0E0" />
+                </linearGradient>
+                <path class="st0" d="M198.8,83.1c0,2.9-2.3,5.2-5.2,5.2H115c-2.9,0-5.2-2.3-5.2-5.2V26h89V83.1z M109.8,13.5v10.4h89V13.5
+			c0-2.9-2.3-5.2-5.2-5.2H115C112.2,8.3,109.8,10.6,109.8,13.5z M129.4,16.1c0-1.6,1-2.6,2.6-2.6c1.6,0,2.6,1,2.6,2.6
+			c0,1.6-1,2.6-2.6,2.6C130.4,18.7,129.4,17.6,129.4,16.1z M122,16.1c0-1.6,1-2.6,2.6-2.6c1.6,0,2.6,1,2.6,2.6c0,1.6-1,2.6-2.6,2.6
+			C123.1,18.7,122,17.6,122,16.1z M114.7,16.1c0-1.6,1-2.6,2.6-2.6c1.6,0,2.6,1,2.6,2.6c0,1.6-1,2.6-2.6,2.6
+			C115.7,18.7,114.7,17.6,114.7,16.1z M144.5,16.1c0-1.6,1-2.6,2.6-2.6h44.3c1.6,0,2.6,1,2.6,2.6c0,1.6-1,2.6-2.6,2.6h-44.3
+			C145.5,18.7,144.5,17.6,144.5,16.1z" />
+            </g>
+            <path class="st1" d="M249.7,166.7c0,10.4-54.1,18.9-120.8,18.9C62.1,185.6,8,177.1,8,166.7s54.1-18.9,120.8-18.9
+		C195.6,147.8,249.7,156.2,249.7,166.7" />
+            <path class="st2" d="M209.8,166.7c0,7-36.2,12.7-81,12.7c-44.7,0-81-5.7-81-12.7c0-7,36.2-12.7,81-12.7
+		C173.6,154,209.8,159.7,209.8,166.7" />
+            <path class="st3"
+                  d="M172,166.7c0,3.7-19.3,6.7-43.1,6.7s-43.1-3-43.1-6.7c0-3.7,19.3-6.7,43.1-6.7S172,163,172,166.7" />
+            <rect x="111.4" y="162.2" class="st4" width="2.9" height="3.2" />
+            <rect x="94.9" y="156.2" class="st4" width="2.8" height="3.2" />
+            <polygon class="st5" points="90.5,111.4 103.9,114.7 117.2,117.8 117.2,141.2 115.1,163.1 110.5,163.1 108.6,141.4 105,126.1
+		103.1,125.7 101.9,139.3 98.6,157 93.8,157 94,138.1 	" />
+            <path class="st6"
+                  d="M85.6,84.4l0.1,24l0,0.1c-0.4,1.1-0.6,2.8,0.3,3.7c2.3,2.5,5.5,0,5-1.8l-1.1-1.7l0.9-23.4L85.6,84.4z" />
+            <path class="st6" d="M107.9,47.9l2.8,1.4c3.5,12.9-6.1,14.5-6.1,14.5l0,2.4c0,1-0.5,2.7-3.3,2.7c-2.8,0-3.3-1.8-3.3-2.5L97.2,53
+		l6-6.8L107.9,47.9z" />
+            <path class="st7" d="M97.7,62.5c0,0,3-5,2.9-6.3l-0.3-3l2.7,0.2c0,0,3.3-1,5.7-2.3c2.4-1.3,2.7-2,2.7-2c2.1-0.5,3.1-1.9-1.1-4.2
+		c-3.3-1.8-6.9-4.6-13.8-0.9C91.3,43.5,86.9,55.8,97.7,62.5" />
+            <path class="st8" d="M97.6,65.8c-4.7,0.4-8.5,3.9-9.6,7.8L84.8,85c-0.2,0.8,0.3,1.6,1.1,1.7l3.4,0.7v19.5c0,5.1,3.8,9.5,8.8,10.2
+		l19.1,1.4c0,0-0.1-9-0.8-19.6c-0.6-9.2-0.2-17.1,0-19.2c0-0.5,0-0.9,0-1.4C115.9,74.7,112.9,64.2,97.6,65.8" />
+            <path class="st6" d="M112.2,81.2l0.6-0.1c1.3-0.3,2.5,0,2.7,1.2l0.8,4.6c0.2,1.1,1.3,1.8,2.4,1.4l17.4-4.9c0.6-0.2,1.3-1.3,1.7-1.9
+		c0.4-0.7,0.6-1,1.1-1.4c0.8-0.1,0.2,2.3,0.2,2.3s5.5-1.9,5.8-1.5c0.3,0.7-3.5,2.2-3.5,2.2s2.2,2.8-0.1,4.5c-1.3,1-3.3,0.7-4.2,0.4
+		c-0.4-0.1-0.8-0.1-1.1,0l-17.4,7.9c-2.9,1.2-6.2-0.3-7.2-3.3l-2.2-6.5C108.3,83.7,109.7,81.8,112.2,81.2" />
+            <path class="st5" d="M111,168.6l3.2-0.9c0.5-0.1,1-0.2,1.4-0.3c1.4-0.3,3.4-0.6,3.5-0.6c0.4-0.2,0.5-2-1.4-2l-1.7,0.1
+		c-0.5,0.1-4.3,0.2-4.3,0.2c-2,0.3-1.9,2.2-1.5,3.2C110.3,168.5,110.6,168.7,111,168.6" />
+            <path class="st5" d="M94.5,162.1l3-0.8c0.5-0.1,0.9-0.2,1.4-0.3c1.4-0.3,3.2-0.6,3.3-0.6c0.4-0.2,0.5-1.9-1.3-1.9l-1.6,0.1
+		c-0.5,0.1-4.1,0.2-4.1,0.2c-1.9,0.3-1.8,2.1-1.4,3C93.8,162,94.2,162.2,94.5,162.1" />
+            <linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="173.355" y1="76.095" x2="173.355"
+                            y2="76.095">
+                <stop offset="1.240000e-06" style="stop-color:#DD9E1D" />
+                <stop offset="0.3794" style="stop-color:#DEA01F" />
+                <stop offset="0.5577" style="stop-color:#E0A527" />
+                <stop offset="0.6941" style="stop-color:#E4AF34" />
+                <stop offset="0.8091" style="stop-color:#E9BC46" />
+                <stop offset="0.9096" style="stop-color:#F0CE5D" />
+                <stop offset="1" style="stop-color:#F8E37A" />
+            </linearGradient>
+            <path class="st9" d="M173.4,76.1" />
+            <g>
+                <path class="st10" d="M154.9,46.7c0.7,0,1.2-0.4,1.2-0.9v-7.2c0-0.5-0.5-0.9-1.2-0.9h-0.8c-0.7,0-1.2,0.4-1.2,0.9v7.2
+			c0,0.5,0.5,0.9,1.2,0.9L154.9,46.7L154.9,46.7z" />
+                <path class="st11" d="M147,49.6c0.2,0.2,0.3,0.2,0.6,0.2c0.3,0,0.7-0.2,0.9-0.4l0.6-0.6c0.5-0.5,0.6-1.2,0.2-1.5l-5.1-5.1
+			c-0.4-0.4-1-0.3-1.5,0.2l-0.6,0.6c-0.5,0.5-0.6,1.2-0.2,1.5L147,49.6z" />
+                <path class="st11" d="M146.7,54.9v-0.9c0-0.7-0.4-1.2-0.9-1.2h-7.2c-0.5,0-0.9,0.5-0.9,1.2v0.9c0,0.7,0.4,1.2,0.9,1.2h7.2
+			C146.3,56.1,146.7,55.6,146.7,54.9L146.7,54.9z" />
+                <path class="st3" d="M148.8,59.7c-0.5-0.5-1.2-0.6-1.5-0.2l-5.1,5.1c-0.4,0.4-0.3,1,0.2,1.5l0.6,0.6c0.2,0.2,0.4,0.3,0.7,0.4
+			c0.1,0,0.2,0,0.2,0c0.2,0,0.4-0.1,0.6-0.2l5.1-5.1c0.2-0.2,0.2-0.4,0.2-0.6c0-0.3-0.2-0.7-0.4-0.9L148.8,59.7z" />
+                <path class="st3" d="M154.9,62.3h-0.8c-0.7,0-1.2,0.4-1.2,0.9v7.2c0,0.5,0.5,0.9,1.2,0.9h0.8c0.7,0,1.2-0.4,1.2-0.9v-7.2
+			C156.1,62.7,155.6,62.3,154.9,62.3L154.9,62.3z" />
+                <path class="st12" d="M161.7,59.6c-0.2-0.2-0.4-0.2-0.6-0.2c-0.3,0-0.7,0.2-0.9,0.4l-0.6,0.6c-0.5,0.5-0.6,1.1-0.2,1.5l5.1,5.1
+			c0.2,0.2,0.4,0.2,0.6,0.2c0.3,0,0.7-0.1,0.9-0.4l0.6-0.6c0.5-0.5,0.6-1.1,0.2-1.5L161.7,59.6z" />
+                <path class="st13" d="M170.1,52.9h-7.1c-0.5,0-0.9,0.5-0.9,1.2v0.8c0,0.7,0.4,1.2,0.9,1.2h7.1c0.5,0,0.9-0.5,0.9-1.2v-0.8
+			C171,53.4,170.6,52.9,170.1,52.9L170.1,52.9z" />
+                <path class="st14" d="M160.1,49.4c0.3,0.3,0.6,0.4,0.9,0.4c0.2,0,0.4-0.1,0.6-0.2l5.1-5.1c0.4-0.4,0.3-1-0.2-1.5l-0.6-0.6
+			c-0.5-0.5-1.2-0.6-1.5-0.2l-5.1,5.1c-0.4,0.4-0.3,1,0.2,1.5L160.1,49.4z" />
+            </g>
+        </g>
+    </svg>
+
+</div>
+<div class="content">
+    <div class="title">抱歉，服务不存在或者未启动...</div>
+    <div class="btn" onclick="window.location.reload()">刷新</div>
+</div>
+<script>
+    // 返回上一个页面
+    function pageBackFunc() {
+        try {
+            window.mobilejs.close();
+        } catch (err) {
+            try {
+                window.parent.window.mobilejs.close();
+            } catch (err) {
+                try {
+                    window.history.back();
+                } catch (err) {
+
+                }
+            }
+        }
+    }
+
+    //判断设备类型
+    function phoneType() {
+        let ua = window.navigator.userAgent,
+            app = window.navigator.appVersion,
+            phoneType;
+        if (!!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
+            // ios端
+            phoneType = "ios";
+        } else if (ua.indexOf("Android") > -1 || ua.indexOf("Adr") > -1) {
+            // android端
+            phoneType = "android";
+        }
+        return phoneType;
+    }
+
+    if (phoneType() == "android" || phoneType() == "ios") {
+        document.getElementsByClassName("m_head")[0].style.display = "block";
+        document.getElementsByClassName("icon")[0].classList.add("icon_phone");
+        document.getElementsByClassName("content")[0].classList.add("content_phone");
+    } else {
+        document.getElementsByClassName("m_head")[0].style.display = "none";
+    }
+</script>
+</body>
+
+</html>

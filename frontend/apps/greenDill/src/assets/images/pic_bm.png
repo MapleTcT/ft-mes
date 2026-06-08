@@ -1,0 +1,8 @@
+module.exports = __webpack_public_path__ + "img/pic_bm.a0bc53c.png";
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./src/assets/images/pic_bm.png
+// module id = 87dT
+// module chunks = 2 3 4 5

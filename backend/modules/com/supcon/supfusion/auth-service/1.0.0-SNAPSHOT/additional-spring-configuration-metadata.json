@@ -1,0 +1,20 @@
+{
+  "hints": [],
+  "groups": [],
+  "properties": [
+    {
+      "sourceType": "com.supcon.supfusion.auth.service.config.AuthProperties",
+      "name": "supfusion.auth.max-admin-user-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 10,
+      "description": "admin用户最大数量"
+    },
+    {
+      "sourceType": "com.supcon.supfusion.auth.service.config.AuthProperties",
+      "name": "supfusion.auth.supos-feature",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "启用supos特性"
+    }
+  ]
+}

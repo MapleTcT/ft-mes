@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>license-parent</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>license-webapi</artifactId>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>license-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>license-api</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>cloud-rpc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>cloud-common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>cloud-boot-security-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+    </dependencies>
+</project>

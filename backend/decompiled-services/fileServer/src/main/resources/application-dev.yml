@@ -1,0 +1,111 @@
+management:
+  health:
+    db:
+      enabled: false
+spring:
+  application:
+    name: file-server
+  profiles:
+    active: dev
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  servlet:
+    multipart:
+      max-file-size: 2048MB
+      max-request-size: 2048MB
+server:
+  port: 8085
+  tomcat:
+    max-swallow-size: 2048MB
+supfusion:
+  cloud:
+    jwt:
+      enabled: true
+      header: Authorization
+      tokenHead: Bearer
+      symmetric: false
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+      expiration: 604800
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:localhost:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    datasource:
+      connect:
+        use-system: true
+        system:
+          db-type: ${DB_TYPE:oracle}
+          db-name: ${DB_NAME:orcl}
+          host: ${HOST:192.168.90.164}
+          port: ${PORT:1521}
+          username: ${USER_NAME:supfusion08}
+          password: ${PASS_WORD:1}
+      druid:
+        init-pool-size: 10
+        min-pool-size: 10
+        max-pool-size: 200
+        validationQuerySql: ${VALIDATIONQUERYSQL:SELECT 1}
+      script:
+        script-root-dirs: classpath*:META-INF/
+    tenant:
+      sync-cache: ${SUPOS_TENANT_SYNC_CACHE:false}
+      init-getter: ${SUPOS_TENANT_INIT_GETTER:false}
+    i18n:
+      enabled: true
+      host: http://localhost:8082
+      locale-modules:
+        - fileServer
+      module-versions:
+        - fileServer202010121502
+      basename: i18n/
+      heartbeat-seconds: 10
+      modules:
+        - fileServer
+    file:
+      filePreview: false #开启附件预览
+      bap:
+        list:
+          maxPageSize: 500
+        import:
+          excel:
+            maxsize: 500
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.file.server.dao.po
+  mapper-locations:
+    - classpath:com/supcon/supfusion/file/server/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    call-setters-on-nulls: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      id-type: ID_WORKER
+      field-strategy: NOT_EMPTY
+      db-type: ${supfusion.cloud.datasource.connect.system.db-type}
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 12000
+  httpclient:
+    enabled: true
+minio:
+  endpoint: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  fileTypes: doc,md,mp3,mp4,xlsx,txt,png,jpg,zip,xml,properties,bat,exe,pdf,htm,html,pptx,ppt,7z,tar,jar,rar,xls,docx,PNG,bmp,gif,jpeg

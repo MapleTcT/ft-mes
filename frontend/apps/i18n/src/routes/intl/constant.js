@@ -1,0 +1,10 @@
+export const LAN_KEY = 'i18nKey';
+export const LAN_VALUE = 'i18nValues';
+export const MODULE_CODE = 'moduleCode';
+export const LAN_USED = 'used';
+export const IMPORT_URL = '/inter-api/i18n/v1/resource/file';
+export const EXPORT_TEMPLATE_URL = '/inter-api/i18n/v1/resource/export/exportSet';
+export const EXPORT_URL = '/inter-api/i18n/v1/resource/export/download';
+export const DOWNLOAD_ALL = 'all';
+export const DOWNLOAD_SELECTED = 'selected';
+export const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';

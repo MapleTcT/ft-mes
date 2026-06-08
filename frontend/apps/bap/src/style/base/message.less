@@ -1,0 +1,158 @@
+// 警告
+.error-info-container {
+    border: none;
+    box-shadow: none;
+
+    // 保存成功提示
+    &.success-info {
+        background-color: #fff;
+        border-radius: 4px;
+        width: 400px !important;
+        height: 140px;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%);
+        border: none;
+        box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.24);
+        text-align: center;
+
+        .error-info-wrap {
+            background: none;
+            border: none;
+            width: auto;
+            box-shadow: none;
+            padding-left: 27px;
+            height: 100%;
+
+            &:before {
+                display: none;
+            }
+        }
+
+        .error-info-content {
+            font-size: 20px;
+            color: #4F4F4F;
+            // margin-top: 35px;
+            line-height: 44px;
+            padding-left: 57px;
+            position: relative;
+            height: 100%;
+            padding-top: 41px !important;
+
+            &:before {
+                position: absolute;
+                width: 44px;
+                height: 44px;
+                content: "";
+                background: url(@success-check-circle) no-repeat;
+                color: @msg-success-bg-color;
+                background-size: 44px;
+                margin-left: -57px;
+                top: 28px;
+            }
+        }
+    }
+
+    .error-info-wrap {
+        background: none;
+        width: 350px;
+        min-height: auto;
+        border-radius: 4px;
+        box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.24);
+        box-sizing: border-box;
+        border: none;
+        border-top: 4px solid @msg-warning-bg-color;
+        padding-top: 15px;
+        padding-left: 85px;
+
+        &:before {
+            position: absolute;
+            width: 41px;
+            height: 41px;
+            content: "";
+            background-image: url(@warning-exclamation-circle);
+            background-repeat: no-repeat;
+            color: @msg-success-bg-color;
+            background-size: 41px;
+            margin-left: -57px;
+        }
+
+        .error-info-head {
+            background: none;
+            padding-left: 0;
+            color: @msg-warning-bg-color;
+            font-size: 16px;
+            font-weight: bold;
+            padding-top: 3px;
+            line-height: 1;
+            height: auto;
+            margin-bottom: 17px;
+        }
+
+        .error-info-content {
+            padding-top: 0;
+            color: #000;
+            line-height: 16px;
+        }
+
+        .error-info-close {
+            top: 12px;
+            background: none;
+            right: 12px;
+
+            .close-icon(#BCBCBC);
+        }
+    }
+}
+
+// 处理对话框中情况
+.ewc-dialog-el,
+.ewc-dialog-blove {
+    .error-info-container {
+        right: 16px !important;
+        top: 8px !important;
+        width: 183px !important;
+        background: #fff;
+    }
+
+    .error-info-wrap {
+        width: 180px;
+        padding-left: 38px;
+        padding-top: 11px;
+        padding-right: 22px;
+        padding-bottom: 19px;
+        min-height: auto;
+
+        &::before {
+            width: 18px;
+            height: 18px;
+            top: 17px;
+            left: 14px;
+            margin-left: 0;
+            background-size: 18px;
+        }
+
+        .error-info-head {
+            display: block;
+        }
+
+        .error-info-close {
+            right: 8px;
+        }
+    }
+
+    .dialog-modul-success {
+        .error-info-wrap {
+            border-top: 4px solid @msg-success-bg-color;
+
+            &::before {
+                color: @msg-success-bg-color;
+                background-image: url(@success-check-circle);
+            }
+
+            .error-info-head {
+                color: @msg-success-bg-color;
+            }
+        }
+    }
+}

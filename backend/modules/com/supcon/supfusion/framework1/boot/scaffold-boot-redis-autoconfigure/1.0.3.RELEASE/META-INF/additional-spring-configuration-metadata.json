@@ -1,0 +1,27 @@
+{
+  "hints": [],
+  "groups": [],
+  "properties": [
+    {
+      "name": "spring.cache.use-tenant-prefix",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.supcon.supfusion.framework.scaffold.redis.properties.SupfusionRedisProperties",
+      "defaultValue": "false",
+      "description": "使用租户信息为redis key的前缀"
+    },
+    {
+      "name": "spring.cache.cache-ttl",
+      "type": "java.lang.String",
+      "sourceType": "com.supcon.supfusion.framework.scaffold.redis.properties.SupfusionRedisProperties",
+      "defaultValue": "PT30M",
+      "description": "SpringCache有效时间"
+    },
+    {
+      "name": "spring.cache.cache-null-values",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.supcon.supfusion.framework.scaffold.redis.properties.SupfusionRedisProperties",
+      "defaultValue": "false",
+      "description": "是否缓存null值"
+    }
+  ]
+}

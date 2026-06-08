@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>404</title>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content{
+            width: 178px;
+            height: 207px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+        .title {
+            margin: 0 auto;
+            margin-top: 40px;
+            color: #8d8d8d;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        .btn {
+            margin: 0 auto;
+            width: 116px;
+            height: 42px;
+            margin-top: 30px;
+            line-height: 42px;
+            text-align: center;
+            border-radius: 21px;
+            border: 1px solid #15a1a3;
+            color: #15a1a3;
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .btn:active {
+            border: 1px solid#63ebec;
+            color: #63ebec;
+        }
+
+        .m_head {
+            position: absolute;
+            width: 100%;
+            height: 50px;
+            background: -webkit-linear-gradient(bottom, #2874d2, #2874d2);
+            background: linear-gradient(to top, #2874d2, #2874d2);
+            top: 0;
+            left: 0;
+        }
+        .m_head .m_hbox {
+            height: 100%;
+        }
+        .m_hbox .head_arrow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: inline-block;
+            width: 70px;
+            height: 50px;
+            line-height: 50px;
+        }
+        .m_hbox .m_arrow {
+            position: absolute;
+            left: 25px;
+            display: inline-block;
+            width: 23px;
+            height: 50px;
+        }
+        .m_hbox .m_arrow img {
+            width: 45%;
+            height: 35%;
+            position: absolute;
+            top: 50%;
+            margin-top: -35%;
+        }
+
+        .m_hbox .m_title {
+            color: #fff;
+            text-align: center;
+            font-size: 18px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 70px;
+            margin-right: 70px;
+            display: block;
+        }
+        .icon_phone {
+            display: block;
+            position: absolute;
+            top: 27%;
+        }
+        .content_phone {
+            width:100%;
+            position: absolute;
+            top: 50%;
+        }
+    </style>
+</head>
+<body>
+<div class="m_head">
+    <div class="m_hbox">
+	<span onclick="pageBackFunc()" class="head_arrow">
+		<a href="javascript:;" class="m_arrow">
+			<img
+                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAdCAYAAACjbey/AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1MzY1MUFFNzkxMzFFOTExOTVERkFFQjdGMjdEOUZBOSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDNEQzQkQxNTM4Q0IxMUU5QTlGM0NGOUJFMDY4QjY5RCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDNEQzQkQxNDM4Q0IxMUU5QTlGM0NGOUJFMDY4QjY5RCIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjVDNDcxNTU0QzAzOEU5MTE5RkJGOUQzRjE0ODBFRTBBIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjUzNjUxQUU3OTEzMUU5MTE5NURGQUVCN0YyN0Q5RkE5Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+xfjHnQAAAS9JREFUeNqcldlOAkEQRfsZUQH9AmUZWURc4n8TngmgAlEWv8EFV9B3HoZbsTopyUxP10xyCDBzbqCrutqEYWhScAluQZBGvgA/4d/V0cotsGK5DzIa+Qx8szwAO/S9r9wEXyzTf9+193zkBvhk+Q7syftJck3IQ7C//YxLroIPlsdRsivgBLyzfB8nxwVUwILliUuOCiiDV5anIJ+0yPJDEbywPAMFnxLbN8fgmeU5OPBtMHo5Ak8sP4JDTXsbbg661rz6RhtQ3Pr5BW0AURIL6LX6UVWQJaT657QBRADeOOQhqYniOtG7jV17oZq0C312Y901B3znwakI+TeJNBOpKWbhDchqA+w0XoqBmtEGEOdipPdsSJoT6ZdDutpzwXIlQtom5dl4DUZU6o0AAwCm8bt+s/+PqQAAAABJRU5ErkJggg=="
+                    alt="" />
+		</a>
+	</span>
+        <h2 class="m_title"></h2>
+    </div>
+</div>
+<div class="icon">
+    <svg version="1.1" x="0px" y="0px"
+         width="257.505px" height="193px" viewBox="0 0 257.505 193" enable-background="new 0 0 257.505 193" xml:space="preserve">
+   <g>
+     <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="154.3408" y1="88.2676" x2="154.3408" y2="8.2773">
+       <stop  offset="0" style="stop-color:#F2F2F2"/>
+         <stop  offset="1" style="stop-color:#E0E0E0"/>
+     </linearGradient>
+       <path fill="url(#SVGID_1_)" d="M198.836,83.08c0,2.852-2.334,5.188-5.187,5.188h-78.616c-2.853,0-5.186-2.336-5.186-5.188V26.023
+       h88.989V83.08z M109.846,13.464v10.373h88.99V13.464c0-2.853-2.334-5.187-5.187-5.187h-78.616
+       C112.18,8.277,109.846,10.611,109.846,13.464z M129.409,16.057c0-1.556,1.038-2.593,2.593-2.593c1.556,0,2.594,1.037,2.594,2.593
+       c0,1.557-1.038,2.594-2.594,2.594C130.447,18.65,129.409,17.613,129.409,16.057z M122.035,16.057c0-1.556,1.038-2.593,2.594-2.593
+       c1.556,0,2.593,1.037,2.593,2.593c0,1.557-1.036,2.594-2.593,2.594C123.073,18.65,122.035,17.613,122.035,16.057z M114.661,16.057
+       c0-1.556,1.038-2.593,2.594-2.593s2.593,1.037,2.593,2.593c0,1.557-1.037,2.594-2.593,2.594S114.661,17.613,114.661,16.057z
+        M144.474,16.057c0-1.556,1.037-2.593,2.594-2.593h44.307c1.556,0,2.594,1.037,2.594,2.593c0,1.557-1.038,2.594-2.594,2.594
+       h-44.307C145.51,18.65,144.474,17.613,144.474,16.057z"/>
+       <g>
+       <path fill="#FFFFFF" d="M139.183,54.494c0,2.813-2.28,5.092-5.092,5.092s-5.092-2.279-5.092-5.092s2.28-5.092,5.092-5.092
+         S139.183,51.682,139.183,54.494"/>
+           <path fill="#FFFFFF" d="M179.683,54.494c0,2.813-2.28,5.092-5.092,5.092s-5.092-2.279-5.092-5.092s2.28-5.092,5.092-5.092
+         S179.683,51.682,179.683,54.494"/>
+           <path fill="#FFFFFF" d="M159.433,54.494c0,2.813-2.28,5.092-5.092,5.092s-5.092-2.279-5.092-5.092s2.28-5.092,5.092-5.092
+         S159.433,51.682,159.433,54.494"/>
+     </g>
+   </g>
+        <path fill="#FBFBFB" d="M249.692,166.69c0,10.445-54.104,18.913-120.846,18.913C62.104,185.604,8,177.136,8,166.69
+     s54.104-18.914,120.846-18.914C195.588,147.776,249.692,156.245,249.692,166.69"/>
+        <path fill="#EFEFEF" d="M209.809,166.69c0,6.998-36.248,12.671-80.963,12.671c-44.715,0-80.963-5.673-80.963-12.671
+     s36.248-12.672,80.963-12.672C173.561,154.019,209.809,159.692,209.809,166.69"/>
+        <path fill="#D1D1D1" d="M171.962,166.69c0,3.727-19.304,6.748-43.117,6.748s-43.117-3.021-43.117-6.748s19.304-6.748,43.117-6.748
+     S171.962,162.964,171.962,166.69"/>
+        <rect x="111.368" y="162.246" fill="#FFE3C2" width="2.905" height="3.217"/>
+        <rect x="94.93" y="156.197" fill="#FFE3C2" width="2.767" height="3.217"/>
+        <polygon fill="#4B4B4B" points="90.477,111.396 103.86,114.729 117.244,117.787 117.244,141.216 115.107,163.119 110.509,163.119
+     108.589,141.412 104.969,126.082 103.076,125.687 101.873,139.282 98.585,156.994 93.804,156.994 94.043,138.107 "/>
+        <path fill="#FFE2BF" d="M85.59,84.402l0.06,24.038l-0.049,0.122c-0.428,1.082-0.553,2.755,0.312,3.691
+     c2.318,2.509,5.529-0.006,4.991-1.826l-1.138-1.697l0.863-23.375L85.59,84.402z"/>
+        <path fill="#FFE2BF" d="M107.909,47.878l2.765,1.363c3.54,12.896-6.098,14.535-6.098,14.535l-0.017,2.421
+     c0,0.95-0.5,2.735-3.321,2.735c-2.822,0.001-3.325-1.775-3.33-2.47l-0.683-13.474l6.011-6.821L107.909,47.878z"/>
+        <path fill="#282828" d="M97.705,62.451c0,0,2.964-4.971,2.89-6.288l-0.254-3.001l2.682,0.224c0,0,3.342-1.001,5.726-2.349
+     c2.384-1.347,2.706-2.026,2.706-2.026c2.075-0.484,3.071-1.94-1.108-4.186c-3.323-1.784-6.852-4.626-13.808-0.873
+     C91.294,43.498,86.893,55.753,97.705,62.451"/>
+        <path fill="#2AA8A5" d="M97.604,65.824c-4.702,0.445-8.492,3.881-9.605,7.826l-3.197,11.332c-0.219,0.775,0.273,1.573,1.065,1.726
+     l3.422,0.661v19.493c0,5.12,3.767,9.461,8.836,10.182l19.119,1.423c0,0-0.141-8.964-0.813-19.61
+     c-0.579-9.162-0.164-17.147-0.037-19.197c0.029-0.472,0.019-0.93-0.041-1.398C115.89,74.653,112.924,64.158,97.604,65.824"/>
+        <path fill="#FFE2BF" d="M112.182,81.243l0.587-0.142c1.254-0.301,2.45-0.024,2.674,1.246l0.81,4.6
+     c0.197,1.112,1.344,1.783,2.41,1.409l17.386-4.917c0.638-0.205,1.336-1.349,1.704-1.909c0.431-0.658,0.65-1.021,1.149-1.431
+     c0.847-0.099,0.16,2.305,0.16,2.305s5.525-1.859,5.841-1.457c0.342,0.685-3.469,2.172-3.469,2.172s2.195,2.818-0.15,4.512
+     c-1.336,0.966-3.294,0.745-4.155,0.392c-0.361-0.148-0.76-0.146-1.116,0.016l-17.38,7.878c-2.91,1.185-6.219-0.319-7.238-3.293
+     l-2.234-6.518C108.343,83.723,109.731,81.832,112.182,81.243"/>
+        <path fill="#4B4B4B" d="M110.949,168.595l3.172-0.865c0.478-0.131,0.955-0.242,1.442-0.335c1.441-0.274,3.399-0.603,3.498-0.646
+     c0.421-0.186,0.537-2.023-1.406-1.985l-1.685,0.103c-0.525,0.067-4.322,0.214-4.322,0.214c-1.99,0.297-1.856,2.2-1.477,3.151
+     C110.29,168.531,110.632,168.681,110.949,168.595"/>
+        <path fill="#4B4B4B" d="M94.467,162.085l3.029-0.826c0.456-0.124,0.912-0.231,1.377-0.319c1.376-0.263,3.246-0.576,3.34-0.617
+     c0.401-0.178,0.512-1.933-1.343-1.896l-1.609,0.099c-0.501,0.064-4.127,0.203-4.127,0.203c-1.899,0.284-1.771,2.102-1.41,3.01
+     C93.839,162.024,94.165,162.167,94.467,162.085"/>
+   </svg>
+
+</div>
+<div class="content">
+    <div class="title">抱歉，该页面无法显示...</div>
+    <div class="btn" onclick="window.location.reload()">刷新</div>
+</div>
+<script>
+    // 返回上一个页面
+    function pageBackFunc() {
+        try {
+            window.mobilejs.close();
+        } catch (err) {
+            try {
+                window.parent.window.mobilejs.close();
+            } catch (err) {
+                try {
+                    window.history.back();
+                } catch (err) {
+
+                }
+            }
+        }
+    }
+
+    //判断设备类型
+    function phoneType() {
+        let ua = window.navigator.userAgent,
+            app = window.navigator.appVersion,
+            phoneType;
+        if (!!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
+            // ios端
+            phoneType = "ios";
+        } else if (ua.indexOf("Android") > -1 || ua.indexOf("Adr") > -1) {
+            // android端
+            phoneType = "android";
+        }
+        return phoneType;
+    }
+
+    if (phoneType() == "android" || phoneType() == "ios") {
+        document.getElementsByClassName("m_head")[0].style.display = "block";
+        document.getElementsByClassName("icon")[0].classList.add("icon_phone");
+        document.getElementsByClassName("content")[0].classList.add("content_phone");
+    } else {
+        document.getElementsByClassName("m_head")[0].style.display = "none";
+    }
+</script>
+</body>
+</html>

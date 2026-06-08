@@ -1,0 +1,160 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        enabled: false
+    stream:
+      bindings:
+        tenant-input:
+          destination: supOS_tenant
+          content-type: application/json
+          group: ${spring.application.name}
+  application:
+    name: task-scheduler
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  cache:
+    use-tenant-prefix: false  # true: 在原有缓存key的基础上加上租户信息前缀, <tenantId>:<originKey>
+    cacheTtl: PT1H20M50S  # SpringCache Duration ttl
+    cache-null-values: false  # SpringCache 是否缓存null值
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+#    time-zone: GMT+8
+management:
+  health:
+    db:
+      enabled: false # 关闭spring boot的数据源健康检查
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: ${MONITOR_ENABLED:true}
+    binders:
+      files:
+        enabled: ${MONITOR_ENABLED:true}
+      jvm:
+        enabled: ${MONITOR_ENABLED:true}
+      logback:
+        enabled: ${MONITOR_ENABLED:true}
+      processor:
+        enabled: ${MONITOR_ENABLED:true}
+      uptime:
+        enabled: ${MONITOR_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+    shutdown:
+      enabled: false
+server:
+  port: 8080
+  servlet:
+    context-path: /
+supfusion:
+  cloud:
+    tenant:
+      sync-cache: false
+      init-getter: true
+      register: false
+    jwt:
+      enabled: ${SUPOS_JWT_ENABLED:true}
+      header: ${SUPOS_JWT_HEADER:Authorization}
+      tokenHead: ${SUPOS_JWT_HEADER_TOKEN:Bearer}
+      symmetric: false
+      expiration: 604800
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+    datasource:
+      connect:
+        use-system: ${SUPOS_SYSTEM_DB_USE:true}
+        system:
+          db-type: ${SUPOS_SYSTEM_DB_TYPE:mariadb}
+          db-name: ${SUPOS_SYSTEM_DB_NAME}
+          host: ${SUPOS_SYSTEM_DB_HOST}
+          port: ${SUPOS_SYSTEM_DB_PORT}
+          username: ${SUPOS_SYSTEM_DB_USERNAME}
+          password: ${SUPOS_SYSTEM_DB_PASSWORD}
+      druid:
+        init-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        min-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        max-pool-size: ${SUPOS_DS_MAX_POOL_SIZE:15}
+        idle-live-millis: ${SUPOS_DS_IDLE_TIME:30000}
+        max-live-millis: ${SUPOS_DS_LIVE_TIME:1800000}
+        connection-timeout: ${SUPOS_DS_CONN_TIME:15000}
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'    # 版本号标识符。默认为##
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    config-center:
+      enabled: true
+      type: json
+    registry:
+      enabled: true # 开启服务注册
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}    # 服务注册组名称
+    discovery:
+      enabled: true # 开启服务发现，根据需要开启
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod} # 服务注册组名称，只有和被调用的服务同在一个Nacos服务组才会被发现
+    i18n:
+      enabled: true
+      host: http://i18n-service:8080
+      basename: i18n/
+      locale-modules:
+        - taskScheduler
+      module-versions:
+        - taskScheduler202012161354
+      modules:
+        - taskScheduler
+      use-get-all-module: true
+      heartbeat-seconds: 30
+
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 1000
+        read-timeout: 2000
+
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.scheduler.server.dao.po # po/entity类的扫描路径
+  type-handlers-package: com.supcon.supfusion.supfusion.scheduler.server.typehandler # 自定义的typehandler扫描路径
+  global-config:
+    db-config:
+      logic-delete-enabled: false # 开启逻辑删除，根据需要开启
+      optimistic-lock-enabled: false # 开启乐观锁，根据需要开启
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true # 开启表字段与类字段的驼峰规则匹配
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+org:
+  quartz:
+    threadPool:
+      class: org.quartz.simpl.SimpleThreadPool
+      threadCount: 10
+      threadPriority: 5
+      threadsInheritContextClassLoaderOfInitializingThread: true
+    jobStore:
+      class: org.quartz.impl.jdbcjobstore.JobStoreTX
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      tablePrefix: QRTZ_
+      isClustered: true
+      clusterCheckinInterval: 10000
+      misfireThreshold: 9000
+      useProperties: false
+      acquireTriggersWithinLock: true
+      dataSource: quartzDataSource
+    scheduler:
+      instanceName: DefaultQuartzScheduler
+      instanceId: AUTO

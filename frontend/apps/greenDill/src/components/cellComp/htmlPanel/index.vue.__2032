@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"html-link"},[(_vm.isAppendixPreview)?_c('header',{staticClass:"m_head",style:({background: _vm.bgColor})},[_c('div',{staticClass:"m_hbox"},[_c('span',{staticClass:"head_arrow",on:{"click":_vm.backHistory}},[_c('a',{staticClass:"m_arrow",attrs:{"href":"javascript:;"}})]),_vm._v(" "),_c('h2',{staticClass:"m_title"},[_vm._v(_vm._s(_vm.$t('cellComp.htmlPanel.attach.preview')))]),_vm._v(" "),_c('span',{staticClass:"head-icon-download",on:{"click":function($event){return _vm.downloadFile($event)}}})])]):_vm._e(),_vm._v(" "),_c('iframe',{ref:"iframe",class:{'appendix-preview': _vm.isAppendixPreview},attrs:{"id":"newPage","src":_vm.url,"frameborder":"0","scrolling":_vm.isAppendixPreview ? 'auto' : 'no',"marginwidth":"0","marginheight":"0","vspace":"0","hspace":"0","allowtransparency":"true","allowfullscreen":"true"}})])}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-78b59564","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/cellComp/htmlPanel/index.vue
+// module id = null
+// module chunks = 

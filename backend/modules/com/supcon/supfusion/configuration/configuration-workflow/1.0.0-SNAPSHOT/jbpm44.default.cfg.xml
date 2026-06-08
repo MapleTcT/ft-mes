@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jbpm-configuration>
+
+  <import resource="jbpm44.default.scriptmanager.xml" />
+
+  <process-engine-context>
+  
+    <repository-service />
+    <repository-cache />
+    <execution-service />
+    <!-- <history-service /> -->
+    <management-service />
+    <!-- <identity-service /> -->
+    <task-service />
+
+    <object class="org.jbpm.pvm.internal.id.DatabaseDbidGenerator">
+      <field name="commandService"><ref object="newTxRequiredCommandService" /></field>
+    </object>
+
+    <object class="org.jbpm.pvm.internal.id.DatabaseIdComposer" init="eager" />
+    
+    <object class="org.jbpm.pvm.internal.el.JbpmElFactoryImpl" />
+
+    <types resource="jbpm.variable.types.xml" />
+<!--  不使用默认的发信服务
+    <address-resolver />
+-->   
+  </process-engine-context>
+
+  <transaction-context>
+    <repository-session />
+    <db-session />
+    
+    <message-session />
+    <timer-session />
+    
+    <history-sessions>
+      <object class="org.jbpm.pvm.internal.history.HistorySessionImpl" />
+    </history-sessions>
+    <!--  
+    <mail-session>
+      <mail-server>
+        <session-properties resource="jbpm.mail.properties" />
+      </mail-server>
+    </mail-session>
+-->
+  </transaction-context>
+
+</jbpm-configuration>

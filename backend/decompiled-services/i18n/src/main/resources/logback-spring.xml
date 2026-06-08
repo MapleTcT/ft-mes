@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration scan="true" scanPeriod="60" debug="false">
+    <conversionRule conversionWord="traceId" converterClass="com.supcon.supfusion.framework.cloud.logger.converter.TraceIdConverter"/>
+    <conversionRule conversionWord="fromServiceName" converterClass="com.supcon.supfusion.framework.cloud.logger.converter.FromServiceNameConverter"/>
+
+    <property name="logHome" value="${work.dir}/logs"/>
+    <property name="pattern" value="[%d{ISO8601}][%-5level]%traceId[%t][%C][i18n]%fromServiceName - %msg%n"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <springProfile name="default">
+        <include resource="logback-prod.xml"/>
+    </springProfile>
+    <springProfile name="prod">
+        <include resource="logback-prod.xml"/>
+    </springProfile>
+    <springProfile name="dev">
+        <include resource="logback-dev.xml"/>
+    </springProfile>
+</configuration>

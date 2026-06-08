@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<!--<util:properties id="workflow.engine.defaultProps">
+	<prop key="bap.serverHost">127.0.0.1</prop>
+	<prop key="bap.serverName">http://${bap.serverHost}:8080</prop>
+	<prop key="bap.serverUrlPrefix">${bap.serverName}/**</prop>
+	<prop key="orchid.env">dev</prop>
+	<prop key="sessionFactory.packagesToScan">com.supcon.orchid.workflow.engine.entities</prop>
+	<prop key="sessionFactory.mappingResources">jbpm.execution.hbm.xml,jbpm.repository.hbm.xml,jbpm.task.hbm.xml,jbpm.history.hbm.xml</prop>
+	&lt;!&ndash; 		<prop key="wf.defaultMsgPath">classpath:META-INF/default-msg.xml</prop> &ndash;&gt;
+	&lt;!&ndash; 		<prop key="wf.pendingMsgPath">classpath:META-INF/remind-msg.xml</prop> &ndash;&gt;
+	&lt;!&ndash; 		<prop key="wf.overPendingMsgPath">classpath:META-INF/pendingRemind-msg.xml</prop> &ndash;&gt;
+	</util:properties>-->
+
+	<bean id="springHelper" class="org.jbpm.pvm.internal.processengine.SpringHelper" p:jbpmCfg="jbpm44.cfg.xml" />
+	<bean id="processEngine" factory-bean="springHelper" factory-method="createProcessEngine" />
+	
+	<bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+	<bean id="executionService" factory-bean="processEngine" factory-method="getExecutionService" />
+	<bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+
+</beans>

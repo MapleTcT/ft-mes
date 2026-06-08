@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.organization.dao.mapper.mnecode.CompanyMneCodeMapper">
+
+    <insert id="insertBatch" parameterType="list" useGeneratedKeys="false">
+        INSERT INTO ORG_COMPANY_MNECODE
+        (ID,
+        ROW_VERSION,
+        LANGUAGE,
+        MNE_CODE,
+        COMPANY_ID,
+        COMPANY_SHORT_NAME,
+        CREATOR,
+        MODIFIER,
+        CREATE_STAFF_ID,
+        MODIFY_STAFF_ID)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.rowVersion},
+            #{item.language},
+            #{item.mneCode},
+            #{item.companyId},
+            #{item.companyShortName},
+            #{item.creator},
+            #{item.modifier},
+            #{item.createStaffId},
+            #{item.modifyStaffId}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

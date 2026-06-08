@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="60">
+    <conversionRule conversionWord="traceId"
+                    converterClass="com.supcon.supfusion.framework.cloud.logger.converter.TraceIdConverter"/>
+    <conversionRule conversionWord="fromServiceName"
+                    converterClass="com.supcon.supfusion.framework.cloud.logger.converter.FromServiceNameConverter"/>
+
+    <property name="logHome" value="${work.dir}/logs"/>
+    <property name="pattern" value="[%d{ISO8601}][%-5level][%X{traceId}][%t][%C{0}][notification-mobile][%X{fromServiceName}] - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${pattern}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <springProfile name="default">
+        <include resource="logback-prod.xml" />
+    </springProfile>
+
+    <springProfile name="prod">
+        <include resource="logback-prod.xml" />
+    </springProfile>
+
+    <springProfile name="dev">
+        <include resource="logback-dev.xml" />
+    </springProfile>
+
+</configuration>
+
+

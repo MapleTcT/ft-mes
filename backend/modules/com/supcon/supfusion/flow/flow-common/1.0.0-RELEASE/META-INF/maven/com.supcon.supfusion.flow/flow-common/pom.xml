@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.supcon.supfusion.flow</groupId>
+		<artifactId>supfusion-flow</artifactId>
+		<version>1.0.0-RELEASE</version>
+	</parent>
+	<artifactId>flow-common</artifactId>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<springfox-swagger2.version>2.9.2</springfox-swagger2.version>
+   		<springfox-swagger-ui.version>2.9.2</springfox-swagger-ui.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.supcon.supfusion.framework.boot</groupId>
+			<artifactId>cloud-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.supcon.supfusion.framework</groupId>
+			<artifactId>cloud-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.supcon.supfusion.framework.boot</groupId>
+			<artifactId>scaffold-boot-starter-dbp</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.oracle.jdbc</groupId>
+            		<artifactId>ojdbc6</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc7</artifactId>
+            <version>12.1.0.2</version>
+		</dependency>
+		<!-- Mybatis -->
+		<dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-mybatis</artifactId>
+        </dependency>
+        <!-- redis -->
+        <dependency>
+			<groupId>com.supcon.supfusion.framework.boot</groupId>
+			<artifactId>scaffold-boot-starter-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-swagger2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-swagger-ui.version}</version>
+		</dependency>
+		<!-- dom4j -->
+		<dependency>
+		    <groupId>dom4j</groupId>
+		    <artifactId>dom4j</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </dependency>
+        <!-- 推荐使用gson\jackson, 不建议使用fastjson, 其存在性能问题,社区反馈代码bug多 -->
+		<dependency>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		</dependency>
+	</dependencies>
+</project>

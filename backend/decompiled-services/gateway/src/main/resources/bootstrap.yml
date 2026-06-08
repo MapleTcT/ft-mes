@@ -1,0 +1,130 @@
+server:
+  port: 8008
+spring:
+  output:
+    ansi:
+      enabled: ALWAYS
+  application:
+    name: supos-gateway
+  profiles:
+    active: prod    
+  jmx:
+    enabled: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  cloud:
+    nacos:
+      config:
+        server-addr: ${nacos:127.0.0.1}:8848
+        group: prod        
+        extension-configs:
+          - data-id: supfusion-redis-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-gateway.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-jwt-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-registry.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+      discovery:
+        server-addr: ${nacos:127.0.0.1}:8848
+        group: prod
+    gateway:
+      httpclient:
+        websocket:
+          # 4MB
+          max-frame-payload-length: 4194304
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: false
+          predicates:
+            - Path='/api/' + serviceId + '/**', '/inter-api/' + serviceId + '/**', '/open-api/' + serviceId + '/**', '/open-api/supos/' + serviceId + '/**', '/openapi/' + serviceId + '/**','/msService/' + serviceId + '/**','/msService/public/' + serviceId + '/**'
+          filters:
+            - RewritePath='/' + serviceId + '/(?<remaining>.*)', '/' + serviceId + '/${remaining}'
+            - RewritePath='/msService/public/' + serviceId + '/(?<remaining>.*)', '/' + serviceId + '/${remaining}'
+            - RewritePath='/msService/' + serviceId + '/(?<remaining>.*)', '/' + serviceId + '/${remaining}'
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: '*'
+            allowedMethods: '*'
+            allowedHeaders: '*'
+            allowCredentials: true
+            maxAge: 1800
+
+ribbon:
+  ServerListRefreshInterval: 15000
+  ReadTimeout: 10000
+  ConnectTimeout: 5000
+  #  饥饿加载模式，起服后立刻实例化client，以避免实例化时间过长导致第一次请求触发超时异常的问题
+  eager-load:
+    enabled: true
+    clients: supos-iam
+
+#actuator监控端点信息的开放策略
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+    shutdown:
+      enabled: false
+  health:
+    db:
+      enabled: false
+    mail:
+      enabled: false
+    redis:
+      enabled: false
+    mongo:
+      enabled: false
+    elasticsearch:
+      enabled: false
+    jms:
+      enabled: false
+    rabbit:
+      enabled: false
+    solr:
+      enabled: false
+    cassandra:
+      enabled: false
+    couchbase:
+      enabled: false
+    influxdb:
+      enabled: false
+    ldap:
+      enabled: false
+    neo4j:
+      enabled: false
+
+jwt:
+  secret: mySecret
+  expiration: 604800
+rbac:
+  enable: true
+
+snow-flake:
+  datacenterId: ${SNOW_FLAKE_DATACENTER_ID:0}
+  workerId: ${SNOW_FLAKE_WORKER_ID:0}
+
+oauth:
+  secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+
+filter:
+  cacheRequestBodyGlobalFilter:
+    enabled: true
+keycloak:
+  client: ms-content-sample
+  grant-type: password
+  
+license:
+  enabled: ${SUPPLANT_LICENSE_ENABLED:false}

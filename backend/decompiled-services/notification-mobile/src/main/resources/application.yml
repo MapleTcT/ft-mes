@@ -1,0 +1,52 @@
+management:
+  health:
+    db:  
+      enabled: false
+spring:
+  messages:
+    basename: i18n/notificationMobile
+  application:
+    name: notification-mobile
+server:
+  port: 8080
+  servlet:
+    context-path: /
+supfusion:
+  supos:
+    ak: ${SUPOS_APP_ACCOUNT_ID:9f0816c6598c0b9a3822cebcb675016a}
+    sk: ${SUPOS_APP_SECRET_KEY:0af37a42db057a1d1d6bd1150bcccc3f}
+    supos-host: ${SUPOS_ADDRESS:127.0.0.1:30230}
+    appId: ${SUPOS_APP_ID:4998efc7efc81b77c1ed4a265b55f1fa}
+  cloud:
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: DEFAULT_GROUP
+    discovery:
+      enabled: true
+      group: DEFAULT_GROUP
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos.default}:${NACOS_PORT:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    i18n:
+      enabled: true
+      host: http://${I18N_HOST:127.0.0.1}:${I18N_PORT:30130}
+      basename: i18n/
+      locale-module: notificationMobile
+      module-version: notificationMobile202102200001
+      modules:
+        - notificationMobile
+  swagger:
+    enable: true
+feign:
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 12000
+  httpclient:
+    enabled: true

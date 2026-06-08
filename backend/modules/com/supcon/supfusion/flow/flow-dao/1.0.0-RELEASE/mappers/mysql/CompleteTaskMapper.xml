@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.flow.dao.CompleteTaskMapper">
+
+
+    <select id="queryTasks"
+            resultType="com.supcon.supfusion.flow.common.po.CompleteTaskPO">
+         SELECT
+            user_id userId,
+	        cid,
+	        multi_company multiCompany,
+	        id,
+	        task_source taskSource,
+	        process_id processId,
+	        task_name taskName,
+	        process_name processName,
+	        table_no tableNo,
+	        initiator_name initiatorName,
+	        start_time startTime,
+	        create_time createTime,
+	        reject,
+	        open_url openUrl
+        FROM
+            wfm_task_complete
+        <where>
+            <if test="queryContract.taskNames != null">
+                <foreach collection="queryContract.taskNames" item="taskName" open="and (" separator="or" close=")">
+                    task_name like concat(concat('%',#{taskName}),'%')
+                </foreach>
+            </if>
+            <if test="queryContract.processNames != null">
+                <foreach collection="queryContract.processNames" item="processName" open="and (" separator="or" close=")">
+                    process_name like concat(concat('%',#{processName}),'%')
+                </foreach>
+            </if>
+            <if test="queryContract.formNos != null">
+                <foreach collection="queryContract.formNos" item="formNo" open="and (" separator="or" close=")">
+                    table_no like concat(concat('%',#{formNo}),'%')
+                </foreach>
+            </if>
+            <if test="queryContract.initiators != null">
+                <foreach collection="queryContract.initiators" item="initiator" open="and (" separator="or" close=")">
+                    initiator_name like concat(concat('%',#{initiator}),'%')
+                </foreach>
+            </if>
+            <if test='queryContract.userId != null'>AND user_id = #{queryContract.userId}</if>
+            <if test='queryContract.startFrom != null'>AND start_time &gt;= #{queryContract.startFrom}</if>
+            <if test='queryContract.startTo != null'>AND start_time &lt;= #{queryContract.startTo}</if>
+            <if test='queryContract.completeFrom != null'>AND create_time &gt;= #{queryContract.completeFrom}</if>
+            <if test='queryContract.completeTo != null'>AND create_time &lt;= #{queryContract.completeTo}</if>
+        </where>
+            order by create_time desc limit #{begin}, #{end}
+    </select>
+
+    <select id="queryTotals"
+            resultType="java.lang.Integer">
+         SELECT COUNT(*)  
+        FROM  
+            wfm_task_complete  
+        <where>
+            <if test="taskNames != null">
+                <foreach collection="taskNames" item="taskName" open="and (" separator="or" close=")">
+                    task_name like concat(concat('%',#{taskName}),'%')
+                </foreach>
+            </if>
+            <if test="processNames != null">
+                <foreach collection="processNames" item="processName" open="and (" separator="or" close=")">
+                    process_name like concat(concat('%',#{processName}),'%')
+                </foreach>
+            </if>
+            <if test="formNos != null">
+                <foreach collection="formNos" item="formNo" open="and (" separator="or" close=")">
+                    table_no like concat(concat('%',#{formNo}),'%')
+                </foreach>
+            </if>
+            <if test="initiators != null">
+                <foreach collection="initiators" item="initiator" open="and (" separator="or" close=")">
+                    initiator_name like concat(concat('%',#{initiator}),'%')
+                </foreach>
+            </if>
+            <if test='userId != null'>AND user_id = #{userId}</if>
+            <if test='startFrom != null'>AND start_time &gt;= #{startFrom}</if>
+            <if test='startTo != null'>AND start_time &lt;= #{startTo}</if>
+            <if test='completeFrom != null'>AND create_time &gt;= #{completeFrom}</if>
+            <if test='completeTo != null'>AND create_time &lt;= #{completeTo}</if>
+        </where>
+    </select>
+
+</mapper>

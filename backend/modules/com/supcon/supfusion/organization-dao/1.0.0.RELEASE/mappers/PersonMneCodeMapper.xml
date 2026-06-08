@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.organization.dao.mapper.mnecode.PersonMneCodeMapper">
+
+    <insert id="insertBatch" parameterType="list" useGeneratedKeys="false">
+        <if test="dbType == 'oracle'">
+            INSERT INTO ORG_PERSON_MNECODE
+            (ID,
+            ROW_VERSION,
+            LANGUAGE,
+            MNE_CODE,
+            PERSON_ID,
+            PERSON_NAME,
+            CREATOR,
+            MODIFIER,
+            CREATE_STAFF_ID,
+            MODIFY_STAFF_ID)
+            <foreach collection="list" item="item" separator="union all" index="index">
+                select
+                #{item.id},
+                #{item.rowVersion},
+                #{item.language},
+                #{item.mneCode},
+                #{item.personId},
+                #{item.personName},
+                #{item.creator},
+                #{item.modifier},
+                #{item.createStaffId},
+                #{item.modifyStaffId}
+                from dual
+            </foreach>
+        </if>
+
+        <if test="dbType == 'mysql' or dbType == 'mariadb' or dbType == 'sqlserver'">
+            INSERT INTO ORG_PERSON_MNECODE
+            (ID,
+            ROW_VERSION,
+            LANGUAGE,
+            MNE_CODE,
+            PERSON_ID,
+            PERSON_NAME,
+            CREATOR,
+            MODIFIER,
+            CREATE_STAFF_ID,
+            MODIFY_STAFF_ID)
+            VALUES
+            <foreach collection="list" item="item" separator=",">
+                (
+                #{item.id},
+                #{item.rowVersion},
+                #{item.language},
+                #{item.mneCode},
+                #{item.personId},
+                #{item.personName},
+                #{item.creator},
+                #{item.modifier},
+                #{item.createStaffId},
+                #{item.modifyStaffId}
+                )
+            </foreach>
+        </if>
+
+    </insert>
+
+    <select id="isChineseMne"  resultType="java.lang.Integer">
+        <if test="dbType == 'oracle'">
+            select count(id) from org_person_mnecode
+            where length(MNE_CODE) != lengthb(MNE_CODE)
+        </if>
+        <if test="dbType == 'mysql' or dbType == 'mariadb'">
+            select count(id) from org_person_mnecode
+            where length(MNE_CODE) != char_length(MNE_CODE)
+        </if>
+        <if test="dbType == 'sqlserver'">
+            select count(id) from org_person_mnecode
+            where len(MNE_CODE) != datalength(MNE_CODE)
+        </if>
+    </select>
+
+</mapper>

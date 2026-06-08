@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[(_vm.isPicture)?[_c('div',{staticClass:"m_attachment"},[_vm._l((_vm.imgList),function(item,index){return _c('viewer',{key:index,staticClass:"ma_item pickbox",attrs:{"images":_vm.imgList}},[_c('img',{staticClass:"selimg",attrs:{"src":item,"alt":""}}),_vm._v(" "),(!_vm.params.con.readonly)?_c('a',{staticClass:"i_cancel",on:{"click":function($event){return _vm.deleteImg(index)}}},[_c('i',[_vm._v("×")])]):_vm._e()])}),_vm._v(" "),(!_vm.params.con.readonly)?_c('div',{staticClass:"ma_add"},[_c('input',{attrs:{"type":"file","accept":"image/*","name":_vm.params.name,"mutiple":""},on:{"change":_vm.getPickResult}}),_vm._v(" "),_c('a',{staticClass:"btn_add"})]):_vm._e()],2)]:_vm._e(),_vm._v(" "),(_vm.isAppendix)?[_c('div',{staticClass:"m_wrap"},[_c('span',{staticClass:"ml_text"},[_vm._v(_vm._s(_vm.params.label?_vm.params.label:'图片'))]),_vm._v(" "),_c('div',{staticClass:"m_attachment"},[_vm._l((_vm.fileList),function(item,index){return _c('div',{key:index,staticClass:"ma_fileItem pickbox"},[_c('img',{staticClass:"file_image fl",attrs:{"src":require("@/assets/images/file_image.png")}}),_vm._v(" "),_c('div',{staticClass:"file_box"},[_c('span',{staticClass:"fb_name"},[_vm._v(_vm._s(item.name))]),_c('i',{staticClass:"fb_size"},[_vm._v(_vm._s(item.size))])]),_vm._v(" "),_c('a',{staticClass:"i_cancel fr",on:{"click":function($event){return _vm.deleteFile(index)}}},[_c('i',[_vm._v("×")])])])}),_vm._v(" "),_c('div',{staticClass:"ma_add"},[_c('input',{attrs:{"type":"file"},on:{"change":_vm.getPickFileResult}}),_vm._v(" "),_c('a',{staticClass:"btn_add"})])],2)])]:_vm._e()],2)}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-604baac3","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/selectAppendix.vue
+// module id = null
+// module chunks = 

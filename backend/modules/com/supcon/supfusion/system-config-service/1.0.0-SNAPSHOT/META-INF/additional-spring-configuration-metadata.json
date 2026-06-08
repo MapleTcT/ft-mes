@@ -1,0 +1,13 @@
+{
+  "hints": [],
+  "groups": [],
+  "properties": [
+    {
+      "name": "supfusion.sysconf.file-store-dir",
+      "type": "java.lang.String",
+      "sourceType": "com.supcon.supfusion.systemconfig.service.config.SystemConfigProperties",
+      "defaultValue": "/tmp/sysconf",
+      "description": "文件存储目录"
+    }
+  ]
+}

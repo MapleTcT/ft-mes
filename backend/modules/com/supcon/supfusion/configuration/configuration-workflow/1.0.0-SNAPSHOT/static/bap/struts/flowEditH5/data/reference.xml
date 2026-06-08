@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?> <process name="docDefect" systemVersion="3.60.0.00" xmlns="http://jbpm.org/4.4/jpdl" lastModify="2018-12-07 14:55">
+  <description text="参考流程图">
+  </description>
+  <start name="StartEvent_0l06uzz" internationalKey="knowledge_1.0.docDefect.StartEvent_0l06uzz" desc="开始活动" g="146,287,40,40">
+   <transition name="SequenceFlow_0uhlptl" internationalKey="knowledge_1.0.docDefect.SequenceFlow_0uhlptl" desc="" to="TaskEvent_00rtrlt" sequence="" px="" reject="0">
+    <condition expr="">
+    </condition>
+   </transition>
+  </start>
+  <task name="TaskEvent_00rtrlt" internationalKey="knowledge_1.0.docDefect.TaskEvent_00rtrlt" desc="打开参考流程" g="354,287,40,40">
+   <transition name="SequenceFlow_09zlfm5" internationalKey="knowledge_1.0.docDefect.SequenceFlow_09zlfm5" desc="" to="TaskEvent_12vkpti" sequence="" px="" reject="0">
+    <condition expr="">
+    </condition>
+   </transition>
+   <transition name="SequenceFlow_1kc1o87" internationalKey="knowledge_1.0.docDefect.SequenceFlow_1kc1o87" desc="" to="EndCancelEvent_0nlkqql" sequence="" px="" reject="0">
+    <condition expr="">
+    </condition>
+   </transition>
+  </task>
+  <task name="TaskEvent_12vkpti" internationalKey="knowledge_1.0.docDefect.TaskEvent_12vkpti" desc="打开参考流程" g="562,287,40,40">
+   <transition name="SequenceFlow_0esfa8z" internationalKey="knowledge_1.0.docDefect.SequenceFlow_0esfa8z" desc="" to="EndEvent_1jh1cl2" sequence="" px="" reject="0">
+    <condition expr="">
+    </condition>
+   </transition>
+   <transition name="SequenceFlow_0dnq4ic" internationalKey="knowledge_1.0.docDefect.SequenceFlow_0dnq4ic" desc="" to="TaskEvent_00rtrlt" sequence="" px="" reject="1" g="498,207">
+    <condition expr="">
+    </condition>
+   </transition>
+  </task>
+  <end name="EndEvent_1jh1cl2" internationalKey="knowledge_1.0.docDefect.EndEvent_1jh1cl2" desc="结束" g="802,287,40,40">
+  </end>
+  <end-cancel name="EndCancelEvent_0nlkqql" internationalKey="knowledge_1.0.docDefect.EndCancelEvent_0nlkqql" desc="作废" g="354,449,40,40">
+  </end-cancel>
+ </process>

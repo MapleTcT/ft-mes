@@ -1,0 +1,110 @@
+management:
+  health:
+    db:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "health"
+          - "info"
+          - "prometheus"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+server:
+  port: 8080
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: supos-iam
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SUPOS_KAFKA_BROKERS:kafka:9092}
+          auto-create-topics: true
+      bindings:
+        tenant-input:
+          destination: supOS_tenant
+          content-type: application/json
+          group: ${spring.application.name}
+  kafka:
+    jaas:
+      enabled: false
+  redis:
+    host: ${SUPOS_REDIS_HOST:redis}
+    port: ${SUPOS_REDIS_PORT:6379}
+  cache:
+    use-tenant-prefix: false
+    cache-null-values: false
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.iam.dao.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+    banner: false
+supfusion:
+  cloud:
+    i18n:
+      enabled: false
+    system:
+      top-level-domain: ${SUPOS_TOP_LEVEL_DOMAIN}
+      host-ip: ${SUPOS_HOST_IP}
+      deploy-mode: ${SUPOS_DEPLOY_MODE:single}
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    config-center:
+      enabled: true
+      group: ${SUPOS_NACOS_GROUP:DEFAULT_GROUP}
+      type: yaml
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_GROUP:DEFAULT_GROUP}
+    discovery:
+      enabled: true
+      watch-delay: 30000
+      group: ${SUPOS_NACOS_GROUP:DEFAULT_GROUP}
+    datasource:
+      druid:
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 10
+        show-log: true
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'
+      connect:
+        use-system: ${SUPOS_SYSTEM_DB_USE:false}
+        system:
+          db-type: ${SUPOS_SYSTEM_DB_TYPE:}
+          db-name: ${SUPOS_SYSTEM_DB_NAME:}
+          host: ${SUPOS_SYSTEM_DB_HOST:}
+          port: ${SUPOS_SYSTEM_DB_PORT:3306}
+          username: ${SUPOS_SYSTEM_DB_USERNAME:}
+          password: ${SUPOS_SYSTEM_DB_PASSWORD:}
+    tenant:
+      sync-cache: ${SUPOS_TENANT_SYNC_CACHE:true}
+      init-getter: ${SUPOS_TENANT_INIT_GETTER:true}
+      register: ${SUPOS_TENANT_REGISTER:true}
+feign:
+  httpclient:
+    enabled: true
+  client:
+    default-config: default
+    default-to-properties: true
+    config:
+      default:
+        connect-timeout: 2000
+        read-timeout: 12000

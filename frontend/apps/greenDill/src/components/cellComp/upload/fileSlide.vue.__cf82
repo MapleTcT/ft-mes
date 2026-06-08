@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"file-slide-bg"},[_c('div',{staticClass:"file-moveSlide",style:({left:_vm.slideLeft}),on:{"touchstart":function($event){return _vm.moveSlideStart($event)},"touchmove":function($event){return _vm.moveSlideMove($event)},"touchend":function($event){return _vm.moveSlideEnd($event)}}},[_vm._t("default")],2),_vm._v(" "),_vm._l((_vm.button),function(btn,i){return [_c('div',{staticClass:"btn-list",on:{"click":function ($event){$event.stopPropagation();btn.event(btn.fileName)}}},[_c('div',{class:("delete-icon " + (btn.type)),style:({width: ((btn.width / 75) + "rem")})},[_vm._v(_vm._s(btn.txt))])])]})],2)}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-6934eb21","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/cellComp/upload/fileSlide.vue
+// module id = null
+// module chunks = 

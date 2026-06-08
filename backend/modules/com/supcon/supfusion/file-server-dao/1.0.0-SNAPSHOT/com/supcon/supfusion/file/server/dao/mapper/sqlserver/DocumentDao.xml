@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.file.server.dao.DocumentDao">
+
+    <resultMap type="com.supcon.supfusion.file.server.dao.po.DocumentPO" id="map">
+        <result property="id" column="id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileOrgType" column="file_org_type"/>
+        <result property="linkId" column="link_id"/>
+        <result property="mainModelId" column="main_model_id"/>
+        <result property="memo" column="memo"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="downloadTimes" column="download_times"/>
+        <result property="previewTimes" column="preview_times"/>
+        <result property="sizeDis" column="size_dis"/>
+        <result property="propertyCode" column="property_code"/>
+        <result property="fileType" column="file_type"/>
+        <result property="showType" column="show_type"/>
+        <result property="opener" column="opener"/>
+        <result property="openTime" column="open_time"/>
+        <result property="deploymentId" column="deployment_id"/>
+        <result property="activityName" column="activity_name"/>
+        <result property="taskDescription" column="task_description"/>
+        <result property="fileIcon" column="file_icon"/>
+        <result property="isFileView" column="is_file_view"/>
+        <result property="convertStatus" column="convert_status"/>
+        <result property="reason" column="reason"/>
+        <result property="convertPath" column="convert_path"/>
+        <result property="docContent" column="doc_content"/>
+        <result property="docSummary" column="doc_summary"/>
+        <result property="valid" column="valid"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+    </resultMap>
+
+    <insert id="saveBatch" parameterType="list" useGeneratedKeys="false">
+        INSERT INTO FILE_SERVER_DOCUMENT
+        (id ,
+        file_name ,
+        file_path ,
+        file_org_type ,
+        link_id ,
+        main_model_id ,
+        memo ,
+        file_size ,
+        download_times ,
+        preview_times ,
+        size_dis ,
+        property_code ,
+        file_type ,
+        show_type ,
+        opener ,
+        open_time ,
+        deployment_id ,
+        activity_name ,
+        task_description ,
+        file_icon ,
+        is_file_view ,
+        convert_status ,
+        reason ,
+        convert_path ,
+        doc_content ,
+        doc_summary ,
+        valid ,
+        create_time ,
+        modify_time ,
+        creator ,
+        modifier )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.fileName},
+            #{item.filePath},
+            #{item.fileOrgType},
+            #{item.linkId},
+            #{item.mainModelId},
+            #{item.memo},
+            #{item.fileSize},
+            #{item.downloadTimes},
+            #{item.previewTimes},
+            #{item.sizeDis},
+            #{item.propertyCode},
+            #{item.fileType},
+            #{item.showType},
+            #{item.opener},
+            #{item.openTime},
+            #{item.deploymentId},
+            #{item.activityName},
+            #{item.taskDescription},
+            #{item.fileIcon},
+            #{item.isFileView},
+            #{item.convertStatus},
+            #{item.reason},
+            #{item.convertPath},
+            #{item.docContent},
+            #{item.docSummary},
+            #{item.valid},
+            #{item.createTime},
+            #{item.modifyTime},
+            #{item.creator},
+            #{item.modifier}
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="selectListByLinkIdAndType" resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        select
+        *
+        from file_server_document
+        where valid = '1'
+        <if test="type != null and type != '' ">
+            and file_org_type = #{type}
+        </if>
+        <if test="fileType != null  and  fileType=='attachment' ">
+            AND ( file_type = #{fileType} OR file_type is null )
+        </if>
+        <if test="fileType != null and  fileType=='office' ">
+            AND file_type = #{fileType}
+        </if>
+        <if test="fileType != null and  fileType=='pic' ">
+            AND file_type = #{fileType}
+        </if>
+        <if test="propertyCode != null and propertyCode != '' ">
+            and property_code = #{propertyCode}
+        </if>
+        <if test="linkId != null">
+            and link_id = #{linkId}
+        </if>
+        order by create_time
+    </select>
+
+
+    <select id="selectListByLinkIdsAndType" resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        select
+        *
+        from file_server_document
+        where valid = '1'
+        <if test="type != null and type != '' ">
+            and file_org_type = #{type}
+        </if>
+        <if test="fileType != null  and  fileType=='attachment' ">
+            AND ( file_type = #{fileType} OR file_type is null )
+        </if>
+        <if test="fileType != null and  fileType=='office' ">
+            AND file_type = #{fileType}
+        </if>
+        <if test="fileType != null and  fileType=='pic' ">
+            AND file_type = #{fileType}
+        </if>
+        <if test="propertyCode != null and propertyCode != '' ">
+            and property_code = #{propertyCode}
+        </if>
+        <if test="linkIds != null">
+            and
+            link_id in (
+            <foreach collection="linkIds" item="item" index="index" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+        order by create_time
+    </select>
+
+
+    <select id="selectAllByValidIsFalse" resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        select
+        *
+        from file_server_document
+        where valid = '0'
+    </select>
+
+
+    <delete id="deleteByDocumentPOId" parameterType="long">
+        delete from file_server_document
+        where id = #{id} and valid = '0'
+    </delete>
+
+
+    <update id="deleteByFileId" parameterType="long">
+        update file_server_document
+        set valid = '0'
+        where id = #{id} and valid = '1'
+    </update>
+
+    <select id="selectListByLinkIdAndTypeAndPropertyCode" resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        SELECT
+        *
+        FROM FILE_SERVER_DOCUMENT
+        WHERE VALID = '1'
+        <if test="linkId != null and linkId != 0 ">
+            AND link_id = #{linkId}
+        </if>
+        <if test="type != null and type.trim() != ''">
+            AND type = #{type}
+        </if>
+        <if test="propertyCode != null and propertyCode.trim() != ''">
+            AND propertyCode = #{propertyCode}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByFilePath"  resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        SELECT
+        *
+        FROM FILE_SERVER_DOCUMENT
+        WHERE VALID = '1'
+        <if test="filePath != null and filePath != '' ">
+            AND file_path = #{filePath}
+        </if>
+    </select>
+
+
+    <update id="updatedDownloadTimesByOneId" parameterType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        UPDATE FILE_SERVER_DOCUMENT
+        <set>
+            <if test="downloadTimes != null">DOWNLOAD_TIMES = #{downloadTimes}</if>
+            <if test="modifyTime != null">MODIFY_TIME = #{modifyTime}</if>
+        </set>
+        WHERE id = #{id} AND VALID = '1'
+    </update>
+
+    <update id="updatedPreviewTimesByOneId" parameterType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        UPDATE FILE_SERVER_DOCUMENT
+        <set>
+            <if test="previewTimes != null">PREVIEW_TIMES = #{previewTimes}</if>
+            <if test="modifyTime != null">MODIFY_TIME = #{modifyTime}</if>
+        </set>
+        WHERE id = #{id} AND VALID = '1'
+    </update>
+
+    <select id="selectByFileId"  resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        select
+        *
+        from file_server_document
+        where valid = '1'
+        <if test="fileId != null">
+            and id = #{fileId}
+        </if>
+    </select>
+
+    <update id="updateAllById" parameterType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        update file_server_document
+        <set>
+            <if test="filePath != null">file_path = #{filePath}</if>
+            <if test="fileName != null">file_name = #{fileName}</if>
+            <if test="fileOrgType != null">file_org_type = #{fileOrgType}</if>
+            <if test="fileSize != null">file_size = #{fileSize}</if>
+            <if test="linkId != null">link_id = #{linkId}</if>
+            <if test="fileType != null">file_type = #{fileType}</if>
+            <if test="mainModelId != null">main_model_id = #{mainModelId}</if>
+            <if test="sizeDis != null">size_dis = #{sizeDis}</if>
+            <if test="memo != null">memo = #{memo}</if>
+            <if test="propertyCode != null">property_code = #{propertyCode}</if>
+            <if test="showType != null">show_type = #{showType}</if>
+            <if test="opener != null">opener = #{opener}</if>
+            <if test="openTime != null">open_time = #{openTime}</if>
+            <if test="deploymentId != null">deployment_id = #{deploymentId}</if>
+            <if test="activityName != null">activity_name = #{activityName}</if>
+            <if test="taskDescription != null">task_description = #{taskDescription}</if>
+            <if test="fileIcon != null">file_icon = #{fileIcon}</if>
+            <if test="isFileView != null">is_file_view = #{isFileView}</if>
+            <if test="docContent != null">doc_content = #{docContent}</if>
+            <if test="docSummary != null">doc_summary = #{docSummary}</if>
+            <if test="convertStatus != null">convert_status = #{convertStatus}</if>
+            <if test="reason != null">reason = #{reason}</if>
+            <if test="convertPath != null">convert_path = #{convertPath}</if>
+            <if test="downloadTimes != null">download_times = #{downloadTimes}</if>
+            <if test="previewTimes != null">preview_times = #{previewTimes}</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime}</if>
+            <if test="createStaffId != null">create_staff_id = #{createStaffId}</if>
+            <if test="modifyStaffId != null">modify_staff_id = #{modifyStaffId}</if>
+        </set>
+        where id = #{id} and valid = '1'
+    </update>
+
+    <update id="updatedConvertReasonByOneId" parameterType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        UPDATE FILE_SERVER_DOCUMENT
+        <set>
+            <if test="convertStatus != null">CONVERT_STATUS = #{convertStatus},</if>
+            <if test="reason != null">REASON = #{reason},</if>
+            <if test="convertPath != null">CONVERT_PATH = #{convertPath}</if>
+        </set>
+        WHERE id = #{id} AND VALID = '1'
+    </update>
+
+    <select id="selectAllByIsNotConvert" resultType="com.supcon.supfusion.file.server.dao.po.DocumentPO">
+        select
+        *
+        from file_server_document
+        where valid = '1' and (convert_status is null or convert_status ='CONVERTING')
+    </select>
+</mapper>

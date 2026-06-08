@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nResourceDao">
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" id="supfusionI18nResourceMap">
+        <result property="id" column="id"/>
+        <result property="i18nKey" column="i18n_key"/>
+        <result property="i18nValue" column="i18n_value"/>
+        <result property="languCode" column="langu_code"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleVersionCode" column="module_version_code"/>
+        <result property="valid" column="valid"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+    </resultMap>
+
+    <insert id="saveBatch" parameterType="list" useGeneratedKeys="false">
+        INSERT INTO /*+append_values */ SUPFUSION_I18N_RESOURCE
+            (
+            ID ,
+            I18N_KEY ,
+            I18N_VALUE ,
+            LANGU_CODE ,
+            MODULE_CODE ,
+            MODULE_VERSION_CODE ,
+            VALID ,
+            CREATOR ,
+            MODIFIER ,
+            CREATE_TIME ,
+            MODIFY_TIME
+            )
+        <foreach collection="list" item="item"  index="index"  separator="union all">
+            (SELECT
+            #{item.id},
+            #{item.i18nKey,jdbcType=VARCHAR},
+            #{item.i18nValue,jdbcType=VARCHAR},
+            #{item.languCode,jdbcType=VARCHAR},
+            #{item.moduleCode,jdbcType=VARCHAR},
+            #{item.moduleVersionCode,jdbcType=VARCHAR},
+            1,
+            #{item.creator,jdbcType=VARCHAR},
+            #{item.modifier,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP},
+            #{item.modifyTime,jdbcType=TIMESTAMP}
+            FROM DUAL
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateByI18nKeyAndValidOne" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        UPDATE SUPFUSION_I18N_RESOURCE
+        <set>
+            <if test="modifyTime != null">MODIFY_TIME = #{modifyTime}</if>
+        </set>
+        WHERE I18N_KEY = #{i18nKey} AND VALID = '1'
+    </update>
+
+
+    <!--查询语句-->
+    <select id="selectByKeyAndValueAndLanguageCount" resultType="int">
+        SELECT COUNT(I18N_KEY) FROM(
+        SELECT I18N_KEY , MAX(MODIFY_TIME) from (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE WHERE
+        VALID = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        </if>
+        <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+            AND LANGU_CODE = #{langu_code} AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        </if>
+        )  GROUP BY I18N_KEY)
+    </select>
+
+
+    <select id="selectKeyByKeyAndValueAndLanguage" resultType="string">
+        SELECT I18N_KEY FROM(
+        SELECT rownum seq,I18N_KEY FROM(
+        SELECT I18N_KEY,MAX(MODIFY_TIME) from (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE  WHERE
+        VALID = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        </if>
+        <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+            AND LANGU_CODE = #{langu_code} AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        </if>) GROUP BY
+        I18N_KEY ORDER BY MAX(MODIFY_TIME) DESC,I18N_KEY DESC
+        )
+        )t1 <if test="offset != null and limit != null">
+        <bind name="rowStart" value="offset+1"/>
+        <bind name="rowOver" value="offset+limit"/>
+        WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+    </if>
+    </select>
+
+
+    <select id="selectByKeyOrValueCount" resultType="int">
+        SELECT COUNT(I18N_KEY) FROM(
+        select I18N_KEY , MAX(MODIFY_TIME) from (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE WHERE
+        VALID = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        </if>
+        <if test="i18n_value != null and i18n_value.trim() != '' ">
+            AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        </if> )  GROUP BY I18N_KEY)
+
+    </select>
+
+    <select id="selectByKeyOrValue" resultType="string">
+        SELECT I18N_KEY FROM(
+        select rownum seq,I18N_KEY FROM(
+        select I18N_KEY,MAX(MODIFY_TIME) from (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE WHERE
+        VALID = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        </if>
+        <if test="i18n_value != null and i18n_value.trim() != '' ">
+            AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        </if>)  group by I18N_KEY order by MAX(MODIFY_TIME) desc,I18N_KEY desc
+        )
+        )t1
+        <if test="offset != null and limit != null">
+            <bind name="rowStart" value="offset+1"/>
+            <bind name="rowOver" value="offset+limit"/>
+            WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+        </if>
+    </select>
+
+    <select id="selectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        SELECT
+        ID ,
+        I18N_KEY ,
+        I18N_VALUE ,
+        LANGU_CODE ,
+        MODULE_CODE ,
+        MODULE_VERSION_CODE ,
+        VALID ,
+        CREATOR ,
+        MODIFIER ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        FROM
+        SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE .VALID = '1'
+        AND I18N_KEY IN
+        <foreach item="i18n_key" collection="list" open="(" separator="," close=")">
+            #{i18n_key}
+        </foreach>
+    </select>
+
+
+    <select id="getAllNeedI18nKeyByModuleCodeAndLanguCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        SELECT
+        ID ,
+        I18N_KEY ,
+        I18N_VALUE ,
+        LANGU_CODE ,
+        MODULE_CODE ,
+        MODULE_VERSION_CODE ,
+        VALID
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE 1=1
+        <if test="moduleCode != null and moduleCode.trim() != ''  and  languCode != null and languCode.trim() != ''">
+            AND MODULE_CODE = #{moduleCode} AND LANGU_CODE = #{languCode} AND VALID = '1'
+        </if>
+    </select>
+
+
+    <select id="selectByKeys" resultType="string" parameterType="map">
+        SELECT I18N_KEY FROM(
+        SELECT rownum seq,I18N_KEY FROM(
+        SELECT I18N_KEY,MAX(MODIFY_TIME) FROM (
+        SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE.VALID = '1'
+        AND
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="OR" close=")">
+            I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))  ESCAPE '\'
+        </foreach>
+        )  GROUP BY I18N_KEY ORDER BY MAX(MODIFY_TIME) DESC,I18N_KEY DESC
+        )
+        )t1
+        <if test="offset != null and limit != null">
+        <bind name="rowStart" value="offset+1"/>
+        <bind name="rowOver" value="offset+limit"/>
+        WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+    </if>
+    </select>
+    <select id="selectByKeysCount" resultType="int" parameterType="map">
+        SELECT
+        COUNT( I18N_KEY )
+        FROM (
+        SELECT I18N_KEY
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE.VALID = '1'
+        AND
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="or" close=")">
+            I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))   ESCAPE '\'
+        </foreach>
+        GROUP BY SUPFUSION_I18N_RESOURCE.I18N_KEY
+        ) T2
+    </select>
+
+
+    <select id="selectKeysByKeys" resultType="string" parameterType="map">
+        SELECT I18N_KEY FROM(
+        SELECT rownum seq,I18N_KEY FROM(
+        SELECT I18N_KEY,MAX(MODIFY_TIME) FROM (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE.VALID = '1'
+        AND I18N_KEY IN
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="," close=")">
+            #{i18n_key}
+        </foreach>
+        )  GROUP BY I18N_KEY ORDER BY MAX(MODIFY_TIME) DESC,I18N_KEY DESC
+        )
+        )t1
+        <if test="offset != null and limit != null">
+        <bind name="rowStart" value="offset+1"/>
+        <bind name="rowOver" value="offset+limit"/>
+        WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+        </if>
+    </select>
+
+    <select id="selectByOneKeyAndValues" resultType="java.lang.String" parameterType="map">
+        SELECT I18N_KEY
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        VALID = '1'
+        <if test="i18nKey != null and i18nKey.trim() != ''">
+            AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18nKey},'%'))
+            ESCAPE '\'
+        </if>
+        <if test="languCode != null and languCode.trim() != ''">
+            AND LANGU_CODE = #{languCode}
+        </if>
+        AND
+        <foreach item="i18n_value" collection="i18nValues" open="(" separator="OR" close=")">
+            I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%')) ESCAPE '\'
+        </foreach>
+        GROUP BY SUPFUSION_I18N_RESOURCE.I18N_KEY
+    </select>
+
+
+    <select id="queryKeyByKeyCount" resultType="int" parameterType="map">
+        SELECT COUNT(I18N_KEY) FROM
+        (
+        SELECT I18N_KEY
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE . VALID = '1'
+        AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        ESCAPE '\'
+        GROUP BY SUPFUSION_I18N_RESOURCE .I18N_KEY
+        ) T
+    </select>
+    <select id="queryKeyByKey" resultType="string" parameterType="map">
+        SELECT I18N_KEY
+        FROM(
+        SELECT rownum seq,I18N_KEY FROM(
+        SELECT I18N_KEY
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE . VALID = '1'
+        AND I18N_KEY LIKE CONCAT('%',CONCAT(#{i18n_key},'%'))
+        ESCAPE '\'
+        GROUP BY I18N_KEY
+        )
+        )t1
+        <if test="offset != null and limit != null">
+            <bind name="rowStart" value="offset+1"/>
+            <bind name="rowOver" value="offset+limit"/>
+            WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+        </if>
+    </select>
+    <select id="queryValueByValueCount" resultType="int" parameterType="map">
+        SELECT COUNT(I18N_VALUE) FROM
+        (
+        SELECT I18N_VALUE
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE . VALID = '1'
+        AND LANGU_CODE = #{langu_code}
+        AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        ESCAPE '\'
+        ) T
+    </select>
+    <select id="queryValueByValue" resultType="string" parameterType="map">
+        SELECT I18N_VALUE
+        FROM(
+        SELECT rownum seq, I18N_VALUE
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE.VALID = '1'
+        AND LANGU_CODE = #{langu_code}
+        AND I18N_VALUE LIKE CONCAT('%',CONCAT(#{i18n_value},'%'))
+        ESCAPE '\'
+        )t1
+        <if test="offset != null and limit != null">
+            <bind name="rowStart" value="offset+1"/>
+            <bind name="rowOver" value="offset+limit"/>
+            WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+        </if>
+    </select>
+
+
+    <select id="selectByOneKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        SELECT
+        ID ,
+        I18N_KEY ,
+        LANGU_CODE ,
+        I18N_VALUE
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE 1=1
+        <if test="i18nKey != null ">
+            AND I18N_KEY = #{i18nKey} AND VALID = '1'
+        </if>
+    </select>
+    <select id="queryObjectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        SELECT
+        ID ,
+        I18N_KEY ,
+        I18N_VALUE ,
+        LANGU_CODE ,
+        MODULE_CODE ,
+        MODULE_VERSION_CODE ,
+        VALID ,
+        CREATOR ,
+        MODIFIER ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        FROM SUPFUSION_I18N_RESOURCE
+        WHERE 1=1
+        <if test="key != null and key.trim() != '' ">
+            AND I18N_KEY = #{key} AND VALID = '1'
+        </if>
+    </select>
+
+
+    <delete id="deleteOneByKeyAndLanguCode" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        DELETE FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        I18N_KEY = #{i18nKey}
+        AND LANGU_CODE = #{languCode}
+    </delete>
+
+    <delete id="deleteByIdList" parameterType="list">
+        DELETE FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        ID IN (
+        <foreach collection="list" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="deleteOracleByModule" parameterType="string">
+        DELETE FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        MODULE_CODE = #{moduleCode}
+    </delete>
+
+    <select id="selectKeysByValuesReturnPO" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="map">
+        SELECT I18N_KEY,t1.M_T2 MODIFY_TIME FROM(
+        SELECT rownum seq,I18N_KEY,M_T M_T2 FROM(
+        SELECT I18N_KEY,MAX(MODIFY_TIME) M_T FROM (SELECT I18N_KEY,MODIFY_TIME FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        SUPFUSION_I18N_RESOURCE.VALID = '1'
+        AND I18N_KEY IN
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="," close=")">
+            #{i18n_key}
+        </foreach>
+        )  GROUP BY I18N_KEY ORDER BY MAX(MODIFY_TIME) DESC,I18N_KEY DESC
+        )
+        )t1
+        <if test="offset != null and limit != null">
+            <bind name="rowStart" value="offset+1"/>
+            <bind name="rowOver" value="offset+limit"/>
+            WHERE t1.seq &gt;= #{rowStart} AND t1.seq &lt;= #{rowOver}
+        </if>
+    </select>
+
+    <delete id="deleteListByKeyAndLanguage">
+        DELETE FROM SUPFUSION_I18N_RESOURCE
+        WHERE
+        I18N_KEY in (
+        <foreach collection="keys" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+        AND LANGU_CODE = #{language}
+        AND MODULE_CODE = #{moduleCode}
+    </delete>
+
+</mapper>

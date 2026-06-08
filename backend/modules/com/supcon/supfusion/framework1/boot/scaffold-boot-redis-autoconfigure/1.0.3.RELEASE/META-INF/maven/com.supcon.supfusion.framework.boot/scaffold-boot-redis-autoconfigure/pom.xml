@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold-redis-parent</artifactId>
+        <groupId>com.supcon.supfusion.framework</groupId>
+        <version>1.0.3.RELEASE</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.supcon.supfusion.framework.boot</groupId>
+    <artifactId>scaffold-boot-redis-autoconfigure</artifactId>
+    <packaging>jar</packaging>
+    <name>supFusion-Framework-Scaffold-Redis-AutoConfigure</name>
+    <description>supFusion的Redis脚手架自动配置工程</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>scaffold-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.supcon.supfusion.framework</groupId>
+            <artifactId>cloud-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

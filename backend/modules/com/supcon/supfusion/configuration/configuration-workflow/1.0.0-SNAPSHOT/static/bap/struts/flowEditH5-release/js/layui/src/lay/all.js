@@ -1,0 +1,1 @@
+layui.define(function(exports){var a=layui.cache;layui.config({dir:a.dir.replace(/lay\/dest\/$/,"")}),exports("layui.all",layui.v)});

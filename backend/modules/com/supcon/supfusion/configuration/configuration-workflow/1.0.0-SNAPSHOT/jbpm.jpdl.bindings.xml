@@ -1,0 +1,30 @@
+<bindings>
+
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.StartBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.EndBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.EndCancelBinding" />
+	
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.DecisionBinding" />
+	
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.ForkBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.JoinBinding" />
+
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.TaskBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.CountersignBinding" />
+
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.SubProcessBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.NotificationBinding" />
+	<activity binding="com.supcon.supfusion.configuration.workflow.activity.AutoBinding" /> 
+<activity binding="com.supcon.supfusion.configuration.workflow.activity.InfoBinding" /> 
+
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.EventListenerBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.JavaBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.HqlBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.SqlBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.ScriptBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.MailBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.AssignBinding" />
+	<eventlistener binding="org.jbpm.jpdl.internal.activity.JmsBinding" />
+
+
+</bindings>

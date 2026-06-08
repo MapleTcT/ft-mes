@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.UserPStaffMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.UserPStaffPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="staffId" column="STAFF_ID"/>
+        <result property="userpermissionId" column="USERPERMISSION_ID"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,STAFF_ID,USERPERMISSION_ID
+    </sql>
+    <!-- condition -->
+    <sql id="base_where">
+        <where>
+            <if test="id != null">
+                ID = #{id}
+            </if>
+            <if test="version != null">
+                VERSION = #{version}
+            </if>
+            <if test="userId != null">
+                STAFF_ID = #{staffId}
+            </if>
+            <if test="userpermissionId != null">
+                USERPERMISSION_ID = #{userPermissionId}
+            </if>
+        </where>
+    </sql>
+    <!-- select -->
+    <select id="findByUserPermissionId" parameterType="com.supcon.supfusion.rbac.dao.query.UserPStaffQuery" resultMap="base_map">
+        SELECT STAFF_ID,USERPERMISSION_ID FROM rbac_userpstaff ups WHERE ups.USERPERMISSION_ID IN <foreach
+            collection="userPermissionIds" item="id" open="(" close=")" separator=",">
+        #{id}
+    </foreach>
+        UNION
+        SELECT STAFF_ID,FLOWPERMISSION_ID USERPERMISSION_ID FROM rbac_flow_permission_staff rfps
+        WHERE rfps.FLOWPERMISSION_ID IN <foreach
+            collection="userPermissionIds" item="id" open="(" close=")" separator=",">
+        #{id}
+    </foreach>
+    </select>
+</mapper>

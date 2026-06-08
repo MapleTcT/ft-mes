@@ -1,0 +1,27 @@
+spring:
+  profiles:
+    active: prod
+  cloud:
+    nacos:
+      config:
+        enabled: false
+        server-addr: http://${nacos:127.0.0.1}:8848
+        extension-configs:
+          - data-id: supfusion-datasource-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-mybatis-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-registry.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-i18n-system.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-jwt-common.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false
+          - data-id: supfusion-task-scheduler.properties
+            group: ${spring.profiles.active:prod}
+            refresh: false

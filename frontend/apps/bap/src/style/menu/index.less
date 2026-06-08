@@ -1,0 +1,74 @@
+// 菜单信息
+
+#ec_project_publish_container_main {
+    margin-top: 26px;
+}
+
+#ec_project_publish_menu_select_list {
+    td:nth-child(2n-1){
+        text-align: right;
+    }
+
+    .padding20 {
+        padding-left: 5px;
+        padding-bottom: 7px;
+
+        select {
+            height: 32px;
+            width: 340px;
+            border-color: #D9D9D9;
+        }
+    }
+
+    .cui-noborder-input {
+        width: 100% !important;
+        height: 30px;
+        border: none;
+    }
+}
+
+#ec_project_publish_menu_nav {
+    height: 32px;
+    background-color: #f5f5f5;
+    padding-left: 9px;
+    padding-top: 9px;
+    padding-right: 12px;
+
+    a {
+        color: @text-color;
+        text-decoration: none;
+    }
+
+    .right_action {
+        padding-left: 20px;
+        
+        &:before {
+            content: "";
+            width: 18px;
+            height: 18px;
+            background-image: url(@pt-bg-url);
+            background-position: 0 -1592px;
+            background-repeat: no-repeat;
+            vertical-align: middle;
+            display: inline-block;
+        }
+    }
+}
+
+#ec_project_publish_menu {
+    table {
+
+        * {
+            font-size: 12px;
+        }
+    }
+
+    table.itemList thead tr {
+        background-color: #fff;
+    }
+
+    table.itemList td.title,
+    table.itemList tbody td {
+        border-color: @border-color;
+    }
+}

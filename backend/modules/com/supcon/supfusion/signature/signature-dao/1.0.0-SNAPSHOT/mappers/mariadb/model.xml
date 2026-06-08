@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.signature.dao.mappers.ModelMapeer">
+
+    <select id="getSignaureLogsBylike" resultType="com.supcon.supfusion.signature.dao.dto.ModelTableDto">
+        select
+        process_key ,process_version
+        from ${dealInfoTableName}
+        WHERE ${columnName} = #{tableInfoId}
+    </select>
+
+    <select id="getSignaureLogsBylike" resultType="com.supcon.supfusion.signature.dao.dto.ModelTableDto">
+        select
+        process_key ,process_version
+        from ${dealInfoTable}
+        WHERE TABLE_INFO_ID = #{tableInfoId}
+        order by ID ASC
+    </select>
+</mapper>

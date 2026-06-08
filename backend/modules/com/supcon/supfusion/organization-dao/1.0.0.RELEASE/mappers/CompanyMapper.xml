@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.organization.dao.mapper.company.CompanyMapper">
+
+    <resultMap id="companiesMap" type="com.supcon.supfusion.organization.dao.po.company.CompanyDetailInfoPO">
+        <result column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="fullName" property="fullName"/>
+        <result column="shortName" property="shortName"/>
+        <result column="description" property="description"/>
+        <result column="fullPath" property="fullPath"/>
+        <result column="layNo" property="layNo"/>
+        <result column="sort" property="sort"/>
+        <result column="valid" property="valid"/>
+        <result column="modifyTime" property="modifyTime"/>
+        <result column="parentCode" property="parentCode"/>
+    </resultMap>
+
+    <select id="getCompanies" resultMap="companiesMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id
+            <if test="modifyTime != null">
+                where curCom.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curCom.valid =1
+            </if>
+            order by curCom.lay_no, curCom.sort
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id
+            <if test="modifyTime != null">
+                where to_char(curCom.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curCom.valid = 1
+            </if>
+            ) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;= #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by modify_time desc) as tempId, * from (
+            select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id
+            <if test="modifyTime != null">
+                where curCom.modify_time &gt; #{modifyTime} )as a )as a
+            </if>
+            <if test="modifyTime == null">
+                where curCom.valid =1 )as a )as a
+            </if>
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getCompanyCount" resultType="java.lang.Integer">
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb' or dbType == 'sqlserver'">
+            select count(*) from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id
+            <if test="modifyTime != null">
+                where curCom.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curCom.valid =1
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select count(*) from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id
+            <if test="modifyTime != null">
+                where to_char(curCom.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curCom.valid = 1
+            </if>
+        </if>
+    </select>
+
+    <select id="getCompanyByCode" resultMap="companiesMap">
+        select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+        curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+        from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id where curCom.valid =1 and curCom.code =#{companyCode}
+    </select>
+
+    <select id="getSubCompaniesByCode" resultMap="companiesMap">
+       <!-- select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+        curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+        from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id where
+        curCom.full_path LIKE #{fullPath} and curCom.valid =1
+        <if test="null != keyword and '' != keyword">
+            and curCom.short_name like #{keyword}
+        </if>
+        <if test="!isMultistage">
+            and curCom.lay_no = #{layNo} + 1
+        </if>
+        order by curCom.lay_no, curCom.sort-->
+
+        <bind name="mysqlOffset" value="(current-1)*pageSize"/>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="offset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'mariadb' or dbType == 'mysql'">
+            select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id where
+            curCom.full_path LIKE #{fullPath} and curCom.valid =1
+            <if test="null != keyword and '' != keyword">
+                and curCom.short_name like #{keyword}
+            </if>
+            <if test="!isMultistage">
+                and curCom.lay_no = #{layNo} + 1
+            </if>
+            order by curCom.lay_no, curCom.sort
+            limit #{mysqlOffset},#{pageSize}
+        </if>
+
+        <if test="dbType == 'oracle'">
+            select * from
+            (select temp.*,rownum row_id from
+            (select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id where
+            curCom.full_path LIKE #{fullPath} and curCom.valid =1
+            <if test="null != keyword and '' != keyword">
+                and curCom.short_name like #{keyword}
+            </if>
+            <if test="!isMultistage">
+                and curCom.lay_no = #{layNo} + 1
+            </if>
+            order by curCom.lay_no, curCom.sort) temp)
+            where row_id between #{offset} and #{pointer}
+        </if>
+
+        <if test="dbType == 'sqlserver'">
+            select * from
+            (select temp.*,row_number() over (order by temp.layNo, temp.sort) row_id from
+            (select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,
+            curCom.valid, curCom.modify_time as modifyTime, parentCom.code as parentCode
+            from org_company curCom left join org_company parentCom on curCom.parent_id = parentCom.id where
+            curCom.full_path LIKE #{fullPath} and curCom.valid =1
+            <if test="null != keyword and '' != keyword">
+                and curCom.short_name like #{keyword}
+            </if>
+            <if test="!isMultistage">
+                and curCom.lay_no = #{layNo} + 1
+            </if>) temp) temp1
+            where temp1.row_id between #{offset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getSubCompaniesTotal" resultType="java.lang.Integer">
+        select count(1) from org_company curCom
+        left join org_company parentCom
+        on curCom.parent_id = parentCom.id
+        where
+        curCom.full_path LIKE #{fullPath}
+        and curCom.valid =1
+        <if test="null != keyword and '' != keyword">
+            and curCom.short_name like #{keyword}
+        </if>
+        <if test="!isMultistage">
+            and curCom.lay_no = #{layNo} + 1
+        </if>
+    </select>
+
+</mapper>

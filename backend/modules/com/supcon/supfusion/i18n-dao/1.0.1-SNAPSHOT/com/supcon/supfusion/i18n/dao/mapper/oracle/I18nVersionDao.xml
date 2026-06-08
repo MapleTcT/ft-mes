@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nVersionDao">
+
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nVersionPO" id="supfusionI18nVersionMap">
+        <result property="id" column="id"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleVersionCode" column="module_version_code"/>
+        <result property="valid" column="valid"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+    </resultMap>
+
+    <insert id="add" parameterType="com.supcon.supfusion.i18n.dao.po.I18nVersionPO">
+        INSERT INTO SUPFUSION_I18N_VERSION(
+        ID ,
+        MODULE_CODE ,
+        MODULE_VERSION_CODE ,
+        VALID ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        )
+        VALUES(
+        #{id},
+        #{moduleCode},
+        #{moduleVersionCode},
+        #{valid},
+        #{createTime},
+        #{modifyTime}
+        )
+    </insert>
+
+    <select id="selectByModuleCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nVersionPO">
+        SELECT
+        ID,
+        MODULE_CODE,
+        MODULE_VERSION_CODE,
+        VALID,
+        CREATE_TIME,
+        MODIFY_TIME
+        from supfusion_i18n_version
+        WHERE 1=1
+        AND VALID = '1'
+        AND ROWNUM=1
+        <if test="moduleCode != null and moduleCode.trim() != ''">
+            AND MODULE_CODE = #{moduleCode}
+        </if>
+        ORDER BY MODIFY_TIME DESC
+    </select>
+
+    <select id="selectAllVersionsByModuleCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nVersionPO">
+        SELECT
+        ID ,
+        MODULE_CODE ,
+        MODULE_VERSION_CODE ,
+        VALID ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        FROM SUPFUSION_I18N_VERSION
+        WHERE 1=1
+        <if test="moduleCode != null and moduleCode.trim() != ''">
+            AND MODULE_CODE = #{moduleCode}
+        </if>
+        order by CREATE_TIME
+    </select>
+
+    <delete id="deleteByModuleCode">
+        DELETE FROM SUPFUSION_I18N_VERSION WHERE MODULE_CODE = #{moduleCode}
+    </delete>
+
+
+</mapper>

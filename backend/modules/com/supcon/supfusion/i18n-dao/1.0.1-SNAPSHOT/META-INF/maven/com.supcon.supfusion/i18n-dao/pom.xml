@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>supfusion-i18n-service</artifactId>
+        <groupId>com.supcon.supfusion</groupId>
+        <version>1.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>i18n-dao</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion</groupId>
+            <artifactId>i18n-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-dbp</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.supcon.supfusion.framework.boot</groupId>
+                    <artifactId>cloud-boot-autoconfigure</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>scaffold-boot-starter-mybatis</artifactId>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.baomidou</groupId>-->
+        <!--            <artifactId>mybatis-plus</artifactId>-->
+        <!--            <version>${mybatis-plus.version}</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--        <groupId>com.baomidou</groupId>-->
+        <!--        <artifactId>mybatis-plus-boot-starter</artifactId>-->
+        <!--        <version>${mybatis-plus.version}</version>-->
+        <!--        <exclusions>-->
+        <!--            <exclusion>-->
+        <!--                <groupId>org.springframework.boot</groupId>-->
+        <!--                <artifactId>spring-boot-starter-jdbc</artifactId>-->
+        <!--            </exclusion>-->
+        <!--        </exclusions>-->
+        <!--        </dependency>-->
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>

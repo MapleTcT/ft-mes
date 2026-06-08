@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.notification.admin.dao.mappers.NoticeProtocolMapper">
+
+
+    <select id="getProtocolNamesByTask"
+            resultType="com.supcon.supfusion.notification.admin.dao.entities.NoticeProtocol">
+        select
+          np.name,
+          np.i18n_key as i18nKey
+        from
+          notice_protocol np
+        join
+          notice_task_protocol ntp on ntp.notice_protocol_id = np.id
+        WHERE ntp.notice_task_id = #{taskId}
+    </select>
+
+</mapper>

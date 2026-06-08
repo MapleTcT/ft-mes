@@ -1,0 +1,293 @@
+{
+  "version": 43,
+  "initBaseData": [
+    {
+      "code": "system",
+      "name": "rbac.MENU_NAME_SYSTEM",
+      "app": "rbac",
+      "cid": 1000,
+      "nameDisplay": "系统管理",
+      "memo": "系统管理"
+    }, 
+	{
+      "name": "rbac.PRINT",
+      "code": "print",
+      "app": "printer",
+      "nameDisplay": "打印配置",
+      "cid": 1000,
+      "parentCode": "system",
+	  "route": "/design/system/print/printManage",
+      "url": "/print/#/printManage",
+	  "showType": 1,
+      "memo": "打印配置",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.PRINT",
+          "code": "print",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },	
+    {
+      "name": "rbac.MENU_SIGNATURE",
+      "code": "signature",
+      "app": "signature",
+      "nameDisplay": "电子签名按钮管理",
+      "cid": 1000,
+      "parentCode": "system",
+	  "route": "/design/system/esign",
+      "url": "/esign/#/esign",
+	  "showType": 1,
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_SIGNATURE",
+          "code": "signature",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "code": "logManagement",
+      "name": "rbac.MENU_LOG_MANAGE",
+      "app": "rbac",
+      "cid": 1000,
+      "nameDisplay": "日志管理",
+      "memo": "日志管理",
+	  "showType": 1,
+      "parentCode": "system"
+    },
+    {
+      "name": "rbac.MENU_SIGNATURE_LOG_MANAGE",
+      "code": "signature_log",
+      "app": "signature",
+      "nameDisplay": "电子签名日志",
+      "cid": 1000,
+      "parentCode": "logManagement",
+	  "route": "/design/system/esign/esignlog",
+      "url": "/esign/index.html#/esignlog",
+	  "showType": 1,
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_SIGNATURE_LOG_MANAGE",
+          "code": "signature_log",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_TASK_SCHEDULER",
+      "code": "taskScheduler",
+      "app": "taskScheduler",
+      "nameDisplay": "任务调度管理",
+      "cid": 1000,
+      "parentCode": "system",
+	  "route": "/design/system/taskscheduler/taskscheduler",
+      "url": "/taskscheduler/#/taskscheduler",
+	  "showType": 1,
+      "memo": "任务调度管理",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_NAME_TASK_SCHEDULER",
+          "code": "taskScheduler",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_TASK_SCHEDULER_LOG",
+      "code": "taskScheduler_log",
+      "app": "taskScheduler",
+      "nameDisplay": "任务调度日志",
+      "cid": 1000,
+      "parentCode": "logManagement",
+	  "route": "/design/system/taskscheduler/tasklog",
+      "url": "/taskscheduler/index.html#/tasklog",
+	  "showType": 1,
+      "memo": "任务调度日志",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_NAME_TASK_SCHEDULER_LOG",
+          "code": "taskScheduler_log",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_LICENSE",
+      "code": "license",
+      "app": "rbac",
+      "nameDisplay": "授权查看",
+      "cid": 1000,
+      "parentCode": "system",
+      "route": "/design/supplant/authorityList",
+      "url": "/supplant/#/authorityList",
+	  "isHide": 1,
+      "memo": "授权查看",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_LICENSE",
+          "code": "license",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "code": "customField",
+      "name": "rbac.MENU_NAME_CUSTOM_FIELD",
+      "app": "rbac",
+      "cid": 1000,
+      "memo": "自定义字段",
+	  "showType": 1,
+      "parentCode": "system"
+    },
+    {
+      "name": "rbac.MENU_NAME_MODEL_MANAGE",
+      "code": "modelManage",
+      "app": "rbac",
+      "nameDisplay": "模型管理",
+      "cid": 1000,
+      "sort": 1,
+	  "route": "/design/system/supplant/customFieldModelManage",
+      "url": "/supplant/#/customFieldModelManage",
+      "parentCode": "customField",
+	  "showType": 1,
+      "memo": "模型管理",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_NAME_MODEL_MANAGE",
+          "code": "modelManage",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_VIEW_MANAGE",
+      "code": "viewManage",
+      "app": "rbac",
+      "nameDisplay": "视图管理",
+      "cid": 1000,
+      "sort": 2,
+	  "route": "/design/system/supplant/customFieldViewManage",
+      "url": "/supplant/#/customFieldViewManage",
+	  "showType": 1,
+      "parentCode": "customField",
+      "memo": "视图管理",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_NAME_VIEW_MANAGE",
+          "code": "viewManage",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+          ]
+        }
+      ]
+    }      
+  ],
+  "initBasePermissionCodes": [
+    "modelManage",
+    "viewManage",
+    "customField",
+    "license",
+    "taskScheduler",
+    "taskScheduler_log",
+	"print",
+    "signature",
+    "signature_log"
+  ],
+  "initCompanyPermissionCodes": [
+  ]
+}

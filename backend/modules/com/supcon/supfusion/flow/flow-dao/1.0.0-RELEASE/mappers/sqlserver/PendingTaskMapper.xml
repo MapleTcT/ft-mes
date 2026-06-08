@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.flow.dao.PendingTaskMapper">
+
+
+    <select id="queryTasks"
+            resultType="com.supcon.supfusion.flow.common.po.PendingTaskPO">
+        SELECT * FROM (
+        SELECT
+        ROW_NUMBER() OVER (ORDER BY create_time DESC) AS rn,
+        user_id userId,
+        cid,
+        multi_company multiCompany,
+        id,
+        task_source taskSource,
+        process_id processId,
+        task_description_zh_cn activityName,
+        process_name processName,
+        table_no tableNo,
+        initiator_id initiatorId,
+        staff_name staffName,
+        create_time createTime,
+        task_status taskStatus,
+        open_url openUrl
+        FROM
+        wfm_task_pending
+        <where>
+            <if test="taskNames != null">
+                <foreach collection="taskNames" item="taskName" open="and (" separator="or" close=")">
+                    task_description_zh_cn like concat(concat('%',#{taskName}),'%')
+                </foreach>
+            </if>
+            <if test="diagramNames != null">
+                <foreach collection="diagramNames" item="diagramName" open="and (" separator="or" close=")">
+                    process_name like concat(concat('%',#{diagramName}),'%')
+                </foreach>
+            </if>
+            <if test="formNos != null">
+                <foreach collection="formNos" item="formNo" open="and (" separator="or" close=")">
+                    table_no like concat(concat('%',#{formNo}),'%')
+                </foreach>
+            </if>
+            <if test="initiators != null">
+                <foreach collection="initiators" item="initiator" open="and (" separator="or" close=")">
+                    staff_name like concat(concat('%',#{initiator}),'%')
+                </foreach>
+            </if>
+            <if test="taskStatus != null">
+                <foreach collection="taskStatus" item="status" open="and task_status in (" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test='userId != null'>AND user_id = #{userId}</if>
+            <if test='beginTime != null'>AND create_time &gt;= #{beginTime}</if>
+            <if test='endTime != null'>AND create_time &lt;= #{endTime}</if>
+        </where>
+        ) a
+        WHERE a.rn &lt;= ${end} AND a.rn &gt;= (${begin}+1)
+    </select>
+
+    <select id="queryTotals"
+            resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM
+        wfm_task_pending
+        <where>
+            <if test="taskNames != null">
+                <foreach collection="taskNames" item="taskName" open="and (" separator="or" close=")">
+                    task_description_zh_cn like concat(concat('%',#{taskName}),'%')
+                </foreach>
+            </if>
+            <if test="diagramNames != null">
+                <foreach collection="diagramNames" item="diagramName" open="and (" separator="or" close=")">
+                    process_name like concat(concat('%',#{diagramName}),'%')
+                </foreach>
+            </if>
+            <if test="formNos != null">
+                <foreach collection="formNos" item="formNo" open="and (" separator="or" close=")">
+                    table_no like concat(concat('%',#{formNo}),'%')
+                </foreach>
+            </if>
+            <if test="initiators != null">
+                <foreach collection="initiators" item="initiator" open="and (" separator="or" close=")">
+                    staff_name like concat(concat('%',#{initiator}),'%')
+                </foreach>
+            </if>
+            <if test="taskStatus != null">
+                <foreach collection="taskStatus" item="status" open="and task_status in (" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test='userId != null'>AND user_id = #{userId}</if>
+            <if test='beginTime != null'>AND create_time &gt;= #{beginTime}</if>
+            <if test='endTime != null'>AND create_time &lt;= #{endTime}</if>
+        </where>
+    </select>
+
+</mapper>

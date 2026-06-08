@@ -1,0 +1,22 @@
+package com.supcon.supfusion.scheduler.server.openapi.vo;
+
+import lombok.Data;
+
+@Data
+public class SchedulerJobVo {
+    private Long id;
+    private String modelName;
+    private String jobName;
+    private String jobKey;
+    private String jobNameInternational;
+    private String jobCron;
+    private Integer jobStatus;
+    private String jobDesc;
+    private String serviceApi;
+    private String sorter;
+    private  Integer current;
+    private Integer pageSize;
+    private Integer filter;
+    private String userName;
+    private String serviceParams;
+}

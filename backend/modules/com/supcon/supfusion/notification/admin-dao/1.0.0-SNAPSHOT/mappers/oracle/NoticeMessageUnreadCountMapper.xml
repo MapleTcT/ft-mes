@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.notification.admin.dao.mappers.NoticeMessageUnreadCountMapper">
+
+
+    <select id="getUnreadNumGroup"
+            resultType="com.supcon.supfusion.notification.admin.dao.entities.NoticeMessageUnreadCount">
+        select
+            un.*,
+         top.name topicName
+        from
+            NOTICE_MESSAGE_UNREAD_COUNT un
+        left join
+            NOTICE_TOPIC top on un.topic_id = top.id
+        WHERE
+        un.staff_code = #{staffCode} and un.notice_protocol_id = #{protocolId}
+    </select>
+
+</mapper>

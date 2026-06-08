@@ -1,0 +1,135 @@
+#开发本地配置文件
+server:
+  port: 8082
+  servlet:
+    context-path: /
+  tomcat:
+    max-swallow-size: 100MB # 单次请求上传文件最大值
+spring:
+  messages:
+    basename: i18n/i18n/i18n
+  profiles:
+    active: dev
+  redis:
+    database: 0
+    host: 192.168.91.186
+    port: 6379
+    password:
+  application:
+    name: i18n
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+#  main:
+#    allow-bean-definition-overriding: true #当遇到同样名字的时候，是否允许覆盖注册
+  servlet:
+    multipart:
+      max-file-size: 100MB # 单次请求上传文件最大值
+      max-request-size: 100MB # 单次请求上传文件最大值
+  cloud:
+    nacos:
+      config:
+        enabled: false
+supfusion:
+  cloud:
+    nacos:
+      server-addr: 192.168.91.186:8848
+      username: nacos
+      password: nacos
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    i18n:
+      enabled: true
+      host: http://127.0.0.1:${server.port:8080}
+      locale-modules:
+        - i18n
+        - sys
+      module-versions:
+        - i18n202101081213
+        - sys202101081213
+      modules:
+        - i18n
+        - sys
+      basename: error/ # 故意填一个错的，目的是为了不使用SDK上载国际化资源
+    datasource:
+      connect:
+        use-system: false
+        system:
+#          db-type: mariadb
+#          db-name: supfusion_i18n
+#          host: 127.0.0.1
+#          port: 3306
+#          username: root
+#          password: 123456
+          db-type: oracle
+          db-name: orcl
+          host: 192.168.90.164
+          port: 3306
+          username: supfusion11
+          password: 1
+      druid:
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 50
+        validationQuerySql: ${VALIDATIONQUERYSQL:SELECT 1 FROM DUAL}
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'
+    tenant:
+      sync-cache: false
+      init-getter: false
+      register: false
+  swagger:
+    enable: true
+  i18n:
+    profiles: productDev
+#    profiles: product
+    xlsx-upload-max-size: 15  #单个文件最大 值  单位 MB 非必填 默认15M
+    i18n-key-length-num-defa: 255 #国际化key 字符长度限制 非必填 默认255字符长度
+    i18n-value-length-num-defa: 500 #国际化value 字符长度限制 (不超过多少字符) 非必填 默认
+    i18n-resource-path: i18n/i18n/ #际化自己的国际化资源路径  非必填 默认路径 i18n/i18n/
+    i18n-resource-code: i18n # g国际化服务 编码 非必填 默认i18n
+    i18n-resource-version: i18n202008190930 # 国际化资源版本号 非必填 默认 i18n202008190930
+    default-resource-path: i18n/sys/ #系统默认的国际化资源路径 非必填 默认 i18n/sys/
+    default-resource-code: sys # 系统默认模块的编码 非必填 默认 sys
+    default-resource-version: sys202008190930 #系统默认资源版本号  非必填 默认sys202008190930
+    default-utc: UTC+8 # 设置系统默认的时区 UTC+8 代表 当前默认时间显示为东8区时间 非必填 默认 UTC+8
+    default-language: zh_CN  #设置系统默认的语言 为中文 请求时如果没有传语言类型则默认为传输的是中文 非必填 默认zh_CN
+#    file:
+#      path: /app/resource  #国际化文件存储位置 非必填 默认项目根路径
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 10000
+        read-timeout: 12000
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.i18n.dao.po
+  mapper-locations:
+    - classpath:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml
+  global-config:
+    db-config:
+      #主键类型 AUTO:"数据库ID自增" INPUT:"用户输入ID",ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: ID_WORKER
+      #字段策略 IGNORED:"忽略判断"  NOT_NULL:"非 NULL 判断")  NOT_EMPTY:"非空判断"
+      field-strategy: NOT_EMPTY
+      #数据库类型
+      db-type: ${supfusion.cloud.datasource.connect.system.db-type}
+      # 乐观锁
+      optimistic-lock-enabled: false
+      # 逻辑删
+      logic-delete-enabled: true
+  configuration:
+    # 是否开启自动驼峰命名规则映射:从数据库列名到Java属性驼峰命名的类似映射
+    map-underscore-to-camel-case: true
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    call-setters-on-nulls: true
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

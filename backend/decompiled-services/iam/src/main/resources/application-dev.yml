@@ -1,0 +1,88 @@
+management:
+  health:
+    db:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include:
+        - "health"
+        - "info"
+        - "prometheus"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+server:
+  port: 8082
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: supos-iam
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.11.99:9092
+          zk-nodes: 192.168.11.99:2181
+          auto-create-topics: true
+      bindings:
+        tenant-input:
+          destination: supOS_tenant
+          content-type: application/json
+          group: ${spring.application.name}
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.iam.dao.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+    banner: false
+supfusion:
+  cloud:
+    nacos:
+      server-addr: 192.168.11.99:8848
+      username: nacos
+      password: nacos
+    config-center:
+      enabled: true
+      group: DEFAULT_GROUP
+      type: yaml
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: DEFAULT_GROUP
+    discovery:
+      enabled: true
+      watch-delay: 30000
+      group: DEFAULT_GROUP
+    datasource:
+      connect:
+        use-system: true
+        system:
+          db-type: sqlserver
+          db-name: supos_for_test
+          host: 10.30.44.66
+          port: 1433
+          username: sa
+          password: Supos1304
+      druid:
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 10
+      script:
+        script-root-dirs: classpath*:META-INF/
+        version-prefix: '##'
+    tenant:
+      sync-cache: false
+      init-getter: false
+      register: false
+feign:
+  httpclient:
+    enabled: true

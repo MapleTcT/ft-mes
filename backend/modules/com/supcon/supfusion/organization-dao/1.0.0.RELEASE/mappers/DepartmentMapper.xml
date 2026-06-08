@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.organization.dao.mapper.department.DepartmentMapper">
+
+    <resultMap id="departmentMap" type="com.supcon.supfusion.organization.dao.po.department.DepartmentSynchronizationInfoPO">
+        <result column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="parentCode" property="parentCode"/>
+        <result column="name" property="name"/>
+        <result column="valid" property="valid"/>
+        <result column="modifyTime" property="modifyTime"/>
+        <result column="description" property="description"/>
+        <result column="fullPath" property="fullPath"/>
+        <result column="layNo" property="layNo"/>
+        <result column="sort" property="sort"/>
+        <result column="deptType" property="deptType"/>
+        <result column="companyCode" property="companyCode"/>
+        <result column="companyFullName" property="companyFullName"/>
+        <result column="companyShortName" property="companyShortName"/>
+    </resultMap>
+
+    <resultMap id="departmentManagerMap" type="com.supcon.supfusion.organization.dao.po.department.DepartmentSynchronizationManagerPO">
+        <result column="deptId" property="deptId"/>
+        <result column="managerCode" property="managerCode"/>
+        <result column="managerName" property="managerName"/>
+    </resultMap>
+
+    <resultMap id="departmentBaseInfoMap" type="com.supcon.supfusion.organization.dao.po.department.DepartmentBaseInfoPO">
+        <result column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="parentCode" property="parentCode"/>
+        <result column="name" property="name"/>
+        <result column="valid" property="valid"/>
+        <result column="fullPath" property="fullPath"/>
+        <result column="deptType" property="deptType"/>
+        <result column="companyCode" property="companyCode"/>
+        <result column="companyFullName" property="companyFullName"/>
+        <result column="companyShortName" property="companyShortName"/>
+    </resultMap>
+    <select id="getDepartments" resultMap="departmentMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select curDept.id, od.code as parentCode, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.description, curDept.full_path as fullPath, curDept.lay_no as layNo, curDept.sort,
+            curDept.valid, curDept.modify_time as modifyTime, company.code as companyCode, company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept left join org_company company on curDept.company_id = company.id left join org_department od on curDept.parent_id = od.id
+            <if test="modifyTime != null">
+                where curDept.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curDept.valid =1
+            </if>
+            order by curDept.lay_no, curDept.sort
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select curDept.id, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.description, curDept.full_path as fullPath, curDept.lay_no as layNo, curDept.sort,
+            curDept.valid, curDept.modify_time as modifyTime, company.code as companyCode, company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept left join org_company company on curDept.company_id = company.id
+            <if test="modifyTime != null">
+                where to_char(curDept.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curDept.valid =1
+            </if>
+            order by curDept.lay_no, curDept.sort) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;= #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                    #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by layNo,sort) as tempId, * from (
+            select curDept.id, od.code as parentCode, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.description, curDept.full_path as fullPath, curDept.lay_no as layNo, curDept.sort,
+            curDept.valid, curDept.modify_time as modifyTime, company.code as companyCode, company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept left join org_company company on curDept.company_id = company.id left join org_department od on curDept.parent_id = od.id
+            <if test="modifyTime != null">
+                where curDept.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curDept.valid =1
+            </if>
+            )as a) as a where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+
+    <select id="getDepartmentsCount" resultType="java.lang.Integer">
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb' or dbType == 'sqlserver'">
+            select count(*) from org_department curDept left join org_company company on curDept.company_id = company.id left join org_department od on curDept.parent_id = od.id
+            <if test="modifyTime != null">
+                where curDept.modify_time &gt; #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curDept.valid =1
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select count(*) from org_department curDept left join org_company company on curDept.company_id = company.id
+            <if test="modifyTime != null">
+                where to_char(curDept.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}
+            </if>
+            <if test="modifyTime == null">
+                where curDept.valid =1
+            </if>
+        </if>
+    </select>
+
+    <select id="getDepartmentByCode" resultMap="departmentMap">
+            select curDept.id, od.code as parentCode, curDept.parent_id as parentId, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.description, curDept.full_path as fullPath, curDept.lay_no as layNo, curDept.sort,
+            curDept.valid, curDept.modify_time as modifyTime, company.code as companyCode, company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept left join org_company company on curDept.company_id = company.id left join org_department od on curDept.parent_id = od.id  where curDept.valid = 1 and curDept.code = #{departmentCode }
+    </select>
+
+    <select id="getManagersByDeptIds" resultMap="departmentManagerMap">
+        select orgManager.org_id as deptId, person.code as managerCode, person.name as managerName
+        from org_manager orgManager join org_person person on orgManager.manager_id = person.id where orgManager.org_id in
+        <foreach collection="deptIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getManagerByDeptId" resultMap="departmentManagerMap">
+        select orgManager.org_id as deptId, person.code as managerCode, person.name as managerName
+        from org_manager orgManager join org_person person on orgManager.manager_id = person.id where orgManager.org_id = #{deptId}
+    </select>
+
+    <select id="getDepartmentsByCompanyId" resultMap="departmentBaseInfoMap">
+        <bind name="offset" value="(current-1)*pageSize"/>
+        <if test="dbType == null or dbType == '' or dbType == 'mysql' or dbType == 'mariadb'">
+            select curDept.id, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.valid, curDept.full_path as fullPath, parentDept.code as parentCode, company.code as companyCode,
+            company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept
+            left join org_company company on curDept.company_id = company.id
+            left join org_department parentDept on curDept.parent_id = parentDept.id
+            where company.id = #{companyId} and curDept.valid = 1
+            order by curDept.lay_no, curDept.sort
+            <if test="current != -1">
+                limit #{offset}, #{pageSize}
+            </if>
+        </if>
+        <if test="dbType == 'oracle'">
+            select * from (select TMP.*, ROWNUM ROW_ID from (select curDept.id, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.valid, curDept.full_path as fullPath, parentDept.code as parentCode, company.code as companyCode,
+            company.full_name as companyFullName, company.short_name as companyShortName from org_department curDept
+            left join org_company company on curDept.company_id = company.id
+            left join org_department parentDept on curDept.parent_id = parentDept.id
+            where company.id = #{companyId} and curDept.valid = 1
+            order by curDept.lay_no, curDept.sort) TMP
+            <if test="current != -1">
+                where ROWNUM &lt;= #{current}*#{pageSize}
+            </if>
+            ) where ROW_ID &gt;
+            <if test="current != -1">
+                #{offset}
+            </if>
+            <if test="current == -1">
+                0
+            </if>
+        </if>
+        <bind name="pointer" value="current * pageSize"/>
+        <bind name="sqlserverOffset" value="(current - 1) * pageSize + 1"/>
+        <if test="dbType == 'sqlserver'">
+            select * from (select ROW_NUMBER() over (order by lay_no,sort  desc) as tempId, * from (
+            select curDept.id, curDept.lay_no, curDept.sort, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.valid, curDept.full_path as fullPath, parentDept.code as parentCode, company.code as companyCode,
+            company.full_name as companyFullName, company.short_name as companyShortName
+            from org_department curDept
+            left join org_company company on curDept.company_id = company.id
+            left join org_department parentDept on curDept.parent_id = parentDept.id
+            where company.id = #{companyId} and curDept.valid = 1
+            )as a )as a
+            where a.tempId between #{sqlserverOffset} and #{pointer}
+        </if>
+    </select>
+</mapper>

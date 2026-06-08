@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.notification.admin.dao.mappers.NoticeTopicDao">
+    <resultMap type="com.supcon.supfusion.notification.admin.dao.entities.NoticeTopic" id="NoticeTopicDaoResultMap">
+        <result property="template_id" column="template_id"/>
+        <result property="template_name" column="template_name"/>
+        <result property="protocol_name" column="protocol_name"/>
+        <result property="protocol_id" column="protocol_id"/>
+        <result property="memo" column="description"/>
+        <association property="topicTree" column="notice_topic_type_id"
+                     select="com.supcon.supfusion.notification.admin.dao.mappers.NoticeTopicTreeDao.selectById">
+        </association>
+        <!--<result property="id" column="id"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleIndexCode" column="module_index_code"/>
+        <result property="valid" column="valid"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>-->
+    </resultMap>
+
+    <select id="getListByPage" resultType="com.supcon.supfusion.notification.admin.dao.entities.NoticeTopicList">
+        select
+        notice_topic.id topicId,
+        notice_topic.name topicName,
+        notice_topic.code topicCode,
+        GROUP_CONCAT(notice_tmpl.id) templateIds,
+        GROUP_CONCAT(notice_topic_range.id) rangeIds
+        from notice_topic
+        left join notice_topic_tmpl_rel on notice_topic_tmpl_rel.notice_topic_id = notice_topic.id
+        left join notice_tmpl on notice_topic_tmpl_rel.notice_tmpl_id = notice_tmpl.id
+        left join notice_protocol on notice_protocol.id = notice_tmpl.notice_protocol_id
+        left join notice_topic_range on notice_topic_range.notice_topic_id = notice_topic.id
+        <where>
+            <if test="names != null">
+                <foreach collection="names" item="name" open="and (" separator="or" close=")">
+                    notice_topic.name like concat('%',#{name},'%')
+                </foreach>
+            </if>
+            <if test="codes != null">
+                <foreach collection="codes" item="code" open="and (" separator="or" close=")">
+                    notice_topic.code like concat('%',#{code},'%')
+                </foreach>
+            </if>
+            <if test="templateNames != null">
+                <foreach collection="templateNames" item="templateName" open="and (" separator="or" close=")">
+                    notice_tmpl.name like concat('%',#{templateName},'%')
+                </foreach>
+            </if>
+            <if test="topicTree != null">
+                and notice_topic.notice_topic_type_id = #{topicTree}
+            </if>
+            <if test="protocols != null">
+                <foreach collection="protocols" item="protocolId" open="and (" separator="or" close=")">
+                    notice_protocol.id = #{protocolId}
+                </foreach>
+            </if>
+        </where>
+        group by notice_topic.id, notice_topic.name, notice_topic.code
+        order by notice_topic.create_time desc
+        limit #{start}, #{end}
+    </select>
+
+    <select id="getListByPageCount" resultType="integer">
+        select count(1) from (
+        select
+        count(1)
+        from notice_topic
+        left join notice_topic_tmpl_rel on notice_topic_tmpl_rel.notice_topic_id = notice_topic.id
+        left join notice_tmpl on notice_topic_tmpl_rel.notice_tmpl_id = notice_tmpl.id
+        left join notice_protocol on notice_protocol.id = notice_tmpl.notice_protocol_id
+        left join notice_topic_range on notice_topic_range.notice_topic_id = notice_topic.id
+        <where>
+            <if test="names != null">
+                <foreach collection="names" item="name" open="and (" separator="or" close=")">
+                    notice_topic.name like concat('%',#{name},'%')
+                </foreach>
+            </if>
+            <if test="codes != null">
+                <foreach collection="codes" item="code" open="and (" separator="or" close=")">
+                    notice_topic.code like concat('%',#{code},'%')
+                </foreach>
+            </if>
+            <if test="templateNames != null">
+                <foreach collection="templateNames" item="templateName" open="and (" separator="or" close=")">
+                    notice_tmpl.name like concat('%',#{templateName},'%')
+                </foreach>
+            </if>
+            <if test="topicTree != null">
+                and notice_topic.notice_topic_type_id = #{topicTree}
+            </if>
+            <if test="protocols != null">
+                <foreach collection="protocols" item="protocolId" open="and (" separator="or" close=")">
+                    notice_protocol.id = #{protocolId}
+                </foreach>
+            </if>
+        </where>
+        group by notice_topic.id, notice_topic.name, notice_topic.code
+        ) a
+    </select>
+
+    <select id="getTmplName" resultMap="NoticeTopicDaoResultMap">
+        SELECT topic.*,tmpl.name as template_name FROM notice_topic topic 
+        left join notice_topic_tmpl_rel rel on topic.id=rel.notice_topic_id 
+        left join notice_tmpl tmpl on tmpl.id =rel.notice_tmpl_id ${ew.customSqlSegment}
+    </select>
+</mapper>

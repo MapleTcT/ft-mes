@@ -1,0 +1,76 @@
+management:
+  health:
+    db:
+      enabled: false
+spring:
+  messages:
+    basename: i18n/notificationSMS
+  application:
+    name: notification-sms-jincang
+#  datasource:
+#    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+#    initialization-mode: never
+server:
+  port: 8080
+
+supfusion:
+  supos:
+    ak: ${SUPOS_APP_ACCOUNT_ID:3ba8a60b48185a9e23d38e962b415603}
+    sk: ${SUPOS_APP_SECRET_KEY:335e481694545a53e7385db62bab8bd9}
+    supos-host: ${SUPOS_ADDRESS:http://127.0.0.1:8008}
+    appId: ${SUPOS_APP_ID:605fd270fb5b3563411572db01634214}
+  cloud:
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: DEFAULT_GROUP
+    i18n:
+      enabled: true
+      host: http://${I18N_HOST:127.0.0.1}:${I18N_PORT:30130}
+      locale-module: notificationSMS
+      module-version: notificationSMS20210407
+      basename: i18n/
+      modules:
+        - notificationSMS
+    discovery:
+      enabled: true
+      group: DEFAULT_GROUP
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:nacos.default}:${NACOS_PORT:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+  #    datasource:
+  #      connect:
+  #        use-system: true
+  #        system:
+  #          db-type: ${DB_TYPE:mariadb}
+  #          db-name: ${DB_NAME:supos_dt}
+  #          host: ${HOST:lake-mariadb}
+  #          port: ${PORT:3306}
+  #          username: ${USER_NAME:supos}
+  #          password: ${PASS_WORD:Supos1304}
+  #      script:
+  #        script-root-dirs: classpath*:META-INF/
+  swagger:
+    enable: true
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.notification.sms.dao.entities
+  configuration:
+    log-impl:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+logging:
+  level:
+    com:
+      supcon:
+        supfusion:
+          notification:
+            admin:
+              openapi:
+                feign: debug
+

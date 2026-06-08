@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.UserPermissionMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.UserPermissionPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="cid" column="CID"/>
+        <result property="version" column="VERSION"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="menuOperateId" column="MENUOPERATE_ID"/>
+        <result property="positionFlag" column="POSITION_FLAG"/>
+        <result property="departmentFlag" column="DEPARTMENT_FLAG"/>
+        <result property="groupFlag" column="GROUP_FLAG"/>
+        <result property="assignStaffFlag" column="ASSIGN_STAFF_FLAG"/>
+        <result property="assignPosFlag" column="ASSIGN_POS_FLAG"/>
+        <result property="assignDeptFlag" column="ASSIGN_DEPT_FLAG"/>
+        <result property="dealerPermissionFlag" column="DEALER_PERMISSION_FLAG"/>
+        <result property="noRestrictFlag" column="NO_RESTRICT_FLAG"/>
+        <result property="assignDataPermissionFlag" column="ASSIGN_DATAPERMISSION_FLAG"/>
+        <result property="assignCustomPermissionFlag" column="ASSIGN_CUSTOMPERMISSION_FLAG"/>
+        <result property="urlPattern" column="URL_PATTERN"/>
+    </resultMap>
+
+    <resultMap id="getFlowPermissionList_map" type="com.supcon.supfusion.rbac.dao.bo.UserPermissionBO">
+        <result property="id" column="ID"/>
+        <result property="positionFlag" column="POSITION_FLAG" />
+        <result property="assignPosFlag" column="ASSIGN_POS_FLAG" />
+        <result property="assignStaffFlag" column="ASSIGN_STAFF_FLAG" />
+        <result property="noRestrictFlag" column="NO_RESTRICT_FLAG" />
+        <result property="dealerPermissionFlag" column="DEALER_PERMISSION_FLAG"/>
+        <result property="assignCustomPermissionFlag" column="ASSIGN_CUSTOMPERMISSION_FLAG" />
+        <result property="assignDataPermissionFlag" column="ASSIGN_DATAPERMISSION_FLAG" />
+        <result property="departmentFlag" column="DEPARTMENT_FLAG" />
+        <result property="assignDeptFlag" column="ASSIGN_DEPT_FLAG"/>
+        <result property="purviewType" column="PURVIEWTYPE" />
+        <result property="typeFlag" column="TYPEFLAG"/>
+        <result property="flowKey" column="FLOWKEY"/>
+    </resultMap>
+
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,CID,USER_ID,MENUOPERATE_ID,POSITION_FLAG,DEPARTMENT_FLAG,GROUP_FLAG,ASSIGN_STAFF_FLAG,ASSIGN_POS_FLAG,ASSIGN_DEPT_FLAG,DEALER_PERMISSION_FLAG,
+        NO_RESTRICT_FLAG,ASSIGN_DATAPERMISSION_FLAG,ASSIGN_CUSTOMPERMISSION_FLAG,URL_PATTERN
+    </sql>
+
+    <sql id="getFlowPermissionList_column">
+        FP.ID AS ID, MO.ID AS MENUOPERATE_ID,MO.CODE AS MENUOPERATE_CODE, FP.TYPE_ID AS USER_ID, FP.GROUP_POWER_FLAG AS GROUP_FLAG,
+        FP.POSITION_POWER_FLAG AS POSITION_FLAG, ASSIGN_POS_FLAG AS ASSIGN_POS_FLAG,0 AS DEPARTMENT_FLAG, 0 AS ASSIGN_DEPT_FLAG,
+        ASSIGN_STAFF_FLAG AS ASSIGN_STAFF_FLAG, FP.UNLIMITED_POWER AS NO_RESTRICT_FLAG,0 as DEALER_PERMISSION_FLAG,0 AS ASSIGN_CUSTOMPERMISSION_FLAG,0 AS ASSIGN_DATAPERMISSION_FLAG,0 as TYPEFLAG , 1 as PURVIEWTYPE,MO.FLOW_KEY as FLOWKEY
+    </sql>
+
+    <sql id="getUserPermissionList_column">
+        UP.ID, UP.MENUOPERATE_ID,UP.MENUOPERATE_CODE, UP.USER_ID, UP.GROUP_FLAG, UP.POSITION_FLAG, UP.ASSIGN_POS_FLAG, UP.DEPARTMENT_FLAG,UP.ASSIGN_DEPT_FLAG,
+        UP.ASSIGN_STAFF_FLAG, UP.NO_RESTRICT_FLAG,UP.DEALER_PERMISSION_FLAG,UP.ASSIGN_CUSTOMPERMISSION_FLAG,UP.ASSIGN_DATAPERMISSION_FLAG,1 as TYPEFLAG, UP.PURVIEW_TYPE as PURVIEWTYPE ,MO.FLOW_KEY as FLOWKEY
+    </sql>
+
+    <!-- condition -->
+    <!-- todo in 换成关联子查询-->
+    <sql id="getFlowPermissionList_where">
+        <where>
+            <if test="purviewType != null and purviewType == 0">
+                FP.FLOW_PERMISSION_TYPE = 'ROLE'
+                AND FP.TYPE_ID IN (SELECT ROLE_ID FROM rbac_roleuser WHERE rbac_roleuser.USER_ID = #{userId})
+            </if>
+            <if test="purviewType != null and purviewType == 1">
+                FP.FLOW_PERMISSION_TYPE = 'USER'
+                <if test="userId != null">
+                	AND FP.TYPE_ID = #{userId}
+           		</if>
+            </if>         
+        </where>
+    </sql>
+
+    <!-- select -->
+<!--    <select id="getFlowPermissionList" resultMap="getFlowPermissionList_map">-->
+<!--        select <include refid="getFlowPermissionList_column"/> FROM rbac_flow_permission FP JOIN rbac_menuoperate MO ON FP.ACTIVITY_CODE = MO.CODE AND FP.FLOW_KEY = MO.FLOW_KEY-->
+<!--        INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID-->
+<!--        <include refid="getFlowPermissionList_where"/>-->
+<!--    </select>-->
+
+    <select id="getUserPermissionList" resultMap="getFlowPermissionList_map">
+        select <include refid="getUserPermissionList_column"/> FROM rbac_userpermission  UP
+        INNER JOIN rbac_menuoperate MO ON UP.MENUOPERATE_ID = MO.ID
+        INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID
+        <where>
+            UP.USER_ID = #{userId}
+            AND UP.CID = #{cid}
+            AND UP.PURVIEW_TYPE = #{purviewType}
+        </where>
+        UNION
+        select <include refid="getFlowPermissionList_column"/> FROM rbac_flow_permission FP JOIN rbac_menuoperate MO ON FP.ACTIVITY_CODE = MO.CODE AND FP.FLOW_KEY = MO.FLOW_KEY
+        INNER JOIN rbac_menuinfo MI ON MO.MENUINFO_ID = MI.ID
+        <include refid="getFlowPermissionList_where"/>
+    </select>
+
+
+
+
+
+</mapper>

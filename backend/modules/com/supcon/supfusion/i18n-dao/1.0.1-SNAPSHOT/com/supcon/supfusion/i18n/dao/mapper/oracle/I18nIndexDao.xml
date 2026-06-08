@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nIndexDao">
+
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nIndexPO" id="supfusionI18nIndexMap">
+        <result property="id" column="id"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleIndexCode" column="module_index_code"/>
+        <result property="valid" column="valid"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+    </resultMap>
+
+
+    <select id="selectByModuleCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nIndexPO">
+        SELECT
+        ID ,
+        MODULE_CODE ,
+        MODULE_INDEX_CODE ,
+        VALID ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        FROM SUPFUSION_I18N_INDEX
+        WHERE MODULE_CODE = #{moduleCode}
+    </select>
+
+
+    <insert id="add" parameterType="com.supcon.supfusion.i18n.dao.po.I18nIndexPO" >
+        INSERT INTO SUPFUSION_I18N_INDEX(
+        ID ,
+        MODULE_CODE ,
+        MODULE_INDEX_CODE ,
+        VALID ,
+        CREATOR ,
+        CREATE_TIME ,
+        MODIFY_TIME )
+        VALUES(
+        #{id},
+        #{moduleCode},
+        #{moduleIndexCode},
+        #{valid},
+        #{creator},
+        #{createTime},
+        #{modifyTime})
+    </insert>
+
+    <delete id="deleteByModuleCode">
+        DELETE FROM SUPFUSION_I18N_INDEX WHERE MODULE_CODE= #{moduleCode}
+    </delete>
+
+
+    <update id="updateByModuleIndexCode" parameterType="com.supcon.supfusion.i18n.dao.po.I18nIndexPO">
+        UPDATE SUPFUSION_I18N_INDEX
+        <set>
+            <if test="moduleIndexCode != null">MODULE_INDEX_CODE = #{moduleIndexCode},</if>
+            <if test="valid != null">VALID = #{valid},</if>
+            <if test="createTime != null">CREATE_TIME = #{createTime},</if>
+            <if test="modifyTime != null">MODIFY_TIME = #{modifyTime}</if>
+        </set>
+        WHERE MODULE_CODE = #{moduleCode}
+    </update>
+
+    <select id="queryAllModuleCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nIndexPO">
+        SELECT
+        ID ,
+        MODULE_CODE ,
+        MODULE_INDEX_CODE ,
+        VALID ,
+        CREATE_TIME ,
+        MODIFY_TIME
+        FROM SUPFUSION_I18N_INDEX
+    </select>
+
+</mapper>

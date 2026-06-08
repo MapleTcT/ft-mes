@@ -1,0 +1,8 @@
+id,version,serialVersionUID,createStaffId,modifyStaffId,deleteStaffId,createStaff,modifyStaff,deleteStaff,
+createTime,modifyTime,deleteTime,valid,cid,entityCode,tableInfoId,groupId,parent,children,layRec,layNo,parentId,type,
+value,attribute,memo,sort,defaultFlag,oa,tableInfoId,createDepartmentId,createPositionId,tableNo,positionLayRec,
+ownerStaffId,ownerPositionId,ownerDepartmentId,effectStaffId,effectTime,status,ownerStaff,ownerDepartment,ownerPosition,
+createPosition,effectStaff,shortName,address,postcode,tableInfoId,company,files,Order, Staff, CompanyStaff, Department, DepartmentWork,
+Document, Group, GroupMember, International, Message, Position, PositionWork, Role, RoleUser, User, SystemCode, SystemEntity,documents,
+approval,attachment-init,initImport,importxls,downLoad,loadXMLRefOrData,dealInfo-list,delete,bulkSubmit,retrial,mneClient,
+fileName,event,top,leaf,ids,model,tree

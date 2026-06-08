@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nResourceDao">
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" id="supfusionI18nResourceMap">
+        <result property="id" column="id"/>
+        <result property="i18nKey" column="i18n_key"/>
+        <result property="i18nValue" column="i18n_value"/>
+        <result property="languCode" column="langu_code"/>
+        <result property="moduleCode" column="module_code"/>
+        <result property="moduleVersionCode" column="module_version_code"/>
+        <result property="valid" column="valid"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+    </resultMap>
+
+
+    <insert id="saveBatch" parameterType="list">
+        insert into supfusion_i18n_resource (
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time )
+        values
+        <foreach collection="list" item="item" separator=",">
+            ( #{item.id},
+            #{item.i18nKey},
+            #{item.i18nValue},
+            #{item.languCode},
+            #{item.moduleCode},
+            #{item.moduleVersionCode},
+            #{item.valid},
+            #{item.creator},
+            #{item.modifier},
+            #{item.createTime},
+            #{item.modifyTime}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateByI18nKeyAndValidOne" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        update supfusion_i18n_resource
+        <set>
+            <if test="modifyTime != null">modify_time = #{modifyTime}</if>
+        </set>
+        where i18n_key = #{i18nKey} and valid = '1'
+    </update>
+
+
+
+    <!--查询语句-->
+    <select id="selectByKeyAndValueAndLanguageCount" resultType="int">
+        select
+        count( i18n_key )
+        from (
+        select
+        i18n_key
+        from supfusion_i18n_resource
+        WHERE 1=1 and valid = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        </if>
+        <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+            AND langu_code = #{langu_code} AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        </if>
+        group by i18n_key ) AS T2
+    </select>
+    <select id="selectKeyByKeyAndValueAndLanguage" resultType="string">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        </if>
+        <if test="langu_code != null and langu_code.trim() != '' and i18n_value != null and i18n_value.trim() != '' ">
+            AND langu_code = #{langu_code} AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        </if>
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ORDER BY supfusion_i18n_resource.modify_time DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="selectByKeyOrValueCount" resultType="int">
+        select
+        count( i18n_key )
+        from (
+        select
+        i18n_key
+        from supfusion_i18n_resource
+        WHERE 1=1 and valid = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        </if>
+        <if test=" i18n_value != null and i18n_value.trim() != '' ">
+            AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        </if>
+        group by i18n_key ) AS T2
+    </select>
+
+    <select id="selectByKeyOrValue" resultType="string">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        <if test="i18n_key != null and i18n_key.trim() != ''">
+            AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        </if>
+        <if test="i18n_value != null and i18n_value.trim() != '' ">
+            AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        </if>
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ORDER BY supfusion_i18n_resource.modify_time DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="selectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        SELECT
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time
+        FROM
+        supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource .valid = '1'
+        AND i18n_key in
+        <foreach item="i18n_key" collection="list" open="(" separator="," close=")">
+            #{i18n_key}
+        </foreach>
+    </select>
+
+
+    <select id="getAllNeedI18nKeyByModuleCodeAndLanguCode" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        select
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid
+        from supfusion_i18n_resource
+        WHERE 1=1
+        <if test="moduleCode != null and moduleCode.trim() != ''  and  languCode != null and languCode.trim() != ''">
+            AND module_code = #{moduleCode} and langu_code = #{languCode} and valid = '1'
+        </if>
+    </select>
+
+
+    <select id="selectByKeys" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="or" close=")">
+            i18n_key LIKE concat('%',#{i18n_key},'%')
+        </foreach>
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ORDER BY supfusion_i18n_resource.modify_time DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="selectByKeysCount" resultType="int" parameterType="map">
+        select
+        count( i18n_key )
+        from (
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="or" close=")">
+            i18n_key LIKE concat('%',#{i18n_key},'%')
+        </foreach>
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ) AS T2
+    </select>
+
+
+    <select id="selectKeysByKeys" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND i18n_key in
+        <foreach item="i18n_key" collection="i18nKeys" open="(" separator="," close=")">
+            #{i18n_key}
+        </foreach>
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ORDER BY supfusion_i18n_resource.modify_time DESC
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="selectByOneKeyAndValues" resultType="java.lang.String" parameterType="map">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        <if test="i18nKey != null and i18nKey.trim() != ''">
+            AND i18n_key LIKE concat('%',#{i18nKey},'%')
+        </if>
+        <if test="languCode != null and languCode.trim() != ''">
+            AND langu_code = #{languCode}
+        </if>
+        AND
+        <foreach item="i18n_value" collection="i18nValues" open="(" separator="or" close=")">
+            i18n_value LIKE concat('%',#{i18n_value},'%')
+        </foreach>
+        GROUP BY supfusion_i18n_resource .i18n_key
+    </select>
+
+
+    <select id="queryKeyByKeyCount" resultType="int" parameterType="map">
+        SELECT count(i18n_key) FROM
+        (
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        GROUP BY supfusion_i18n_resource .i18n_key
+        ) AS t
+    </select>
+    <select id="queryKeyByKey" resultType="string" parameterType="map">
+        SELECT i18n_key
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND i18n_key LIKE concat('%',#{i18n_key},'%')
+        GROUP BY supfusion_i18n_resource .i18n_key
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+    <select id="queryValueByValueCount" resultType="int" parameterType="map">
+        SELECT count(i18n_value) FROM
+        (
+        SELECT i18n_value
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND langu_code = #{langu_code}
+        AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        ) AS t
+    </select>
+    <select id="queryValueByValue" resultType="string" parameterType="map">
+        SELECT i18n_value
+        FROM supfusion_i18n_resource
+        WHERE
+        supfusion_i18n_resource . valid = '1'
+        AND langu_code = #{langu_code}
+        AND i18n_value LIKE concat('%',#{i18n_value},'%')
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="selectByOneKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        select
+        id ,
+        i18n_key ,
+        langu_code ,
+        i18n_value
+        from supfusion_i18n_resource
+        WHERE 1=1
+        <if test="i18nKey != null ">
+            AND i18n_key = #{i18nKey} and valid = '1'
+        </if>
+    </select>
+    <select id="queryObjectByKey" resultType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO" parameterType="string">
+        select
+        id ,
+        i18n_key ,
+        i18n_value ,
+        langu_code ,
+        module_code ,
+        module_version_code ,
+        valid ,
+        creator ,
+        modifier ,
+        create_time ,
+        modify_time
+        from supfusion_i18n_resource
+        WHERE 1=1
+        <if test="key != null and key.trim() != '' ">
+            AND i18n_key = #{key} and valid = '1'
+        </if>
+    </select>
+
+
+    <delete id="deleteOneByKeyAndLanguCode" parameterType="com.supcon.supfusion.i18n.dao.po.I18nResourcePO">
+        delete from supfusion_i18n_resource
+        where
+        i18n_key = #{i18nKey}
+        and langu_code = #{languCode}
+    </delete>
+
+
+    <delete id="deleteByIdList" parameterType="list">
+        delete from supfusion_i18n_resource
+        where
+        id in (
+        <foreach collection="list" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="deleteListByKeyAndLanguage">
+        delete from supfusion_i18n_resource
+        where
+        i18n_key in (
+        <foreach collection="keys" item="item" index="index" separator=",">
+            #{item}
+        </foreach>
+        )
+        and langu_code = #{language}
+        and module_code = #{moduleCode}
+    </delete>
+</mapper>

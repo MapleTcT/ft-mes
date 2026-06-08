@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?> <process name="simple" systemVersion="4.50.0.00" xmlns="http://jbpm.org/4.4/jpdl" lastModify="2019-05-24 09:12">
+  <description text="简单流程">
+  </description>
+  <start desc="开始活动" g="715,363,40,40"  ignorePermission="false">
+  </start>
+  <end  desc="结束活动" g="1139,363,40,40"  effectFlag="true">
+  </end>
+ </process>

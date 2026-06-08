@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jbpm-configuration>
+
+	<import resource="jbpm44.default.cfg.xml" />
+
+	<import resource="jbpm44.tx.spring.cfg.xml" />
+	<import resource="jbpm44.jpdl.cfg.xml" />
+	<!--<import resource="jbpm44.identity.cfg.xml" /> -->
+	</jbpm-configuration>

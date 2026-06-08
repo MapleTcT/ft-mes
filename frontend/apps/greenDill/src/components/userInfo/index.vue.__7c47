@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"m-user-info list-bt list-space list-flex",style:(_vm.showOrHidePanel())},[_c('span',{staticClass:"ml_name"},[_vm._v(_vm._s(_vm.info.userName))]),_vm._v(" "),_c('span',{staticClass:"ml_time"},[_vm._v(_vm._s(_vm.info.createTime))]),_vm._v(" "),[(_vm.info.position)?_c('label',{attrs:{"id":"selectPositionShow"}},[_vm._v(_vm._s(_vm.info.position))]):_c('label',{attrs:{"id":"selectPositionShow"},on:{"click":_vm.showPickPos}},[_vm._v(_vm._s(_vm.pickPos.value))]),_vm._v(" "),_c('input',{attrs:{"type":"hidden","id":"selectPositionGet","value":""}}),_vm._v(" "),(_vm.showUserPickpos && !_vm.isReadOnly)?_c('a',{staticClass:"m_dropdown",on:{"click":_vm.showPickPos}}):_vm._e()],_vm._v(" "),(_vm.showUserPickpos && !_vm.isReadOnly)?_c('custom-picker',{attrs:{"name":_vm.pickPos.name,"isShow":_vm.pickPos.isShow,"slots":_vm.pickPos.slots,"value":_vm.pickPos.value},on:{"pickercallback":_vm.pickerPosEvent}}):_vm._e()],2)}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-1e288e21","hasScoped":false,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/userInfo/index.vue
+// module id = null
+// module chunks = 

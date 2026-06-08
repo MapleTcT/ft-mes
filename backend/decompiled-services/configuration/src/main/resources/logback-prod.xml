@@ -1,0 +1,66 @@
+<included>
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logHome}/appConfig.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logHome}/%d{yyyy-MM-dd}/appConfig.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>200MB</maxFileSize>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file"/>
+    </root>
+
+    <logger name="com.netflix" level="ERROR"/>
+
+    <logger name="org.springframework" level="ERROR"/>
+    <logger name="org.hibernate.validator" level="ERROR"/>
+    <logger name="org.apache.ibatis" level="ERROR"/>
+    <logger name="org.apache.http.impl.conn" level="ERROR"/>
+
+    <logger name="io.fabric8.kubernetes" level="ERROR"/>
+
+
+    <appender name="CONFIGURATION_UPLOAD_FULL_LOG_FILE" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>uploadTask</Key>
+            <DefaultValue>ec</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="${uploadTask}_FULL_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+                <file>${logHome}/appUpload/${uploadTask}-full.log</file>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <Pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] %-28.28thread %-5level %logger{80} - %msg %ex%n</Pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+    <appender name="CONFIGURATION_UPLOAD_LOG_FILE" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>uploadTask</Key>
+            <DefaultValue>ec</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="${uploadTask}_FULL_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+                <file>${logHome}/appUpload/${uploadTask}.log</file>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <Pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] - %msg %ex%n</Pattern>
+                </encoder>
+            </appender>
+        </sift>
+    </appender>
+    <logger name="configuration.upload" additivity="false" level="INFO">
+        <appender-ref ref="CONFIGURATION_UPLOAD_LOG_FILE" />
+    </logger>
+
+    <logger name="configuration.upload.full" additivity="false" level="INFO">
+        <appender-ref ref="CONFIGURATION_UPLOAD_FULL_LOG_FILE" />
+    </logger>
+
+</included>

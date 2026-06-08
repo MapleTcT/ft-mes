@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>notification-sms-jincang</artifactId>
+        <groupId>com.supcon.supfusion.notification</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>sms-config</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.supcon.supfusion.notification</groupId>
+            <artifactId>sms-common</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.notification</groupId>
+            <artifactId>notification-protocol</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.supcon.supfusion.framework.boot</groupId>
+            <artifactId>cloud-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>cloud-boot-i18n-autoconfigure</artifactId>
+                    <groupId>com.supcon.supfusion.framework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>cloud-i18n</artifactId>
+                    <groupId>com.supcon.supfusion.framework</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+</project>

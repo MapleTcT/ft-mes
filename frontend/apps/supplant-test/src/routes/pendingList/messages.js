@@ -1,0 +1,31 @@
+import { defineMessages } from 'react-intl';
+
+export default defineMessages({
+  rowIndex: '序号',
+  processName: '流程名称',
+  taskName: '活动名称',
+  count: '待办条数',
+  staff: '用户',
+  currestActivity: '当前活动',
+  assignor: '委托人',
+  tableNo: '单据编号',
+  initiator: '制单人',
+  search: '查询',
+  clear: '清空',
+  byGroup: '按分类',
+  activity: '活动',
+  process: '流程',
+  byTime: '按时间',
+  today: '今天',
+  threeDays: '3天内',
+  sevenDays: '7天内',
+  thisMonth: '本月',
+  lastMonth: '上月',
+  inThreeMonths: '三月内',
+  outOfThreeMonths: '三月外',
+  byType: '按类型',
+  all: '全部',
+  normal: '常规',
+  assign: '委托',
+  noFlow: '工作流不存在!'
+});

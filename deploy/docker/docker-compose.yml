@@ -1,0 +1,328 @@
+x-app-env: &app-env
+  TZ: ${TZ:-Asia/Shanghai}
+  SPRING_PROFILES_ACTIVE: prod
+  NACOS_HOST: nacos
+  NACOS_PORT: "8848"
+  nacos: nacos
+  SUPOS_NACOS_ADDRESS: ${SUPOS_NACOS_ADDRESS:-nacos:8848}
+  SUPOS_NACOS_USERNAME: ${SUPOS_NACOS_USERNAME:-nacos}
+  SUPOS_NACOS_PASSWORD: ${SUPOS_NACOS_PASSWORD:-nacos}
+  SUPOS_NACOS_REGISTRY_GROUP: ${SUPOS_NACOS_REGISTRY_GROUP:-prod}
+  CLOUD_DISCOVERY_GROUP: ${CLOUD_DISCOVERY_GROUP:-prod}
+  I18N_HOST: ${I18N_HOST:-i18n}
+  I18N_PORT: ${I18N_PORT:-8080}
+  SUPOS_ADDRESS: ${SUPOS_ADDRESS:-http://10.11.100.17:18080}
+  SUPOS_SYSTEM_DB_TYPE: ${SUPOS_SYSTEM_DB_TYPE:-postgresql}
+  SUPOS_SYSTEM_DB_NAME: ${SUPOS_SYSTEM_DB_NAME:-adp}
+  SUPOS_SYSTEM_DB_HOST: ${SUPOS_SYSTEM_DB_HOST:-postgres}
+  SUPOS_SYSTEM_DB_PORT: ${SUPOS_SYSTEM_DB_PORT:-5432}
+  SUPOS_SYSTEM_DB_USERNAME: ${SUPOS_SYSTEM_DB_USERNAME:-adp}
+  SUPOS_SYSTEM_DB_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-adp123456}
+  VALIDATIONQUERYSQL: ${VALIDATIONQUERYSQL:-SELECT 1}
+  SUPOS_REDIS_HOST: ${SUPOS_REDIS_HOST:-redis}
+  SUPOS_REDIS_PORT: ${SUPOS_REDIS_PORT:-6379}
+  SUPOS_KAFKA_BROKERS: ${SUPOS_KAFKA_BROKERS:-kafka:9092}
+  SUPOS_ZOOKEEPER_NODES: ${SUPOS_ZOOKEEPER_NODES:-zookeeper:2181}
+  SUPOS_MINIO_ENDPOINT: ${SUPOS_MINIO_ENDPOINT:-http://minio:30200}
+  SUPOS_MINIO_ACCESS_KEY: ${SUPOS_MINIO_ACCESS_KEY:-adpminio}
+  SUPOS_MINIO_SECRET_KEY: ${SUPOS_MINIO_SECRET_KEY:-adpminio123}
+  MONGO_USERNAME: ${MONGO_USERNAME:-root}
+  MONGO_PASSWORD: ${MONGO_PASSWORD:-adpmongo123}
+  MONGO_HOST: ${MONGO_HOST:-mongo}
+  MONGO_PORT: ${MONGO_PORT:-27017}
+  MONGO_DBNAME: ${MONGO_DBNAME:-supfusion}
+  MONGO_AUTH_DBNAME: ${MONGO_AUTH_DBNAME:-admin}
+  ADP_PUBLIC_HOST: ${ADP_PUBLIC_HOST:-10.11.100.17}
+  ADP_HTTP_PORT: ${ADP_HTTP_PORT:-18080}
+  JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+  JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai
+  "db-type": ${SUPOS_SYSTEM_DB_TYPE:-postgresql}
+
+x-java-service: &java-service
+  image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+  restart: unless-stopped
+  working_dir: /opt/adp
+  environment: *app-env
+  volumes:
+    - ../../runtime/bap-server:/opt/adp/bap-server
+    - ../../runtime/postgres-sql:/opt/adp/sql:ro
+    - ../../runtime/bap-server/assembly/repository/maven/org/postgresql/postgresql/42.2.8/postgresql-42.2.8.jar:/opt/adp/drivers/postgresql.jar:ro
+    - ../../runtime/logs:/opt/adp/logs
+    - ./scripts/run-service.sh:/opt/adp/bin/run-service.sh:ro
+  depends_on:
+    nacos:
+      condition: service_started
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    kafka:
+      condition: service_started
+    mongo:
+      condition: service_started
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-m.daocloud.io/docker.io/library/postgres:15-alpine}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-adp}
+      POSTGRES_USER: ${POSTGRES_USER:-adp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-adp123456}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-adp} -d ${POSTGRES_DB:-adp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: ${REDIS_IMAGE:-m.daocloud.io/docker.io/library/redis:6-alpine}
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  zookeeper:
+    image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+    restart: unless-stopped
+    working_dir: /opt/adp/bap-server/assembly/zookeeper
+    command:
+      - sh
+      - -c
+      - mkdir -p ../tmp/zookeeper /opt/adp/logs/zookeeper && java -Dzookeeper.log.dir=/opt/adp/logs/zookeeper -cp "zookeeper-3.4.10.jar:lib/*:conf" org.apache.zookeeper.server.quorum.QuorumPeerMain conf/zoo.cfg
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ../../runtime/bap-server:/opt/adp/bap-server
+      - ../../runtime/logs:/opt/adp/logs
+
+  kafka:
+    image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+    restart: unless-stopped
+    working_dir: /opt/adp/bap-server/assembly/kafka_2
+    command:
+      - sh
+      - -c
+      - mkdir -p /opt/adp/kafka-data /opt/adp/logs/kafka && chmod +x bin/*.sh && exec bin/kafka-server-start.sh config/server.properties --override zookeeper.connect=zookeeper:2181 --override listeners=PLAINTEXT://:9092 --override advertised.listeners=PLAINTEXT://kafka:9092 --override log.dirs=/opt/adp/kafka-data
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ../../runtime/bap-server:/opt/adp/bap-server
+      - ../../runtime/logs:/opt/adp/logs
+      - kafka-data:/opt/adp/kafka-data
+    depends_on:
+      - zookeeper
+
+  mongo:
+    image: ${MONGO_IMAGE:-m.daocloud.io/docker.io/library/mongo:4.4}
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-adpmongo123}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - mongo-data:/data/db
+
+  nacos:
+    image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+    restart: unless-stopped
+    working_dir: /opt/adp/bap-server/assembly/nacos-1.2.1
+    command:
+      - sh
+      - -c
+      - mkdir -p logs && exec java -Xms256m -Xmx512m -Xmn128m -Dnacos.standalone=true -jar target/nacos-server.jar
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${ADP_NACOS_PORT:-18848}:8848"
+    volumes:
+      - ../../runtime/bap-server:/opt/adp/bap-server
+
+  nacos-config:
+    image: ${CURL_IMAGE:-m.daocloud.io/docker.io/curlimages/curl:8.17.0}
+    restart: "no"
+    working_dir: /work
+    environment: *app-env
+    volumes:
+      - ./nacos-rendered:/work/nacos-rendered:ro
+      - ./scripts/publish-nacos-configs.sh:/work/publish-nacos-configs.sh:ro
+    entrypoint: ["/bin/sh", "/work/publish-nacos-configs.sh"]
+    depends_on:
+      - nacos
+
+  keycloak:
+    image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
+    restart: unless-stopped
+    working_dir: /opt/keycloak
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    command: ["sh", "-c", "mkdir -p /opt/jboss && ln -sfn /opt/keycloak /opt/jboss/keycloak && chmod +x /opt/keycloak/bin/*.sh && (/opt/keycloak/bin/add-user-keycloak.sh -u \"$${KEYCLOAK_USER:-admin}\" -p \"$${KEYCLOAK_PASSWORD:-admin}\" || true) && exec /opt/keycloak/bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 -Dnacos.address=nacos:8848 -Dnacos.group=prod -Dauthkeycloak.port=8080"]
+    volumes:
+      - ../../runtime/bap-server/assembly/keycloak-10.0.1:/opt/keycloak
+
+  minio:
+    image: ${MINIO_IMAGE:-m.daocloud.io/docker.io/minio/minio:latest}
+    restart: unless-stopped
+    command: ["server", "/data", "--address", ":30200", "--console-address", ":30201"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-adpminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-adpminio123}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - minio-data:/data
+
+  websocket:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/websocket/supfusion-websocket.jar", "com.supcon.supfusion.ws.Application", "--nacos.server-addr=nacos:8848"]
+
+  i18n:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/i18n/supfusion-i18n.jar"]
+    networks:
+      default:
+        aliases:
+          - i18n-service
+
+  sysmanagement:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar"]
+
+  basicmanagement:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/basicmanagement/supfusion-basicmanagement.jar"]
+
+  orgmanagement:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/orgmanagement/supfusion-orgmanagement.jar"]
+
+  iam:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/iam/supfusion-iam.jar"]
+    depends_on:
+      keycloak:
+        condition: service_started
+      nacos:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  gateway:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/gateway/supos-gateway.jar"]
+    ports:
+      - "${ADP_GATEWAY_PORT:-18008}:8008"
+    depends_on:
+      keycloak:
+        condition: service_started
+      nacos:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  license:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/license/supfusion-license.jar"]
+
+  configuration:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/configuration/supfusion-configuration.jar"]
+
+  operatetools:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/operatetools/supfusion-operatetools.jar"]
+
+  baseService:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/baseService/supfusion-baseservice.jar"]
+
+  flow:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/flow/supfusion-flow.jar"]
+
+  notification-admin:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-admin/notification-admin.jar"]
+
+  notification-apiserver:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-apiserver/notification-apiserver.jar"]
+
+  notification-engine:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-engine/notification-engine.jar"]
+
+  fileServer:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/fileServer/supfusion-file-server.jar"]
+    depends_on:
+      minio:
+        condition: service_started
+      nacos:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  task-scheduler:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/task-scheduler/supfusion-task-scheduler-service.jar"]
+
+  customProperty:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/customProperty/custom-property.jar"]
+
+  notification-app:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-app/notification-app.jar"]
+
+  notification-mobile:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-mobile/notification-mobile.jar"]
+
+  notification-sms-jincang:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar"]
+
+  printer:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/printer/supfusion-printer.jar"]
+
+  auditlog:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/auditlog/supfusion-auditlog.jar"]
+
+  nginx:
+    image: ${NGINX_IMAGE:-m.daocloud.io/docker.io/library/nginx:1.24.0}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${ADP_HTTP_PORT:-18080}:8080"
+    volumes:
+      - ../../runtime/bap-server/bap-workspace/bap-static:/usr/share/nginx/html:ro
+      - ./nginx/adp.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - gateway
+
+volumes:
+  postgres-data:
+  redis-data:
+  kafka-data:
+  mongo-data:
+  minio-data:

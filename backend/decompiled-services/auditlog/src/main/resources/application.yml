@@ -1,0 +1,85 @@
+management:
+  health:
+    db:
+      enabled: false
+spring:
+  messages:
+    basename: i18n/auditlog
+  application:
+    name: auditlog
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+  data:
+    mongodb:
+      authentication-database: ${MONGO_AUTH_DBNAME:admin}
+      database: ${MONGO_DBNAME:supfusion}
+      uri: mongodb://${MONGO_USERNAME:root}:${MONGO_PASSWORD:Supcon1304}@${MONGO_HOST:127.0.0.1}:${MONGO_PORT:27017}
+server:
+  port: 38679
+  servlet:
+    context-path: /
+supfusion:
+  cloud:
+    i18n:
+      enabled: true
+#      host: http://192.168.91.200:30130
+      host: http://i18n-service:8080
+      basename: i18n/
+      locale-modules:
+        - auditlog
+      module-versions:
+        - auditlog202012021519
+      modules:
+        - auditlog
+      use-get-all-module: true
+    jwt:
+      enabled: ${SUPOS_JWT_ENABLED:true}
+      expiration: 604800
+      header: ${SUPOS_JWT_HEADER:Authorization}
+      secret: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkvoXs7oFBaeUS+I6Ha1SFbz4owQP4YZ0af/ujDAj0BWbHBbGQXbOwSr/Kw6eFPzxz2BfQTvrtaAtAoo5//ZS6S8wsGfXnwSkkXyMYrye+OJfsCGHv0FfSbSvfs6Agp+8E9A/ScB/fL/kMvvVxvr+1LeXr8Kc4R5woydaHto4CjD6ix7Jbfaq+UVS7RT2TE+TGBjpbcUfxceygVaX8lt7s48z0dcwg8gJEk4MwIVCC5iA44tZS3bXBLBUaZsx4VC5dK+4c5PXNDADWHXKF2w+U70MoB5vSR5RzADWO5slQf2h3Vt2Hb7cFPdhGBoWzrTfmdzRM+Kii8bfLxrYpz2WQIDAQAB
+      symmetric: false
+      tokenHead: ${SUPOS_JWT_HEADER_TOKEN:Bearer}
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:localhost:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+    datasource:
+      connect:
+        use-system: ${SUPOS_SYSTEM_DB_USE:true}
+        system:
+          db-type: ${SUPOS_SYSTEM_DB_TYPE:mariadb}
+          db-name: ${SUPOS_SYSTEM_DB_NAME:adp200_2}
+          host: ${SUPOS_SYSTEM_DB_HOST:192.168.91.189}
+          port: ${SUPOS_SYSTEM_DB_PORT:3306}
+          username: ${SUPOS_SYSTEM_DB_USERNAME:root}
+          password: ${SUPOS_SYSTEM_DB_PASSWORD:123456}
+      druid:
+        init-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        min-pool-size: ${SUPOS_DS_MIN_POOL_SIZE:1}
+        max-pool-size: ${SUPOS_DS_MAX_POOL_SIZE:10}
+      script:
+        script-root-dirs: classpath*:META-INF/
+    tenant:
+      sync-cache: ${SUPOS_TENANT_SYNC_CACHE:false}
+      init-getter: ${SUPOS_TENANT_INIT_GETTER:false}
+  swagger:
+    enable: false
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.auditlog.dao.po
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+org-type: single

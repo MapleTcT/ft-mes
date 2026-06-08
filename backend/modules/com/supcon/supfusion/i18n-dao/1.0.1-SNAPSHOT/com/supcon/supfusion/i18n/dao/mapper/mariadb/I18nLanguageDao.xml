@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.i18n.dao.I18nLanguageDao">
+
+    <resultMap type="com.supcon.supfusion.i18n.dao.po.I18nLanguagePO" id="supfusionI18nLanguageMap">
+        <result property="id" column="id"/>
+        <result property="languCode" column="langu_code"/>
+        <result property="languType" column="langu_type"/>
+        <result property="languName" column="langu_name"/>
+        <result property="hasUsed" column=" has_used"/>
+        <result property="valid" column="valid"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="creator" column="creator"/>
+        <result property="modifier" column="modifier"/>
+    </resultMap>
+
+    <update id="updateByLanguageCode" parameterType="com.supcon.supfusion.i18n.dao.po.I18nLanguagePO">
+        update supfusion_i18n_language
+        <set>
+            <if test="languCode != null">langu_code = #{languCode},</if>
+            <if test="languType != null">langu_type = #{languType},</if>
+            <if test="languName != null">langu_name = #{languName},</if>
+            <if test=" hasUsed != null">has_used = #{ hasUsed},</if>
+            <if test="valid != null">valid = #{valid},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="modifyTime != null">modify_time = #{modifyTime},</if>
+            <if test="modifier != null">modifier = #{modifier}</if>
+        </set>
+        where 1=1
+        AND langu_code = #{languCode}
+    </update>
+    <delete id="delete">
+        delete from supfusion_i18n_language where id = #{value}
+    </delete>
+</mapper>

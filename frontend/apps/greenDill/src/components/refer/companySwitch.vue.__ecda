@@ -1,0 +1,11 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{class:(_vm.prefix + "-panel")},[_c('div',{class:(_vm.prefix + "-tit"),on:{"click":_vm.togglePanel}},[_c('span',[_vm._v(_vm._s(_vm.showName))]),_vm._v(" "),_c('i',{class:(_vm.prefix + "-drop-icon")})]),_vm._v(" "),_c('div',{class:(_vm.prefix + "-option-panel " + _vm.showOption)},[_c('ul',_vm._l((_vm.options),function(list,index){return (_vm.options.length)?_c('li',{key:list.id,class:(_vm.prefix + "-option-item " + (list.id === _vm.currentId?'active':'')),on:{"click":function($event){return _vm.checkItem(list)}}},[_vm._v("\n          "+_vm._s(list.shortName)+"\n        ")]):_vm._e()}),0)])]),_vm._v(" "),_c('div',{class:(_vm.prefix + "-mask " + _vm.showOption),on:{"click":_vm.togglePanel}})])}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-5cd9496f","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/refer/companySwitch.vue
+// module id = null
+// module chunks = 

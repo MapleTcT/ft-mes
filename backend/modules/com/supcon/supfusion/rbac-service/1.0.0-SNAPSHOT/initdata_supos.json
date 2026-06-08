@@ -1,0 +1,4250 @@
+{
+  "version": 42,
+  "initBaseData": [
+    {
+      "code": "collectionStation",
+      "name": "rbac.MENU_NAME_COLLECTION_STATION",
+      "nameDisplay": "采集节点管理",
+      "app": "rbac",
+      "cid": 1000,
+      "sort": 1,
+      "cssClass": "icon_collect_nav",
+      "showType": 1,
+      "memo": "采集节点管理"
+    },
+    {
+      "name": "rbac.MENU_NAME_ACCEPT_MANAGE",
+      "nameDisplay": "鉴权管理",
+      "code": "acceptManage",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "collectionStation",
+      "showType": 1,
+      "route": "/design/collector/acceptm",
+      "url": "/dlake/#/device-accept",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_STATUS_MANAGE",
+      "nameDisplay": "状态管理",
+      "code": "collectionMange",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "collectionStation",
+      "showType": 1,
+      "route": "/design/collector/manage",
+      "url": "/dlake/#/status-manage",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_OBJECT_TEMPLATE_MANAGER",
+      "nameDisplay": "对象模型管理",
+      "code": "objectTemplateManage",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "sort": 2,
+      "route": "/design/object-template-mgr",
+      "url": "/project/oodm/#/factory/template",
+      "cssClass": "icon_model_nav",
+      "menuOperates": []
+    },
+    {
+      "code": "organization",
+      "name": "rbac.MENU_NAME_ORGANIZATION",
+      "nameDisplay": "企业组织架构",
+      "app": "rbac",
+      "cid": 1000,
+      "sort": 3,
+      "cssClass": "icon_organize_nav",
+      "showType": 1,
+      "memo": "企业组织架构"
+    },
+    {
+      "name": "rbac.MENU_NAME_ORGANIZATION_COMPANY",
+      "nameDisplay": "公司管理",
+      "code": "organizationcompany",
+      "app": "organization",
+      "cid": 1000,
+      "parentCode": "organization",
+      "showType": 1,
+      "route": "/design/organization/companyManage",
+      "url": "/organization/#/company",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_COMPANIES",
+          "code": "companies",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "companies",
+              "url": "/inter-api/organization/v1/companies",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "companies",
+              "url": "/inter-api/organization/v1/companies/sub",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "companies",
+              "url": "/inter-api/organization/v1/company/{id}",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_COMPANY",
+          "code": "addCompany",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addCompany",
+              "url": "/inter-api/organization/v1/company",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addCompany",
+              "url": "/inter-api/organization/v1/companies",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addCompany",
+              "url": "/inter-api/organization/v1/companies/sub",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addCompany",
+              "url": "/inter-api/organization/v1/company/{id}",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_UPDATE_COMPANY",
+          "code": "updateCompany",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "updateCompany",
+              "url": "/inter-api/organization/v1/company",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateCompany",
+              "url": "/inter-api/organization/v1/companies",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateCompany",
+              "url": "/inter-api/organization/v1/companies/sub",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateCompany",
+              "url": "/inter-api/organization/v1/company/{id}",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DEL_COMPANY",
+          "code": "delCompany",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "delCompany",
+              "url": "/inter-api/organization/v1/company/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "delCompany",
+              "url": "/inter-api/organization/v1/companies",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "delCompany",
+              "url": "/inter-api/organization/v1/companies/sub",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "delCompany",
+              "url": "/inter-api/organization/v1/company/{id}",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_ORGANIZATION_MANAGE",
+      "nameDisplay": "组织管理",
+      "code": "organizationmanage",
+      "app": "organization",
+      "cid": 1000,
+      "parentCode": "organization",
+      "showType": 1,
+      "route": "/design/organization/organizationManage",
+      "url": "/organization/#/organizationmanage",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_IMPORT_ORG",
+          "code": "importOrg",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/excel/template",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importOrg",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_IMPORT_POS",
+          "code": "importPos",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/excel/template",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPos",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_DEPARTMENT",
+          "code": "addDepartment",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addDepartment",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_UPDATE_DEPARTMENT",
+          "code": "updateDepartment",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/department/location",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateDepartment",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_DEP",
+          "code": "deleteDep",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/department/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteDep",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_GET_DEP_TREE",
+          "code": "getDepTree",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "getDepTree",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_POSITION",
+          "code": "addPosition",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPosition",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_POS",
+          "code": "deletePos",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePos",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_UPDATE_POS",
+          "code": "updatePos",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/location",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/role",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/departments",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/department/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/department",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/positions",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/keyword",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePos",
+              "url": "/inter-api/organization/v1/position",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_PERSON_MANAGE",
+      "nameDisplay": "人员管理",
+      "code": "personmanage",
+      "app": "organization",
+      "cid": 1000,
+      "parentCode": "organization",
+      "showType": 1,
+      "route": "/design/organization/personManage",
+      "url": "/organization/#/personmanage",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_PERSON",
+          "code": "addPerson",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addPerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPerson",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPerson",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addPerson",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_UPDATE_PERSON",
+          "code": "updatePerson",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/person/modify/page",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updatePerson",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_PERSON",
+          "code": "deletePerson",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deletePerson",
+              "url": "/inter-api/organization/v1/person/{id}",
+              "app": "organization",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePerson",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePerson",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deletePerson",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_IMPORT_PERSON",
+          "code": "importPerson",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/excel/template",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importPerson",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_OFF_POSITION",
+          "code": "offPosition",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "offPosition",
+              "url": "/inter-api/organization/v1/person/off/position",
+              "app": "organization",
+              "methodType":1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "offPosition",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "offPosition",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "offPosition",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "offPosition",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_TRANSFER_POSITION",
+          "code": "transferPosition",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "transferPosition",
+              "url": "/inter-api/organization/v1/person/transfer/position",
+              "app": "organization",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "transferPosition",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "transferPosition",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "transferPosition",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "transferPosition",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_PERSON_MANAGER",
+          "code": "querypersonManager",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "querypersonManager",
+              "url": "/inter-api/organization/v1/department/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "querypersonManager",
+              "url": "/inter-api/organization/v1/position/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "querypersonManager",
+              "url": "/inter-api/organization/v1/person",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "querypersonManager",
+              "url": "/inter-api/organization/v1/excel",
+              "app": "organization",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "user",
+      "name": "rbac.MENU_NAME_USER",
+      "app": "rbac",
+      "cid": 1000,
+      "sort": 4,
+      "cssClass": "icon_safe_nav",
+      "showType": 1,
+      "memo": "用户安全管理"
+    },
+    {
+      "name": "rbac.MENU_NAME_AUTH",
+      "nameDisplay": "用户管理",
+      "code": "auth",
+      "app": "authentication",
+      "cid": 1000,
+      "parentCode": "user",
+      "showType": 1,
+      "route": "/design/auth/user",
+      "url": "/auth/#",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_USER",
+          "code": "queryUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_UPDATE_USER",
+          "code": "updateUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "updateUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateUser",
+              "url": "/inter-api/auth/v1/user/password",
+              "app": "auth",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "updateUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_LOCK_USER",
+          "code": "lockUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "lockUser",
+              "url": "/inter-api/auth/v1/user/status",
+              "app": "auth",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "lockUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "lockUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_USER",
+          "code": "deleteUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deleteUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_CREATE_USER",
+          "code": "createUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "createUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "createUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "createUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_IMPORT_USER",
+          "code": "importUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "importUser",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "importUser",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_USER_PERMISSION",
+          "code": "queryUserPermission",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryUserPermission",
+              "url": "/inter-api/rbac/v1/userPermissions",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryUserPermission",
+              "url": "/inter-api/rbac/v1/userPermissions/assigned",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryUserPermission",
+              "url": "/inter-api/rbac/v1/userPermission",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryUserPermission",
+              "url": "/inter-api/auth/v1/user",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryUserPermission",
+              "url": "/inter-api/auth/v1/user/search",
+              "app": "auth",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_ROLE",
+      "nameDisplay": "角色管理",
+      "code": "role",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "user",
+      "showType": 1,
+      "route": "/design/auth/role",
+      "url": "/auth/#/role",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_ROLE",
+          "code": "addRole",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/role",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRole",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_EDIT_ROLE",
+          "code": "editRole",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/role",
+              "app": "rbac",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editRole",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_ROLE",
+          "code": "deleteRole",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/role/[^/^]+",
+              "app": "rbac",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRole",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": " rbac.MENU_OPERATE_QUERY_ROLE",
+          "code": "queryRole",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },{
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRole",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_ROLE_USER",
+          "code": "addRoleUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_ROLE_USER",
+          "code": "deleteRoleUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/[^/^]+",
+              "app": "rbac",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteRoleUser",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_ROLE_PERMISSIONS",
+          "code": "queryRolePermissions",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/rolePermissions",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/rolePermissions/assigned",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/rolePermission",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/role/findOne",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roles/tree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roles/findRoleByKeyword",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/tag/findTagsName",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roles/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roleUsers",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roleUser/downloadFile",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roleUser/createTemp",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryRolePermissions",
+              "url": "/inter-api/rbac/v1/roleUser/getFileStatus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_ONLINE",
+      "nameDisplay": "在线用户",
+      "code": "online",
+      "app": "authentication",
+      "cid": 1000,
+      "parentCode": "user",
+      "showType": 1,
+      "route": "/design/auth/online",
+      "url": "/auth/#/online",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ONLINE_USER",
+          "code": "onlineUser",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "onlineUser",
+              "url": "/inter-api/auth/v1/online-user",
+              "app": "auth",
+              "methodType": 3,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_IP",
+      "nameDisplay": "黑白名单",
+      "code": "ip",
+      "app": "authentication",
+      "cid": 1000,
+      "parentCode": "user",
+      "showType": 1,
+      "route": "/design/auth/ip",
+      "url": "/auth/#/ip",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_IP_CONFIG",
+          "code": "IpConfig",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "IpConfig",
+              "url": "/inter-api/auth/v1/ip-black-white",
+              "app": "auth",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "IpConfig",
+              "url": "/inter-api/auth/v1/ip-black-white",
+              "app": "auth",
+              "methodType": 1,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "bisDesigner",
+      "name": "rbac.MENU_NAME_BIS_DESIGNER",
+      "nameDisplay": "业务设计器",
+      "app": "rbac",
+      "cid": 1000,
+      "sort": 5,
+      "cssClass": "btn_business_nav",
+      "showType": 0,
+      "memo": "业务设计器"
+    },
+    {
+      "name": "rbac.MENU_NAME_UI_DESIGNER",
+      "nameDisplay": "界面设计",
+      "code": "uiDesigner",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "bisDesigner",
+      "showType": 0,
+      "route": "/design/industry-application-mgr/business-designer/app_default",
+      "url": "/design/industry-application-mgr/business-designer/:id",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_OPEN_BUSINESS_DESIGNER",
+          "code": "openBusinessDesigner",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "openBusinessDesigner",
+              "url": "/design/industry-application-mgr/business-designer/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openBusinessDesigner",
+              "url": "/design/workflow/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_PROCESS_INSTANCE",
+      "nameDisplay": "流程实例",
+      "code": "processInstance",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "bisDesigner",
+      "showType": 1,
+      "route": "/design/workflow/processInstance",
+      "url": "/project/flow/#/processInstance",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_TASK_INSTANCE",
+      "nameDisplay": "任务实例",
+      "code": "taskInstance",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "bisDesigner",
+      "showType": 1,
+      "route": "/design/workflow/taskInstance",
+      "url": "/project/flow/#/taskInstance",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_APP_DESIGNER",
+      "nameDisplay": "APP设计器",
+      "code": "appDesigner",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_appdesign_nav",
+      "sort": 6,
+      "showType": 0,
+      "route": "/design/industry-application-mgr/application-mgr",
+      "url": "/design/industry-application-mgr/application-mgr",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_OPEN_APP_DESIGNER",
+          "code": "openAppDesigner",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/design/industry-application-mgr/application-editor/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/design/app-design/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/application-preview/{appId}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/industry-application-mgr/application-editor/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/industry-application-mgr/file-mgr/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/runtime-fullscreen/runtime-fullscreen/{pageId}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/design/block-editor/{id}/{blockId}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/block-editor/{id}/{blockId}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/app-design/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/runtime-fullscreen/app-runtime/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppDesigner",
+              "url": "/layout/workflow/{id}",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_APP_MANAGER",
+      "nameDisplay": "APP管理",
+      "code": "appManager",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_apps_nav",
+      "sort": 7,
+      "showType": 0,
+      "route": "/design/industry-application-mgr/application-manager",
+      "url": "/design/industry-application-mgr/application-manager",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_OPEN_APP_MANAGER",
+          "code": "openAppManager",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "openAppManager",
+              "url": "/design/industry-application-mgr/application-manager",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "openAppManager",
+              "url": "/runtime-fullscreen/app-install",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "industryComputeTask",
+      "name": "rbac.MENU_NAME_INDUSTRY_COMPUTE_TASK",
+      "nameDisplay": "计算任务",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_compute_engine",
+      "sort": 10,
+      "showType": 1,
+      "memo": "计算任务"
+    },
+    {
+      "name": "rbac.MENU_NAME_REALTIME_DATA_DUMP",
+      "nameDisplay": "实时数据转储",
+      "code": "realtimeDatadump",
+      "parentCode": "industryComputeTask",
+      "app": "rbac",
+      "cid": 1000,
+      "memo": "实时数据转储",
+      "sort": 4,
+      "showType": 1,
+      "route": "/design/industry-task-scheduler/datadump-mgr",
+      "url": "/project/compute-engine/datadump",
+      "menuOperates": []
+    },
+    {
+      "code": "message",
+      "name": "rbac.MENU_NAME_MESSAGE",
+      "nameDisplay": "消息管理",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_inform_nav",
+      "sort": 11,
+      "showType": 1,
+      "memo": "消息管理"
+    },
+    {
+      "name": "rbac.MENU_NAME_MESSAGE_CENTER",
+      "nameDisplay": "任务管理",
+      "code": "messageCenter",
+      "app": "notificationAdmin",
+      "cid": 1000,
+      "parentCode": "message",
+      "showType": 1,
+      "route": "/design/notification/messageCenter",
+      "url": "/notification/#/messageCenter",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_TASKS",
+          "code": "queryTasks",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryTasks",
+              "url": "/inter-api/notification-admin/v1/notice/topic/topics",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryTasks",
+              "url": "/inter-api/notification-admin/v1/notice/task/tasks",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryTasks",
+              "url": "/inter-api/notification-admin/v1/notice/protocol/protocols",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryTasks",
+              "url": "/inter-api/notification-admin/v1/notice/message/record/messages",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_PROTOCOL_CONFIG",
+          "code": "protocolConfig",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/protocol/protocols",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/systemconfig/v1/config/catalog/{xxx}/{xxx}",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/protocolconfig/email",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/valid/emailconfig",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/systemconfig/v1/config/catalog/value",
+              "app": "notification-admin",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/protocolconfig/stationletter",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/template/templates",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/template/defulttmpl",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/protocol/basetempalte",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/template/update",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/template/delete",
+              "app": "notification-admin",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topictree/add",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topictree/update",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topictree/delete",
+              "app": "notification-admin",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topic/topics",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topic/add",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topictree/topictrees",
+              "app": "notification-admin",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/template/add",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topic/update",
+              "app": "notification-admin",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "protocolConfig",
+              "url": "/inter-api/notification-admin/v1/notice/topic/delete",
+              "app": "notification-admin",
+              "methodType": 3,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "system",
+      "name": "rbac.MENU_NAME_SYSTEM",
+      "nameDisplay": "系统管理",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "sort": 12,
+      "cssClass": "icon_apps_nav",
+      "memo": "系统管理"
+    },
+    {
+      "name": "rbac.MENU_NAME_OAUTH",
+      "nameDisplay": "第三方认证",
+      "code": "oauth",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "system",
+      "showType": 1,
+      "route": "/design/system/oauth",
+      "url": "/systemconfig/#/oauth",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_MENU_MANAGE",
+      "nameDisplay": "菜单配置",
+      "code": "menumanage",
+      "app": "rbac",
+      "cid": 1000,
+      "parentCode": "system",
+      "showType": 1,
+      "route": "/design/system/menuManage",
+      "url": "/menu/#/supos",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_MENU",
+          "code": "addMenu",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menu",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menuTree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menus/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menuOperatePage",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_MENU",
+          "code": "queryMenu",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryMenu",
+              "url": "/inter-api/rbac/v1/menus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryMenu",
+              "url": "/inter-api/rbac/v1/menuTree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryMenu",
+              "url": "/inter-api/rbac/v1/menus/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryMenu",
+              "url": "/inter-api/rbac/v1/menuOperatePage",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_EDIT_MENU",
+          "code": "editMenu",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menu",
+              "app": "rbac",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menu/sort",
+              "app": "rbac",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuOperates/{codes}",
+              "app": "rbac",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuTree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menus/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuOperatePage",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ENABLE_MENU",
+          "code": "enableMenu",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menu/modifyEnableStatus",
+              "app": "rbac",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menus",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menuTree",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menus/associate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menuOperatePage",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "enableMenu",
+              "url": "/inter-api/rbac/v1/menuOperate",
+              "app": "rbac",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_SYSTEM_CONFIG",
+      "code": "systemconfig",
+      "app": "systemConfig",
+      "cid": 1000,
+      "parentCode": "system",
+      "showType": 1,
+      "route": "/design/system/systemConfig",
+      "url": "/systemconfig/#",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_CONFIG_CATALOG",
+          "code": "configCatalog",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "configCatalog",
+              "url": "/inter-api/systemconfig/v1/config/catalog",
+              "app": "systemconfig",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "configCatalog",
+              "url": "/inter-api/systemconfig/v1/config/catalog/{catalogId}",
+              "app": "systemconfig",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "configCatalog",
+              "url": "/inter-api/systemconfig/v1/config/{appCode}/{code}",
+              "app": "systemconfig",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "configCatalog",
+              "url": "/inter-api/systemconfig/v1/config/catalog/value",
+              "app": "systemconfig",
+              "methodType": 2,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_SYSTEM_CODE",
+      "nameDisplay": "系统编码",
+      "code": "systemcode",
+      "app": "systemCode",
+      "cid": 1000,
+      "parentCode": "system",
+      "showType": 1,
+      "route": "/design/system/systemCode",
+      "url": "/systemcode/#",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_ADD_ENTITY",
+          "code": "addEntity",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value/sort",
+              "app": "systemcode",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/{entityCode}/value/{code}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/{entityCode}/values/{codes}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/values",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value/tree",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value/nodes",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/modules",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/entities",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "addEntity",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_EDIT_ENTITY",
+          "code": "editEntity",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value/sort",
+              "app": "systemcode",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/{entityCode}/value/{code}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/{entityCode}/values/{codes}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/values",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value/tree",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value/nodes",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/modules",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/entities",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "editEntity",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_DELETE_ENTITY",
+          "code": "deleteEntity",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/entity/{code}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/entities/{codes}",
+              "app": "systemcode",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/values",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/value/tree",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/value/nodes",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/modules",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/entities",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "deleteEntity",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        },
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_QUERY_VALUE",
+          "code": "queryValue",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/values",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/value/tree",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/value/nodes",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/value",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/modules",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/entities",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "queryValue",
+              "url": "/inter-api/systemcode/v1/entity",
+              "app": "systemcode",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rbac.MENU_NAME_I18N",
+      "nameDisplay": "国际化管理",
+      "code": "i18n",
+      "app": "i18n",
+      "cid": 1000,
+      "parentCode": "system",
+      "showType": 1,
+      "route": "/design/system/i18n",
+      "url": "/i18n/#",
+      "menuOperates": [
+        {
+          "enableDataPermission": false,
+          "enableCustomPermission": false,
+          "forDataPermission": false,
+          "enableNorestrict": true,
+          "enableAssignstaff": false,
+          "enableAssignpos": false,
+          "enablePosrestrict": false,
+          "enableAssignDept": false,
+          "enableDeptrict": false,
+          "name": "rbac.MENU_OPERATE_I18N_MANAGE",
+          "code": "i18n",
+          "cid": 1000,
+          "defaultOperate": "0",
+          "urls": [
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/modules",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/language/all",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/initkey",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/language/code",
+              "app": "i18n",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code",
+              "app": "i18n",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code",
+              "app": "i18n",
+              "methodType": 2,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/file",
+              "app": "i18n",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/file/heart",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/file/error",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/export/download/file",
+              "app": "i18n",
+              "methodType": 1,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/export/download/heart",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code",
+              "app": "i18n",
+              "methodType": 3,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code/page",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code/page/key/exist",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code/page/one",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code/page/key",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/code/page/sugrec",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/export/exportSet",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            },
+            {
+              "menuoperateCode": "i18n",
+              "url": "/inter-api/i18n/v1/resource/export/download",
+              "app": "i18n",
+              "methodType": 0,
+              "isCustom": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "globalSetting",
+      "name": "rbac.MENU_NAME_GLOBAL_SETTING",
+      "nameDisplay": "全局配置",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "sort": 14,
+      "cssClass": "icon_set",
+      "memo": "全局配置"
+    },
+    {
+      "name": "rbac.MENU_NAME_DATA_SOURCE_MANAGE",
+      "nameDisplay": "数据源管理",
+      "code": "sqlDataSource",
+      "parentCode": "globalSetting",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "route": "/design/global-setting/sql-datasource",
+      "url": "/project/dam/#/integrated/source",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_HETEROGENEOUS_RESOURCE",
+      "nameDisplay": "异构资源",
+      "code": "heterogeneousResource",
+      "parentCode": "globalSetting",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "route": "/design/global-setting/heterogeneousResource",
+      "url": "/dlake/#/plugin-server",
+      "menuOperates": []
+    },
+    {
+      "code": "personalInfo",
+      "name": "rbac.MENU_NAME_PERSONAL_INFO",
+      "nameDisplay": "个人信息管理",
+      "app": "rbac",
+      "cid": 1000,
+      "sort": 16,
+      "status": 1,
+      "cssClass": "btn_basis_nav",
+      "showType": 0,
+      "memo": "个人信息管理"
+    },
+    {
+      "name": "rbac.MENU_NAME_BASE_INFO",
+      "nameDisplay": "个人信息",
+      "code": "baseInfo",
+      "app": "rbac",
+      "cid": 1000,
+      "status": 1,
+      "parentCode": "personalInfo",
+      "showType": 0,
+      "route": "/personal/personal-msg",
+      "url": "/personal/personal-msg",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_EDIT_PWD",
+      "nameDisplay": "密码修改",
+      "code": "editPassword",
+      "app": "rbac",
+      "cid": 1000,
+      "status": 1,
+      "parentCode": "personalInfo",
+      "showType": 0,
+      "route": "/personal/password",
+      "url": "/personal/password",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_MSG_MANAGE",
+      "nameDisplay": "站内信管理",
+      "code": "selfstationletter",
+      "app": "rbac",
+      "cid": 1000,
+      "status": 1,
+      "parentCode": "personalInfo",
+      "showType": 1,
+      "route": "/selfstationletter",
+      "url": "/notification/#/selfstationletter",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_WORK_FLOW_MANAGER",
+      "nameDisplay": "流程管理",
+      "code": "workflowManage",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 1,
+      "status": 1,
+      "sort": 17,
+      "route": "/workflow/workflowManage",
+      "url": "/project/flow/#/workflowManage",
+      "cssClass": "icon_model_nav",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_SYS_SETTING",
+      "nameDisplay": "系统设置",
+      "code": "sysSetting",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_set",
+      "sort": 18,
+      "showType": 0,
+      "isHide": 1,
+      "route": "/design/system-info-mgr/system-info",
+      "url": "/design/system-info-mgr/system-info",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_VERSION_INFO",
+      "nameDisplay": "版本信息",
+      "code": "versionInfo",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_set",
+      "sort": 19,
+      "showType": 0,
+      "isHide": 1,
+      "route": "/design/about",
+      "url": "/design/about",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_TO_DO_CENTER",
+      "nameDisplay": "待办中心",
+      "code": "todoCenter",
+      "app": "rbac",
+      "cid": 1000,
+      "cssClass": "icon_set",
+      "sort": 20,
+      "showType": 0,
+      "isHide": 1,
+      "route": "/application-runtime/todo-center",
+      "url": "/workflow/#/todocenter",
+      "menuOperates": []
+    },
+    {
+      "name": "rbac.MENU_NAME_APP_STORE",
+      "nameDisplay": "APP商店",
+      "code": "appStore",
+      "app": "rbac",
+      "cid": 1000,
+      "showType": 0,
+      "sort": 21,
+      "route": "/design/industry-application-mgr/app-store",
+      "url": "/design/industry-application-mgr/app-store",
+      "cssClass": "",
+      "menuOperates": []
+    }
+  ],
+  "initBasePermissionCodes": [
+    "queryUser",
+    "queryUserPermission",
+    "addMenu",
+    "queryMenu",
+    "editMenu",
+    "deleteMenu",
+    "onlineUser",
+    "addRole",
+    "editRole",
+    "deleteRole",
+    "queryRole",
+    "queryRoleUser",
+    "addRoleUser",
+    "deleteRoleUser",
+    "queryRolePermissions",
+    "addPerson",
+    "updatePerson",
+    "deletePerson",
+    "importPerson",
+    "exportPerson",
+    "offPosition",
+    "queryPersonDetailById",
+    "transferPosition",
+    "querypersonManager",
+    "importOrg",
+    "importPos",
+    "addDepartment",
+    "updateDepartment",
+    "deleteDep",
+    "getDepTree",
+    "addPosition",
+    "getPosDetail",
+    "getPosTree",
+    "companies",
+    "addCompany",
+    "updateCompany",
+    "delCompany",
+    "company",
+    "createGroup",
+    "updateGroup",
+    "deletGroup",
+    "queryGroup",
+    "updateUser",
+    "lockUser",
+    "deleteUser",
+    "createUser",
+    "addEntity",
+    "editEntity",
+    "deleteEntity",
+    "queryValue",
+    "queryTasks",
+    "updateOperate",
+    "queryOperate",
+    "IpConfig",
+    "i18n",
+    "configCatalog",
+    "protocolConfig",
+    "deletePos",
+    "updatePos",
+    "importUser",
+    "enableMenu",
+    "collectionStation_default",
+    "acceptManage_default",
+    "collectionMange_default",
+    "objectTemplateManage_default",
+    "globalSetting_default",
+    "sqlDataSource_default",
+    "heterogeneousResource_default",
+    "processInstance_default",
+    "taskInstance_default",
+    "openBusinessDesigner",
+    "openAppDesigner",
+    "openAppManager",
+    "personalInfo_default",
+    "editPassword_default",
+    "workflowManage_default",
+    "sysSetting_default",
+    "versionInfo_default",
+    "todoCenter_default",
+    "realtimeDatadump_default",
+    "industryComputeTask_default",
+    "targetManagement_default",
+    "appStore_default",
+    "oauth_default"
+  ],
+  "initCompanyPermissionCodes": [
+    "queryUser",
+    "queryUserPermission",
+    "onlineUser",
+    "addRole",
+    "editRole",
+    "deleteRole",
+    "queryRole",
+    "queryRoleUser",
+    "addRoleUser",
+    "deleteRoleUser",
+    "queryRolePermissions",
+    "addPerson",
+    "updatePerson",
+    "deletePerson",
+    "importPerson",
+    "exportPerson",
+    "offPosition",
+    "queryPersonDetailById",
+    "transferPosition",
+    "querypersonManager",
+    "importOrg",
+    "importPos",
+    "addDepartment",
+    "updateDepartment",
+    "deleteDep",
+    "getDepTree",
+    "addPosition",
+    "getPosDetail",
+    "companies",
+    "addCompany",
+    "updateCompany",
+    "delCompany",
+    "company",
+    "createGroup",
+    "updateGroup",
+    "deletGroup",
+    "queryGroup",
+    "updateUser",
+    "lockUser",
+    "deleteUser",
+    "createUser",
+    "updateOperate",
+    "queryOperate",
+    "IpConfig",
+    "deletePos",
+    "updatePos",
+    "importUser",
+    "personalInfo_default",
+    "editPassword_default"
+  ],
+  "initNormalPermissionCodes": [
+    "baseInfo_default",
+    "personalInfo_default",
+    "editPassword_default"
+  ]
+}

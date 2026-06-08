@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="300">
+
+    <Properties>
+        <Property name="SPRING_APP_NAME" value="supos-gateway"/>
+
+        <Property name="LOG_HOME" value="/var/log/${SPRING_APP_NAME}"/>
+
+        <Property name="CONSOLE_LOG_PATTERN"
+                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%5p}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=green bold, TRACE=blue} %style{${sys:PID}}{magenta} [%15.15t{1.}] %style{%-40.40c{1.}}{cyan} : %m%n%wEx" />
+        <Property name="FILE_LOG_PATTERN"
+                  value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${sys:PID} [%t] %c : %m%n%wEx"/>
+    </Properties>
+
+    <Appenders>
+
+        <!--输出到控制台-->
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <!--输出日志的格式-->
+            <PatternLayout pattern="${CONSOLE_LOG_PATTERN}" disableAnsi="false"/>
+            <!--控制台只输出level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!-- 这个会打印出所有的info及以下级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingRandomAccessFile name="FILE" immediateFlush="false" bufferSize="8192"
+                                 fileName="${LOG_HOME}/${SPRING_APP_NAME}.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/${SPRING_APP_NAME}-%d{yyyy-MM-dd}_%i.log.gz">
+            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${FILE_LOG_PATTERN}"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="59 59 23 * * ?"/>
+                <SizeBasedTriggeringPolicy size="64MB"/>
+            </Policies>
+            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件开始覆盖-->
+            <DefaultRolloverStrategy max="100">
+                <Delete basePath="${LOG_HOME}" maxDepth="2">
+                    <IfFileName glob="*/${SPRING_APP_NAME}-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+    </Appenders>
+
+    <Loggers>
+        <AsyncRoot level="INFO">
+            <AppenderRef ref="STDOUT"/>
+            <appenderRef ref="FILE"/>
+        </AsyncRoot>
+    </Loggers>
+
+</Configuration>

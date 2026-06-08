@@ -1,0 +1,38 @@
+#config-newlist-layout2 {
+    .elm-layout-wrap-in-west {
+        border: none;
+    }
+
+    #area {
+        border: none;
+    }
+
+    .elm-layout-unit-west {
+        background-color: transparent;
+    }
+
+    #west1 {
+        padding: 16px;
+
+        &:before {
+            display: block;
+            content: "";
+            background-color: @nav-bg-color;
+            border: 1px solid @border-color;
+            height: 100%;
+            box-sizing: border-box;
+        }
+    }
+
+    #center1 {
+        padding: 16px;
+        padding-left: 0;
+        &:before {
+            display: block;
+            content: "";
+            border: 1px solid @border-color;
+            height: 100%;
+            box-sizing: border-box;
+        }
+    }
+}

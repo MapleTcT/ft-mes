@@ -1,0 +1,67 @@
+management:
+  health:
+    db:
+      enabled: false
+spring:
+  messages:
+    basename: i18n/userManager
+  application:
+    name: license
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+server:
+  port: 9200
+  servlet:
+    context-path: /
+supfusion:
+  cloud:
+    config-center:
+      enabled: true
+      type: json
+    nacos:
+      server-addr: 192.168.90.50:8848
+      username: nacos
+      password: nacos
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: DEFAULT_GROUP
+    discovery:
+      enabled: false
+      group: DEFAULT_GROUP
+    datasource:
+      connect:
+        use-system: true
+        system:
+          db-type: mysql
+          db-name: auth
+          host: 127.0.0.1
+          port: 3306
+          username: root
+          password: root
+      druid:
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 10
+      script:
+        script-root-dirs: classpath*:META-INF/
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.license.dao.po
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+jwt:
+  header: Authorization
+  token-head: bearer
+  secret: mySecret
+  expiration: 604800

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.supcon.supfusion.rbac.dao.UserPPositionMapper">
+    <!-- map -->
+    <resultMap type="com.supcon.supfusion.rbac.dao.po.UserPPositionPO" id="base_map">
+        <result property="id" column="ID"/>
+        <result property="version" column="VERSION"/>
+        <result property="includeLower" column="INCLUDE_LOWER"/>
+        <result property="positionId" column="POSITION_ID"/>
+        <result property="userpermissionId" column="USERPERMISSION_ID"/>
+    </resultMap>
+    <!-- column -->
+    <sql id="base_column">
+        ID,VERSION,INCLUDE_LOWER,POSITION_ID,USERPERMISSION_ID
+    </sql>
+    <!-- condition -->
+    <sql id="base_where">
+        <where>
+            <if test="id != null">
+                ID = #{id}
+            </if>
+            <if test="version != null">
+                VERSION = #{version}
+            </if>
+            <if test="includeLower != null">
+                INCLUDE_LOWER = #{includeLower}
+            </if>
+            <if test="positionId != null">
+                POSITION_ID = #{positionId}
+            </if>
+            <if test="userpermissionId != null">
+                USERPERMISSION_ID = #{userPermissionId}
+            </if>
+        </where>
+    </sql>
+    <!-- select -->
+    <select id="findByUserPermissionId" parameterType="com.supcon.supfusion.rbac.dao.query.UserPPositionQuery" resultMap="base_map">
+        SELECT POSITION_ID,USERPERMISSION_ID FROM rbac_userpposition upp WHERE upp.USERPERMISSION_ID IN <foreach
+            collection="userPermissionIds" item="id" open="(" close=")" separator=",">
+        #{id}
+    </foreach>
+        UNION
+        SELECT POSITION_ID,FLOWPERMISSION_ID USERPERMISSION_ID FROM rbac_flow_permission_position rfpp
+        WHERE rfpp.FLOWPERMISSION_ID IN <foreach
+            collection="userPermissionIds" item="id" open="(" close=")" separator=",">
+        #{id}
+    </foreach>
+    </select>
+</mapper>

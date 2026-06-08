@@ -1,0 +1,28 @@
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('div',{staticClass:"m_box"},[_c('ul',{staticClass:"m_list"},[_vm._l((_vm.layout),function(item,index){return [(item[0] && item[0].type == 'DATAGRID')?[_c('DataGrid',{ref:item[0].datagridCode,refInFor:true,attrs:{"isFileView":_vm.isFileView,"params":{layout:_vm.datagrid[item[0].datagridCode],item:item,isReadOnly:_vm.isReadOnly,dtID: _vm.params.dtID,tabIndex:_vm.layOut.tabIndex}}})]:(item[0] && item[0].type == 'PROPERTYATTACHMENT' || item[1] && item[1].type == 'PROPERTYATTACHMENT')?_c('li',{staticClass:"mt20 list-space"},[_vm._l((item),function(tdItem,tdIndex){return [_c('div',{staticClass:"m_box"},[_c('div',{},[(tdItem.label)?_c('Label',{attrs:{"labelName":tdItem.label,"className":"ml_text ml_text_upload","condition":tdItem.condition[0],"isNullable":_vm.isNullable(item) && _vm.viewType !== 'VIEW'}}):(tdItem.condition && tdItem.condition[0].type=='attachment')?_c('div',{style:(tdItem.condition[0] && _vm.getCssStyle(tdItem.condition[0].cssstyle, tdItem.condition[0]))},[_c('upload',{ref:tdItem.condition[0].name,refInFor:true,attrs:{"params":{
+                      isAppendix: tdItem.condition && tdItem.condition[0].type=='attachment'?true:false,
+                      isNullable :_vm.isNullable(item),
+                      fileList: _vm.fileList, 
+                      postUrl: _vm.uploadURL,
+                      name:tdItem.condition[0].name,
+                      propertyCode:tdItem.condition[0].propertyCode,
+                      condition: tdItem.condition[0],
+                      isFileView: _vm.isFileView
+                  }},on:{"updateAppendix":_vm.updateAppendix}})],1):_vm._e()],1)])]})],2):(item[0] && item[0].type == 'PICTURE' || item[1] && item[1].type == 'PICTURE')?_c('li',{staticClass:"mt20 list-space"},[_vm._l((item),function(tdItem,tdIndex){return [_c('div',{staticClass:"m_box"},[_c('div',{},[(tdItem.label)?_c('Label',{attrs:{"labelName":tdItem.label,"className":"ml_text ml_text_upload","condition":tdItem.condition[0],"isNullable":_vm.isNullable(item) && _vm.viewType !== 'VIEW'}}):(tdItem.condition && tdItem.condition[0].type=='picture')?_c('div',{style:(tdItem.condition[0] && _vm.getCssStyle(tdItem.condition[0].cssstyle, tdItem.condition[0]))},[_c('upload',{ref:tdItem.condition[0].name,refInFor:true,attrs:{"params":{
+                      isPicture: tdItem.condition && tdItem.condition[0].type=='picture'?true:false,
+                      isNullable :_vm.isNullable(item),
+                      //postUrl:'/foundation/workbench/uploadFile.action', 
+                      postUrl: _vm.uploadURL,
+                      name:tdItem.condition[0].name,
+                      condition: tdItem.condition[0],
+                      isFileView: _vm.isFileView
+                  },"imgValue":tdItem.condition[0].value},on:{"updatePicture":_vm.getPickResult}})],1):_vm._e()],1)])]})],2):[(!(item[1] && item[1].condition && item[1].condition[0] && item[1].condition[0].type =='longtext'))?_c('li',{class:index != _vm.layout.length-1 ? 'm-flex list-space list-bt': 'm-flex list-space'},[_vm._l((item),function(tdItem,tdIndex){return [(tdItem.label)?_c('Label',{attrs:{"labelName":tdItem.label,"className":tdItem.condition[0] && tdItem.condition[0].colspan==2?'flex-item block': 'flex-item lt',"condition":tdItem.condition[0],"isNullable":_vm.isNullable(item) && _vm.viewType !== 'VIEW'}}):(tdItem.condition)?_c('span',{class:tdItem.condition[0] && tdItem.condition[0].colspan==2?'flex-item block':'flex-item rt',style:(tdItem.condition[0] && _vm.getCssStyle(tdItem.condition[0].cssstyle, tdItem.condition[0]))},[(tdItem.condition[0])?_c('inputTagment',{ref:tdItem.condition[0].name,refInFor:true,attrs:{"params":tdItem.condition[0]},on:{"update:params":function($event){return _vm.$set(tdItem.condition, 0, $event)}}}):_vm._e(),_vm._v(" "),_c('i',{staticClass:"m-unit"},[_vm._v(_vm._s(_vm.getUnitByFormat(tdItem.condition[0])))])],1):_vm._e()]})],2):_c('li',{class:index != _vm.layout.length-1 ? 'm-longtext list-space list-bt': 'm-longtext list-space'},[_vm._l((item),function(tdItem,tdIndex){return [(tdItem.label)?_c('Label',{attrs:{"labelName":tdItem.label,"className":tdItem.condition[0] && tdItem.condition[0].colspan==2?'flex-item flex-longlabel block': 'flex-item flex-longlabel lt',"condition":tdItem.condition[0],"isNullable":_vm.isNullable(item) && _vm.viewType !== 'VIEW'}}):(tdItem.condition)?_c('span',{class:tdItem.condition[0] && tdItem.condition[0].colspan==2?'flex-item flex-longtext block':'flex-item flex-longtext lt',style:(tdItem.condition[0] && _vm.getCssStyle(tdItem.condition[0].cssstyle, tdItem.condition[0]))},[(tdItem.condition[0])?_c('inputTagment',{ref:tdItem.condition[0].name,refInFor:true,attrs:{"params":tdItem.condition[0]},on:{"update:params":function($event){return _vm.$set(tdItem.condition, 0, $event)}}}):_vm._e()],1):_vm._e()]})],2)]]})],2)])])}
+var staticRenderFns = []
+var esExports = { render: render, staticRenderFns: staticRenderFns }
+export default esExports
+
+
+//////////////////
+// WEBPACK FOOTER
+// ./node_modules/vue-loader/lib/template-compiler?{"id":"data-v-18ef8a5c","hasScoped":true,"transformToRequire":{"video":["src","poster"],"source":"src","img":"src","image":"xlink:href"},"buble":{"transforms":{}}}!./node_modules/vue-loader/lib/selector.js?type=template&index=0!./src/components/form/editLayout.vue
+// module id = null
+// module chunks = 

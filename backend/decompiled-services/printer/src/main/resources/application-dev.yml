@@ -1,0 +1,84 @@
+management:
+  health:
+    db:
+      enabled: false
+server:
+  port: 8081
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: supfusion-printer
+  #cloud:
+  #  refresh:
+  #    enabled: true
+  #    extra-refreshable: false
+  datasource:
+    type: com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource
+    initialization-mode: never
+mybatis-plus:
+  type-aliases-package: com.supcon.supfusion.printer.dao.po
+  configuration:
+    log-impl:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-enabled: false
+      optimistic-lock-enabled: false
+supfusion:
+  cloud:
+    #system:
+    #  top-level-domain: supos.com
+    #  host-ip:
+    #  deploy-mode: single
+    nacos:
+      server-addr: ${SUPOS_NACOS_ADDRESS:10.30.44.78:8848}
+      username: ${SUPOS_NACOS_USERNAME:nacos}
+      password: ${SUPOS_NACOS_PASSWORD:nacos}
+    registry:
+      enabled: true
+      secure: false
+      weight: 1
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    discovery:
+      enabled: true
+      group: ${SUPOS_NACOS_REGISTRY_GROUP:DEFAULT_GROUP}
+    #config-center:
+    #  enabled: true
+    #  group: DEFAULT_GROUP
+    #  type: yaml
+    #dlake:
+    #  server-addr: http://192.168.11.91:30654
+    #  resource:
+    #    catalog: sql
+    #    sub-catalog: maria
+    #    group: supOS
+    #    name: ${spring.application.name}
+    #    instance:
+    #    alloc-ts-enabled: true
+    tenant:
+      init-getter: false
+      sync-cache: false
+    kubernetes:
+      client:
+        enabled: false
+        master-url: https://192.168.11.99:6443
+        username: admin
+        password: 12ce4a510ff8f98369b781bcb9fb73f5
+    datasource:
+      connect:
+        use-system: true
+        system:
+          db-type: ${DB_TYPE:mariadb}
+          db-name: ${DB_NAME:auth}
+          host: ${HOST:localhost}
+          port: ${PORT:3306}
+          username: ${USER_NAME:root}
+          password: ${PASS_WORD:123456}
+      druid:
+        init-pool-size: 1
+        min-pool-size: 1
+        max-pool-size: 10
+      script:
+        script-root-dirs: classpath*:META-INF/
