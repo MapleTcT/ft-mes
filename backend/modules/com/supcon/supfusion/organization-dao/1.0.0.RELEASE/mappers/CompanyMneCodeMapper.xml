@@ -5,36 +5,8 @@
 
 
     <insert id="insertBatch" useGeneratedKeys="false">
-        <if test="dbType == 'oracle'">
-        INSERT INTO ORG_COMPANY_MNECODE
-        (ID,
-        ROW_VERSION,
-        LANGUAGE,
-        MNE_CODE,
-        COMPANY_ID,
-        COMPANY_SHORT_NAME,
-        CREATOR,
-        MODIFIER,
-        CREATE_STAFF_ID,
-        MODIFY_STAFF_ID
-        )
-        <foreach collection="list" item="item" separator="union all" index="index">
-            select
-            #{item.id},
-            #{item.rowVersion},
-            #{item.language},
-            #{item.mneCode},
-            #{item.companyId},
-            #{item.companyShortName},
-            #{item.creator},
-            #{item.modifier},
-            #{item.createStaffId},
-            #{item.modifyStaffId}
-             from dual
-        </foreach>
-        </if>
 
-        <if test="dbType == 'mysql' or dbType == 'mariadb' or dbType == 'sqlserver'">
+        <if test="dbType == 'postgresql'">
             INSERT INTO ORG_COMPANY_MNECODE
             (ID,
             ROW_VERSION,
@@ -65,17 +37,9 @@
     </insert>
 
     <select id="isChineseMne"  resultType="java.lang.Integer">
-        <if test="dbType == 'oracle'">
+        <if test="dbType == 'postgresql'">
             select count(id) from org_company_mnecode
-            where length(MNE_CODE) != lengthb(MNE_CODE)
-        </if>
-        <if test="dbType == 'mysql' or dbType == 'mariadb'">
-            select count(id) from org_company_mnecode
-            where length(MNE_CODE) != char_length(MNE_CODE)
-        </if>
-        <if test="dbType == 'sqlserver'">
-            select count(id) from org_company_mnecode
-            where len(MNE_CODE) != datalength(MNE_CODE)
+            where length(MNE_CODE) != octet_length(MNE_CODE)
         </if>
     </select>
 

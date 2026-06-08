@@ -236,10 +236,7 @@
             </if>
             <if test="menuInfoQuery.name != null">
                 <bind name="pattern" value="'%' + menuInfoQuery.name + '%'"/>
-                <if test="dbType == 'oracle'">
-                    AND mm.MNE_CODE like #{pattern} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     AND mm.MNE_CODE like #{pattern}
                 </if>
             </if>
@@ -258,10 +255,7 @@
             </if>
             <if test="menuInfoQuery.name != null">
                 <bind name="pattern" value="'%' + menuInfoQuery.name + '%'"/>
-                <if test="dbType == 'oracle'">
-                    AND mm.MNE_CODE like #{pattern} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     AND mm.MNE_CODE like #{pattern}
                 </if>
             </if>
@@ -274,10 +268,7 @@
             mne.LANGUAGE = #{menuInfoMneCodeQuery.language}
             <if test="menuInfoMneCodeQuery.mneCode != null">
                 AND mne.MNE_CODE LIKE
-                <if test="dbType == 'oracle'">CONCAT('%',CONCAT(#{menuInfoMneCodeQuery.mneCode},'%')) ESCAPE '\'</if>
-                <if test="dbType == 'mysql'">concat('%',#{menuInfoMneCodeQuery.mneCode},'%')</if>
-                <if test="dbType == 'mariadb'">concat('%',#{menuInfoMneCodeQuery.mneCode},'%')</if>
-                <if test="dbType == 'sqlserver'">'%'+#{menuInfoMneCodeQuery.mneCode}+'%'</if>
+                <if test="dbType == 'postgresql'">concat('%',#{menuInfoMneCodeQuery.mneCode},'%')</if>
             </if>
             AND mi.valid = 1
         </where>

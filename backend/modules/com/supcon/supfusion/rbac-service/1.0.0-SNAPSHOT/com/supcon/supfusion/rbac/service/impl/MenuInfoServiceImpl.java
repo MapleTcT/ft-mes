@@ -1793,7 +1793,7 @@ public class MenuInfoServiceImpl extends ServiceImpl<MenuInfoMapper, MenuInfoPO>
         QueryWrapper<MenuOperatePO> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("mi." + MenuInfoField.id, menuInfoIds);
         queryWrapper.groupBy("mi." + MenuInfoField.id, "mi." + MenuInfoField.code, "mi." + MenuInfoField.url, "mi." + MenuInfoField.cid);
-        queryWrapper.having("sum(mo." + MenuOperateField.defaultOperate + ") = {0} or sum(mo." + MenuOperateField.defaultOperate + ") is null", 0);
+        queryWrapper.having("COALESCE(sum(CASE WHEN mo." + MenuOperateField.defaultOperate + " THEN 1 ELSE 0 END), 0) = {0}", 0);
         List<Map<String, Object>> list = menuoperateMapper.getNoneDefaultOperateMenu(queryWrapper);
         List<MenuOperatePO> menuOperatePOS = list.stream().map(map -> {
             MenuOperatePO menuOperatePO = new MenuOperatePO();

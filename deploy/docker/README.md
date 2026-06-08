@@ -45,3 +45,7 @@ http://10.11.100.17:18080/
 ## PostgreSQL Note
 
 The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and provides `patch-postgres-runtime.py` to inject PostgreSQL DBP classes and generated `postgresql` mapper directories into nested runtime JARs. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; any remaining failures should be fixed from that report and container logs.
+
+For the recovered binaries, run the PostgreSQL compatibility SQL in `postgres/init/004-011*.sql` after the recovered runtime creates legacy auth/RBAC tables. These scripts seed the admin/auth baseline, repair RBAC initialization metadata, convert Boolean-backed permission columns, and add compatibility shims for legacy MyBatis fragments that still compare or aggregate Boolean fields as `0/1`.
+
+Use `scripts/audit-postgres-mappings.py` against both source folders and patched runtime JARs before handoff. A clean migration has `findingCount: 0` for loadable mapper/SQL files.

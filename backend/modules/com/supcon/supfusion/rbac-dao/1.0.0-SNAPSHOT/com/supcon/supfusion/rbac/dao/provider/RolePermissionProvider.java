@@ -37,13 +37,13 @@ public class RolePermissionProvider {
                 "       rp.URL_PATTERN,\n" +
                 "       mo.CODE,\n" +
                 "       max(rp.GROUP_FLAG) as GROUP_FLAG,\n" +
-                "       max(rp.POSITION_FLAG) as POSITION_FLAG,\n" +
-                "       max(rp.ASSIGN_POS_FLAG) as ASSIGN_POS_FLAG,\n" +
-                "       max(rp.ASSIGN_STAFF_FLAG) as ASSIGN_STAFF_FLAG,\n" +
-                "       max(rp.NO_RESTRICT_FLAG) as NO_RESTRICT_FLAG,\n" +
-                "       max(rp.DEALER_PERMISSION_FLAG) as DEALER_PERMISSION_FLAG,\n" +
-                "       max(rp.ASSIGN_DEPT_FLAG) as ASSIGN_DEPT_FLAG,\n" +
-                "       max(rp.DEPARTMENT_FLAG) as DEPARTMENT_FLAG");
+                "       CASE WHEN bool_or(rp.POSITION_FLAG) THEN 1 ELSE 0 END as POSITION_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.ASSIGN_POS_FLAG) THEN 1 ELSE 0 END as ASSIGN_POS_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.ASSIGN_STAFF_FLAG) THEN 1 ELSE 0 END as ASSIGN_STAFF_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.NO_RESTRICT_FLAG) THEN 1 ELSE 0 END as NO_RESTRICT_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.DEALER_PERMISSION_FLAG) THEN 1 ELSE 0 END as DEALER_PERMISSION_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.ASSIGN_DEPT_FLAG) THEN 1 ELSE 0 END as ASSIGN_DEPT_FLAG,\n" +
+                "       CASE WHEN bool_or(rp.DEPARTMENT_FLAG) THEN 1 ELSE 0 END as DEPARTMENT_FLAG");
         sql.append(" from rbac_rolepermission rp");
         sql.append(" left join rbac_roleuser ru on rp.ROLE_ID = ru.ROLE_ID");
         sql.append(" left join rbac_role r on rp.ROLE_ID = r.ID");

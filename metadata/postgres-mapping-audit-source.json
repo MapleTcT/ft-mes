@@ -1,0 +1,2124 @@
+{
+  "summary": {
+    "findingCount": 237,
+    "undecodableCount": 0,
+    "byPattern": {
+      "mysql-alter-modify": 4,
+      "mysql-backtick": 1,
+      "mysql-engine": 5,
+      "mysql-group-concat": 1,
+      "oracle-decode": 63,
+      "oracle-dual": 4,
+      "oracle-number": 11,
+      "oracle-rownum": 32,
+      "oracle-to-char": 8,
+      "oracle-to-date": 8,
+      "oracle-varchar2": 10,
+      "sqlserver-isnull": 90
+    },
+    "byScope": {
+      "runtime-default": 237
+    },
+    "topFiles": [
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+        "findingCount": 14
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+        "findingCount": 10
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+        "findingCount": 7
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+        "findingCount": 6
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+        "findingCount": 6
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+        "findingCount": 6
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+        "findingCount": 5
+      },
+      {
+        "file": "modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/com/supcon/supfusion/license/common/utils/security/Base64Util.java",
+        "findingCount": 4
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/repository/LicenseDao.java",
+        "findingCount": 3
+      },
+      {
+        "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/MenuInfoServiceImpl.java",
+        "findingCount": 3
+      },
+      {
+        "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemEntityServiceImpl.java",
+        "findingCount": 3
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/feign/FeignErrorDecoder.java",
+        "findingCount": 2
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/utils/Base64Util.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/utils/Base64Util.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/config/LoginNumConfig.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/rpc/BranchOfficeApiServiceImpl.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/webapi/controller/HeadOfficeController.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/DataPermissionServiceImpl.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/Constants.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/custom/propertye/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/util/TotpUtil.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/utils/Base64Util.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/scheduling/DynamicTableTask.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/Base64Util.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/dao/po/MenuSuposPO.java",
+        "findingCount": 2
+      },
+      {
+        "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/Constants.java",
+        "findingCount": 2
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/cache/redisson/GenericFastJsonCodec.java",
+        "findingCount": 1
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/filter/JwtAuthenticationTokenFilter.java",
+        "findingCount": 1
+      },
+      {
+        "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/utils/IpUtil.java",
+        "findingCount": 1
+      },
+      {
+        "file": "decompiled-services/task-scheduler/src/main/java/com/supcon/supfusion/scheduler/runner/ClearRunner.java",
+        "findingCount": 1
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/useragent/UserAgent.java",
+        "findingCount": 1
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/useragent/UserAgentParser.java",
+        "findingCount": 1
+      },
+      {
+        "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/utils/AESUtils.java",
+        "findingCount": 1
+      }
+    ]
+  },
+  "findings": [
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/repository/LicenseDao.java",
+      "line": 63,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String moduleCodeRedis = Base64Util.decode(keySplit[0]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/repository/LicenseDao.java",
+      "line": 65,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String value = Base64Util.decode(split[0]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/repository/LicenseDao.java",
+      "line": 66,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String time = Base64Util.decode(split[1]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/feign/FeignErrorDecoder.java",
+      "line": 29,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public Exception decode(String methodKey, Response response) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/feign/FeignErrorDecoder.java",
+      "line": 30,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "Exception e = super.decode(methodKey, response);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/utils/IpUtil.java",
+      "line": 32,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "byte[] decode = Base64.getDecoder().decode(split[1]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/utils/Base64Util.java",
+      "line": 33,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static String decode(String encodedText) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/utils/Base64Util.java",
+      "line": 36,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "text = new String(decoder.decode(encodedText), \"UTF-8\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/filter/JwtAuthenticationTokenFilter.java",
+      "line": 89,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(this.secret));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/gateway/src/main/java/com/supcon/supos/suposgateway/cache/redisson/GenericFastJsonCodec.java",
+      "line": 55,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public Object decode(ByteBuf in, State state) throws IOException {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "decompiled-services/task-scheduler/src/main/java/com/supcon/supfusion/scheduler/runner/ClearRunner.java",
+      "line": 45,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "qryWrapper.isNull((Object)\"module_code\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom-property-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/dao/utils/ValidateUtils.java",
+      "line": 56,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "public static boolean isNULL(String content) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+      "line": 172,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String moduleCode = Base64Util.decode(licenseInfoPO.getModuleCode());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+      "line": 173,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String licenseKey = Base64Util.decode(licenseInfoPO.getLicenseKey());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+      "line": 174,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String time = Base64Util.decode(licenseInfoPO.getTime());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+      "line": 220,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String result = moduleCode + licenseKey + valueFromSCDog + Base64Util.decode(one.getTime()) + Constants.Salt;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/impl/LicenseServiceImpl.java",
+      "line": 266,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String result = licenseInfoBO.getModuleCode() + licenseInfoBO.getLicenseKey() + Base64Util.decode(licenseInfoPO.getValue()) + licenseInfoBO.getTime() + Constants.Salt;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+      "line": 39,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String moduleCodeRedis = Base64Util.decode(keySplit[0]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+      "line": 40,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String licenseKeyRedis = Base64Util.decode(keySplit[1]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+      "line": 96,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String key = Base64Util.decode(keySplit[0]) + Base64Util.decode(keySplit[1]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+      "line": 98,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String value = Base64Util.decode(split[0]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/LicenseCache.java",
+      "line": 99,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String time = Base64Util.decode(split[1]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-service/1.0.0-SNAPSHOT/com/supcon/supfusion/license/service/cache/redisson/GenericFastJsonCodec.java",
+      "line": 47,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public Object decode(ByteBuf in, State state) throws IOException {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom/propertye/custom-property-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/dao/utils/ValidateUtils.java",
+      "line": 56,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "public static boolean isNULL(String content) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom/propertye/custom-property-service/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/server/impl/ViewServiceFoundationImpl.java",
+      "line": 216,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "customPropertyViewMappingLambdaQueryWrapper.isNull(CustomPropertyView::getPropertyLayRec);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom/propertye/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+      "line": 29,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "public static String SQL_KEYWORDS_TO_DATE = \"to_date(?, 'yyyy-mm-dd')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom/propertye/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+      "line": 30,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "public static String SQL_KEYWORDS_TO_DATETIME = \"to_date(?, 'yyyy-mm-dd HH24:mi:ss')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/impl/OnlineUserServiceImpl.java",
+      "line": 304,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "onlineUserMapper.delete(Wrappers.lambdaQuery(OnlineUserPO.class).isNull(OnlineUserPO::getDeviceType));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/impl/UserDirectoryServiceImpl.java",
+      "line": 161,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "// .and(wrapper -> wrapper.isNull(UserPO::getHasLock).or(w -> w.eq(UserPO::getHasLock, false)));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/impl/ThirdAuthServiceImpl.java",
+      "line": 117,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(userBO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/cache/UserCache.java",
+      "line": 223,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(UserPO::getPersonName).isNotNull(UserPO::getPersonId);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/config/LoginNumConfig.java",
+      "line": 59,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String moduleCodeRedis = Base64Util.decode(keySplit[0]);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/config/LoginNumConfig.java",
+      "line": 62,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "valueLicenseRedis = Integer.valueOf(Base64Util.decode(split[0]));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/rpc/BranchOfficeApiServiceImpl.java",
+      "line": 34,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String decodeOriginUrl = Base64Util.decode(originUrl);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-service/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/service/rpc/BranchOfficeApiServiceImpl.java",
+      "line": 35,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String decodeHostUrl = Base64Util.decode(hostUrl);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework1/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/util/ClassExUtil.java",
+      "line": 165,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "return Objects.isNull(value) || Modifier.isStatic(field.getModifiers())",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework1/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/aspect/AuditLogAspect.java",
+      "line": 123,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(arg)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework1/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/strategy/AuditLogStrategy.java",
+      "line": 22,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(model)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/system-config-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemconfig/service/impl/SystemConfigServiceImpl.java",
+      "line": 139,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "List<ConfigCatalogPO> configCatalogPos = catalogService.list(new QueryWrapper<ConfigCatalogPO>().lambda().isNull(true, ConfigCatalogPO::getParentId).eq(ConfigCatalogPO::getHasHide, false).orderByAsc(ConfigCatalogPO::getSort));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/theme-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/theme/webapi/PersonalThemeInterApiController.java",
+      "line": 50,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(personalThemePO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/useragent/UserAgent.java",
+      "line": 121,
+      "pattern": "mysql-engine",
+      "severity": "error",
+      "excerpt": "this.engine = engine;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/useragent/UserAgentParser.java",
+      "line": 27,
+      "pattern": "mysql-engine",
+      "severity": "error",
+      "excerpt": "final Engine engine = parseEngine(userAgentString);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/utils/AESUtils.java",
+      "line": 62,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "return new String(cipher.doFinal(Base64.getDecoder().decode(base64Data)));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/utils/Base64Util.java",
+      "line": 43,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static String decode(String encodedText) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-common/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/common/utils/Base64Util.java",
+      "line": 46,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "text = new String(decoder.decode(encodedText), \"UTF-8\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/com/supcon/supfusion/license/common/utils/security/Base64Util.java",
+      "line": 45,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static String decode(String encodedText) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/com/supcon/supfusion/license/common/utils/security/Base64Util.java",
+      "line": 48,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "text = new String(decoder.decode(encodedText), \"UTF-8\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/com/supcon/supfusion/license/common/utils/security/Base64Util.java",
+      "line": 67,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "System.out.println(Base64Util.decode(Base64Util.encode(username)));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/license-common/1.0.0-SNAPSHOT/com/supcon/supfusion/license/common/utils/security/Base64Util.java",
+      "line": 68,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "System.out.println(Base64Util.decode(Base64Util.encode(password)));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/OtpUtil.java",
+      "line": 33,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "secretHex = HexEncoding.encode(Base32String.decode(secretBase32));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/utils/Base64Util.java",
+      "line": 43,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static String decode(String encodedText) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/utils/Base64Util.java",
+      "line": 46,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "text = new String(decoder.decode(encodedText), \"UTF-8\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/util/TotpUtil.java",
+      "line": 133,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "int codeDigits = Integer.decode(returnDigits).intValue();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/util/TotpUtil.java",
+      "line": 196,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "secretHex = HexEncoding.encode(Base32String.decode(secretBase32));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/util/HexEncoding.java",
+      "line": 27,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static byte[] decode(String encoded) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/file-server-common/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/common/otp/util/Base32String.java",
+      "line": 51,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static byte[] decode(String encoded) throws DecodingException {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+      "line": 120,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(SystemCodePO.getParentIdFieldName());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+      "line": 419,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (!Objects.isNull(currentSystemCodePO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+      "line": 450,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(systemCodePO)) continue;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+      "line": 506,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(SystemCodePO.getParentIdFieldName());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemCodeServiceImpl.java",
+      "line": 608,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(currentSystemCodePO)) return;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemEntityServiceImpl.java",
+      "line": 111,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(SystemEntityPO.getSourceName());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemEntityServiceImpl.java",
+      "line": 338,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(moduleDTO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/impl/SystemEntityServiceImpl.java",
+      "line": 345,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(systemEntityPO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+      "line": 227,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(currentSystemCode)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+      "line": 238,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(systemCodeParent)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+      "line": 341,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(systemCodeParent)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+      "line": 385,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(systemCodeParent)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/systemcode-service/1.0.0-SNAPSHOT/com/supcon/supfusion/systemcode/service/rpc/SystemCodeApiServiceImpl.java",
+      "line": 442,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(SystemCodePO.getParentIdFieldName());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom-property-service/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/server/impl/ViewServiceFoundationImpl.java",
+      "line": 245,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "customPropertyViewMappingLambdaQueryWrapper.isNull(CustomPropertyView::getPropertyLayRec);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+      "line": 29,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "public static String SQL_KEYWORDS_TO_DATE = \"to_date(?, 'yyyy-mm-dd')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/custom-property-common/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/common/constants/Constants.java",
+      "line": 30,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "public static String SQL_KEYWORDS_TO_DATETIME = \"to_date(?, 'yyyy-mm-dd HH24:mi:ss')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/webapi/UserPermissionController.java",
+      "line": 238,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(userPermissionAddVO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/webapi/MenuInfoInterApiController.java",
+      "line": 793,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(menuInfoPO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/webapi/RolePermissionController.java",
+      "line": 223,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(rolePermissionAddVO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+      "line": 232,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "judgeWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+      "line": 653,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+      "line": 1522,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+      "line": 2184,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/DepartmentServiceImpl.java",
+      "line": 2231,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "subPosWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+      "line": 221,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "judgeWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+      "line": 586,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+      "line": 1827,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+      "line": 2391,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PositionServiceImpl.java",
+      "line": 2437,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "subPosWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 1464,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "Integer rowNum = page * per_page;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 1466,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "if (rowNum > persons.size()) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 1469,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "endIndex = rowNum;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 203,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (!Objects.isNull(comPO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 1757,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/CompanyServiceImpl.java",
+      "line": 1832,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.isNull(\"parent_id\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTopicTreeServieImpl.java",
+      "line": 79,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "topicWrapper.isNull(\"i18n_key\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/scheduling/DynamicTableTask.java",
+      "line": 285,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "List<HashMap<String, String>> query = jdbcTemplate.query(sql, new Object[]{version}, (rs, rowNum) -> {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/scheduling/DynamicTableTask.java",
+      "line": 391,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "sqls.add(String.format(alterSql, tableName, topicId, \"NUMBER(20,0)\"));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/notification/sms-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/sms/service/impl/SmsServiceImpl.java",
+      "line": 144,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "// if (Objects.isNull(config)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.6.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/util/ClassExUtil.java",
+      "line": 181,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "return Objects.isNull(value) || Modifier.isStatic(field.getModifiers())",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.6.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/aspect/AuditLogAspect.java",
+      "line": 123,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(arg)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.6.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/strategy/AuditLogStrategy.java",
+      "line": 23,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(model)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.5.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/util/ClassExUtil.java",
+      "line": 165,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "return Objects.isNull(value) || Modifier.isStatic(field.getModifiers())",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.5.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/aspect/AuditLogAspect.java",
+      "line": 123,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(arg)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.5.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/strategy/AuditLogStrategy.java",
+      "line": 22,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(model)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/util/ClassExUtil.java",
+      "line": 165,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "return Objects.isNull(value) || Modifier.isStatic(field.getModifiers())",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/aspect/AuditLogAspect.java",
+      "line": 123,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(arg)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/framework/scaffold-auditlog/1.0.4.RELEASE/com/supcon/supfusion/framework/scaffold/auditlog/strategy/AuditLogStrategy.java",
+      "line": 22,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(model)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "line": 38,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select curCom.id, curCom.code, curCom.full_name as fullName, curCom.short_name as shortName, curCom.description, curCom.full_path as fullPath, curCom.lay_no as layNo, curCom.sort,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "line": 49,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "line": 136,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "(select temp.*,rownum row_id from",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "line": 42,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curCom.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "line": 89,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curCom.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMneCodeMapper.xml",
+      "line": 31,
+      "pattern": "oracle-dual",
+      "severity": "error",
+      "excerpt": "from dual",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 62,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select parentPos.code as parentCode, curPos.id, curPos.code, curPos.name, curPos.valid, curPos.modify_time as modifyTime, curPos.description, curPos.full_path as fullPath, curPos.lay_no as la",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 75,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 157,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select pos.id, pos.code, pos.name, pos.full_path as fullPath, parentPos.code as parentCode, dept.code as deptCode, dept.name as deptName, company.code as companyCode,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 166,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 68,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curPos.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "line": 121,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curPos.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMneCodeMapper.xml",
+      "line": 33,
+      "pattern": "oracle-dual",
+      "severity": "error",
+      "excerpt": "from dual",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMneCodeMapper.xml",
+      "line": 31,
+      "pattern": "oracle-dual",
+      "severity": "error",
+      "excerpt": "from dual",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 59,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select curDept.id, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.description, curDept.full_path as fullPath, curDept.lay_no as layNo, curDept.sort,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 70,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 152,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select curDept.id, curDept.code, curDept.name, curDept.dept_type as deptType, curDept.valid, curDept.full_path as fullPath, parentDept.code as parentCode, company.code as companyCode,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 159,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 63,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curDept.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "line": 110,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(curDept.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 54,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select DISTINCT op.id, op.code, op.name, op.valid, op.gender, op.status,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 63,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 113,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select distinct op.id, op.code, op.name, op.valid, op.gender, op.status, op.modify_time,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 122,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "where ROWNUM &lt;= #{current}*#{pageSize}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 172,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "select * from (select TMP.*, ROWNUM ROW_ID from (select distinct op.id, op.code, op.name, op.valid,",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 241,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(op.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "line": 291,
+      "pattern": "oracle-to-char",
+      "severity": "error",
+      "excerpt": "where to_char(op.modify_time ,'yyyy-mm-dd hh24:mi:ss') > #{modifyTime}",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMneCodeMapper.xml",
+      "line": 31,
+      "pattern": "oracle-dual",
+      "severity": "error",
+      "excerpt": "from dual",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+      "line": 29,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "AtomicInteger rownum = new AtomicInteger();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+      "line": 32,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "rownum.incrementAndGet();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+      "line": 50,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "setData(excelCallback, sheet, rownum, cellStyle);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+      "line": 66,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "private static void setData(ExcelCallback excelCallback, XSSFSheet sheet, AtomicInteger rownum, CellStyle cellStyle) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-service/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/services/utils/excel/ExcelUtils.java",
+      "line": 74,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "XSSFRow dataRow = sheet.createRow(rownum.getAndIncrement());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+      "line": 90,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static byte[] decode(byte[] bytes) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+      "line": 91,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "return decode(bytes, 0, bytes.length, NO_OPTIONS);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+      "line": 100,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "decode(bytes);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+      "line": 416,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "private static byte[] decode(byte[] source, int off, int len, int options) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/BAPUrlBase64.java",
+      "line": 482,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String pc = new String(decode(_pc.getBytes()));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/ValidateUtils.java",
+      "line": 56,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "public static boolean isNULL(String content) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/Constants.java",
+      "line": 123,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "String SQL_KEYWORDS_TO_DATE = \"to_date(?, 'yyyy-mm-dd')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/signature/signature-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/signature/dao/utils/Constants.java",
+      "line": 127,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "String SQL_KEYWORDS_TO_DATETIME = \"to_date(?, 'yyyy-mm-dd HH24:mi:ss')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/webapi/controller/HeadOfficeController.java",
+      "line": 73,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "redirectUri = Base64Util.decode(redirectUri);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/auth-webapi/1.0.0-SNAPSHOT/com/supcon/supfusion/auth/webapi/controller/HeadOfficeController.java",
+      "line": 92,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "password = Base64Util.decode(password);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/system-config-common/1.1.1.RELEASE/com/supcon/supfusion/systemconfig/common/util/Base64Util.java",
+      "line": 36,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "byte[] decoded = Base64.getDecoder().decode(str);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/system-config-common/1.0.0-SNAPSHOT/com/supcon/supfusion/systemconfig/common/util/Base64Util.java",
+      "line": 36,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "byte[] decoded = Base64.getDecoder().decode(str);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/DataPermissionServiceImpl.java",
+      "line": 65,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "return rbacDataResourceGroupService.list(Wrappers.<RbacDataResourceGroupPO>query().eq(RbacDataResourceGroupPO.getCidFieldName(), cid).or().isNull(RbacDataResourceGroupPO.getCidFieldName()));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/RoleServiceImpl.java",
+      "line": 349,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "queryWrapper.and(i -> i.eq(\"parent_id\", \"-1\").or().isNull(\"parent_id\"));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/FlowPermissionServiceImpl.java",
+      "line": 101,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "userpermissionId = (Long.decode(objectMap.get(\"ID\").toString()));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/MenuInfoServiceImpl.java",
+      "line": 720,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(menuInfoPO)) continue;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/MenuInfoServiceImpl.java",
+      "line": 775,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(currentMenuInfoPO)) return;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/impl/MenuInfoServiceImpl.java",
+      "line": 1887,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(menuInfoPO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-service/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/service/rpc/MenuOperateApiServiceImpl.java",
+      "line": 186,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "wrapper.isNull(\"ACTION_URL\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+      "line": 1573,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "for (Integer rowNum : i18n_key_errorMap.keySet()) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+      "line": 1574,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "Row row = errorFileSheet.getRow(rowNum);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+      "line": 1578,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "cell2.setCellValue(i18n_key_errorMap.get(rowNum));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+      "line": 1583,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "for (Integer rowNum : i18n_value_errorMap.keySet()) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java",
+      "line": 1584,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "Row row = errorFileSheet.getRow(rowNum);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/DbUtils.java",
+      "line": 142,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "public T mapRow(ResultSet rs, int rowNum) throws SQLException {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 176,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"PROCESS_KEY VARCHAR2(510 CHAR),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 185,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"POSITION_LAY_REC VARCHAR2(510 CHAR),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 189,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"TABLE_NO VARCHAR2(510 CHAR),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 244,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"FULL_PATH_NAME VARCHAR2(4000 CHAR),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 245,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"PARENT_ID VARCHAR2(510 CHAR),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 125,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ID NUMBER(19,0),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 126,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"VERSION NUMBER(*,0) DEFAULT 0,\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 130,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"DELETE_STAFF_ID NUMBER(19,0),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 131,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"MODIFY_STAFF_ID NUMBER(19,0),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java",
+      "line": 132,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"CREATE_STAFF_ID NUMBER(19,0),\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+      "line": 90,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static byte[] decode(byte[] bytes) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+      "line": 91,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "return decode(bytes, 0, bytes.length, NO_OPTIONS);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+      "line": 100,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "decode(bytes);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+      "line": 416,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "private static byte[] decode(byte[] source, int off, int len, int options) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/BAPUrlBase64.java",
+      "line": 482,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String pc = new String(decode(_pc.getBytes()));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 131,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" VARCHAR2(\" + maxLength + \" CHAR));\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 134,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" VARCHAR2(4000 CHAR)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 137,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" VARCHAR2(4000 CHAR)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 167,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" VARCHAR2(4000 CHAR)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 171,
+      "pattern": "oracle-varchar2",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" VARCHAR2(\" + maxLength + \" CHAR));\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 140,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" NUMBER(*,0)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 143,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" NUMBER(19,\" + property.getDecimalNum() + \"));\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 155,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" NUMBER(*,0)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 161,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" NUMBER(19,0)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 165,
+      "pattern": "oracle-number",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" ADD (\" + colName + \" NUMBER(19,0)\" + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 241,
+      "pattern": "mysql-alter-modify",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" MODIFY (\" + oldColName + \" VARCHAR2(\" + maxLength + \" CHAR));\");//执行变更SQL，不关心变更是否成功",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 595,
+      "pattern": "mysql-alter-modify",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" MODIFY COLUMN \" + oldColName + \" varchar(\" + maxLength + \");\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 605,
+      "pattern": "mysql-alter-modify",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" MODIFY COLUMN \" + colName + \" timestamp NULL;\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
+      "line": 607,
+      "pattern": "mysql-alter-modify",
+      "severity": "error",
+      "excerpt": "tarSql.append(\"ALTER TABLE \" + modelTableName + \" MODIFY COLUMN \" + colName + \" timestamp NOT NULL;\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/Constants.java",
+      "line": 123,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "String SQL_KEYWORDS_TO_DATE = \"to_date(?, 'yyyy-mm-dd')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/Constants.java",
+      "line": 127,
+      "pattern": "oracle-to-date",
+      "severity": "error",
+      "excerpt": "String SQL_KEYWORDS_TO_DATETIME = \"to_date(?, 'yyyy-mm-dd HH24:mi:ss')\";",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/CustomCodeServiceImpl.java",
+      "line": 112,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "c = customCodeDao.findEntityByCriteria(Restrictions.eq(\"moduleCode\", cc.getModuleCode()), Restrictions.isNull(\"modelCode\"),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java",
+      "line": 415,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.or(Restrictions.eq(\"inherentCommonFlag\", false), Restrictions.isNull(\"inherentCommonFlag\")) };",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java",
+      "line": 420,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "cs[criterions.length + 1] = Restrictions.or(Restrictions.eq(\"inherentCommonFlag\", false), Restrictions.isNull(\"inherentCommonFlag\"));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ViewServiceImpl.java",
+      "line": 1595,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.or(Restrictions.eq(\"mobile\", Boolean.FALSE), Restrictions.isNull(\"mobile\")));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
+      "line": 1363,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "detachedCriteria.add(Restrictions.or(Restrictions.eq(\"isCustom\", false), Restrictions.isNull(\"isCustom\")));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java",
+      "line": 2166,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "List<Property> list = propertyDao.findByCriteria(Restrictions.isNotNull(\"associatedProperty\"), Restrictions.isNull(\"isMainAssociated\"));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ButtonServiceImpl.java",
+      "line": 442,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "buttons = buttonDao.findByCriteria(Restrictions.eq(\"valid\", true), Restrictions.isNull(\"operateType\"));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/workflow/service/impl/WorkflowProcessServiceImpl.java",
+      "line": 386,
+      "pattern": "mysql-backtick",
+      "severity": "error",
+      "excerpt": "//如果原先该环节已经被设置为“不允许委托”，如果修改为“允许委托”，则只修改流程实例，``不恢复``之前被删除的委托待办和预期委托数据，需要用户重新进入委托管理或待办管理中进行操作",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/org/jbpm/pvm/internal/script/GroovyCompiledScript.java",
+      "line": 44,
+      "pattern": "mysql-engine",
+      "severity": "error",
+      "excerpt": "this.engine = engine;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/org/jbpm/pvm/internal/script/JuelScriptEngine.java",
+      "line": 303,
+      "pattern": "mysql-engine",
+      "severity": "error",
+      "excerpt": "this.engine = engine;",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-workflow/1.0.0-SNAPSHOT/org/jbpm/pvm/internal/script/XPathScriptEngineFactory.java",
+      "line": 98,
+      "pattern": "mysql-engine",
+      "severity": "error",
+      "excerpt": "XPathScriptEngine engine = new XPathScriptEngine();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ValidateUtils.java",
+      "line": 56,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "public static boolean isNULL(String content) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+      "line": 98,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.isNull(\"mobile\")), Restrictions.eq(\"valid\",",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+      "line": 120,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.isNull(\"mobile\")), Restrictions.eq(\"valid\",",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+      "line": 121,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Boolean.TRUE), Restrictions.isNull(\"projFlag\"), Restrictions",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+      "line": 122,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": ".isNull(\"inheritType\"), Restrictions.or(",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/controller/ProjectViewController.java",
+      "line": 124,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.isNull(\"customFlag\")),Restrictions.ne(\"type\", ViewType.DIGEST),Restrictions.eq(\"isShadow\", Boolean.FALSE));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-project-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/projectapi/services/impl/ProjViewImExServiceImpl.java",
+      "line": 203,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.or(Restrictions.eq(\"mobile\", Boolean.FALSE), Restrictions.isNull(\"mobile\")), Restrictions.eq(\"valid\", Boolean.TRUE),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/openapi/controller/EcImportController.java",
+      "line": 760,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "// list.add(Restrictions.or(Restrictions.eq(\"isCustom\", false), Restrictions.isNull(\"isCustom\")));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/DataPermissionServiceImpl.java",
+      "line": 1311,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "Long pId = Long.decode(map.get(\"POSITIONID\").toString());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/DataPermissionServiceImpl.java",
+      "line": 1344,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "Long pId = Long.decode(map.get(\"POSITIONID\").toString());",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/StaffServiceImpl.java",
+      "line": 93,
+      "pattern": "oracle-rownum",
+      "severity": "error",
+      "excerpt": "* rownum",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+      "line": 193,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "List<MenuInfo> list = menuInfoDao.createCriteria(Restrictions.or(Restrictions.eq(\"entityCode\", entityCode), Restrictions.and(Restrictions.isNull(\"entityCode\"), Restrictions.like(\"entityCode\", entityCode, MatchMode.START))), Restrictions.eq(",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+      "line": 425,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": ".createCriteria(Restrictions.or(Restrictions.isNull(\"parentId\"), Restrictions.eq(\"parentId\", new Long(-1))),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+      "line": 426,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.eq(\"valid\", true), Restrictions.or(Restrictions.ne(\"absoluteHidden\", true), Restrictions.isNull(\"absoluteHidden\"))).addOrder(Order.asc(\"sort\")).addOrder(Order.asc(\"id\")).list();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+      "line": 431,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "(!groupOnly ? Restrictions.or(Restrictions.isNull(\"groupOnly\"), Restrictions.eq(\"groupOnly\", false)) : Restrictions.or(",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/MenuInfoServiceImpl.java",
+      "line": 432,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.isNull(\"groupOnly\"), Restrictions.and(Restrictions.eq(\"groupOnly\", true), Restrictions.eq(\"cid\", 1l)))),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+      "line": 650,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": ".createCriteria(Restrictions.or(Restrictions.isNull(\"parentId\"), Restrictions.eq(\"parentId\", new Long(-1))),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+      "line": 651,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.eq(\"valid\", true), Restrictions.or(Restrictions.ne(\"absoluteHidden\", true), Restrictions.isNull(\"absoluteHidden\"))).addOrder(Order.asc(\"sort\")).addOrder(Order.asc(\"id\")).list();",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+      "line": 656,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "(!groupOnly ? Restrictions.or(Restrictions.isNull(\"groupOnly\"), Restrictions.eq(\"groupOnly\", false)) : Restrictions.or(",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+      "line": 657,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.isNull(\"groupOnly\"), Restrictions.and(Restrictions.eq(\"groupOnly\", true), Restrictions.eq(\"cid\", 1l)))),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/configuration/configuration-services-base/1.0.0-SNAPSHOT/com/supcon/supfusion/base/services/impl/CustomMenuInfoServiceImpl.java",
+      "line": 658,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "Restrictions.in(\"cid\", cids), Restrictions.or(Restrictions.isNull(\"parentId\"), Restrictions.eq(\"parentId\", new Long(-1))),",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/theme-service/1.0.0-SNAPSHOT/com/supcon/supfusion/theme/service/impl/PersonalThemeServiceImpl.java",
+      "line": 63,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(personalThemePO)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+      "line": 90,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static byte[] decode(byte[] bytes) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+      "line": 91,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "return decode(bytes, 0, bytes.length, NO_OPTIONS);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+      "line": 100,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "decode(bytes);",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+      "line": 416,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "private static byte[] decode(byte[] source, int off, int len, int options) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/BAPUrlBase64.java",
+      "line": 482,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "String pc = new String(decode(_pc.getBytes()));",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/Base64Util.java",
+      "line": 43,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "public static String decode(String encodedText) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-common/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/common/utils/Base64Util.java",
+      "line": 46,
+      "pattern": "oracle-decode",
+      "severity": "error",
+      "excerpt": "text = new String(decoder.decode(encodedText), \"UTF-8\");",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/dao/TagMapper.java",
+      "line": 26,
+      "pattern": "mysql-group-concat",
+      "severity": "error",
+      "excerpt": "@Select(\"SELECT tag.name, GROUP_CONCAT(OBJECTID separator ',') objectIds from rbac_tag tag \" +",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/dao/po/MenuSuposPO.java",
+      "line": 94,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(this.children)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/dao/po/MenuSuposPO.java",
+      "line": 101,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(this.children)) {",
+      "scope": "runtime-default"
+    },
+    {
+      "file": "modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/rbac/dao/po/MenuInfoPO.java",
+      "line": 323,
+      "pattern": "sqlserver-isnull",
+      "severity": "error",
+      "excerpt": "if (Objects.isNull(this.getChildren())) {",
+      "scope": "runtime-default"
+    }
+  ],
+  "undecodable": []
+}

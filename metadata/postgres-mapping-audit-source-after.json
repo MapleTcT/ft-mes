@@ -1,0 +1,11 @@
+{
+  "summary": {
+    "findingCount": 0,
+    "undecodableCount": 0,
+    "byPattern": {},
+    "byScope": {},
+    "topFiles": []
+  },
+  "findings": [],
+  "undecodable": []
+}

@@ -63,12 +63,7 @@
                 <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
                 <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
                 AND (
-                <if test="dbType == 'oracle'">
-                    roleUser.USER_NAME like #{userName} ESCAPE '\'
-                    OR roleUser.PERSON_NAME like #{personName} ESCAPE '\'
-                    OR roleUser.PERSON_CODE like #{personCode} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     roleUser.USER_NAME like #{userName}
                     OR roleUser.PERSON_NAME like #{personName}
                     OR roleUser.PERSON_CODE like #{personCode}
@@ -95,12 +90,7 @@
                 <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
                 <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
                 AND (
-                <if test="dbType == 'oracle'">
-                    ru.USER_NAME like #{userName} ESCAPE '\'
-                    OR ru.PERSON_NAME like #{personName} ESCAPE '\'
-                    OR ru.PERSON_CODE like #{personCode} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     ru.USER_NAME like #{userName}
                     OR ru.PERSON_NAME like #{personName}
                     OR ru.PERSON_CODE like #{personCode}
@@ -121,12 +111,7 @@
                 <bind name="personName" value="'%' + roleUserQuery.personName + '%'"/>
                 <bind name="personCode" value="'%' + roleUserQuery.personCode + '%'"/>
                 AND (
-                <if test="dbType == 'oracle'">
-                    ru.USER_NAME like #{userName} ESCAPE '\'
-                    OR ru.PERSON_NAME like #{personName} ESCAPE '\'
-                    OR ru.PERSON_CODE like #{personCode} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     ru.USER_NAME like #{userName}
                     OR ru.PERSON_NAME like #{personName}
                     OR ru.PERSON_CODE like #{personCode}

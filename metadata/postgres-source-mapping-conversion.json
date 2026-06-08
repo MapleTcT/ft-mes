@@ -1,0 +1,82 @@
+{
+  "changedFileCount": 11,
+  "changedFiles": [
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMapper.xml",
+      "warnings": [
+        "postgres-default-branches:3",
+        "removed-non-postgres-branches:5"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMneCodeMapper.xml",
+      "warnings": [
+        "postgres-default-branches:2",
+        "removed-non-postgres-branches:3"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMapper.xml",
+      "warnings": [
+        "postgres-default-branches:3",
+        "removed-non-postgres-branches:5"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/CompanyMneCodeMapper.xml",
+      "warnings": [
+        "postgres-default-branches:2",
+        "removed-non-postgres-branches:3"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PositionMneCodeMapper.xml",
+      "warnings": [
+        "postgres-default-branches:2",
+        "removed-non-postgres-branches:3"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMapper.xml",
+      "warnings": [
+        "postgres-default-branches:3",
+        "removed-non-postgres-branches:5"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/PersonMapper.xml",
+      "warnings": [
+        "postgres-default-branches:29",
+        "removed-non-postgres-branches:41"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/mappers/DepartmentMneCodeMapper.xml",
+      "warnings": [
+        "postgres-default-branches:2",
+        "removed-non-postgres-branches:3"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/mapper/MenuInfoMapper.xml",
+      "warnings": [
+        "postgres-default-branches:4",
+        "removed-non-postgres-branches:4"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/mapper/MenuOperateMapper.xml",
+      "warnings": [
+        "postgres-default-branches:1",
+        "removed-non-postgres-branches:1"
+      ]
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/adp-source-repo/backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/mapper/RoleUserMapper.xml",
+      "warnings": [
+        "postgres-default-branches:3",
+        "removed-non-postgres-branches:3"
+      ]
+    }
+  ]
+}

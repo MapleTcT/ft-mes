@@ -178,11 +178,7 @@
             <if test="menuOperateQuery.name != null">
                 <bind name="pattern_name" value="'%' + menuOperateQuery.name + '%'"/>
                 <bind name="pattern_code" value="'%' + menuOperateQuery.code + '%'"/>
-                <if test="dbType == 'oracle'">
-                    AND mm.MNE_CODE like #{pattern_name} ESCAPE '\'
-                    AND mo.CODE like #{pattern_code} ESCAPE '\'
-                </if>
-                <if test="dbType != 'oracle'">
+                <if test="dbType == 'postgresql'">
                     AND mm.MNE_CODE like #{pattern_name}
                     AND mo.CODE like #{pattern_code}
                 </if>

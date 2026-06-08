@@ -30,7 +30,7 @@ public class UserPermissionProvider {
     public String getNewPositionPermissionList(@Param("cid") Long cid, @Param("opIds") List<Long> opIds, @Param("roleId") Long roleId, @Param("userId") Long userId) {
         StringBuilder sql = new StringBuilder();
         sql.append("<script>");
-        sql.append("select distinct up.ID as upid,rpp.POSITION_ID pid,max(rpp.INCLUDE_LOWER) as includeLower");
+        sql.append("select distinct up.ID as upid,rpp.POSITION_ID pid,CASE WHEN bool_or(rpp.INCLUDE_LOWER) THEN 1 ELSE 0 END as includeLower");
         sql.append(" from rbac_rolepermission rp");
         sql.append(" left join rbac_rolepposition rpp on rpp.ROLEPERMISSION_ID = rp.ID");
         sql.append(" left join rbac_userpermission up on up.MENUOPERATE_ID = rp.MENUOPERATE_ID");

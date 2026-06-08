@@ -62,7 +62,7 @@ public class MenuOperateCodeUrlRefServiceImpl extends ServiceImpl<MenuOperateCod
     @Override
     public void updateUrl(String app) {
         //查找不需要匹配的URL
-        List<MenuOperateCodeUrlRefPO> completeMatch = menuOperateCodeUrlRefMapper.selectList(new QueryWrapper<MenuOperateCodeUrlRefPO>().eq(MenuOperateCodeUrlRefField.regMatch, 0).eq(!ObjectUtils.isEmpty(app),MenuOperateCodeUrlRefField.app,app));
+        List<MenuOperateCodeUrlRefPO> completeMatch = menuOperateCodeUrlRefMapper.selectList(new QueryWrapper<MenuOperateCodeUrlRefPO>().eq(MenuOperateCodeUrlRefField.regMatch, false).eq(!ObjectUtils.isEmpty(app),MenuOperateCodeUrlRefField.app,app));
         //根据请求方式分组
         Map<Integer, List<MenuOperateCodeUrlRefPO>> groupByType = completeMatch.stream().filter(menuOperateCodeUrlRefPO -> !ObjectUtils.isEmpty(menuOperateCodeUrlRefPO.getMethodType())).collect(Collectors.groupingBy(MenuOperateCodeUrlRefPO::getMethodType));
         Map<String,Map<String, Object>> methodTypeMap = new HashMap<>();
@@ -105,7 +105,7 @@ public class MenuOperateCodeUrlRefServiceImpl extends ServiceImpl<MenuOperateCod
         redisAdd(app,"completeMatchUrl",methodTypeMap);
 
         //查找需要匹配的URL
-        List<MenuOperateCodeUrlRefPO> regMatch = menuOperateCodeUrlRefMapper.selectList(new QueryWrapper<MenuOperateCodeUrlRefPO>().eq(MenuOperateCodeUrlRefField.regMatch, 1).eq(!ObjectUtils.isEmpty(app),MenuOperateCodeUrlRefField.app,app));
+        List<MenuOperateCodeUrlRefPO> regMatch = menuOperateCodeUrlRefMapper.selectList(new QueryWrapper<MenuOperateCodeUrlRefPO>().eq(MenuOperateCodeUrlRefField.regMatch, true).eq(!ObjectUtils.isEmpty(app),MenuOperateCodeUrlRefField.app,app));
 
         //根据请求方式分组
         Map<Integer, List<MenuOperateCodeUrlRefPO>> reg_groupByType = regMatch.stream().collect(Collectors.groupingBy(MenuOperateCodeUrlRefPO::getMethodType));

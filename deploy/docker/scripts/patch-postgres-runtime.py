@@ -99,6 +99,12 @@ def postgres_xml_from_mysqlish(text: str) -> tuple[str, list[str]]:
     converted = text
     converted = converted.replace("`", "")
     converted = re.sub(r"\bIFNULL\s*\(", "COALESCE(", converted, flags=re.IGNORECASE)
+    converted = re.sub(
+        r"\bGROUP_CONCAT\s*\(\s*([^)]+?)\s*\)",
+        r"STRING_AGG(\1::text, ',')",
+        converted,
+        flags=re.IGNORECASE,
+    )
     converted = re.sub(r"\bNOW\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bSYSDATE\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bCURDATE\s*\(\s*\)", "CURRENT_DATE", converted, flags=re.IGNORECASE)
@@ -114,6 +120,126 @@ def postgres_xml_from_mysqlish(text: str) -> tuple[str, list[str]]:
 
     flags = [pattern for pattern in UNSUPPORTED_SQL_PATTERNS if pattern.lower() in converted.lower()]
     return converted, flags
+
+
+def _if_line_dbtype(line: str) -> str | None:
+    match = re.search(r"<if\s+test=\"([^\"]*\bdbType\b[^\"]*)\"", line)
+    if match:
+        return match.group(1)
+    return None
+
+
+def _line_if_depth(line: str) -> int:
+    return len(re.findall(r"<if\b", line)) - len(re.findall(r"</if>", line))
+
+
+def _postgres_if_test(original: str) -> str:
+    if "dbType == null" in original or "dbType==null" in original or "dbType == ''" in original or "dbType==''" in original:
+        return "dbType == null or dbType == '' or dbType == 'postgresql'"
+    return "dbType == 'postgresql'"
+
+
+def _replace_if_test(line: str, new_test: str) -> str:
+    return re.sub(r"(<if\s+test=\")[^\"]*(\")", rf"\1{new_test}\2", line, count=1)
+
+
+def _convert_postgres_xml_sql_line(line: str) -> str:
+    converted = line.replace("`", "")
+    converted = re.sub(
+        r"\blimit\s+(#\{[^}]+\}|\$\{[^}]+\}|\d+)\s*,\s*(#\{[^}]+\}|\$\{[^}]+\}|\d+)",
+        r"limit \2 offset \1",
+        converted,
+        flags=re.IGNORECASE,
+    )
+    converted = re.sub(r"\bIFNULL\s*\(", "COALESCE(", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bNOW\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bSYSDATE\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bCURDATE\s*\(\s*\)", "CURRENT_DATE", converted, flags=re.IGNORECASE)
+    converted = re.sub(
+        r"length\s*\(\s*MNE_CODE\s*\)\s*!=\s*char_length\s*\(\s*MNE_CODE\s*\)",
+        "length(MNE_CODE) != octet_length(MNE_CODE)",
+        converted,
+        flags=re.IGNORECASE,
+    )
+    return converted
+
+
+def postgres_xml_from_dynamic_dbtype(text: str) -> tuple[str, list[str]]:
+    """Rewrite legacy dbType branches in default mapper XML to PostgreSQL-only SQL.
+
+    Some ADP mapper XML files are loaded from classpath:mappers/*.xml and contain
+    mutually-exclusive Oracle/MySQL/SQLServer branches. For PostgreSQL runtime,
+    keeping those files unchanged means dbType=postgresql can render an empty SQL
+    fragment. This keeps the same mapper namespace/id surface while removing
+    Oracle/SQLServer branches from the default runtime mapper and converting the
+    MySQL/MariaDB branch into the PostgreSQL branch.
+    """
+    if "dbType" not in text:
+        return text, []
+
+    output: list[str] = []
+    skip_depth = 0
+    changed = False
+    branch_count = 0
+    removed_count = 0
+
+    for line in text.splitlines(keepends=True):
+        if skip_depth:
+            skip_depth += _line_if_depth(line)
+            if skip_depth <= 0:
+                skip_depth = 0
+            changed = True
+            continue
+
+        test = _if_line_dbtype(line)
+        if test is not None:
+            lowered = test.lower()
+            has_pg = "postgresql" in lowered or "postgres" in lowered
+            has_not_oracle = re.search(r"dbtype\s*!=\s*'oracle'", lowered) is not None
+            has_mysqlish = "mysql" in lowered or "mariadb" in lowered or "dbtype == null" in lowered or "dbtype==null" in lowered or "dbtype == ''" in lowered or "dbtype==''" in lowered
+            has_oracle = "oracle" in lowered
+            has_sqlserver = "sqlserver" in lowered
+
+            if not has_pg and has_not_oracle:
+                line = _replace_if_test(line, _postgres_if_test(test))
+                branch_count += 1
+                changed = True
+            elif not has_pg and has_oracle and not has_mysqlish:
+                skip_depth = _line_if_depth(line)
+                removed_count += 1
+                changed = True
+                if skip_depth <= 0:
+                    skip_depth = 0
+                continue
+            elif not has_pg and has_sqlserver and not has_mysqlish:
+                skip_depth = _line_if_depth(line)
+                removed_count += 1
+                changed = True
+                if skip_depth <= 0:
+                    skip_depth = 0
+                continue
+            elif not has_pg and has_mysqlish:
+                line = _replace_if_test(line, _postgres_if_test(test))
+                branch_count += 1
+                changed = True
+
+        output.append(_convert_postgres_xml_sql_line(line))
+
+    converted = "".join(output)
+    converted = re.sub(
+        r"(?m)([ \t]*<if test=\"dbType == 'postgresql'\">[^\n]*</if>\n)(?:\1)+",
+        r"\1",
+        converted,
+    )
+    warnings: list[str] = []
+    if branch_count:
+        warnings.append(f"postgres-default-branches:{branch_count}")
+    if removed_count:
+        warnings.append(f"removed-non-postgres-branches:{removed_count}")
+    if changed:
+        _, risky = postgres_xml_from_mysqlish(converted)
+        warnings.extend(risky)
+    return converted, warnings
 
 
 def _strip_inline_comments(text: str) -> str:
@@ -172,6 +298,71 @@ def _convert_alter_indexes(text: str) -> str:
     return text
 
 
+def _convert_oracle_type_tokens(text: str) -> str:
+    text = re.sub(r"\bVARCHAR2\s*\(", "VARCHAR(", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNVARCHAR2\s*\(", "VARCHAR(", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bCLOB\b", "TEXT", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bBLOB\b", "BYTEA", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNUMBER\s*\(\s*1\s*,\s*0\s*\)", "SMALLINT", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNUMBER\s*\(\s*(\d+)\s*,\s*0\s*\)", r"NUMERIC(\1,0)", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bNUMBER\s*\(([^)]+)\)", r"NUMERIC(\1)", text, flags=re.IGNORECASE)
+    return text
+
+
+def _clean_column_type(value: str) -> str:
+    value = _convert_oracle_type_tokens(value)
+    value = re.sub(r"\bCHARACTER\s+SET\s+[A-Za-z0-9_]+", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bCOLLATE\s+[A-Za-z0-9_]+", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"\s+", " ", value)
+    return value.strip()
+
+
+def _normalize_default_value(value: str) -> str:
+    value = value.strip()
+    value = re.sub(r"\bcurrent_timestamp\s*\(\s*\)", "CURRENT_TIMESTAMP", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bnow\s*\(\s*\)", "CURRENT_TIMESTAMP", value, flags=re.IGNORECASE)
+    value = re.sub(r"'0000-00-00(?:\s+00:00:00(?:\.000000)?)?'", "CURRENT_TIMESTAMP", value, flags=re.IGNORECASE)
+    return value
+
+
+def _convert_modify_column_statements(text: str) -> str:
+    def convert(match: re.Match[str]) -> str:
+        table = match.group("table")
+        column = match.group("column")
+        rest = _clean_column_type(match.group("rest"))
+        attr_match = re.search(r"\s+(DEFAULT\b|NOT\s+NULL\b|NULL\b)", rest, flags=re.IGNORECASE)
+        if attr_match:
+            column_type = rest[: attr_match.start()].strip()
+            attrs = rest[attr_match.start() :].strip()
+        else:
+            column_type = rest
+            attrs = ""
+
+        statements = [f"ALTER TABLE {table} ALTER COLUMN {column} TYPE {column_type};"]
+        default_match = re.search(
+            r"\bDEFAULT\s+(.+?)(?=\s+NOT\s+NULL\b|\s+NULL\b|$)",
+            attrs,
+            flags=re.IGNORECASE,
+        )
+        if default_match:
+            default_value = _normalize_default_value(default_match.group(1))
+            if default_value.upper() == "NULL":
+                statements.append(f"ALTER TABLE {table} ALTER COLUMN {column} DROP DEFAULT;")
+            else:
+                statements.append(f"ALTER TABLE {table} ALTER COLUMN {column} SET DEFAULT {default_value};")
+        if re.search(r"\bNOT\s+NULL\b", attrs, flags=re.IGNORECASE):
+            statements.append(f"ALTER TABLE {table} ALTER COLUMN {column} SET NOT NULL;")
+        elif re.search(r"\bNULL\b", attrs, flags=re.IGNORECASE):
+            statements.append(f"ALTER TABLE {table} ALTER COLUMN {column} DROP NOT NULL;")
+        return "\n".join(statements)
+
+    return re.sub(
+        r"(?im)^\s*ALTER\s+TABLE\s+(?P<table>[A-Za-z0-9_]+)\s+MODIFY(?:\s+COLUMN)?\s+(?P<column>[A-Za-z0-9_]+)\s+(?P<rest>[^;]+);",
+        convert,
+        text,
+    )
+
+
 def _add_tenant_id_columns(text: str) -> str:
     def add_column(match: re.Match[str]) -> str:
         body = match.group("body")
@@ -201,8 +392,10 @@ def postgres_sql_from_mysqlish(text: str) -> tuple[str, list[str]]:
     converted = text.replace("`", "")
     converted = re.sub(r"(?m)^\s*##", "--", converted)
     converted = _strip_inline_comments(converted)
+    converted = re.sub(r"\s+FROM\s+DUAL\b", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bUSING\s+BTREE\b", "", converted, flags=re.IGNORECASE)
     converted = _convert_create_table_indexes(converted)
+    converted = _convert_oracle_type_tokens(converted)
 
     converted = re.sub(r"\bBIGINT\s*\(\s*\d+\s*\)", "BIGINT", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bINT\s*\(\s*\d+\s*\)", "INTEGER", converted, flags=re.IGNORECASE)
@@ -217,6 +410,8 @@ def postgres_sql_from_mysqlish(text: str) -> tuple[str, list[str]]:
     converted = re.sub(r"\bDEFAULT\s+CHARSET\s*=\s*[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bCHARSET\s*=\s*[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bCOLLATE\s*=\s*[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bCHARACTER\s+SET\s+[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bCOLLATE\s+[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bENGINE\s*=\s*[A-Za-z0-9_]+", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bCOMMENT\s*=\s*'(?:\\'|''|[^'])*'", "", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bINSERT\s+IGNORE\b", "INSERT", converted, flags=re.IGNORECASE)
@@ -226,10 +421,29 @@ def postgres_sql_from_mysqlish(text: str) -> tuple[str, list[str]]:
         converted,
         flags=re.IGNORECASE | re.DOTALL,
     )
+    converted = re.sub(
+        r"(?im)^\s*ALTER\s+TABLE\s+auth_user\s+DROP\s+(?:COLUMN\s+)?(?:ldap_user_name|user_directory_id)\s*;\s*$",
+        "-- skipped PostgreSQL compatibility: keep auth_user legacy column",
+        converted,
+    )
     converted = re.sub(r"\bIFNULL\s*\(", "COALESCE(", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bNOW\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bCURRENT_TIMESTAMP\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bSYSDATE\s*\(\s*\)", "CURRENT_TIMESTAMP", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bCURDATE\s*\(\s*\)", "CURRENT_DATE", converted, flags=re.IGNORECASE)
+    converted = re.sub(r"\bGROUP_CONCAT\s*\(\s*([^)]+?)\s*\)", r"STRING_AGG(\1::text, ',')", converted, flags=re.IGNORECASE)
+    converted = re.sub(
+        r"\s+or\s+[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)?\s*=\s*'0000-00-00(?:\s+00:00:00(?:\.000000)?)?'",
+        "",
+        converted,
+        flags=re.IGNORECASE,
+    )
+    converted = re.sub(
+        r"\bDEFAULT\s+'0000-00-00(?:\s+00:00:00(?:\.000000)?)?'",
+        "DEFAULT CURRENT_TIMESTAMP",
+        converted,
+        flags=re.IGNORECASE,
+    )
     converted = re.sub(r"\bTRUE\b", "true", converted, flags=re.IGNORECASE)
     converted = re.sub(r"\bFALSE\b", "false", converted, flags=re.IGNORECASE)
     converted = re.sub(
@@ -244,6 +458,7 @@ def postgres_sql_from_mysqlish(text: str) -> tuple[str, list[str]]:
         converted,
         flags=re.IGNORECASE,
     )
+    converted = _convert_modify_column_statements(converted)
     converted = _convert_alter_indexes(converted)
     converted = re.sub(r",\s*\)", "\n)", converted)
     converted = _add_tenant_id_columns(converted)
@@ -290,6 +505,7 @@ def patch_nested_jar(
         "nested": nested_name,
         "dbpPatched": False,
         "oracleDriversRemoved": [],
+        "defaultMappersPatched": [],
         "postgresMappersAdded": [],
         "postgresScriptsAdded": [],
         "mapperWarnings": [],
@@ -312,6 +528,25 @@ def patch_nested_jar(
     if remove_oracle_drivers and re.search(r"/ojdbc[^/]*\.jar$", nested_name):
         report["oracleDriversRemoved"].append(nested_name)
         return b"", report | {"removed": True}
+
+    for name in list(entries):
+        if not name.endswith(".xml"):
+            continue
+        if detect_db_segment(name) is not None:
+            continue
+        info, data = entries[name]
+        try:
+            text = data.decode("utf-8")
+            converted, warnings = postgres_xml_from_dynamic_dbtype(text)
+        except UnicodeDecodeError:
+            continue
+        if converted == text:
+            continue
+        entries[name] = (info, converted.encode("utf-8"))
+        changed = True
+        report["defaultMappersPatched"].append(name)
+        for warning in warnings:
+            report["mapperWarnings"].append({"file": name, "pattern": warning})
 
     xml_sources: dict[str, tuple[int, str]] = {}
     for name in list(entries):
@@ -436,6 +671,11 @@ def main() -> None:
         "changedJarCount": sum(1 for item in reports if item["changed"]),
         "postgresMapperCount": sum(
             len(nested.get("postgresMappersAdded", []))
+            for item in reports
+            for nested in item["nestedReports"]
+        ),
+        "defaultMapperPatchCount": sum(
+            len(nested.get("defaultMappersPatched", []))
             for item in reports
             for nested in item["nestedReports"]
         ),
