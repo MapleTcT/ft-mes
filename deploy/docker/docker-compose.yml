@@ -91,6 +91,21 @@ services:
       timeout: 5s
       retries: 12
 
+  test-license-seed:
+    image: ${REDIS_IMAGE:-m.daocloud.io/docker.io/library/redis:6-alpine}
+    restart: "no"
+    environment:
+      ADP_SEED_TEST_LICENSE: ${ADP_SEED_TEST_LICENSE:-true}
+      ADP_REDIS_HOST: redis
+      ADP_REDIS_PORT: "6379"
+      ADP_TEST_LOGIN_LIMIT: ${ADP_TEST_LOGIN_LIMIT:-255}
+    volumes:
+      - ./scripts/seed-test-license.sh:/work/seed-test-license.sh:ro
+    entrypoint: ["/bin/sh", "/work/seed-test-license.sh"]
+    depends_on:
+      redis:
+        condition: service_healthy
+
   zookeeper:
     image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
     restart: unless-stopped

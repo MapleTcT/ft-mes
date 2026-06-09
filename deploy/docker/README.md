@@ -28,6 +28,7 @@ cd /home/v6/adp-mes-docker/deploy/docker
 cp .env.example .env
 python3 scripts/render-nacos-configs.py
 docker compose --env-file .env up -d postgres redis mongo zookeeper kafka nacos keycloak minio
+docker compose --env-file .env run --rm test-license-seed
 scripts/init-keycloak-realm.sh
 scripts/sync-keycloak-jwt-public-key.sh
 python3 scripts/patch-postgres-runtime.py \
@@ -51,6 +52,8 @@ admin / 123456
 ```
 
 `scripts/init-keycloak-realm.sh` creates the ADP business Keycloak realm (`dt` by default), `pc_dt`/`mobile_dt` clients, the `supos` token scope and the bundled `readonly-property-file` user storage provider. It is idempotent and can be rerun after Keycloak volume resets. `scripts/sync-keycloak-jwt-public-key.sh` reads that realm public key into `nacos-rendered/supfusion-jwt-common.properties` and publishes the Nacos config so Java services can populate `UserContext` from Keycloak access tokens.
+
+`test-license-seed` writes test-only Redis license entries for `supPlant-Dev` and `supPlant-Server-S0C`. The recovered Windows bundle expects a hardware license dongle; without this seed the `/msService/ec/**` and `/msService/servicemanager/**` engineering pages expire after the built-in trial window and return `当前模块无软件狗授权`. Set `ADP_SEED_TEST_LICENSE=false` if you need to validate real license-dongle behavior.
 
 ## PostgreSQL Note
 
