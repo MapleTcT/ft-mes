@@ -1,0 +1,93 @@
+-- Old BAP/foundation services query BASE_COMPANY and BASE_COMPANYSTAFF.
+-- The recovered PostgreSQL bootstrap keeps the canonical organization data in
+-- org_company and org_person_company, so expose the expected compatibility
+-- views instead of duplicating rows.
+CREATE OR REPLACE VIEW public.base_company (
+  id,
+  version,
+  code,
+  description,
+  short_name,
+  name,
+  address,
+  sort,
+  parent_id,
+  lay_rec,
+  valid,
+  create_staff_id,
+  modify_staff_id,
+  delete_staff_id,
+  create_time,
+  modify_time,
+  delete_time,
+  is_default,
+  customer_field2,
+  customer_field1,
+  uuid,
+  sc_nature,
+  email,
+  site,
+  fax,
+  telephone,
+  post_code,
+  type
+) AS
+SELECT
+  id,
+  row_version AS version,
+  code,
+  description,
+  short_name,
+  full_name AS name,
+  address,
+  sort,
+  parent_id,
+  lay_rec,
+  valid,
+  create_staff_id,
+  modify_staff_id,
+  NULL::BIGINT AS delete_staff_id,
+  create_time,
+  modify_time,
+  NULL::TIMESTAMP AS delete_time,
+  1::SMALLINT AS is_default,
+  NULL::VARCHAR(255) AS customer_field2,
+  NULL::VARCHAR(255) AS customer_field1,
+  NULL::VARCHAR(64) AS uuid,
+  NULL::VARCHAR(255) AS sc_nature,
+  NULL::VARCHAR(255) AS email,
+  NULL::VARCHAR(255) AS site,
+  NULL::VARCHAR(255) AS fax,
+  NULL::VARCHAR(255) AS telephone,
+  NULL::VARCHAR(255) AS post_code,
+  'UNIT'::VARCHAR(32) AS type
+FROM public.org_company;
+
+CREATE OR REPLACE VIEW public.base_companystaff (
+  id,
+  version,
+  cid,
+  staff_id,
+  valid,
+  transfer_out_deal_time,
+  transfer_in_deal_time,
+  transfer_out_dealer_id,
+  transfer_in_dealer_id,
+  edit_date,
+  end_time,
+  start_time
+) AS
+SELECT
+  id,
+  row_version AS version,
+  company_id AS cid,
+  person_id AS staff_id,
+  valid,
+  NULL::TIMESTAMP AS transfer_out_deal_time,
+  NULL::TIMESTAMP AS transfer_in_deal_time,
+  NULL::BIGINT AS transfer_out_dealer_id,
+  NULL::BIGINT AS transfer_in_dealer_id,
+  NULL::TIMESTAMP AS edit_date,
+  NULL::TIMESTAMP AS end_time,
+  NULL::TIMESTAMP AS start_time
+FROM public.org_person_company;

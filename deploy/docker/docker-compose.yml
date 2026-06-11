@@ -12,21 +12,47 @@ x-app-env: &app-env
   I18N_HOST: ${I18N_HOST:-i18n}
   I18N_PORT: ${I18N_PORT:-8080}
   SUPOS_ADDRESS: ${SUPOS_ADDRESS:-http://10.11.100.17:18080}
-  SUPOS_SYSTEM_DB_TYPE: ${SUPOS_SYSTEM_DB_TYPE:-postgresql}
-  SUPOS_SYSTEM_DB_NAME: ${SUPOS_SYSTEM_DB_NAME:-adp}
-  SUPOS_SYSTEM_DB_HOST: ${SUPOS_SYSTEM_DB_HOST:-postgres}
-  SUPOS_SYSTEM_DB_PORT: ${SUPOS_SYSTEM_DB_PORT:-5432}
+  SUPOS_SYSTEM_DB_TYPE: ${SUPOS_SYSTEM_DB_TYPE:-oracle}
+  SUPOS_SYSTEM_DB_USE: ${SUPOS_SYSTEM_DB_USE:-true}
+  SUPOS_SYSTEM_DB_NAME: ${SUPOS_SYSTEM_DB_NAME:-orcl}
+  SUPOS_SYSTEM_DB_HOST: ${SUPOS_SYSTEM_DB_HOST:-127.0.0.1}
+  SUPOS_SYSTEM_DB_PORT: ${SUPOS_SYSTEM_DB_PORT:-1521}
   SUPOS_SYSTEM_DB_USERNAME: ${SUPOS_SYSTEM_DB_USERNAME:-adp}
-  SUPOS_SYSTEM_DB_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-adp123456}
+  SUPOS_SYSTEM_DB_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-1}
+  SUPOS_SUPPLANT_DBTYPE: ${SUPOS_SYSTEM_DB_TYPE:-oracle}
+  SUPOS_SUPPLANT_DBNAME: ${SUPOS_SYSTEM_DB_NAME:-orcl}
+  SUPOS_SUPPLANT_HOST: ${SUPOS_SYSTEM_DB_HOST:-127.0.0.1}
+  SUPOS_SUPPLANT_PORT: ${SUPOS_SYSTEM_DB_PORT:-1521}
+  SUPOS_SUPPLANT_USERNAME: ${SUPOS_SYSTEM_DB_USERNAME:-adp}
+  SUPOS_SUPPLANT_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-1}
+  SUPOS_FUSION_DINGTALK_DBNAME: ${SUPOS_SYSTEM_DB_NAME:-orcl}
+  SUPOS_FUSION_DINGTALK_HOST: ${SUPOS_SYSTEM_DB_HOST:-127.0.0.1}
+  SUPOS_FUSION_DINGTALK_PORT: ${SUPOS_SYSTEM_DB_PORT:-1521}
+  SUPOS_FUSION_DINGTALK_USERNAME: ${SUPOS_SYSTEM_DB_USERNAME:-adp}
+  SUPOS_FUSION_DINGTALK_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-1}
+  SUPOS_FUSION_WECHAT_DBNAME: ${SUPOS_SYSTEM_DB_NAME:-orcl}
+  SUPOS_FUSION_WECHAT_HOST: ${SUPOS_SYSTEM_DB_HOST:-127.0.0.1}
+  SUPOS_FUSION_WECHAT_PORT: ${SUPOS_SYSTEM_DB_PORT:-1521}
+  SUPOS_FUSION_WECHAT_USERNAME: ${SUPOS_SYSTEM_DB_USERNAME:-adp}
+  SUPOS_FUSION_WECHAT_PASSWORD: ${SUPOS_SYSTEM_DB_PASSWORD:-1}
   VALIDATIONQUERYSQL: ${VALIDATIONQUERYSQL:-SELECT 1}
   SUPOS_REDIS_HOST: ${SUPOS_REDIS_HOST:-redis}
   SUPOS_REDIS_PORT: ${SUPOS_REDIS_PORT:-6379}
+  SUPOS_REDIS_CLUSTER_NODES: ${SUPOS_REDIS_CLUSTER_NODES:-redis:6379}
   SUPPLANT_LICENSE_ENABLED: ${SUPPLANT_LICENSE_ENABLED:-true}
   SUPOS_KAFKA_BROKERS: ${SUPOS_KAFKA_BROKERS:-kafka:9092}
   SUPOS_ZOOKEEPER_NODES: ${SUPOS_ZOOKEEPER_NODES:-zookeeper:2181}
   SUPOS_MINIO_ENDPOINT: ${SUPOS_MINIO_ENDPOINT:-http://minio:30200}
   SUPOS_MINIO_ACCESS_KEY: ${SUPOS_MINIO_ACCESS_KEY:-adpminio}
   SUPOS_MINIO_SECRET_KEY: ${SUPOS_MINIO_SECRET_KEY:-adpminio123}
+  SUPOS_MINIO_CLUSTER_NODES: ${SUPOS_MINIO_CLUSTER_NODES:-minio:30200}
+  SUPOS_MINIO_IP: ${SUPOS_MINIO_IP:-minio}
+  SUPOS_MINIO_PORT: ${SUPOS_MINIO_PORT:-30200}
+  SUPOS_MINIO_ACCESSKEY: ${SUPOS_MINIO_ACCESSKEY:-adpminio}
+  SUPOS_MINIO_SECRETKEY: ${SUPOS_MINIO_SECRETKEY:-adpminio123}
+  INTEGRATION_SUPOS_ENABLED: ${INTEGRATION_SUPOS_ENABLED:-false}
+  ADP_REMOTE_I18N_LOG_LEVEL: ${ADP_REMOTE_I18N_LOG_LEVEL:-OFF}
+  ADP_SWAGGER_LOG_LEVEL: ${ADP_SWAGGER_LOG_LEVEL:-OFF}
   MONGO_USERNAME: ${MONGO_USERNAME:-root}
   MONGO_PASSWORD: ${MONGO_PASSWORD:-adpmongo123}
   MONGO_HOST: ${MONGO_HOST:-mongo}
@@ -37,7 +63,7 @@ x-app-env: &app-env
   ADP_HTTP_PORT: ${ADP_HTTP_PORT:-18080}
   JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
   JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai
-  "db-type": ${SUPOS_SYSTEM_DB_TYPE:-postgresql}
+  "db-type": ${SUPOS_SYSTEM_DB_TYPE:-oracle}
 
 x-java-service: &java-service
   image: ${ADP_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jre}
@@ -49,6 +75,8 @@ x-java-service: &java-service
     - ../../runtime/postgres-sql:/opt/adp/sql:ro
     - ../../runtime/bap-server/assembly/repository/maven/org/postgresql/postgresql/42.2.8/postgresql-42.2.8.jar:/opt/adp/drivers/postgresql.jar:ro
     - ../../runtime/logs:/opt/adp/logs
+    - ./assets/fileServer/initFile:/root/initFile:ro
+    - ./patches/scdog-test-bypass/lib/libSCDog.so:/opt/adp/lib/libSCDog.so:ro
     - ./scripts/run-service.sh:/opt/adp/bin/run-service.sh:ro
   depends_on:
     nacos:
@@ -183,6 +211,7 @@ services:
       TZ: ${TZ:-Asia/Shanghai}
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      SUPOS_NACOS_ADDRESS: ${SUPOS_NACOS_ADDRESS:-nacos:8848}
     command: ["sh", "-c", "mkdir -p /opt/jboss && ln -sfn /opt/keycloak /opt/jboss/keycloak && chmod +x /opt/keycloak/bin/*.sh && (/opt/keycloak/bin/add-user-keycloak.sh -u \"$${KEYCLOAK_USER:-admin}\" -p \"$${KEYCLOAK_PASSWORD:-admin}\" || true) && exec /opt/keycloak/bin/standalone.sh -b 0.0.0.0 -Djboss.http.port=8080 -Dnacos.address=nacos:8848 -Dnacos.group=prod -Dauthkeycloak.port=8080"]
     volumes:
       - ../../runtime/bap-server/assembly/keycloak-10.0.1:/opt/keycloak
@@ -303,9 +332,25 @@ services:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/customProperty/custom-property.jar"]
 
+  adp-admin:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/adp-admin/adp-admin.jar"]
+
+  excel-server:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/excel-server/excel-server.jar"]
+
+  msgmanagement:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/msgmanagement/supfusion-msgmanagement.jar"]
+
   notification-app:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-app/notification-app.jar"]
+
+  notification-dingtalk:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-dingtalk/notification-dingtalk.jar"]
 
   notification-mobile:
     <<: *java-service
@@ -314,6 +359,10 @@ services:
   notification-sms-jincang:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar"]
+
+  notification-wechat:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/notification-wechat/notification-wechat.jar"]
 
   printer:
     <<: *java-service

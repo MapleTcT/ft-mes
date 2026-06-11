@@ -1,8 +1,12 @@
-ALTER TABLE public.org_person
-  ADD COLUMN IF NOT EXISTS avatar_url varchar(256) DEFAULT NULL;
-
 DO $$
 BEGIN
+  IF to_regclass('public.org_person') IS NULL THEN
+    RETURN;
+  END IF;
+
+  ALTER TABLE public.org_person
+    ADD COLUMN IF NOT EXISTS avatar_url varchar(256) DEFAULT NULL;
+
   IF EXISTS (
     SELECT 1
     FROM information_schema.columns
@@ -109,6 +113,7 @@ CREATE TABLE IF NOT EXISTS public.systemconfig_config_info (
   has_require boolean DEFAULT NULL,
   custom varchar(256) DEFAULT NULL,
   description varchar(256) DEFAULT NULL,
+  angle_desc varchar(4000) DEFAULT NULL,
   creator varchar(256) NOT NULL DEFAULT 'system',
   create_time timestamp NOT NULL DEFAULT current_timestamp,
   modifier varchar(256) DEFAULT NULL,
@@ -121,6 +126,9 @@ CREATE TABLE IF NOT EXISTS public.systemconfig_config_info (
 
 CREATE UNIQUE INDEX IF NOT EXISTS udx_sysconf_info_code
   ON public.systemconfig_config_info(app_code, code);
+
+ALTER TABLE public.systemconfig_config_info
+  ADD COLUMN IF NOT EXISTS angle_desc varchar(4000) DEFAULT NULL;
 
 CREATE TABLE IF NOT EXISTS public.systemconfig_config_version (
   id bigint NOT NULL,

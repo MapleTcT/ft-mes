@@ -47,6 +47,22 @@ AS $$
     END
 $$;
 
+CREATE OR REPLACE FUNCTION public.adp_integer_to_boolean(value integer)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT CASE WHEN value IS NULL THEN NULL ELSE value <> 0 END
+$$;
+
+CREATE OR REPLACE FUNCTION public.adp_boolean_to_integer(value boolean)
+RETURNS integer
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT CASE WHEN value IS NULL THEN NULL WHEN value THEN 1 ELSE 0 END
+$$;
+
 DROP OPERATOR IF EXISTS public.= (boolean, integer);
 DROP OPERATOR IF EXISTS public.= (integer, boolean);
 DROP OPERATOR IF EXISTS public.<> (boolean, integer);

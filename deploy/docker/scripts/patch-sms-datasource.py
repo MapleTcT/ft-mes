@@ -12,6 +12,13 @@ from pathlib import Path
 
 COMPILED_CLASS = "com/supcon/supfusion/notification/sms/config/DataSourceConfig.class"
 JAR_CLASS_ENTRY = f"BOOT-INF/classes/{COMPILED_CLASS}"
+DEFAULT_CLASS_FILE = (
+    Path(__file__).resolve().parents[1]
+    / "patches"
+    / "notification-sms-datasource"
+    / "classes"
+    / COMPILED_CLASS
+)
 SOURCE = r"""
 package com.supcon.supfusion.notification.sms.config;
 
@@ -77,6 +84,8 @@ def write_entries(path: Path, entries: dict[str, tuple[zipfile.ZipInfo, bytes]])
 def main() -> None:
     parser = argparse.ArgumentParser(description="Patch notification-sms-jincang DataSourceConfig for Docker PostgreSQL.")
     parser.add_argument("--jar", type=Path, required=True)
+    parser.add_argument("--class-file", type=Path, default=DEFAULT_CLASS_FILE)
+    parser.add_argument("--force-build", action="store_true")
     parser.add_argument("--backup-suffix", default=".pre-sms-datasource.bak")
     args = parser.parse_args()
 
@@ -84,41 +93,48 @@ def main() -> None:
     if JAR_CLASS_ENTRY not in entries:
         raise SystemExit(f"{JAR_CLASS_ENTRY} was not found in {args.jar}")
 
-    with tempfile.TemporaryDirectory(prefix="adp-sms-datasource-") as tmp:
-        tmp_path = Path(tmp)
-        lib_dir = tmp_path / "lib"
-        src_dir = tmp_path / "src/com/supcon/supfusion/notification/sms/config"
-        classes_dir = tmp_path / "classes"
-        lib_dir.mkdir()
-        src_dir.mkdir(parents=True)
-        classes_dir.mkdir()
+    if args.class_file.exists() and not args.force_build:
+        class_bytes = args.class_file.read_bytes()
+    else:
+        with tempfile.TemporaryDirectory(prefix="adp-sms-datasource-") as tmp:
+            tmp_path = Path(tmp)
+            lib_dir = tmp_path / "lib"
+            src_dir = tmp_path / "src/com/supcon/supfusion/notification/sms/config"
+            classes_dir = tmp_path / "classes"
+            lib_dir.mkdir()
+            src_dir.mkdir(parents=True)
+            classes_dir.mkdir()
 
-        classpath_parts: list[str] = []
-        for name, (_, data) in entries.items():
-            if name.startswith("BOOT-INF/lib/") and name.endswith(".jar"):
-                lib_path = lib_dir / Path(name).name
-                lib_path.write_bytes(data)
-                classpath_parts.append(str(lib_path))
+            classpath_parts: list[str] = []
+            for name, (_, data) in entries.items():
+                if name.startswith("BOOT-INF/lib/") and name.endswith(".jar"):
+                    lib_path = lib_dir / Path(name).name
+                    lib_path.write_bytes(data)
+                    classpath_parts.append(str(lib_path))
 
-        source_path = src_dir / "DataSourceConfig.java"
-        source_path.write_text(SOURCE + "\n", encoding="utf-8")
-        subprocess.run(
-            [
-                "javac",
-                "--release",
-                "8",
-                "-proc:none",
-                "-encoding",
-                "UTF-8",
-                "-cp",
-                ":".join(classpath_parts),
-                "-d",
-                str(classes_dir),
-                str(source_path),
-            ],
-            check=True,
-        )
-        class_bytes = (classes_dir / COMPILED_CLASS).read_bytes()
+            source_path = src_dir / "DataSourceConfig.java"
+            source_path.write_text(SOURCE + "\n", encoding="utf-8")
+            subprocess.run(
+                [
+                    "javac",
+                    "-source",
+                    "8",
+                    "-target",
+                    "8",
+                    "-proc:none",
+                    "-encoding",
+                    "UTF-8",
+                    "-cp",
+                    ":".join(classpath_parts),
+                    "-d",
+                    str(classes_dir),
+                    str(source_path),
+                ],
+                check=True,
+            )
+            class_bytes = (classes_dir / COMPILED_CLASS).read_bytes()
+        args.class_file.parent.mkdir(parents=True, exist_ok=True)
+        args.class_file.write_bytes(class_bytes)
 
     backup = args.jar.with_name(args.jar.name + args.backup_suffix)
     if not backup.exists():

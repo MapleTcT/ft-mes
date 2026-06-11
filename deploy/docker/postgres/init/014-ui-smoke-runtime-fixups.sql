@@ -147,20 +147,31 @@ ON CONFLICT (id) DO UPDATE
 SET config = EXCLUDED.config,
     user_id = EXCLUDED.user_id;
 
-ALTER TABLE public.supos_app
-  ADD COLUMN IF NOT EXISTS app_version integer DEFAULT 0;
+DO $$
+BEGIN
+  IF to_regclass('public.supos_app') IS NOT NULL THEN
+    ALTER TABLE public.supos_app
+      ADD COLUMN IF NOT EXISTS app_version integer DEFAULT 0;
 
-UPDATE public.supos_app
-SET app_version = 0
-WHERE app_version IS NULL;
+    UPDATE public.supos_app
+    SET app_version = 0
+    WHERE app_version IS NULL;
+  END IF;
 
-UPDATE public.rbac_menuinfo
-SET url = '/taskscheduler/index.html#/tasklog'
-WHERE code = 'taskScheduler_log'
-  AND url = '/taskScheduler/index.html#/tasklog';
+  IF to_regclass('public.rbac_menuinfo') IS NOT NULL THEN
+    UPDATE public.rbac_menuinfo
+    SET url = '/taskscheduler/index.html#/tasklog'
+    WHERE code = 'taskScheduler_log'
+      AND url = '/taskScheduler/index.html#/tasklog';
+  END IF;
+END $$;
 
 DROP VIEW IF EXISTS public.base_menuoperate;
-CREATE VIEW public.base_menuoperate AS
+DO $$
+BEGIN
+  IF to_regclass('public.rbac_menuoperate') IS NOT NULL THEN
+    EXECUTE $view$
+CREATE OR REPLACE VIEW public.base_menuoperate AS
 SELECT
   rbac_menuoperate.id,
   rbac_menuoperate.row_version AS version,
@@ -225,9 +236,16 @@ SELECT
   NULL::text AS menuoperate_entryoperatecode,
   rbac_menuoperate.menuoperatetype
 FROM public.rbac_menuoperate;
+$view$;
+  END IF;
+END $$;
 
 DROP VIEW IF EXISTS public.base_datapermission;
-CREATE VIEW public.base_datapermission AS
+DO $$
+BEGIN
+  IF to_regclass('public.rbac_flow_permission') IS NOT NULL THEN
+    EXECUTE $view$
+CREATE OR REPLACE VIEW public.base_datapermission AS
 SELECT
   rbac_flow_permission.id,
   rbac_flow_permission.version,
@@ -253,6 +271,9 @@ SELECT
   NULLIF(rbac_flow_permission.flow_version, '')::integer AS flow_version,
   rbac_flow_permission.flow_key
 FROM public.rbac_flow_permission;
+$view$;
+  END IF;
+END $$;
 
 CREATE OR REPLACE FUNCTION public.bap_bigint_eq_bytea(left_value bigint, right_value bytea)
 RETURNS boolean
@@ -361,7 +382,11 @@ BEGIN
 END $$;
 
 DROP VIEW IF EXISTS public.base_positionwork;
-CREATE VIEW public.base_positionwork AS
+DO $$
+BEGIN
+  IF to_regclass('public.org_person_position') IS NOT NULL THEN
+    EXECUTE $view$
+CREATE OR REPLACE VIEW public.base_positionwork AS
 SELECT
   org_person_position.id,
   org_person_position.row_version AS version,
@@ -376,6 +401,9 @@ SELECT
   NULL::text AS end_time,
   NULL::text AS start_time
 FROM public.org_person_position;
+$view$;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.wfm_task_form (
   id bigint NOT NULL,

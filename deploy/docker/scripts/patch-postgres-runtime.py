@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+import struct
 from pathlib import Path
 from typing import Iterable
 
@@ -30,6 +31,94 @@ DBP_PATCH_CLASSES = (
     "com/supcon/supfusion/framework/scaffold/dbp/util/DataId.class",
     "com/supcon/supfusion/framework/scaffold/dbp/util/TenantUtils.class",
 )
+
+ORM_UPSERT_CLASS = "com/supcon/supfusion/framework/scaffold/mybatis/upsert/support/UpsertMethod.class"
+ORM_UPSERT_SQLSERVER_IF = b"</if><if test=\"_databaseId =='sqlserver'\" >"
+ORM_UPSERT_POSTGRES_IF = b"</if><if test=\"_databaseId !='oracle'\" >"
+LOGIC_DELETE_CLASS = "com/supcon/supfusion/framework/scaffold/mybatis/entity/LogicDeleteBaseEntity.class"
+LOGIC_DELETE_UTF8_REPLACEMENTS = {
+    "0": "false",
+}
+RBAC_CLASS_UTF8_REPLACEMENTS = {
+    "UPDATE rbac_menuinfo SET VALID = 1 ${ew.customSqlSegment}":
+        "UPDATE rbac_menuinfo SET VALID = true ${ew.customSqlSegment}",
+    "update rbac_role set valid = 1 where code = #{code}":
+        "update rbac_role set valid = true where code = #{code}",
+    "update rbac_tag set valid = 0 ${ew.customSqlSegment}":
+        "update rbac_tag set valid = false ${ew.customSqlSegment}",
+}
+POSTGRES_DYNAMIC_SQL_FTL = {
+    "notice_task.sql.ftl": """CREATE TABLE IF NOT EXISTS ${notice_task}
+(
+id                                 BIGINT NOT NULL,
+code                               VARCHAR(128) NOT NULL,
+bsmod_code                         VARCHAR(200) NOT NULL,
+bsmod_name                         VARCHAR(200) NOT NULL,
+task_type                          SMALLINT NOT NULL,
+status                             SMALLINT DEFAULT 0,
+sharding_time                      BIGINT NOT NULL,
+notice_topic_id                    BIGINT,
+creator                            VARCHAR(32) NOT NULL,
+create_time                        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+create_staff_id                    BIGINT NOT NULL,
+modify_staff_id                    BIGINT,
+modifier                           VARCHAR(32),
+modify_time                        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY (id)
+);
+""",
+    "notice_task_protocol.sql.ftl": """CREATE TABLE IF NOT EXISTS notice_task_protocol_${month}
+(
+id                                         BIGINT NOT NULL,
+notice_protocol_id                         BIGINT NOT NULL,
+notice_task_id                             BIGINT NOT NULL,
+content                                    TEXT NOT NULL,
+creator                                    VARCHAR(32) NOT NULL,
+create_time                                TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+create_staff_id                            BIGINT NOT NULL,
+modify_staff_id                            BIGINT,
+modifier                                   VARCHAR(32),
+modify_time                                TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY (id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS udx_ntp_${month}
+ON notice_task_protocol_${month}(notice_task_id, notice_protocol_id);
+""",
+    "notice_msg.sql.ftl": """CREATE TABLE IF NOT EXISTS ${notice_msg}
+(
+id                                         BIGINT NOT NULL,
+staff_code                                 VARCHAR(200) NOT NULL,
+staff_name                                 VARCHAR(200) NOT NULL,
+bsmod_code                                 VARCHAR(200),
+bsmod_name                                 VARCHAR(200),
+topic_name                                 VARCHAR(32),
+topic_id                                   BIGINT,
+user_name                                  VARCHAR(200),
+send_status                                SMALLINT NOT NULL,
+error_result                               VARCHAR(200),
+param                                      TEXT,
+read_status                                SMALLINT NOT NULL,
+retry                                      SMALLINT DEFAULT 0,
+sharding_time                              BIGINT NOT NULL,
+notice_task_id                             BIGINT NOT NULL,
+notice_protocol_id                         BIGINT NOT NULL,
+notice_task_protocol_id                    BIGINT NOT NULL,
+creator                                    VARCHAR(32) NOT NULL,
+create_time                                TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+create_staff_id                            BIGINT NOT NULL,
+modify_staff_id                            BIGINT,
+modifier                                   VARCHAR(32),
+modify_time                                TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY (id)
+);
+CREATE INDEX IF NOT EXISTS idx_notice_msg_${month}_staff_protocol
+ON ${notice_msg}(staff_code, notice_protocol_id, read_status);
+CREATE INDEX IF NOT EXISTS idx_notice_msg_${month}_staff_topic
+ON ${notice_msg}(staff_code, topic_id);
+CREATE INDEX IF NOT EXISTS idx_notice_msg_${month}_task
+ON ${notice_msg}(notice_task_id);
+""",
+}
 
 DEFAULT_DBP_OVERRIDE_CLASS_DIR = (
     Path(__file__).resolve().parents[1]
@@ -78,6 +167,61 @@ def write_zip_entries(entries: dict[str, tuple[zipfile.ZipInfo, bytes]]) -> byte
             new_info.create_system = info.create_system
             zf.writestr(new_info, data)
     return out.getvalue()
+
+
+def replace_class_utf8_constants(data: bytes, replacements: dict[str, str]) -> tuple[bytes, int]:
+    if len(data) < 10 or data[:4] != b"\xca\xfe\xba\xbe":
+        return data, 0
+
+    output = bytearray(data[:8])
+    constant_pool_count = struct.unpack(">H", data[8:10])[0]
+    output.extend(data[8:10])
+    offset = 10
+    index = 1
+    changed = 0
+
+    while index < constant_pool_count:
+        tag = data[offset]
+        output.append(tag)
+        offset += 1
+        if tag == 1:
+            size = struct.unpack(">H", data[offset:offset + 2])[0]
+            offset += 2
+            raw = data[offset:offset + size]
+            offset += size
+            try:
+                value = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                replacement = None
+            else:
+                replacement = replacements.get(value)
+            if replacement is not None:
+                raw = replacement.encode("utf-8")
+                changed += 1
+            output.extend(struct.pack(">H", len(raw)))
+            output.extend(raw)
+        elif tag in (3, 4):
+            output.extend(data[offset:offset + 4])
+            offset += 4
+        elif tag in (5, 6):
+            output.extend(data[offset:offset + 8])
+            offset += 8
+            index += 1
+        elif tag in (7, 8, 16):
+            output.extend(data[offset:offset + 2])
+            offset += 2
+        elif tag in (9, 10, 11, 12, 18):
+            output.extend(data[offset:offset + 4])
+            offset += 4
+        elif tag == 15:
+            output.extend(data[offset:offset + 3])
+            offset += 3
+        else:
+            raise ValueError(f"unsupported constant-pool tag {tag}")
+        index += 1
+
+    output.extend(data[offset:])
+    return bytes(output), changed
 
 
 def make_info(name: str, compress_type: int = zipfile.ZIP_DEFLATED) -> zipfile.ZipInfo:
@@ -563,18 +707,29 @@ def patch_nested_jar(
     report = {
         "nested": nested_name,
         "dbpPatched": False,
+        "ormUpsertPatched": False,
+        "logicDeletePatched": [],
+        "rbacValidSqlPatched": [],
         "oracleDriversRemoved": [],
         "defaultMappersPatched": [],
         "postgresMappersAdded": [],
         "postgresScriptsAdded": [],
+        "postgresDynamicTemplatesAdded": [],
         "mapperWarnings": [],
         "scriptWarnings": [],
     }
 
     if nested_name.startswith("BOOT-INF/lib/scaffold-dbp-"):
+        legacy_postgres_version = "scaffold-dbp-1.0.5.RELEASE.jar" in nested_name
         patched_any = False
         for class_name, class_bytes in donor_classes.items():
             current = entries.get(class_name)
+            if (
+                current is not None
+                and not legacy_postgres_version
+                and class_name != "com/supcon/supfusion/framework/scaffold/dbp/factory/line/PostgresqlDataSourceProductionLine.class"
+            ):
+                continue
             if current is not None and current[1] == class_bytes:
                 continue
             base_info = entries.get(class_name, (make_info(class_name), b""))[0]
@@ -583,6 +738,45 @@ def patch_nested_jar(
         if patched_any:
             changed = True
             report["dbpPatched"] = True
+
+    if nested_name.startswith("BOOT-INF/lib/scaffold-orm-mybatis-"):
+        class_entry = entries.get(ORM_UPSERT_CLASS)
+        if class_entry is not None:
+            info, data = class_entry
+            if ORM_UPSERT_SQLSERVER_IF in data:
+                padded_replacement = ORM_UPSERT_POSTGRES_IF + (
+                    b" " * (len(ORM_UPSERT_SQLSERVER_IF) - len(ORM_UPSERT_POSTGRES_IF))
+                )
+                entries[ORM_UPSERT_CLASS] = (
+                    info,
+                    data.replace(ORM_UPSERT_SQLSERVER_IF, padded_replacement, 1),
+                )
+                changed = True
+                report["ormUpsertPatched"] = True
+        class_entry = entries.get(LOGIC_DELETE_CLASS)
+        if class_entry is not None:
+            info, data = class_entry
+            patched, count = replace_class_utf8_constants(data, LOGIC_DELETE_UTF8_REPLACEMENTS)
+            if count:
+                entries[LOGIC_DELETE_CLASS] = (info, patched)
+                changed = True
+                report["logicDeletePatched"].append({"class": LOGIC_DELETE_CLASS, "count": count})
+
+    if re.search(r"/rbac-dao-[^/]+\.jar$", nested_name):
+        for class_name in sorted(
+            name
+            for name in entries
+            if name.startswith("com/supcon/supfusion/rbac/dao/") and name.endswith(".class")
+        ):
+            class_entry = entries.get(class_name)
+            if class_entry is None:
+                continue
+            info, data = class_entry
+            patched, count = replace_class_utf8_constants(data, RBAC_CLASS_UTF8_REPLACEMENTS)
+            if count:
+                entries[class_name] = (info, patched)
+                changed = True
+                report["rbacValidSqlPatched"].append({"class": class_name, "count": count})
 
     if remove_oracle_drivers and re.search(r"/ojdbc[^/]*\.jar$", nested_name):
         report["oracleDriversRemoved"].append(nested_name)
@@ -669,6 +863,23 @@ def patch_nested_jar(
         for warning in warnings:
             report["scriptWarnings"].append({"file": target_name, "pattern": warning})
 
+    for template_name, template_text in POSTGRES_DYNAMIC_SQL_FTL.items():
+        has_source_template = any(
+            name.endswith("/dynamic/" + template_name)
+            and detect_db_segment(name) in SOURCE_DB_ORDER
+            for name in entries
+        )
+        if not has_source_template:
+            continue
+        target_name = "META-INF/postgresql/dynamic/" + template_name
+        out_data = template_text.encode("utf-8")
+        current = entries.get(target_name)
+        if current is not None and current[1] == out_data:
+            continue
+        entries[target_name] = (make_info(target_name), out_data)
+        changed = True
+        report["postgresDynamicTemplatesAdded"].append(target_name)
+
     if not changed:
         return nested_data, report
     return write_zip_entries(entries), report
@@ -750,11 +961,32 @@ def main() -> None:
             for item in reports
             for nested in item["nestedReports"]
         ),
+        "postgresDynamicTemplateCount": sum(
+            len(nested.get("postgresDynamicTemplatesAdded", []))
+            for item in reports
+            for nested in item["nestedReports"]
+        ),
         "dbpPatchedCount": sum(
             1
             for item in reports
             for nested in item["nestedReports"]
             if nested.get("dbpPatched")
+        ),
+        "ormUpsertPatchedCount": sum(
+            1
+            for item in reports
+            for nested in item["nestedReports"]
+            if nested.get("ormUpsertPatched")
+        ),
+        "logicDeletePatchedCount": sum(
+            len(nested.get("logicDeletePatched", []))
+            for item in reports
+            for nested in item["nestedReports"]
+        ),
+        "rbacValidSqlPatchedCount": sum(
+            len(nested.get("rbacValidSqlPatched", []))
+            for item in reports
+            for nested in item["nestedReports"]
         ),
         "oracleDriversRemovedCount": sum(
             len(nested.get("oracleDriversRemoved", []))

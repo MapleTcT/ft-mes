@@ -33,6 +33,11 @@ def env(name: str, default: str) -> str:
     return ENV.get(name, default)
 
 
+def keycloak_client() -> str:
+    realm = env("ADP_KEYCLOAK_REALM", "dt")
+    return env("KEYCLOAK_CLIENT", f"pc_{realm}")
+
+
 def datasource_password() -> str:
     return env("SUPOS_SYSTEM_DB_PASSWORD", "adp123456")
 
@@ -116,7 +121,7 @@ TARGETED_OVERRIDES = {
         "jwt.secret": env("SUPOS_JWT_SECRET", "adp-test-jwt-secret"),
         "snow-flake.datacenterId": env("SNOW_FLAKE_DATACENTER_ID", "0"),
         "snow-flake.workerId": env("SNOW_FLAKE_WORKER_ID", "0"),
-        "keycloak.client": env("KEYCLOAK_CLIENT", "supos"),
+        "keycloak.client": keycloak_client(),
         "keycloak.grant-type": env("KEYCLOAK_GRANT_TYPE", "password"),
     },
     "supfusion-entityconf.properties": {
@@ -133,6 +138,17 @@ TARGETED_OVERRIDES = {
         "mybatis-plus.mapper-locations[3]": "classpath*:mappers/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
     },
 }
+
+if env("ADP_RENDER_DATASOURCE_COMPAT", "false").lower() not in {"1", "true", "yes", "on"}:
+    for key in (
+        "${SUPOS_SYSTEM_DB_TYPE:oracle}",
+        "${SUPOS_SYSTEM_DB_NAME:orcl}",
+        "${SUPOS_SYSTEM_DB_HOST:127.0.0.1}",
+        "${SUPOS_SYSTEM_DB_PORT:1521}",
+        "${supfusion.cloud.datasource.connect.system.db-type:oracle}",
+    ):
+        REPLACEMENTS.pop(key, None)
+    TARGETED_OVERRIDES.pop("supfusion-datasource-system.properties", None)
 
 
 def set_property(text: str, key: str, value: str) -> str:
