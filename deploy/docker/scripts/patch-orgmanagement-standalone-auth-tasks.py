@@ -12,23 +12,22 @@ from pathlib import Path
 
 DOCKER_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = DOCKER_DIR.parents[1]
-PATCH_ROOT = DOCKER_DIR / "patches" / "signature-log-service-fallback"
+PATCH_ROOT = DOCKER_DIR / "patches" / "orgmanagement-standalone-auth-tasks"
 SOURCE_FILE = (
     PATCH_ROOT
     / "src"
     / "com"
     / "supcon"
     / "supfusion"
-    / "signature"
-    / "services"
+    / "auth"
     / "service"
-    / "impl"
-    / "SignatureLogServiceImpl.java"
+    / "task"
+    / "AuthOnlionLoginTask.java"
 )
 CLASSES_DIR = PATCH_ROOT / "classes"
-CLASS_FILE = CLASSES_DIR / "com/supcon/supfusion/signature/services/service/impl/SignatureLogServiceImpl.class"
-TARGET_CLASS = "com/supcon/supfusion/signature/services/service/impl/SignatureLogServiceImpl.class"
-SIGNATURE_SERVICE_JAR = "BOOT-INF/lib/signature-service-1.0.0-SNAPSHOT.jar"
+CLASS_FILE = CLASSES_DIR / "com/supcon/supfusion/auth/service/task/AuthOnlionLoginTask.class"
+TARGET_CLASS = "com/supcon/supfusion/auth/service/task/AuthOnlionLoginTask.class"
+AUTH_SERVICE_JAR = "BOOT-INF/lib/auth-service-1.0.0-SNAPSHOT.jar"
 
 
 def runtime_root_default() -> Path:
@@ -42,7 +41,7 @@ def runtime_root_default() -> Path:
 
 
 def service_jar(runtime_root: Path) -> Path:
-    service_dir = runtime_root / "base-Server" / "basicmanagement"
+    service_dir = runtime_root / "base-Server" / "orgmanagement"
     jars = sorted(path for path in service_dir.glob("*.jar") if ".bak" not in path.name)
     if len(jars) != 1:
         raise FileNotFoundError(f"expected one jar in {service_dir}, found {len(jars)}")
@@ -60,21 +59,7 @@ def zip_info_copy(info: zipfile.ZipInfo) -> zipfile.ZipInfo:
     return copied
 
 
-def extract_nested_libs(jar_path: Path, target_dir: Path) -> list[Path]:
-    libs: list[Path] = []
-    with zipfile.ZipFile(jar_path, "r") as app_jar:
-        for info in app_jar.infolist():
-            if not info.filename.startswith("BOOT-INF/lib/") or not info.filename.endswith(".jar"):
-                continue
-            out = target_dir / Path(info.filename).name
-            out.write_bytes(app_jar.read(info.filename))
-            libs.append(out)
-    if not any(path.name == Path(SIGNATURE_SERVICE_JAR).name for path in libs):
-        raise FileNotFoundError(f"{jar_path} does not contain {SIGNATURE_SERVICE_JAR}")
-    return libs
-
-
-def build_class(jar_path: Path, force: bool) -> Path:
+def build_class(force: bool) -> Path:
     if CLASS_FILE.exists() and not force:
         return CLASS_FILE
     if not SOURCE_FILE.exists():
@@ -84,23 +69,19 @@ def build_class(jar_path: Path, force: bool) -> Path:
         shutil.rmtree(CLASSES_DIR)
     CLASSES_DIR.mkdir(parents=True)
 
-    with tempfile.TemporaryDirectory(prefix="signature-libs-") as tmp:
-        libs = extract_nested_libs(jar_path, Path(tmp))
-        cmd = [
-            "javac",
-            "-encoding",
-            "UTF-8",
-            "-source",
-            "1.8",
-            "-target",
-            "1.8",
-            "-cp",
-            os.pathsep.join(str(path) for path in libs),
-            "-d",
-            str(CLASSES_DIR),
-            str(SOURCE_FILE),
-        ]
-        subprocess.run(cmd, check=True)
+    cmd = [
+        "javac",
+        "-encoding",
+        "UTF-8",
+        "-source",
+        "1.8",
+        "-target",
+        "1.8",
+        "-d",
+        str(CLASSES_DIR),
+        str(SOURCE_FILE),
+    ]
+    subprocess.run(cmd, check=True)
 
     if not CLASS_FILE.exists():
         raise FileNotFoundError(f"compiled class not found: {CLASS_FILE}")
@@ -109,7 +90,7 @@ def build_class(jar_path: Path, force: bool) -> Path:
 
 def replace_class_in_nested_jar(nested_bytes: bytes, class_bytes: bytes) -> tuple[bytes, bool]:
     replaced = False
-    with tempfile.TemporaryDirectory(prefix="signature-nested-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="auth-service-") as tmp:
         nested_in = Path(tmp) / "in.jar"
         nested_out = Path(tmp) / "out.jar"
         nested_in.write_bytes(nested_bytes)
@@ -129,12 +110,12 @@ def patch_service_jar(jar_path: Path, class_file: Path, backup_suffix: str) -> N
         shutil.copy2(jar_path, backup)
 
     patched = False
-    with tempfile.TemporaryDirectory(prefix="signature-service-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="orgmanagement-auth-task-") as tmp:
         output = Path(tmp) / jar_path.name
         with zipfile.ZipFile(jar_path, "r") as zin, zipfile.ZipFile(output, "w") as zout:
             for info in zin.infolist():
                 data = zin.read(info.filename)
-                if info.filename == SIGNATURE_SERVICE_JAR:
+                if info.filename == AUTH_SERVICE_JAR:
                     data, nested_patched = replace_class_in_nested_jar(data, class_bytes)
                     patched = patched or nested_patched
                 zout.writestr(zip_info_copy(info), data)
@@ -147,24 +128,38 @@ def patch_service_jar(jar_path: Path, class_file: Path, backup_suffix: str) -> N
         os.chmod(jar_path, mode)
 
 
+def restore_service_jar(jar_path: Path, backup_suffix: str) -> bool:
+    backup = jar_path.with_name(jar_path.name + backup_suffix)
+    if not backup.exists():
+        return False
+    shutil.copy2(backup, jar_path)
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Patch signature log service to query with MyBatis-Plus when XML mapper registration is missing."
+        description="Disable legacy orgmanagement auth schedulers for the standalone Docker test profile."
     )
     parser.add_argument("--runtime-root", type=Path, default=runtime_root_default())
-    parser.add_argument("--backup-suffix", default=".pre-signature-log-service-fallback.bak")
+    parser.add_argument("--backup-suffix", default=".pre-standalone-auth-tasks.bak")
     parser.add_argument("--force-build", action="store_true")
     parser.add_argument("--build-only", action="store_true")
+    parser.add_argument("--restore", action="store_true")
     args = parser.parse_args()
 
     jar_path = service_jar(args.runtime_root.resolve())
-    class_file = build_class(jar_path, args.force_build)
+    if args.restore:
+        restored = restore_service_jar(jar_path, args.backup_suffix)
+        print(f"{'restored' if restored else 'missing backup for'} orgmanagement: {jar_path}")
+        return
+
+    class_file = build_class(args.force_build)
     print(f"using patch class: {class_file}")
     if args.build_only:
         return
 
     patch_service_jar(jar_path, class_file, args.backup_suffix)
-    print(f"patched basicmanagement signature log service: {jar_path}")
+    print(f"patched orgmanagement standalone auth tasks: {jar_path}")
 
 
 if __name__ == "__main__":
