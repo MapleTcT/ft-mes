@@ -125,6 +125,7 @@ TARGETED_OVERRIDES = {
         "keycloak.grant-type": env("KEYCLOAK_GRANT_TYPE", "password"),
     },
     "supfusion-entityconf.properties": {
+        "supfusion.cloud.i18n.temp": "/tmp",
         "supos.task.api": "",
         "supos.task.log.api": "",
     },
