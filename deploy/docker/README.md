@@ -77,6 +77,11 @@ ADP_OUTPUT_DIR=/tmp/adp-menu-smoke-current \
 NODE_PATH=/Users/zhangchu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules \
   /Users/zhangchu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node \
   deploy/docker/scripts/adp-menu-smoke.js
+
+ADP_OUTPUT_DIR=/tmp/adp-home-todo-smoke-current \
+NODE_PATH=/Users/zhangchu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules \
+  /Users/zhangchu/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node \
+  deploy/docker/scripts/adp-home-todo-smoke.js
 ```
 
 Optional environment variables:
@@ -90,7 +95,7 @@ ADP_SCREENSHOTS=failures|all|none
 ADP_API_SMOKE_OUTPUT=/tmp/adp-platform-api-smoke.json
 ```
 
-`adp-platform-api-smoke.js` checks the login path plus the platform endpoints most likely to regress during PostgreSQL and standalone-Docker migration. `adp-menu-smoke.js` reads the current user's menu tree from the server, opens every navigable frontend menu, and fails on document/XHR/fetch 4xx/5xx responses, browser console errors, page errors, and visible system-error text.
+`adp-platform-api-smoke.js` checks the login path plus the platform endpoints most likely to regress during PostgreSQL and standalone-Docker migration. `adp-menu-smoke.js` reads the current user's menu tree from the server, opens every navigable frontend menu, and fails on document/XHR/fetch 4xx/5xx responses, browser console errors, page errors, and visible system-error text. `adp-home-todo-smoke.js` logs in through the real frontend and clicks the top workbench Todo tab, covering shell interactions that are not represented by menu URLs.
 
 `scripts/init-keycloak-realm.sh` creates the ADP business Keycloak realm (`dt` by default), `pc_dt`/`mobile_dt` clients, the `supos` token scope and the bundled `readonly-property-file` user storage provider. It is idempotent and can be rerun after Keycloak volume resets. `scripts/sync-keycloak-jwt-public-key.sh` reads that realm public key into `nacos-rendered/supfusion-jwt-common.properties` and publishes the Nacos config so Java services can populate `UserContext` from Keycloak access tokens.
 
@@ -102,6 +107,6 @@ The Docker test profile sets `SUPPLANT_LICENSE_ENABLED=true`. In this recovered 
 
 The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and provides `patch-postgres-runtime.py` to inject PostgreSQL DBP classes and generated `postgresql` mapper directories into nested runtime JARs. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; the follow-up patch scripts apply the current recovered-package fixes for signature log mapper loading and RBAC boolean/`UNION` compatibility. Any remaining failures should be fixed from that report and container logs.
 
-For the recovered binaries, run the PostgreSQL compatibility SQL in `postgres/init/004-012*.sql` after the recovered runtime creates legacy auth/RBAC tables. These scripts seed the admin/auth baseline, repair RBAC initialization metadata, convert Boolean-backed permission columns, backfill RBAC operation codes, and add compatibility shims for legacy MyBatis fragments that still compare or aggregate Boolean fields as `0/1`.
+For the recovered binaries, run the PostgreSQL compatibility SQL in `postgres/init/004-041*.sql` after the recovered runtime creates legacy auth/RBAC tables. These scripts seed the admin/auth baseline, repair RBAC initialization metadata, convert Boolean-backed permission columns, backfill RBAC operation codes, and add compatibility shims for legacy MyBatis fragments that still compare or aggregate Boolean fields as `0/1`.
 
 Use `scripts/audit-postgres-mappings.py` against both source folders and patched runtime JARs before handoff. A clean migration has `findingCount: 0` for loadable mapper/SQL files.
