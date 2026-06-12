@@ -35,6 +35,11 @@ patch_dir="/opt/adp/bap-server/patches"
 if [ -d "$patch_dir" ]; then
   for patch_jar in "$patch_dir"/*.jar; do
     [ -f "$patch_jar" ] || continue
+    case "$(basename "$patch_jar")" in
+      scaffold-dbp-postgresql-url.jar)
+        continue
+        ;;
+    esac
     classpath="$patch_jar:$classpath"
   done
 fi

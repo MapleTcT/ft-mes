@@ -372,6 +372,62 @@ services:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/base-Server/auditlog/supfusion-auditlog.jar"]
 
+  craftGraphMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/craftGraphMs/manual/craftGraphMs-1.0.0.jar"]
+
+  RMMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar"]
+
+  WOMMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar"]
+
+  FoundationMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"]
+
+  EamMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar"]
+
+  SpecialMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/SpecialMs/manual/SpecialMs-1.0.0.jar"]
+
+  OEEMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/OEEMs/manual/OEEMs-1.0.0.jar"]
+
+  ToolMs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/ToolMs/manual/ToolMs-1.0.0.jar"]
+
+  LIMS:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/LIMS/manual/LIMS-1.0.0.jar"]
+
+  LIMSDCMan:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/LIMSDCMan/manual/LIMSDCMan-1.0.0.jar"]
+
+  LIMSINT:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/LIMSINT/manual/LIMSINT-1.0.0.jar"]
+
+  LIMSMatStds:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/LIMSMatStds/manual/LIMSMatStds-1.0.0.jar"]
+
+  WTSs:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WTSs/manual/WTSs-1.0.0.jar"]
+
+  WAPS:
+    <<: *java-service
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WAPS/manual/WAPS-1.0.0.jar"]
+
   nginx:
     image: ${NGINX_IMAGE:-m.daocloud.io/docker.io/library/nginx:1.24.0}
     restart: unless-stopped

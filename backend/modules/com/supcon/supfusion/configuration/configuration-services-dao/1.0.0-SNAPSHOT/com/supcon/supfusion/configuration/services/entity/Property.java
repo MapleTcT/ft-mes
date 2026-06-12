@@ -61,7 +61,6 @@ public class Property extends AbstractAuditUniqueCodeEntity implements Serializa
 	private Boolean isUnique = false;// 是否唯一
 	private Boolean isInherent = false;// 是否是固有字段
 	private Boolean isPk = false;// 是否是主键
-	@Lob
 	private String fillcontent;// 填充值
 	@Transient
 	private String fillcontentEscapeHtml;
@@ -202,7 +201,6 @@ public class Property extends AbstractAuditUniqueCodeEntity implements Serializa
 	public Integer getVersion() {
 		return null == super.getVersion() ? 0 : super.getVersion();
 	}
-	@Lob
 	public String getFillcontent() {
 		return null == fillcontent ? fillcontent : fillcontent.trim();
 	}
@@ -211,7 +209,6 @@ public class Property extends AbstractAuditUniqueCodeEntity implements Serializa
 		return StringEscapeUtils.escapeHtml(fillcontent);
 	}
 
-	@Lob
 	public String getAttributes() {
 		return attributes;
 	}

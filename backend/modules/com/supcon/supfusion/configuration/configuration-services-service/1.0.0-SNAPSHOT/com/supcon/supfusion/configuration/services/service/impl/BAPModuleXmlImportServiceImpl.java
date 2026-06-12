@@ -1131,7 +1131,7 @@ public class BAPModuleXmlImportServiceImpl extends BaseServiceImpl<Module> imple
 			currentMill = System.currentTimeMillis();
 			synchronizeObjInfo(metaMap, module, session, env);
 			log.info("==================刷新数据到EC完成，耗时" + (System.currentTimeMillis() - currentMill) + " ms");
-			msModuleService.saveMsModule(xml);
+			msModuleService.saveMsModule(xml, xml);
 			log.info("==================存储服务信息完成，耗时" + (System.currentTimeMillis() - currentMill) + " ms");
 
 		} catch (Exception e) {
@@ -1650,11 +1650,8 @@ public class BAPModuleXmlImportServiceImpl extends BaseServiceImpl<Module> imple
  						Object value = values.get(j - 1);
 
 						if (clobbb.contains(columnNames.get(j - 1))) {
-							if(value==null){
-								ps.setClob(j,new StringReader(""));
-							}else{
-								ps.setClob(j, new StringReader(value.toString()));
-							}
+							String clobValue = value == null ? "" : value.toString();
+							ps.setCharacterStream(j, new StringReader(clobValue), clobValue.length());
 
 						} else if (value instanceof String) {
 							ps.setString(j, value.toString());
@@ -1663,7 +1660,7 @@ public class BAPModuleXmlImportServiceImpl extends BaseServiceImpl<Module> imple
 						} else if (value instanceof Long) {
 							ps.setLong(j, Long.parseLong(value.toString()));
 						} else if (value instanceof Boolean) {
-							ps.setBoolean(j, Boolean.parseBoolean(value.toString()));
+							ps.setInt(j, Boolean.parseBoolean(value.toString()) ? 1 : 0);
 						} else if (value instanceof BigDecimal) {
 							ps.setBigDecimal(j, new BigDecimal(value.toString()));
 						} else if (value instanceof Double) {

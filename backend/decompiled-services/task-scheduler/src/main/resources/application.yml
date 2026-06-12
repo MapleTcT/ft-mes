@@ -147,7 +147,7 @@ org:
       threadsInheritContextClassLoaderOfInitializingThread: true
     jobStore:
       class: org.quartz.impl.jdbcjobstore.JobStoreTX
-      driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
       tablePrefix: QRTZ_
       isClustered: true
       clusterCheckinInterval: 10000

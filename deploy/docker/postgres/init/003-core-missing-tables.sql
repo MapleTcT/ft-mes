@@ -258,6 +258,7 @@ CREATE TABLE IF NOT EXISTS public.scheduler_job_info (
   last_time timestamp NOT NULL DEFAULT current_timestamp,
   next_time timestamp NOT NULL DEFAULT current_timestamp,
   user_name varchar(64) NOT NULL,
+  callback_flag boolean DEFAULT false,
   delete_time timestamp DEFAULT NULL,
   modify_time timestamp DEFAULT current_timestamp,
   create_time timestamp DEFAULT current_timestamp,
@@ -292,12 +293,33 @@ CREATE TABLE IF NOT EXISTS public.scheduler_job_log_info (
   create_staff_id bigint,
   modify_staff_id bigint,
   tenant_id varchar(64) DEFAULT NULL,
+  callback_time timestamp DEFAULT NULL,
+  callback_data varchar(510),
   CONSTRAINT scheduler_job_log_info_pkey PRIMARY KEY (id)
 );
 
 CREATE INDEX IF NOT EXISTS index_jobloginfo_code ON public.scheduler_job_log_info(code);
 CREATE INDEX IF NOT EXISTS index_jobloginfo_model_name ON public.scheduler_job_log_info(model_name);
 CREATE INDEX IF NOT EXISTS index_jobloginfo_job_status ON public.scheduler_job_log_info(job_status);
+
+CREATE TABLE IF NOT EXISTS public.scheduler_job_operation_log (
+  id bigint NOT NULL,
+  model_code varchar(64),
+  job_name varchar(256),
+  code varchar(64),
+  user_name varchar(64),
+  operation varchar(64),
+  source varchar(64),
+  creator varchar(32) DEFAULT NULL,
+  modifier varchar(32) DEFAULT NULL,
+  terminator varchar(32) DEFAULT NULL,
+  create_time timestamp DEFAULT current_timestamp,
+  modify_time timestamp DEFAULT current_timestamp,
+  delete_time timestamp DEFAULT NULL,
+  create_staff_id bigint,
+  modify_staff_id bigint,
+  CONSTRAINT scheduler_job_operation_log_pkey PRIMARY KEY (id)
+);
 
 CREATE TABLE IF NOT EXISTS public.license_info (
   id bigint NOT NULL,
@@ -340,10 +362,10 @@ CREATE TABLE IF NOT EXISTS public.qrtz_job_details (
   job_group varchar(200) NOT NULL,
   description varchar(250),
   job_class_name varchar(250) NOT NULL,
-  is_durable varchar(1) NOT NULL,
-  is_nonconcurrent varchar(1) NOT NULL,
-  is_update_data varchar(1) NOT NULL,
-  requests_recovery varchar(1) NOT NULL,
+  is_durable varchar(8) NOT NULL,
+  is_nonconcurrent varchar(8) NOT NULL,
+  is_update_data varchar(8) NOT NULL,
+  requests_recovery varchar(8) NOT NULL,
   job_data bytea,
   CONSTRAINT qrtz_job_details_pkey PRIMARY KEY (sched_name, job_name, job_group)
 );
@@ -400,8 +422,8 @@ CREATE TABLE IF NOT EXISTS public.qrtz_simprop_triggers (
   long_prop_2 bigint,
   dec_prop_1 numeric(13,4),
   dec_prop_2 numeric(13,4),
-  bool_prop_1 varchar(1),
-  bool_prop_2 varchar(1),
+  bool_prop_1 varchar(8),
+  bool_prop_2 varchar(8),
   CONSTRAINT qrtz_simprop_triggers_pkey PRIMARY KEY (sched_name, trigger_name, trigger_group)
 );
 
@@ -438,8 +460,8 @@ CREATE TABLE IF NOT EXISTS public.qrtz_fired_triggers (
   state varchar(16) NOT NULL,
   job_name varchar(200),
   job_group varchar(200),
-  is_nonconcurrent varchar(1),
-  requests_recovery varchar(1),
+  is_nonconcurrent varchar(8),
+  requests_recovery varchar(8),
   CONSTRAINT qrtz_fired_triggers_pkey PRIMARY KEY (sched_name, entry_id)
 );
 

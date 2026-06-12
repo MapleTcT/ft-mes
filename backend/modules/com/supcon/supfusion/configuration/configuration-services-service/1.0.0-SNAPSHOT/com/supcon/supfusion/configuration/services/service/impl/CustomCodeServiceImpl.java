@@ -594,7 +594,11 @@ public class CustomCodeServiceImpl implements CustomCodeService {
 					ps.setString(1, customCodes.get(i).getCode());
 					ps.setString(2, customCodes.get(i).getEcEnv().toString());
 					ps.setInt(3, 0);
-					ps.setClob(4, new StringReader(customCodes.get(i).getCustomCode()));
+						String customCode = customCodes.get(i).getCustomCode();
+						if (customCode == null) {
+							customCode = "";
+						}
+						ps.setCharacterStream(4, new StringReader(customCode), customCode.length());
 					ps.setString(5, customCodes.get(i).getSubType());
 					ps.setString(6, customCodes.get(i).getType());
 					ps.setString(7, customCodes.get(i).getModelCode());
