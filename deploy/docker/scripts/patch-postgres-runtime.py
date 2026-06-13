@@ -23,6 +23,7 @@ DBP_PATCH_CLASSES = (
     "com/supcon/supfusion/framework/scaffold/dbp/factory/DataSourceRepository.class",
     "com/supcon/supfusion/framework/scaffold/dbp/factory/DefaultDataSourceFactory.class",
     "com/supcon/supfusion/framework/scaffold/dbp/factory/jdbc/DataSourceProvider.class",
+    "com/supcon/supfusion/framework/scaffold/dbp/factory/jdbc/HikariDataSourceProvider.class",
     "com/supcon/supfusion/framework/scaffold/dbp/factory/line/PostgresqlDataSourceProductionLine.class",
     "com/supcon/supfusion/framework/scaffold/dbp/factory/populator/MultiTenantDatabasePopulator.class",
     "com/supcon/supfusion/framework/scaffold/dbp/factory/populator/MultiTenantDatabasePopulatorUtils.class",
@@ -30,6 +31,12 @@ DBP_PATCH_CLASSES = (
     "com/supcon/supfusion/framework/scaffold/dbp/factory/populator/version/VersionTableProviderFactory.class",
     "com/supcon/supfusion/framework/scaffold/dbp/util/DataId.class",
     "com/supcon/supfusion/framework/scaffold/dbp/util/TenantUtils.class",
+)
+DBP_ALWAYS_PATCH_CLASSES = frozenset(
+    {
+        "com/supcon/supfusion/framework/scaffold/dbp/factory/jdbc/HikariDataSourceProvider.class",
+        "com/supcon/supfusion/framework/scaffold/dbp/factory/line/PostgresqlDataSourceProductionLine.class",
+    }
 )
 
 ORM_UPSERT_CLASS = "com/supcon/supfusion/framework/scaffold/mybatis/upsert/support/UpsertMethod.class"
@@ -727,7 +734,7 @@ def patch_nested_jar(
             if (
                 current is not None
                 and not legacy_postgres_version
-                and class_name != "com/supcon/supfusion/framework/scaffold/dbp/factory/line/PostgresqlDataSourceProductionLine.class"
+                and class_name not in DBP_ALWAYS_PATCH_CLASSES
             ):
                 continue
             if current is not None and current[1] == class_bytes:

@@ -68,6 +68,19 @@ public class HikariDataSourceProvider implements DataSourceProvider {
         return dataSource;
     }
 
+    public DataSource create(
+            String dbType,
+            String driver,
+            String url,
+            String username,
+            String password,
+            DataSourceConfig config,
+            String tenantId,
+            String dbVersion
+    ) {
+        return create(dbType, driver, url, username, password, config, tenantId);
+    }
+
     @Override
     public String getName() {
         return "HikariCP";

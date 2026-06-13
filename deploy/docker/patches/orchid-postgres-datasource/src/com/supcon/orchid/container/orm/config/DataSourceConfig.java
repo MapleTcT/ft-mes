@@ -97,6 +97,9 @@ public class DataSourceConfig {
         dataSource.setPassword(connectionProperties.getPassword());
         dataSource.setDriverClassName(driverClassName);
         dataSource.setValidationQuery(validationQuery);
+        if ("postgres".equalsIgnoreCase(dbType) || "postgresql".equalsIgnoreCase(dbType)) {
+            dataSource.setDefaultAutoCommit(false);
+        }
         dataSource.setInitialSize(druidProperties.getInitPoolSize());
         dataSource.setMaxActive(druidProperties.getMaxPoolSize());
         dataSource.setMaxWait(druidProperties.getSlowSqlMillis());
