@@ -28,6 +28,8 @@ cd /home/v6/adp-mes-docker/deploy/docker
 cp .env.example .env
 python3 scripts/render-nacos-configs.py
 scripts/prepare-static-placeholders.sh
+scripts/prepare-qcs-static-assets.sh
+scripts/prepare-eam-static-assets.sh
 scripts/prepare-runtime-patches.sh /home/v6/adp-mes-docker/runtime/bap-server
 docker compose --env-file .env up -d postgres redis mongo zookeeper kafka nacos keycloak minio
 scripts/init-keycloak-realm.sh

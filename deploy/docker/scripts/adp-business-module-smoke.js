@@ -152,14 +152,119 @@ const checks = [
     path: "/msService/EAM/baseInfo/baseInfo/baseInfoLayout",
   },
   {
+    name: "eqpt-operation-alarm-history-layout",
+    module: "EQPTOperation",
+    path: "/msService/EQPTOperation/alarm/alarmRecord/alarmHistoryLayout",
+  },
+  {
+    name: "eqpt-operation-alarm-record-layout",
+    module: "EQPTOperation",
+    path: "/msService/EQPTOperation/alarm/alarmRecord/alarmRecordLayout",
+  },
+  {
+    name: "eqpt-operation-alarming-layout",
+    module: "EQPTOperation",
+    path: "/msService/EQPTOperation/alarm/alarmRecord/alarmingLayout",
+  },
+  {
+    name: "measure-type-tree-layout",
+    module: "Measure",
+    path: "/msService/Measure/eamType/meaType/treeLayout",
+  },
+  {
+    name: "measure-info-base-layout",
+    module: "Measure",
+    path: "/msService/Measure/meaInfo/baseInfo/baseInfoLayout",
+  },
+  {
+    name: "measure-info-view-layout",
+    module: "Measure",
+    path: "/msService/Measure/meaInfo/baseInfo/eamViewLayout",
+  },
+  {
     name: "oee-running-record-layout",
     module: "OverEquipEffect",
     path: "/msService/OverEquipEffect/runRecord/runningRecord/runningRecordLayout",
   },
   {
+    name: "overhaul-ticket-maintenance-ticket-list",
+    module: "OverhaulTicket",
+    path: "/msService/OverhaulTicket/otMaintenanceTicket/otMWorkTicket/otMtcTicketList",
+  },
+  {
+    name: "overhaul-ticket-hazard-library-list",
+    module: "OverhaulTicket",
+    path: "/msService/OverhaulTicket/otOverhaulHazard/otHazid/otHazidLibList",
+  },
+  {
+    name: "overhaul-ticket-risk-safety-list",
+    module: "OverhaulTicket",
+    path: "/msService/OverhaulTicket/otRiskSafeMeasure/riskSafeys/otRiskSafeyLisit",
+  },
+  {
+    name: "parti-manage-scenario-list",
+    module: "PartiManage",
+    path: "/msService/PartiManage/businessScenario/scenarioInfo/scenarioInfoList",
+  },
+  {
+    name: "parti-manage-notice-log-list",
+    module: "PartiManage",
+    path: "/msService/PartiManage/noticeLog/noticeLog/noticeLogList",
+  },
+  {
+    name: "parti-manage-problem-list",
+    module: "PartiManage",
+    path: "/msService/PartiManage/problemManage/problemDetail/problemList",
+  },
+  {
+    name: "spare-manage-arrival-list",
+    module: "SpareManage",
+    path: "/msService/SpareManage/spareArrvial/purArrivalInfo/spareArrvialList",
+  },
+  {
+    name: "spare-manage-back-list",
+    module: "SpareManage",
+    path: "/msService/SpareManage/spareBack/spWarehousing/spareBackList",
+  },
+  {
+    name: "spare-manage-demand-plan-report-list",
+    module: "SpareManage",
+    path: "/msService/SpareManage/spareDemand/demandDetail/planReportList",
+  },
+  {
     name: "tool-tool-layout",
     module: "TOOL",
     path: "/msService/TOOL/toolInfo/toolInfo/toolLayout",
+  },
+  {
+    name: "maintenance-fault-library-layout",
+    module: "maintenance",
+    path: "/msService/maintenance/faultRepository/eamFaultLib/eamFaultLibLayout",
+  },
+  {
+    name: "maintenance-daily-plan-list",
+    module: "maintenance",
+    path: "/msService/maintenance/dailyPlan/dailyplanHead/dailyPlanList",
+  },
+  {
+    name: "maintenance-entrust-repair-list",
+    module: "maintenance",
+    path: "/msService/maintenance/entrustRepair/entrustRepair/entrustRecordList",
+  },
+  {
+    name: "outag-manage-statistic-list",
+    module: "outagManage",
+    path: "/msService/outagManage/dataStatistic/dataStatistic/statisticList",
+  },
+  {
+    name: "outag-manage-electric-inspect-record-list",
+    module: "outagManage",
+    path: "/msService/outagManage/eleInspectRecord/eleCheckRecord/eleInspectRecordList",
+  },
+  {
+    name: "outag-manage-electric-delay-apply-list",
+    module: "outagManage",
+    path: "/msService/outagManage/electricDelay/eleDelayApply/delayApplyList",
   },
   {
     name: "special-finish-check-list",
