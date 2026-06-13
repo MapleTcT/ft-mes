@@ -17,6 +17,11 @@ const bodyErrorPattern =
 
 const checks = [
   {
+    name: "base-cooperate-layout",
+    module: "BaseSet",
+    path: "/msService/BaseSet/cooperate/cooperate/cmcLayout",
+  },
+  {
     name: "base-material-layout",
     module: "BaseSet",
     path: "/msService/BaseSet/material/material/materialLayout",
@@ -25,6 +30,16 @@ const checks = [
     name: "base-unit-group-list",
     module: "BaseSet",
     path: "/msService/BaseSet/unit/unitGroup/unitGroupList",
+  },
+  {
+    name: "chart-scatter-list",
+    module: "ChartReportMap",
+    path: "/msService/ChartReportMap/scatterChartSet/scatteChartSet/scatterChartList",
+  },
+  {
+    name: "dataset-category-list",
+    module: "DataSet",
+    path: "/msService/DataSet/categoryMgt/categoryMgt/categoryList",
   },
   {
     name: "hierarchical-factory-tree",
@@ -37,9 +52,19 @@ const checks = [
     path: "/msService/TagManagement/tagInfo/tag/tagList",
   },
   {
+    name: "tagmanagement-data-convert-list",
+    module: "TagManagement",
+    path: "/msService/TagManagement/dataConvert/dataConvert/dataConvertList",
+  },
+  {
     name: "team-team-list",
     module: "TeamInfo",
     path: "/msService/TeamInfo/team/team/teamList",
+  },
+  {
+    name: "team-schedule-dept-layout",
+    module: "TeamInfo",
+    path: "/msService/TeamInfo/schedual/schedule/schedualDeptLayout",
   },
   {
     name: "qualification-certificate-layout",
@@ -62,9 +87,49 @@ const checks = [
     path: "/msService/LIMSBasic/sampleType/sampleType/sampleTypeList",
   },
   {
+    name: "lims-dc-analysis-file-ref",
+    module: "LIMSDC",
+    path: "/msService/LIMSDC/analysisFile/analysisFile/analysisFileRef",
+  },
+  {
+    name: "lims-material-info-list",
+    module: "LIMSMaterial",
+    path: "/msService/LIMSMaterial/mATInfo/matInfo/matInfoList",
+  },
+  {
+    name: "lims-retain-plan-list",
+    module: "LIMSRetain",
+    path: "/msService/LIMSRetain/retention/retPlan/retPlanList",
+  },
+  {
+    name: "lims-sample-collect-layout",
+    module: "LIMSSample",
+    path: "/msService/LIMSSample/sample/sampleInfo/collectListLayout",
+  },
+  {
+    name: "lims-stds-aq-prep-record-list",
+    module: "LIMSSTDS",
+    path: "/msService/LIMSSTDS/aqPrepRecord/aqPrepRecord/aqPrepRecordList",
+  },
+  {
+    name: "lims-steady-env-condition-list",
+    module: "LIMSSteady",
+    path: "/msService/LIMSSteady/envCondition/envCondition/envConditionList",
+  },
+  {
+    name: "qcs-manu-inspect-list",
+    module: "QCS",
+    path: "/msService/QCS/inspect/inspect/manuInspectList",
+  },
+  {
     name: "wom-make-task-list",
     module: "WOM",
     path: "/msService/WOM/produceTask/produceTask/makeTaskList",
+  },
+  {
+    name: "wom-retirement-pda-list",
+    module: "WOM",
+    path: "/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList",
   },
   {
     name: "rm-batch-formula-list",

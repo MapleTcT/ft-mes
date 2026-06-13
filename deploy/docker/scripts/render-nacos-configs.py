@@ -98,6 +98,10 @@ TARGETED_OVERRIDES = {
     "supfusion-baseApplications.properties": {
         "WebSocketUrl": f"{env('ADP_PUBLIC_HOST', '10.11.100.17')}:{env('ADP_HTTP_PORT', '18080')}",
         "bap.allow.empty.password": "false",
+        "LIMSBasic/LIMSBasic.dataPermission": "false",
+        "LIMSSample/LIMSSample.dataPermission": "false",
+        "QCS/QCS.dataPermission": "false",
+        "spring.datasource.type": "com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource",
         "mybatis-plus.mapper-locations[0]": "classpath*:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
         "mybatis-plus.mapper-locations[1]": "classpath*:mappers/*.xml",
         "mybatis-plus.mapper-locations[2]": "classpath*:mapper/*.xml",
