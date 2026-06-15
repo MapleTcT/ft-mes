@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T22:10:09+08:00",
-  "repoCommit": "38b65f197f0ab82c141ee18e2aa2a3bf08e63746",
+  "generatedAt": "2026-06-15T22:24:27+08:00",
+  "repoCommit": "690aec42c04df855ff59c365b35bcc732a560400",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 16,
-    "pass": 14,
+    "testedFeatures": 19,
+    "pass": 17,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -101,6 +101,66 @@
       "verificationSql": "select id, code, short_name, full_name, coalesce(description,''), coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,'') from public.org_company where code = 'ADP_E2E_20260615141009_COM' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. No visible error, console error, page error, or organization company request failure. Report: /tmp/adp-organization-company-persistence-acceptance.json DELETE returned 200 for company id 6587882338992656. PostgreSQL retained org_company with valid=0; org_company_mnecode was empty; virtual department/position/person and auth_user had no active rows, auth_user delete mode was soft-delete.",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增人员",
+      "api": "/inter-api/organization/v1/person",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.addPerson -> PersonService.addPersonAndUser(createUser=false) -> PersonServiceImpl.addPersonWithoutKafka -> MyBatis Plus save -> public.org_person; insert public.org_person_position/public.org_person_department/public.org_person_company; OrgMnecodeServiceImpl.addOrgMnecode -> public.org_person_mnecode",
+      "tables": [
+        "org_person",
+        "org_person_position",
+        "org_person_department",
+        "org_person_company",
+        "org_person_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615142411_PER",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(sys_flag::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(direct_leader_id::text,''), coalesce(grand_leader_id::text,''), coalesce(entry_date,''), coalesce(title,''), coalesce(qualification,''), coalesce(education,''), coalesce(major,''), coalesce(id_number,''), coalesce(avatar_url,''), coalesce(sign_pic_url,'') from public.org_person where code = 'ADP_E2E_20260615142411_PER' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. No visible error, console error, page error, or organization person request failure. Report: /tmp/adp-organization-person-persistence-acceptance.json POST returned 200 for marker ADP_E2E_20260615142411_PER. PostgreSQL org_person row existed with id 6587910008717840, valid=1, name=ADP_E2E_20260615142411_PER, gender=sys_gender/male, main_position=1; org_person_position/org_person_department/org_person_company active relations were persisted; org_person_mnecode generated rows; auth_user stayed empty as expected because createUser=false.",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑人员",
+      "api": "/inter-api/organization/v1/person",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.updatePerson -> PersonService.updatePerson -> PersonServiceImpl.updatePersonWithoutKafka -> MyBatis Plus updateById -> public.org_person; OrgMnecodeServiceImpl refresh -> public.org_person_mnecode",
+      "tables": [
+        "org_person",
+        "org_person_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615142411_PER",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(sys_flag::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(direct_leader_id::text,''), coalesce(grand_leader_id::text,''), coalesce(entry_date,''), coalesce(title,''), coalesce(qualification,''), coalesce(education,''), coalesce(major,''), coalesce(id_number,''), coalesce(avatar_url,''), coalesce(sign_pic_url,'') from public.org_person where code = 'ADP_E2E_20260615142411_PER' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin PUT returned 200 for id 6587910008717840. PostgreSQL org_person row changed to name=ADP_E2E_20260615142411_PER_EDIT, gender=sys_gender/female, phone=13815142411, email=adp_e2e_20260615142411_per_edit@example.test, description update marker, while valid remained 1. org_person_mnecode rows were refreshed to the edited name. Report: /tmp/adp-organization-person-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除人员",
+      "api": "/inter-api/organization/v1/person/6587910008717840",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.deletePerson -> PersonService.deletePerson -> PersonServiceImpl.deletePerson -> public.org_person.valid=0; PositionPersonServiceImpl/DepartmentPersonServiceImpl/CompanyPersonServiceImpl relation valid=0; OrgMnecodeServiceImpl.deleteOrgMnecodeByOrgId -> public.org_person_mnecode; PersonMapper.deleteUserByPersonId clears user binding",
+      "tables": [
+        "org_person",
+        "org_person_position",
+        "org_person_department",
+        "org_person_company",
+        "org_person_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615142411_PER",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(sys_flag::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(direct_leader_id::text,''), coalesce(grand_leader_id::text,''), coalesce(entry_date,''), coalesce(title,''), coalesce(qualification,''), coalesce(education,''), coalesce(major,''), coalesce(id_number,''), coalesce(avatar_url,''), coalesce(sign_pic_url,'') from public.org_person where code = 'ADP_E2E_20260615142411_PER' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin DELETE returned 200 for id 6587910008717840. PostgreSQL retained org_person with valid=0, proving soft delete. org_person_position, org_person_department, and org_person_company relation rows for the person also changed to valid=0; org_person_mnecode lookup returned no rows; org_person user_id/user_name were empty. Report: /tmp/adp-organization-person-persistence-acceptance.json",
       "issues": []
     },
     {

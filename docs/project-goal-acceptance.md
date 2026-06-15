@@ -43,8 +43,8 @@ make project-goal-acceptance-check
 | G-004 | 项目目标与交接说明 | READY | `docs/project-objectives.md`、`docs/sustainable-development.md` | 随真实验收继续更新 |
 | G-005 | 后端落表排查交接入口 | READY | `docs/backend-table-audit-handoff.md`、`docs/backend-table-audit/00-index.md` | 表级业务含义仍需专门线程执行 |
 | G-006 | 平台登录/认证 | READY | `metadata/persistence-acceptance.json` 平台 smoke PASS | 保持回归 smoke |
-| G-007 | 用户/人员/岗位/公司/组管理 | PARTIAL | 组织部门 CRUD 已落库；组管理 CRUD 已落库；岗位 CRUD 已落库；公司 CRUD 已落库；组织只读 smoke 通过 | 用户、人员 CRUD 落库未补齐 |
-| G-008 | 组织管理 | PARTIAL | 部门、组、岗位、公司新增/编辑/删除已用 marker 查 PostgreSQL | 组织域人员、用户和权限关联关系仍需动作级验收 |
+| G-007 | 用户/人员/岗位/公司/组管理 | PARTIAL | 组织部门 CRUD 已落库；组管理 CRUD 已落库；岗位 CRUD 已落库；公司 CRUD 已落库；人员 CRUD 已落库；组织只读 smoke 通过 | 用户账号创建、人员勾选创建账号和用户授权落库未补齐 |
+| G-008 | 组织管理 | PARTIAL | 部门、组、岗位、公司、人员新增/编辑/删除已用 marker 查 PostgreSQL | 组织域用户账号创建和权限关联关系仍需动作级验收 |
 | G-009 | 权限/RBAC | PARTIAL | RBAC authority smoke PASS | 权限配置页面和按钮授权 CRUD 落库仍需补 |
 | G-010 | 菜单导航 | READY | 菜单抽样真实浏览器 smoke PASS | 继续扩大菜单覆盖 |
 | G-011 | 待办 | READY | 首页待办/top-nav 待办 smoke 已有证据 | 继续保留回归 |
@@ -61,7 +61,7 @@ make project-goal-acceptance-check
 ## 当前最高优先级缺口
 
 1. 恢复 WOM 真实 edit/view component metadata，解决生产动作页 React #130。
-2. 补用户、人员、权限配置页面的真实前端 CRUD 与 PostgreSQL 落库验收。
+2. 补用户账号创建、人员勾选创建账号和权限配置页面的真实前端 CRUD 与 PostgreSQL 落库验收。
 3. 补基础配置页面的写动作落库验收。
 4. 对生产主流程执行 marker 写动作，并查询 `WOM_*` 相关表证明状态、报工、备料、退料等字段变化。
 5. 把生产迁移模板升级为 rehearsal 证据，但在业务 smoke 签字前保持 `NOT_READY_FOR_PRODUCTION_MIGRATION`。
