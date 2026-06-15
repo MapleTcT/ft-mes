@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`73`。
-- 编号范围：`001` 到 `073`。
+- 脚本数量：`74`。
+- 编号范围：`001` 到 `074`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -17,7 +17,7 @@
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 27 |
+| auth-rbac-org | 28 |
 | business | 9 |
 | compatibility | 42 |
 | configuration | 18 |
@@ -30,7 +30,7 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9180 |
+| alter-table | 9181 |
 | create-function | 38 |
 | create-index | 667 |
 | create-table | 482 |
@@ -115,6 +115,7 @@
 | 071 | 071-organization-person-profile-compat.sql | auth-rbac-org, compatibility | 20 | create-index:3, alter-table:7 | - |
 | 072 | 072-rbac-authority-page-compat.sql | platform, auth-rbac-org, compatibility | 43 | create-table:1, create-index:2, alter-table:1, insert:1, update:2 | - |
 | 073 | 073-auth-user-lock-status-compat.sql | auth-rbac-org, compatibility | 10 | alter-table:1, update:2 | - |
+| 074 | 074-rbac-roleuser-valid-default.sql | auth-rbac-org | 11 | alter-table:1 | - |
 
 ## 规则
 

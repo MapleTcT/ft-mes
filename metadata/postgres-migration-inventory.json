@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 73,
+  "migrationCount": 74,
   "firstNumber": 1,
-  "lastNumber": 73,
+  "lastNumber": 74,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "watchStatementCount": 44,
   "statementTotals": {
-    "alter-table": 9180,
+    "alter-table": 9181,
     "create-function": 38,
     "create-index": 667,
     "create-table": 482,
@@ -19,7 +19,7 @@
     "update": 3651
   },
   "tagTotals": {
-    "auth-rbac-org": 27,
+    "auth-rbac-org": 28,
     "business": 9,
     "compatibility": 42,
     "configuration": 18,
@@ -2001,6 +2001,29 @@
         "alter-table": 1,
         "insert": 0,
         "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
+      "name": "074-rbac-roleuser-valid-default.sql",
+      "number": 74,
+      "slug": "rbac-roleuser-valid-default",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 11,
+      "sha256": "dcbff06bd83c02f6c0725370c66b4f11b4e9fa79061729c74f950bc0bfe7b57c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
       },
       "highRiskStatements": [],
       "watchStatements": []

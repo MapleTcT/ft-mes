@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T23:11:40+08:00",
-  "repoCommit": "d8289fae0127333ba8ad6d484d8e8b25db71b1e6",
+  "generatedAt": "2026-06-15T23:32:40+08:00",
+  "repoCommit": "431571c54a4d39b2a074c3186e291ec0a9597daf",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 27,
-    "pass": 25,
+    "testedFeatures": 36,
+    "pass": 34,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -514,6 +514,167 @@
       "verificationSql": "select id, code, name, coalesce(description,''), company_id, dep_id, coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(leaf::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,''), coalesce(sys_flag::text,'') from public.org_position where code = 'ADP_E2E_20260615134928_POS' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Browser-context same-origin DELETE returned 200 for id 6587841746223632. PostgreSQL retained the org_position row with valid=0, proving soft delete. org_position_mnecode lookup by position_id returned no rows, proving associated mnemonic rows were cleared. Report: /tmp/adp-organization-position-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色管理",
+      "route": "/auth/#/role",
+      "operation": "新增角色",
+      "api": "/inter-api/rbac/v1/role",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RoleInterApiController.save -> RoleServiceImpl.saveRole -> RoleMapper.insert -> rbac_role -> RoleMneCodeServiceImpl.createRoleMneCode",
+      "tables": [
+        "rbac_role",
+        "rbac_role_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, code, name, coalesce(description,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(modify_time::text,''), coalesce(uuid,'') from public.rbac_role where code = 'ADP_E2E_20260615153240_RBAC_ROLE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. POST returned 200; rbac_role id 6588044621169168 persisted valid=true with marker name/description and cid=1000.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色管理",
+      "route": "/auth/#/role",
+      "operation": "编辑角色",
+      "api": "/inter-api/rbac/v1/role",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "RoleInterApiController.update -> RoleServiceImpl.update -> RoleMapper.updateById -> rbac_role",
+      "tables": [
+        "rbac_role",
+        "rbac_role_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, code, name, coalesce(description,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(modify_time::text,''), coalesce(uuid,'') from public.rbac_role where code = 'ADP_E2E_20260615153240_RBAC_ROLE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. PUT returned 200; rbac_role id 6588044621169168 changed to ADP_E2E_20260615153240_RBAC_ROLE_NAME_UPDATED with update marker description.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色用户",
+      "route": "/auth/#/role",
+      "operation": "绑定角色用户",
+      "api": "/inter-api/rbac/v1/roleUser",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RoleUserInterApiController.save -> RoleUserServiceImpl.saveRoleUsers -> RoleUserMapper.insert -> rbac_roleuser -> IUserAdapter.bindRole",
+      "tables": [
+        "rbac_roleuser"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, role_id, user_id, coalesce(user_name,''), coalesce(person_name,''), coalesce(person_code,''), coalesce(valid::text,''), coalesce(from_position::text,'') from public.rbac_roleuser where role_id = 6588044621169168 and user_id = 6588044746244624 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. POST returned 200; rbac_roleuser id 6588044794642960 persisted role_id=6588044621169168, user_id=6588044746244624, valid=true, from_position=1 after 074 fixed the default valid value.",
+      "issues": [
+        "First run returned HTTP 200 but persisted rbac_roleuser.valid=false because the PostgreSQL boolean conversion left the column default false; fixed by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql and rerun passed."
+      ]
+    },
+    {
+      "module": "权限/RBAC-角色用户",
+      "route": "/auth/#/role",
+      "operation": "解绑角色用户",
+      "api": "/inter-api/rbac/v1/roleUser/6588044794642960",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "RoleUserInterApiController.delete -> RoleUserServiceImpl.deleteRoleUsers -> RoleUserMapper.deleteBatchIds -> rbac_roleuser -> IUserAdapter.bindRole(false)",
+      "tables": [
+        "rbac_roleuser"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, role_id, user_id, coalesce(user_name,''), coalesce(person_name,''), coalesce(person_code,''), coalesce(valid::text,''), coalesce(from_position::text,'') from public.rbac_roleuser where role_id = 6588044621169168 and user_id = 6588044746244624 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. DELETE returned 200; PostgreSQL query by role_id=6588044621169168 and user_id=6588044746244624 returned no remaining rows.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色权限",
+      "route": "/auth/#/authority?status=role&id=6588044621169168",
+      "operation": "新增角色菜单操作权限 personmanage/addPerson",
+      "api": "/inter-api/rbac/v1/rolePermission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RolePermissionController.addRolePermission -> RolePermissionServiceImpl.addOrUpdateRolePermission -> MyBatis-Plus saveOrUpdateBatch -> rbac_rolepermission",
+      "tables": [
+        "rbac_rolepermission"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, role_id, menuoperate_id, coalesce(cid::text,''), coalesce(no_restrict_flag::text,''), coalesce(position_flag::text,''), coalesce(assign_staff_flag::text,''), coalesce(assign_pos_flag::text,''), coalesce(assign_dept_flag::text,'') from public.rbac_rolepermission where role_id = 6588044621169168 and menuoperate_id = 6576396551307776 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. POST returned 200; rbac_rolepermission id 6588044952486416 persisted role_id=6588044621169168, menuoperate_id=6576396551307776, cid=1000, no_restrict_flag=1.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色权限",
+      "route": "/auth/#/authority?status=role&id=6588044621169168",
+      "operation": "删除角色菜单操作权限 personmanage/addPerson",
+      "api": "/inter-api/rbac/v1/rolePermission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RolePermissionController.addRolePermission(deleteList) -> RolePermissionServiceImpl.batchDeleteRolePermissions -> rbac_rolepermission and rbac_rolep* refs",
+      "tables": [
+        "rbac_rolepermission",
+        "rbac_rolep*"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, role_id, menuoperate_id, coalesce(cid::text,''), coalesce(no_restrict_flag::text,''), coalesce(position_flag::text,''), coalesce(assign_staff_flag::text,''), coalesce(assign_pos_flag::text,''), coalesce(assign_dept_flag::text,'') from public.rbac_rolepermission where role_id = 6588044621169168 and menuoperate_id = 6576396551307776 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. deleteList POST returned 200; PostgreSQL query by role_id=6588044621169168 and menuoperate_id=6576396551307776 returned no rows.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-用户权限",
+      "route": "/auth/#/authority?status=user&id=6588044746244624",
+      "operation": "新增用户直接菜单操作权限 personmanage/addPerson",
+      "api": "/inter-api/rbac/v1/userPermission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "UserPermissionController.addUserPermission -> UserPermissionServiceImpl.addOrUpdateUserPermission -> MyBatis-Plus saveOrUpdateBatch -> rbac_userpermission",
+      "tables": [
+        "rbac_userpermission"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, user_id, menuoperate_id, coalesce(menuoperate_code,''), coalesce(purview_type::text,''), coalesce(cid::text,''), coalesce(no_restrict_flag::text,''), coalesce(position_flag::text,''), coalesce(assign_staff_flag::text,''), coalesce(assign_pos_flag::text,''), coalesce(assign_dept_flag::text,'') from public.rbac_userpermission where user_id = 6588044746244624 and menuoperate_id = 6576396551307776 and purview_type = 1 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. POST returned 200; rbac_userpermission id 6588045100433936 persisted user_id=6588044746244624, menuoperate_id=6576396551307776, menuoperate_code=addPerson, purview_type=1, no_restrict_flag=1.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-用户权限",
+      "route": "/auth/#/authority?status=user&id=6588044746244624",
+      "operation": "删除用户直接菜单操作权限 personmanage/addPerson",
+      "api": "/inter-api/rbac/v1/userPermission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "UserPermissionController.addUserPermission(deleteList) -> UserPermissionServiceImpl.batchDeleteUserPermissions -> rbac_userpermission and rbac_userp* refs",
+      "tables": [
+        "rbac_userpermission",
+        "rbac_userp*"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, user_id, menuoperate_id, coalesce(menuoperate_code,''), coalesce(purview_type::text,''), coalesce(cid::text,''), coalesce(no_restrict_flag::text,''), coalesce(position_flag::text,''), coalesce(assign_staff_flag::text,''), coalesce(assign_pos_flag::text,''), coalesce(assign_dept_flag::text,'') from public.rbac_userpermission where user_id = 6588044746244624 and menuoperate_id = 6576396551307776 and purview_type = 1 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. deleteList POST returned 200; PostgreSQL query by user_id=6588044746244624, menuoperate_id=6576396551307776, purview_type=1 returned no rows.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-角色管理",
+      "route": "/auth/#/role",
+      "operation": "删除角色并清理前置用户/人员",
+      "api": "/inter-api/rbac/v1/role/ADP_E2E_20260615153240_RBAC_ROLE",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "RoleInterApiController.delete -> RoleServiceImpl.deleteRoles -> RoleMapper.deleteBatchIds -> rbac_role.valid=false/0; cleanup also uses UserController.batchDeleteUser and PersonInterController.deletePerson",
+      "tables": [
+        "rbac_role",
+        "auth_user",
+        "org_person"
+      ],
+      "marker": "ADP_E2E_20260615153240_RBAC",
+      "verificationSql": "select id, code, name, coalesce(description,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(modify_time::text,''), coalesce(uuid,'') from public.rbac_role where code = 'ADP_E2E_20260615153240_RBAC_ROLE' order by create_time desc nulls last, id desc;\nselect id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(description,''), coalesce(time_zone,'') from public.auth_user where user_name = 'adp_e2e_20260615153240_rbac_user' order by create_time desc nulls last, id desc;\nselect id, code, name, coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(main_position::text,''), coalesce(description,'') from public.org_person where code = 'ADP_E2E_20260615153240_RBAC_PER' order by create_time desc nulls last, id desc;\nselect id, code, name, coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(main_position::text,''), coalesce(description,'') from public.org_person where code = 'ADP_E2E_20260615153240_RBAC_PER' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. DELETE returned 200; rbac_role id 6588044621169168 retained with valid=false, cleanup auth_user valid=0 and org_person valid=0.",
       "issues": []
     }
   ]
