@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T23:32:40+08:00",
-  "repoCommit": "431571c54a4d39b2a074c3186e291ec0a9597daf",
+  "generatedAt": "2026-06-15T23:55:30+08:00",
+  "repoCommit": "e372a836adabd174a520bedb1c211cbb81e8f56c",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 36,
-    "pass": 34,
+    "testedFeatures": 40,
+    "pass": 38,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -572,6 +572,46 @@
       ]
     },
     {
+      "module": "权限/RBAC-角色数据资源",
+      "route": "/auth/#/authority?status=role&id=6588088357011984",
+      "operation": "保存角色数据资源权限 ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_ROLE",
+      "api": "/inter-api/rbac/v1/role/6588088357011984/data/resource/oodm-data-group-permission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DataPermissionController.saveDataResourceForRole -> DataPermissionServiceImpl.saveDataResourceForRole -> RbacRoleDataPermissionCtrlServiceImpl.saveOrUpdate -> rbac_role_data_permission_ctrl; RbacRoleDataPermissionServiceImpl.saveBatch -> rbac_role_data_permission; PostgreSQL trigger syncs inherited rbac_user_data_permission purview_type=0",
+      "tables": [
+        "rbac_role_data_permission",
+        "rbac_role_data_permission_ctrl",
+        "rbac_user_data_permission"
+      ],
+      "marker": "ADP_E2E_20260615155455_RBAC",
+      "verificationSql": "select id, role_id, cid, group_code, resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_role_data_permission where role_id = 6588088357011984 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;\nselect id, role_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'') from public.rbac_role_data_permission_ctrl where role_id = 6588088357011984 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;\nselect id, user_id, cid, group_code, coalesce(role_id::text,''), coalesce(purview_type::text,''), resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_user_data_permission where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' and purview_type = 0 and role_id = 6588088357011984 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-data-resource-acceptance-rerun.json; browser route /auth/#/authority?status=role; marker ADP_E2E_20260615155455_RBAC. POST returned 200; rbac_role_data_permission row ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_ROLE persisted valid=true; rbac_role_data_permission_ctrl controlled=1; inherited rbac_user_data_permission row persisted with purview_type=0 and role_id=6588088357011984. First run exposed missing tables and no inherited user row; fixed by deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql.",
+      "issues": [
+        "First run showed the role resource row persisted but no inherited user data permission row; PostgreSQL trigger in 075-rbac-data-resource-permission-tables.sql was added and rerun passed."
+      ]
+    },
+    {
+      "module": "权限/RBAC-角色数据资源",
+      "route": "/auth/#/authority?status=role&id=6588088357011984",
+      "operation": "关闭角色数据资源受控",
+      "api": "/inter-api/rbac/v1/role/6588088357011984/data/resource/oodm-data-group-permission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DataPermissionController.saveDataResourceForRole(controlled=false) -> DataPermissionServiceImpl.saveDataResourceForRole -> rbac_role_data_permission_ctrl.controlled=0 -> remove role direct rows and inherited user data permission rows",
+      "tables": [
+        "rbac_role_data_permission",
+        "rbac_role_data_permission_ctrl",
+        "rbac_user_data_permission"
+      ],
+      "marker": "ADP_E2E_20260615155455_RBAC",
+      "verificationSql": "select id, role_id, cid, group_code, resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_role_data_permission where role_id = 6588088357011984 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;\nselect id, role_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'') from public.rbac_role_data_permission_ctrl where role_id = 6588088357011984 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;\nselect id, user_id, cid, group_code, coalesce(role_id::text,''), coalesce(purview_type::text,''), resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_user_data_permission where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' and purview_type = 0 and role_id = 6588088357011984 order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-data-resource-acceptance-rerun.json; POST controlled=false returned 200; role data row and inherited user data row became valid=false; rbac_role_data_permission_ctrl controlled=0.",
+      "issues": []
+    },
+    {
       "module": "权限/RBAC-角色用户",
       "route": "/auth/#/role",
       "operation": "解绑角色用户",
@@ -621,6 +661,44 @@
       "verificationSql": "select id, role_id, menuoperate_id, coalesce(cid::text,''), coalesce(no_restrict_flag::text,''), coalesce(position_flag::text,''), coalesce(assign_staff_flag::text,''), coalesce(assign_pos_flag::text,''), coalesce(assign_dept_flag::text,'') from public.rbac_rolepermission where role_id = 6588044621169168 and menuoperate_id = 6576396551307776 order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. deleteList POST returned 200; PostgreSQL query by role_id=6588044621169168 and menuoperate_id=6576396551307776 returned no rows.",
+      "issues": []
+    },
+    {
+      "module": "权限/RBAC-用户数据资源",
+      "route": "/auth/#/authority?status=user&id=6588088482251280",
+      "operation": "保存用户直接数据资源权限 ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_USER",
+      "api": "/inter-api/rbac/v1/user/6588088482251280/data/resource/oodm-data-group-permission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DataPermissionController.saveDataResourceForUser -> DataPermissionServiceImpl.saveDataResourceForUser -> RbacUserDataPermissionCtrlServiceImpl.saveOrUpdate -> rbac_user_data_permission_ctrl; RbacUserDataPermissionServiceImpl.saveBatch -> rbac_user_data_permission purview_type=1",
+      "tables": [
+        "rbac_user_data_permission",
+        "rbac_user_data_permission_ctrl"
+      ],
+      "marker": "ADP_E2E_20260615155455_RBAC",
+      "verificationSql": "select id, user_id, cid, group_code, coalesce(role_id::text,''), coalesce(purview_type::text,''), resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_user_data_permission where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' and purview_type = 1 order by create_time desc nulls last, id desc;\nselect id, user_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'') from public.rbac_user_data_permission_ctrl where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-data-resource-acceptance-rerun.json; browser route /auth/#/authority?status=user; POST returned 200; rbac_user_data_permission row ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_USER persisted valid=true with purview_type=1; rbac_user_data_permission_ctrl controlled=1.",
+      "issues": [
+        "Required tables were added by deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql before rerun."
+      ]
+    },
+    {
+      "module": "权限/RBAC-用户数据资源",
+      "route": "/auth/#/authority?status=user&id=6588088482251280",
+      "operation": "关闭用户直接数据资源受控",
+      "api": "/inter-api/rbac/v1/user/6588088482251280/data/resource/oodm-data-group-permission",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DataPermissionController.saveDataResourceForUser(controlled=false) -> DataPermissionServiceImpl.saveDataResourceForUser -> rbac_user_data_permission_ctrl.controlled=0 -> remove direct rbac_user_data_permission purview_type=1 rows",
+      "tables": [
+        "rbac_user_data_permission",
+        "rbac_user_data_permission_ctrl"
+      ],
+      "marker": "ADP_E2E_20260615155455_RBAC",
+      "verificationSql": "select id, user_id, cid, group_code, coalesce(role_id::text,''), coalesce(purview_type::text,''), resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'') from public.rbac_user_data_permission where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' and purview_type = 1 order by create_time desc nulls last, id desc;\nselect id, user_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'') from public.rbac_user_data_permission_ctrl where user_id = 6588088482251280 and group_code = 'oodm-data-group-permission' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Report: /tmp/adp-rbac-permission-data-resource-acceptance-rerun.json; POST controlled=false returned 200; direct user data row became valid=false; rbac_user_data_permission_ctrl controlled=0.",
       "issues": []
     },
     {

@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 74,
+  "migrationCount": 75,
   "firstNumber": 1,
-  "lastNumber": 74,
+  "lastNumber": 75,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
-  "watchStatementCount": 44,
+  "watchStatementCount": 45,
   "statementTotals": {
-    "alter-table": 9181,
-    "create-function": 38,
-    "create-index": 667,
-    "create-table": 482,
+    "alter-table": 9185,
+    "create-function": 39,
+    "create-index": 672,
+    "create-table": 486,
     "create-view": 92,
-    "insert": 3662,
-    "update": 3651
+    "insert": 3663,
+    "update": 3654
   },
   "tagTotals": {
-    "auth-rbac-org": 28,
+    "auth-rbac-org": 29,
     "business": 9,
     "compatibility": 42,
     "configuration": 18,
@@ -2027,6 +2027,35 @@
       },
       "highRiskStatements": [],
       "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql",
+      "name": "075-rbac-data-resource-permission-tables.sql",
+      "number": 75,
+      "slug": "rbac-data-resource-permission-tables",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 198,
+      "sha256": "0fda10b44b45ad3ac9dd0fa5fbbc668e01908513ba241bf39b632f345786ffee",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 5,
+        "alter-table": 4,
+        "insert": 1,
+        "update": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 191,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_rbac_role_data_permission_sync_users"
+        }
+      ]
     }
   ]
 }

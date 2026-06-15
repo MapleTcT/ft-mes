@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T23:32:40+08:00",
+  "generatedAt": "2026-06-15T23:55:30+08:00",
   "generatedFromCommit": "431571c54a4d39b2a074c3186e291ec0a9597daf",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
     "totalItems": 20,
-    "ready": 7,
-    "partial": 11,
+    "ready": 8,
+    "partial": 10,
     "blocked": 2,
     "fail": 0,
     "notStarted": 0
@@ -76,7 +76,9 @@
       ],
       "nextActions": [
         "逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。"
-      ]
+      ],
+      "evidence": "Docker/POM default PostgreSQL; Oracle is legacy/profile/backlog only; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and role-to-user inheritance sync.",
+      "gap": "Oracle backlog still has references and must be migrated module by module."
     },
     {
       "id": "G-004",
@@ -156,8 +158,9 @@
       ],
       "blockingIssues": [],
       "nextActions": [
-        "Keep regression acceptance scripts current as user and organization modules change."
-      ]
+        "保持用户、人员、岗位、公司、组、角色用户绑定回归 smoke。"
+      ],
+      "gap": "Keep regression smoke."
     },
     {
       "id": "G-008",
@@ -186,7 +189,7 @@
     {
       "id": "G-009",
       "title": "权限/RBAC",
-      "status": "PARTIAL",
+      "status": "READY",
       "scope": "角色、用户授权、菜单按钮权限、权限配置页面。",
       "artifacts": [
         "deploy/docker/scripts/adp-rbac-authority-smoke.js",
@@ -199,14 +202,15 @@
         "RBAC authority smoke passed 9/9 in platform validation evidence",
         "RBAC role permission add/delete for personmanage/addPerson has marker PostgreSQL evidence in rbac_rolepermission",
         "RBAC user direct permission add/delete for personmanage/addPerson has marker PostgreSQL evidence in rbac_userpermission",
-        "RBAC role-user bind/unbind has marker PostgreSQL evidence in rbac_roleuser after 074-rbac-roleuser-valid-default.sql fixed the default valid value"
+        "RBAC role-user bind/unbind has marker PostgreSQL evidence in rbac_roleuser after 074-rbac-roleuser-valid-default.sql fixed the default valid value",
+        "RBAC data resource permissions saveRoleSourceAuth/saveUserSourceAuth have marker ADP_E2E_20260615155455_RBAC PostgreSQL evidence in rbac_role_data_permission, rbac_role_data_permission_ctrl, rbac_user_data_permission, and rbac_user_data_permission_ctrl after 075-rbac-data-resource-permission-tables.sql fixed missing tables and inherited-user sync"
       ],
-      "blockingIssues": [
-        "数据资源权限 saveRoleSourceAuth/saveUserSourceAuth 尚未做 marker 落库验收。"
-      ],
+      "blockingIssues": [],
       "nextActions": [
-        "用真实前端执行角色/用户数据资源权限保存动作，记录 API、后端入口和 PostgreSQL 查询。"
-      ]
+        "保持 RBAC 权限和数据资源权限回归 smoke。"
+      ],
+      "evidence": "RBAC authority smoke PASS; marker acceptance covers role/user menu operation permissions and data resource permissions. saveRoleSourceAuth/saveUserSourceAuth marker ADP_E2E_20260615155455_RBAC verified rbac_role_data_permission, rbac_role_data_permission_ctrl, rbac_user_data_permission, rbac_user_data_permission_ctrl in PostgreSQL.",
+      "gap": "Keep regression smoke."
     },
     {
       "id": "G-010",
@@ -346,7 +350,8 @@
       ],
       "nextActions": [
         "用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。"
-      ]
+      ],
+      "evidence": "75 init SQL files, PostgreSQL migration index, mapper audit 0 error; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and inheritance sync."
     },
     {
       "id": "G-017",
@@ -409,7 +414,8 @@
       ],
       "nextActions": [
         "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
-      ]
+      ],
+      "evidence": "Oracle/PostgreSQL audit, init SQL, and backlog are in CI; RBAC validations closed rbac_roleuser.valid, RBAC data resource missing tables, and role data resource inherited-user persistence gap."
     },
     {
       "id": "G-020",

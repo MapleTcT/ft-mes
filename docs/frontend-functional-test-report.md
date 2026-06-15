@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、独立用户管理账号新增/编辑/锁定/解锁/删除落库验收、RBAC 角色/角色用户/角色权限/用户权限落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
+本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、独立用户管理账号新增/编辑/锁定/解锁/删除落库验收、RBAC 角色/角色用户/角色权限/用户权限/数据资源权限落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
 
 执行功能验收时，必须按照 [功能验收与落库验收规则](functional-persistence-acceptance.md) 更新本文件，并同步更新 `metadata/persistence-acceptance.json`。
 
@@ -19,8 +19,8 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 被测功能 | 36 |
-| PASS | 34 |
+| 被测功能 | 40 |
+| PASS | 38 |
 | FAIL | 1 |
 | BLOCKED | 1 |
 | NOT_APPLICABLE | 0 |
@@ -59,9 +59,13 @@
 | 权限/RBAC-角色管理 | `/auth/#/role` | 在已登录角色页面上下文新增角色 `ADP_E2E_20260615153240_RBAC_ROLE` | `POST /inter-api/rbac/v1/role` | 真实浏览器打开角色管理页面；navigation status `200`；核心 RBAC API 无 page error、request failure、visible error；仅记录非业务静态资源 `/supide-app/runtime/permissions/ping.png` 404 | 返回 `200`；PostgreSQL `rbac_role` 新增 active 行，`name/description/cid/uuid` 均写入 | `rbac_role`、`rbac_role_mnecode` | PASS | 首轮验收暴露 `rbac_roleuser.valid` 默认 false，已用 `074-rbac-roleuser-valid-default.sql` 修复后复验通过 |
 | 权限/RBAC-角色管理 | `/auth/#/role` | 在已登录角色页面上下文编辑角色名称和描述 | `PUT /inter-api/rbac/v1/role` | 同一浏览器页面上下文发起同源请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 同一 `rbac_role.name` 更新为 `ADP_E2E_20260615153240_RBAC_ROLE_NAME_UPDATED`，`description` 更新为 update marker | `rbac_role`、`rbac_role_mnecode` | PASS | 无 |
 | 权限/RBAC-角色用户 | `/auth/#/role` | 给 marker 角色绑定 marker 用户 | `POST /inter-api/rbac/v1/roleUser` | 同一浏览器页面上下文发起同源请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL `rbac_roleuser` 新增 active 行，`role_id/user_id/user_name/person_code/from_position` 匹配 | `rbac_roleuser` | PASS | 已修复 `rbac_roleuser.valid` 默认 false |
+| 权限/RBAC-角色数据资源 | `/auth/#/authority?status=role&id=6588088357011984&name=ADP_E2E_20260615155455_RBAC_ROLE_NAME_UPDATED` | 给 marker 角色保存数据资源权限 `ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_ROLE` | `POST /inter-api/rbac/v1/role/6588088357011984/data/resource/oodm-data-group-permission` | 真实浏览器打开角色权限配置页；同一前端会话提交数据资源权限；非业务静态 `ping.png` 404 已忽略；无 blocking console/page/network error | 返回 `200`；PostgreSQL `rbac_role_data_permission` 新增 active 行，`rbac_role_data_permission_ctrl.controlled=1`；已绑定用户同步生成 `rbac_user_data_permission.purview_type=0` 继承行 | `rbac_role_data_permission`、`rbac_role_data_permission_ctrl`、`rbac_user_data_permission` | PASS | 首次验收发现角色权限已写表但用户继承行未落库；已用 `075-rbac-data-resource-permission-tables.sql` 补表和同步 trigger 后复验通过 |
+| 权限/RBAC-角色数据资源 | `/auth/#/authority?status=role&id=6588088357011984&name=ADP_E2E_20260615155455_RBAC_ROLE_NAME_UPDATED` | 关闭 marker 角色数据资源受控 | `POST /inter-api/rbac/v1/role/6588088357011984/data/resource/oodm-data-group-permission` | 同一浏览器页面上下文发起关闭受控请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 同一角色资源行 `valid=false`，继承用户资源行 `valid=false`，`rbac_role_data_permission_ctrl.controlled=0` | `rbac_role_data_permission`、`rbac_role_data_permission_ctrl`、`rbac_user_data_permission` | PASS | 无 |
 | 权限/RBAC-角色用户 | `/auth/#/role` | 解绑 marker 角色用户关系 | `DELETE /inter-api/rbac/v1/roleUser/6588044794642960` | 同一浏览器页面上下文发起同源请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 按 `role_id/user_id` 查询无剩余 active/valid 行，关系已删除 | `rbac_roleuser` | PASS | 无 |
 | 权限/RBAC-角色权限 | `/auth/#/authority?status=role&id=6588044621169168&name=ADP_E2E_20260615153240_RBAC_ROLE_NAME_UPDATED` | 给 marker 角色分配 `personmanage/addPerson` 菜单操作权限 | `POST /inter-api/rbac/v1/rolePermission` | 真实浏览器打开角色权限配置页；核心 RBAC API 无阻断错误；静态 `ping.png` 404 已记录为非业务资源问题 | 返回 `200`；PostgreSQL `rbac_rolepermission` 新增行，`role_id/menuoperate_id/cid/no_restrict_flag` 匹配 | `rbac_rolepermission` | PASS | 无 |
 | 权限/RBAC-角色权限 | `/auth/#/authority?status=role&id=6588044621169168&name=ADP_E2E_20260615153240_RBAC_ROLE_NAME_UPDATED` | 删除 marker 角色的 `personmanage/addPerson` 权限 | `POST /inter-api/rbac/v1/rolePermission` | 同一浏览器页面上下文发起删除权限请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 按 `role_id/menuoperate_id` 查询无剩余行 | `rbac_rolepermission`、`rbac_rolep*` | PASS | 无 |
+| 权限/RBAC-用户数据资源 | `/auth/#/authority?status=user&id=6588088482251280&name=adp_e2e_20260615155455_rbac_user` | 给 marker 用户保存直接数据资源权限 `ADP_E2E_20260615155455_RBAC_DATA_RESOURCE_USER` | `POST /inter-api/rbac/v1/user/6588088482251280/data/resource/oodm-data-group-permission` | 真实浏览器打开用户权限配置页；同一前端会话提交数据资源权限；无 blocking console/page/network error | 返回 `200`；PostgreSQL `rbac_user_data_permission` 新增 active 行，`purview_type=1`，`rbac_user_data_permission_ctrl.controlled=1` | `rbac_user_data_permission`、`rbac_user_data_permission_ctrl` | PASS | 已由 `075-rbac-data-resource-permission-tables.sql` 补齐缺表 |
+| 权限/RBAC-用户数据资源 | `/auth/#/authority?status=user&id=6588088482251280&name=adp_e2e_20260615155455_rbac_user` | 关闭 marker 用户直接数据资源受控 | `POST /inter-api/rbac/v1/user/6588088482251280/data/resource/oodm-data-group-permission` | 同一浏览器页面上下文发起关闭受控请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 同一用户资源行 `valid=false`，`rbac_user_data_permission_ctrl.controlled=0` | `rbac_user_data_permission`、`rbac_user_data_permission_ctrl` | PASS | 无 |
 | 权限/RBAC-用户权限 | `/auth/#/authority?status=user&id=6588044746244624&name=adp_e2e_20260615153240_rbac_user` | 给 marker 用户分配 `personmanage/addPerson` 直接权限 | `POST /inter-api/rbac/v1/userPermission` | 真实浏览器打开用户权限配置页；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL `rbac_userpermission` 新增行，`user_id/menuoperate_id/menuoperate_code/purview_type=1/no_restrict_flag` 匹配 | `rbac_userpermission` | PASS | 无 |
 | 权限/RBAC-用户权限 | `/auth/#/authority?status=user&id=6588044746244624&name=adp_e2e_20260615153240_rbac_user` | 删除 marker 用户的 `personmanage/addPerson` 直接权限 | `POST /inter-api/rbac/v1/userPermission` | 同一浏览器页面上下文发起删除权限请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 按 `user_id/menuoperate_id/purview_type=1` 查询无剩余行 | `rbac_userpermission`、`rbac_userp*` | PASS | 无 |
 | 权限/RBAC-角色管理 | `/auth/#/role` | 删除 marker 角色并清理前置 marker 用户/人员 | `DELETE /inter-api/rbac/v1/role/ADP_E2E_20260615153240_RBAC_ROLE` | 同一浏览器页面上下文发起清理请求；核心 RBAC API 无阻断错误 | 返回 `200`；PostgreSQL 同一 `rbac_role.valid=false`；前置 `auth_user.valid=0`、`org_person.valid=0` | `rbac_role`、`auth_user`、`org_person` | PASS | 无 |
@@ -109,12 +113,13 @@
 - RBAC Make 入口复验：`/tmp/adp-rbac-permission-persistence-make-target.json`，marker `ADP_E2E_20260615153823_RBAC`
 - RBAC 权限页面截图：`/tmp/adp-rbac-permission-persistence-20260615153240/rbac-permission-persistence.png`
 - RBAC Marker：`ADP_E2E_20260615153240_RBAC`
-- RBAC 前端捕获请求：`POST /inter-api/rbac/v1/role`、`PUT /inter-api/rbac/v1/role`、`POST /inter-api/rbac/v1/roleUser`、`DELETE /inter-api/rbac/v1/roleUser/{id}`、`POST /inter-api/rbac/v1/rolePermission`、`POST /inter-api/rbac/v1/userPermission`、`DELETE /inter-api/rbac/v1/role/{code}`
+- RBAC 前端捕获请求：`POST /inter-api/rbac/v1/role`、`PUT /inter-api/rbac/v1/role`、`POST /inter-api/rbac/v1/roleUser`、`DELETE /inter-api/rbac/v1/roleUser/{id}`、`POST /inter-api/rbac/v1/rolePermission`、`POST /inter-api/rbac/v1/userPermission`、`GET /inter-api/rbac/v1/data/resource/groups`、`POST /inter-api/rbac/v1/role/{id}/data/resource/{groupCode}`、`POST /inter-api/rbac/v1/user/{id}/data/resource/{groupCode}`、`DELETE /inter-api/rbac/v1/role/{code}`
 - RBAC 修复证据：首次角色用户绑定验收暴露 `rbac_roleuser.valid` 默认 `false`，已新增并应用 `deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql` 后复验通过。
+- RBAC 数据资源权限复验：`/tmp/adp-rbac-permission-data-resource-acceptance-rerun.json`，marker `ADP_E2E_20260615155455_RBAC`；首次运行发现缺少数据资源权限表和角色资源权限未同步用户继承行，已新增并应用 `deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql` 后复验通过。
 
 ## 未完成范围
 
-- 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限已完成真实前端和 PostgreSQL 落库验收；数据资源权限配置仍需单独补 marker 落库验收。
+- 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
 - 基础配置、Nacos、Keycloak、runtime patch 仍需继续形成专项验收记录。
 - 生产模块当前只有 API/layout 与页面可达性 smoke；`layoutJson` 500 已向前推进为动作页 React #130 渲染阻断，但完整动作级测试用例和写操作落库验收仍未建立，不能视为已完成。
 

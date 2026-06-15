@@ -32,6 +32,12 @@ const personName = process.env.ADP_RBAC_PERSON_NAME || `${marker}_PERSON`;
 const userName = process.env.ADP_RBAC_USER_NAME || `adp_e2e_${stamp}_rbac_user`;
 const userPassword = process.env.ADP_RBAC_USER_PASSWORD || `Ft@${stamp.slice(8, 14)}Rb1`;
 const menuCode = process.env.ADP_RBAC_PERMISSION_MENU_CODE || "personmanage";
+const dataResourceCode = process.env.ADP_RBAC_DATA_RESOURCE_CODE || `${marker}_DATA_RESOURCE`;
+const roleDataResourceName =
+  process.env.ADP_RBAC_ROLE_DATA_RESOURCE_NAME || `${marker} role data resource`;
+const userDataResourceName =
+  process.env.ADP_RBAC_USER_DATA_RESOURCE_NAME || `${marker} user data resource`;
+const dataResourceType = process.env.ADP_RBAC_DATA_RESOURCE_TYPE || "ADP_E2E";
 const activeStatus = "sys_person_status/onWork";
 const gender = "sys_gender/male";
 
@@ -349,9 +355,100 @@ function queryUserPermission(userId, menuOperateId) {
   };
 }
 
+function queryDataResourceGroupsFromDb() {
+  const sql = [
+    "select id, group_code, group_name, resource_url, module_code, coalesce(cid::text,'')",
+    "from public.rbac_data_resource_group",
+    "where cid = 1000 or cid is null",
+    "order by id;",
+  ].join(" ");
+  return {
+    sql,
+    rows: parseTableRows(runSql(sql), ["id", "groupCode", "groupName", "resourceUrl", "moduleCode", "cid"]),
+  };
+}
+
+function queryRoleDataPermission(roleId, groupCode) {
+  const sql = [
+    "select id, role_id, cid, group_code, resource_code, resource_name, coalesce(resource_type,''),",
+    "coalesce(valid::text,''), coalesce(create_time::text,'')",
+    "from public.rbac_role_data_permission",
+    `where role_id = ${Number(roleId)} and group_code = ${sqlLiteral(groupCode)}`,
+    "order by create_time desc nulls last, id desc;",
+  ].join(" ");
+  return {
+    sql,
+    rows: parseTableRows(runSql(sql), [
+      "id",
+      "roleId",
+      "cid",
+      "groupCode",
+      "resourceCode",
+      "resourceName",
+      "resourceType",
+      "valid",
+      "createTime",
+    ]),
+  };
+}
+
+function queryRoleDataPermissionCtrl(roleId, groupCode) {
+  const sql = [
+    "select id, role_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'')",
+    "from public.rbac_role_data_permission_ctrl",
+    `where role_id = ${Number(roleId)} and group_code = ${sqlLiteral(groupCode)}`,
+    "order by create_time desc nulls last, id desc;",
+  ].join(" ");
+  return {
+    sql,
+    rows: parseTableRows(runSql(sql), ["id", "roleId", "cid", "groupCode", "controlled", "modifyTime"]),
+  };
+}
+
+function queryUserDataPermission(userId, groupCode, purviewType, roleId = null) {
+  const roleFilter = roleId === null ? "" : ` and role_id = ${Number(roleId)}`;
+  const sql = [
+    "select id, user_id, cid, group_code, coalesce(role_id::text,''), coalesce(purview_type::text,''),",
+    "resource_code, resource_name, coalesce(resource_type,''), coalesce(valid::text,''), coalesce(create_time::text,'')",
+    "from public.rbac_user_data_permission",
+    `where user_id = ${Number(userId)} and group_code = ${sqlLiteral(groupCode)} and purview_type = ${Number(purviewType)}${roleFilter}`,
+    "order by create_time desc nulls last, id desc;",
+  ].join(" ");
+  return {
+    sql,
+    rows: parseTableRows(runSql(sql), [
+      "id",
+      "userId",
+      "cid",
+      "groupCode",
+      "roleId",
+      "purviewType",
+      "resourceCode",
+      "resourceName",
+      "resourceType",
+      "valid",
+      "createTime",
+    ]),
+  };
+}
+
+function queryUserDataPermissionCtrl(userId, groupCode) {
+  const sql = [
+    "select id, user_id, cid, group_code, coalesce(controlled::text,''), coalesce(modify_time::text,'')",
+    "from public.rbac_user_data_permission_ctrl",
+    `where user_id = ${Number(userId)} and group_code = ${sqlLiteral(groupCode)}`,
+    "order by create_time desc nulls last, id desc;",
+  ].join(" ");
+  return {
+    sql,
+    rows: parseTableRows(runSql(sql), ["id", "userId", "cid", "groupCode", "controlled", "modifyTime"]),
+  };
+}
+
 function requestMatcher(url) {
   return (
-    /\/inter-api\/rbac\/v1\/(role|roleUser|rolePermission|userPermission|rolePermissions|userPermissions)(\/|\?|$)/.test(url) ||
+    /\/inter-api\/rbac\/v1\/(role|roleUser|rolePermission|userPermission|rolePermissions|userPermissions|data\/resource)(\/|\?|$)/.test(url) ||
+    /\/inter-api\/rbac\/v1\/(role|user)\/\d+\/data\/resource(\/|\?|$)/.test(url) ||
     /\/inter-api\/organization\/v1\/person(\/|\?|$)/.test(url) ||
     /\/inter-api\/auth\/v1\/user(\/|\?|$)/.test(url)
   );
@@ -496,6 +593,10 @@ async function main() {
     throw new Error(`No RBAC menu found for code ${menuCode}`);
   }
   const selectedMenu = menuPrecheck.rows[0];
+  const dataResourceGroupPrecheck = queryDataResourceGroupsFromDb();
+  if (!dataResourceGroupPrecheck.rows.length) {
+    throw new Error("No RBAC data resource group found in public.rbac_data_resource_group");
+  }
 
   const api = await request.newContext({ ignoreHTTPSErrors: true });
   const ticket = await login(api);
@@ -600,6 +701,20 @@ async function main() {
   let authAfterCreate;
   let roleUserAfterCreate;
   let roleUserAfterDelete;
+  let dataResourceGroupResult;
+  let selectedDataResourceGroup;
+  let selectedDataResourceGroupCode;
+  let selectedDataResourceGroupName;
+  let roleDataPermissionAfterCreate;
+  let roleDataPermissionCtrlAfterCreate;
+  let inheritedUserDataPermissionAfterRoleCreate;
+  let roleDataPermissionAfterDisable;
+  let roleDataPermissionCtrlAfterDisable;
+  let inheritedUserDataPermissionAfterRoleDisable;
+  let userDataPermissionAfterCreate;
+  let userDataPermissionCtrlAfterCreate;
+  let userDataPermissionAfterDisable;
+  let userDataPermissionCtrlAfterDisable;
   let rolePermissionBefore;
   let rolePermissionCandidate;
   let rolePermissionAfterCreate;
@@ -764,6 +879,144 @@ async function main() {
       rows: roleUserAfterCreate.rows,
     };
 
+    dataResourceGroupResult = await browserApi(page, "GET", "/inter-api/rbac/v1/data/resource/groups");
+    ensureApiOk(dataResourceGroupResult, "Data resource groups load");
+    const dataResourceGroups =
+      (dataResourceGroupResult.json &&
+        dataResourceGroupResult.json.data &&
+        dataResourceGroupResult.json.data.list) ||
+      (dataResourceGroupResult.json && dataResourceGroupResult.json.list) ||
+      [];
+    selectedDataResourceGroup = dataResourceGroups[0] || dataResourceGroupPrecheck.rows[0];
+    selectedDataResourceGroupCode =
+      selectedDataResourceGroup.groupCode || selectedDataResourceGroup.group_code || selectedDataResourceGroup.code;
+    selectedDataResourceGroupName =
+      selectedDataResourceGroup.groupName || selectedDataResourceGroup.group_name || selectedDataResourceGroup.name || "";
+    if (!selectedDataResourceGroupCode) {
+      throw new Error(`No usable data resource group code found: ${JSON.stringify(selectedDataResourceGroup)}`);
+    }
+
+    const roleDataPermissionPayload = {
+      controlled: true,
+      dataResouceVOS: [
+        {
+          resourceCode: `${dataResourceCode}_ROLE`,
+          resourceName: roleDataResourceName,
+          resourceType: dataResourceType,
+        },
+      ],
+    };
+    const roleDataPermissionResult = await browserApi(
+      page,
+      "POST",
+      `/inter-api/rbac/v1/role/${cleanup.roleId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+      roleDataPermissionPayload
+    );
+    ensureApiOk(roleDataPermissionResult, "Role data resource permission save");
+    await page.waitForTimeout(1000);
+    roleDataPermissionAfterCreate = queryRoleDataPermission(cleanup.roleId, selectedDataResourceGroupCode);
+    roleDataPermissionCtrlAfterCreate = queryRoleDataPermissionCtrl(cleanup.roleId, selectedDataResourceGroupCode);
+    inheritedUserDataPermissionAfterRoleCreate = queryUserDataPermission(
+      cleanup.userId,
+      selectedDataResourceGroupCode,
+      0,
+      cleanup.roleId
+    );
+    const activeRoleDataPermission = roleDataPermissionAfterCreate.rows.find(
+      (row) =>
+        row.resourceCode === `${dataResourceCode}_ROLE` &&
+        row.resourceName === roleDataResourceName &&
+        truthyDb(row.valid)
+    );
+    const activeRoleDataCtrl = roleDataPermissionCtrlAfterCreate.rows.find((row) => row.controlled === "1");
+    const inheritedUserDataPermission = inheritedUserDataPermissionAfterRoleCreate.rows.find(
+      (row) =>
+        row.resourceCode === `${dataResourceCode}_ROLE` &&
+        row.resourceName === roleDataResourceName &&
+        row.purviewType === "0" &&
+        row.roleId === String(cleanup.roleId) &&
+        truthyDb(row.valid)
+    );
+    if (!activeRoleDataPermission || !activeRoleDataCtrl || !inheritedUserDataPermission) {
+      throw new Error(
+        `Role data resource save did not persist expected role/user rows: ${JSON.stringify({
+          roleRows: roleDataPermissionAfterCreate.rows,
+          roleCtrlRows: roleDataPermissionCtrlAfterCreate.rows,
+          inheritedUserRows: inheritedUserDataPermissionAfterRoleCreate.rows,
+        })}`
+      );
+    }
+    operationLog.roleDataResourceSave = {
+      method: "POST",
+      api: `/inter-api/rbac/v1/role/${cleanup.roleId}/data/resource/${selectedDataResourceGroupCode}`,
+      payload: roleDataPermissionPayload,
+      responseStatus: roleDataPermissionResult.status,
+      responseBody: roleDataPermissionResult.json || roleDataPermissionResult.text.slice(0, 1000),
+      selectedGroup: {
+        groupCode: selectedDataResourceGroupCode,
+        groupName: selectedDataResourceGroupName,
+      },
+      verificationSql: [
+        roleDataPermissionAfterCreate.sql,
+        roleDataPermissionCtrlAfterCreate.sql,
+        inheritedUserDataPermissionAfterRoleCreate.sql,
+      ].join("\n"),
+      rows: {
+        roleDataPermission: roleDataPermissionAfterCreate.rows,
+        roleDataPermissionCtrl: roleDataPermissionCtrlAfterCreate.rows,
+        inheritedUserDataPermission: inheritedUserDataPermissionAfterRoleCreate.rows,
+      },
+    };
+
+    const roleDataPermissionDisablePayload = { controlled: false, dataResouceVOS: [] };
+    const roleDataPermissionDisableResult = await browserApi(
+      page,
+      "POST",
+      `/inter-api/rbac/v1/role/${cleanup.roleId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+      roleDataPermissionDisablePayload
+    );
+    ensureApiOk(roleDataPermissionDisableResult, "Role data resource permission disable");
+    await page.waitForTimeout(1000);
+    roleDataPermissionAfterDisable = queryRoleDataPermission(cleanup.roleId, selectedDataResourceGroupCode);
+    roleDataPermissionCtrlAfterDisable = queryRoleDataPermissionCtrl(cleanup.roleId, selectedDataResourceGroupCode);
+    inheritedUserDataPermissionAfterRoleDisable = queryUserDataPermission(
+      cleanup.userId,
+      selectedDataResourceGroupCode,
+      0,
+      cleanup.roleId
+    );
+    const activeRoleDataAfterDisable = roleDataPermissionAfterDisable.rows.find((row) => truthyDb(row.valid));
+    const activeInheritedUserDataAfterDisable = inheritedUserDataPermissionAfterRoleDisable.rows.find((row) =>
+      truthyDb(row.valid)
+    );
+    const disabledRoleDataCtrl = roleDataPermissionCtrlAfterDisable.rows.find((row) => row.controlled === "0");
+    if (activeRoleDataAfterDisable || activeInheritedUserDataAfterDisable || !disabledRoleDataCtrl) {
+      throw new Error(
+        `Role data resource disable did not clear active rows or set controlled=0: ${JSON.stringify({
+          roleRows: roleDataPermissionAfterDisable.rows,
+          roleCtrlRows: roleDataPermissionCtrlAfterDisable.rows,
+          inheritedUserRows: inheritedUserDataPermissionAfterRoleDisable.rows,
+        })}`
+      );
+    }
+    operationLog.roleDataResourceDisable = {
+      method: "POST",
+      api: `/inter-api/rbac/v1/role/${cleanup.roleId}/data/resource/${selectedDataResourceGroupCode}`,
+      payload: roleDataPermissionDisablePayload,
+      responseStatus: roleDataPermissionDisableResult.status,
+      responseBody: roleDataPermissionDisableResult.json || roleDataPermissionDisableResult.text.slice(0, 1000),
+      verificationSql: [
+        roleDataPermissionAfterDisable.sql,
+        roleDataPermissionCtrlAfterDisable.sql,
+        inheritedUserDataPermissionAfterRoleDisable.sql,
+      ].join("\n"),
+      rows: {
+        roleDataPermission: roleDataPermissionAfterDisable.rows,
+        roleDataPermissionCtrl: roleDataPermissionCtrlAfterDisable.rows,
+        inheritedUserDataPermission: inheritedUserDataPermissionAfterRoleDisable.rows,
+      },
+    };
+
     const roleUserDeleteResult = await browserApi(
       page,
       "DELETE",
@@ -891,6 +1144,93 @@ async function main() {
       route: `/auth/#/authority?status=user&id=${cleanup.userId}&name=${userName}`,
       status: (await openAndSettle(page, authorityUserPage))?.status() || null,
     });
+    const userDataPermissionPayload = {
+      controlled: true,
+      dataResouceVOS: [
+        {
+          resourceCode: `${dataResourceCode}_USER`,
+          resourceName: userDataResourceName,
+          resourceType: dataResourceType,
+        },
+      ],
+    };
+    const userDataPermissionResult = await browserApi(
+      page,
+      "POST",
+      `/inter-api/rbac/v1/user/${cleanup.userId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+      userDataPermissionPayload
+    );
+    ensureApiOk(userDataPermissionResult, "User data resource permission save");
+    await page.waitForTimeout(1000);
+    userDataPermissionAfterCreate = queryUserDataPermission(cleanup.userId, selectedDataResourceGroupCode, 1);
+    userDataPermissionCtrlAfterCreate = queryUserDataPermissionCtrl(cleanup.userId, selectedDataResourceGroupCode);
+    const activeUserDataPermission = userDataPermissionAfterCreate.rows.find(
+      (row) =>
+        row.resourceCode === `${dataResourceCode}_USER` &&
+        row.resourceName === userDataResourceName &&
+        row.purviewType === "1" &&
+        truthyDb(row.valid)
+    );
+    const activeUserDataCtrl = userDataPermissionCtrlAfterCreate.rows.find((row) => row.controlled === "1");
+    if (!activeUserDataPermission || !activeUserDataCtrl) {
+      throw new Error(
+        `User data resource save did not persist expected rows: ${JSON.stringify({
+          userRows: userDataPermissionAfterCreate.rows,
+          userCtrlRows: userDataPermissionCtrlAfterCreate.rows,
+        })}`
+      );
+    }
+    operationLog.userDataResourceSave = {
+      method: "POST",
+      api: `/inter-api/rbac/v1/user/${cleanup.userId}/data/resource/${selectedDataResourceGroupCode}`,
+      payload: userDataPermissionPayload,
+      responseStatus: userDataPermissionResult.status,
+      responseBody: userDataPermissionResult.json || userDataPermissionResult.text.slice(0, 1000),
+      selectedGroup: {
+        groupCode: selectedDataResourceGroupCode,
+        groupName: selectedDataResourceGroupName,
+      },
+      verificationSql: [userDataPermissionAfterCreate.sql, userDataPermissionCtrlAfterCreate.sql].join("\n"),
+      rows: {
+        userDataPermission: userDataPermissionAfterCreate.rows,
+        userDataPermissionCtrl: userDataPermissionCtrlAfterCreate.rows,
+      },
+    };
+
+    const userDataPermissionDisablePayload = { controlled: false, dataResouceVOS: [] };
+    const userDataPermissionDisableResult = await browserApi(
+      page,
+      "POST",
+      `/inter-api/rbac/v1/user/${cleanup.userId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+      userDataPermissionDisablePayload
+    );
+    ensureApiOk(userDataPermissionDisableResult, "User data resource permission disable");
+    await page.waitForTimeout(1000);
+    userDataPermissionAfterDisable = queryUserDataPermission(cleanup.userId, selectedDataResourceGroupCode, 1);
+    userDataPermissionCtrlAfterDisable = queryUserDataPermissionCtrl(cleanup.userId, selectedDataResourceGroupCode);
+    const activeUserDataAfterDisable = userDataPermissionAfterDisable.rows.find((row) => truthyDb(row.valid));
+    const disabledUserDataCtrl = userDataPermissionCtrlAfterDisable.rows.find((row) => row.controlled === "0");
+    if (activeUserDataAfterDisable || !disabledUserDataCtrl) {
+      throw new Error(
+        `User data resource disable did not clear active rows or set controlled=0: ${JSON.stringify({
+          userRows: userDataPermissionAfterDisable.rows,
+          userCtrlRows: userDataPermissionCtrlAfterDisable.rows,
+        })}`
+      );
+    }
+    operationLog.userDataResourceDisable = {
+      method: "POST",
+      api: `/inter-api/rbac/v1/user/${cleanup.userId}/data/resource/${selectedDataResourceGroupCode}`,
+      payload: userDataPermissionDisablePayload,
+      responseStatus: userDataPermissionDisableResult.status,
+      responseBody: userDataPermissionDisableResult.json || userDataPermissionDisableResult.text.slice(0, 1000),
+      verificationSql: [userDataPermissionAfterDisable.sql, userDataPermissionCtrlAfterDisable.sql].join("\n"),
+      rows: {
+        userDataPermission: userDataPermissionAfterDisable.rows,
+        userDataPermissionCtrl: userDataPermissionCtrlAfterDisable.rows,
+      },
+    };
+
     const userPermissionLoadResult = await browserApi(
       page,
       "GET",
@@ -1066,6 +1406,24 @@ async function main() {
   } finally {
     const cleanupErrors = [];
     try {
+      if (selectedDataResourceGroupCode && cleanup.roleId) {
+        const payload = { controlled: false, dataResouceVOS: [] };
+        await browserApi(
+          page,
+          "POST",
+          `/inter-api/rbac/v1/role/${cleanup.roleId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+          payload
+        ).catch((error) => cleanupErrors.push(`cleanup roleDataResource: ${error.message}`));
+      }
+      if (selectedDataResourceGroupCode && cleanup.userId) {
+        const payload = { controlled: false, dataResouceVOS: [] };
+        await browserApi(
+          page,
+          "POST",
+          `/inter-api/rbac/v1/user/${cleanup.userId}/data/resource/${encodeURIComponent(selectedDataResourceGroupCode)}`,
+          payload
+        ).catch((error) => cleanupErrors.push(`cleanup userDataResource: ${error.message}`));
+      }
       if (cleanup.userPermissionId && cleanup.userId && userPermissionCandidate) {
         const payload = {
           list: [
@@ -1155,6 +1513,7 @@ async function main() {
     marker,
     routes: ["/auth/#/role", "/auth/#/authority?status=role", "/auth/#/authority?status=user"],
     menuCode,
+    dataResourceCode,
     roleCode,
     userName,
     personCode,
@@ -1165,6 +1524,8 @@ async function main() {
       positionPrecheckRows: dependencyPrecheck.rows,
       menuPrecheckSql: menuPrecheck.sql,
       menuPrecheckRows: menuPrecheck.rows,
+      dataResourceGroupPrecheckSql: dataResourceGroupPrecheck.sql,
+      dataResourceGroupPrecheckRows: dataResourceGroupPrecheck.rows,
     },
     backendTrace: {
       roleCreate:
@@ -1185,6 +1546,16 @@ async function main() {
         "UserPermissionController.addUserPermission -> UserPermissionServiceImpl.addOrUpdateUserPermission -> MyBatis-Plus saveOrUpdateBatch -> public.rbac_userpermission -> user position/staff/department refs if selected",
       userPermissionDelete:
         "UserPermissionController.addUserPermission(deleteList) -> UserPermissionServiceImpl.batchDeleteUserPermissions -> public.rbac_userpermission and rbac_userp* refs",
+      dataResourceGroupLoad:
+        "DataPermissionController.queryDataResourceGroups -> DataPermissionServiceImpl.getDataResourceGroups -> RbacDataResourceGroupServiceImpl.list -> public.rbac_data_resource_group",
+      roleDataResourceSave:
+        "DataPermissionController.saveDataResourceForRole -> DataPermissionServiceImpl.saveDataResourceForRole -> RbacRoleDataPermissionCtrlServiceImpl.saveOrUpdate/public.rbac_role_data_permission_ctrl -> RbacRoleDataPermissionServiceImpl.saveBatch/public.rbac_role_data_permission -> addUserPermissionByRole/public.rbac_user_data_permission purview_type=0 for bound users",
+      roleDataResourceDisable:
+        "DataPermissionController.saveDataResourceForRole(controlled=false) -> DataPermissionServiceImpl.saveDataResourceForRole -> public.rbac_role_data_permission_ctrl.controlled=0 -> remove role direct rows and inherited public.rbac_user_data_permission purview_type=0 rows",
+      userDataResourceSave:
+        "DataPermissionController.saveDataResourceForUser -> DataPermissionServiceImpl.saveDataResourceForUser -> RbacUserDataPermissionCtrlServiceImpl.saveOrUpdate/public.rbac_user_data_permission_ctrl -> RbacUserDataPermissionServiceImpl.saveBatch/public.rbac_user_data_permission purview_type=1",
+      userDataResourceDisable:
+        "DataPermissionController.saveDataResourceForUser(controlled=false) -> DataPermissionServiceImpl.saveDataResourceForUser -> public.rbac_user_data_permission_ctrl.controlled=0 -> remove direct public.rbac_user_data_permission purview_type=1 rows",
     },
     browser: {
       navigations,
@@ -1212,8 +1583,12 @@ async function main() {
       Boolean(operationLog.roleUpdate) &&
       Boolean(operationLog.roleUserCreate) &&
       Boolean(operationLog.roleUserDelete) &&
+      Boolean(operationLog.roleDataResourceSave) &&
+      Boolean(operationLog.roleDataResourceDisable) &&
       Boolean(operationLog.rolePermissionAdd) &&
       Boolean(operationLog.rolePermissionDelete) &&
+      Boolean(operationLog.userDataResourceSave) &&
+      Boolean(operationLog.userDataResourceDisable) &&
       Boolean(operationLog.userPermissionAdd) &&
       Boolean(operationLog.userPermissionDelete) &&
       Boolean(operationLog.roleDelete),

@@ -5159,7 +5159,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 已纳入 CI；本轮 RBAC 验收发现并闭合 `rbac_roleuser.valid` 默认值缺口 | 不能证明所有未来发现项已闭环，需要持续记录 |"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 已纳入 CI；本轮 RBAC 验收发现并闭合 `rbac_roleuser.valid` 默认值缺口、RBAC 数据资源权限缺表、角色资源权限继承用户行未落库缺口 | 不能证明所有未来发现项已闭环，需要持续记录 |"
     },
     {
       "file": "docs/project-objectives.md",

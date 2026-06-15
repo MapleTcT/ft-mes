@@ -5,19 +5,19 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`74`。
-- 编号范围：`001` 到 `074`。
+- 脚本数量：`75`。
+- 编号范围：`001` 到 `075`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
-- 需关注语句：`44`。
+- 需关注语句：`45`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 
 ## 标签统计
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 28 |
+| auth-rbac-org | 29 |
 | business | 9 |
 | compatibility | 42 |
 | configuration | 18 |
@@ -30,13 +30,13 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9181 |
-| create-function | 38 |
-| create-index | 667 |
-| create-table | 482 |
+| alter-table | 9185 |
+| create-function | 39 |
+| create-index | 672 |
+| create-table | 486 |
 | create-view | 92 |
-| insert | 3662 |
-| update | 3651 |
+| insert | 3663 |
+| update | 3654 |
 
 ## 脚本清单
 
@@ -116,6 +116,7 @@
 | 072 | 072-rbac-authority-page-compat.sql | platform, auth-rbac-org, compatibility | 43 | create-table:1, create-index:2, alter-table:1, insert:1, update:2 | - |
 | 073 | 073-auth-user-lock-status-compat.sql | auth-rbac-org, compatibility | 10 | alter-table:1, update:2 | - |
 | 074 | 074-rbac-roleuser-valid-default.sql | auth-rbac-org | 11 | alter-table:1 | - |
+| 075 | 075-rbac-data-resource-permission-tables.sql | auth-rbac-org | 198 | create-table:4, create-function:1, create-index:5, alter-table:4, insert:1, update:3 | watch:1 |
 
 ## 规则
 
