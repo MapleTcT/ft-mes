@@ -21,6 +21,9 @@ Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.ex
 - 数据库方言差异集中在 Mapper、Repository、migration SQL 或数据库适配层。
 - 已提升的源码模块默认 `src/main` 必须保持 PostgreSQL-first，不允许带入 Oracle driver、JDBC URL、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每次迁移一个模块，必须有 smoke 或 SQL audit 证据。
+- 每个 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，都必须落到幂等 SQL 或模块 backlog，不允许靠清库重建掩盖问题。
+
+测试环境验证范围和生产迁移前置项见 [测试环境验证范围](runtime-validation-scope.md)。
 
 ## 阶段计划
 
@@ -30,7 +33,8 @@ Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.ex
 
 - 保留 Docker runtime patch。
 - 继续补 `deploy/docker/postgres/init/NNN-*.sql`。
-- 用页面 smoke 和接口 smoke 覆盖人员、组织、菜单、待办、业务模块入口。
+- 用页面 smoke 和接口 smoke 覆盖登录、当前用户、人员、组织、权限、菜单、待办、基础配置、Nacos、Keycloak、PostgreSQL 和 runtime patch。
+- 业务模块只做可启动、菜单/API 可见和落表初查，不把未签字业务闭环混入平台验收。
 
 ### 阶段 1：源码侧 SQL 审计
 
@@ -65,6 +69,14 @@ make backend-dependency-check
 ```
 
 报告见 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，其中会列出直接 Oracle/JDBC 依赖、退场动作、重复模块坐标和内部依赖关系。
+
+新业务包或恢复模块进入源码区前，先运行只读准入预检：
+
+```bash
+make module-intake-check INTAKE=/path/to/package-or-dir
+```
+
+准入预检发现的 Oracle 默认路径、二进制包和 SQL 方言风险，应进入幂等 PostgreSQL SQL、[Oracle 迁移 Backlog](oracle-migration-backlog.md) 或对应模块 backlog。
 
 PostgreSQL 初始化和兼容 SQL 也要维护脚本索引：
 
@@ -128,6 +140,7 @@ make oracle-replacement-check
 
 - `make verify-pom`
 - `make compose-config`
+- `make module-intake-check INTAKE=/path/to/package-or-dir`
 - `make source-module-check`
 - `make backend-dependency-check`
 - `make audit-postgres-mappings`

@@ -17,6 +17,18 @@
 
 ## 标准流程
 
+### 0. 准入预检
+
+新业务包、压缩包或恢复模块目录进入可维护源码区前，先做只读预检：
+
+```bash
+make module-intake-check INTAKE=/path/to/package-or-dir
+```
+
+该检查会扫描目录、源码文件和 zip/jar 包，但不会解包或修改候选内容。阻断项包括默认路径里的 Oracle JDBC 依赖、Oracle URL/driver/dialect 和 Oracle mapper/resource 路径；关注项包括二进制包和常见 SQL 方言风险。
+
+阻断项不能直接带入 `backend/source-modules`。如果只是考古对比，运行脚本时可以加 `--report-only` 保留报告，再把问题落到幂等 SQL 或模块 backlog。
+
 ### 1. 建模块
 
 ```bash
@@ -70,6 +82,7 @@ backend/modules/<group>/<artifact>/<version>/
 ```bash
 make source-module-check
 make source-module-test
+make module-intake-check INTAKE=/path/to/package-or-dir
 make backend-dependency-check
 make audit-postgres-mappings
 make oracle-audit
@@ -107,6 +120,7 @@ make smoke-business
 - 聚合 POM 已包含该模块。
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
+- 接入来源已通过 `make module-intake-check`，或已有 report-only 报告和 backlog。
 - 相关恢复模块依赖已在 [后端恢复模块依赖库存](backend-module-dependency-inventory.md) 中可追溯。
 - `mvn -q -DskipTests validate` 通过。
 - Oracle 默认依赖、默认配置、默认 mapper/resource 路径已移除。

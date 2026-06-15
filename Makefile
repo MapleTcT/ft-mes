@@ -19,8 +19,10 @@ MODULE ?=
 PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
+INTAKE ?=
+INTAKE_REPORT ?= /tmp/adp-module-intake-precheck.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check source-module-test create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -32,6 +34,7 @@ help:
 	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
 	@printf '%s\n' '  make source-module-test      Compile and test promoted backend source modules'
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
+	@printf '%s\n' '  make module-intake-check INTAKE=/path/to/package-or-dir'
 	@printf '%s\n' '  make inventory               Regenerate current content inventory'
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
 	@printf '%s\n' '  make backend-dependency-inventory Regenerate recovered backend dependency inventory'
@@ -77,6 +80,11 @@ source-module-test:
 create-backend-module:
 	@test -n "$(MODULE)" || { echo "MODULE is required, e.g. make create-backend-module MODULE=platform-auth"; exit 2; }
 	$(PYTHON) scripts/create-backend-source-module.py "$(MODULE)" $(if $(PACKAGE),--package "$(PACKAGE)",)
+
+module-intake-check:
+	@test -n "$(INTAKE)" || { echo "INTAKE is required, e.g. make module-intake-check INTAKE=/path/to/package-or-dir"; exit 2; }
+	$(PYTHON) scripts/precheck-module-intake.py "$(INTAKE)" --report "$(INTAKE_REPORT)"
+	@printf 'Module intake precheck report: %s\n' '$(INTAKE_REPORT)'
 
 inventory:
 	$(PYTHON) scripts/generate-current-content-inventory.py

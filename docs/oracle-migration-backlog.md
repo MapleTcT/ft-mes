@@ -6,7 +6,7 @@
 
 ## 摘要
 
-- 总引用数：`783`。
+- 总引用数：`810`。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 142 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 149 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
@@ -25,7 +25,7 @@
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-config-backlog | 2 | Source Nacos config still carries Oracle fallback; rendered Docker config must override to PostgreSQL. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 145 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 165 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 
@@ -36,13 +36,14 @@
 | scripts/generate-oracle-replacement-status.py | 35 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mysql/syscode_1.sql | 34 |
-| docs/oracle-to-postgres-transition.md | 28 |
+| docs/oracle-to-postgres-transition.md | 30 |
 | scripts/generate-backend-dependency-inventory.py | 24 |
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
+| scripts/precheck-module-intake.py | 20 |
 | docs/oracle-replacement-status.md | 18 |
 | backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql | 17 |
+| docs/project-objectives.md | 17 |
 | scripts/verify-source-modules.py | 17 |
-| docs/project-objectives.md | 16 |
 | Makefile | 14 |
 | docs/sustainable-development.md | 14 |
 | scripts/verify-sustainable-repo.py | 14 |
@@ -50,7 +51,7 @@
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |
 | deploy/docker/scripts/audit-postgres-mappings.py | 12 |
 | backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql | 11 |
-| docs/backend-module-promotion-guide.md | 10 |
+| docs/backend-module-promotion-guide.md | 11 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTaskServiceImpl.java | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mariadb/rbac_1.sql | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mysql/rbac_1.sql | 9 |
@@ -60,7 +61,6 @@
 | backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java | 8 |
 | .github/ISSUE_TEMPLATE/oracle-postgres-migration.yml | 7 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/META-INF/oracle/i18n_1.sql | 7 |
-| backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeMessageRecordServiceImpl.java | 7 |
 
 ## 优先 Backlog 样例
 

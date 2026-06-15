@@ -13,6 +13,8 @@
 - 平台功能和业务模块功能有清晰边界。
 - 后续后端落表、业务表含义、页面/API 对表关系可以独立线程持续排查。
 
+当前测试环境的验证边界见 [测试环境验证范围](runtime-validation-scope.md)。本阶段优先闭合平台登录、用户、组织、权限、菜单、待办、基础配置、Nacos、Keycloak、PostgreSQL 和 runtime patch；业务模块先做到可启动、菜单/API 可见和落表初查。
+
 ## 当前项目定位
 
 当前仓库主体是 ADP/BAP 平台运行包，不是完整 MES 业务产品包。
@@ -37,6 +39,7 @@
 - 不把 Oracle 当默认数据库继续适配。
 - 不在没有业务说明和落表证据时声称完整 MES 业务闭环已完成。
 - 不通过重置数据库来掩盖 PostgreSQL 兼容缺口。
+- 不把生产迁移前置项混入当前测试环境闭环；数据迁移、回滚、license、MinIO、Keycloak 生产库、TLS、安全加固和业务签字需要单独补。
 
 ## 工作流
 
@@ -53,6 +56,7 @@
 - GitHub Actions 验证 Maven reactor 和 Compose 语法。
 - `scripts/verify-sustainable-repo.py` 验证仓库治理硬约束。
 - `scripts/create-backend-source-module.py` 创建标准后端源码模块。
+- `scripts/precheck-module-intake.py` 对新业务包或恢复模块做只读准入预检。
 - `scripts/verify-source-modules.py` 校验已提升后端源码模块，并阻止默认源码路径重新带入 Oracle 驱动、配置和 mapper 资源。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
 - `scripts/generate-backend-dependency-inventory.py` 生成恢复后端模块依赖库存。
@@ -63,7 +67,7 @@
 后续增强：
 
 - 每提升一个后端模块，就给模块补单元测试或最小集成测试。
-- 每新增一个业务运行包，就补对应 smoke 脚本或测试清单。
+- 每新增一个业务运行包，先跑 `make module-intake-check INTAKE=/path/to/package-or-dir`，再补对应 smoke 脚本或测试清单。
 
 ### 2. Oracle 替换
 
@@ -77,6 +81,7 @@
 - 方言差异集中到 DAO/Mapper/migration 层。
 - 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每个模块必须有审计结果、迁移脚本和 smoke 证据。
+- 每个 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，都落到幂等 SQL 或模块 backlog，不用清库重建掩盖。
 
 ### 3. 后端落表业务排查
 
@@ -103,6 +108,7 @@
 - `make sustainable-check` 通过。
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
+- `make module-intake-check` 对新接入业务包或模块通过，或已有 report-only 证据和 backlog。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
 - `make oracle-audit-check` 通过。
