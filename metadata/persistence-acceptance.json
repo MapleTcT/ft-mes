@@ -1,14 +1,81 @@
 {
-  "generatedAt": "2026-06-15T18:00:25+08:00",
-  "repoCommit": "5c243b396955122aaf16bf28f1661f14d3d7d0ed",
+  "generatedAt": "2026-06-15T18:37:45+08:00",
+  "repoCommit": "e38a744242890b188ff8629670ec345a8e49ebab",
   "database": "PostgreSQL",
-  "status": "TEMPLATE_NOT_EXECUTED",
+  "status": "PARTIAL_ACCEPTANCE_RECORDED",
   "summary": {
-    "testedFeatures": 0,
-    "pass": 0,
+    "testedFeatures": 4,
+    "pass": 4,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 0
   },
-  "items": []
+  "items": [
+    {
+      "module": "平台基础",
+      "route": "http://10.11.100.17:18080",
+      "operation": "登录、平台 API、首页待办、组织只读、RBAC 权限、菜单页面 smoke",
+      "api": "/inter-api/auth/login; /inter-api/rbac/v1/menus/currentUser; organization/todo/rbac smoke endpoints",
+      "method": "MIXED",
+      "requiresPersistence": false,
+      "backendEntry": "deploy/docker/scripts/adp-platform-validation-smoke.js",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "PASS",
+      "evidence": "2026-06-15 platform smoke on http://10.11.100.17:18080 passed 6/6: platform API 16/16, home todo ok with no visible/network/console/page errors, organization read ok, RBAC authority 9/9, menu sample 12/12. Report: /tmp/adp-platform-validation-acceptance-20260615182929/platform-validation-summary.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增部门",
+      "api": "/inter-api/organization/v1/department",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "DepartmentInterController.addDepartment -> DepartmentService.addDepartment -> DepartmentServiceImpl.addDepartmentWithoutKafka -> MyBatis Plus save",
+      "tables": [
+        "org_department"
+      ],
+      "marker": "ADP_E2E_20260615103620_ORGDEP",
+      "verificationSql": "select id, code, name, dept_type, coalesce(description,''), company_id, valid, leaf, coalesce(full_path,''), coalesce(lay_rec,'') from public.org_department where code='ADP_E2E_20260615103620_ORGDEP_DEP';",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page, selected 默认公司, submitted 新增部门 modal. POST returned 200 with id 6587462000591376. PostgreSQL row existed with valid=1, name=ADP_E2E_20260615103620_ORGDEP, description=create marker. Report: /tmp/adp-organization-persistence-20260615183619.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑部门",
+      "api": "/inter-api/organization/v1/department",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "DepartmentInterController.updateDepartment -> DepartmentService.updateDepartment -> DepartmentServiceImpl.updateDepartmentWithoutKafka -> MyBatis Plus updateById",
+      "tables": [
+        "org_department"
+      ],
+      "marker": "ADP_E2E_20260615103620_ORGDEP",
+      "verificationSql": "select id, code, name, dept_type, coalesce(description,''), company_id, valid, leaf, coalesce(full_path,''), coalesce(lay_rec,'') from public.org_department where code='ADP_E2E_20260615103620_ORGDEP_DEP';",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin PUT returned 200 for id 6587462000591376. PostgreSQL row changed to name=ADP_E2E_20260615103620_ORGDEP_EDIT and description=update marker while valid remained 1.",
+      "issues": []
+    },
+    {
+      "module": "组织管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除部门",
+      "api": "/inter-api/organization/v1/department/6587462000591376",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "DepartmentInterController.deleteDep -> DepartmentService.deleteDepById -> DepartmentServiceImpl.updateBatchById",
+      "tables": [
+        "org_department"
+      ],
+      "marker": "ADP_E2E_20260615103620_ORGDEP",
+      "verificationSql": "select id, code, name, dept_type, coalesce(description,''), company_id, valid, leaf, coalesce(full_path,''), coalesce(lay_rec,'') from public.org_department where code='ADP_E2E_20260615103620_ORGDEP_DEP';",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin DELETE returned 200. PostgreSQL retained id 6587462000591376 with valid=0, proving soft delete persisted.",
+      "issues": []
+    }
+  ]
 }
