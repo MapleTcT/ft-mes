@@ -15,6 +15,8 @@
 
 当前测试环境的验证边界见 [测试环境验证范围](runtime-validation-scope.md)。本阶段优先闭合平台登录、用户、组织、权限、菜单、待办、基础配置、Nacos、Keycloak、PostgreSQL 和 runtime patch；业务模块先做到可启动、菜单/API 可见和落表初查。
 
+功能验收和后端落库验收必须遵循 [功能验收与落库验收规则](functional-persistence-acceptance.md)。后续不能只补治理层、只跑静态检查或只看代码推断功能可用；涉及写业务数据的前端动作必须用唯一 marker 通过 PostgreSQL 查询证明真实落库。
+
 ## 当前项目定位
 
 当前仓库主体是 ADP/BAP 平台运行包，不是完整 MES 业务产品包。
@@ -101,6 +103,23 @@
 - 业务模块：生产、设备、质量、能源、安环、仓储、追溯等。
 - 已验证功能、仅菜单可见功能、缺数据/缺脚本功能、未接入功能。
 
+### 5. 功能验收和落库证明
+
+目标：把“页面能不能用”和“业务动作有没有真实写库”拆成可复验的证据。
+
+固定产出：
+
+- [前端功能测试报告](frontend-functional-test-report.md)
+- [后端落库验收报告](backend-table-audit/persistence-acceptance.md)
+- [机器可读落库验收记录](../metadata/persistence-acceptance.json)
+
+原则：
+
+- 必须用真实前端页面或等效 E2E 操作，不用源码静态阅读代替功能测试。
+- 必须记录 console error、network error、API、payload、response 和页面实际结果。
+- 对新增、编辑、删除、禁用、启用、状态变更等动作，必须追踪 Controller/Service/Mapper/SQL/目标表，并查询 PostgreSQL。
+- `PASS` 只代表真实前端操作、后端链路和 PostgreSQL 证据都齐全；未执行、被阻断或不落库功能必须分别标记 `BLOCKED` 或 `NOT_APPLICABLE`。
+
 ## 验收口径
 
 仓库级验收：
@@ -111,6 +130,7 @@
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
 - `make runtime-script-check` 通过。
+- `make persistence-acceptance-check` 通过。
 - `make module-intake-check` 对新接入业务包或模块通过，或已有 report-only 证据和 backlog。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
@@ -135,6 +155,7 @@
 
 - 每个业务模块有菜单/API/表/字段/流程说明。
 - 每条核心业务链路有输入、操作、状态变化和数据库结果。
+- 每个会改变业务数据的前端动作都有 PostgreSQL 落库验收记录。
 - 未验证或缺包的部分明确标注，不混进已完成功能。
 
 ## 推荐优先级

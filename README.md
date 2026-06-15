@@ -52,6 +52,7 @@ make ci
 make verify-pom
 make compose-config
 make sustainable-check
+make persistence-acceptance-check
 make source-module-check
 make source-module-test
 make inventory-check
@@ -74,6 +75,8 @@ docker compose --env-file .env up -d
 
 - [仓库概述](docs/repository-overview.md)
 - [项目目标和交付路线](docs/project-objectives.md)
+- [功能验收与落库验收规则](docs/functional-persistence-acceptance.md)
+- [前端功能测试报告](docs/frontend-functional-test-report.md)
 - [当前内容迁移清单](docs/current-content-inventory.md)
 - [Oracle 迁移 Backlog](docs/oracle-migration-backlog.md)
 - [Oracle 替换状态总账](docs/oracle-replacement-status.md)
@@ -84,6 +87,7 @@ docker compose --env-file .env up -d
 - [后端恢复模块依赖库存](docs/backend-module-dependency-inventory.md)
 - [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)
 - [后端落表业务排查交接](docs/backend-table-audit-handoff.md)
+- [后端落库验收报告](docs/backend-table-audit/persistence-acceptance.md)
 - [后端说明](backend/README.md)
 - [前端说明](frontend/README.md)
 - [Docker 测试部署](deploy/docker/README.md)

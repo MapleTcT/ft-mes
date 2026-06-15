@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-06-15T18:00:25+08:00",
+  "repoCommit": "5c243b396955122aaf16bf28f1661f14d3d7d0ed",
+  "database": "PostgreSQL",
+  "status": "TEMPLATE_NOT_EXECUTED",
+  "summary": {
+    "testedFeatures": 0,
+    "pass": 0,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "items": []
+}

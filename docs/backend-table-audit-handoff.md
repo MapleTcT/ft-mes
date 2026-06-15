@@ -12,6 +12,7 @@
 - 表字段代表什么业务含义。
 - 哪些表来自平台元数据，哪些表来自业务模块。
 - PostgreSQL 迁移缺口在哪里，是否需要保留 Oracle legacy SQL。
+- 哪些前端业务动作已经通过真实页面操作和 PostgreSQL 查询证明落库。
 
 ## 输入资料
 
@@ -22,6 +23,10 @@
 - `backend/services/`：服务清单、启动类、Nacos Data ID。
 - `deploy/docker/postgres/init/`：当前 PostgreSQL 兼容 SQL。
 - `deploy/docker/scripts/audit-postgres-mappings.py`：SQL 方言审计。
+- `docs/functional-persistence-acceptance.md`：功能验收和落库验收硬规则。
+- `docs/frontend-functional-test-report.md`：前端功能验收报告。
+- `docs/backend-table-audit/persistence-acceptance.md`：后端落库验收报告。
+- `metadata/persistence-acceptance.json`：机器可读落库验收记录。
 - `metadata/backend-service-manifest.json`：运行服务清单。
 - `metadata/backend-source-summary.json`：恢复模块清单。
 - `docs/adp-system-design-logic.md`：平台/业务边界判断。
@@ -134,6 +139,17 @@ rg -n "接口路径|Controller|RequestMapping|GetMapping|PostMapping" backend/mo
 
 每个修复都应落成幂等 SQL，不要通过清库重建绕过。
 
+## 功能与落库验收专项注意
+
+后续落表排查不能只停留在 Mapper 或表字段地图。凡是报告为 `PASS` 的写业务动作，都必须满足：
+
+- 来自真实前端页面或等效 E2E 操作。
+- 请求带唯一 marker，且记录 method、URL、payload、response。
+- 追踪到 Controller、Service、Mapper/DAO 和目标表。
+- 直接查询 PostgreSQL，记录 SQL 和结果摘要。
+
+完整规则见 [功能验收与落库验收规则](functional-persistence-acceptance.md)。
+
 ## 第一批建议排查模块
 
 1. `auth` / `iam` / `rbac` / `organization`
@@ -164,4 +180,5 @@ rg -n "接口路径|Controller|RequestMapping|GetMapping|PostMapping" backend/mo
 - PostgreSQL 迁移缺口列清楚，已有修复或有明确 backlog。
 - 业务动作的读写表有证据。
 - 页面/API smoke 或等价手工验证可复现。
+- 会改变业务数据的动作有 PostgreSQL 落库验收证据。
 - 文档标注已验证、未验证和风险，不把猜测写成事实。

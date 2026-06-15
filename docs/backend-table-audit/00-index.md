@@ -18,3 +18,11 @@
 | `business-quality-lims-qcs.md` | 待开始 | LIMS、QCS、Qualify 质量域 |
 | `business-production.md` | 待开始 | 生产、工单、报工、追溯 |
 | `business-equipment-energy-ehs.md` | 待开始 | 设备、能源、安环 |
+| `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |
+
+## 验收规则
+
+- 功能验收入口：[功能验收与落库验收规则](../functional-persistence-acceptance.md)
+- 前端功能报告：[前端功能测试报告](../frontend-functional-test-report.md)
+- 机器可读记录：`metadata/persistence-acceptance.json`
+- 结构校验：`make persistence-acceptance-check`
