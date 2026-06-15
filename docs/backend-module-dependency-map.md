@@ -75,6 +75,7 @@ business services
 ## 依赖管理原则
 
 - 新模块继承根 `pom.xml`，不要复制恢复 POM 中的父级和私服配置。
+- 使用 `make create-backend-module MODULE=<name>` 创建标准模块结构，并用 `make source-module-check` 校验。
 - 统一使用父 POM 管理 Spring、数据库驱动和 Maven 插件版本。
 - Oracle 驱动只允许在 legacy profile 或明确标注的兼容模块中出现。
 - Mapper SQL 必须先通过 `make audit-postgres-mappings` 或有等价报告。

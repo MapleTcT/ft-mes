@@ -52,6 +52,7 @@ make ci
 make verify-pom
 make compose-config
 make sustainable-check
+make source-module-check
 make inventory-check
 make oracle-audit-check
 ```
@@ -71,6 +72,7 @@ docker compose --env-file .env up -d
 - [项目目标和交付路线](docs/project-objectives.md)
 - [当前内容迁移清单](docs/current-content-inventory.md)
 - [Oracle 迁移 Backlog](docs/oracle-migration-backlog.md)
+- [后端模块提升指南](docs/backend-module-promotion-guide.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)
 - [后端模块依赖地图](docs/backend-module-dependency-map.md)
 - [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)

@@ -70,6 +70,8 @@ make ci
 make verify-pom
 make compose-config
 make sustainable-check
+make source-module-check
+make create-backend-module MODULE=platform-auth
 make inventory
 make inventory-check
 make oracle-audit
@@ -84,13 +86,14 @@ make audit-postgres-mappings
 make audit-postgres-report
 ```
 
-`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、内容库存是否新鲜、Oracle 迁移 backlog 是否新鲜，以及 PostgreSQL 方言审计。
+`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、Oracle 迁移 backlog 是否新鲜，以及 PostgreSQL 方言审计。
 
 `make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 
 ## 后续工作
 
 - 将高频修改的基础模块优先提升到 `backend/source-modules`。
+- 提升模块前先用 `make create-backend-module MODULE=<name>` 创建标准结构，提升过程见 [后端模块提升指南](backend-module-promotion-guide.md)。
 - 为新业务包建立独立模块组，不直接污染基础平台模块。
 - 将 PostgreSQL 兼容补丁从 runtime patch 逐步前移到源码、Mapper 和迁移脚本。
 - 给每个已提升模块补最小 smoke 或集成测试。

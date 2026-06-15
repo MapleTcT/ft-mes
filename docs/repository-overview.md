@@ -68,5 +68,6 @@
 - [项目目标和交付路线](project-objectives.md)
 - [可持续开发仓库说明](sustainable-development.md)
 - [后端模块依赖地图](backend-module-dependency-map.md)
+- [后端模块提升指南](backend-module-promotion-guide.md)
 - [Oracle 到 PostgreSQL 替换路线](oracle-to-postgres-transition.md)
 - [后端落表业务排查交接](backend-table-audit-handoff.md)

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "findingCount": 584,
+  "findingCount": 623,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
@@ -13,19 +13,23 @@
     "recovered-source-backlog": 266,
     "runtime-config-backlog": 2,
     "runtime-patch-backlog": 9,
-    "tooling-or-audit-code": 16
+    "tooling-or-audit-code": 55
   },
   "patternCounts": {
     "from-dual": 139,
-    "ojdbc": 7,
-    "oracle-keyword": 268,
-    "rownum": 38,
-    "sysdate": 132
+    "ojdbc": 9,
+    "oracle-keyword": 302,
+    "rownum": 40,
+    "sysdate": 133
   },
   "topFiles": [
     {
       "file": "backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/oracle/rbac_1.sql",
       "findingCount": 61
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "findingCount": 39
     },
     {
       "file": "backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql",
@@ -138,10 +142,6 @@
     {
       "file": "deploy/database/README.md",
       "findingCount": 6
-    },
-    {
-      "file": "pom.xml",
-      "findingCount": 6
     }
   ],
   "findings": [
@@ -219,15 +219,15 @@
     },
     {
       "file": "Makefile",
-      "line": 21,
+      "line": 23,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": ".PHONY: help ci verify verify-pom compose-config sustainable-check inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-bu"
+      "excerpt": ".PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps log"
     },
     {
       "file": "Makefile",
-      "line": 32,
+      "line": 36,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -235,7 +235,7 @@
     },
     {
       "file": "Makefile",
-      "line": 33,
+      "line": 37,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -243,15 +243,15 @@
     },
     {
       "file": "Makefile",
-      "line": 47,
+      "line": 51,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": "ci: verify sustainable-check inventory-check oracle-audit-check audit-postgres-mappings"
+      "excerpt": "ci: verify sustainable-check source-module-check inventory-check oracle-audit-check audit-postgres-mappings"
     },
     {
       "file": "Makefile",
-      "line": 66,
+      "line": 77,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -259,7 +259,7 @@
     },
     {
       "file": "Makefile",
-      "line": 67,
+      "line": 78,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -267,7 +267,7 @@
     },
     {
       "file": "Makefile",
-      "line": 69,
+      "line": 80,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 70,
+      "line": 81,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -291,7 +291,7 @@
     },
     {
       "file": "README.md",
-      "line": 56,
+      "line": 57,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -299,7 +299,7 @@
     },
     {
       "file": "README.md",
-      "line": 73,
+      "line": 74,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -307,7 +307,7 @@
     },
     {
       "file": "README.md",
-      "line": 76,
+      "line": 78,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4267,7 +4267,7 @@
     },
     {
       "file": "docs/backend-module-dependency-map.md",
-      "line": 79,
+      "line": 80,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4539,7 +4539,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 56,
+      "line": 58,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4547,7 +4547,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 63,
+      "line": 65,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4555,7 +4555,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 65,
+      "line": 67,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4563,7 +4563,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 70,
+      "line": 72,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4571,7 +4571,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 98,
+      "line": 101,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4579,7 +4579,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 102,
+      "line": 105,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4595,7 +4595,7 @@
     },
     {
       "file": "docs/repository-overview.md",
-      "line": 71,
+      "line": 72,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4635,7 +4635,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 75,
+      "line": 77,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4643,7 +4643,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 76,
+      "line": 78,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4651,15 +4651,15 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 87,
+      "line": 89,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、内容库存是否新鲜、Oracle 迁移 backlog 是否新鲜，以及 PostgreSQL 方言审计。"
+      "excerpt": "`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、Oracle 迁移 backlog 是否新鲜，以及 PostgreSQL 方言审计。"
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 89,
+      "line": 91,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4667,7 +4667,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 99,
+      "line": 102,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4770,6 +4770,318 @@
       "excerpt": "\"- 如果清单变化引入 Oracle 配置，必须进入 `oracle-legacy` 路径并补迁移 issue。\","
     },
     {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 15,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "OUTPUT_JSON = ROOT / \"metadata/oracle-migration-audit.json\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 16,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "OUTPUT_MD = ROOT / \"docs/oracle-migration-backlog.md\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 21,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"docs/oracle-migration-backlog.md\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 42,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"oracle-keyword\": re.compile(r\"\\boracle\\b\", re.IGNORECASE),"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 43,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"ojdbc\": re.compile(r\"\\bojdbc\\d*\\b|com\\.oracle\\.jdbc|com\\.oracle\\.database\\.jdbc\", re.IGNORECASE),"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 44,
+      "pattern": "rownum",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"rownum\": re.compile(r\"\\brownum\\b\", re.IGNORECASE),"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 45,
+      "pattern": "sysdate",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"sysdate\": re.compile(r\"\\bsysdate\\b|\\bsystimestamp\\b\", re.IGNORECASE),"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 93,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"deploy/docker/.env.oracle-legacy.example\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 96,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"allowed-legacy-contract\", \"Oracle is explicit legacy compatibility, not the default runtime path.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 98,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"tooling-or-audit-code\", \"Tooling may mention Oracle to generate or check migration audit outputs.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 101,
+      "pattern": "rownum",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "if lower.startswith(\"frontend/\") and pattern == \"rownum\":"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 102,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"frontend-row-index-noise\", \"Frontend rowNum variable naming is not Oracle SQL ROWNUM.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 104,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"tooling-or-audit-code\", \"Tooling may mention Oracle to detect or convert legacy references.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 106,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"postgres-conversion-tooling\", \"Runtime conversion script; Oracle references should convert away from Oracle defaults.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 108,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"runtime-patch-backlog\", \"Runtime patch still contains Oracle branch logic that should be retired after source promotion.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 110,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"runtime-config-backlog\", \"Source Nacos config still carries Oracle fallback; rendered Docker config must override to PostgreSQL.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 111,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "if \"/meta-inf/oracle/\" in lower or \"/mappers/oracle/\" in lower or \"/mapper/oracle/\" in lower:"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 112,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"legacy-oracle-sql-resource\", \"Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 113,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "if lower.endswith(\"/pom.xml\") and (\"ojdbc\" in line_lower or \"oracle.jdbc\" in line_lower):"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 114,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"legacy-ojdbc-dependency\", \"Recovered module POM declares Oracle JDBC and needs module-level replacement.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 116,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"recovered-source-backlog\", \"Recovered source contains Oracle-specific branch or keyword; verify during module promotion.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 118,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"decompiled-runtime-backlog\", \"Decompiled runtime config/source contains Oracle-specific branch or keyword.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 120,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"postgres-compat-reference\", \"PostgreSQL compatibility SQL may mention Oracle as source context.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 121,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"unclassified-oracle-reference\", \"Review and classify this reference.\""
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 191,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"legacy-oracle-sql-resource\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 192,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"legacy-ojdbc-dependency\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 197,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"unclassified-oracle-reference\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 216,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"# Oracle 迁移 Backlog\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 218,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"本文件由 `scripts/generate-oracle-migration-audit.py` 生成，用来跟踪仓库内仍然出现的 Oracle/ojdbc/Oracle 方言引用。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 225,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 226,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- 机器可读报告：`metadata/oracle-migration-audit.json`。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 242,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- `legacy-oracle-sql-resource`：保留作原厂参考，迁移模块时必须补 PostgreSQL 主路径。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 243,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- `legacy-ojdbc-dependency`：模块提升到 `backend/source-modules` 时移除直接 ojdbc 依赖。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 244,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- `runtime-config-backlog`：Nacos 源配置里的 Oracle 默认值要继续由渲染脚本转成 PostgreSQL，并逐步改源配置。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 245,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- `runtime-patch-backlog`：当前 runtime patch 为了兼容老包可存在，源码提升后应删除 Oracle 分支。\","
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 266,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "print(\"Oracle migration audit outputs are stale:\", \", \".join(stale), file=sys.stderr)"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 267,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "print(\"Run: make oracle-audit\", file=sys.stderr)"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 269,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "print(\"Oracle migration audit outputs are current.\")"
+    },
+    {
+      "file": "scripts/generate-oracle-migration-audit.py",
+      "line": 274,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "parser = argparse.ArgumentParser(description=\"Generate Oracle-to-PostgreSQL migration backlog.\")"
+    },
+    {
       "file": "scripts/verify-sustainable-repo.py",
       "line": 18,
       "pattern": "oracle-keyword",
@@ -4803,7 +5115,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 87,
+      "line": 89,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -4811,7 +5123,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 88,
+      "line": 90,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

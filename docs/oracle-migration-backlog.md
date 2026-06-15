@@ -6,7 +6,7 @@
 
 ## 摘要
 
-- 总引用数：`584`。
+- 总引用数：`623`。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -25,13 +25,14 @@
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-config-backlog | 2 | Source Nacos config still carries Oracle fallback; rendered Docker config must override to PostgreSQL. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 16 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 55 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 
 | File | Findings |
 | --- | --- |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/oracle/rbac_1.sql | 61 |
+| scripts/generate-oracle-migration-audit.py | 39 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mysql/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
@@ -60,7 +61,6 @@
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 6 |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 6 |
 | deploy/database/README.md | 6 |
-| pom.xml | 6 |
 
 ## 优先 Backlog 样例
 

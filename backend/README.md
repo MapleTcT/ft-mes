@@ -79,3 +79,5 @@ backend/decompiled-services/<service>/src/main/resources/
 4. 到 `deploy/nacos-config/` 查看脱敏配置。
 
 模块提升和依赖分层见 [后端模块依赖地图](../docs/backend-module-dependency-map.md)。
+
+创建和提升可编译模块见 [后端模块提升指南](../docs/backend-module-promotion-guide.md)。

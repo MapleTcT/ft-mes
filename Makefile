@@ -15,10 +15,12 @@ ADP_BASE_URL ?= http://10.11.100.17:18080
 ADP_USERNAME ?= admin
 ADP_PASSWORD ?= 123456
 SERVICE ?=
+MODULE ?=
+PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -27,6 +29,8 @@ help:
 	@printf '%s\n' '  make verify-pom             Validate parent/module POM structure'
 	@printf '%s\n' '  make compose-config          Validate Docker Compose rendering'
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
+	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
+	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
 	@printf '%s\n' '  make inventory               Regenerate current content inventory'
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
 	@printf '%s\n' '  make oracle-audit            Regenerate Oracle migration backlog'
@@ -44,7 +48,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check inventory-check oracle-audit-check audit-postgres-mappings
+ci: verify sustainable-check source-module-check inventory-check oracle-audit-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -56,6 +60,13 @@ compose-config:
 
 sustainable-check:
 	$(PYTHON) scripts/verify-sustainable-repo.py
+
+source-module-check:
+	$(PYTHON) scripts/verify-source-modules.py
+
+create-backend-module:
+	@test -n "$(MODULE)" || { echo "MODULE is required, e.g. make create-backend-module MODULE=platform-auth"; exit 2; }
+	$(PYTHON) scripts/create-backend-source-module.py "$(MODULE)" $(if $(PACKAGE),--package "$(PACKAGE)",)
 
 inventory:
 	$(PYTHON) scripts/generate-current-content-inventory.py

@@ -25,6 +25,8 @@ REQUIRED_PATHS = [
     "metadata/current-content-inventory.json",
     "metadata/oracle-migration-audit.json",
     ".github/workflows/verify.yml",
+    "scripts/create-backend-source-module.py",
+    "scripts/verify-source-modules.py",
 ]
 
 ALLOWED_BINARY_FILES = {
