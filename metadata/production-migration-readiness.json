@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T21:10:00+08:00",
+  "repoCommit": "000c93dbb4d24bdfa173dfd1c37d72cf714d7828",
+  "database": "PostgreSQL",
+  "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
+  "summary": {
+    "totalTracks": 9,
+    "ready": 0,
+    "planned": 3,
+    "blocked": 3,
+    "notStarted": 3
+  },
+  "tracks": [
+    {
+      "id": "postgres-data-migration",
+      "title": "PostgreSQL 数据迁移脚本",
+      "status": "BLOCKED",
+      "owner": "backend-db-migration-thread",
+      "scope": "生产源库到 PostgreSQL 目标库的结构、全量数据、增量窗口和校验脚本。",
+      "currentEvidence": [
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json",
+        "docs/oracle-migration-backlog.md"
+      ],
+      "requiredEvidence": [
+        "生产源库 inventory",
+        "全量迁移脚本",
+        "增量或冻结窗口方案",
+        "行数和 checksum 校验 SQL",
+        "至少一次 rehearsal 报告"
+      ],
+      "blockingIssues": [
+        "当前只有 PostgreSQL init SQL 和 Oracle backlog，不是生产数据迁移脚本。",
+        "缺生产源库抽取、增量同步、数据量评估和校验结果。"
+      ],
+      "nextActions": [
+        "建立 deploy/database/production-migration/ 脚本入口。",
+        "按模块输出表级迁移顺序和校验 SQL。",
+        "在测试副本执行 rehearsal 并记录报告。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "rollback-plan",
+      "title": "回滚方案",
+      "status": "NOT_STARTED",
+      "owner": "release-manager",
+      "scope": "生产切换失败后的数据库、对象文件、认证、配置、端口和 runtime patch 回退。",
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "docs/runtime-validation-scope.md"
+      ],
+      "requiredEvidence": [
+        "备份命令",
+        "恢复命令",
+        "回切流程",
+        "回滚演练报告",
+        "负责人和时间窗"
+      ],
+      "blockingIssues": [
+        "缺生产级备份、恢复、回切、DNS/端口回滚和演练时间窗。"
+      ],
+      "nextActions": [
+        "编写生产回滚 runbook。",
+        "在测试环境演练 PostgreSQL restore、MinIO 对象回滚、Keycloak realm 回滚和 Nacos 配置回滚。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "license-strategy",
+      "title": "license 策略",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "scope": "测试 bypass 与生产正式授权、失效行为、应急开关和审计策略。",
+      "currentEvidence": [
+        "deploy/nacos-config/supfusion-license.properties",
+        "deploy/docker/scripts/seed-test-license.sh",
+        "docs/runtime-validation-scope.md"
+      ],
+      "requiredEvidence": [
+        "正式授权方案",
+        "过期行为说明",
+        "应急 bypass 审批路径",
+        "license 配置备份恢复方法"
+      ],
+      "blockingIssues": [
+        "测试环境可以 bypass，但生产是否允许、如何审计尚未确认。"
+      ],
+      "nextActions": [
+        "确认是否采购或接入正式 license。",
+        "补生产 license runbook 和应急审批记录模板。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "minio-file-migration",
+      "title": "MinIO 文件迁移",
+      "status": "BLOCKED",
+      "owner": "storage-migration-thread",
+      "scope": "MinIO bucket、对象、hash 校验、断点续传、迁移后抽样下载和回滚。",
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "历史包线索：MinIO mes / transfer bucket"
+      ],
+      "requiredEvidence": [
+        "bucket inventory",
+        "对象数量和大小统计",
+        "对象迁移脚本",
+        "hash 或 etag 校验结果",
+        "抽样下载验证",
+        "回滚或双写策略"
+      ],
+      "blockingIssues": [
+        "缺生产 bucket inventory 和对象迁移 dry-run。",
+        "缺断点续传和回滚策略。"
+      ],
+      "nextActions": [
+        "导出生产 bucket/object 清单。",
+        "编写 dry-run 迁移脚本并记录 hash/etag 校验。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "keycloak-production-db",
+      "title": "Keycloak 生产库策略",
+      "status": "PLANNED",
+      "owner": "identity-platform-owner",
+      "scope": "Keycloak realm、用户、client、secret、JWT key、生产 PostgreSQL 和备份恢复。",
+      "currentEvidence": [
+        "deploy/docker/scripts/init-keycloak-realm.sh",
+        "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
+        "deploy/docker/scripts/register-keycloak-nacos.sh"
+      ],
+      "requiredEvidence": [
+        "realm export/import",
+        "生产库备份恢复",
+        "admin 和 client secret 轮换",
+        "JWT public key 同步验证",
+        "用户/角色/组织映射策略"
+      ],
+      "blockingIssues": [
+        "当前只有测试环境 realm 初始化和 JWT 同步脚本，缺生产库策略和演练证据。"
+      ],
+      "nextActions": [
+        "补 Keycloak production runbook。",
+        "在测试副本执行 realm export/import 和 JWT 同步验证。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "nacos-runtime-patch",
+      "title": "Nacos / runtime patch 生产化",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "scope": "Nacos 配置渲染、runtime patch 清单、页面修复、重启顺序、漂移检查和回退方法。",
+      "currentEvidence": [
+        "deploy/docker/scripts/render-nacos-configs.py",
+        "deploy/docker/scripts/prepare-runtime-patches.sh",
+        "deploy/docker/postgres/init/065-business-view-runtime-json.sql"
+      ],
+      "requiredEvidence": [
+        "生产 Nacos 配置差异清单",
+        "runtime patch 版本和影响清单",
+        "回退脚本",
+        "重启顺序",
+        "健康检查结果"
+      ],
+      "blockingIssues": [
+        "测试环境 runtime patch 仍是运行包兼容层，生产升级策略和回退脚本未形成。"
+      ],
+      "nextActions": [
+        "输出 Nacos/rendered 配置 diff。",
+        "为每个 runtime patch 记录业务影响和回退方式。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "ports-domain-tls",
+      "title": "端口 / 域名 / TLS",
+      "status": "NOT_STARTED",
+      "owner": "infrastructure-owner",
+      "scope": "生产域名、证书、反向代理、端口暴露边界和证书续期。",
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "deploy/docker/.env.example"
+      ],
+      "requiredEvidence": [
+        "生产域名清单",
+        "TLS 证书来源和续期方案",
+        "反向代理配置",
+        "端口暴露边界",
+        "防火墙或安全组规则"
+      ],
+      "blockingIssues": [
+        "当前只有测试端口和 Docker Compose 暴露关系，缺生产域名/TLS/网络边界设计。"
+      ],
+      "nextActions": [
+        "确认生产域名和证书来源。",
+        "补 nginx / gateway / Keycloak / MinIO / Nacos / PostgreSQL 暴露边界。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "security-hardening",
+      "title": "安全加固",
+      "status": "NOT_STARTED",
+      "owner": "security-owner",
+      "scope": "账号、密码、密钥、数据库权限、容器运行用户、镜像扫描、日志审计和告警。",
+      "currentEvidence": [
+        "docs/oracle-replacement-status.md",
+        "metadata/oracle-replacement-status.json"
+      ],
+      "requiredEvidence": [
+        "默认账号处理记录",
+        "密码和 secret 轮换记录",
+        "最小权限矩阵",
+        "镜像扫描报告",
+        "日志审计和告警策略"
+      ],
+      "blockingIssues": [
+        "测试账号和测试配置不能直接进入生产。",
+        "缺生产密钥管理、数据库账号拆分和镜像扫描证据。"
+      ],
+      "nextActions": [
+        "建立生产 secret inventory 模板。",
+        "补最小权限和默认账号清理 checklist。"
+      ],
+      "artifacts": []
+    },
+    {
+      "id": "business-smoke-signoff",
+      "title": "业务 smoke 签字",
+      "status": "BLOCKED",
+      "owner": "business-owner",
+      "scope": "平台、基础配置、生产主流程和所有写业务数据动作的真实前端 smoke 与 PostgreSQL 落库签字。",
+      "currentEvidence": [
+        "docs/frontend-functional-test-report.md",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "metadata/persistence-acceptance.json",
+        "metadata/production-module-test-cases.json"
+      ],
+      "requiredEvidence": [
+        "平台 smoke PASS",
+        "基础配置 smoke PASS",
+        "生产模块完整主流程 PASS",
+        "所有写动作 PostgreSQL 落库 PASS",
+        "业务负责人签字"
+      ],
+      "blockingIssues": [
+        "WOM 生产动作页仍 React #130，生产状态流转/报工没有 marker 落库证据。",
+        "生产模块完整主流程不能签字。"
+      ],
+      "nextActions": [
+        "恢复 WOM 真实 edit/view component metadata。",
+        "补生产主流程 marker 落库验收。",
+        "形成业务 smoke 签字单。"
+      ],
+      "artifacts": []
+    }
+  ]
+}

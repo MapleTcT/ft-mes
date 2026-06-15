@@ -113,6 +113,8 @@
 - [前端功能测试报告](frontend-functional-test-report.md)
 - [后端落库验收报告](backend-table-audit/persistence-acceptance.md)
 - [机器可读落库验收记录](../metadata/persistence-acceptance.json)
+- [生产迁移就绪账本](production-migration-readiness.md)
+- [机器可读生产迁移就绪记录](../metadata/production-migration-readiness.json)
 
 原则：
 
@@ -132,6 +134,9 @@
 - `make source-module-test` 通过。
 - `make runtime-script-check` 通过。
 - `make persistence-acceptance-check` 通过。
+- `make production-testcase-check` 通过。
+- `make production-action-map-check` 通过。
+- `make production-migration-readiness-check` 通过。
 - `make module-intake-check` 对新接入业务包或模块通过，或已有 report-only 证据和 backlog。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
@@ -159,6 +164,13 @@
 - 每条核心业务链路有输入、操作、状态变化和数据库结果。
 - 每个会改变业务数据的前端动作都有 PostgreSQL 落库验收记录。
 - 未验证或缺包的部分明确标注，不混进已完成功能。
+
+生产迁移验收：
+
+- [生产迁移就绪账本](production-migration-readiness.md) 覆盖 PostgreSQL 数据迁移脚本、回滚方案、license 策略、MinIO 文件迁移、Keycloak 生产库策略、Nacos/runtime patch 生产化、端口/域名/TLS、安全加固和业务 smoke 签字。
+- `metadata/production-migration-readiness.json` 通过 `make production-migration-readiness-check`。
+- 整体状态保持 `NOT_READY_FOR_PRODUCTION_MIGRATION`，直到所有轨道都有脚本、演练或签字证据。
+- 生产迁移脚本、回滚脚本和配置模板不得提交真实密码、token、证书私钥。
 
 ## 推荐优先级
 
