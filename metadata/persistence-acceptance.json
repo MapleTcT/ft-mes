@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T20:48:01+08:00",
-  "repoCommit": "0fcdda693a89cd73b449c253f28596338b22f0ba",
+  "generatedAt": "2026-06-15T21:38:01+08:00",
+  "repoCommit": "d6290c887c2250e50ebbdc86cc0c257cda2d681d",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 7,
-    "pass": 5,
+    "testedFeatures": 10,
+    "pass": 8,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -135,6 +135,57 @@
       "verificationSql": "select id, code, name, dept_type, coalesce(description,''), company_id, coalesce(parent_id::text,''), valid, leaf, coalesce(full_path,''), coalesce(lay_rec,'') from public.org_department where code = 'ADP_E2E_20260615123939_ORGDEP_DEP' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Browser-context same-origin DELETE returned 200. PostgreSQL retained id 6587704459641360 with valid=0, proving soft delete persisted. Report: /tmp/adp-organization-persistence-final-20260615203939.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-组管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增组",
+      "api": "/inter-api/organization/v1/group",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "GroupInterController.addDepartment -> GroupService.addGroup -> GroupServiceImpl.addGroup -> MyBatis Plus save",
+      "tables": [
+        "org_group"
+      ],
+      "marker": "ADP_E2E_20260615133645_GRP",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, coalesce(valid::text,''), coalesce(full_path,''), coalesce(sort::text,''), coalesce(manager_id::text,''), coalesce(manager_name,'') from public.org_group where code = 'ADP_E2E_20260615133645_GRP' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context to POST group marker ADP_E2E_20260615133645_GRP. API returned 200. PostgreSQL org_group row existed with id 6587816676082192, valid=1, name=ADP_E2E_20260615133645_GRP, and the create marker description. Report: /tmp/adp-organization-group-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-组管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑组",
+      "api": "/inter-api/organization/v1/group",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "GroupInterController.updateDepartment -> GroupService.updateGroup -> GroupServiceImpl.updateGroup -> MyBatis Plus updateById",
+      "tables": [
+        "org_group"
+      ],
+      "marker": "ADP_E2E_20260615133645_GRP",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, coalesce(valid::text,''), coalesce(full_path,''), coalesce(sort::text,''), coalesce(manager_id::text,''), coalesce(manager_name,'') from public.org_group where code = 'ADP_E2E_20260615133645_GRP' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin PUT returned 200 for id 6587816676082192. PostgreSQL org_group row changed to name=ADP_E2E_20260615133645_GRP_EDIT and description=ADP_E2E_20260615133645_GRP update via organization browser context while valid remained 1. Report: /tmp/adp-organization-group-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-组管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除组",
+      "api": "/inter-api/organization/v1/group/6587816676082192",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "GroupInterController.deleteDep -> GroupService.deleteGroupById -> GroupServiceImpl.deleteGroupById -> MyBatis Plus removeById",
+      "tables": [
+        "org_group"
+      ],
+      "marker": "ADP_E2E_20260615133645_GRP",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, coalesce(valid::text,''), coalesce(full_path,''), coalesce(sort::text,''), coalesce(manager_id::text,''), coalesce(manager_name,'') from public.org_group where code = 'ADP_E2E_20260615133645_GRP' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin DELETE returned 200 for id 6587816676082192. PostgreSQL lookup by code returned no remaining rows, so the runtime delete mode for org_group is physical-delete. Report: /tmp/adp-organization-group-persistence-acceptance.json",
       "issues": []
     }
   ]

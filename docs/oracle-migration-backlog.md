@@ -6,7 +6,7 @@
 
 ## 摘要
 
-- 总引用数：`823`。
+- 总引用数：`827`。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 162 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 165 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
@@ -25,7 +25,7 @@
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-config-backlog | 2 | Source Nacos config still carries Oracle fallback; rendered Docker config must override to PostgreSQL. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 165 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 166 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 

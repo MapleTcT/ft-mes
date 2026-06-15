@@ -24,12 +24,13 @@ INTAKE_REPORT ?= /tmp/adp-module-intake-precheck.json
 PLATFORM_SMOKE_OUTPUT ?= /tmp/adp-platform-validation-smoke
 PLATFORM_MENU_LIMIT ?= 40
 ORGANIZATION_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-persistence-acceptance.json
+ORGANIZATION_GROUP_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-group-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
 PRODUCTION_DISCOVERY_OUTPUT ?= /tmp/adp-production-action-discovery
 PRODUCTION_DISCOVERY_TARGETS ?=
 PRODUCTION_DISCOVERY_CLICK_CREATE ?= true
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence acceptance-organization-group-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -71,6 +72,7 @@ help:
 	@printf '%s\n' '  make smoke-todo              Run home Todo smoke against ADP_BASE_URL'
 	@printf '%s\n' '  make smoke-organization      Run organization department click/API smoke'
 	@printf '%s\n' '  make acceptance-organization-persistence Run organization CRUD persistence acceptance'
+	@printf '%s\n' '  make acceptance-organization-group-persistence Run organization group CRUD persistence acceptance'
 	@printf '%s\n' '  make smoke-rbac-authority    Run role/user authority editor API smoke'
 	@printf '%s\n' '  make smoke-business          Run API/layout smoke for restored business module routes'
 	@printf '%s\n' '  make smoke-business-page     Run browser page smoke for restored business module routes'
@@ -95,6 +97,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-home-todo-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-organization-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-organization-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-organization-group-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-module-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-page-smoke.js
@@ -207,6 +210,9 @@ smoke-organization:
 
 acceptance-organization-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_ORGANIZATION_PERSISTENCE_OUTPUT=$(ORGANIZATION_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-organization-persistence-acceptance.js
+
+acceptance-organization-group-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_ORGANIZATION_GROUP_PERSISTENCE_OUTPUT=$(ORGANIZATION_GROUP_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-organization-group-persistence-acceptance.js
 
 smoke-rbac-authority:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) $(NODE) deploy/docker/scripts/adp-rbac-authority-smoke.js

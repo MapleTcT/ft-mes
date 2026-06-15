@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T21:35:00+08:00",
-  "generatedFromCommit": "d13b817cb35923e26d6a408f0752135d12960df8",
+  "generatedAt": "2026-06-15T21:38:01+08:00",
+  "generatedFromCommit": "d6290c887c2250e50ebbdc86cc0c257cda2d681d",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -144,13 +144,14 @@
         "metadata/persistence-acceptance.json"
       ],
       "currentEvidence": [
-        "organization department CRUD has marker PostgreSQL evidence"
+        "organization department CRUD has marker PostgreSQL evidence",
+        "organization group CRUD has marker PostgreSQL evidence"
       ],
       "blockingIssues": [
-        "用户、人员、岗位、公司、组新增/编辑/删除落库验收仍未补齐。"
+        "用户、人员、岗位、公司新增/编辑/删除落库验收仍未补齐。"
       ],
       "nextActions": [
-        "用真实前端分别执行人员、岗位、公司、组和用户动作，记录 API、后端入口和 PostgreSQL 查询。"
+        "用真实前端分别执行人员、岗位、公司和用户动作，记录 API、后端入口和 PostgreSQL 查询。"
       ]
     },
     {
@@ -163,13 +164,14 @@
         "metadata/persistence-acceptance.json"
       ],
       "currentEvidence": [
-        "department create/update/delete passed with marker ADP_E2E_20260615123939_ORGDEP"
+        "department create/update/delete passed with marker ADP_E2E_20260615123939_ORGDEP",
+        "group create/update/delete passed with marker ADP_E2E_20260615133645_GRP"
       ],
       "blockingIssues": [
         "组织域其它对象和关联关系未完成动作级落库验收。"
       ],
       "nextActions": [
-        "扩展 organization persistence acceptance 到岗位、人员、公司和组关系。"
+        "扩展 organization persistence acceptance 到岗位、人员、公司和用户/权限关系。"
       ]
     },
     {
