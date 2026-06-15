@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-本文件是后端“业务动作是否真实落库”的验收入口。当前已记录组织部门 CRUD、组织组管理 CRUD、组织岗位 CRUD、组织公司 CRUD、组织人员 CRUD、组织人员创建账号 CRUD 的 PostgreSQL 落库验收，并记录 WOM 制造任务创建入口阻断；未列入动作仍未完成验收。
+本文件是后端“业务动作是否真实落库”的验收入口。当前已记录组织部门 CRUD、组织组管理 CRUD、组织岗位 CRUD、组织公司 CRUD、组织人员 CRUD、组织人员创建账号 CRUD、独立用户管理账号新增/编辑/锁定/解锁/删除的 PostgreSQL 落库验收，并记录 WOM 制造任务创建入口阻断；未列入动作仍未完成验收。
 
 落库验收必须来自真实前端操作或等效 E2E 操作，并且必须直接查询 PostgreSQL 证明数据变化。
 
@@ -10,8 +10,8 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 验收动作 | 20 |
-| PASS | 18 |
+| 验收动作 | 25 |
+| PASS | 23 |
 | FAIL | 1 |
 | BLOCKED | 1 |
 | NOT_APPLICABLE | 0 |
@@ -38,6 +38,11 @@
 | 新增人员并创建账号 | 已登录组织页面上下文同源请求 | `POST /inter-api/organization/v1/person` | `PersonInterController.addPerson -> PersonService.addPersonAndUser(createUser=true) -> PersonServiceImpl.addPerson -> org_person/org_person_position/org_person_department/org_person_company -> OrganizationAdapter.createUser -> UserApiServiceImpl.createUser -> UserServiceImpl.creatUser -> auth_user -> PersonMapper.saveOrUpdateUserByPersonId` | `org_person`、`org_person_position`、`org_person_department`、`org_person_company`、`auth_user`、`auth_user_role` | `select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(modify_time::text,'') from public.org_person where code = 'ADP_E2E_20260615144220_PUSR' order by create_time desc nulls last, id desc;`；并查 `auth_user where user_name = 'adp_e2e_20260615144220_person_user'` | 返回 `200`；`org_person` 新增 id `6587945615016464` 且 `valid=1`，绑定 `user_id=6587945615639056`、`user_name=adp_e2e_20260615144220_person_user`；`auth_user` 新增 active 行，`person_id/person_code/person_name/company_id/user_type/description` 匹配，密码字段为 32 位非明文编码值；未传角色时 `auth_user_role` 计数为 `0` | PASS |
 | 编辑带账号人员并同步账号人员名 | 已登录组织页面上下文同源请求 | `PUT /inter-api/organization/v1/person` | `PersonInterController.updatePerson -> PersonService.updatePerson -> PersonServiceImpl.updatePersonWithoutKafka -> org_person -> OrganizationAdapter.updateUserPersonName -> UserApiServiceImpl.changeUserPersonName -> auth_user.person_name` | `org_person`、`auth_user` | 同上，按 code 和 user_name 查询同一人员与用户 | 返回 `200`；同一 `org_person` 姓名变为 `ADP_E2E_20260615144220_PUSR_EDIT`，手机号/邮箱/描述更新；`auth_user.person_name` 同步变为 `ADP_E2E_20260615144220_PUSR_EDIT`，账号绑定保持不变 | PASS |
 | 删除带账号人员并软删账号 | 已登录组织页面上下文同源请求 | `DELETE /inter-api/organization/v1/person/6587945615016464` | `PersonInterController.deletePerson -> PersonService.deletePerson -> org_person.valid=0 and relation valid=0 -> OrganizationAdapter.deleteUser -> UserServiceImpl.deleteUserByPersonIds -> auth_user.valid=0 -> PersonMapper.deleteUserByPersonId clears org_person.user_id/user_name` | `org_person`、`org_person_position`、`org_person_department`、`org_person_company`、`auth_user`、`auth_user_role` | 同上，按 code 和 user_name 查询；并查 `org_person_position/org_person_department/org_person_company where person_id = '6587945615016464'` | 返回 `200`；`org_person` 保留且 `valid=0`，`user_id/user_name` 清空；岗位/部门/公司人员关系均 `valid=0`；同一 `auth_user` 保留且 `valid=0`，证明账号软删除；`auth_user_role` 计数仍为 `0` | PASS |
+| 新增用户账号 | `/auth/#/user` 用户管理页面 | `POST /inter-api/auth/v1/user` | `UserController.createUser -> UserServiceImpl.creatUser -> userMapper.insert -> auth_user -> PersonServiceAdapter.saveOrUpdateUsers -> org_person.user_id/user_name` | `auth_user`、`org_person`、`auth_user_role` | `select id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(user_type::text,''), coalesce(description,''), coalesce(time_zone,''), coalesce(has_lock::text,''), left(coalesce(password,''), 4), length(coalesce(password,''))::text from public.auth_user where user_name = 'adp_e2e_20260615150418_auth_user' order by create_time desc nulls last, id desc;`；并查 `org_person where code='ADP_E2E_20260615150418_AUSR_PER'` 和 `auth_user_role` 计数 | 返回 `200`；`auth_user` id `6587988858225168`，`valid=1`，绑定 `org_person` id `6587988816478736`，`company_id=1000`，`time_zone=CST+08:00`，密码为 32 位非明文编码值；`org_person.user_id/user_name` 同步写入；`auth_user_role` 计数为 `0` | PASS |
+| 编辑用户账号 | `/auth/#/user` 用户管理页面 | `PUT /inter-api/auth/v1/user` | `UserController.updateUser -> UserServiceImpl.updateUser -> userMapper.update -> auth_user.description/time_zone/person fields -> UserRoleService refreshes auth_user_role` | `auth_user`、`auth_user_role` | 同上，按 `user_name='adp_e2e_20260615150418_auth_user'` 查询；并查 `auth_user_role where user_id='6587988858225168'` | 返回 `200`；同一 `auth_user.description` 更新为 `ADP_E2E_20260615150418_AUSR update via auth user page`，`time_zone=JST+09:00`，人员绑定保持不变；`auth_user_role` 计数为 `0` | PASS |
+| 锁定用户账号 | `/auth/#/user` 用户管理页面 | `PUT /inter-api/auth/v1/user/status` | `UserController.lockUser -> UserServiceImpl.updateUser(hasLock=true) -> userMapper.update -> auth_user.has_lock` | `auth_user` | 同上，按 `user_name='adp_e2e_20260615150418_auth_user'` 查询 `has_lock` | 返回 `200`；PostgreSQL 同一 `auth_user.has_lock=1` | PASS |
+| 解锁用户账号 | `/auth/#/user` 用户管理页面 | `PUT /inter-api/auth/v1/user/status` | `UserController.lockUser -> UserServiceImpl.updateUser(hasLock=false) -> userMapper.update -> auth_user.has_lock` | `auth_user` | 同上，按 `user_name='adp_e2e_20260615150418_auth_user'` 查询 `has_lock` | 首次验收返回 `500` 并定位为 `auth_user.error_count` 缺列；新增并应用 `deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql` 后复验返回 `200`，PostgreSQL 同一 `auth_user.has_lock=0` | PASS |
+| 删除用户账号 | `/auth/#/user` 用户管理页面 | `DELETE /inter-api/auth/v1/user` | `UserController.batchDeleteUser -> UserServiceImpl.batchDelet -> userMapper.delete soft delete auth_user -> userRoleService.remove auth_user_role -> PersonServiceAdapter.deleteUsersByPersonIds clears org_person binding` | `auth_user`、`org_person`、`auth_user_role` | 同上，按 user_name/code 查询 `auth_user` 和 `org_person`；并查 `auth_user_role where user_id='6587988858225168'` | 返回 `200`；`auth_user.valid=0`，`org_person.user_id/user_name` 清空，`auth_user_role` 计数为 `0`；后续清理前置人员时 `org_person.valid=0` | PASS |
 | 新建生产工单或制造任务 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 未发现创建接口；仅捕获 `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` 列表查询 | 未进入后端写链路；运行时视图 `buttons` 为空 | 待确认写表，读模型为 `WOM_PRODUCE_TASKS` / `wfm_task_pending` | 未执行。当前页面无新增入口，不能生成 marker 写动作 | 真实浏览器页面 `200`，无错误；可见按钮只有“查询 / 仅查待办 / 清空”；兼容运行时视图按钮为空；无法执行落库验收 | BLOCKED |
 | 生产状态流转、报工、活动执行 | WOM `makeTaskList`、`prepareMakeTaskList`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | 源码定位到 `updateTaskState`、`addOutputByOutPutDetails`、`generatePrepareNeed`、`startActive/endActive`、`endEasyActive`；当前页面按钮缺失，动作页 `layoutJson` 500 已修复为 200，但前端仍 React #130 崩溃 | `WOMProduceTaskController -> WOMProduceTaskServiceImpl` 对应方法已在 WOM 6.1.3.4 源码定位；`/baseService/view/layoutJson` 后端链路已不再抛 500 | `WOM_PRODUCE_TASKS`、`WOM_TASK_PROCESSES`、`WOM_TASK_ACTIVES`、`WOM_PROC_REPORTS`、`WOM_TASK_MATERIALS` | 未执行。动作视图仍无法渲染出按钮或表单，不能从真实前端提交 marker 写动作 | runtime JSON 补丁后 `makeTaskEdit/Submit/View/Batch/EasyOperate` 的 `layoutJson` 返回 200，pageType 为 `EDIT/VIEW`；真实浏览器仍 React #130；`makeTaskGraphList` 404；当前只能记录源链路，不能认定落库成功 | FAIL |
 
@@ -82,6 +87,17 @@
 - 人员创建账号删除 endpoint：`DELETE /inter-api/organization/v1/person/6587945615016464`
 - 人员创建账号最终 PostgreSQL 行：`org_person` 同一 id 保留且 `valid=0`，`user_id/user_name` 清空；`auth_user` id `6587945615639056` 保留且 `valid=0`；删除前 `auth_user.person_id=6587945615016464`、`person_code=ADP_E2E_20260615144220_PUSR`、`person_name=ADP_E2E_20260615144220_PUSR_EDIT`、`company_id=1000`、`user_type=0`
 - 人员创建账号原始脚本报告：`/tmp/adp-organization-person-user-persistence-acceptance.json`
+- 用户管理 Marker：`ADP_E2E_20260615150418_AUSR`
+- 用户管理前置人员 payload：`{"code":"ADP_E2E_20260615150418_AUSR_PER","name":"ADP_E2E_20260615150418_AUSR_PERSON","gender":"sys_gender/male","mainPosition":1,"status":"sys_person_status/onWork","phone":"13515150418","email":"adp_e2e_20260615150418_auth_user@example.test","description":"ADP_E2E_20260615150418_AUSR prerequisite person for auth user page","createUser":false,"roles":[],"roleNames":[]}`
+- 新增用户 payload：`{"userName":"adp_e2e_20260615150418_auth_user","password":"[REDACTED]","personId":6587988816478736,"role":[],"timeZone":"CST+08:00","description":"ADP_E2E_20260615150418_AUSR create via auth user page","userType":0}`
+- 编辑用户 payload：`{"id":6587988858225168,"personId":6587988816478736,"role":[],"timeZone":"JST+09:00","description":"ADP_E2E_20260615150418_AUSR update via auth user page","userType":0}`
+- 锁定用户 payload：`{"id":6587988858225168,"lock":true}`
+- 解锁用户 payload：`{"id":6587988858225168,"lock":false}`
+- 删除用户 payload：`{"ids":[6587988858225168]}`
+- 用户管理 PostgreSQL 新增结果：`auth_user` id `6587988858225168`，`user_name=adp_e2e_20260615150418_auth_user`，`person_id=6587988816478736`，`person_code=ADP_E2E_20260615150418_AUSR_PER`，`person_name=ADP_E2E_20260615150418_AUSR_PERSON`，`company_id=1000`，`valid=1`，`user_type=0`，`time_zone=CST+08:00`，密码长度 `32`；`org_person.user_id/user_name` 已绑定；`auth_user_role` 计数 `0`
+- 用户管理编辑/状态/删除结果：编辑后 `description=ADP_E2E_20260615150418_AUSR update via auth user page` 且 `time_zone=JST+09:00`；锁定后 `has_lock=1`；解锁后 `has_lock=0`；删除后 `auth_user.valid=0`，`org_person.user_id/user_name` 清空，`auth_user_role` 计数 `0`
+- 用户管理修复证据：首次解锁触发 `ERROR: column "error_count" of relation "auth_user" does not exist`，已新增并应用 `deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql`，复跑 `make acceptance-auth-user-persistence` 通过。
+- 用户管理原始脚本报告：`/tmp/adp-auth-user-persistence-acceptance.json`
 - WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
 - WOM 生产动作候选页探测：`/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json`
 - WOM runtime JSON 修复后复验：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`

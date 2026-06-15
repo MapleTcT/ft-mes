@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
+本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、独立用户管理账号新增/编辑/锁定/解锁/删除落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
 
 执行功能验收时，必须按照 [功能验收与落库验收规则](functional-persistence-acceptance.md) 更新本文件，并同步更新 `metadata/persistence-acceptance.json`。
 
@@ -19,8 +19,8 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 被测功能 | 22 |
-| PASS | 20 |
+| 被测功能 | 27 |
+| PASS | 25 |
 | FAIL | 1 |
 | BLOCKED | 1 |
 | NOT_APPLICABLE | 0 |
@@ -51,6 +51,11 @@
 | 组织管理-人员创建账号 | `/organization/#/organizationmanage` | 在已登录组织页面上下文新增人员 `ADP_E2E_20260615144220_PUSR`，`createUser=true` | `POST /inter-api/organization/v1/person` | 真实浏览器打开组织管理页面；navigation status `200`；同源前端会话发起新增请求；无 console error、page error、request failure、visible error；请求中密码已在报告中脱敏 | 返回 `200`；PostgreSQL `org_person` 新增 id `6587945615016464` 并绑定 `user_id=6587945615639056`、`user_name=adp_e2e_20260615144220_person_user`；`auth_user` 新增 active 行，`person_id/person_code/person_name/company_id/user_type/description` 均匹配；密码字段为 32 位非明文编码值；岗位/部门/公司人员关系均 active | `org_person`、`org_person_position`、`org_person_department`、`org_person_company`、`auth_user`、`auth_user_role` | PASS | 无 |
 | 组织管理-人员创建账号 | `/organization/#/organizationmanage` | 在已登录组织页面上下文编辑人员姓名、性别、手机号、邮箱和描述，并验证账号人员名同步 | `PUT /inter-api/organization/v1/person` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 返回 `200`；PostgreSQL 同一人员变为 `ADP_E2E_20260615144220_PUSR_EDIT`；`auth_user.person_name` 同步更新为编辑后的人员姓名，账号绑定保持不变 | `org_person`、`auth_user` | PASS | 无 |
 | 组织管理-人员创建账号 | `/organization/#/organizationmanage` | 在已登录组织页面上下文删除带账号人员 | `DELETE /inter-api/organization/v1/person/6587945615016464` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 返回 `200`；PostgreSQL `org_person.valid=0` 且 `user_id/user_name` 清空；岗位/部门/公司人员关系均 `valid=0`；`auth_user.valid=0`，证明人员删除联动软删账号 | `org_person`、`org_person_position`、`org_person_department`、`org_person_company`、`auth_user`、`auth_user_role` | PASS | 无 |
+| 用户管理 | `/auth/#/user` | 在已登录用户管理页面上下文新增账号 `ADP_E2E_20260615150418_AUSR` | `POST /inter-api/auth/v1/user` | 真实浏览器打开用户管理页面；navigation status `200`；无 console error、page error、request failure、visible error；请求中密码已脱敏 | 返回 `200`，响应包含用户 id `6587988858225168`；PostgreSQL `auth_user` 新增 active 行，绑定前置人员 id `6587988816478736`；`org_person.user_id/user_name` 同步写入；密码为 32 位非明文编码值；未传角色时 `auth_user_role` 计数为 `0` | `auth_user`、`org_person`、`auth_user_role` | PASS | 无 |
+| 用户管理 | `/auth/#/user` | 在已登录用户管理页面上下文编辑账号描述和时区 | `PUT /inter-api/auth/v1/user` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 返回 `200`；PostgreSQL 同一 `auth_user.description` 更新为 update marker，`time_zone` 更新为 `JST+09:00`，人员绑定保持不变 | `auth_user`、`auth_user_role` | PASS | 无 |
+| 用户管理 | `/auth/#/user` | 在已登录用户管理页面上下文锁定账号 | `PUT /inter-api/auth/v1/user/status` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 返回 `200`；PostgreSQL 同一 `auth_user.has_lock=1` | `auth_user` | PASS | 无 |
+| 用户管理 | `/auth/#/user` | 在已登录用户管理页面上下文解锁账号 | `PUT /inter-api/auth/v1/user/status` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 首次真实验收暴露 PostgreSQL 缺列 `auth_user.error_count`，已通过 `deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql` 补齐并应用；复验返回 `200`，PostgreSQL 同一 `auth_user.has_lock=0` | `auth_user` | PASS | 已修复：`auth_user.error_count` 缺列 |
+| 用户管理 | `/auth/#/user` | 在已登录用户管理页面上下文删除账号，并清理前置人员 | `DELETE /inter-api/auth/v1/user` | 同一浏览器页面上下文发起同源请求；无 console error、page error、request failure、visible error | 返回 `200`；PostgreSQL 同一 `auth_user.valid=0`；`org_person.user_id/user_name` 清空；`auth_user_role` 计数为 `0`；随后通过组织人员删除接口清理前置人员，`org_person.valid=0` | `auth_user`、`org_person`、`auth_user_role` | PASS | 无 |
 
 ## 本轮证据
 
@@ -86,10 +91,15 @@
 - 组织人员创建账号页面截图：`/tmp/adp-organization-person-user-persistence-20260615144220/organization-person-user-persistence.png`
 - 人员创建账号 Marker：`ADP_E2E_20260615144220_PUSR`
 - 人员创建账号前端捕获请求：`POST`、`PUT`、`DELETE` 均来自 `http://10.11.100.17:18080/inter-api/organization/v1/person...`
+- 用户管理账号 CRUD/锁定解锁落库验收：`/tmp/adp-auth-user-persistence-acceptance.json`
+- 用户管理页面截图：`/tmp/adp-auth-user-persistence-20260615150418/auth-user-persistence.png`
+- 用户管理 Marker：`ADP_E2E_20260615150418_AUSR`
+- 用户管理前端捕获请求：`POST /inter-api/auth/v1/user`、`PUT /inter-api/auth/v1/user`、`PUT /inter-api/auth/v1/user/status`、`DELETE /inter-api/auth/v1/user`
+- 用户管理修复证据：首次解锁验收暴露 `auth_user.error_count` 缺列，已新增并应用 `deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql` 后复验通过。
 
 ## 未完成范围
 
-- 人员勾选创建账号已完成真实前端和 PostgreSQL 落库验收；独立用户管理页面的账号创建/编辑/删除、用户授权和权限配置页面的新增/编辑/删除落库验收仍需补。
+- 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除已完成真实前端和 PostgreSQL 落库验收；用户授权和权限配置页面的新增/编辑/删除落库验收仍需补。
 - 基础配置、Nacos、Keycloak、runtime patch 仍需继续形成专项验收记录。
 - 生产模块当前只有 API/layout 与页面可达性 smoke；`layoutJson` 500 已向前推进为动作页 React #130 渲染阻断，但完整动作级测试用例和写操作落库验收仍未建立，不能视为已完成。
 

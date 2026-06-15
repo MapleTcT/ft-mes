@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 72,
+  "migrationCount": 73,
   "firstNumber": 1,
-  "lastNumber": 72,
+  "lastNumber": 73,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "watchStatementCount": 44,
   "statementTotals": {
-    "alter-table": 9179,
+    "alter-table": 9180,
     "create-function": 38,
     "create-index": 667,
     "create-table": 482,
     "create-view": 92,
     "insert": 3662,
-    "update": 3649
+    "update": 3651
   },
   "tagTotals": {
-    "auth-rbac-org": 26,
+    "auth-rbac-org": 27,
     "business": 9,
-    "compatibility": 41,
+    "compatibility": 42,
     "configuration": 18,
     "general": 3,
     "notification": 9,
@@ -1976,6 +1976,30 @@
         "create-index": 2,
         "alter-table": 1,
         "insert": 1,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
+      "name": "073-auth-user-lock-status-compat.sql",
+      "number": 73,
+      "slug": "auth-user-lock-status-compat",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 10,
+      "sha256": "3014805ddb021a318a75925fa8eb51b153b68fc02973878e9da0f6cdccc3c40d",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
         "update": 2
       },
       "highRiskStatements": [],

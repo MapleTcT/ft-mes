@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T22:43:36+08:00",
-  "generatedFromCommit": "d31145b41932d20c1939b0f60abbfc4470a69c84",
+  "generatedAt": "2026-06-15T23:11:40+08:00",
+  "generatedFromCommit": "d8289fae0127333ba8ad6d484d8e8b25db71b1e6",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -68,7 +68,8 @@
       ],
       "currentEvidence": [
         "oracle replacement check is part of make ci",
-        "mapper PostgreSQL audit currently reports 0 errors and 3 warnings"
+        "mapper PostgreSQL audit currently reports 0 errors and 3 warnings",
+        "auth_user lock/unlock PostgreSQL gap is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql and make acceptance-auth-user-persistence"
       ],
       "blockingIssues": [
         "Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies."
@@ -149,13 +150,14 @@
         "organization position CRUD has marker PostgreSQL evidence",
         "organization company CRUD has marker PostgreSQL evidence",
         "organization person CRUD has marker PostgreSQL evidence",
-        "organization person createUser=true has marker PostgreSQL evidence for org_person/auth_user binding, update synchronization, and soft delete"
+        "organization person createUser=true has marker PostgreSQL evidence for org_person/auth_user binding, update synchronization, and soft delete",
+        "independent auth user create/update/lock/unlock/delete has marker PostgreSQL evidence for auth_user, org_person binding, and auth_user_role cleanup"
       ],
       "blockingIssues": [
-        "独立用户管理页面的账号创建/编辑/删除和用户授权落库验收仍未补齐。"
+        "用户授权和权限配置页面的新增/编辑/删除落库验收仍未补齐。"
       ],
       "nextActions": [
-        "用真实前端分别执行独立用户管理页面账号 CRUD、用户授权和权限配置动作，记录 API、后端入口和 PostgreSQL 查询。"
+        "用真实前端执行用户授权和权限配置页面动作，记录 API、后端入口和 PostgreSQL 查询。"
       ]
     },
     {
@@ -331,7 +333,8 @@
         "deploy/database/production-migration/README.md"
       ],
       "currentEvidence": [
-        "make ci checks PostgreSQL migration inventory and mapper audit"
+        "make ci checks PostgreSQL migration inventory and mapper audit",
+        "73 PostgreSQL init SQL scripts are indexed, including 073-auth-user-lock-status-compat.sql for auth_user.error_count compatibility"
       ],
       "blockingIssues": [
         "生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。"

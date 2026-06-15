@@ -235,7 +235,7 @@
     },
     {
       "file": "Makefile",
-      "line": 37,
+      "line": 38,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -243,7 +243,7 @@
     },
     {
       "file": "Makefile",
-      "line": 60,
+      "line": 61,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -251,7 +251,7 @@
     },
     {
       "file": "Makefile",
-      "line": 61,
+      "line": 62,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -259,7 +259,7 @@
     },
     {
       "file": "Makefile",
-      "line": 64,
+      "line": 65,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -267,7 +267,7 @@
     },
     {
       "file": "Makefile",
-      "line": 65,
+      "line": 66,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 91,
+      "line": 93,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -283,7 +283,7 @@
     },
     {
       "file": "Makefile",
-      "line": 166,
+      "line": 169,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -291,7 +291,7 @@
     },
     {
       "file": "Makefile",
-      "line": 167,
+      "line": 170,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -299,7 +299,7 @@
     },
     {
       "file": "Makefile",
-      "line": 169,
+      "line": 172,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -307,7 +307,7 @@
     },
     {
       "file": "Makefile",
-      "line": 170,
+      "line": 173,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -315,7 +315,7 @@
     },
     {
       "file": "Makefile",
-      "line": 178,
+      "line": 181,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -323,7 +323,7 @@
     },
     {
       "file": "Makefile",
-      "line": 179,
+      "line": 182,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -331,7 +331,7 @@
     },
     {
       "file": "Makefile",
-      "line": 181,
+      "line": 184,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -339,7 +339,7 @@
     },
     {
       "file": "Makefile",
-      "line": 182,
+      "line": 185,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -5151,7 +5151,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-003 | Oracle 替换为 PostgreSQL 默认路径 | PARTIAL | Docker/POM 默认 PostgreSQL；Oracle 只允许 legacy/profile/backlog | Oracle backlog 仍有引用，需要逐模块迁移 |"
+      "excerpt": "| G-003 | Oracle 替换为 PostgreSQL 默认路径 | PARTIAL | Docker/POM 默认 PostgreSQL；Oracle 只允许 legacy/profile/backlog；用户锁定/解锁暴露的 `auth_user.error_count` 缺列已用 `073-auth-user-lock-status-compat.sql` 纳入 PostgreSQL init | Oracle backl"
     },
     {
       "file": "docs/project-goal-acceptance.md",

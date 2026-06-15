@@ -39,11 +39,11 @@ make project-goal-acceptance-check
 | --- | --- | --- | --- | --- |
 | G-001 | 可持续开发仓库基础 | READY | `make ci` 通过；父 POM、Makefile、CI、库存和门禁已建立 | 继续随模块提升补测试 |
 | G-002 | 当前内容迁移 | PARTIAL | `docs/current-content-inventory.md` 和源码恢复目录 | 业务模块动作级源码/表关系仍需继续排查 |
-| G-003 | Oracle 替换为 PostgreSQL 默认路径 | PARTIAL | Docker/POM 默认 PostgreSQL；Oracle 只允许 legacy/profile/backlog | Oracle backlog 仍有引用，需要逐模块迁移 |
+| G-003 | Oracle 替换为 PostgreSQL 默认路径 | PARTIAL | Docker/POM 默认 PostgreSQL；Oracle 只允许 legacy/profile/backlog；用户锁定/解锁暴露的 `auth_user.error_count` 缺列已用 `073-auth-user-lock-status-compat.sql` 纳入 PostgreSQL init | Oracle backlog 仍有引用，需要逐模块迁移 |
 | G-004 | 项目目标与交接说明 | READY | `docs/project-objectives.md`、`docs/sustainable-development.md` | 随真实验收继续更新 |
 | G-005 | 后端落表排查交接入口 | READY | `docs/backend-table-audit-handoff.md`、`docs/backend-table-audit/00-index.md` | 表级业务含义仍需专门线程执行 |
 | G-006 | 平台登录/认证 | READY | `metadata/persistence-acceptance.json` 平台 smoke PASS | 保持回归 smoke |
-| G-007 | 用户/人员/岗位/公司/组管理 | PARTIAL | 组织部门 CRUD 已落库；组管理 CRUD 已落库；岗位 CRUD 已落库；公司 CRUD 已落库；人员 CRUD 已落库；人员勾选创建账号已落库；组织只读 smoke 通过 | 独立用户管理页面的账号创建/编辑/删除和用户授权落库未补齐 |
+| G-007 | 用户/人员/岗位/公司/组管理 | PARTIAL | 组织部门 CRUD 已落库；组管理 CRUD 已落库；岗位 CRUD 已落库；公司 CRUD 已落库；人员 CRUD 已落库；人员勾选创建账号已落库；独立用户管理账号新增/编辑/锁定/解锁/删除已落库；组织只读 smoke 通过 | 用户授权和权限配置页面的新增/编辑/删除落库未补齐 |
 | G-008 | 组织管理 | PARTIAL | 部门、组、岗位、公司、人员新增/编辑/删除已用 marker 查 PostgreSQL；人员 `createUser=true` 已证明 `org_person` 和 `auth_user` 绑定、同步和软删除 | 权限关联关系仍需动作级验收 |
 | G-009 | 权限/RBAC | PARTIAL | RBAC authority smoke PASS | 权限配置页面和按钮授权 CRUD 落库仍需补 |
 | G-010 | 菜单导航 | READY | 菜单抽样真实浏览器 smoke PASS | 继续扩大菜单覆盖 |
@@ -52,7 +52,7 @@ make project-goal-acceptance-check
 | G-013 | 生产模块完整功能 | BLOCKED | 生产页面 smoke 和动作源码地图已建立 | WOM 动作页 React #130；生产写动作无 marker 落库证据 |
 | G-014 | Nacos 配置链路 | PARTIAL | render/publish 脚本和测试环境配置路径存在 | 生产差异清单、漂移检查和回退演练未补 |
 | G-015 | Keycloak/JWT 链路 | PARTIAL | realm 初始化、JWT public key 同步脚本和登录 smoke | 生产 realm/用户/client/secret 迁移演练未补 |
-| G-016 | PostgreSQL 运行与迁移治理 | PARTIAL | 72 个 init SQL、PostgreSQL migration index、mapper audit 0 error | 生产数据迁移和每个业务动作落库仍未完成 |
+| G-016 | PostgreSQL 运行与迁移治理 | PARTIAL | 73 个 init SQL、PostgreSQL migration index、mapper audit 0 error；`073-auth-user-lock-status-compat.sql` 已覆盖 `auth_user.error_count` 兼容缺口 | 生产数据迁移和每个业务动作落库仍未完成 |
 | G-017 | runtime patch | PARTIAL | runtime patch 脚本和业务 view JSON SQL 已建立 | WOM 动作页面仍阻断，生产 patch 版本/回退演练未补 |
 | G-018 | 业务模块完整测试用例 | PARTIAL | 生产模块测试矩阵和 53 个业务页面 smoke | 动作级测试和业务签字未完成 |
 | G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 已纳入 CI | 不能证明所有未来发现项已闭环，需要持续记录 |
@@ -61,7 +61,7 @@ make project-goal-acceptance-check
 ## 当前最高优先级缺口
 
 1. 恢复 WOM 真实 edit/view component metadata，解决生产动作页 React #130。
-2. 补独立用户管理页面账号 CRUD、用户授权和权限配置页面的真实前端 CRUD 与 PostgreSQL 落库验收。
+2. 补用户授权和权限配置页面的真实前端 CRUD 与 PostgreSQL 落库验收。
 3. 补基础配置页面的写动作落库验收。
 4. 对生产主流程执行 marker 写动作，并查询 `WOM_*` 相关表证明状态、报工、备料、退料等字段变化。
 5. 把生产迁移模板升级为 rehearsal 证据，但在业务 smoke 签字前保持 `NOT_READY_FOR_PRODUCTION_MIGRATION`。

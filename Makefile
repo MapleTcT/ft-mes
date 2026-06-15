@@ -29,12 +29,13 @@ ORGANIZATION_POSITION_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-position-persi
 ORGANIZATION_COMPANY_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-company-persistence-acceptance.json
 ORGANIZATION_PERSON_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-person-persistence-acceptance.json
 ORGANIZATION_PERSON_USER_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-person-user-persistence-acceptance.json
+AUTH_USER_PERSISTENCE_OUTPUT ?= /tmp/adp-auth-user-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
 PRODUCTION_DISCOVERY_OUTPUT ?= /tmp/adp-production-action-discovery
 PRODUCTION_DISCOVERY_TARGETS ?=
 PRODUCTION_DISCOVERY_CLICK_CREATE ?= true
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence acceptance-organization-group-persistence acceptance-organization-position-persistence acceptance-organization-company-persistence acceptance-organization-person-persistence acceptance-organization-person-user-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence acceptance-organization-group-persistence acceptance-organization-position-persistence acceptance-organization-company-persistence acceptance-organization-person-persistence acceptance-organization-person-user-persistence acceptance-auth-user-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -81,6 +82,7 @@ help:
 	@printf '%s\n' '  make acceptance-organization-company-persistence Run organization company CRUD persistence acceptance'
 	@printf '%s\n' '  make acceptance-organization-person-persistence Run organization person CRUD persistence acceptance'
 	@printf '%s\n' '  make acceptance-organization-person-user-persistence Run organization person create-account persistence acceptance'
+	@printf '%s\n' '  make acceptance-auth-user-persistence Run auth user CRUD/status persistence acceptance'
 	@printf '%s\n' '  make smoke-rbac-authority    Run role/user authority editor API smoke'
 	@printf '%s\n' '  make smoke-business          Run API/layout smoke for restored business module routes'
 	@printf '%s\n' '  make smoke-business-page     Run browser page smoke for restored business module routes'
@@ -110,6 +112,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-organization-company-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-organization-person-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-organization-person-user-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-auth-user-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-module-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-page-smoke.js
@@ -237,6 +240,9 @@ acceptance-organization-person-persistence:
 
 acceptance-organization-person-user-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_ORGANIZATION_PERSON_USER_PERSISTENCE_OUTPUT=$(ORGANIZATION_PERSON_USER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-organization-person-user-persistence-acceptance.js
+
+acceptance-auth-user-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_AUTH_USER_PERSISTENCE_OUTPUT=$(AUTH_USER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-auth-user-persistence-acceptance.js
 
 smoke-rbac-authority:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) $(NODE) deploy/docker/scripts/adp-rbac-authority-smoke.js
