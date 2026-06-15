@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T22:24:27+08:00",
-  "repoCommit": "690aec42c04df855ff59c365b35bcc732a560400",
+  "generatedAt": "2026-06-15T22:43:36+08:00",
+  "repoCommit": "d31145b41932d20c1939b0f60abbfc4470a69c84",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 19,
-    "pass": 17,
+    "testedFeatures": 22,
+    "pass": 20,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -161,6 +161,68 @@
       "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(sys_flag::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(direct_leader_id::text,''), coalesce(grand_leader_id::text,''), coalesce(entry_date,''), coalesce(title,''), coalesce(qualification,''), coalesce(education,''), coalesce(major,''), coalesce(id_number,''), coalesce(avatar_url,''), coalesce(sign_pic_url,'') from public.org_person where code = 'ADP_E2E_20260615142411_PER' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Browser-context same-origin DELETE returned 200 for id 6587910008717840. PostgreSQL retained org_person with valid=0, proving soft delete. org_person_position, org_person_department, and org_person_company relation rows for the person also changed to valid=0; org_person_mnecode lookup returned no rows; org_person user_id/user_name were empty. Report: /tmp/adp-organization-person-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员创建账号",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增人员并创建账号",
+      "api": "/inter-api/organization/v1/person",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.addPerson -> PersonService.addPersonAndUser(createUser=true) -> PersonServiceImpl.addPerson -> org_person/org_person_position/org_person_department/org_person_company -> OrganizationAdapter.createUser -> UserApiServiceImpl.createUser -> UserServiceImpl.creatUser -> auth_user -> PersonMapper.saveOrUpdateUserByPersonId",
+      "tables": [
+        "org_person",
+        "org_person_position",
+        "org_person_department",
+        "org_person_company",
+        "auth_user",
+        "auth_user_role"
+      ],
+      "marker": "ADP_E2E_20260615144220_PUSR",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(modify_time::text,'') from public.org_person where code = 'ADP_E2E_20260615144220_PUSR' order by create_time desc nulls last, id desc;\nselect id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(user_type::text,''), coalesce(description,''), left(coalesce(password,''), 4), length(coalesce(password,''))::text from public.auth_user where user_name = 'adp_e2e_20260615144220_person_user' order by create_time desc nulls last, id desc;\nselect count(*)::text from public.auth_user_role where user_id = '6587945615639056';",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. POST returned 200 for marker ADP_E2E_20260615144220_PUSR; no visible error, console error, page error, or person request failure. PostgreSQL org_person id 6587945615016464 existed with valid=1 and user_id=6587945615639056, user_name=adp_e2e_20260615144220_person_user; auth_user id 6587945615639056 existed with valid=1, person_id=6587945615016464, person_code=ADP_E2E_20260615144220_PUSR, person_name=ADP_E2E_20260615144220_PUSR, company_id=1000, user_type=0, description marker, and encoded non-plaintext 32-character password storage; auth_user_role count was 0 because no roles were supplied. Report: /tmp/adp-organization-person-user-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员创建账号",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑带账号人员并同步账号人员名",
+      "api": "/inter-api/organization/v1/person",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.updatePerson -> PersonService.updatePerson -> PersonServiceImpl.updatePersonWithoutKafka -> org_person -> OrganizationAdapter.updateUserPersonName -> UserApiServiceImpl.changeUserPersonName -> auth_user.person_name",
+      "tables": [
+        "org_person",
+        "auth_user"
+      ],
+      "marker": "ADP_E2E_20260615144220_PUSR",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(modify_time::text,'') from public.org_person where code = 'ADP_E2E_20260615144220_PUSR' order by create_time desc nulls last, id desc;\nselect id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(user_type::text,''), coalesce(description,''), left(coalesce(password,''), 4), length(coalesce(password,''))::text from public.auth_user where user_name = 'adp_e2e_20260615144220_person_user' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin PUT returned 200 for person id 6587945615016464. PostgreSQL org_person changed to name=ADP_E2E_20260615144220_PUSR_EDIT, gender=sys_gender/female, phone=13615144220, email=adp_e2e_20260615144220_person_user_edit@example.test, description update marker, while valid remained 1 and user binding remained 6587945615639056/adp_e2e_20260615144220_person_user. auth_user.person_name synchronized to ADP_E2E_20260615144220_PUSR_EDIT. Report: /tmp/adp-organization-person-user-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-人员创建账号",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除带账号人员并软删账号",
+      "api": "/inter-api/organization/v1/person/6587945615016464",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "PersonInterController.deletePerson -> PersonService.deletePerson -> org_person.valid=0 and relation valid=0 -> OrganizationAdapter.deleteUser -> UserServiceImpl.deleteUserByPersonIds -> auth_user.valid=0 -> PersonMapper.deleteUserByPersonId clears org_person.user_id/user_name",
+      "tables": [
+        "org_person",
+        "org_person_position",
+        "org_person_department",
+        "org_person_company",
+        "auth_user",
+        "auth_user_role"
+      ],
+      "marker": "ADP_E2E_20260615144220_PUSR",
+      "verificationSql": "select id, code, name, coalesce(gender,''), coalesce(status,''), coalesce(main_position::text,''), coalesce(phone,''), coalesce(email,''), coalesce(description,''), coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(modify_time::text,'') from public.org_person where code = 'ADP_E2E_20260615144220_PUSR' order by create_time desc nulls last, id desc;\nselect id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(user_type::text,''), coalesce(description,''), left(coalesce(password,''), 4), length(coalesce(password,''))::text from public.auth_user where user_name = 'adp_e2e_20260615144220_person_user' order by create_time desc nulls last, id desc;\nselect count(*)::text from public.auth_user_role where user_id = '6587945615639056';",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin DELETE returned 200 for person id 6587945615016464. PostgreSQL retained org_person with valid=0 and cleared user_id/user_name; org_person_position, org_person_department, and org_person_company relation rows for the person changed to valid=0. auth_user id 6587945615639056 was retained with valid=0, proving account soft delete; auth_user_role count remained 0. Report: /tmp/adp-organization-person-user-persistence-acceptance.json",
       "issues": []
     },
     {

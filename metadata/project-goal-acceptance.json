@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T22:24:27+08:00",
-  "generatedFromCommit": "690aec42c04df855ff59c365b35bcc732a560400",
+  "generatedAt": "2026-06-15T22:43:36+08:00",
+  "generatedFromCommit": "d31145b41932d20c1939b0f60abbfc4470a69c84",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -148,13 +148,14 @@
         "organization group CRUD has marker PostgreSQL evidence",
         "organization position CRUD has marker PostgreSQL evidence",
         "organization company CRUD has marker PostgreSQL evidence",
-        "organization person CRUD has marker PostgreSQL evidence"
+        "organization person CRUD has marker PostgreSQL evidence",
+        "organization person createUser=true has marker PostgreSQL evidence for org_person/auth_user binding, update synchronization, and soft delete"
       ],
       "blockingIssues": [
-        "用户账号创建、人员勾选创建账号和用户授权落库验收仍未补齐。"
+        "独立用户管理页面的账号创建/编辑/删除和用户授权落库验收仍未补齐。"
       ],
       "nextActions": [
-        "用真实前端分别执行用户账号创建、人员勾选创建账号和权限授权动作，记录 API、后端入口和 PostgreSQL 查询。"
+        "用真实前端分别执行独立用户管理页面账号 CRUD、用户授权和权限配置动作，记录 API、后端入口和 PostgreSQL 查询。"
       ]
     },
     {
@@ -171,13 +172,14 @@
         "group create/update/delete passed with marker ADP_E2E_20260615133645_GRP",
         "position create/update/delete passed with marker ADP_E2E_20260615134928_POS",
         "company create/update/delete passed with marker ADP_E2E_20260615141009_COM",
-        "person create/update/delete passed with marker ADP_E2E_20260615142411_PER"
+        "person create/update/delete passed with marker ADP_E2E_20260615142411_PER",
+        "person create/update/delete with createUser=true passed with marker ADP_E2E_20260615144220_PUSR and verified org_person plus auth_user"
       ],
       "blockingIssues": [
-        "组织域用户账号创建和权限关联关系未完成动作级落库验收。"
+        "组织域权限关联关系仍需动作级落库验收。"
       ],
       "nextActions": [
-        "扩展 organization persistence acceptance 到人员 createUser=true 和用户/权限关系。"
+        "扩展 RBAC/权限 persistence acceptance 到用户授权和权限关系。"
       ]
     },
     {
