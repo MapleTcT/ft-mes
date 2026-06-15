@@ -7,6 +7,7 @@
 ```text
 nacos-config/             # 从 bap-server/config/configgroup 复制并脱敏
 docker/                   # Linux Docker Compose 测试部署
+database/                 # 数据库迁移和兼容策略说明
 nginx/                    # 从 nginx/conf 复制的 Nginx 配置
 windows-start-reference/  # Windows 启停脚本，仅用于分析启动顺序和参数
 ```
@@ -35,3 +36,5 @@ Windows 运行包通过 `nssm` 注册服务；Linux 迁移时建议改为：
 - 前端/Nginx：`18080`
 - 网关调试端口：`18008`
 - Nacos 调试端口：`18848`
+
+数据库迁移策略见 [database/README.md](database/README.md) 和 [Oracle 到 PostgreSQL 替换路线](../docs/oracle-to-postgres-transition.md)。当前默认测试编排是 PostgreSQL-first，Oracle 只作为显式 legacy 配置保留。

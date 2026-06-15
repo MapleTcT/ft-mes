@@ -6,6 +6,8 @@
 
 本仓库把其中可维护的源码和配置参考抽离出来，形成前后端分离的源码仓库。
 
+当前仓库已经增加可持续开发入口：根 `pom.xml` 作为 Maven 父级，`backend/source-modules/` 用于承接后续可编译后端模块，`Makefile` 收敛验证、部署和 smoke 命令。
+
 ## 前端边界
 
 前端位于 `frontend/apps/`，按静态资源目录中的应用拆分。源码来自 source map，因此当前更适合作为阅读、重构和二次工程化的起点，而不是直接构建产物。
@@ -33,6 +35,7 @@
 - `backend/modules/`：业务源码模块，来自 Maven `sources.jar`。
 - `backend/decompiled-services/`：运行服务 JAR 中的启动类和少量壳代码反编译结果。
 - `backend/services/`：运行服务清单和服务级配置参考。
+- `backend/source-modules/`：后续新开发或已提升模块的可编译源码区。
 
 运行服务以 Spring Boot 微服务为主，核心基础设施依赖包括：
 
@@ -44,7 +47,7 @@
 - WebSocket `30135`
 - Keycloak
 - MinIO
-- 系统数据库，原配置默认偏 Oracle，也有部分模块提供 MariaDB 默认值
+- 系统数据库，原运行包配置偏 Oracle；当前 Linux 测试编排已经转为 PostgreSQL-first，Oracle 作为 legacy profile 保留。
 
 ## 代码来源优先级
 
@@ -55,7 +58,13 @@
 
 ## 还原缺口
 
-- 缺少原厂聚合工程的父级 Maven `pom.xml` 和模块构建顺序。
+- 原厂聚合工程和模块构建顺序仍缺失；本仓库父级 `pom.xml` 是后续可持续开发入口，不等同于原厂完整 reactor。
 - 缺少前端原始构建工程的完整 npm/yarn lock、webpack 配置和私有依赖声明。
 - 反编译代码不保证和原始源码完全一致，注释、局部变量名和部分语法结构可能已变化。
-- Linux 部署还需要确认数据库类型、授权许可、Keycloak realm、MinIO 数据目录和生产端口策略。
+- Linux 生产化部署还需要确认授权许可、Keycloak realm、MinIO 数据目录、生产端口策略和模块级数据库迁移脚本。
+
+可持续开发和数据库迁移见：
+
+- [可持续开发仓库说明](sustainable-development.md)
+- [后端模块依赖地图](backend-module-dependency-map.md)
+- [Oracle 到 PostgreSQL 替换路线](oracle-to-postgres-transition.md)

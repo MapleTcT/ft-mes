@@ -54,6 +54,16 @@ docker compose --env-file .env restart nginx
 docker compose --env-file .env ps
 ```
 
+从仓库根目录也可以使用统一入口：
+
+```bash
+make compose-config
+make render-config
+make up-infra
+make up
+make ps
+```
+
 Open:
 
 ```text
@@ -104,6 +114,12 @@ ADP_API_SMOKE_OUTPUT=/tmp/adp-platform-api-smoke.json
 The Docker test profile sets `SUPPLANT_LICENSE_ENABLED=true`. In this recovered gateway, that prevents the software-dongle `LicenseFilter` and license refresh task from registering, so `/msService/ec/**` and `/msService/servicemanager/**` do not depend on Redis or hardware license data. `test-license-seed` is kept only as a manual fallback if you deliberately re-enable the legacy license filter with `SUPPLANT_LICENSE_ENABLED=false`.
 
 `scripts/patch-operatetools-standalone-app-list.py` keeps the Manage App page usable when the optional `installer` service is not present in the base-platform Docker profile. The original method already falls back to the local `supos_app` table; the patch prevents the missing optional service from emitting repeated ERROR stack traces during page smoke tests.
+
+## Database Profile
+
+The Docker profile is PostgreSQL-first. `.env.example` and the built-in Compose defaults both point to `postgres:5432`.
+
+If a legacy module must temporarily connect to Oracle, copy the relevant values from `.env.oracle-legacy.example` into `.env` and document the reason in the migration notes for that module. Oracle should be explicit, not the silent default.
 
 ## PostgreSQL Note
 

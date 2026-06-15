@@ -20,11 +20,14 @@ backend/decompiled-services/   # 从可运行服务 JAR 反编译补齐的启动
 backend/services/              # 23 个可运行服务的清单和服务级配置参考
 deploy/nacos-config/           # 脱敏后的 Nacos 配置参考
 deploy/docker/                 # Linux Docker Compose 测试部署编排
+deploy/database/               # 数据库迁移和 Oracle/PostgreSQL 兼容策略
 deploy/nginx/                  # Nginx 配置参考
 deploy/windows-start-reference/# Windows 启停脚本参考
 metadata/                      # 恢复统计和服务清单 JSON
 scripts/                       # 可重复运行的源码恢复脚本
 docs/                          # 仓库概述和迁移说明
+pom.xml                        # 可持续开发父级 Maven POM
+Makefile                       # 开发、部署、smoke 验证入口
 ```
 
 ## 当前恢复结果
@@ -36,11 +39,33 @@ docs/                          # 仓库概述和迁移说明
 
 ## 重要说明
 
-这个仓库是“源码整理仓库”，不是已经可直接 `mvn package` 或 `npm build` 的原厂工程。前端源码来自 source map，后端主体来自真实 `sources.jar`，服务启动壳来自 CFR 反编译。后续如果要变成可持续开发仓库，需要再补父级 `pom.xml`、模块依赖聚合、前端 package lock 和 Linux 启动编排。
+这个仓库已经具备可持续开发的基础入口：根 `pom.xml` 提供 Maven 父级和依赖管理，`backend/source-modules/` 用于承接后续提升为可编译的新模块，`Makefile` 收敛 Maven、Docker Compose 和 smoke 验证命令。
+
+仍需注意：前端源码来自 source map，后端主体来自真实 `sources.jar`，服务启动壳来自 CFR 反编译；恢复目录本身仍不是原厂完整工程。后续应按模块逐步把高频维护代码提升到 `backend/source-modules/`，而不是直接把 `backend/modules/**/META-INF/maven/**/pom.xml` 全量纳入构建。
+
+## 快速验证
+
+```bash
+make verify
+make verify-pom
+make compose-config
+```
+
+启动测试环境仍以 `deploy/docker/README.md` 为准：
+
+```bash
+cd deploy/docker
+cp .env.example .env
+python3 scripts/render-nacos-configs.py
+docker compose --env-file .env up -d
+```
 
 详细说明见：
 
 - [仓库概述](docs/repository-overview.md)
+- [可持续开发仓库说明](docs/sustainable-development.md)
+- [后端模块依赖地图](docs/backend-module-dependency-map.md)
+- [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)
 - [后端说明](backend/README.md)
 - [前端说明](frontend/README.md)
 - [Docker 测试部署](deploy/docker/README.md)
