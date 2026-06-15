@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T21:50:08+08:00",
-  "repoCommit": "be558e2a09b0aca2ad26569b6f77ac3b287e1733",
+  "generatedAt": "2026-06-15T22:10:09+08:00",
+  "repoCommit": "38b65f197f0ab82c141ee18e2aa2a3bf08e63746",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 13,
-    "pass": 11,
+    "testedFeatures": 16,
+    "pass": 14,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -39,6 +39,68 @@
       "verificationSql": "",
       "status": "PASS",
       "evidence": "2026-06-15 business module API/layout smoke passed 53/53 and the latest Playwright browser page smoke on http://10.11.100.17:18080 passed 53/53 with no visible error, network error, console error, page error, or request failure. Production-related entries included WOM make task, WOM retirement PDA, RM batch formula, craftGraph, WTS work permit, and workAppointment work plan. Reports: /tmp/adp-business-module-smoke-20260615184508.json and /tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json. This proves route/API/page reachability only; action-level persistence remains untested.",
+      "issues": []
+    },
+    {
+      "module": "组织管理-公司管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增公司",
+      "api": "/inter-api/organization/v1/company",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "CompanyInterController.addCompany -> CompanyService.addCompany -> CompanyServiceImpl.addCompany -> org_company/org_company_mnecode plus virtual org and auth_user side effects",
+      "tables": [
+        "org_company",
+        "org_company_mnecode",
+        "org_department",
+        "org_position",
+        "org_person",
+        "auth_user"
+      ],
+      "marker": "ADP_E2E_20260615141009_COM",
+      "verificationSql": "select id, code, short_name, full_name, coalesce(description,''), coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,'') from public.org_company where code = 'ADP_E2E_20260615141009_COM' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. No visible error, console error, page error, or organization company request failure. Report: /tmp/adp-organization-company-persistence-acceptance.json POST returned 200 with company id 6587882338992656. PostgreSQL org_company row existed with valid=1, shortName=ADP_E2E_20260615141009_COM, fullName=ADP_E2E_20260615141009_COM_FULL; org_company_mnecode generated rows; virtual department/position/person and auth_user were persisted.",
+      "issues": []
+    },
+    {
+      "module": "组织管理-公司管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑公司",
+      "api": "/inter-api/organization/v1/company",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "CompanyInterController.updateCompany -> CompanyService.saveOrUpdateCom -> CompanyServiceImpl.saveOrUpdateCom -> org_company update and org_company_mnecode refresh",
+      "tables": [
+        "org_company",
+        "org_company_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615141009_COM",
+      "verificationSql": "select id, code, short_name, full_name, coalesce(description,''), coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,'') from public.org_company where code = 'ADP_E2E_20260615141009_COM' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. No visible error, console error, page error, or organization company request failure. Report: /tmp/adp-organization-company-persistence-acceptance.json PUT returned 200 for company id 6587882338992656. PostgreSQL row changed to shortName=ADP_E2E_20260615141009_COM_EDIT, fullName=ADP_E2E_20260615141009_COM_FULL_EDIT, description update marker, and full_path=/默认公司/ADP_E2E_20260615141009_COM_EDIT; org_company_mnecode refreshed to the edited short name.",
+      "issues": []
+    },
+    {
+      "module": "组织管理-公司管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除公司",
+      "api": "/inter-api/organization/v1/company/6587882338992656",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "CompanyInterController.delCompany -> CompanyService.delCompany -> CompanyServiceImpl.delCompany -> org_company.valid=0, company mnecode cleanup, virtual department/position/person soft delete, auth_user.valid=0",
+      "tables": [
+        "org_company",
+        "org_company_mnecode",
+        "org_department",
+        "org_position",
+        "org_person",
+        "auth_user"
+      ],
+      "marker": "ADP_E2E_20260615141009_COM",
+      "verificationSql": "select id, code, short_name, full_name, coalesce(description,''), coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,'') from public.org_company where code = 'ADP_E2E_20260615141009_COM' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context. No visible error, console error, page error, or organization company request failure. Report: /tmp/adp-organization-company-persistence-acceptance.json DELETE returned 200 for company id 6587882338992656. PostgreSQL retained org_company with valid=0; org_company_mnecode was empty; virtual department/position/person and auth_user had no active rows, auth_user delete mode was soft-delete.",
       "issues": []
     },
     {

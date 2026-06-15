@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-本文件是后端“业务动作是否真实落库”的验收入口。当前已记录组织部门 CRUD、组织组管理 CRUD、组织岗位 CRUD 的 PostgreSQL 落库验收，并记录 WOM 制造任务创建入口阻断；未列入动作仍未完成验收。
+本文件是后端“业务动作是否真实落库”的验收入口。当前已记录组织部门 CRUD、组织组管理 CRUD、组织岗位 CRUD、组织公司 CRUD 的 PostgreSQL 落库验收，并记录 WOM 制造任务创建入口阻断；未列入动作仍未完成验收。
 
 落库验收必须来自真实前端操作或等效 E2E 操作，并且必须直接查询 PostgreSQL 证明数据变化。
 
@@ -10,8 +10,8 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 验收动作 | 11 |
-| PASS | 9 |
+| 验收动作 | 14 |
+| PASS | 12 |
 | FAIL | 1 |
 | BLOCKED | 1 |
 | NOT_APPLICABLE | 0 |
@@ -29,6 +29,9 @@
 | 新增岗位 | 已登录组织页面上下文同源请求 | `POST /inter-api/organization/v1/position` | `PositionInterController.addPosition -> PositionService.addPosition -> PositionServiceImpl.addPositionWithoutKafka -> MyBatis Plus save; OrgMnecodeServiceImpl.addOrgMnecode` | `org_position`、`org_position_mnecode` | `select id, code, name, coalesce(description,''), company_id, dep_id, coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(leaf::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,''), coalesce(sys_flag::text,'') from public.org_position where code = 'ADP_E2E_20260615134928_POS' order by create_time desc nulls last, id desc;` | 返回 `200`；id `6587841746223632`；新增后 `valid=1`、`dep_id=1`、`full_path=/默认公司/ADP_E2E_20260615134928_POS`；`org_position_mnecode` 生成 3 行 | PASS |
 | 编辑岗位 | 已登录组织页面上下文同源请求 | `PUT /inter-api/organization/v1/position` | `PositionInterController.updatePosition -> PositionService.updatePosition -> PositionServiceImpl.updatePositionWithoutKafka -> MyBatis Plus updateById; OrgMnecodeServiceImpl refresh` | `org_position`、`org_position_mnecode` | 同上，按 code 查询同一 id；并查 `org_position_mnecode where position_id = '6587841746223632'` | 返回 `200`；同一 id 名称变为 `ADP_E2E_20260615134928_POS_EDIT`，描述和 `full_path` 变为 update marker；`org_position_mnecode` 已刷新为编辑后名称 | PASS |
 | 删除岗位 | 已登录组织页面上下文同源请求 | `DELETE /inter-api/organization/v1/position/6587841746223632` | `PositionInterController.deletePos -> PositionService.deletePosById -> PositionServiceImpl.deletePosById -> MyBatis Plus updateBatchById; OrgMnecodeServiceImpl.deleteOrgMnecodeByOrgId` | `org_position`、`org_position_mnecode` | 同上，按 code 查询同一 id；并查 `org_position_mnecode where position_id = '6587841746223632'` | 返回 `200`；同一 id 保留且 `valid=0`，证明为软删除；`org_position_mnecode` 查询为空 | PASS |
+| 新增公司 | 已登录组织页面上下文同源请求 | `POST /inter-api/organization/v1/company` | `CompanyInterController.addCompany -> CompanyService.addCompany -> CompanyServiceImpl.addCompany -> MyBatis Plus save; addVirtualDept/addVirtualPos/addVirtualPerson; OrgMnecodeServiceImpl.addOrgMnecode; OrganizationAdapter.createUser -> UserServiceImpl.creatUser` | `org_company`、`org_company_mnecode`、`org_department`、`org_position`、`org_person`、`auth_user` | `select id, code, short_name, full_name, coalesce(description,''), coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,'') from public.org_company where code = 'ADP_E2E_20260615141009_COM' order by create_time desc nulls last, id desc;` | 返回 `200`；id `6587882338992656`；新增后 `org_company.valid=1`，`short_name=ADP_E2E_20260615141009_COM`；`org_company_mnecode` 生成；虚拟部门/岗位/人员和 `auth_user` 均有 active 行 | PASS |
+| 编辑公司 | 已登录组织页面上下文同源请求 | `PUT /inter-api/organization/v1/company` | `CompanyInterController.updateCompany -> CompanyService.saveOrUpdateCom -> CompanyServiceImpl.saveOrUpdateCom -> MyBatis Plus updateBatchById/saveOrUpdate; OrgMnecodeServiceImpl refresh` | `org_company`、`org_company_mnecode` | 同上，按 code 查询同一 id；并查 `org_company_mnecode where company_id = '6587882338992656'` | 返回 `200`；同一 id 的 `short_name` 变为 `ADP_E2E_20260615141009_COM_EDIT`，`full_name` 变为 `ADP_E2E_20260615141009_COM_FULL_EDIT`，`description` 和 `full_path` 变为 update marker；`org_company_mnecode` 已刷新 | PASS |
+| 删除公司 | 已登录组织页面上下文同源请求 | `DELETE /inter-api/organization/v1/company/6587882338992656` | `CompanyInterController.delCompany -> CompanyService.delCompany -> CompanyServiceImpl.delCompany -> MyBatis Plus updateById; OrgMnecodeServiceImpl.deleteOrgMnecodeByOrgId; OrganizationAdapter.deleteCompanyUser -> UserServiceImpl.deleteUserByCompanyId` | `org_company`、`org_company_mnecode`、`org_department`、`org_position`、`org_person`、`auth_user` | 同上，按 code 查询同一 id；并查 `org_company_mnecode`、公司下 `org_department/org_position`、管理员 `org_person/auth_user` | 返回 `200`；同一公司保留且 `valid=0`，证明为软删除；`org_company_mnecode` 查询为空；虚拟部门、虚拟岗位、虚拟人员、管理员 `auth_user` 均无 active 行，`auth_user` 删除模式为软删除 | PASS |
 | 新建生产工单或制造任务 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 未发现创建接口；仅捕获 `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` 列表查询 | 未进入后端写链路；运行时视图 `buttons` 为空 | 待确认写表，读模型为 `WOM_PRODUCE_TASKS` / `wfm_task_pending` | 未执行。当前页面无新增入口，不能生成 marker 写动作 | 真实浏览器页面 `200`，无错误；可见按钮只有“查询 / 仅查待办 / 清空”；兼容运行时视图按钮为空；无法执行落库验收 | BLOCKED |
 | 生产状态流转、报工、活动执行 | WOM `makeTaskList`、`prepareMakeTaskList`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | 源码定位到 `updateTaskState`、`addOutputByOutPutDetails`、`generatePrepareNeed`、`startActive/endActive`、`endEasyActive`；当前页面按钮缺失，动作页 `layoutJson` 500 已修复为 200，但前端仍 React #130 崩溃 | `WOMProduceTaskController -> WOMProduceTaskServiceImpl` 对应方法已在 WOM 6.1.3.4 源码定位；`/baseService/view/layoutJson` 后端链路已不再抛 500 | `WOM_PRODUCE_TASKS`、`WOM_TASK_PROCESSES`、`WOM_TASK_ACTIVES`、`WOM_PROC_REPORTS`、`WOM_TASK_MATERIALS` | 未执行。动作视图仍无法渲染出按钮或表单，不能从真实前端提交 marker 写动作 | runtime JSON 补丁后 `makeTaskEdit/Submit/View/Batch/EasyOperate` 的 `layoutJson` 返回 200，pageType 为 `EDIT/VIEW`；真实浏览器仍 React #130；`makeTaskGraphList` 404；当前只能记录源链路，不能认定落库成功 | FAIL |
 
@@ -53,6 +56,13 @@
 - 岗位最终 PostgreSQL 行：`6587841746223632|ADP_E2E_20260615134928_POS|ADP_E2E_20260615134928_POS_EDIT|ADP_E2E_20260615134928_POS update via organization browser context|1000|1||0|1|/默认公司/ADP_E2E_20260615134928_POS_EDIT|6587841746223632|1|2000|Position_6587841746223632|0`
 - 岗位助记码最终查询：`org_position_mnecode where position_id = 6587841746223632` 返回空，证明删除时关联助记码已清理
 - 岗位原始脚本报告：`/tmp/adp-organization-position-persistence-acceptance.json`
+- 公司 Marker：`ADP_E2E_20260615141009_COM`
+- 新增公司 payload：`{"code":"ADP_E2E_20260615141009_COM","shortName":"ADP_E2E_20260615141009_COM","fullName":"ADP_E2E_20260615141009_COM_FULL","parentId":1000,"description":"ADP_E2E_20260615141009_COM create via organization browser context","tags":[],"userName":"adp_e2e_20260615141009_com_admin","password":"[REDACTED]"}`
+- 编辑公司 payload：`{"id":6587882338992656,"shortName":"ADP_E2E_20260615141009_COM_EDIT","fullName":"ADP_E2E_20260615141009_COM_FULL_EDIT","description":"ADP_E2E_20260615141009_COM update via organization browser context","tags":[]}`
+- 删除公司 endpoint：`DELETE /inter-api/organization/v1/company/6587882338992656`
+- 公司最终 PostgreSQL 行：`6587882338992656|ADP_E2E_20260615141009_COM|ADP_E2E_20260615141009_COM_EDIT|ADP_E2E_20260615141009_COM_FULL_EDIT|ADP_E2E_20260615141009_COM update via organization browser context|1000|0|/默认公司/ADP_E2E_20260615141009_COM_EDIT|1000-6587882338992656|1|1000|Company_6587882338992656`
+- 公司副作用最终查询：公司下虚拟部门、虚拟岗位、虚拟人员和管理员 `auth_user` 均无 active 行；`auth_user` 保留 `valid=0`
+- 公司原始脚本报告：`/tmp/adp-organization-company-persistence-acceptance.json`
 - WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
 - WOM 生产动作候选页探测：`/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json`
 - WOM runtime JSON 修复后复验：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`

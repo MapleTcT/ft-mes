@@ -146,13 +146,14 @@
       "currentEvidence": [
         "organization department CRUD has marker PostgreSQL evidence",
         "organization group CRUD has marker PostgreSQL evidence",
-        "organization position CRUD has marker PostgreSQL evidence"
+        "organization position CRUD has marker PostgreSQL evidence",
+        "organization company CRUD has marker PostgreSQL evidence"
       ],
       "blockingIssues": [
-        "用户、人员、公司新增/编辑/删除落库验收仍未补齐。"
+        "用户、人员新增/编辑/删除落库验收仍未补齐。"
       ],
       "nextActions": [
-        "用真实前端分别执行人员、公司和用户动作，记录 API、后端入口和 PostgreSQL 查询。"
+        "用真实前端分别执行人员和用户动作，记录 API、后端入口和 PostgreSQL 查询。"
       ]
     },
     {
@@ -167,13 +168,14 @@
       "currentEvidence": [
         "department create/update/delete passed with marker ADP_E2E_20260615123939_ORGDEP",
         "group create/update/delete passed with marker ADP_E2E_20260615133645_GRP",
-        "position create/update/delete passed with marker ADP_E2E_20260615134928_POS"
+        "position create/update/delete passed with marker ADP_E2E_20260615134928_POS",
+        "company create/update/delete passed with marker ADP_E2E_20260615141009_COM"
       ],
       "blockingIssues": [
-        "组织域其它对象和关联关系未完成动作级落库验收。"
+        "组织域人员、用户和权限关联关系未完成动作级落库验收。"
       ],
       "nextActions": [
-        "扩展 organization persistence acceptance 到人员、公司和用户/权限关系。"
+        "扩展 organization persistence acceptance 到人员和用户/权限关系。"
       ]
     },
     {
