@@ -6,7 +6,7 @@
 
 ## 摘要
 
-- 总引用数：`637`。
+- 总引用数：`643`。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 82 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 88 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
@@ -36,7 +36,7 @@
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mysql/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
-| docs/oracle-to-postgres-transition.md | 18 |
+| docs/oracle-to-postgres-transition.md | 19 |
 | backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql | 17 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mariadb/systemconfig_1.sql | 12 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |
@@ -51,13 +51,13 @@
 | Makefile | 8 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml | 8 |
 | backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java | 8 |
+| docs/backend-module-promotion-guide.md | 8 |
 | .github/ISSUE_TEMPLATE/oracle-postgres-migration.yml | 7 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/META-INF/oracle/i18n_1.sql | 7 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeMessageRecordServiceImpl.java | 7 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTemplateServiceImpl.java | 7 |
 | backend/modules/com/supcon/supfusion/organization-dao/1.0.0.RELEASE/META-INF/oracle/org_1.sql | 7 |
 | backend/modules/com/supcon/supfusion/organization-service/1.0.0.RELEASE/com/supcon/supfusion/organization/service/impl/PersonServiceImpl.java | 7 |
-| docs/backend-module-promotion-guide.md | 7 |
 | docs/backend-table-audit-handoff.md | 7 |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 6 |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 6 |

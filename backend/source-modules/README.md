@@ -23,6 +23,7 @@ make create-backend-module MODULE=platform-auth PACKAGE=com.mapletct.ftmes.platf
 
 ```bash
 make source-module-check
+make backend-dependency-check
 make ci
 ```
 
@@ -38,6 +39,7 @@ make ci
 
 1. 从 `backend/modules/<group>/<artifact>/<version>` 复制可信源码到新模块。
 2. 保留原恢复目录不动，方便对比和回溯。
-3. 先提升 `common/api/dao/service/webapi` 中最小可构建闭环。
-4. DAO/Mapper 层优先 PostgreSQL，Oracle SQL 只能保留在 legacy 说明或迁移 backlog。
-5. 每个已提升模块补最小测试或 smoke 证据。
+3. 复制前先查看 [后端恢复模块依赖库存](../../docs/backend-module-dependency-inventory.md)，确认原模块依赖、重复坐标和 Oracle/JDBC 风险。
+4. 先提升 `common/api/dao/service/webapi` 中最小可构建闭环。
+5. DAO/Mapper 层优先 PostgreSQL，Oracle SQL 只能保留在 legacy 说明或迁移 backlog。
+6. 每个已提升模块补最小测试或 smoke 证据。

@@ -10,6 +10,8 @@
 
 因此当前仓库不是单体 Maven 项目，而是“基础平台服务 + 可选业务运行包 + 恢复源码目录”的混合形态。
 
+恢复区 POM 的机器清单见 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)。该清单由 `make backend-dependency-inventory` 生成，会统计模块层级、内部依赖、外部依赖、重复坐标以及 Oracle/JDBC 风险；提交前用 `make backend-dependency-check` 保证清单没有过期。
+
 ## 推荐分层
 
 ```text
@@ -75,6 +77,7 @@ business services
 ## 依赖管理原则
 
 - 新模块继承根 `pom.xml`，不要复制恢复 POM 中的父级和私服配置。
+- 提升前先看 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，确认 family/layer、内部依赖、重复坐标和 Oracle/JDBC 风险。
 - 使用 `make create-backend-module MODULE=<name>` 创建标准模块结构，并用 `make source-module-check` 校验。
 - 统一使用父 POM 管理 Spring、数据库驱动和 Maven 插件版本。
 - Oracle 驱动只允许在 legacy profile 或明确标注的兼容模块中出现。
@@ -87,6 +90,7 @@ business services
 
 1. 先把原包放到 `runtime/bap-server/module-Server/<module>` 的测试部署目录，不提交二进制。
 2. 将可读源码或反编译源码整理到 `backend/modules` 或 `backend/decompiled-services`。
-3. 在 `deploy/docker/docker-compose.yml` 增加服务条目，先让前端菜单可见。
-4. 对数据库脚本做 PostgreSQL 兼容转换，落到 `deploy/docker/postgres/init/NNN-*.sql`。
-5. 通过 smoke 后，再把高频维护代码提升到 `backend/source-modules/<module>`。
+3. 运行 `make backend-dependency-inventory`，确认新增源码包的依赖和 Oracle/JDBC 风险已经入账。
+4. 在 `deploy/docker/docker-compose.yml` 增加服务条目，先让前端菜单可见。
+5. 对数据库脚本做 PostgreSQL 兼容转换，落到 `deploy/docker/postgres/init/NNN-*.sql`。
+6. 通过 smoke 后，再把高频维护代码提升到 `backend/source-modules/<module>`。

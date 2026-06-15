@@ -55,6 +55,7 @@
 - `scripts/create-backend-source-module.py` 创建标准后端源码模块。
 - `scripts/verify-source-modules.py` 校验已提升后端源码模块。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
+- `scripts/generate-backend-dependency-inventory.py` 生成恢复后端模块依赖库存。
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
 - `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引。
 
@@ -99,6 +100,7 @@
 - `make sustainable-check` 通过。
 - `make source-module-check` 通过。
 - `make inventory-check` 通过。
+- `make backend-dependency-check` 通过。
 - `make oracle-audit-check` 通过。
 - `make postgres-migration-check` 通过。
 - GitHub Actions `Verify` 通过。

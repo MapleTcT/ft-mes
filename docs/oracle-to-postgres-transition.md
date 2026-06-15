@@ -55,6 +55,15 @@ make oracle-audit-check
 
 报告见 [Oracle 迁移 Backlog](oracle-migration-backlog.md)，机器可读结果在 `metadata/oracle-migration-audit.json`。
 
+恢复 POM 的依赖风险用下面命令维护：
+
+```bash
+make backend-dependency-inventory
+make backend-dependency-check
+```
+
+报告见 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，其中会列出直接 Oracle/JDBC 依赖、重复模块坐标和内部依赖关系。
+
 PostgreSQL 初始化和兼容 SQL 也要维护脚本索引：
 
 ```bash
@@ -106,6 +115,7 @@ make postgres-migration-check
 
 - `make verify-pom`
 - `make compose-config`
+- `make backend-dependency-check`
 - `make audit-postgres-mappings`
 - `make postgres-migration-check`
 - `make smoke-api`

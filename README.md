@@ -54,6 +54,7 @@ make compose-config
 make sustainable-check
 make source-module-check
 make inventory-check
+make backend-dependency-check
 make oracle-audit-check
 make postgres-migration-check
 ```
@@ -77,6 +78,7 @@ docker compose --env-file .env up -d
 - [后端模块提升指南](docs/backend-module-promotion-guide.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)
 - [后端模块依赖地图](docs/backend-module-dependency-map.md)
+- [后端恢复模块依赖库存](docs/backend-module-dependency-inventory.md)
 - [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)
 - [后端落表业务排查交接](docs/backend-table-audit-handoff.md)
 - [后端说明](backend/README.md)

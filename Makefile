@@ -20,7 +20,7 @@ PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -33,6 +33,8 @@ help:
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
 	@printf '%s\n' '  make inventory               Regenerate current content inventory'
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
+	@printf '%s\n' '  make backend-dependency-inventory Regenerate recovered backend dependency inventory'
+	@printf '%s\n' '  make backend-dependency-check Check recovered backend dependency inventory is fresh'
 	@printf '%s\n' '  make oracle-audit            Regenerate Oracle migration backlog'
 	@printf '%s\n' '  make oracle-audit-check      Check Oracle migration backlog is fresh'
 	@printf '%s\n' '  make postgres-migration-index Regenerate PostgreSQL migration index'
@@ -50,7 +52,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check source-module-check inventory-check oracle-audit-check postgres-migration-check audit-postgres-mappings
+ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -75,6 +77,12 @@ inventory:
 
 inventory-check:
 	$(PYTHON) scripts/generate-current-content-inventory.py --check
+
+backend-dependency-inventory:
+	$(PYTHON) scripts/generate-backend-dependency-inventory.py
+
+backend-dependency-check:
+	$(PYTHON) scripts/generate-backend-dependency-inventory.py --check
 
 oracle-audit:
 	$(PYTHON) scripts/generate-oracle-migration-audit.py
