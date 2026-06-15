@@ -6,7 +6,7 @@
 
 ## 摘要
 
-- 总引用数：`820`。
+- 总引用数：`823`。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -16,7 +16,7 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 159 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 162 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
@@ -41,11 +41,11 @@
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
 | scripts/precheck-module-intake.py | 20 |
 | docs/oracle-replacement-status.md | 18 |
+| docs/project-objectives.md | 18 |
 | backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql | 17 |
-| docs/project-objectives.md | 17 |
 | scripts/verify-source-modules.py | 17 |
+| docs/sustainable-development.md | 15 |
 | Makefile | 14 |
-| docs/sustainable-development.md | 14 |
 | scripts/verify-sustainable-repo.py | 14 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mariadb/systemconfig_1.sql | 12 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |

@@ -17,6 +17,8 @@
 
 功能验收和后端落库验收必须遵循 [功能验收与落库验收规则](functional-persistence-acceptance.md)。后续不能只补治理层、只跑静态检查或只看代码推断功能可用；涉及写业务数据的前端动作必须用唯一 marker 通过 PostgreSQL 查询证明真实落库。
 
+总目标完成状态见 [项目总目标验收总账](project-goal-acceptance.md)。该总账把可持续开发仓库、Oracle 替换、平台验证、生产模块完整验证、PostgreSQL 缺口治理和生产迁移前置项统一到机器可读账本 `metadata/project-goal-acceptance.json`，并由 `make project-goal-acceptance-check` 校验。总账为 `IN_PROGRESS_NOT_COMPLETE` 时，不能宣称当前目标已全部完成。
+
 ## 当前项目定位
 
 当前仓库主体是 ADP/BAP 平台运行包，不是完整 MES 业务产品包。
@@ -130,6 +132,7 @@
 - `make verify` 通过。
 - `make ci` 通过。
 - `make sustainable-check` 通过。
+- `make project-goal-acceptance-check` 通过。
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
 - `make runtime-script-check` 通过。

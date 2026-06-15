@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T21:35:00+08:00",
+  "generatedFromCommit": "d13b817cb35923e26d6a408f0752135d12960df8",
+  "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
+  "databaseDefault": "PostgreSQL",
+  "summary": {
+    "totalItems": 20,
+    "ready": 6,
+    "partial": 12,
+    "blocked": 2,
+    "fail": 0,
+    "notStarted": 0
+  },
+  "items": [
+    {
+      "id": "G-001",
+      "title": "可持续开发仓库基础",
+      "status": "READY",
+      "scope": "父 POM、Makefile、CI、Docker Compose、库存、源码模块和门禁。",
+      "artifacts": [
+        "pom.xml",
+        "Makefile",
+        ".github/workflows/verify.yml",
+        "docs/sustainable-development.md",
+        "scripts/verify-sustainable-repo.py"
+      ],
+      "currentEvidence": [
+        "make ci passed on 2026-06-15 after commit d13b817"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "每提升一个后端源码模块继续补测试和模块级门禁。"
+      ]
+    },
+    {
+      "id": "G-002",
+      "title": "当前内容迁移",
+      "status": "PARTIAL",
+      "scope": "把 Windows 交付包中可恢复的前端、后端、部署、SQL 和文档资产迁入新仓库。",
+      "artifacts": [
+        "docs/current-content-inventory.md",
+        "metadata/current-content-inventory.json",
+        "frontend/README.md",
+        "backend/README.md"
+      ],
+      "currentEvidence": [
+        "current content inventory is tracked and checked by make inventory-check"
+      ],
+      "blockingIssues": [
+        "业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。"
+      ],
+      "nextActions": [
+        "后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。"
+      ]
+    },
+    {
+      "id": "G-003",
+      "title": "Oracle 替换为 PostgreSQL 默认路径",
+      "status": "PARTIAL",
+      "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
+      "artifacts": [
+        "docs/oracle-replacement-status.md",
+        "metadata/oracle-replacement-status.json",
+        "docs/oracle-migration-backlog.md",
+        "metadata/oracle-migration-audit.json",
+        "deploy/docker/.env.oracle-legacy.example"
+      ],
+      "currentEvidence": [
+        "oracle replacement check is part of make ci",
+        "mapper PostgreSQL audit currently reports 0 errors and 3 warnings"
+      ],
+      "blockingIssues": [
+        "Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies."
+      ],
+      "nextActions": [
+        "逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。"
+      ]
+    },
+    {
+      "id": "G-004",
+      "title": "项目目标与交接说明",
+      "status": "READY",
+      "scope": "项目目标、可持续开发说明、验收规则和接手入口。",
+      "artifacts": [
+        "docs/project-objectives.md",
+        "docs/sustainable-development.md",
+        "docs/functional-persistence-acceptance.md",
+        "README.md",
+        "AGENTS.md"
+      ],
+      "currentEvidence": [
+        "required docs are checked by scripts/verify-sustainable-repo.py"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "随着真实验收继续更新目标状态。"
+      ]
+    },
+    {
+      "id": "G-005",
+      "title": "后端落表排查交接入口",
+      "status": "READY",
+      "scope": "为后续专门线程准备表级业务含义排查入口。",
+      "artifacts": [
+        "docs/backend-table-audit-handoff.md",
+        "docs/backend-table-audit/00-index.md",
+        "docs/backend-table-audit/persistence-acceptance.md"
+      ],
+      "currentEvidence": [
+        "backend table audit index and persistence acceptance report exist"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "专门线程继续补页面/API/Service/Mapper/表/字段业务含义地图。"
+      ]
+    },
+    {
+      "id": "G-006",
+      "title": "平台登录/认证",
+      "status": "READY",
+      "scope": "登录、current user、基础平台 API smoke。",
+      "artifacts": [
+        "metadata/persistence-acceptance.json",
+        "docs/frontend-functional-test-report.md",
+        "deploy/docker/scripts/adp-platform-validation-smoke.js"
+      ],
+      "currentEvidence": [
+        "platform smoke passed 6/6 with login/API/todo/menu/RBAC evidence in metadata/persistence-acceptance.json"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "继续保留 smoke-platform 回归。"
+      ]
+    },
+    {
+      "id": "G-007",
+      "title": "用户/人员/岗位/公司/组管理",
+      "status": "PARTIAL",
+      "scope": "用户、人员、岗位、公司、组管理页面和 CRUD 落库验收。",
+      "artifacts": [
+        "docs/frontend-functional-test-report.md",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "organization department CRUD has marker PostgreSQL evidence"
+      ],
+      "blockingIssues": [
+        "用户、人员、岗位、公司、组新增/编辑/删除落库验收仍未补齐。"
+      ],
+      "nextActions": [
+        "用真实前端分别执行人员、岗位、公司、组和用户动作，记录 API、后端入口和 PostgreSQL 查询。"
+      ]
+    },
+    {
+      "id": "G-008",
+      "title": "组织管理",
+      "status": "PARTIAL",
+      "scope": "组织管理页面、部门 CRUD、组织关联人员/岗位/公司等。",
+      "artifacts": [
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "department create/update/delete passed with marker ADP_E2E_20260615123939_ORGDEP"
+      ],
+      "blockingIssues": [
+        "组织域其它对象和关联关系未完成动作级落库验收。"
+      ],
+      "nextActions": [
+        "扩展 organization persistence acceptance 到岗位、人员、公司和组关系。"
+      ]
+    },
+    {
+      "id": "G-009",
+      "title": "权限/RBAC",
+      "status": "PARTIAL",
+      "scope": "角色、用户授权、菜单按钮权限、权限配置页面。",
+      "artifacts": [
+        "deploy/docker/scripts/adp-rbac-authority-smoke.js",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "RBAC authority smoke passed 9/9 in platform validation evidence"
+      ],
+      "blockingIssues": [
+        "权限配置页面 CRUD 和按钮授权变更未完成 marker 落库验收。"
+      ],
+      "nextActions": [
+        "修复并验收权限配置页面，记录 rbac 相关表 before/after。"
+      ]
+    },
+    {
+      "id": "G-010",
+      "title": "菜单导航",
+      "status": "READY",
+      "scope": "登录后菜单加载和抽样页面导航。",
+      "artifacts": [
+        "deploy/docker/scripts/adp-menu-smoke.js",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "menu sample 12/12 passed in platform validation evidence"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "随着模块接入扩大菜单抽样范围。"
+      ]
+    },
+    {
+      "id": "G-011",
+      "title": "待办",
+      "status": "READY",
+      "scope": "首页待办和 top-nav 待办页面。",
+      "artifacts": [
+        "deploy/docker/scripts/adp-home-todo-smoke.js",
+        "deploy/docker/postgres/init/041-workflow-pending-source-fixups.sql",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "home todo smoke has no visible/network/console/page errors in platform validation evidence"
+      ],
+      "blockingIssues": [],
+      "nextActions": [
+        "继续把待办查询字段缺口纳入 PostgreSQL init SQL。"
+      ]
+    },
+    {
+      "id": "G-012",
+      "title": "基础配置",
+      "status": "PARTIAL",
+      "scope": "基础配置、实体配置、系统配置和配置类页面 CRUD。",
+      "artifacts": [
+        "docs/frontend-functional-test-report.md",
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json"
+      ],
+      "currentEvidence": [
+        "configuration-related PostgreSQL init scripts and business page smoke exist"
+      ],
+      "blockingIssues": [
+        "基础配置页面写动作没有形成完整前端操作和 PostgreSQL 落库证据。"
+      ],
+      "nextActions": [
+        "挑选配置类页面执行新增/编辑/删除 marker 验收，并补后端表映射。"
+      ]
+    },
+    {
+      "id": "G-013",
+      "title": "生产模块完整功能",
+      "status": "BLOCKED",
+      "scope": "生产模块主流程、状态流转、备料、投料、报工、退料、质量和追溯。",
+      "artifacts": [
+        "docs/production-module-functional-test-cases.md",
+        "metadata/production-module-test-cases.json",
+        "metadata/production-module-source-action-map.json",
+        "metadata/persistence-acceptance.json"
+      ],
+      "currentEvidence": [
+        "production page smoke and source action map exist",
+        "metadata/persistence-acceptance.json records production action pages blocked by React #130"
+      ],
+      "blockingIssues": [
+        "WOM 动作页 React #130，真实前端无法提交 marker 写动作。",
+        "生产创建、状态流转、报工、备料、退料等写动作没有 PostgreSQL before/after 证据。"
+      ],
+      "nextActions": [
+        "恢复 WOM edit/view component metadata 和按钮权限后重新做生产主流程落库验收。"
+      ]
+    },
+    {
+      "id": "G-014",
+      "title": "Nacos 配置链路",
+      "status": "PARTIAL",
+      "scope": "Nacos 配置渲染、发布、生产差异、漂移检查和回退。",
+      "artifacts": [
+        "deploy/docker/scripts/render-nacos-configs.py",
+        "deploy/docker/scripts/publish-nacos-configs.sh",
+        "docs/production-migration/nacos-runtime-patch-runbook.md"
+      ],
+      "currentEvidence": [
+        "test deployment has render and publish scripts"
+      ],
+      "blockingIssues": [
+        "生产配置差异清单、漂移检查和回退演练未完成。"
+      ],
+      "nextActions": [
+        "导出生产 Nacos 配置，和 rendered 配置做差异账本。"
+      ]
+    },
+    {
+      "id": "G-015",
+      "title": "Keycloak/JWT 链路",
+      "status": "PARTIAL",
+      "scope": "Keycloak realm、用户、client、JWT public key 同步和登录链路。",
+      "artifacts": [
+        "deploy/docker/scripts/init-keycloak-realm.sh",
+        "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
+        "docs/production-migration/keycloak-production-runbook.md"
+      ],
+      "currentEvidence": [
+        "login smoke passed and Keycloak helper scripts exist"
+      ],
+      "blockingIssues": [
+        "生产 realm、用户、client secret 和 JWT key 迁移演练未完成。"
+      ],
+      "nextActions": [
+        "做 realm export/import rehearsal，并验证 Nacos JWT public key 同步后登录/currentuser。"
+      ]
+    },
+    {
+      "id": "G-016",
+      "title": "PostgreSQL 运行与迁移治理",
+      "status": "PARTIAL",
+      "scope": "PostgreSQL 默认运行、init SQL、mapper 方言审计和生产数据迁移。",
+      "artifacts": [
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json",
+        "deploy/docker/postgres/init/001-adp-postgres-compat.sql",
+        "deploy/database/production-migration/README.md"
+      ],
+      "currentEvidence": [
+        "make ci checks PostgreSQL migration inventory and mapper audit"
+      ],
+      "blockingIssues": [
+        "生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。"
+      ],
+      "nextActions": [
+        "用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。"
+      ]
+    },
+    {
+      "id": "G-017",
+      "title": "runtime patch",
+      "status": "PARTIAL",
+      "scope": "运行包兼容 patch、页面 runtime metadata、回退和生产化。",
+      "artifacts": [
+        "deploy/docker/scripts/prepare-runtime-patches.sh",
+        "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+        "docs/production-migration/nacos-runtime-patch-runbook.md"
+      ],
+      "currentEvidence": [
+        "runtime patch scripts parse and business view runtime JSON SQL exists"
+      ],
+      "blockingIssues": [
+        "WOM action views still fail in frontend render; production patch version/checksum/rollback rehearsal not complete."
+      ],
+      "nextActions": [
+        "修复 WOM renderer metadata 后更新 runtime patch inventory 和 page smoke。"
+      ]
+    },
+    {
+      "id": "G-018",
+      "title": "业务模块完整测试用例",
+      "status": "PARTIAL",
+      "scope": "业务模块页面、动作级测试用例、真实前端 smoke 和落库验收。",
+      "artifacts": [
+        "docs/production-module-functional-test-cases.md",
+        "metadata/production-module-test-cases.json",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "currentEvidence": [
+        "53 business pages have API/layout and browser smoke evidence",
+        "production module test matrix has 23 cases"
+      ],
+      "blockingIssues": [
+        "动作级测试和业务签字未完成。"
+      ],
+      "nextActions": [
+        "按测试矩阵逐条执行 create/update/status/import/export/upload 等动作。"
+      ]
+    },
+    {
+      "id": "G-019",
+      "title": "PostgreSQL 缺口进入幂等 SQL/backlog",
+      "status": "PARTIAL",
+      "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
+      "artifacts": [
+        "docs/oracle-migration-backlog.md",
+        "docs/postgres-migration-index.md",
+        "metadata/oracle-migration-audit.json",
+        "metadata/postgres-migration-inventory.json"
+      ],
+      "currentEvidence": [
+        "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci"
+      ],
+      "blockingIssues": [
+        "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
+      ],
+      "nextActions": [
+        "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
+      ]
+    },
+    {
+      "id": "G-020",
+      "title": "生产迁移前置项",
+      "status": "BLOCKED",
+      "scope": "数据迁移脚本、回滚、license、MinIO、Keycloak、端口/TLS、安全加固和业务 smoke 签字。",
+      "artifacts": [
+        "docs/production-migration-readiness.md",
+        "metadata/production-migration-readiness.json",
+        "docs/production-migration/README.md",
+        "deploy/database/production-migration/README.md"
+      ],
+      "currentEvidence": [
+        "production migration templates and readiness gate exist"
+      ],
+      "blockingIssues": [
+        "production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION.",
+        "business smoke signoff is blocked by production action persistence gaps."
+      ],
+      "nextActions": [
+        "完成生产迁移 rehearsal、回滚演练和业务 smoke 签字前不得改为 READY。"
+      ]
+    }
+  ]
+}

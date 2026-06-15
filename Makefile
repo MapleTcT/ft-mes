@@ -29,7 +29,7 @@ PRODUCTION_DISCOVERY_OUTPUT ?= /tmp/adp-production-action-discovery
 PRODUCTION_DISCOVERY_TARGETS ?=
 PRODUCTION_DISCOVERY_CLICK_CREATE ?= true
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -39,6 +39,7 @@ help:
 	@printf '%s\n' '  make compose-config          Validate Docker Compose rendering'
 	@printf '%s\n' '  make runtime-script-check    Validate smoke and runtime patch scripts parse'
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
+	@printf '%s\n' '  make project-goal-acceptance-check Validate objective-level acceptance ledger'
 	@printf '%s\n' '  make persistence-acceptance-check Validate functional/persistence acceptance assets'
 	@printf '%s\n' '  make production-testcase-check Validate production module action test matrix'
 	@printf '%s\n' '  make production-action-map-check Validate production source action map'
@@ -77,7 +78,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify runtime-script-check sustainable-check project-goal-acceptance-check persistence-acceptance-check production-testcase-check production-action-map-check production-migration-readiness-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -104,6 +105,9 @@ runtime-script-check:
 
 sustainable-check:
 	$(PYTHON) scripts/verify-sustainable-repo.py
+
+project-goal-acceptance-check:
+	$(PYTHON) scripts/verify-project-goal-acceptance.py
 
 persistence-acceptance-check:
 	$(PYTHON) scripts/verify-persistence-acceptance.py

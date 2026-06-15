@@ -56,6 +56,7 @@ make ci
 make verify-pom
 make compose-config
 make sustainable-check
+make project-goal-acceptance-check
 make persistence-acceptance-check
 make source-module-check
 make source-module-test
@@ -79,6 +80,7 @@ docker compose --env-file .env up -d
 
 - [仓库概述](docs/repository-overview.md)
 - [项目目标和交付路线](docs/project-objectives.md)
+- [项目总目标验收总账](docs/project-goal-acceptance.md)
 - [功能验收与落库验收规则](docs/functional-persistence-acceptance.md)
 - [前端功能测试报告](docs/frontend-functional-test-report.md)
 - [当前内容迁移清单](docs/current-content-inventory.md)

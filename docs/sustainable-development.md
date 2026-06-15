@@ -8,6 +8,8 @@
 
 项目级工作指令见根目录 [`AGENTS.md`](../AGENTS.md)。继续开发、模块接入、测试环境修复和交付验收时，必须先按该指令确认真实前端功能、后端写动作和 PostgreSQL 落库证据；`make ci` 和静态扫描只是仓库门禁，不替代功能验收。
 
+总目标完成状态见 [`project-goal-acceptance.md`](project-goal-acceptance.md)。它把当前目标拆成可持续开发、内容迁移、Oracle 替换、平台功能、生产模块、Nacos/Keycloak/PostgreSQL/runtime patch、缺口治理和生产迁移前置项。只要该总账仍是 `IN_PROGRESS_NOT_COMPLETE`，仓库就不能被描述为整体目标已完成。
+
 ## 开发分区
 
 ```text
@@ -21,6 +23,7 @@ deploy/pom.xml                  # 部署资料聚合入口
 deploy/docker/                  # Linux Docker Compose 测试部署
 deploy/database/                # 数据库迁移和兼容策略入口
 docs/runtime-validation-scope.md # 测试环境验证范围和生产迁移边界
+docs/project-goal-acceptance.md # 总目标验收总账
 Makefile                        # 常用开发、验证、部署命令
 AGENTS.md                       # 当前项目工作指令和功能验收优先规则
 .github/workflows/verify.yml    # GitHub Actions 验证入口
@@ -85,6 +88,7 @@ make verify-pom
 make compose-config
 make runtime-script-check
 make sustainable-check
+make project-goal-acceptance-check
 make persistence-acceptance-check
 make production-testcase-check
 make production-action-map-check
@@ -116,7 +120,7 @@ make audit-postgres-report
 
 `make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、source module 默认路径是否 Oracle-free、已提升 source module 编译测试、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。
 
-`make runtime-script-check` 只做 smoke 与 runtime patch 脚本语法检查，不访问远程环境。`make persistence-acceptance-check` 校验功能验收和落库验收资产的结构，不代表功能已经通过；真实结论必须来自 [功能验收与落库验收规则](functional-persistence-acceptance.md) 要求的浏览器操作、API 记录、后端链路和 PostgreSQL 查询。`make production-migration-readiness-check` 校验 [生产迁移就绪账本](production-migration-readiness.md) 和 `metadata/production-migration-readiness.json` 是否覆盖数据迁移、回滚、license、MinIO、Keycloak、Nacos/runtime patch、端口/TLS、安全加固和业务签字；它不代表生产迁移已完成。`make smoke-platform` 是测试环境平台验证入口，会串联 API、主页待办和菜单页面 smoke，并输出统一 JSON 报告。`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
+`make runtime-script-check` 只做 smoke 与 runtime patch 脚本语法检查，不访问远程环境。`make project-goal-acceptance-check` 校验 [项目总目标验收总账](project-goal-acceptance.md) 和 `metadata/project-goal-acceptance.json` 的覆盖范围，防止把局部 PASS 误报成整体完成；它不替代真实功能验收。`make persistence-acceptance-check` 校验功能验收和落库验收资产的结构，不代表功能已经通过；真实结论必须来自 [功能验收与落库验收规则](functional-persistence-acceptance.md) 要求的浏览器操作、API 记录、后端链路和 PostgreSQL 查询。`make production-migration-readiness-check` 校验 [生产迁移就绪账本](production-migration-readiness.md) 和 `metadata/production-migration-readiness.json` 是否覆盖数据迁移、回滚、license、MinIO、Keycloak、Nacos/runtime patch、端口/TLS、安全加固和业务签字；它不代表生产迁移已完成。`make smoke-platform` 是测试环境平台验证入口，会串联 API、主页待办和菜单页面 smoke，并输出统一 JSON 报告。`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 
 ## 后续工作
 
@@ -125,6 +129,7 @@ make audit-postgres-report
 - 新业务包进入源码区前先用 `make module-intake-check INTAKE=/path/to/package-or-dir` 扫描，并建立独立模块组，不直接污染基础平台模块。
 - 将 PostgreSQL 兼容补丁从 runtime patch 逐步前移到源码、Mapper 和迁移脚本。
 - 给每个已提升模块补最小 smoke 或集成测试。
+- 按 [项目总目标验收总账](project-goal-acceptance.md) 维护 `metadata/project-goal-acceptance.json`，只有全部目标项 `READY` 才能宣称总目标完成。
 - 按 [后端落表业务排查交接](backend-table-audit-handoff.md) 建立模块级表字段地图。
 - 按 [功能验收与落库验收规则](functional-persistence-acceptance.md) 维护 [前端功能测试报告](frontend-functional-test-report.md)、[后端落库验收报告](backend-table-audit/persistence-acceptance.md) 和 `metadata/persistence-acceptance.json`。
 - 按 [生产迁移就绪账本](production-migration-readiness.md) 维护 `metadata/production-migration-readiness.json`，生产迁移前必须补数据迁移脚本、回滚方案、license 策略、MinIO 文件迁移、Keycloak 生产库策略、端口/域名/TLS、安全加固和业务 smoke 签字。
