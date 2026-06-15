@@ -78,6 +78,27 @@ REQUIRED_PATHS = [
     "deploy/docker/scripts/patch-eam-reactapi-ready.py",
 ]
 
+REQUIRED_TEXT = {
+    "AGENTS.md": [
+        "本项目当前阶段以功能验收优先",
+        "必须先验证真实前端行为",
+        "真实落到 PostgreSQL",
+        "不能只凭代码推断",
+    ],
+    "docs/functional-persistence-acceptance.md": [
+        "本次项目固定指令",
+        "任务不是继续补治理层，也不是只跑静态检查",
+        "真实前端页面或等效 E2E",
+        "唯一 marker",
+        "metadata/persistence-acceptance.json",
+    ],
+    "README.md": [
+        "项目工作指令",
+        "功能验收与落库验收规则",
+        "不能只凭源码、静态检查或 `make ci` 判断功能完成",
+    ],
+}
+
 ALLOWED_BINARY_FILES = {
     "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
     "deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar",
@@ -158,6 +179,17 @@ def check_required_paths(failures: list[str]) -> None:
             fail(f"required path missing: {relative}", failures)
 
 
+def check_required_text(failures: list[str]) -> None:
+    for relative, snippets in REQUIRED_TEXT.items():
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        content = path.read_text(encoding="utf-8")
+        for snippet in snippets:
+            if snippet not in content:
+                fail(f"{relative} missing required instruction text: {snippet}", failures)
+
+
 def check_maven_structure(failures: list[str]) -> None:
     pom_path = ROOT / "pom.xml"
     pom = pom_path.read_text(encoding="utf-8")
@@ -231,6 +263,7 @@ def check_large_files(failures: list[str]) -> None:
 def main() -> int:
     failures: list[str] = []
     check_required_paths(failures)
+    check_required_text(failures)
     check_maven_structure(failures)
     check_postgres_defaults(failures)
     check_binary_policy(failures)

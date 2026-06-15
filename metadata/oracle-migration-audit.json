@@ -4707,7 +4707,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 38,
+      "line": 51,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4715,7 +4715,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 124,
+      "line": 137,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -6707,7 +6707,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 141,
+      "line": 162,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6715,7 +6715,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 178,
+      "line": 210,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6723,7 +6723,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 187,
+      "line": 219,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6731,7 +6731,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 191,
+      "line": 223,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6739,7 +6739,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 198,
+      "line": 230,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6747,7 +6747,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 206,
+      "line": 238,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6755,7 +6755,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 207,
+      "line": 239,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
