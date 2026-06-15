@@ -31,8 +31,5 @@ jobs:
           mvn -version
           docker compose version
 
-      - name: Validate Maven reactor
-        run: mvn -q -DskipTests validate
-
-      - name: Validate Docker Compose rendering
-        run: docker compose --env-file deploy/docker/.env.example -f deploy/docker/docker-compose.yml config --quiet
+      - name: Run repository gate
+        run: make ci

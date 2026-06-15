@@ -1,0 +1,866 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    "metadata/backend-source-summary.json",
+    "metadata/backend-service-manifest.json",
+    "metadata/backend-decompile-summary.json",
+    "metadata/frontend-sourcemap-summary.json",
+    "metadata/frontend-recovered-files.json",
+    "deploy/docker/docker-compose.yml"
+  ],
+  "backend": {
+    "sourceJarCount": 250,
+    "javaFileCount": 4807,
+    "xmlFileCount": 398,
+    "sourceGroups": [
+      {
+        "group": "com.supcon.supfusion",
+        "moduleCount": 147,
+        "javaFiles": 2275,
+        "xmlFiles": 223,
+        "artifacts": [
+          "auditlog-api:1.0.0.RELEASE",
+          "auditlog-common:1.0.0.RELEASE",
+          "auditlog-dao:1.0.0.RELEASE",
+          "auditlog-manager:1.0.0.RELEASE",
+          "auditlog-openapi:1.0.0.RELEASE",
+          "auditlog-service:1.0.0.RELEASE",
+          "auditlog-webapi:1.0.0.RELEASE",
+          "auth-api:1.0.0.RELEASE",
+          "auth-api:1.0.1.RELEASE",
+          "auth-common:1.0.0-SNAPSHOT",
+          "auth-dao:1.0.0-SNAPSHOT",
+          "auth-keycloak:1.0.0-SNAPSHOT",
+          "auth-keycloak-client-api:1.0.0.RELEASE",
+          "auth-keycloak-client-api:1.0.1.RELEASE",
+          "auth-manager:1.0.0-SNAPSHOT",
+          "auth-openapi:1.0.0-SNAPSHOT",
+          "auth-resources:1.0.0-SNAPSHOT",
+          "auth-resources:1.0.0.RELEASE",
+          "auth-service:1.0.0-SNAPSHOT",
+          "auth-upgrade:1.0.1.RELEASE",
+          "auth-webapi:1.0.0-SNAPSHOT",
+          "basicmanagement-auditlog:1.0-SNAPSHOT",
+          "basicmanagement-portal:1.0-SNAPSHOT",
+          "basicmanagement-printer:1.0-SNAPSHOT",
+          "basicmanagement-signature:1.0-SNAPSHOT",
+          "basicmanagement-theme:1.0-SNAPSHOT",
+          "cloud-task-scheduler-server-api:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-api:1.0.0.RELEASE",
+          "cloud-task-scheduler-server-common:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-dao:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-manager:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-openapi:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-service:1.0.0-SNAPSHOT",
+          "cloud-task-scheduler-server-webapi:1.0.0-SNAPSHOT",
+          "counter-api:1.0.0.RELEASE",
+          "counter-common:1.0.0-SNAPSHOT",
+          "counter-common:1.0.0.RELEASE",
+          "counter-dao:1.0.0-SNAPSHOT",
+          "counter-sdk:1.0.0-SNAPSHOT",
+          "counter-service:1.0.0-SNAPSHOT",
+          "counter-webapi:1.0.0-SNAPSHOT",
+          "custom-property-api:1.0.0-SNAPSHOT",
+          "custom-property-common:1.0.0-SNAPSHOT",
+          "custom-property-dao:1.0.0-SNAPSHOT",
+          "custom-property-service:1.0.0-SNAPSHOT",
+          "custom-property-webapi:1.0.0-SNAPSHOT",
+          "file-server-api:1.0.0.RELEASE",
+          "file-server-common:1.0.0-SNAPSHOT",
+          "file-server-dao:1.0.0-SNAPSHOT",
+          "file-server-manager:1.0.0-SNAPSHOT",
+          "file-server-openapi:1.0.0-SNAPSHOT",
+          "file-server-service:1.0.0-SNAPSHOT",
+          "file-server-webapi:1.0.0-SNAPSHOT",
+          "i18n-common:1.0.1-SNAPSHOT",
+          "i18n-dao:1.0.1-SNAPSHOT",
+          "i18n-inter-api:1.0.1-SNAPSHOT",
+          "i18n-manager:1.0.1-SNAPSHOT",
+          "i18n-open-api:1.0.1-SNAPSHOT",
+          "i18n-resources:1.0.1-SNAPSHOT",
+          "i18n-service:1.0.1-SNAPSHOT",
+          "i18n-service-api:1.0.0.RELEASE",
+          "i18n-service-sdk:1.0.1-SNAPSHOT",
+          "iam-api:1.0.2.RELEASE",
+          "iam-common:1.0.6-SNAPSHOT",
+          "iam-dao:1.0.6-SNAPSHOT",
+          "iam-manager:1.0.6-SNAPSHOT",
+          "iam-openapi:1.0.6-SNAPSHOT",
+          "iam-service:1.0.6-SNAPSHOT",
+          "iam-webapi:1.0.6-SNAPSHOT",
+          "license-api:1.0.0.RELEASE",
+          "license-common:1.0.0-SNAPSHOT",
+          "license-dao:1.0.0-SNAPSHOT",
+          "license-manager:1.0.0-SNAPSHOT",
+          "license-openapi:1.0.0-SNAPSHOT",
+          "license-service:1.0.0-SNAPSHOT",
+          "license-webapi:1.0.0-SNAPSHOT",
+          "organization-api:1.0.0.RELEASE",
+          "organization-api:1.0.1.RELEASE",
+          "organization-api:1.2.0-SNAPSHOT",
+          "organization-common:1.0.0.RELEASE",
+          "organization-dao:1.0.0.RELEASE",
+          "organization-manager:1.0.0.RELEASE",
+          "organization-openapi:1.0.0.RELEASE",
+          "organization-resources:1.0.0.RELEASE",
+          "organization-service:1.0.0.RELEASE",
+          "organization-webapi:1.0.0.RELEASE",
+          "orgmanagement-auth:1.0-SNAPSHOT",
+          "orgmanagement-organization:1.0-SNAPSHOT",
+          "orgmanagement-rbac:1.0-SNAPSHOT",
+          "portal-common:1.0.0-SNAPSHOT",
+          "portal-dao:1.0.0-SNAPSHOT",
+          "portal-manager:1.0.0-SNAPSHOT",
+          "portal-service:1.0.0-SNAPSHOT",
+          "portal-webapi:1.0.0-SNAPSHOT",
+          "printer-api:1.0.0.RELEASE",
+          "printer-common:1.0-SNAPSHOT",
+          "printer-dao:1.0-SNAPSHOT",
+          "printer-interapi:1.0-SNAPSHOT",
+          "printer-openapi:1.0-SNAPSHOT",
+          "printer-resources:1.0-SNAPSHOT",
+          "printer-service:1.0-SNAPSHOT",
+          "protal-resources:1.0.0-SNAPSHOT",
+          "rbac-api:1.0.0.RELEASE",
+          "rbac-api:1.0.2.RELEASE",
+          "rbac-api:1.0.3.RELEASE",
+          "rbac-common:1.0.0-SNAPSHOT",
+          "rbac-dao:1.0.0-SNAPSHOT",
+          "rbac-manager:1.0.0-SNAPSHOT",
+          "rbac-openapi:1.0.0-SNAPSHOT",
+          "rbac-resources:1.0.0-SNAPSHOT",
+          "rbac-service:1.0.0-SNAPSHOT",
+          "rbac-urlscan:1.0.0-SNAPSHOT",
+          "rbac-webapi:1.0.0-SNAPSHOT",
+          "sysmanagement-counter:1.0-SNAPSHOT",
+          "sysmanagement-module-registry:1.0-SNAPSHOT",
+          "sysmanagement-systemcode:1.0-SNAPSHOT",
+          "sysmanagement-systemconfig:1.0-SNAPSHOT",
+          "system-config-api:1.0.0-SNAPSHOT",
+          "system-config-api:1.0.0.RELEASE",
+          "system-config-api:1.1.1.RELEASE",
+          "system-config-client:1.0.0-SNAPSHOT",
+          "system-config-common:1.0.0-SNAPSHOT",
+          "system-config-common:1.1.1.RELEASE",
+          "system-config-dao:1.0.0-SNAPSHOT",
+          "system-config-manager:1.0.0-SNAPSHOT",
+          "system-config-openapi:1.0.0-SNAPSHOT",
+          "system-config-resources:1.0.0-SNAPSHOT",
+          "system-config-service:1.0.0-SNAPSHOT",
+          "system-config-webapi:1.0.0-SNAPSHOT",
+          "systemcode-api:1.0.0-SNAPSHOT",
+          "systemcode-api:1.0.0.RELEASE",
+          "systemcode-api:1.0.1.RELEASE",
+          "systemcode-api:1.0.4.RELEASE",
+          "systemcode-api:1.0.5.RELEASE",
+          "systemcode-common:1.0.0-SNAPSHOT",
+          "systemcode-dao:1.0.0-SNAPSHOT",
+          "systemcode-manager:1.0.0-SNAPSHOT",
+          "systemcode-openapi:1.0.0-SNAPSHOT",
+          "systemcode-resources:1.0.0-SNAPSHOT",
+          "systemcode-service:1.0.0-SNAPSHOT",
+          "systemcode-webapi:1.0.0-SNAPSHOT",
+          "theme-common:1.0.0-SNAPSHOT",
+          "theme-dao:1.0.0-SNAPSHOT",
+          "theme-service:1.0.0-SNAPSHOT",
+          "theme-webapi:1.0.0-SNAPSHOT",
+          "websocket-service:1.0.0-SNAPSHOT",
+          "websocket-service-api:1.0.0.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.notification",
+        "moduleCount": 42,
+        "javaFiles": 428,
+        "xmlFiles": 54,
+        "artifacts": [
+          "admin-api:1.0.0-SNAPSHOT",
+          "admin-api:1.0.3-RELEASE",
+          "admin-common:1.0.0-SNAPSHOT",
+          "admin-dao:1.0.0-SNAPSHOT",
+          "admin-manager:1.0.0-SNAPSHOT",
+          "admin-openapi:1.0.0-SNAPSHOT",
+          "admin-resources:1.0.0-SNAPSHOT",
+          "admin-service:1.0.0-SNAPSHOT",
+          "admin-webapi:1.0.0-SNAPSHOT",
+          "apiserver-api:1.0.0-RELEASE",
+          "apiserver-api:1.0.0-SNAPSHOT",
+          "apiserver-api:1.0.0.RELEASE",
+          "apiserver-common:1.0.0-SNAPSHOT",
+          "apiserver-dao:1.0.0-SNAPSHOT",
+          "apiserver-manager:1.0.0-SNAPSHOT",
+          "apiserver-openapi:1.0.0-SNAPSHOT",
+          "apiserver-resources:1.0.0-SNAPSHOT",
+          "apiserver-service:1.0.0-SNAPSHOT",
+          "apiserver-webapi:1.0.0-SNAPSHOT",
+          "app-common:1.0.0-RELEASE",
+          "app-config:1.0.0-RELEASE",
+          "app-dao:1.0.0-RELEASE",
+          "app-manager:1.0.0-RELEASE",
+          "app-openapi:1.0.0-RELEASE",
+          "app-resources:1.0.0-RELEASE",
+          "app-service:1.0.0-RELEASE",
+          "engine-common:1.0.0-SNAPSHOT",
+          "engine-dao:1.0.0-SNAPSHOT",
+          "engine-dispatcher:1.0.0-SNAPSHOT",
+          "mobile-config:1.0.0-SNAPSHOT",
+          "mobile-dao:1.0.0-SNAPSHOT",
+          "mobile-manager:1.0.0-SNAPSHOT",
+          "mobile-openapi:1.0.0-SNAPSHOT",
+          "mobile-resources:1.0.0-SNAPSHOT",
+          "mobile-service:1.0.0-SNAPSHOT",
+          "sms-common:1.0.0-SNAPSHOT",
+          "sms-config:1.0.0-SNAPSHOT",
+          "sms-dao:1.0.0-SNAPSHOT",
+          "sms-manager:1.0.0-SNAPSHOT",
+          "sms-openapi:1.0.0-SNAPSHOT",
+          "sms-resources:1.0.0-SNAPSHOT",
+          "sms-service:1.0.0-SNAPSHOT"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.framework.boot",
+        "moduleCount": 10,
+        "javaFiles": 20,
+        "xmlFiles": 10,
+        "artifacts": [
+          "scaffold-boot-auditlog-autoconfigure:1.0.4.RELEASE",
+          "scaffold-boot-auditlog-autoconfigure:1.0.5.RELEASE",
+          "scaffold-boot-auditlog-autoconfigure:1.0.6.RELEASE",
+          "scaffold-boot-kafka-autoconfigure:1.0.3.RELEASE",
+          "scaffold-boot-redis-autoconfigure:1.0.3.RELEASE",
+          "scaffold-boot-starter-auditlog:1.0.4.RELEASE",
+          "scaffold-boot-starter-auditlog:1.0.5.RELEASE",
+          "scaffold-boot-starter-auditlog:1.0.6.RELEASE",
+          "scaffold-boot-starter-kafka:1.0.3.RELEASE",
+          "scaffold-boot-starter-redis:1.0.3.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.module.registry",
+        "moduleCount": 10,
+        "javaFiles": 34,
+        "xmlFiles": 10,
+        "artifacts": [
+          "module-registry-api:1.0.0.RELEASE",
+          "module-registry-api:1.0.1.RELEASE",
+          "module-registry-dao:1.0.0-RELEASE",
+          "module-registry-dao:1.0.1.RELEASE",
+          "module-registry-resources:1.0.0-RELEASE",
+          "module-registry-resources:1.0.1.RELEASE",
+          "module-registry-server:1.0.0-RELEASE",
+          "module-registry-server:1.0.1.RELEASE",
+          "module-registry-webapi:1.0.0-RELEASE",
+          "module-registry-webapi:1.0.1.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.flow",
+        "moduleCount": 9,
+        "javaFiles": 256,
+        "xmlFiles": 16,
+        "artifacts": [
+          "flow-api:1.0.0-RELEASE",
+          "flow-api:1.0.0.RELEASE",
+          "flow-common:1.0.0-RELEASE",
+          "flow-dao:1.0.0-RELEASE",
+          "flow-engine:1.0.0-RELEASE",
+          "flow-openapi:1.0.0-RELEASE",
+          "flow-resources:1.0.0-RELEASE",
+          "flow-webapi:1.0.0-RELEASE",
+          "task-center:1.0.0-RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.configuration",
+        "moduleCount": 7,
+        "javaFiles": 1353,
+        "xmlFiles": 41,
+        "artifacts": [
+          "configuration-services-api:1.0.0.RELEASE",
+          "configuration-services-base:1.0.0-SNAPSHOT",
+          "configuration-services-dao:1.0.0-SNAPSHOT",
+          "configuration-services-open-api:1.0.0-SNAPSHOT",
+          "configuration-services-project-api:1.0.0-SNAPSHOT",
+          "configuration-services-service:1.0.0-SNAPSHOT",
+          "configuration-workflow:1.0.0-SNAPSHOT"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.framework1.boot",
+        "moduleCount": 6,
+        "javaFiles": 16,
+        "xmlFiles": 6,
+        "artifacts": [
+          "scaffold-boot-auditlog-autoconfigure:1.0.4.RELEASE",
+          "scaffold-boot-kafka-autoconfigure:1.0.3.RELEASE",
+          "scaffold-boot-redis-autoconfigure:1.0.3.RELEASE",
+          "scaffold-boot-starter-auditlog:1.0.4.RELEASE",
+          "scaffold-boot-starter-kafka:1.0.3.RELEASE",
+          "scaffold-boot-starter-redis:1.0.3.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.signature",
+        "moduleCount": 6,
+        "javaFiles": 146,
+        "xmlFiles": 14,
+        "artifacts": [
+          "signature-base:1.0.0-SNAPSHOT",
+          "signature-dao:1.0.0-SNAPSHOT",
+          "signature-inter-api:1.0.0-SNAPSHOT",
+          "signature-resouces:1.0.0-SNAPSHOT",
+          "signature-service:1.0.0-SNAPSHOT",
+          "signature-service-openapi:1.0.0-SNAPSHOT"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.framework",
+        "moduleCount": 5,
+        "javaFiles": 101,
+        "xmlFiles": 5,
+        "artifacts": [
+          "scaffold-auditlog:1.0.4.RELEASE",
+          "scaffold-auditlog:1.0.5.RELEASE",
+          "scaffold-auditlog:1.0.6.RELEASE",
+          "scaffold-kafka:1.0.3.RELEASE",
+          "scaffold-redis:1.0.3.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.custom.propertye",
+        "moduleCount": 4,
+        "javaFiles": 133,
+        "xmlFiles": 14,
+        "artifacts": [
+          "custom-property-common:1.0.0-SNAPSHOT",
+          "custom-property-dao:1.0.0-SNAPSHOT",
+          "custom-property-service:1.0.0-SNAPSHOT",
+          "custom-property-webapi:1.0.0-SNAPSHOT"
+        ]
+      },
+      {
+        "group": "com.supcon.supfusion.framework1",
+        "moduleCount": 3,
+        "javaFiles": 36,
+        "xmlFiles": 3,
+        "artifacts": [
+          "scaffold-auditlog:1.0.4.RELEASE",
+          "scaffold-kafka:1.0.3.RELEASE",
+          "scaffold-redis:1.0.3.RELEASE"
+        ]
+      },
+      {
+        "group": "com.supcon.msgcenter",
+        "moduleCount": 1,
+        "javaFiles": 9,
+        "xmlFiles": 2,
+        "artifacts": [
+          "msgcenter:5.0.0.00"
+        ]
+      }
+    ],
+    "platformServiceCount": 23,
+    "platformServices": [
+      {
+        "service": "auditlog",
+        "startClass": "com.supcon.supfusion.auditlog.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/auditlog/supfusion-auditlog.jar"
+      },
+      {
+        "service": "baseService",
+        "startClass": "com.supcon.greendill.BaseServiceApp",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/baseService/supfusion-baseservice.jar"
+      },
+      {
+        "service": "basicmanagement",
+        "startClass": "com.supcon.supfusion.basicmanagement.BasicmanagementApp",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/basicmanagement/supfusion-basicmanagement.jar"
+      },
+      {
+        "service": "configuration",
+        "startClass": "com.supcon.supfusion.configuration.services.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/configuration/supfusion-configuration.jar"
+      },
+      {
+        "service": "customProperty",
+        "startClass": "com.supcon.supfusion.custon.property.CoustomPropertyBootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/customProperty/custom-property.jar"
+      },
+      {
+        "service": "fileServer",
+        "startClass": "com.supcon.supfusion.file.server.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/fileServer/supfusion-file-server.jar"
+      },
+      {
+        "service": "flow",
+        "startClass": "com.supcon.supfusion.flow.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/flow/supfusion-flow.jar"
+      },
+      {
+        "service": "gateway",
+        "startClass": "com.supcon.supos.suposgateway.SuposGatewayApplication",
+        "springBootVersion": "2.1.12.RELEASE",
+        "jar": "bap-server/base-Server/gateway/supos-gateway.jar"
+      },
+      {
+        "service": "i18n",
+        "startClass": "com.supcon.supfusion.i18n.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/i18n/supfusion-i18n.jar"
+      },
+      {
+        "service": "iam",
+        "startClass": "com.supcon.supfusion.iam.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/iam/supfusion-iam.jar"
+      },
+      {
+        "service": "license",
+        "startClass": "com.supcon.supfusion.license.bootstrap.LicenseApplication",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/license/supfusion-license.jar"
+      },
+      {
+        "service": "notification-admin",
+        "startClass": "com.supcon.supfusion.notification.admin.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-admin/notification-admin.jar"
+      },
+      {
+        "service": "notification-apiserver",
+        "startClass": "com.supcon.supfusion.notification.apiserver.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-apiserver/notification-apiserver.jar"
+      },
+      {
+        "service": "notification-app",
+        "startClass": "com.supcon.supfusion.notification.app.bootstrap.NoticeAppBootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-app/notification-app.jar"
+      },
+      {
+        "service": "notification-engine",
+        "startClass": "com.supcon.supfusion.notification.engine.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-engine/notification-engine.jar"
+      },
+      {
+        "service": "notification-mobile",
+        "startClass": "com.supcon.supfusion.notification.mobile.MobileBootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-mobile/notification-mobile.jar"
+      },
+      {
+        "service": "notification-sms-jincang",
+        "startClass": "com.supcon.supfusion.notification.sms.SmsBootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar"
+      },
+      {
+        "service": "operatetools",
+        "startClass": "com.supcon.orchid.entityconf.MicroService",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/operatetools/supfusion-operatetools.jar"
+      },
+      {
+        "service": "orgmanagement",
+        "startClass": "com.supcon.supfusion.orgmanagement.OrgManagementApp",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/orgmanagement/supfusion-orgmanagement.jar"
+      },
+      {
+        "service": "printer",
+        "startClass": "com.supcon.supfusion.printer.bootstrap.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/printer/supfusion-printer.jar"
+      },
+      {
+        "service": "sysmanagement",
+        "startClass": "com.supcon.supfusion.sysmanagement.SysmanagementApp",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar"
+      },
+      {
+        "service": "task-scheduler",
+        "startClass": "com.supcon.supfusion.scheduler.Bootstrap",
+        "springBootVersion": "2.1.5.RELEASE",
+        "jar": "bap-server/base-Server/task-scheduler/supfusion-task-scheduler-service.jar"
+      },
+      {
+        "service": "websocket",
+        "startClass": "",
+        "springBootVersion": "",
+        "jar": "bap-server/base-Server/websocket/supfusion-websocket.jar"
+      }
+    ],
+    "decompiledServiceCount": 23,
+    "decompiledJavaFileCount": 259
+  },
+  "frontend": {
+    "sourceMapCount": 366,
+    "recoveredFileCount": 991,
+    "failedSourceMapCount": 0,
+    "apps": [
+      {
+        "app": "auth",
+        "recoveredFileCount": 57,
+        "sourceMapCount": 24
+      },
+      {
+        "app": "bap",
+        "recoveredFileCount": 185,
+        "sourceMapCount": 19
+      },
+      {
+        "app": "greenDill",
+        "recoveredFileCount": 226,
+        "sourceMapCount": 9
+      },
+      {
+        "app": "i18n",
+        "recoveredFileCount": 16,
+        "sourceMapCount": 6
+      },
+      {
+        "app": "menu",
+        "recoveredFileCount": 21,
+        "sourceMapCount": 6
+      },
+      {
+        "app": "notification",
+        "recoveredFileCount": 43,
+        "sourceMapCount": 15
+      },
+      {
+        "app": "organization",
+        "recoveredFileCount": 47,
+        "sourceMapCount": 36
+      },
+      {
+        "app": "print",
+        "recoveredFileCount": 78,
+        "sourceMapCount": 24
+      },
+      {
+        "app": "signature-static",
+        "recoveredFileCount": 19,
+        "sourceMapCount": 10
+      },
+      {
+        "app": "supplant",
+        "recoveredFileCount": 97,
+        "sourceMapCount": 108
+      },
+      {
+        "app": "supplant-test",
+        "recoveredFileCount": 87,
+        "sourceMapCount": 88
+      },
+      {
+        "app": "systemcode",
+        "recoveredFileCount": 26,
+        "sourceMapCount": 6
+      },
+      {
+        "app": "systemconfig",
+        "recoveredFileCount": 48,
+        "sourceMapCount": 8
+      },
+      {
+        "app": "taskscheduler",
+        "recoveredFileCount": 22,
+        "sourceMapCount": 2
+      },
+      {
+        "app": "theme",
+        "recoveredFileCount": 19,
+        "sourceMapCount": 5
+      }
+    ]
+  },
+  "deployment": {
+    "composeServiceCount": 53,
+    "composeServiceKindCounts": {
+      "business-runtime": 14,
+      "infrastructure": 11,
+      "platform-runtime": 28
+    },
+    "composeServices": [
+      {
+        "service": "postgres",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "redis",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "test-license-seed",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "zookeeper",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "kafka",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "mongo",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "nacos",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "nacos-config",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "keycloak",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "minio",
+        "jarPath": "",
+        "kind": "infrastructure"
+      },
+      {
+        "service": "websocket",
+        "jarPath": "bap-server/base-Server/websocket/supfusion-websocket.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "i18n",
+        "jarPath": "bap-server/base-Server/i18n/supfusion-i18n.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "sysmanagement",
+        "jarPath": "bap-server/base-Server/sysmanagement/supfusion-sysmanagement.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "basicmanagement",
+        "jarPath": "bap-server/base-Server/basicmanagement/supfusion-basicmanagement.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "orgmanagement",
+        "jarPath": "bap-server/base-Server/orgmanagement/supfusion-orgmanagement.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "iam",
+        "jarPath": "bap-server/base-Server/iam/supfusion-iam.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "gateway",
+        "jarPath": "bap-server/base-Server/gateway/supos-gateway.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "license",
+        "jarPath": "bap-server/base-Server/license/supfusion-license.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "configuration",
+        "jarPath": "bap-server/base-Server/configuration/supfusion-configuration.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "operatetools",
+        "jarPath": "bap-server/base-Server/operatetools/supfusion-operatetools.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "baseService",
+        "jarPath": "bap-server/base-Server/baseService/supfusion-baseservice.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "flow",
+        "jarPath": "bap-server/base-Server/flow/supfusion-flow.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-admin",
+        "jarPath": "bap-server/base-Server/notification-admin/notification-admin.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-apiserver",
+        "jarPath": "bap-server/base-Server/notification-apiserver/notification-apiserver.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-engine",
+        "jarPath": "bap-server/base-Server/notification-engine/notification-engine.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "fileServer",
+        "jarPath": "bap-server/base-Server/fileServer/supfusion-file-server.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "task-scheduler",
+        "jarPath": "bap-server/base-Server/task-scheduler/supfusion-task-scheduler-service.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "customProperty",
+        "jarPath": "bap-server/base-Server/customProperty/custom-property.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "adp-admin",
+        "jarPath": "bap-server/base-Server/adp-admin/adp-admin.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "excel-server",
+        "jarPath": "bap-server/base-Server/excel-server/excel-server.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "msgmanagement",
+        "jarPath": "bap-server/base-Server/msgmanagement/supfusion-msgmanagement.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-app",
+        "jarPath": "bap-server/base-Server/notification-app/notification-app.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-dingtalk",
+        "jarPath": "bap-server/base-Server/notification-dingtalk/notification-dingtalk.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-mobile",
+        "jarPath": "bap-server/base-Server/notification-mobile/notification-mobile.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-sms-jincang",
+        "jarPath": "bap-server/base-Server/notification-sms-jincang/notification-sms-jincang.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "notification-wechat",
+        "jarPath": "bap-server/base-Server/notification-wechat/notification-wechat.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "printer",
+        "jarPath": "bap-server/base-Server/printer/supfusion-printer.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "auditlog",
+        "jarPath": "bap-server/base-Server/auditlog/supfusion-auditlog.jar",
+        "kind": "platform-runtime"
+      },
+      {
+        "service": "craftGraphMs",
+        "jarPath": "bap-server/module-Server/craftGraphMs/manual/craftGraphMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "RMMs",
+        "jarPath": "bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "WOMMs",
+        "jarPath": "bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "FoundationMs",
+        "jarPath": "bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "EamMs",
+        "jarPath": "bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "SpecialMs",
+        "jarPath": "bap-server/module-Server/SpecialMs/manual/SpecialMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "OEEMs",
+        "jarPath": "bap-server/module-Server/OEEMs/manual/OEEMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "ToolMs",
+        "jarPath": "bap-server/module-Server/ToolMs/manual/ToolMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "LIMS",
+        "jarPath": "bap-server/module-Server/LIMS/manual/LIMS-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "LIMSDCMan",
+        "jarPath": "bap-server/module-Server/LIMSDCMan/manual/LIMSDCMan-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "LIMSINT",
+        "jarPath": "bap-server/module-Server/LIMSINT/manual/LIMSINT-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "LIMSMatStds",
+        "jarPath": "bap-server/module-Server/LIMSMatStds/manual/LIMSMatStds-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "WTSs",
+        "jarPath": "bap-server/module-Server/WTSs/manual/WTSs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "WAPS",
+        "jarPath": "bap-server/module-Server/WAPS/manual/WAPS-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "nginx",
+        "jarPath": "",
+        "kind": "infrastructure"
+      }
+    ],
+    "databaseDefault": "postgresql",
+    "oracleMode": "legacy-template-only"
+  }
+}

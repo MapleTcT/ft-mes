@@ -51,6 +51,8 @@ make verify
 make ci
 make verify-pom
 make compose-config
+make sustainable-check
+make inventory-check
 ```
 
 启动测试环境仍以 `deploy/docker/README.md` 为准：
@@ -66,6 +68,7 @@ docker compose --env-file .env up -d
 
 - [仓库概述](docs/repository-overview.md)
 - [项目目标和交付路线](docs/project-objectives.md)
+- [当前内容迁移清单](docs/current-content-inventory.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)
 - [后端模块依赖地图](docs/backend-module-dependency-map.md)
 - [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)

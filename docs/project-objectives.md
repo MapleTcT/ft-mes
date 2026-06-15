@@ -51,6 +51,8 @@
 - `deploy/docker/` PostgreSQL-first Compose 编排。
 - `Makefile` 统一验证、部署、smoke 命令。
 - GitHub Actions 验证 Maven reactor 和 Compose 语法。
+- `scripts/verify-sustainable-repo.py` 验证仓库治理硬约束。
+- `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
 
 后续增强：
 
@@ -89,6 +91,9 @@
 仓库级验收：
 
 - `make verify` 通过。
+- `make ci` 通过。
+- `make sustainable-check` 通过。
+- `make inventory-check` 通过。
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。
