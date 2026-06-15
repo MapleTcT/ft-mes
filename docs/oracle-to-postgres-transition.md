@@ -8,6 +8,7 @@
 - `deploy/docker/docker-compose.yml` 在无 `.env` 时也默认指向 `postgres:5432`。
 - PostgreSQL 初始化和兼容 SQL 位于 `deploy/docker/postgres/init/`。
 - Runtime JAR 的 PostgreSQL mapper/DBP 注入由 `deploy/docker/scripts/patch-postgres-runtime.py` 负责。
+- Runtime 补丁编排入口为 `deploy/docker/scripts/prepare-runtime-patches.sh`，同时串联 RBAC smallint 权限查询兼容、基础平台补丁和 EAM 低代码页面 `ReactAPI` 就绪兼容。
 - GitHub Actions 会验证 Maven reactor 和 Docker Compose 渲染，防止默认数据库配置回退到隐式 Oracle。
 
 Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.example`，用于后续需要回连老库或对比迁移结果的场景。
@@ -35,6 +36,14 @@ Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.ex
 - 继续补 `deploy/docker/postgres/init/NNN-*.sql`。
 - 用页面 smoke 和接口 smoke 覆盖登录、当前用户、人员、组织、权限、菜单、待办、基础配置、Nacos、Keycloak、PostgreSQL 和 runtime patch。
 - 业务模块只做可启动、菜单/API 可见和落表初查，不把未签字业务闭环混入平台验收。
+
+统一平台验证入口：
+
+```bash
+make smoke-platform
+```
+
+该命令会生成 `/tmp/adp-platform-validation-smoke/platform-validation-summary.json`，作为后续判断平台修复是否闭合的证据。
 
 ### 阶段 1：源码侧 SQL 审计
 
@@ -140,6 +149,7 @@ make oracle-replacement-check
 
 - `make verify-pom`
 - `make compose-config`
+- `make runtime-script-check`
 - `make module-intake-check INTAKE=/path/to/package-or-dir`
 - `make source-module-check`
 - `make backend-dependency-check`

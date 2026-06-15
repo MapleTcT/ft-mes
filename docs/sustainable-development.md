@@ -68,11 +68,19 @@ backend/source-modules/<module>/
 
 ## 常用命令
 
+首次运行浏览器 smoke 前安装 Node 依赖：
+
+```bash
+npm install
+npx playwright install chromium
+```
+
 ```bash
 make verify
 make ci
 make verify-pom
 make compose-config
+make runtime-script-check
 make sustainable-check
 make source-module-check
 make source-module-test
@@ -91,6 +99,7 @@ make oracle-replacement-check
 make render-config
 make up-infra
 make up
+make smoke-platform
 make smoke-api
 make smoke-menu
 make smoke-todo
@@ -100,7 +109,7 @@ make audit-postgres-report
 
 `make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、source module 默认路径是否 Oracle-free、已提升 source module 编译测试、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。
 
-`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
+`make runtime-script-check` 只做 smoke 与 runtime patch 脚本语法检查，不访问远程环境。`make smoke-platform` 是测试环境平台验证入口，会串联 API、主页待办和菜单页面 smoke，并输出统一 JSON 报告。`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 
 ## 后续工作
 

@@ -63,11 +63,13 @@
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
 - `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引。
 - `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。
+- `deploy/docker/scripts/adp-platform-validation-smoke.js` 汇总平台 API、菜单和待办 smoke，输出统一平台验证报告。
 
 后续增强：
 
 - 每提升一个后端模块，就给模块补单元测试或最小集成测试。
 - 每新增一个业务运行包，先跑 `make module-intake-check INTAKE=/path/to/package-or-dir`，再补对应 smoke 脚本或测试清单。
+- 每次测试环境修复后，优先跑 `make smoke-platform` 形成平台验证报告，再进入业务模块 smoke。
 
 ### 2. Oracle 替换
 
@@ -108,6 +110,7 @@
 - `make sustainable-check` 通过。
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
+- `make runtime-script-check` 通过。
 - `make module-intake-check` 对新接入业务包或模块通过，或已有 report-only 证据和 backlog。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
@@ -126,6 +129,7 @@
 - 迁移脚本幂等。
 - SQL audit 阻断项有处理记录。
 - 对应页面/API smoke 通过。
+- 平台修复后的 `make smoke-platform` 报告通过，或失败项已进入幂等 SQL/backlog。
 
 业务说明验收：
 

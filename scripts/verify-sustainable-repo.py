@@ -11,6 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_PATHS = [
     "pom.xml",
+    "package.json",
+    "package-lock.json",
     "backend/pom.xml",
     "backend/source-modules/pom.xml",
     "deploy/pom.xml",
@@ -39,6 +41,8 @@ REQUIRED_PATHS = [
     "scripts/generate-backend-dependency-inventory.py",
     "scripts/generate-oracle-replacement-status.py",
     "scripts/generate-postgres-migration-inventory.py",
+    "deploy/docker/scripts/adp-platform-validation-smoke.js",
+    "deploy/docker/scripts/patch-eam-reactapi-ready.py",
 ]
 
 ALLOWED_BINARY_FILES = {

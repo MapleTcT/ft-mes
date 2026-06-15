@@ -10,6 +10,7 @@ const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const headless = process.env.ADP_HEADLESS !== "false";
 const screenshotMode = process.env.ADP_SCREENSHOTS || "failures";
+const menuLimit = Number.parseInt(process.env.ADP_MENU_LIMIT || "", 10);
 const outputDir =
   process.env.ADP_OUTPUT_DIR ||
   path.join("/tmp", `adp-menu-smoke-${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`);
@@ -172,6 +173,13 @@ function flattenMenus(payload) {
   });
 }
 
+function applyMenuLimit(targets) {
+  if (!Number.isFinite(menuLimit) || menuLimit <= 0) {
+    return targets;
+  }
+  return targets.slice(0, menuLimit);
+}
+
 async function fetchMenus(api, ticket) {
   const response = await api.get(`${baseUrl}/inter-api/rbac/v1/menus/currentUser`, {
     headers: {
@@ -300,7 +308,8 @@ async function main() {
 
   const api = await request.newContext({ ignoreHTTPSErrors: true });
   const ticket = await login(api);
-  const targets = await fetchMenus(api, ticket);
+  const discoveredTargets = await fetchMenus(api, ticket);
+  const targets = applyMenuLimit(discoveredTargets);
   await api.dispose();
 
   const browser = await chromium.launch({ headless });
@@ -339,6 +348,8 @@ async function main() {
     generatedAt: new Date().toISOString(),
     baseUrl,
     username,
+    discoveredTotal: discoveredTargets.length,
+    menuLimit: Number.isFinite(menuLimit) && menuLimit > 0 ? menuLimit : null,
     total: results.length,
     passed: results.length - failed.length,
     failed: failed.length,

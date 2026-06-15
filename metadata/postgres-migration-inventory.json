@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 69,
+  "migrationCount": 70,
   "firstNumber": 1,
-  "lastNumber": 69,
+  "lastNumber": 70,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -13,17 +13,17 @@
     "alter-table": 9111,
     "create-function": 38,
     "create-index": 659,
-    "create-table": 479,
+    "create-table": 480,
     "create-view": 91,
-    "insert": 3577,
-    "update": 3563
+    "insert": 3578,
+    "update": 3564
   },
   "tagTotals": {
     "auth-rbac-org": 24,
     "business": 9,
     "compatibility": 39,
     "configuration": 18,
-    "general": 2,
+    "general": 3,
     "notification": 9,
     "platform": 20,
     "workflow": 6
@@ -1905,6 +1905,29 @@
         "alter-table": 0,
         "insert": 0,
         "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/070-test-admin-default-password.sql",
+      "name": "070-test-admin-default-password.sql",
+      "number": 70,
+      "slug": "test-admin-default-password",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 47,
+      "sha256": "8ce49178b1008b2923ea8fe5167477519cf679082c58dbbde6848477e7b85d58",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
       },
       "highRiskStatements": [],
       "watchStatements": []

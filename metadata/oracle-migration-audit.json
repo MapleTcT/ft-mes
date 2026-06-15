@@ -219,15 +219,15 @@
     },
     {
       "file": "Makefile",
-      "line": 25,
+      "line": 27,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": ".PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependenc"
+      "excerpt": ".PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-invent"
     },
     {
       "file": "Makefile",
-      "line": 42,
+      "line": 45,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -235,7 +235,7 @@
     },
     {
       "file": "Makefile",
-      "line": 43,
+      "line": 46,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -243,7 +243,7 @@
     },
     {
       "file": "Makefile",
-      "line": 46,
+      "line": 49,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -251,7 +251,7 @@
     },
     {
       "file": "Makefile",
-      "line": 47,
+      "line": 50,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -259,15 +259,15 @@
     },
     {
       "file": "Makefile",
-      "line": 61,
+      "line": 65,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": "ci: verify sustainable-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings"
+      "excerpt": "ci: verify runtime-script-check sustainable-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappin"
     },
     {
       "file": "Makefile",
-      "line": 101,
+      "line": 115,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 102,
+      "line": 116,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -283,7 +283,7 @@
     },
     {
       "file": "Makefile",
-      "line": 104,
+      "line": 118,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -291,7 +291,7 @@
     },
     {
       "file": "Makefile",
-      "line": 105,
+      "line": 119,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -299,7 +299,7 @@
     },
     {
       "file": "Makefile",
-      "line": 113,
+      "line": 127,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -307,7 +307,7 @@
     },
     {
       "file": "Makefile",
-      "line": 114,
+      "line": 128,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -315,7 +315,7 @@
     },
     {
       "file": "Makefile",
-      "line": 116,
+      "line": 130,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -323,7 +323,7 @@
     },
     {
       "file": "Makefile",
-      "line": 117,
+      "line": 131,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -4075,7 +4075,7 @@
     },
     {
       "file": "deploy/docker/README.md",
-      "line": 122,
+      "line": 107,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4819,7 +4819,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 11,
+      "line": 12,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4827,7 +4827,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 13,
+      "line": 14,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4835,7 +4835,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 18,
+      "line": 19,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4843,7 +4843,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 19,
+      "line": 20,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4851,7 +4851,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 22,
+      "line": 23,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4859,7 +4859,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 24,
+      "line": 25,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4867,7 +4867,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 41,
+      "line": 50,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4875,7 +4875,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 53,
+      "line": 62,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4883,7 +4883,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 55,
+      "line": 64,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4891,7 +4891,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 58,
+      "line": 67,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4899,7 +4899,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 59,
+      "line": 68,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4907,7 +4907,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 62,
+      "line": 71,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4915,7 +4915,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 71,
+      "line": 80,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4923,7 +4923,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 79,
+      "line": 88,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4931,7 +4931,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 90,
+      "line": 99,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4939,7 +4939,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 93,
+      "line": 102,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4947,7 +4947,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 94,
+      "line": 103,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4955,7 +4955,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 97,
+      "line": 106,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4963,7 +4963,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 101,
+      "line": 110,
       "pattern": "rownum",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4971,7 +4971,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 102,
+      "line": 111,
       "pattern": "sysdate",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4979,7 +4979,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 104,
+      "line": 113,
       "pattern": "from-dual",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4987,7 +4987,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 115,
+      "line": 124,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4995,7 +4995,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 116,
+      "line": 125,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5003,7 +5003,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 117,
+      "line": 126,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5011,7 +5011,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 129,
+      "line": 138,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5019,7 +5019,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 131,
+      "line": 140,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5027,7 +5027,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 136,
+      "line": 145,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5035,7 +5035,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 137,
+      "line": 146,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5043,7 +5043,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 148,
+      "line": 158,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5107,7 +5107,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 72,
+      "line": 74,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5115,7 +5115,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 74,
+      "line": 76,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5123,7 +5123,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 79,
+      "line": 81,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5131,7 +5131,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 80,
+      "line": 82,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5139,7 +5139,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 82,
+      "line": 84,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5147,7 +5147,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 84,
+      "line": 86,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5155,7 +5155,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 114,
+      "line": 117,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5163,7 +5163,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 116,
+      "line": 119,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5171,7 +5171,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 120,
+      "line": 123,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5179,7 +5179,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 121,
+      "line": 124,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5203,7 +5203,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 44,
+      "line": 78,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5211,7 +5211,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 47,
+      "line": 81,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5219,7 +5219,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 57,
+      "line": 91,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5275,7 +5275,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 85,
+      "line": 93,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5283,7 +5283,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 86,
+      "line": 94,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5291,7 +5291,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 89,
+      "line": 97,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5299,7 +5299,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 90,
+      "line": 98,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5307,7 +5307,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 101,
+      "line": 110,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5315,15 +5315,15 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 103,
+      "line": 112,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。"
+      "excerpt": "`make runtime-script-check` 只做 smoke 与 runtime patch 脚本语法检查，不访问远程环境。`make smoke-platform` 是测试环境平台验证入口，会串联 API、主页待办和菜单页面 smoke，并输出统一 JSON 报告。`make module-intake-check` 是新业务包和恢复模块的只读准入检查，发现默认路径 Oracle 残留会返回非 0。`make audit-"
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 115,
+      "line": 124,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5331,7 +5331,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 117,
+      "line": 126,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -6515,7 +6515,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 19,
+      "line": 21,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6523,7 +6523,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 22,
+      "line": 24,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6531,7 +6531,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 27,
+      "line": 29,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6539,7 +6539,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 28,
+      "line": 30,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6547,7 +6547,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 32,
+      "line": 34,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6555,7 +6555,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 33,
+      "line": 35,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6563,7 +6563,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 40,
+      "line": 42,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6571,7 +6571,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 104,
+      "line": 108,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6579,7 +6579,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 141,
+      "line": 145,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6587,7 +6587,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 150,
+      "line": 154,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6595,7 +6595,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 154,
+      "line": 158,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6603,7 +6603,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 161,
+      "line": 165,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6611,7 +6611,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 169,
+      "line": 173,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6619,7 +6619,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 170,
+      "line": 174,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

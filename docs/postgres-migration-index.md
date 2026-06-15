@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`69`。
-- 编号范围：`001` 到 `069`。
+- 脚本数量：`70`。
+- 编号范围：`001` 到 `070`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,7 +21,7 @@
 | business | 9 |
 | compatibility | 39 |
 | configuration | 18 |
-| general | 2 |
+| general | 3 |
 | notification | 9 |
 | platform | 20 |
 | workflow | 6 |
@@ -33,10 +33,10 @@
 | alter-table | 9111 |
 | create-function | 38 |
 | create-index | 659 |
-| create-table | 479 |
+| create-table | 480 |
 | create-view | 91 |
-| insert | 3577 |
-| update | 3563 |
+| insert | 3578 |
+| update | 3564 |
 
 ## 脚本清单
 
@@ -111,6 +111,7 @@
 | 067 | 067-qcs-table-types-postgres.sql | business | 118 | create-table:1, create-index:3, alter-table:2, insert:2 | - |
 | 068 | 068-organization-position-role-compat.sql | auth-rbac-org, compatibility | 33 | create-table:1, create-view:1, create-index:3 | - |
 | 069 | 069-organization-manager-compat.sql | auth-rbac-org, compatibility | 21 | create-table:1, create-index:3 | - |
+| 070 | 070-test-admin-default-password.sql | general | 47 | create-table:1, insert:1, update:1 | - |
 
 ## 规则
 

@@ -34,21 +34,6 @@ scripts/prepare-runtime-patches.sh /home/v6/adp-mes-docker/runtime/bap-server
 docker compose --env-file .env up -d postgres redis mongo zookeeper kafka nacos keycloak minio
 scripts/init-keycloak-realm.sh
 scripts/sync-keycloak-jwt-public-key.sh
-python3 scripts/patch-postgres-runtime.py \
-  --base-server /home/v6/adp-mes-docker/runtime/bap-server/base-Server \
-  --report /home/v6/adp-mes-docker/runtime/postgres-patch-report.json
-python3 scripts/patch-basicmanagement-signature-mapper.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
-python3 scripts/patch-signature-log-service-fallback.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
-python3 scripts/patch-orgmanagement-rbac-permission-mapper.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
-python3 scripts/patch-orgmanagement-keycloak-admin-url.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
-python3 scripts/patch-orgmanagement-standalone-auth-tasks.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
-python3 scripts/patch-operatetools-standalone-app-list.py \
-  --runtime-root /home/v6/adp-mes-docker/runtime/bap-server
 docker compose --env-file .env up -d
 docker compose --env-file .env restart nginx
 docker compose --env-file .env ps
@@ -123,7 +108,7 @@ If a legacy module must temporarily connect to Oracle, copy the relevant values 
 
 ## PostgreSQL Note
 
-The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and provides `patch-postgres-runtime.py` to inject PostgreSQL DBP classes and generated `postgresql` mapper directories into nested runtime JARs. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; the follow-up patch scripts apply the current recovered-package fixes for signature log mapper loading and RBAC boolean/`UNION` compatibility. Any remaining failures should be fixed from that report and container logs.
+The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and uses `prepare-runtime-patches.sh` to inject PostgreSQL DBP classes, generated `postgresql` mapper directories, recovered-package runtime fixes, and the current EAM static-page compatibility patch. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; any remaining failures should be fixed from that report and container logs.
 
 For the recovered binaries, run the PostgreSQL compatibility SQL in `postgres/init/004-041*.sql` after the recovered runtime creates legacy auth/RBAC tables. These scripts seed the admin/auth baseline, repair RBAC initialization metadata, convert Boolean-backed permission columns, backfill RBAC operation codes, and add compatibility shims for legacy MyBatis fragments that still compare or aggregate Boolean fields as `0/1`.
 
