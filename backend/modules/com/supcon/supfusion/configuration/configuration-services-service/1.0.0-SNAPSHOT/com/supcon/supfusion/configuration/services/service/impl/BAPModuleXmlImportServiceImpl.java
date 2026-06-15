@@ -298,19 +298,19 @@ public class BAPModuleXmlImportServiceImpl extends BaseServiceImpl<Module> imple
 											getLastMetaItem(metaMap, ExtraView.class.getName()).put("fullConfig", null);
 											if (null != codeE) {
 												codeE = codeE.element("config");
-												if (codeE != null) {
-													String fullConfig = codeE.asXML();
-													getLastMetaItem(metaMap, ExtraView.class.getName()).put("config", fullConfig);
-													//getLastMetaItem(metaMap, ExtraView.class.getName()).put("fullConfig", fullConfig);
+													if (codeE != null) {
+														String fullConfig = codeE.asXML();
+														getLastMetaItem(metaMap, ExtraView.class.getName()).put("config", fullConfig);
+														getLastMetaItem(metaMap, ExtraView.class.getName()).put("fullConfig", fullConfig);
+													}
 												}
-											}
-											// 含viewJson
-											getLastMetaItem(metaMap, ExtraView.class.getName()).put("viewJson", null);
-											/*Element viewJsonE = viewPropertyE.element("viewJson");
-											if (null != viewJsonE) {
-												String viewJson = viewJsonE.getText();
-												getLastMetaItem(metaMap, ExtraView.class.getName()).put("viewJson", viewJson);
-											}*/
+												// 含viewJson
+												getLastMetaItem(metaMap, ExtraView.class.getName()).put("viewJson", null);
+												Element viewJsonE = viewPropertyE.element("viewJson");
+												if (null != viewJsonE) {
+													String viewJson = viewJsonE.getText();
+													getLastMetaItem(metaMap, ExtraView.class.getName()).put("viewJson", viewJson);
+												}
 										} else if ("fastQueryJson".equals(viewPropertyName)) {
 											getLastMetaItemAdd(metaMap, FastQueryJson.class.getName()).put("view", view);
 											getLastMetaItem(metaMap, FastQueryJson.class.getName()).put("code", view.getCode());

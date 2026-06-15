@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     ldap_user_name VARCHAR(256) DEFAULT NULL,
     user_directory_id BIGINT DEFAULT NULL,
     lock_reason SMALLINT DEFAULT NULL,
+    lock_time TIMESTAMP DEFAULT NULL,
     time_zone VARCHAR(64) DEFAULT NULL,
     description VARCHAR(512) DEFAULT NULL,
     login_first SMALLINT NOT NULL DEFAULT 1,
@@ -104,7 +105,7 @@ SELECT
     NULL::TIMESTAMP AS passwordmodify_time,
     NULL::TIMESTAMP AS login_time,
     NULL::INTEGER AS login_num,
-    NULL::TIMESTAMP AS lock_time,
+    lock_time,
     'zh_CN' AS language,
     0 AS is_allow_remote_access,
     0 AS remote_access_modified_flag
