@@ -57,6 +57,7 @@ make inventory-check
 make backend-dependency-check
 make oracle-audit-check
 make postgres-migration-check
+make oracle-replacement-check
 ```
 
 启动测试环境仍以 `deploy/docker/README.md` 为准：
@@ -74,6 +75,7 @@ docker compose --env-file .env up -d
 - [项目目标和交付路线](docs/project-objectives.md)
 - [当前内容迁移清单](docs/current-content-inventory.md)
 - [Oracle 迁移 Backlog](docs/oracle-migration-backlog.md)
+- [Oracle 替换状态总账](docs/oracle-replacement-status.md)
 - [PostgreSQL 迁移脚本索引](docs/postgres-migration-index.md)
 - [后端模块提升指南](docs/backend-module-promotion-guide.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)

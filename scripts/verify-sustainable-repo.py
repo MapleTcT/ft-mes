@@ -23,15 +23,18 @@ REQUIRED_PATHS = [
     "docs/current-content-inventory.md",
     "docs/backend-module-dependency-inventory.md",
     "docs/oracle-migration-backlog.md",
+    "docs/oracle-replacement-status.md",
     "docs/postgres-migration-index.md",
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
     "metadata/oracle-migration-audit.json",
+    "metadata/oracle-replacement-status.json",
     "metadata/postgres-migration-inventory.json",
     ".github/workflows/verify.yml",
     "scripts/create-backend-source-module.py",
     "scripts/verify-source-modules.py",
     "scripts/generate-backend-dependency-inventory.py",
+    "scripts/generate-oracle-replacement-status.py",
     "scripts/generate-postgres-migration-inventory.py",
 ]
 

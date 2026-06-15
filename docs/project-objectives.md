@@ -58,6 +58,7 @@
 - `scripts/generate-backend-dependency-inventory.py` 生成恢复后端模块依赖库存。
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
 - `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引。
+- `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。
 
 后续增强：
 
@@ -103,6 +104,7 @@
 - `make backend-dependency-check` 通过。
 - `make oracle-audit-check` 通过。
 - `make postgres-migration-check` 通过。
+- `make oracle-replacement-check` 通过。
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。

@@ -20,7 +20,7 @@ PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -39,6 +39,8 @@ help:
 	@printf '%s\n' '  make oracle-audit-check      Check Oracle migration backlog is fresh'
 	@printf '%s\n' '  make postgres-migration-index Regenerate PostgreSQL migration index'
 	@printf '%s\n' '  make postgres-migration-check Check PostgreSQL migration index is fresh'
+	@printf '%s\n' '  make oracle-replacement-status Regenerate Oracle replacement status ledger'
+	@printf '%s\n' '  make oracle-replacement-check Check Oracle replacement status ledger is fresh'
 	@printf '%s\n' '  make render-config           Render Nacos configs from deploy/docker/.env'
 	@printf '%s\n' '  make prepare-runtime         Prepare static assets and runtime patch assets'
 	@printf '%s\n' '  make up-infra                Start infrastructure services only'
@@ -52,7 +54,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check audit-postgres-mappings
+ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -95,6 +97,12 @@ postgres-migration-index:
 
 postgres-migration-check:
 	$(PYTHON) scripts/generate-postgres-migration-inventory.py --check
+
+oracle-replacement-status:
+	$(PYTHON) scripts/generate-oracle-replacement-status.py
+
+oracle-replacement-check:
+	$(PYTHON) scripts/generate-oracle-replacement-status.py --check
 
 render-config:
 	cd $(DEPLOY_DIR) && $(PYTHON) scripts/render-nacos-configs.py

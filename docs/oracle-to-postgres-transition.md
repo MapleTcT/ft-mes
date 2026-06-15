@@ -73,6 +73,15 @@ make postgres-migration-check
 
 报告见 [PostgreSQL 迁移脚本索引](postgres-migration-index.md)，机器可读结果在 `metadata/postgres-migration-inventory.json`。
 
+所有专项证据会汇总到 Oracle 替换状态总账：
+
+```bash
+make oracle-replacement-status
+make oracle-replacement-check
+```
+
+总账见 [Oracle 替换状态总账](oracle-replacement-status.md)，用于区分当前 CI 阻断项、长期迁移缺口、关注项和计划项。
+
 重点处理：
 
 - `rownum`
@@ -118,6 +127,7 @@ make postgres-migration-check
 - `make backend-dependency-check`
 - `make audit-postgres-mappings`
 - `make postgres-migration-check`
+- `make oracle-replacement-check`
 - `make smoke-api`
 - `make smoke-menu`
 - `make smoke-todo`

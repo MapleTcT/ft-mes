@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": [
+    "metadata/current-content-inventory.json",
+    "metadata/backend-module-dependency-inventory.json",
+    "metadata/oracle-migration-audit.json",
+    "metadata/postgres-migration-inventory.json",
+    "backend/source-modules/pom.xml",
+    "deploy/docker/docker-compose.yml",
+    "deploy/docker/.env.example",
+    "deploy/docker/.env.oracle-legacy.example"
+  ],
+  "summary": {
+    "blockingIssueCount": 0,
+    "gapCount": 2,
+    "watchCount": 1,
+    "plannedCount": 1,
+    "sourceModuleCount": 0,
+    "oracleBacklogReferenceCount": 687,
+    "directOracleDependencyCount": 2,
+    "postgresMigrationCount": 69,
+    "postgresMigrationHighRiskCount": 0,
+    "postgresMapperAuditErrorCount": 0,
+    "postgresMapperAuditWarningCount": 3
+  },
+  "sourceCounts": {
+    "backendSourceJars": 250,
+    "backendJavaFiles": 4807,
+    "backendXmlFiles": 398,
+    "decompiledServices": 23,
+    "frontendSourceMaps": 366,
+    "frontendRecoveredFiles": 991,
+    "composeServices": 53,
+    "businessRuntimeServices": 14
+  },
+  "composeDefaults": {
+    "contentInventoryDefault": "postgresql",
+    "composeDefaultsPostgres": true,
+    "composeImplicitOracleDefault": false,
+    "envExamplePostgres": true,
+    "envExamplePostgresHost": true,
+    "oracleLegacyTemplatePresent": true
+  },
+  "postgresMapperAudit": {
+    "findingCount": 3,
+    "errorCount": 0,
+    "warningCount": 3,
+    "undecodableCount": 0,
+    "byPattern": {
+      "oracle-to-char": 3
+    },
+    "bySeverity": {
+      "warning": 3
+    },
+    "byScope": {
+      "postgresql": 3
+    },
+    "topFiles": [
+      {
+        "file": "014-ui-smoke-runtime-fixups.sql",
+        "findingCount": 1
+      },
+      {
+        "file": "016-notification-printer-runtime-fixups.sql",
+        "findingCount": 1
+      },
+      {
+        "file": "021-notification-postgres-idempotent-fixups.sql",
+        "findingCount": 1
+      }
+    ]
+  },
+  "oracleBacklogCategoryCounts": {
+    "allowed-legacy-contract": 6,
+    "decompiled-runtime-backlog": 16,
+    "documentation-or-workflow": 106,
+    "frontend-row-index-noise": 4,
+    "legacy-ojdbc-dependency": 6,
+    "legacy-oracle-sql-resource": 160,
+    "postgres-compat-reference": 1,
+    "postgres-conversion-tooling": 26,
+    "recovered-source-backlog": 266,
+    "runtime-config-backlog": 2,
+    "runtime-patch-backlog": 9,
+    "tooling-or-audit-code": 85
+  },
+  "backendDirectOracleModules": [
+    {
+      "key": "com.supcon.supfusion.flow:flow-common",
+      "path": "backend/modules/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE/META-INF/maven/com.supcon.supfusion.flow/flow-common/pom.xml",
+      "oracleDependencyCount": 1
+    },
+    {
+      "key": "com.supcon.supfusion:auth-upgrade",
+      "path": "backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/META-INF/maven/com.supcon.supfusion/auth-upgrade/pom.xml",
+      "oracleDependencyCount": 1
+    }
+  ],
+  "postgresMigrationWatchCount": 44,
+  "checks": [
+    {
+      "id": "runtime-default-postgresql",
+      "title": "Docker 测试环境默认 PostgreSQL",
+      "status": "pass",
+      "evidence": "content inventory default=postgresql, compose postgres default=True, env example postgres=True",
+      "nextAction": "保持 `.env.example` 和 Compose 默认值指向 PostgreSQL。",
+      "blocking": false
+    },
+    {
+      "id": "oracle-legacy-only",
+      "title": "Oracle 只作为 legacy 路径保留",
+      "status": "watch",
+      "evidence": "Oracle migration backlog has 687 tracked references.",
+      "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
+      "blocking": false
+    },
+    {
+      "id": "backend-direct-oracle-deps",
+      "title": "恢复 POM 直接 Oracle/JDBC 依赖已入账",
+      "status": "gap",
+      "evidence": "250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies.",
+      "nextAction": "模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。",
+      "blocking": false
+    },
+    {
+      "id": "mapper-postgres-audit",
+      "title": "默认路径 Mapper/SQL 无阻断方言",
+      "status": "pass",
+      "evidence": "errors=0, warnings=3, findings=3",
+      "nextAction": "任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。",
+      "blocking": false
+    },
+    {
+      "id": "postgres-migration-governance",
+      "title": "PostgreSQL 初始化脚本可审计",
+      "status": "pass",
+      "evidence": "69 scripts, range=001-069, highRisk=0, watch=44",
+      "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
+      "blocking": false
+    },
+    {
+      "id": "recovered-source-inventory",
+      "title": "当前恢复内容有机器库存",
+      "status": "pass",
+      "evidence": "250 source jars, 991 frontend files, 53 compose services.",
+      "nextAction": "新增包、服务或 source map 后运行 `make inventory`。",
+      "blocking": false
+    },
+    {
+      "id": "source-module-promotion",
+      "title": "恢复源码已开始提升为可编译模块",
+      "status": "gap",
+      "evidence": "`backend/source-modules` currently declares 0 buildable modules.",
+      "nextAction": "按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。",
+      "blocking": false
+    },
+    {
+      "id": "backend-table-audit",
+      "title": "后端落表业务排查已拆为专门工作流",
+      "status": "planned",
+      "evidence": "`docs/backend-table-audit-handoff.md` and issue template exist; detailed table maps remain future work.",
+      "nextAction": "专门线程输出页面/API/服务/Mapper/表/字段映射，避免混进平台工程化任务。",
+      "blocking": false
+    }
+  ]
+}

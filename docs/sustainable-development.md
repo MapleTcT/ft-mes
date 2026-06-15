@@ -80,6 +80,8 @@ make oracle-audit
 make oracle-audit-check
 make postgres-migration-index
 make postgres-migration-check
+make oracle-replacement-status
+make oracle-replacement-check
 make render-config
 make up-infra
 make up
@@ -90,7 +92,7 @@ make audit-postgres-mappings
 make audit-postgres-report
 ```
 
-`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜，以及 PostgreSQL 方言审计。
+`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。
 
 `make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 
@@ -106,3 +108,4 @@ make audit-postgres-report
 - 新增、移除或修改 `backend/modules` 恢复源码 POM 后，运行 `make backend-dependency-inventory` 更新 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)。
 - 新增、删除或修改 Oracle/ojdbc/Oracle 方言引用后，运行 `make oracle-audit` 更新 [Oracle 迁移 Backlog](oracle-migration-backlog.md)。
 - 新增、删除或修改 `deploy/docker/postgres/init/*.sql` 后，运行 `make postgres-migration-index` 更新 [PostgreSQL 迁移脚本索引](postgres-migration-index.md)。
+- 更新任一 Oracle 退场相关清单后，运行 `make oracle-replacement-status` 更新 [Oracle 替换状态总账](oracle-replacement-status.md)。

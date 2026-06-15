@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "findingCount": 643,
+  "findingCount": 687,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 88,
+    "documentation-or-workflow": 106,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -13,12 +13,12 @@
     "recovered-source-backlog": 266,
     "runtime-config-backlog": 2,
     "runtime-patch-backlog": 9,
-    "tooling-or-audit-code": 59
+    "tooling-or-audit-code": 85
   },
   "patternCounts": {
     "from-dual": 139,
-    "ojdbc": 9,
-    "oracle-keyword": 322,
+    "ojdbc": 13,
+    "oracle-keyword": 362,
     "rownum": 40,
     "sysdate": 133
   },
@@ -40,16 +40,24 @@
       "findingCount": 34
     },
     {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "findingCount": 24
+    },
+    {
       "file": "backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql",
       "findingCount": 20
     },
     {
-      "file": "docs/oracle-to-postgres-transition.md",
-      "findingCount": 19
-    },
-    {
       "file": "backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql",
       "findingCount": 17
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "findingCount": 17
+    },
+    {
+      "file": "Makefile",
+      "findingCount": 14
     },
     {
       "file": "backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mariadb/systemconfig_1.sql",
@@ -64,12 +72,16 @@
       "findingCount": 12
     },
     {
-      "file": "backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql",
-      "findingCount": 11
+      "file": "docs/project-objectives.md",
+      "findingCount": 12
     },
     {
-      "file": "docs/project-objectives.md",
-      "findingCount": 10
+      "file": "docs/sustainable-development.md",
+      "findingCount": 12
+    },
+    {
+      "file": "backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql",
+      "findingCount": 11
     },
     {
       "file": "backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTaskServiceImpl.java",
@@ -88,12 +100,8 @@
       "findingCount": 9
     },
     {
-      "file": "docs/sustainable-development.md",
+      "file": "scripts/verify-sustainable-repo.py",
       "findingCount": 9
-    },
-    {
-      "file": "Makefile",
-      "findingCount": 8
     },
     {
       "file": "backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml",
@@ -134,14 +142,6 @@
     {
       "file": "docs/backend-table-audit-handoff.md",
       "findingCount": 7
-    },
-    {
-      "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java",
-      "findingCount": 6
-    },
-    {
-      "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
-      "findingCount": 6
     }
   ],
   "findings": [
@@ -243,15 +243,31 @@
     },
     {
       "file": "Makefile",
-      "line": 55,
+      "line": 42,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": "ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check audit-postgres-mappings"
+      "excerpt": "@printf '%s\\n' ' make oracle-replacement-status Regenerate Oracle replacement status ledger'"
     },
     {
       "file": "Makefile",
-      "line": 87,
+      "line": 43,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "@printf '%s\\n' ' make oracle-replacement-check Check Oracle replacement status ledger is fresh'"
+    },
+    {
+      "file": "Makefile",
+      "line": 57,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings"
+    },
+    {
+      "file": "Makefile",
+      "line": 89,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -259,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 88,
+      "line": 90,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -267,7 +283,7 @@
     },
     {
       "file": "Makefile",
-      "line": 90,
+      "line": 92,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,11 +291,43 @@
     },
     {
       "file": "Makefile",
-      "line": 91,
+      "line": 93,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
       "excerpt": "$(PYTHON) scripts/generate-oracle-migration-audit.py --check"
+    },
+    {
+      "file": "Makefile",
+      "line": 101,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "oracle-replacement-status:"
+    },
+    {
+      "file": "Makefile",
+      "line": 102,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "$(PYTHON) scripts/generate-oracle-replacement-status.py"
+    },
+    {
+      "file": "Makefile",
+      "line": 104,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "oracle-replacement-check:"
+    },
+    {
+      "file": "Makefile",
+      "line": 105,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
+      "excerpt": "$(PYTHON) scripts/generate-oracle-replacement-status.py --check"
     },
     {
       "file": "README.md",
@@ -299,7 +347,15 @@
     },
     {
       "file": "README.md",
-      "line": 76,
+      "line": 60,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "make oracle-replacement-check"
+    },
+    {
+      "file": "README.md",
+      "line": 77,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -307,7 +363,15 @@
     },
     {
       "file": "README.md",
-      "line": 82,
+      "line": 78,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- [Oracle 替换状态总账](docs/oracle-replacement-status.md)"
+    },
+    {
+      "file": "README.md",
+      "line": 84,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4298,6 +4362,54 @@
       "excerpt": "mybatis-plus.mapper-locations[0]=forceChange:classpath:mappers/${supfusion.cloud.datasource.connect.system.db-type:oracle}/*.xml"
     },
     {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 15,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle 依赖：`2`。"
+    },
+    {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 103,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "## Oracle/JDBC 风险"
+    },
+    {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 105,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "| Module | Oracle deps | Path |"
+    },
+    {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 144,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "| Module | Family | Layer | Deps | Internal | External | Oracle | Path |"
+    },
+    {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 400,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 提升模块前先查看本清单中的 family、layer、内部依赖和 Oracle/JDBC 风险。"
+    },
+    {
+      "file": "docs/backend-module-dependency-inventory.md",
+      "line": 402,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle JDBC 只能保留在 legacy profile 或迁移说明中，不能进入默认 PostgreSQL 路径。"
+    },
+    {
       "file": "docs/backend-module-dependency-map.md",
       "line": 13,
       "pattern": "oracle-keyword",
@@ -4571,7 +4683,39 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 78,
+      "line": 76,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "所有专项证据会汇总到 Oracle 替换状态总账："
+    },
+    {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "line": 79,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "make oracle-replacement-status"
+    },
+    {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "line": 80,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "make oracle-replacement-check"
+    },
+    {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "line": 83,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "总账见 [Oracle 替换状态总账](oracle-replacement-status.md)，用于区分当前 CI 阻断项、长期迁移缺口、关注项和计划项。"
+    },
+    {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "line": 87,
       "pattern": "rownum",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4579,7 +4723,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 79,
+      "line": 88,
       "pattern": "sysdate",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4587,7 +4731,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 81,
+      "line": 90,
       "pattern": "from-dual",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4595,7 +4739,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 92,
+      "line": 101,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4603,7 +4747,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 104,
+      "line": 113,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4611,7 +4755,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 106,
+      "line": 115,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4619,7 +4763,7 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 111,
+      "line": 120,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4627,11 +4771,19 @@
     },
     {
       "file": "docs/oracle-to-postgres-transition.md",
-      "line": 112,
+      "line": 121,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- 文档中记录了旧 Oracle 脚本对应的 PostgreSQL 替代方案。"
+    },
+    {
+      "file": "docs/oracle-to-postgres-transition.md",
+      "line": 130,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `make oracle-replacement-check`"
     },
     {
       "file": "docs/project-objectives.md",
@@ -4675,7 +4827,15 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 67,
+      "line": 61,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 68,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4683,7 +4843,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 69,
+      "line": 70,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4691,7 +4851,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 74,
+      "line": 75,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4699,7 +4859,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 104,
+      "line": 105,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4707,7 +4867,15 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 109,
+      "line": 107,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- `make oracle-replacement-check` 通过。"
+    },
+    {
+      "file": "docs/project-objectives.md",
+      "line": 111,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4779,11 +4947,19 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 93,
+      "line": 83,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜，以及 PostgreSQL 方言审计。"
+      "excerpt": "make oracle-replacement-status"
+    },
+    {
+      "file": "docs/sustainable-development.md",
+      "line": 84,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "make oracle-replacement-check"
     },
     {
       "file": "docs/sustainable-development.md",
@@ -4791,15 +4967,31 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。"
+    },
+    {
+      "file": "docs/sustainable-development.md",
+      "line": 97,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。"
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 107,
+      "line": 109,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- 新增、删除或修改 Oracle/ojdbc/Oracle 方言引用后，运行 `make oracle-audit` 更新 [Oracle 迁移 Backlog](oracle-migration-backlog.md)。"
+    },
+    {
+      "file": "docs/sustainable-development.md",
+      "line": 111,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 更新任一 Oracle 退场相关清单后，运行 `make oracle-replacement-status` 更新 [Oracle 替换状态总账](oracle-replacement-status.md)。"
     },
     {
       "file": "frontend/apps/print/src/routes/reporter/ReporterDesigner/FillData.js",
@@ -4880,6 +5072,142 @@
       "category": "allowed-legacy-contract",
       "note": "Oracle is explicit legacy compatibility, not the default runtime path.",
       "excerpt": "<adp.db.flavor>oracle</adp.db.flavor>"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 43,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"ojdbc6\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 44,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"ojdbc7\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 45,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"ojdbc8\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 46,
+      "pattern": "ojdbc",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"ojdbc10\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 47,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"oracle-jdbc\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 120,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "return \"oracle\" in group or \"oracle\" in artifact or artifact.startswith(\"ojdbc\")"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 138,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"oracle\": is_oracle_dependency(group_id, artifact_id),"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 201,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "item[\"oracleDependencyCount\"] = sum(1 for dep in own_deps if dep[\"oracle\"])"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 236,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"oracle\": dep[\"oracle\"],"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 251,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"oracleDependencyCount\": sum(1 for dep in dependencies if dep[\"oracle\"]),"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 303,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "oracle_rows = [[\"Module\", \"Oracle deps\", \"Path\"]]"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 311,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "module_rows = [[\"Module\", \"Family\", \"Layer\", \"Deps\", \"Internal\", \"External\", \"Oracle\", \"Path\"]]"
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 341,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "f\"- Oracle 依赖：`{inventory['oracleDependencyCount']}`。\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 361,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"## Oracle/JDBC 风险\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 363,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "table(oracle_rows) if len(oracle_rows) > 1 else \"当前恢复 POM 没有直接 Oracle JDBC 依赖。\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 376,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- 提升模块前先查看本清单中的 family、layer、内部依赖和 Oracle/JDBC 风险。\","
+    },
+    {
+      "file": "scripts/generate-backend-dependency-inventory.py",
+      "line": 378,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"- Oracle JDBC 只能保留在 legacy profile 或迁移说明中，不能进入默认 PostgreSQL 路径。\","
     },
     {
       "file": "scripts/generate-current-content-inventory.py",
@@ -5267,7 +5595,15 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 29,
+      "line": 26,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"docs/oracle-replacement-status.md\","
+    },
+    {
+      "file": "scripts/verify-sustainable-repo.py",
+      "line": 30,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -5275,7 +5611,23 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 95,
+      "line": 31,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"metadata/oracle-replacement-status.json\","
+    },
+    {
+      "file": "scripts/verify-sustainable-repo.py",
+      "line": 37,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"scripts/generate-oracle-replacement-status.py\","
+    },
+    {
+      "file": "scripts/verify-sustainable-repo.py",
+      "line": 98,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -5283,7 +5635,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 96,
+      "line": 99,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
