@@ -1,0 +1,1913 @@
+{
+  "schemaVersion": 1,
+  "migrationDirectory": "deploy/docker/postgres/init",
+  "migrationCount": 69,
+  "firstNumber": 1,
+  "lastNumber": 69,
+  "missingNumbers": [],
+  "duplicateNumbers": [],
+  "invalidNames": [],
+  "highRiskStatementCount": 0,
+  "watchStatementCount": 44,
+  "statementTotals": {
+    "alter-table": 9111,
+    "create-function": 38,
+    "create-index": 659,
+    "create-table": 479,
+    "create-view": 91,
+    "insert": 3577,
+    "update": 3563
+  },
+  "tagTotals": {
+    "auth-rbac-org": 24,
+    "business": 9,
+    "compatibility": 39,
+    "configuration": 18,
+    "general": 2,
+    "notification": 9,
+    "platform": 20,
+    "workflow": 6
+  },
+  "migrations": [
+    {
+      "file": "deploy/docker/postgres/init/001-adp-postgres-compat.sql",
+      "name": "001-adp-postgres-compat.sql",
+      "number": 1,
+      "slug": "adp-postgres-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 108,
+      "sha256": "cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 6,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 1,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, smallint);"
+        },
+        {
+          "line": 2,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, integer);"
+        },
+        {
+          "line": 3,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, bigint);"
+        },
+        {
+          "line": 4,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_smallint(varchar, smallint);"
+        },
+        {
+          "line": 5,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_integer(varchar, integer);"
+        },
+        {
+          "line": 6,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_bigint(varchar, bigint);"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/002-sms-jincang.sql",
+      "name": "002-sms-jincang.sql",
+      "number": 2,
+      "slug": "sms-jincang",
+      "validName": true,
+      "tags": [
+        "notification"
+      ],
+      "lineCount": 26,
+      "sha256": "43007e1051a191caa4b6eb1238520600530c2605258ce166d0b00cdd0a32e598",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/003-core-missing-tables.sql",
+      "name": "003-core-missing-tables.sql",
+      "number": 3,
+      "slug": "core-missing-tables",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 502,
+      "sha256": "a4d495dbbd3b77e45b18b4cb4a1f600afbcc46090b6e3590b7dadea224547439",
+      "statementCounts": {
+        "create-table": 24,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 30,
+        "alter-table": 0,
+        "insert": 7,
+        "update": 4
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/004-auth-org-user.sql",
+      "name": "004-auth-org-user.sql",
+      "number": 4,
+      "slug": "auth-org-user",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 112,
+      "sha256": "fd117cb4304b8821e1335b7c92a05fe1794de74da819cca0a2933d1d63fed0d2",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 1,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/005-rbac-init-version.sql",
+      "name": "005-rbac-init-version.sql",
+      "number": 5,
+      "slug": "rbac-init-version",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 12,
+      "sha256": "7bfe6e70d337bfac3fdaceefce495a9d4b114981c0fbe41145d39ac214085874",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/006-rbac-auth-fixups.sql",
+      "name": "006-rbac-auth-fixups.sql",
+      "number": 6,
+      "slug": "rbac-auth-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 410,
+      "sha256": "44910d5e6297785bb12ef173a09e71a2fc22fe9e8098931b78ee2a6f1c9dd8ce",
+      "statementCounts": {
+        "create-table": 10,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 22,
+        "alter-table": 15,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/007-rbac-boolean-columns.sql",
+      "name": "007-rbac-boolean-columns.sql",
+      "number": 7,
+      "slug": "rbac-boolean-columns",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 97,
+      "sha256": "275eae5be41b33fafb9d60ad2160a27e17bf8f77dc54b9a2bc183823da3025c7",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 3,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 5,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS base_rolepermission;"
+        },
+        {
+          "line": 6,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS base_menuoperate;"
+        },
+        {
+          "line": 7,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS base_menuinfo;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/008-rbac-boolean-aggregate.sql",
+      "name": "008-rbac-boolean-aggregate.sql",
+      "number": 8,
+      "slug": "rbac-boolean-aggregate",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 21,
+      "sha256": "c087b3161c3a0d3c272867052809440deaec6749892030ac11151107f5e79bd8",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 16,
+          "pattern": "drop-aggregate",
+          "excerpt": "DROP AGGREGATE IF EXISTS public.sum(boolean);"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/009-rbac-boolean-integer-operators.sql",
+      "name": "009-rbac-boolean-integer-operators.sql",
+      "number": 9,
+      "slug": "rbac-boolean-integer-operators",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 93,
+      "sha256": "d9e66c4ecd1c0816c599481dbaa9899d96d8db3f4aeaca56d77c499040fe9904",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 6,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 66,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, integer);"
+        },
+        {
+          "line": 67,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (integer, boolean);"
+        },
+        {
+          "line": 68,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.<> (boolean, integer);"
+        },
+        {
+          "line": 69,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.<> (integer, boolean);"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/010-rbac-boolean-minmax-aggregates.sql",
+      "name": "010-rbac-boolean-minmax-aggregates.sql",
+      "number": 10,
+      "slug": "rbac-boolean-minmax-aggregates",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 45,
+      "sha256": "cf79ae2fe0d2685240d76c46d8728bfd0780e6c26e9367272462b779c5b209a4",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 34,
+          "pattern": "drop-aggregate",
+          "excerpt": "DROP AGGREGATE IF EXISTS public.max(boolean);"
+        },
+        {
+          "line": 35,
+          "pattern": "drop-aggregate",
+          "excerpt": "DROP AGGREGATE IF EXISTS public.min(boolean);"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/011-rbac-userpermission-boolean-fixups.sql",
+      "name": "011-rbac-userpermission-boolean-fixups.sql",
+      "number": 11,
+      "slug": "rbac-userpermission-boolean-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 111,
+      "sha256": "f0e40b2eb0aaf1969dc2614529c0018cdf0cad7831e4287a5f43a1b60dff605c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 3,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 5,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS base_userpermission;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/012-rbac-userpermission-menuoperate-code.sql",
+      "name": "012-rbac-userpermission-menuoperate-code.sql",
+      "number": 12,
+      "slug": "rbac-userpermission-menuoperate-code",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org"
+      ],
+      "lineCount": 15,
+      "sha256": "2a8b6f118d8494bada4bf86d7e2ead8b06a6591e85abf2990375e322f3619a17",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/013-page-runtime-schema-fixups.sql",
+      "name": "013-page-runtime-schema-fixups.sql",
+      "number": 13,
+      "slug": "page-runtime-schema-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 409,
+      "sha256": "9e86a39b8ec4c810509369d3276aa4d5070d4717641b78b76f42c6b39c6991e8",
+      "statementCounts": {
+        "create-table": 8,
+        "create-view": 2,
+        "create-function": 0,
+        "create-index": 7,
+        "alter-table": 2,
+        "insert": 5,
+        "update": 6
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/014-ui-smoke-runtime-fixups.sql",
+      "name": "014-ui-smoke-runtime-fixups.sql",
+      "number": 14,
+      "slug": "ui-smoke-runtime-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 570,
+      "sha256": "dc3f6de2cdb32fbdac65f65f4a21851ec2efadd1dc4fae7b881a5cf11b45e59e",
+      "statementCounts": {
+        "create-table": 8,
+        "create-view": 3,
+        "create-function": 3,
+        "create-index": 7,
+        "alter-table": 3,
+        "insert": 4,
+        "update": 7
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 169,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+        },
+        {
+          "line": 243,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;"
+        },
+        {
+          "line": 384,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_positionwork;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/015-i18n-dingtalk-startup.sql",
+      "name": "015-i18n-dingtalk-startup.sql",
+      "number": 15,
+      "slug": "i18n-dingtalk-startup",
+      "validName": true,
+      "tags": [
+        "platform",
+        "notification"
+      ],
+      "lineCount": 175,
+      "sha256": "b4afb8d147923038d9f3ca31d4ffd0730256d5877ccffa761b8c19e6c344393f",
+      "statementCounts": {
+        "create-table": 9,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 6,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 4
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/016-notification-printer-runtime-fixups.sql",
+      "name": "016-notification-printer-runtime-fixups.sql",
+      "number": 16,
+      "slug": "notification-printer-runtime-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "notification",
+        "compatibility"
+      ],
+      "lineCount": 625,
+      "sha256": "9bcdb7f214118649780c148d9ee80f3480496ad85a1446801ad8dff86c33138c",
+      "statementCounts": {
+        "create-table": 29,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 18,
+        "alter-table": 2,
+        "insert": 7,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/017-rbac-menuoperate-url-ref-fixups.sql",
+      "name": "017-rbac-menuoperate-url-ref-fixups.sql",
+      "number": 17,
+      "slug": "rbac-menuoperate-url-ref-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 241,
+      "sha256": "71f6d9fe21d722cb957441bb5f21b3264797702402cbe7b90a378025ab138233",
+      "statementCounts": {
+        "create-table": 6,
+        "create-view": 4,
+        "create-function": 0,
+        "create-index": 9,
+        "alter-table": 4,
+        "insert": 8,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 195,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapmsposition;"
+        },
+        {
+          "line": 196,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermissionstaff;"
+        },
+        {
+          "line": 197,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/018-org-mnecode-fixups.sql",
+      "name": "018-org-mnecode-fixups.sql",
+      "number": 18,
+      "slug": "org-mnecode-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 102,
+      "sha256": "3e8a2776e3220b4ea133fd99273d05fe446540e75e134116904acf1e3ecb43e3",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 4,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 61,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_staff_mnecode;"
+        },
+        {
+          "line": 62,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_department_mnecode;"
+        },
+        {
+          "line": 63,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_position_mnecode;"
+        },
+        {
+          "line": 64,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group_mnecode;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/019-auth-online-user-fixups.sql",
+      "name": "019-auth-online-user-fixups.sql",
+      "number": 19,
+      "slug": "auth-online-user-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 46,
+      "sha256": "34e7a57b48c4e54eed48b3605926ba7c8f2976eb8690ea97967153457329a661",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 19,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/020-iam-account-fixups.sql",
+      "name": "020-iam-account-fixups.sql",
+      "number": 20,
+      "slug": "iam-account-fixups",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 55,
+      "sha256": "3affc904e46dc12f817a61c209d30323d228a1e06d52928fe249205f057a03ff",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 12,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/021-notification-postgres-idempotent-fixups.sql",
+      "name": "021-notification-postgres-idempotent-fixups.sql",
+      "number": 21,
+      "slug": "notification-postgres-idempotent-fixups",
+      "validName": true,
+      "tags": [
+        "notification",
+        "compatibility"
+      ],
+      "lineCount": 264,
+      "sha256": "11baee6798eef14548089c6d1a21e163deaf93e19f774861feccef7a1abd4b43",
+      "statementCounts": {
+        "create-table": 3,
+        "create-view": 0,
+        "create-function": 5,
+        "create-index": 4,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 6
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 38,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_before_insert_idempotent ON public.notice_protocol;"
+        },
+        {
+          "line": 91,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_tmpl_before_insert_idempotent ON public.notice_protocol_tmpl;"
+        },
+        {
+          "line": 130,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_tmpl_before_insert_idempotent ON public.notice_tmpl;"
+        },
+        {
+          "line": 167,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_before_insert_idempotent ON public.notice_topic;"
+        },
+        {
+          "line": 199,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_tmpl_rel_before_insert_idempotent ON public.notice_topic_tmpl_rel;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/022-notification-topic-rel-type-fixups.sql",
+      "name": "022-notification-topic-rel-type-fixups.sql",
+      "number": 22,
+      "slug": "notification-topic-rel-type-fixups",
+      "validName": true,
+      "tags": [
+        "notification",
+        "compatibility"
+      ],
+      "lineCount": 42,
+      "sha256": "32bbd36e7ab93be3edb914ac85eeff1b0663f60820a38ac096377cf736a384e3",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 3,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/023-auth-user-role-fixups.sql",
+      "name": "023-auth-user-role-fixups.sql",
+      "number": 23,
+      "slug": "auth-user-role-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 63,
+      "sha256": "8b130d90be57e654450e46ed1241944ba1f125a5e2221d58c91472f76a710e55",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/024-auth-login-config-fixups.sql",
+      "name": "024-auth-login-config-fixups.sql",
+      "number": 24,
+      "slug": "auth-login-config-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 37,
+      "sha256": "9ada921b0fb48204f28660fc773d9ba33908a8cdc902eee28839ce729ab12397",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/025-notification-default-iam-account.sql",
+      "name": "025-notification-default-iam-account.sql",
+      "number": 25,
+      "slug": "notification-default-iam-account",
+      "validName": true,
+      "tags": [
+        "notification"
+      ],
+      "lineCount": 37,
+      "sha256": "ee272155f83ce3ff404196664e1818c61943d5e839db59f6e74dc4b8792eb12a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/026-notification-pending-topic-bindings.sql",
+      "name": "026-notification-pending-topic-bindings.sql",
+      "number": 26,
+      "slug": "notification-pending-topic-bindings",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "notification"
+      ],
+      "lineCount": 42,
+      "sha256": "3adf33ab32eb1749ea251a8d752888f247a55410cb472010b5957841b628da71",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/027-login-theme-runtime-fixups.sql",
+      "name": "027-login-theme-runtime-fixups.sql",
+      "number": 27,
+      "slug": "login-theme-runtime-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 116,
+      "sha256": "fcf6d3c310fd348be16aeddb6337dc3e8a6326eab93ff335ea72591e51f6190e",
+      "statementCounts": {
+        "create-table": 2,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/028-auth-user-directory-fixups.sql",
+      "name": "028-auth-user-directory-fixups.sql",
+      "number": 28,
+      "slug": "auth-user-directory-fixups",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 33,
+      "sha256": "a1e5f61e429bc82971b0c667a8a1d4c816a1c5bfe9272bc263243be19edf75c7",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/029-theme-portal-loginlog-fixups.sql",
+      "name": "029-theme-portal-loginlog-fixups.sql",
+      "number": 29,
+      "slug": "theme-portal-loginlog-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 141,
+      "sha256": "6eb78aa1cdb785fe8a72b1a310d409a108cf96532a761e30e8bd1284a30ac379",
+      "statementCounts": {
+        "create-table": 6,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 4,
+        "insert": 1,
+        "update": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/030-rbac-menu-validity-fixups.sql",
+      "name": "030-rbac-menu-validity-fixups.sql",
+      "number": 30,
+      "slug": "rbac-menu-validity-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 10,
+      "sha256": "9bc36f25cc048853884e0d81819358ed04a56d3a8d4b262e88f1fb105b9274f2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/031-rbac-menu-collection-fixups.sql",
+      "name": "031-rbac-menu-collection-fixups.sql",
+      "number": 31,
+      "slug": "rbac-menu-collection-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 30,
+      "sha256": "13e52258026b73b8ce3e87dba839de937837e528c9981d5a740d94fdd2f707cf",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/032-organization-base-company-views.sql",
+      "name": "032-organization-base-company-views.sql",
+      "number": 32,
+      "slug": "organization-base-company-views",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "configuration"
+      ],
+      "lineCount": 93,
+      "sha256": "a74fa53f4daa102159f72dc6c74887984e40497061bbdac233563ecfdf628038",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 2,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/033-test-admin-usability-fixups.sql",
+      "name": "033-test-admin-usability-fixups.sql",
+      "number": 33,
+      "slug": "test-admin-usability-fixups",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 8,
+      "sha256": "a6d871c0efe566a9d7895dd4a48a2741a9137c5b23b7f0c483c408f543fddb2a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/034-workflow-ec-table-info-fixups.sql",
+      "name": "034-workflow-ec-table-info-fixups.sql",
+      "number": 34,
+      "slug": "workflow-ec-table-info-fixups",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 40,
+      "sha256": "d85554bd69477e3c24d03b2759ad7b16792ae6079d8e6725a7c8033454f8eb44",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/035-organization-core-base-views.sql",
+      "name": "035-organization-core-base-views.sql",
+      "number": 35,
+      "slug": "organization-core-base-views",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "configuration"
+      ],
+      "lineCount": 360,
+      "sha256": "946301574fbf903d204f5c088eac84ffa86ae6c9e0f27e7eba8c9b36f9c71b27",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 4,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/036-notification-stationletter-config.sql",
+      "name": "036-notification-stationletter-config.sql",
+      "number": 36,
+      "slug": "notification-stationletter-config",
+      "validName": true,
+      "tags": [
+        "notification"
+      ],
+      "lineCount": 32,
+      "sha256": "3a1250a3a1d967ac7d7a3d70d0613106fc019f61e8b583e7da7d964b78605dfc",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/037-platform-page-smoke-fixups.sql",
+      "name": "037-platform-page-smoke-fixups.sql",
+      "number": 37,
+      "slug": "platform-page-smoke-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 369,
+      "sha256": "f8ac0b8b9db205d7e502b447d862e5129a6b60fc31fba9b83887cca43c7a7199",
+      "statementCounts": {
+        "create-table": 15,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 15,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 304,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/038-i18n-language-name-resource-fixups.sql",
+      "name": "038-i18n-language-name-resource-fixups.sql",
+      "number": 38,
+      "slug": "i18n-language-name-resource-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 31,
+      "sha256": "f1550d2c5563dab21c7a8a90d281056b2e18ab517085d2b1aba64911421661ed",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/039-platform-menu-full-smoke-fixups.sql",
+      "name": "039-platform-menu-full-smoke-fixups.sql",
+      "number": 39,
+      "slug": "platform-menu-full-smoke-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 586,
+      "sha256": "fb8c9ecc20509935d9b73714445c40bfcae87cac3fe9e6dacc1e04ab7af4da0f",
+      "statementCounts": {
+        "create-table": 11,
+        "create-view": 5,
+        "create-function": 0,
+        "create-index": 15,
+        "alter-table": 6,
+        "insert": 2,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 414,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuinfo;"
+        },
+        {
+          "line": 469,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+        },
+        {
+          "line": 538,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_roleuser;"
+        },
+        {
+          "line": 551,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group;"
+        },
+        {
+          "line": 570,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_groupmember;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/040-notification-i18n-resource-fixups.sql",
+      "name": "040-notification-i18n-resource-fixups.sql",
+      "number": 40,
+      "slug": "notification-i18n-resource-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "notification",
+        "compatibility"
+      ],
+      "lineCount": 31,
+      "sha256": "8e0d0f8ba6b916aea3e2e9d6f37d5f09338ba19d3652c8ae55d1a4bfe92ccd63",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/041-workflow-pending-source-fixups.sql",
+      "name": "041-workflow-pending-source-fixups.sql",
+      "number": 41,
+      "slug": "workflow-pending-source-fixups",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "compatibility"
+      ],
+      "lineCount": 19,
+      "sha256": "56607b7468a0059bdb807718b21dc0d0ecfdf8beb5640457f96b55f719c40fb3",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/042-configuration-module-import-fixups.sql",
+      "name": "042-configuration-module-import-fixups.sql",
+      "number": 42,
+      "slug": "configuration-module-import-fixups",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 109,
+      "sha256": "d2d997ee244a474cefcfc1dfbff75b03ee8c7cf7212127ef6269bb3622959957",
+      "statementCounts": {
+        "create-table": 3,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 1,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/043-configuration-design-tables-from-vendor.sql",
+      "name": "043-configuration-design-tables-from-vendor.sql",
+      "number": 43,
+      "slug": "configuration-design-tables-from-vendor",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 3069,
+      "sha256": "b77338cb0f6ecbcb80e3f5a675ee4899cc6539eeb54dceca7d535c804188d31b",
+      "statementCounts": {
+        "create-table": 121,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 1,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/044-configuration-design-flag-types.sql",
+      "name": "044-configuration-design-flag-types.sql",
+      "number": 44,
+      "slug": "configuration-design-flag-types",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 220,
+      "sha256": "b736f4ecb910e7c6c503cec0a7b8b7d5983f92e1f9edae19bbdcfbfb8bbb8321",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 3,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/045-configuration-view-mobile-version.sql",
+      "name": "045-configuration-view-mobile-version.sql",
+      "number": 45,
+      "slug": "configuration-view-mobile-version",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 14,
+      "sha256": "39332921ae1d1f7db35b4c1ccded172e750732691c95ad6868a18606761a1155",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/046-configuration-property-newer-fields.sql",
+      "name": "046-configuration-property-newer-fields.sql",
+      "number": 46,
+      "slug": "configuration-property-newer-fields",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 16,
+      "sha256": "84ec722ce30d7294dda3aa4afcd7c0bf0d42b27971fd3c950c9cc360cdf3d6f7",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/047-configuration-sql-model-dm-sql.sql",
+      "name": "047-configuration-sql-model-dm-sql.sql",
+      "number": 47,
+      "slug": "configuration-sql-model-dm-sql",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 4,
+      "sha256": "3906b30d0e848910d7144fe72aad81668d04cc406b46a20340f52f878dca7925",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/048-rbac-menu-company-ref-compat.sql",
+      "name": "048-rbac-menu-company-ref-compat.sql",
+      "number": 48,
+      "slug": "rbac-menu-company-ref-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 18,
+      "sha256": "01a2cff80777193b6f313139bd37868d1dbfc67010b0202c3e8ae5d63f620167",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/049-rbac-menuoperate-valid-integer.sql",
+      "name": "049-rbac-menuoperate-valid-integer.sql",
+      "number": 49,
+      "slug": "rbac-menuoperate-valid-integer",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org"
+      ],
+      "lineCount": 89,
+      "sha256": "be86bd4c70b06fb32bd5ccb9165288a3d577eab26896dde9e11fca07ac6be4dd",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 14,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/050-postgres-boolean-smallint-assignment-cast.sql",
+      "name": "050-postgres-boolean-smallint-assignment-cast.sql",
+      "number": 50,
+      "slug": "postgres-boolean-smallint-assignment-cast",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 26,
+      "sha256": "332c91efe4826567d35ed064fe9f0c299b5bb621ab0567a47ba460802822f0f9",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/051-rbac-deployment-company-ref-ec.sql",
+      "name": "051-rbac-deployment-company-ref-ec.sql",
+      "number": 51,
+      "slug": "rbac-deployment-company-ref-ec",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "configuration"
+      ],
+      "lineCount": 15,
+      "sha256": "efaf1b3e56bbb24f8b585562a3754a5fe3ead32838069255081fab99c6129193",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/052-module-company-ref.sql",
+      "name": "052-module-company-ref.sql",
+      "number": 52,
+      "slug": "module-company-ref",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 13,
+      "sha256": "0c8d3d7acc60a5c1699c1c4e84d4c03a9dfd57069109be266a597f5614832165",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/053-postgres-boolean-integer-assignment-cast.sql",
+      "name": "053-postgres-boolean-integer-assignment-cast.sql",
+      "number": 53,
+      "slug": "postgres-boolean-integer-assignment-cast",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 31,
+      "sha256": "ee980197d2f91b95ed226716521a32533093e50b1f110ffd83531f6be8f1286b",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/054-scheduler-job-callback-flag.sql",
+      "name": "054-scheduler-job-callback-flag.sql",
+      "number": 54,
+      "slug": "scheduler-job-callback-flag",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 10,
+      "sha256": "c41263942111b24f033546484a63771e74c61a31b254d64d5ecb0b805bd24db6",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/055-scheduler-quartz-runtime-compat.sql",
+      "name": "055-scheduler-quartz-runtime-compat.sql",
+      "number": 55,
+      "slug": "scheduler-quartz-runtime-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "workflow",
+        "compatibility"
+      ],
+      "lineCount": 43,
+      "sha256": "7c3603cb4ee3da5b212d9d466cfdf72949310f0d23e6c7d135cdcb0f9810dbba",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/056-runtime-metadata-from-ec-compat.sql",
+      "name": "056-runtime-metadata-from-ec-compat.sql",
+      "number": 56,
+      "slug": "runtime-metadata-from-ec-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 170,
+      "sha256": "538b565be9942a2019664430398f8384662aa4960a4c6c123c9b0dc55707ca2c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 3,
+        "insert": 1,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/057-latest-foundation-newmods-business-schema.sql",
+      "name": "057-latest-foundation-newmods-business-schema.sql",
+      "number": 57,
+      "slug": "latest-foundation-newmods-business-schema",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 3311,
+      "sha256": "49f043d15415cfe62750eb6ad868f89d0c4ffbe58fb1e0187071f88c33eab7e4",
+      "statementCounts": {
+        "create-table": 50,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 39,
+        "alter-table": 1558,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/058-sysbase-core-runtime-metadata.sql",
+      "name": "058-sysbase-core-runtime-metadata.sql",
+      "number": 58,
+      "slug": "sysbase-core-runtime-metadata",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 183,
+      "sha256": "4218853e6178c86438f562e60a9fca485df5bc39616d5c6305ad6f01877b4ada",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/059-configuration-script-code-compat.sql",
+      "name": "059-configuration-script-code-compat.sql",
+      "number": 59,
+      "slug": "configuration-script-code-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 5,
+      "sha256": "1ee3e3c1a294e8f1e4d5039d89d7dec03d3c77342f225010d4f9a4c9db72fbf1",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/060-sysbase-department-reference-views.sql",
+      "name": "060-sysbase-department-reference-views.sql",
+      "number": 60,
+      "slug": "sysbase-department-reference-views",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 306,
+      "sha256": "b60f9bdd9c5ec77311de89251e7adf57fbc65d7f348d2e19b9ccc622a3b038db",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/061-sysbase-staff-reference-view.sql",
+      "name": "061-sysbase-staff-reference-view.sql",
+      "number": 61,
+      "slug": "sysbase-staff-reference-view",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 293,
+      "sha256": "f126d3000e475dfd4cea65ea5e47e658829aef05dda2879fafb8ca0b144228d2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 7,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/062-wts-business-schema-from-initxml.sql",
+      "name": "062-wts-business-schema-from-initxml.sql",
+      "number": 62,
+      "slug": "wts-business-schema-from-initxml",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 2784,
+      "sha256": "dd403ceb3b008d102df78aaf993204582f5a98bcae6d9879d444f10926d2b599",
+      "statementCounts": {
+        "create-table": 64,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 192,
+        "alter-table": 2460,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/063-disable-legacy-external-scheduler-jobs.sql",
+      "name": "063-disable-legacy-external-scheduler-jobs.sql",
+      "number": 63,
+      "slug": "disable-legacy-external-scheduler-jobs",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 33,
+      "sha256": "64935a4416662e711cb8866ace80249b180ef1bd461a65745a7352f0645eef8a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 30,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.scheduler_job_log_info"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/064-craftgraph-business-schema-from-initxml.sql",
+      "name": "064-craftgraph-business-schema-from-initxml.sql",
+      "number": 64,
+      "slug": "craftgraph-business-schema-from-initxml",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 1329,
+      "sha256": "4ecabb7da7d96e6bca94f5c1e68559efd95d36b42b9e22c6c7d781f66230871c",
+      "statementCounts": {
+        "create-table": 32,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 96,
+        "alter-table": 1165,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+      "name": "065-business-view-runtime-json.sql",
+      "number": 65,
+      "slug": "business-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 180770,
+      "sha256": "a56a688072daf2988cfe96b74ac4368eae09fdc460ad7e2560daaf28c0081851",
+      "statementCounts": {
+        "create-table": 57,
+        "create-view": 62,
+        "create-function": 11,
+        "create-index": 169,
+        "alter-table": 3808,
+        "insert": 3508,
+        "update": 3508
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 48,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, bigint);"
+        },
+        {
+          "line": 51,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (bigint, text);"
+        },
+        {
+          "line": 54,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, text);"
+        },
+        {
+          "line": 57,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, boolean);"
+        }
+      ]
+    },
+    {
+      "file": "deploy/docker/postgres/init/066-lims-qcs-test-config.sql",
+      "name": "066-lims-qcs-test-config.sql",
+      "number": 66,
+      "slug": "lims-qcs-test-config",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 27,
+      "sha256": "62ae4a184385017e6df18a50cfffee51a969e86daddd5e7b5b0ffee30e848cc2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/067-qcs-table-types-postgres.sql",
+      "name": "067-qcs-table-types-postgres.sql",
+      "number": 67,
+      "slug": "qcs-table-types-postgres",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 118,
+      "sha256": "9b2fb9c473ac9000ef09245ba6617444dc004beefa50a51d1300b03ea2fec379",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 2,
+        "insert": 2,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/068-organization-position-role-compat.sql",
+      "name": "068-organization-position-role-compat.sql",
+      "number": 68,
+      "slug": "organization-position-role-compat",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 33,
+      "sha256": "e75ad424f669f91a6e4f95b92abad0b81d74e0079425fca21a076dbe1df9e44d",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/069-organization-manager-compat.sql",
+      "name": "069-organization-manager-compat.sql",
+      "number": 69,
+      "slug": "organization-manager-compat",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 21,
+      "sha256": "fe00be9129c75e35d1de3deba3d7f845f0078d4638c80351584762ccb681fef3",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    }
+  ]
+}

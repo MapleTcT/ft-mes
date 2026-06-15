@@ -20,7 +20,7 @@ PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -35,6 +35,8 @@ help:
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
 	@printf '%s\n' '  make oracle-audit            Regenerate Oracle migration backlog'
 	@printf '%s\n' '  make oracle-audit-check      Check Oracle migration backlog is fresh'
+	@printf '%s\n' '  make postgres-migration-index Regenerate PostgreSQL migration index'
+	@printf '%s\n' '  make postgres-migration-check Check PostgreSQL migration index is fresh'
 	@printf '%s\n' '  make render-config           Render Nacos configs from deploy/docker/.env'
 	@printf '%s\n' '  make prepare-runtime         Prepare static assets and runtime patch assets'
 	@printf '%s\n' '  make up-infra                Start infrastructure services only'
@@ -48,7 +50,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check source-module-check inventory-check oracle-audit-check audit-postgres-mappings
+ci: verify sustainable-check source-module-check inventory-check oracle-audit-check postgres-migration-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -79,6 +81,12 @@ oracle-audit:
 
 oracle-audit-check:
 	$(PYTHON) scripts/generate-oracle-migration-audit.py --check
+
+postgres-migration-index:
+	$(PYTHON) scripts/generate-postgres-migration-inventory.py
+
+postgres-migration-check:
+	$(PYTHON) scripts/generate-postgres-migration-inventory.py --check
 
 render-config:
 	cd $(DEPLOY_DIR) && $(PYTHON) scripts/render-nacos-configs.py

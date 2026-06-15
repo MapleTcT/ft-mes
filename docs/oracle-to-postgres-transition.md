@@ -55,6 +55,15 @@ make oracle-audit-check
 
 报告见 [Oracle 迁移 Backlog](oracle-migration-backlog.md)，机器可读结果在 `metadata/oracle-migration-audit.json`。
 
+PostgreSQL 初始化和兼容 SQL 也要维护脚本索引：
+
+```bash
+make postgres-migration-index
+make postgres-migration-check
+```
+
+报告见 [PostgreSQL 迁移脚本索引](postgres-migration-index.md)，机器可读结果在 `metadata/postgres-migration-inventory.json`。
+
 重点处理：
 
 - `rownum`
@@ -81,6 +90,7 @@ make oracle-audit-check
 - DDL、DML、兼容 view/function 分开。
 - 每次变更记录来源：原厂 init.xml、运行时报错、页面 smoke、人工业务规则。
 - 可以重复执行的脚本必须保持幂等。
+- 继续用 `make postgres-migration-check` 阻断编号缺失、重复编号、过期索引和高风险清库语句。
 
 ### 阶段 4：Oracle 退场
 
@@ -97,6 +107,7 @@ make oracle-audit-check
 - `make verify-pom`
 - `make compose-config`
 - `make audit-postgres-mappings`
+- `make postgres-migration-check`
 - `make smoke-api`
 - `make smoke-menu`
 - `make smoke-todo`

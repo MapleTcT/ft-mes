@@ -56,6 +56,7 @@
 - `scripts/verify-source-modules.py` 校验已提升后端源码模块。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
+- `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引。
 
 后续增强：
 
@@ -99,6 +100,7 @@
 - `make source-module-check` 通过。
 - `make inventory-check` 通过。
 - `make oracle-audit-check` 通过。
+- `make postgres-migration-check` 通过。
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。

@@ -12,6 +12,15 @@ deploy/docker/postgres/init/
 
 These scripts are intentionally idempotent where possible because the recovered ADP/MES runtime creates part of the schema at startup and the compatibility scripts repair missing tables, views, columns and type shims after that.
 
+The current script inventory is generated into:
+
+```text
+docs/postgres-migration-index.md
+metadata/postgres-migration-inventory.json
+```
+
+Run `make postgres-migration-index` after adding or changing scripts, and `make postgres-migration-check` before committing. Script names must stay in the `NNN-lowercase-slug.sql` form, numbers must be continuous and unique, and destructive table/schema/database reset statements are blocked by the check.
+
 ## Legacy Oracle
 
 Oracle is treated as a legacy compatibility source. Use:
