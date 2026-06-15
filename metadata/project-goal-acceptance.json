@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T23:55:30+08:00",
-  "generatedFromCommit": "431571c54a4d39b2a074c3186e291ec0a9597daf",
+  "generatedAt": "2026-06-16T00:15:46+08:00",
+  "generatedFromCommit": "f5dbd07bbcfadd564b6d79b5d59897122f72b1d9",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -255,16 +255,21 @@
       "artifacts": [
         "docs/frontend-functional-test-report.md",
         "docs/postgres-migration-index.md",
-        "metadata/postgres-migration-inventory.json"
+        "metadata/postgres-migration-inventory.json",
+        "deploy/docker/scripts/adp-systemcode-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md"
       ],
       "currentEvidence": [
-        "configuration-related PostgreSQL init scripts and business page smoke exist"
+        "configuration-related PostgreSQL init scripts and business page smoke exist",
+        "system code dictionary entity/value CRUD has marker ADP_E2E_20260615161445_SYSCODE PostgreSQL evidence for sys_entity and sys_code create/update/soft-delete"
       ],
       "blockingIssues": [
-        "基础配置页面写动作没有形成完整前端操作和 PostgreSQL 落库证据。"
+        "系统配置其他页面、Nacos/Keycloak 配置链路和配置类专项仍需继续动作级验收。"
       ],
       "nextActions": [
-        "挑选配置类页面执行新增/编辑/删除 marker 验收，并补后端表映射。"
+        "继续挑选 systemconfig 配置类页面执行新增/编辑/删除 marker 验收，并补后端表映射。",
+        "保持 make acceptance-systemcode-persistence 作为基础配置字典回归入口。"
       ]
     },
     {

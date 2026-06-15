@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、独立用户管理账号新增/编辑/锁定/解锁/删除落库验收、RBAC 角色/角色用户/角色权限/用户权限/数据资源权限落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
+本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD 落库验收、组织岗位 CRUD 落库验收、组织公司 CRUD 落库验收、组织人员 CRUD 落库验收、组织人员创建账号落库验收、独立用户管理账号新增/编辑/锁定/解锁/删除落库验收、RBAC 角色/角色用户/角色权限/用户权限/数据资源权限落库验收、基础配置-系统编码字典项/字典值 CRUD 落库验收、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke，以及 WOM 制造任务创建入口发现。未列入的页面、生产模块动作级功能和写操作落库仍未完成验收。
 
 执行功能验收时，必须按照 [功能验收与落库验收规则](functional-persistence-acceptance.md) 更新本文件，并同步更新 `metadata/persistence-acceptance.json`。
 
@@ -19,8 +19,8 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 被测功能 | 40 |
-| PASS | 38 |
+| 被测功能 | 46 |
+| PASS | 44 |
 | FAIL | 1 |
 | BLOCKED | 1 |
 | NOT_APPLICABLE | 0 |
@@ -30,6 +30,12 @@
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
 | 平台基础 | `http://10.11.100.17:18080` | 登录、平台 API、首页待办、组织只读、RBAC 权限、菜单页面 smoke | `/inter-api/auth/login`、`/inter-api/rbac/v1/menus/currentUser`、组织/待办/RBAC 相关接口 | Playwright 真实浏览器 smoke `6/6` passed；首页待办无 visible error、network error、console error；菜单抽样 `12/12` passed | platform API `16/16` passed；RBAC authority `9/9` passed；组织只读接口通过 | 不适用 | PASS | 证据：`/tmp/adp-platform-validation-acceptance-20260615182929/platform-validation-summary.json` |
+| 基础配置-系统编码 | `/systemcode/#/` | 新增系统编码字典项 `systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY` | `POST /inter-api/systemcode/v1/entity` | 真实浏览器打开系统编码页面；navigation status `200`；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL `sys_entity` 新增 active 行，`code/name/display_name/type/module_id/cid/memo` 均为 marker 值 | `sys_entity` | PASS | 证据：`/tmp/adp-systemcode-persistence-second.json` |
+| 基础配置-系统编码 | `/systemcode/#/` | 编辑系统编码字典项名称、显示名和备注 | `PUT /inter-api/systemcode/v1/entity` | 同一浏览器页面上下文发起同源请求；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL 同一 `sys_entity` id `6588127318163920` 更新为 update marker，`row_version=1`，`valid=1` | `sys_entity` | PASS | 无 |
+| 基础配置-系统编码 | `/systemcode/#/` | 新增系统编码值 `ADP_E2E_20260615161445_SYSCODE_VALUE` | `POST /inter-api/systemcode/v1/value` | 同一浏览器页面上下文发起同源请求；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL `sys_code` 新增 active 行，`entity_code/code/cid/default_flag/lay_no/full_path/memo/desA/desB/desC` 均写入 | `sys_code` | PASS | 无 |
+| 基础配置-系统编码 | `/systemcode/#/` | 编辑系统编码值名称、显示名、默认值和描述字段 | `PUT /inter-api/systemcode/v1/value` | 同一浏览器页面上下文发起同源请求；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL 同一 `sys_code` id `6588127405097424` 更新为 update marker，`row_version=1`、`default_flag=0` | `sys_code` | PASS | 无 |
+| 基础配置-系统编码 | `/systemcode/#/` | 删除系统编码值 | `DELETE /inter-api/systemcode/v1/systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY/values/ADP_E2E_20260615161445_SYSCODE_VALUE` | 同一浏览器页面上下文发起同源请求；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL 同一 `sys_code` 保留且 `valid=0`，证明软删除 | `sys_code` | PASS | 软删后 `display_name` 被服务对象回写为 i18n key；因记录已失效，不阻断当前落库验收 |
+| 基础配置-系统编码 | `/systemcode/#/` | 删除系统编码字典项并联动字典值 | `DELETE /inter-api/systemcode/v1/entities/systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY` | 同一浏览器页面上下文发起同源请求；无 visible error、console error、page error、systemcode request failure | 返回 `200`；PostgreSQL 同一 `sys_entity.valid=0`，子 `sys_code.valid=0`，证明字典项软删除与子值清理 | `sys_entity`、`sys_code` | PASS | 无 |
 | 业务模块页面 | `53` 个 `/msService/...` 入口 | 登录后逐页打开 BaseSet、LIMS/QCS、WOM、RM、craftGraph、EAM、Measure、WTS、workAppointment 等业务模块页面 | `GET /msService/...` 页面与布局入口；详见 `deploy/docker/scripts/adp-business-module-smoke.js`、`deploy/docker/scripts/adp-business-page-smoke.js` | API/layout smoke `53/53` passed；Playwright 真实浏览器页面 smoke 复验 `53/53` passed；无 visible error、network error、console error、page error、request failure | 当前只验证页面/API 可达和渲染无错误，不代表新增、编辑、删除、状态流转等业务写操作已落库 | 不适用 | PASS | 证据：`/tmp/adp-business-module-smoke-20260615184508.json`、`/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json`；动作级落库仍未验收 |
 | 生产模块 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 真实浏览器打开制造任务列表，定位新建生产工单/制造任务入口 | `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` | 页面 `200`，无 visible error、console error、page error、request failure；可见按钮只有“查询 / 仅查待办 / 清空”，未发现安全的新增/新建/添加/创建按钮；运行时视图 `layoutDatagrid.buttons` 为 `[]` | 只捕获到列表查询接口，读模型识别到 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending`，但未发现创建接口；无法执行 marker 写动作和 PostgreSQL 落库验收 | 待确认写表，读模型为 `WOM_PRODUCE_TASKS` / `wfm_task_pending` | BLOCKED | 证据：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`；截图：`/tmp/adp-production-action-discovery-final8-20260615204438/01-PROD-002--msService-WOM-produceTask-produceTask-makeTaskList-initial.png` |
 | 生产模块动作视图 | WOM `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView`、`makeTaskGraphList` | 真实浏览器逐个打开源包中出现的生产动作候选页面，只观察不点击新增/保存 | `GET /msService/baseService/view/layoutJson?viewCode=...`；`GET /msService/WOM/produceTask/produceTask/makeTaskGraphList` | runtime JSON 补丁后 `makeTaskEdit/Submit/View/Batch/EasyOperate` 的 `layoutJson` 已返回 200，且包含 `DataGridCode` 和真实 `produceTask` 字段 key；但真实浏览器复验仍显示错误页，console 为 React error #130，页面无按钮、无表单字段、无写请求；`makeTaskGraphList` 仍返回 404 | 源包已定位状态流转、报工、活动开始/结束、备料生成等写接口，但当前动作页面前端渲染失败或不可达，不能进入 marker 落库验收 | `WOM_PRODUCE_TASKS`、`WOM_TASK_PROCESSES`、`WOM_TASK_ACTIVES`、`WOM_PROC_REPORTS` 等待动作恢复后复验 | FAIL | 证据：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`；layoutJson 直连复验：5 个动作 viewCode 均 `200`，pageType 为 `EDIT/VIEW`；动作地图：`metadata/production-module-source-action-map.json` |
@@ -116,11 +122,15 @@
 - RBAC 前端捕获请求：`POST /inter-api/rbac/v1/role`、`PUT /inter-api/rbac/v1/role`、`POST /inter-api/rbac/v1/roleUser`、`DELETE /inter-api/rbac/v1/roleUser/{id}`、`POST /inter-api/rbac/v1/rolePermission`、`POST /inter-api/rbac/v1/userPermission`、`GET /inter-api/rbac/v1/data/resource/groups`、`POST /inter-api/rbac/v1/role/{id}/data/resource/{groupCode}`、`POST /inter-api/rbac/v1/user/{id}/data/resource/{groupCode}`、`DELETE /inter-api/rbac/v1/role/{code}`
 - RBAC 修复证据：首次角色用户绑定验收暴露 `rbac_roleuser.valid` 默认 `false`，已新增并应用 `deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql` 后复验通过。
 - RBAC 数据资源权限复验：`/tmp/adp-rbac-permission-data-resource-acceptance-rerun.json`，marker `ADP_E2E_20260615155455_RBAC`；首次运行发现缺少数据资源权限表和角色资源权限未同步用户继承行，已新增并应用 `deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql` 后复验通过。
+- 基础配置-系统编码字典 CRUD 落库验收：`/tmp/adp-systemcode-persistence-second.json`
+- 基础配置-系统编码页面截图：`/tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png`
+- 基础配置-系统编码 Marker：`ADP_E2E_20260615161445_SYSCODE`
+- 基础配置-系统编码前端捕获请求：`POST /inter-api/systemcode/v1/entity`、`PUT /inter-api/systemcode/v1/entity`、`POST /inter-api/systemcode/v1/value`、`PUT /inter-api/systemcode/v1/value`、`DELETE /inter-api/systemcode/v1/{entityCode}/values/{valueCode}`、`DELETE /inter-api/systemcode/v1/entities/{entityCode}`
 
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
-- 基础配置、Nacos、Keycloak、runtime patch 仍需继续形成专项验收记录。
+- 基础配置中的系统编码字典项/字典值 CRUD 已完成真实前端和 PostgreSQL 落库验收；系统配置其他页面、Nacos、Keycloak、runtime patch 仍需继续形成专项验收记录。
 - 生产模块当前只有 API/layout 与页面可达性 smoke；`layoutJson` 500 已向前推进为动作页 React #130 渲染阻断，但完整动作级测试用例和写操作落库验收仍未建立，不能视为已完成。
 
 ## 记录要求

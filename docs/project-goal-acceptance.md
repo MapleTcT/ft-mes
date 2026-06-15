@@ -48,7 +48,7 @@ make project-goal-acceptance-check
 | G-009 | 权限/RBAC | READY | RBAC authority smoke PASS；角色权限页和用户权限页已用 marker 验收 `personmanage/addPerson` 菜单操作权限新增/删除，`rbac_rolepermission`、`rbac_userpermission` 均有 PostgreSQL 证据；数据资源权限 `saveRoleSourceAuth/saveUserSourceAuth` 已用 marker `ADP_E2E_20260615155455_RBAC` 验收 `rbac_role_data_permission`、`rbac_role_data_permission_ctrl`、`rbac_user_data_permission`、`rbac_user_data_permission_ctrl` | 保持回归 smoke |
 | G-010 | 菜单导航 | READY | 菜单抽样真实浏览器 smoke PASS | 继续扩大菜单覆盖 |
 | G-011 | 待办 | READY | 首页待办/top-nav 待办 smoke 已有证据 | 继续保留回归 |
-| G-012 | 基础配置 | PARTIAL | 配置类 init SQL 和业务页面 smoke 有覆盖 | 基础配置页面 CRUD/落库验收未形成完整闭环 |
+| G-012 | 基础配置 | PARTIAL | 配置类 init SQL 和业务页面 smoke 有覆盖；系统编码字典项/字典值 CRUD 已用 marker `ADP_E2E_20260615161445_SYSCODE` 验收 `sys_entity`、`sys_code` 的 PostgreSQL 新增/编辑/软删除 | 系统配置其他页面、Nacos/Keycloak 配置链路和配置类专项仍需继续动作级验收 |
 | G-013 | 生产模块完整功能 | BLOCKED | 生产页面 smoke 和动作源码地图已建立 | WOM 动作页 React #130；生产写动作无 marker 落库证据 |
 | G-014 | Nacos 配置链路 | PARTIAL | render/publish 脚本和测试环境配置路径存在 | 生产差异清单、漂移检查和回退演练未补 |
 | G-015 | Keycloak/JWT 链路 | PARTIAL | realm 初始化、JWT public key 同步脚本和登录 smoke | 生产 realm/用户/client/secret 迁移演练未补 |
@@ -61,7 +61,7 @@ make project-goal-acceptance-check
 ## 当前最高优先级缺口
 
 1. 恢复 WOM 真实 edit/view component metadata，解决生产动作页 React #130。
-2. 补基础配置页面的写动作落库验收。
+2. 扩展基础配置专项验收到 systemconfig 其他页面、Nacos/Keycloak 配置链路。
 3. 对生产主流程执行 marker 写动作，并查询 `WOM_*` 相关表证明状态、报工、备料、退料等字段变化。
 4. 把生产迁移模板升级为 rehearsal 证据，但在业务 smoke 签字前保持 `NOT_READY_FOR_PRODUCTION_MIGRATION`。
 

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T23:55:30+08:00",
-  "repoCommit": "e372a836adabd174a520bedb1c211cbb81e8f56c",
+  "generatedAt": "2026-06-16T00:15:46+08:00",
+  "repoCommit": "f5dbd07bbcfadd564b6d79b5d59897122f72b1d9",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 40,
-    "pass": 38,
+    "testedFeatures": 46,
+    "pass": 44,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -753,6 +753,109 @@
       "verificationSql": "select id, code, name, coalesce(description,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(modify_time::text,''), coalesce(uuid,'') from public.rbac_role where code = 'ADP_E2E_20260615153240_RBAC_ROLE' order by create_time desc nulls last, id desc;\nselect id, user_name, coalesce(person_id::text,''), coalesce(person_code,''), coalesce(person_name,''), coalesce(company_id::text,''), coalesce(valid::text,''), coalesce(description,''), coalesce(time_zone,'') from public.auth_user where user_name = 'adp_e2e_20260615153240_rbac_user' order by create_time desc nulls last, id desc;\nselect id, code, name, coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(main_position::text,''), coalesce(description,'') from public.org_person where code = 'ADP_E2E_20260615153240_RBAC_PER' order by create_time desc nulls last, id desc;\nselect id, code, name, coalesce(valid::text,''), coalesce(user_id::text,''), coalesce(user_name,''), coalesce(main_position::text,''), coalesce(description,'') from public.org_person where code = 'ADP_E2E_20260615153240_RBAC_PER' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Report: /tmp/adp-rbac-permission-persistence-current.json; marker ADP_E2E_20260615153240_RBAC; browser routes /auth/#/role, /auth/#/authority?status=role, /auth/#/authority?status=user. Non-business static 404 /supide-app/runtime/permissions/ping.png was recorded and ignored; blocking console/network/page errors were 0. DELETE returned 200; rbac_role id 6588044621169168 retained with valid=false, cleanup auth_user valid=0 and org_person valid=0.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "新增系统编码字典项 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY",
+      "api": "/inter-api/systemcode/v1/entity",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "SystemEntityWebController.addEntity -> SystemEntityServiceImpl.addEntity -> MyBatis Plus save -> public.sys_entity",
+      "tables": [
+        "sys_entity"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, code, name, coalesce(display_name,''), coalesce(type,''), coalesce(module_id,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(multi_flag::text,''), coalesce(sys_default::text,''), coalesce(memo,''), coalesce(row_version::text,''), coalesce(modify_time::text,'') from public.sys_entity where code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. POST returned 200; PostgreSQL sys_entity id 6588127318163920 was active with code=systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY, name=ADP_E2E_20260615161445_SYSCODE.entity, displayName=ADP_E2E_20260615161445_SYSCODE entity, type=list, moduleId=systemCode, cid=1000, memo create marker.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "编辑系统编码字典项 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY",
+      "api": "/inter-api/systemcode/v1/entity",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "SystemEntityWebController.updateEntity -> SystemEntityServiceImpl.updateEntity -> MyBatis Plus update -> public.sys_entity",
+      "tables": [
+        "sys_entity"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, code, name, coalesce(display_name,''), coalesce(type,''), coalesce(module_id,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(multi_flag::text,''), coalesce(sys_default::text,''), coalesce(memo,''), coalesce(row_version::text,''), coalesce(modify_time::text,'') from public.sys_entity where code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. PUT returned 200; PostgreSQL retained sys_entity id 6588127318163920, row_version=1, name/displayName/memo changed to update marker values while valid=1.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "新增系统编码值 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY/ADP_E2E_20260615161445_SYSCODE_VALUE",
+      "api": "/inter-api/systemcode/v1/value",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "SystemCodeWebController.addValue -> SystemCodeServiceImpl.addValue -> insertValue -> MyBatis Plus save -> public.sys_code",
+      "tables": [
+        "sys_code"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, coalesce(row_version::text,''), entity_code, code, coalesce(name,''), coalesce(display_name,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(default_flag::text,''), coalesce(parent_id::text,''), coalesce(lay_no::text,''), coalesce(lay_rec,''), coalesce(sort::text,''), coalesce(full_path,''), coalesce(full_path_name,''), coalesce(memo,''), coalesce(des_a,''), coalesce(des_b,''), coalesce(des_c,''), coalesce(modify_time::text,'') from public.sys_code where entity_code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' and code = 'ADP_E2E_20260615161445_SYSCODE_VALUE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. POST returned 200; PostgreSQL sys_code id 6588127405097424 was active with entity_code=systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY, code=ADP_E2E_20260615161445_SYSCODE_VALUE, cid=1000, default_flag=1, lay_no=1, full_path=ADP_E2E_20260615161445_SYSCODE_VALUE, memo/desA/desB/desC create marker values.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "编辑系统编码值 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY/ADP_E2E_20260615161445_SYSCODE_VALUE",
+      "api": "/inter-api/systemcode/v1/value",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "SystemCodeWebController.updateValue -> SystemCodeServiceImpl.updateValue -> MyBatis Plus update -> public.sys_code",
+      "tables": [
+        "sys_code"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, coalesce(row_version::text,''), entity_code, code, coalesce(name,''), coalesce(display_name,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(default_flag::text,''), coalesce(parent_id::text,''), coalesce(lay_no::text,''), coalesce(lay_rec,''), coalesce(sort::text,''), coalesce(full_path,''), coalesce(full_path_name,''), coalesce(memo,''), coalesce(des_a,''), coalesce(des_b,''), coalesce(des_c,''), coalesce(modify_time::text,'') from public.sys_code where entity_code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' and code = 'ADP_E2E_20260615161445_SYSCODE_VALUE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. PUT returned 200; PostgreSQL retained sys_code id 6588127405097424, row_version=1, name/memo/desA/desB/desC changed to update marker values and default_flag=0.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "删除系统编码值 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY/ADP_E2E_20260615161445_SYSCODE_VALUE",
+      "api": "/inter-api/systemcode/v1/systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY/values/ADP_E2E_20260615161445_SYSCODE_VALUE",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "SystemCodeWebController.batchDeleteValues -> SystemCodeServiceImpl.batchDeleteValues -> public.sys_code.valid=0",
+      "tables": [
+        "sys_code"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, coalesce(row_version::text,''), entity_code, code, coalesce(name,''), coalesce(display_name,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(default_flag::text,''), coalesce(parent_id::text,''), coalesce(lay_no::text,''), coalesce(lay_rec,''), coalesce(sort::text,''), coalesce(full_path,''), coalesce(full_path_name,''), coalesce(memo,''), coalesce(des_a,''), coalesce(des_b,''), coalesce(des_c,''), coalesce(modify_time::text,'') from public.sys_code where entity_code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' and code = 'ADP_E2E_20260615161445_SYSCODE_VALUE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. DELETE returned 200; PostgreSQL retained sys_code id 6588127405097424 with valid=0, proving soft delete. The soft-deleted row later shows display_name rewritten to the i18n key by the service object, which is recorded as compatibility behavior and does not block persistence acceptance because valid=0.",
+      "issues": []
+    },
+    {
+      "module": "基础配置-系统编码",
+      "route": "/systemcode/#/",
+      "operation": "删除系统编码字典项 systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY 并联动字典值",
+      "api": "/inter-api/systemcode/v1/entities/systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "SystemEntityWebController.batchDeleteEntities -> SystemEntityServiceImpl.batchDeleteEntities -> public.sys_entity.valid=0 and public.sys_code.valid=0",
+      "tables": [
+        "sys_entity",
+        "sys_code"
+      ],
+      "marker": "ADP_E2E_20260615161445_SYSCODE",
+      "verificationSql": "select id, code, name, coalesce(display_name,''), coalesce(type,''), coalesce(module_id,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(multi_flag::text,''), coalesce(sys_default::text,''), coalesce(memo,''), coalesce(row_version::text,''), coalesce(modify_time::text,'') from public.sys_entity where code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' order by create_time desc nulls last, id desc;\nselect id, coalesce(row_version::text,''), entity_code, code, coalesce(name,''), coalesce(display_name,''), coalesce(cid::text,''), coalesce(valid::text,''), coalesce(default_flag::text,''), coalesce(parent_id::text,''), coalesce(lay_no::text,''), coalesce(lay_rec,''), coalesce(sort::text,''), coalesce(full_path,''), coalesce(full_path_name,''), coalesce(memo,''), coalesce(des_a,''), coalesce(des_b,''), coalesce(des_c,''), coalesce(modify_time::text,'') from public.sys_code where entity_code = 'systemCode_ADP_E2E_20260615161445_SYSCODE_ENTITY' and code = 'ADP_E2E_20260615161445_SYSCODE_VALUE' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real Playwright browser opened http://10.11.100.17:18080/systemcode/#/ with navigation status 200; no visible error, console error, page error, or systemcode request failure. Report: /tmp/adp-systemcode-persistence-second.json; screenshot: /tmp/adp-systemcode-persistence-20260615161445/systemcode-persistence.png. Marker ADP_E2E_20260615161445_SYSCODE. DELETE returned 200; PostgreSQL retained sys_entity id 6588127318163920 with valid=0 and child sys_code id 6588127405097424 remained valid=0, proving entity soft delete and child value cleanup.",
       "issues": []
     }
   ]
