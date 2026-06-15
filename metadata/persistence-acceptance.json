@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T21:38:01+08:00",
-  "repoCommit": "d6290c887c2250e50ebbdc86cc0c257cda2d681d",
+  "generatedAt": "2026-06-15T21:50:08+08:00",
+  "repoCommit": "be558e2a09b0aca2ad26569b6f77ac3b287e1733",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_FRONTEND_RUNTIME_RENDER_BLOCKERS",
   "summary": {
-    "testedFeatures": 10,
-    "pass": 8,
+    "testedFeatures": 13,
+    "pass": 11,
     "fail": 1,
     "blocked": 1,
     "notApplicable": 0
@@ -186,6 +186,60 @@
       "verificationSql": "select id, code, name, coalesce(description,''), company_id, coalesce(valid::text,''), coalesce(full_path,''), coalesce(sort::text,''), coalesce(manager_id::text,''), coalesce(manager_name,'') from public.org_group where code = 'ADP_E2E_20260615133645_GRP' order by create_time desc nulls last, id desc;",
       "status": "PASS",
       "evidence": "Browser-context same-origin DELETE returned 200 for id 6587816676082192. PostgreSQL lookup by code returned no remaining rows, so the runtime delete mode for org_group is physical-delete. Report: /tmp/adp-organization-group-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-岗位管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "新增岗位",
+      "api": "/inter-api/organization/v1/position",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PositionInterController.addPosition -> PositionService.addPosition -> PositionServiceImpl.addPositionWithoutKafka -> MyBatis Plus save; OrgMnecodeServiceImpl.addOrgMnecode",
+      "tables": [
+        "org_position",
+        "org_position_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615134928_POS",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, dep_id, coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(leaf::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,''), coalesce(sys_flag::text,'') from public.org_position where code = 'ADP_E2E_20260615134928_POS' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Real browser opened organization page with navigation status 200 and used the authenticated same-origin browser context to POST position marker ADP_E2E_20260615134928_POS. API returned 200 with id 6587841746223632. PostgreSQL org_position row existed with valid=1, dep_id=1, full_path=/默认公司/ADP_E2E_20260615134928_POS, lay_rec=6587841746223632, and the create marker description. org_position_mnecode had generated rows. Report: /tmp/adp-organization-position-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-岗位管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "编辑岗位",
+      "api": "/inter-api/organization/v1/position",
+      "method": "PUT",
+      "requiresPersistence": true,
+      "backendEntry": "PositionInterController.updatePosition -> PositionService.updatePosition -> PositionServiceImpl.updatePositionWithoutKafka -> MyBatis Plus updateById; OrgMnecodeServiceImpl refresh",
+      "tables": [
+        "org_position",
+        "org_position_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615134928_POS",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, dep_id, coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(leaf::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,''), coalesce(sys_flag::text,'') from public.org_position where code = 'ADP_E2E_20260615134928_POS' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin PUT returned 200 for id 6587841746223632. PostgreSQL org_position row changed to name=ADP_E2E_20260615134928_POS_EDIT, description=ADP_E2E_20260615134928_POS update via organization browser context, full_path=/默认公司/ADP_E2E_20260615134928_POS_EDIT, dep_id=1 while valid remained 1. org_position_mnecode rows were refreshed to the edited name. Report: /tmp/adp-organization-position-persistence-acceptance.json",
+      "issues": []
+    },
+    {
+      "module": "组织管理-岗位管理",
+      "route": "/organization/#/organizationmanage",
+      "operation": "删除岗位",
+      "api": "/inter-api/organization/v1/position/6587841746223632",
+      "method": "DELETE",
+      "requiresPersistence": true,
+      "backendEntry": "PositionInterController.deletePos -> PositionService.deletePosById -> PositionServiceImpl.deletePosById -> MyBatis Plus updateBatchById; OrgMnecodeServiceImpl.deleteOrgMnecodeByOrgId",
+      "tables": [
+        "org_position",
+        "org_position_mnecode"
+      ],
+      "marker": "ADP_E2E_20260615134928_POS",
+      "verificationSql": "select id, code, name, coalesce(description,''), company_id, dep_id, coalesce(parent_id::text,''), coalesce(valid::text,''), coalesce(leaf::text,''), coalesce(full_path,''), coalesce(lay_rec,''), coalesce(lay_no::text,''), coalesce(sort::text,''), coalesce(old_id,''), coalesce(sys_flag::text,'') from public.org_position where code = 'ADP_E2E_20260615134928_POS' order by create_time desc nulls last, id desc;",
+      "status": "PASS",
+      "evidence": "Browser-context same-origin DELETE returned 200 for id 6587841746223632. PostgreSQL retained the org_position row with valid=0, proving soft delete. org_position_mnecode lookup by position_id returned no rows, proving associated mnemonic rows were cleared. Report: /tmp/adp-organization-position-persistence-acceptance.json",
       "issues": []
     }
   ]
