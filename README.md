@@ -28,6 +28,7 @@ scripts/                       # 可重复运行的源码恢复脚本
 docs/                          # 仓库概述和迁移说明
 pom.xml                        # 可持续开发父级 Maven POM
 Makefile                       # 开发、部署、smoke 验证入口
+.github/                       # CI、PR 模板和专项 issue 模板
 ```
 
 ## 当前恢复结果
@@ -47,6 +48,7 @@ Makefile                       # 开发、部署、smoke 验证入口
 
 ```bash
 make verify
+make ci
 make verify-pom
 make compose-config
 ```
@@ -63,9 +65,11 @@ docker compose --env-file .env up -d
 详细说明见：
 
 - [仓库概述](docs/repository-overview.md)
+- [项目目标和交付路线](docs/project-objectives.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)
 - [后端模块依赖地图](docs/backend-module-dependency-map.md)
 - [Oracle 到 PostgreSQL 替换路线](docs/oracle-to-postgres-transition.md)
+- [后端落表业务排查交接](docs/backend-table-audit-handoff.md)
 - [后端说明](backend/README.md)
 - [前端说明](frontend/README.md)
 - [Docker 测试部署](deploy/docker/README.md)

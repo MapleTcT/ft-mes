@@ -19,6 +19,8 @@ deploy/pom.xml                  # 部署资料聚合入口
 deploy/docker/                  # Linux Docker Compose 测试部署
 deploy/database/                # 数据库迁移和兼容策略入口
 Makefile                        # 常用开发、验证、部署命令
+.github/workflows/verify.yml    # GitHub Actions 验证入口
+.github/ISSUE_TEMPLATE/         # Oracle 迁移和后端落表排查模板
 ```
 
 ## Maven 基线
@@ -64,6 +66,7 @@ backend/source-modules/<module>/
 
 ```bash
 make verify
+make ci
 make verify-pom
 make compose-config
 make render-config
@@ -73,9 +76,12 @@ make smoke-api
 make smoke-menu
 make smoke-todo
 make audit-postgres-mappings
+make audit-postgres-report
 ```
 
 `make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。
+
+`make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 
 ## 后续工作
 
@@ -83,3 +89,4 @@ make audit-postgres-mappings
 - 为新业务包建立独立模块组，不直接污染基础平台模块。
 - 将 PostgreSQL 兼容补丁从 runtime patch 逐步前移到源码、Mapper 和迁移脚本。
 - 给每个已提升模块补最小 smoke 或集成测试。
+- 按 [后端落表业务排查交接](backend-table-audit-handoff.md) 建立模块级表字段地图。

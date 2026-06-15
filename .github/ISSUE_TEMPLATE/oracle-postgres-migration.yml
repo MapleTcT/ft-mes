@@ -1,0 +1,50 @@
+name: Oracle 到 PostgreSQL 迁移项
+description: 跟踪模块级 Oracle 方言、配置或驱动替换
+title: "[Oracle->Postgres] "
+labels:
+  - oracle-to-postgres
+  - postgres-migration
+body:
+  - type: input
+    id: module
+    attributes:
+      label: 模块/服务
+    validations:
+      required: true
+  - type: textarea
+    id: oracle-dependency
+    attributes:
+      label: Oracle 依赖点
+      placeholder: |
+        - 配置：
+        - Mapper：
+        - SQL：
+        - 驱动：
+    validations:
+      required: true
+  - type: textarea
+    id: postgres-plan
+    attributes:
+      label: PostgreSQL 替换方案
+      placeholder: |
+        - SQL 改写：
+        - schema/view/function：
+        - 兼容脚本：
+  - type: textarea
+    id: verification
+    attributes:
+      label: 验证方式
+      placeholder: |
+        - make audit-postgres-mappings
+        - make smoke-api
+        - make smoke-menu
+        - 页面/API：
+  - type: checkboxes
+    id: done
+    attributes:
+      label: 完成检查
+      options:
+        - label: PostgreSQL 为默认路径
+        - label: Oracle 仅保留在 legacy profile/template
+        - label: 幂等 SQL 已提交
+        - label: smoke 或日志证据已补充

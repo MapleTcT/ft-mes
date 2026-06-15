@@ -1,0 +1,54 @@
+name: 后端落表排查
+description: 记录菜单/API/服务/Mapper/表字段链路和业务含义
+title: "[Table Audit] "
+labels:
+  - backend-table-audit
+  - postgres-migration
+body:
+  - type: input
+    id: module
+    attributes:
+      label: 模块/服务
+      description: 例如 auth、organization、flow、LIMS、QCS、EamMs
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 排查范围
+      description: 菜单、页面、API 或业务动作范围
+      placeholder: |
+        - 菜单：
+        - API：
+        - 业务动作：
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 现有证据
+      description: 代码路径、SQL、日志、截图、smoke 输出
+  - type: textarea
+    id: table-map
+    attributes:
+      label: 落表链路
+      placeholder: |
+        | API | Controller | Service | Mapper | 表 | 字段 |
+        | --- | --- | --- | --- | --- | --- |
+  - type: textarea
+    id: postgres-risk
+    attributes:
+      label: PostgreSQL 风险
+      placeholder: |
+        - 缺表/缺列：
+        - Oracle/MySQL 方言：
+        - Boolean/数字兼容：
+  - type: checkboxes
+    id: done
+    attributes:
+      label: 完成检查
+      options:
+        - label: 菜单/API/服务/Mapper/表字段链路已记录
+        - label: PostgreSQL 迁移缺口已记录
+        - label: smoke 或等价验证证据已记录
+        - label: 未验证项已明确标注

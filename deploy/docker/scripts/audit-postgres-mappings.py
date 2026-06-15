@@ -36,7 +36,7 @@ PATTERNS = [
     PatternSpec("oracle-sysdate", re.compile(r"\bsysdate\b", re.IGNORECASE)),
     PatternSpec("oracle-systimestamp", re.compile(r"\bsystimestamp\b", re.IGNORECASE)),
     PatternSpec("oracle-to-date", re.compile(r"\bto_date\s*\(", re.IGNORECASE)),
-    PatternSpec("oracle-to-char", re.compile(r"\bto_char\s*\(", re.IGNORECASE)),
+    PatternSpec("oracle-to-char", re.compile(r"\bto_char\s*\(", re.IGNORECASE), "warning"),
     PatternSpec("oracle-nvl", re.compile(r"\bnvl\s*\(", re.IGNORECASE)),
     PatternSpec("oracle-decode", re.compile(r"\bdecode\s*\(", re.IGNORECASE)),
     PatternSpec("oracle-dual", re.compile(r"\bfrom\s+dual\b|\bdual\b", re.IGNORECASE)),
@@ -184,16 +184,21 @@ def scan_jar(jar: Path, max_hits_per_file: int) -> tuple[list[dict[str, object]]
 
 def summarize(findings: list[dict[str, object]], undecodable: list[str]) -> dict[str, object]:
     by_pattern: dict[str, int] = {}
+    by_severity: dict[str, int] = {}
     by_scope: dict[str, int] = {}
     by_file: dict[str, int] = {}
     for item in findings:
         by_pattern[str(item["pattern"])] = by_pattern.get(str(item["pattern"]), 0) + 1
+        by_severity[str(item["severity"])] = by_severity.get(str(item["severity"]), 0) + 1
         by_scope[str(item["scope"])] = by_scope.get(str(item["scope"]), 0) + 1
         by_file[str(item["file"])] = by_file.get(str(item["file"]), 0) + 1
     return {
         "findingCount": len(findings),
+        "errorCount": by_severity.get("error", 0),
+        "warningCount": by_severity.get("warning", 0),
         "undecodableCount": len(undecodable),
         "byPattern": dict(sorted(by_pattern.items())),
+        "bySeverity": dict(sorted(by_severity.items())),
         "byScope": dict(sorted(by_scope.items())),
         "topFiles": [
             {"file": file, "findingCount": count}
@@ -236,7 +241,7 @@ def main() -> None:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(output["summary"], ensure_ascii=False, indent=2))
-    if findings:
+    if any(item.get("severity") == "error" for item in findings):
         raise SystemExit(1)
 
 

@@ -8,6 +8,7 @@
 - `deploy/docker/docker-compose.yml` 在无 `.env` 时也默认指向 `postgres:5432`。
 - PostgreSQL 初始化和兼容 SQL 位于 `deploy/docker/postgres/init/`。
 - Runtime JAR 的 PostgreSQL mapper/DBP 注入由 `deploy/docker/scripts/patch-postgres-runtime.py` 负责。
+- GitHub Actions 会验证 Maven reactor 和 Docker Compose 渲染，防止默认数据库配置回退到隐式 Oracle。
 
 Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.example`，用于后续需要回连老库或对比迁移结果的场景。
 
@@ -36,6 +37,14 @@ Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.ex
 ```bash
 make audit-postgres-mappings
 ```
+
+如果只是想产出阶段性报告而不阻断当前工作：
+
+```bash
+make audit-postgres-report
+```
+
+审计脚本按 `error` / `warning` 分级。`to_char` 这类 PostgreSQL 也支持、但在 Oracle 迁移中仍值得人工确认的函数会作为 warning 记录，不作为阻断项。
 
 重点处理：
 

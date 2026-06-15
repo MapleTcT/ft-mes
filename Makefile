@@ -16,10 +16,13 @@ ADP_USERNAME ?= admin
 ADP_PASSWORD ?= 123456
 SERVICE ?=
 
-.PHONY: help verify verify-pom compose-config render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings
+POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
+
+.PHONY: help ci verify verify-pom compose-config render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
+	@printf '%s\n' '  make ci                     Run the repository CI gate locally'
 	@printf '%s\n' '  make verify                 Validate Maven reactor and Docker Compose syntax'
 	@printf '%s\n' '  make verify-pom             Validate parent/module POM structure'
 	@printf '%s\n' '  make compose-config          Validate Docker Compose rendering'
@@ -34,6 +37,9 @@ help:
 	@printf '%s\n' '  make smoke-menu              Run browser menu smoke against ADP_BASE_URL'
 	@printf '%s\n' '  make smoke-todo              Run home Todo smoke against ADP_BASE_URL'
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
+	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
+
+ci: verify
 
 verify: verify-pom compose-config
 
@@ -81,3 +87,7 @@ smoke-business:
 
 audit-postgres-mappings:
 	$(PYTHON) deploy/docker/scripts/audit-postgres-mappings.py backend/modules deploy/docker/postgres/init
+
+audit-postgres-report:
+	-$(PYTHON) deploy/docker/scripts/audit-postgres-mappings.py backend/modules deploy/docker/postgres/init --report $(POSTGRES_AUDIT_REPORT)
+	@printf 'PostgreSQL audit report: %s\n' '$(POSTGRES_AUDIT_REPORT)'

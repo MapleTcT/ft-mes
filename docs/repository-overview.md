@@ -6,7 +6,7 @@
 
 本仓库把其中可维护的源码和配置参考抽离出来，形成前后端分离的源码仓库。
 
-当前仓库已经增加可持续开发入口：根 `pom.xml` 作为 Maven 父级，`backend/source-modules/` 用于承接后续可编译后端模块，`Makefile` 收敛验证、部署和 smoke 命令。
+当前仓库已经增加可持续开发入口：根 `pom.xml` 作为 Maven 父级，`backend/source-modules/` 用于承接后续可编译后端模块，`Makefile` 收敛验证、部署和 smoke 命令，`.github/` 提供 CI、PR 模板和专项 issue 模板。
 
 ## 前端边界
 
@@ -65,6 +65,8 @@
 
 可持续开发和数据库迁移见：
 
+- [项目目标和交付路线](project-objectives.md)
 - [可持续开发仓库说明](sustainable-development.md)
 - [后端模块依赖地图](backend-module-dependency-map.md)
 - [Oracle 到 PostgreSQL 替换路线](oracle-to-postgres-transition.md)
+- [后端落表业务排查交接](backend-table-audit-handoff.md)
