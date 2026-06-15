@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-06-15T18:37:45+08:00",
-  "repoCommit": "e38a744242890b188ff8629670ec345a8e49ebab",
+  "generatedAt": "2026-06-15T18:48:53+08:00",
+  "repoCommit": "123b460f98c9e7cdda34b7bc8adf96339a8e6a25",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_RECORDED",
   "summary": {
-    "testedFeatures": 4,
-    "pass": 4,
+    "testedFeatures": 5,
+    "pass": 5,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 0
@@ -24,6 +24,21 @@
       "verificationSql": "",
       "status": "PASS",
       "evidence": "2026-06-15 platform smoke on http://10.11.100.17:18080 passed 6/6: platform API 16/16, home todo ok with no visible/network/console/page errors, organization read ok, RBAC authority 9/9, menu sample 12/12. Report: /tmp/adp-platform-validation-acceptance-20260615182929/platform-validation-summary.json",
+      "issues": []
+    },
+    {
+      "module": "业务模块页面",
+      "route": "53 /msService/... business module routes",
+      "operation": "业务模块 API/layout 与真实浏览器页面 smoke：BaseSet、LIMS/QCS、WOM、RM、craftGraph、EAM、Measure、WTS、workAppointment 等入口",
+      "api": "GET /msService/... business module routes; see deploy/docker/scripts/adp-business-module-smoke.js and deploy/docker/scripts/adp-business-page-smoke.js",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "deploy/docker/scripts/adp-business-module-smoke.js; deploy/docker/scripts/adp-business-page-smoke.js",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "PASS",
+      "evidence": "2026-06-15 business module API/layout smoke and Playwright browser page smoke on http://10.11.100.17:18080 both passed 53/53. Browser report showed no visible error, network error, console error, page error, or request failure. Production-related entries included WOM make task, WOM retirement PDA, RM batch formula, craftGraph, WTS work permit, and workAppointment work plan. Reports: /tmp/adp-business-module-smoke-20260615184508.json and /tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json. This proves route/API/page reachability only; action-level persistence remains untested.",
       "issues": []
     },
     {
