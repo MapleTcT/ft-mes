@@ -186,4 +186,13 @@
 
 ## 当前下一步
 
-建议下一条专门线程从“后端落表业务排查”开始，先做基础平台和实体配置的表级地图，再推进到质量和生产类业务模块。
+当前下一步不是继续补治理层，也不是只跑静态检查。必须先按 [功能验收与落库验收规则](functional-persistence-acceptance.md) 启动或访问真实系统，通过前端页面/E2E 操作验证当前功能，并对每个会改变业务数据的动作完成 PostgreSQL 落库验收。
+
+优先顺序：
+
+1. 真实前端测试登录、首页、菜单、列表、查询、新增、编辑、删除/禁用、详情、导入导出、上传、配置页和业务主流程。
+2. 对写动作使用唯一 marker，记录 HTTP 请求、后端 Controller/Service/Mapper/DAO 链路、目标表和 PostgreSQL 查询结果。
+3. 同步更新 [前端功能测试报告](frontend-functional-test-report.md)、[后端落库验收报告](backend-table-audit/persistence-acceptance.md) 和 `metadata/persistence-acceptance.json`。
+4. 对启动失败、页面空白、权限不足、接口 500、SQL 异常、接口成功但未落库等问题，先作为阻断或失败项入账，再按影响面修复。
+
+后端落表业务排查仍然是持续线程，但它必须服务于真实功能验收和落库证明，不能替代真实页面测试。

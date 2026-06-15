@@ -15,6 +15,15 @@ REQUIRED_DOCS = [
     ROOT / "docs/backend-table-audit/persistence-acceptance.md",
 ]
 
+FUNCTIONAL_RULE_REQUIRED_PHRASES = [
+    "不是继续补治理层",
+    "不允许只看代码判断功能是否可用",
+    "必须通过浏览器或等效前端 E2E 方式访问页面",
+    "PostgreSQL",
+    "ADP_E2E_YYYYMMDD_HHMMSS_xxx",
+    "metadata/persistence-acceptance.json",
+]
+
 SUMMARY_KEYS = {
     "testedFeatures": "all",
     "pass": "PASS",
@@ -67,6 +76,17 @@ def check_docs(failures: list[str]) -> None:
     for path in REQUIRED_DOCS:
         if not path.exists():
             fail(f"required acceptance document missing: {path.relative_to(ROOT)}", failures)
+
+    functional = ROOT / "docs/functional-persistence-acceptance.md"
+    if functional.exists():
+        text = functional.read_text(encoding="utf-8")
+        for phrase in FUNCTIONAL_RULE_REQUIRED_PHRASES:
+            if phrase not in text:
+                fail(
+                    "functional persistence acceptance rules are missing required phrase: "
+                    f"{phrase}",
+                    failures,
+                )
 
     frontend = ROOT / "docs/frontend-functional-test-report.md"
     if frontend.exists():
