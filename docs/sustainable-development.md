@@ -6,6 +6,8 @@
 
 当前阶段不把 `backend/modules/**/META-INF/maven/**/pom.xml` 直接纳入 Maven reactor。那些 POM 来自 `sources.jar` 元数据，缺少原厂父工程、私服依赖、构建插件和模块顺序，强行纳入会得到一个表面完整但不可维护的工程。
 
+项目级工作指令见根目录 [`AGENTS.md`](../AGENTS.md)。继续开发、模块接入、测试环境修复和交付验收时，必须先按该指令确认真实前端功能、后端写动作和 PostgreSQL 落库证据；`make ci` 和静态扫描只是仓库门禁，不替代功能验收。
+
 ## 开发分区
 
 ```text
@@ -20,6 +22,7 @@ deploy/docker/                  # Linux Docker Compose 测试部署
 deploy/database/                # 数据库迁移和兼容策略入口
 docs/runtime-validation-scope.md # 测试环境验证范围和生产迁移边界
 Makefile                        # 常用开发、验证、部署命令
+AGENTS.md                       # 当前项目工作指令和功能验收优先规则
 .github/workflows/verify.yml    # GitHub Actions 验证入口
 .github/ISSUE_TEMPLATE/         # Oracle 迁移和后端落表排查模板
 ```

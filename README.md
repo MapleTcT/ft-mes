@@ -44,6 +44,10 @@ Makefile                       # 开发、部署、smoke 验证入口
 
 仍需注意：前端源码来自 source map，后端主体来自真实 `sources.jar`，服务启动壳来自 CFR 反编译；恢复目录本身仍不是原厂完整工程。后续应按模块逐步把高频维护代码提升到 `backend/source-modules/`，而不是直接把 `backend/modules/**/META-INF/maven/**/pom.xml` 全量纳入构建。
 
+## 接手前必读
+
+本项目当前阶段以真实功能验收和 PostgreSQL 落库证明为优先级。继续开发、修复或交付验收前，先阅读 [项目工作指令](AGENTS.md) 和 [功能验收与落库验收规则](docs/functional-persistence-acceptance.md)。不能只凭源码、静态检查或 `make ci` 判断功能完成。
+
 ## 快速验证
 
 ```bash

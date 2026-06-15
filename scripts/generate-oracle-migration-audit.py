@@ -96,7 +96,7 @@ def classify(relative: str, pattern: str, line: str) -> tuple[str, str]:
         return "allowed-legacy-contract", "Oracle is explicit legacy compatibility, not the default runtime path."
     if relative == "Makefile":
         return "tooling-or-audit-code", "Tooling may mention Oracle to generate or check migration audit outputs."
-    if lower.startswith((".github/", "docs/", "readme.md")) or lower.endswith("/readme.md"):
+    if lower in {"agents.md", "readme.md"} or lower.startswith((".github/", "docs/")) or lower.endswith("/readme.md"):
         return "documentation-or-workflow", "Documentation/template reference; keep wording aligned with PostgreSQL-first policy."
     if lower.startswith("frontend/") and pattern == "rownum":
         return "frontend-row-index-noise", "Frontend rowNum variable naming is not Oracle SQL ROWNUM."

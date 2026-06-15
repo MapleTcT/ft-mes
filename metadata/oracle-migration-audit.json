@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "findingCount": 810,
+  "findingCount": 815,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 149,
+    "documentation-or-workflow": 154,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -18,7 +18,7 @@
   "patternCounts": {
     "from-dual": 139,
     "ojdbc": 14,
-    "oracle-keyword": 482,
+    "oracle-keyword": 487,
     "rownum": 41,
     "sysdate": 134
   },
@@ -218,6 +218,22 @@
       "excerpt": "- [ ] Oracle legacy 兼容已明确标注"
     },
     {
+      "file": "AGENTS.md",
+      "line": 18,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle 只允许作为 `legacy-template-only` 或显式 `oracle-legacy` 路径存在，不允许重新变成默认运行路径。"
+    },
+    {
+      "file": "AGENTS.md",
+      "line": 103,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 不把 PostgreSQL 问题绕回 Oracle。"
+    },
+    {
       "file": "Makefile",
       "line": 27,
       "pattern": "oracle-keyword",
@@ -339,7 +355,7 @@
     },
     {
       "file": "README.md",
-      "line": 60,
+      "line": 64,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -347,7 +363,7 @@
     },
     {
       "file": "README.md",
-      "line": 62,
+      "line": 66,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -355,7 +371,7 @@
     },
     {
       "file": "README.md",
-      "line": 81,
+      "line": 85,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -363,7 +379,7 @@
     },
     {
       "file": "README.md",
-      "line": 82,
+      "line": 86,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -371,7 +387,7 @@
     },
     {
       "file": "README.md",
-      "line": 88,
+      "line": 92,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4658,6 +4674,30 @@
       "excerpt": "- 如果清单变化引入 Oracle 配置，必须进入 `oracle-legacy` 路径并补迁移 issue。"
     },
     {
+      "file": "docs/frontend-functional-test-report.md",
+      "line": 15,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "| Oracle 状态 | legacy-template-only / oracle-legacy only |"
+    },
+    {
+      "file": "docs/functional-persistence-acceptance.md",
+      "line": 18,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle 只允许作为 `legacy-template-only` 或显式 `oracle-legacy` 对照路径存在，不允许重新变成默认运行路径。"
+    },
+    {
+      "file": "docs/functional-persistence-acceptance.md",
+      "line": 104,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 不把 PostgreSQL 问题绕回 Oracle。"
+    },
+    {
       "file": "docs/linux-migration-notes.md",
       "line": 59,
       "pattern": "oracle-keyword",
@@ -4687,7 +4727,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- Oracle backlog 引用：`810`。"
+      "excerpt": "- Oracle backlog 引用：`815`。"
     },
     {
       "file": "docs/oracle-replacement-status.md",
@@ -4719,7 +4759,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 810 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
+      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 815 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
     },
     {
       "file": "docs/oracle-replacement-status.md",
@@ -5227,7 +5267,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 24,
+      "line": 27,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5235,7 +5275,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 36,
+      "line": 39,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5243,7 +5283,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 37,
+      "line": 40,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5251,7 +5291,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 42,
+      "line": 45,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5259,7 +5299,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 55,
+      "line": 58,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5267,7 +5307,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 57,
+      "line": 60,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5275,7 +5315,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 94,
+      "line": 97,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5283,7 +5323,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 95,
+      "line": 98,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5291,7 +5331,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 98,
+      "line": 101,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5299,7 +5339,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 99,
+      "line": 102,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5307,7 +5347,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 111,
+      "line": 114,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5315,7 +5355,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 113,
+      "line": 116,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5323,7 +5363,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 126,
+      "line": 129,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5331,7 +5371,7 @@
     },
     {
       "file": "docs/sustainable-development.md",
-      "line": 128,
+      "line": 131,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -6515,7 +6555,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 21,
+      "line": 22,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6523,7 +6563,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 24,
+      "line": 25,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6531,7 +6571,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 32,
+      "line": 33,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6539,7 +6579,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 33,
+      "line": 34,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6547,7 +6587,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 37,
+      "line": 38,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6555,7 +6595,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 38,
+      "line": 39,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6563,7 +6603,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 46,
+      "line": 47,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6571,7 +6611,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 113,
+      "line": 114,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6579,7 +6619,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 150,
+      "line": 151,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6587,7 +6627,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 159,
+      "line": 160,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6595,7 +6635,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 163,
+      "line": 164,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6603,7 +6643,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 170,
+      "line": 171,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6611,7 +6651,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 178,
+      "line": 179,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6619,7 +6659,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 179,
+      "line": 180,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
