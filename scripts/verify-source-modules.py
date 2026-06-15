@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -10,6 +11,41 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_MODULES_DIR = ROOT / "backend/source-modules"
 AGGREGATOR_POM = SOURCE_MODULES_DIR / "pom.xml"
 MAVEN_NS = "http://maven.apache.org/POM/4.0.0"
+
+TEXT_SUFFIXES = {
+    ".conf",
+    ".ftl",
+    ".java",
+    ".json",
+    ".properties",
+    ".sql",
+    ".txt",
+    ".xml",
+    ".yaml",
+    ".yml",
+}
+
+PROHIBITED_DEFAULT_SOURCE_PATTERNS = {
+    "Oracle JDBC URL": re.compile(r"jdbc:oracle:", re.IGNORECASE),
+    "Oracle JDBC driver": re.compile(
+        r"\boracle\.jdbc(?:\.driver)?\b|\bcom\.oracle\.database\.jdbc\b",
+        re.IGNORECASE,
+    ),
+    "Oracle JDBC artifact": re.compile(r"\bojdbc\d*\b", re.IGNORECASE),
+    "Oracle database default": re.compile(
+        r"\b(?:db|database)[_.-]?type\s*[:=]\s*oracle\b"
+        r"|\bdbType\s*[:=]\s*oracle\b"
+        r"|<\s*(?:db[-_]?type|dbType|database[-_]?type)\s*>\s*oracle\s*<",
+        re.IGNORECASE,
+    ),
+    "Oracle Hibernate dialect": re.compile(r"org\.hibernate\.dialect\.Oracle", re.IGNORECASE),
+}
+
+PROHIBITED_DEFAULT_RESOURCE_PATHS = (
+    "/mapper/oracle/",
+    "/mappers/oracle/",
+    "/meta-inf/oracle/",
+)
 
 
 def q(name: str) -> str:
@@ -28,6 +64,15 @@ def parse(path: Path) -> ET.Element:
         return ET.parse(path).getroot()
     except ET.ParseError as exc:
         raise SystemExit(f"Invalid XML in {path.relative_to(ROOT)}: {exc}") from exc
+
+
+def read_text(path: Path) -> str | None:
+    for encoding in ("utf-8", "gb18030", "latin-1"):
+        try:
+            return path.read_text(encoding=encoding)
+        except UnicodeDecodeError:
+            continue
+    return None
 
 
 def aggregator_modules() -> list[str]:
@@ -71,6 +116,40 @@ def check_module_pom(module_name: str, failures: list[str]) -> None:
         fail(failures, f"{module_name} must not default database type to Oracle")
 
 
+def check_default_sources(module_name: str, failures: list[str]) -> None:
+    module_dir = SOURCE_MODULES_DIR / module_name
+    main_dir = module_dir / "src/main"
+    if not main_dir.exists():
+        return
+
+    for path in sorted(main_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(ROOT)
+        normalized = "/" + str(relative).lower().replace("\\", "/")
+        for marker in PROHIBITED_DEFAULT_RESOURCE_PATHS:
+            if marker in normalized:
+                fail(
+                    failures,
+                    f"{module_name} must keep Oracle mapper/resources out of default src/main: {relative}",
+                )
+                break
+
+        if path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        text_value = read_text(path)
+        if text_value is None:
+            continue
+        for line_number, line in enumerate(text_value.splitlines(), start=1):
+            for label, pattern in PROHIBITED_DEFAULT_SOURCE_PATTERNS.items():
+                if pattern.search(line):
+                    fail(
+                        failures,
+                        f"{module_name} default src/main contains {label}: {relative}:{line_number}",
+                    )
+                    break
+
+
 def check_unlisted_modules(modules: list[str], failures: list[str]) -> None:
     listed = set(modules)
     for child in SOURCE_MODULES_DIR.iterdir():
@@ -95,6 +174,7 @@ def main() -> int:
             fail(failures, "empty module entry in backend/source-modules/pom.xml")
             continue
         check_module_pom(module_name, failures)
+        check_default_sources(module_name, failures)
     check_unlisted_modules(modules, failures)
     if failures:
         print(f"Source module verification failed: {len(failures)} issue(s).", file=sys.stderr)

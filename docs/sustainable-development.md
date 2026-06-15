@@ -33,6 +33,7 @@ Makefile                        # 常用开发、验证、部署命令
 - Spring Cloud Alibaba `2.1.1.RELEASE`。
 - PostgreSQL JDBC `42.2.8`，和当前 Docker 运行补丁保持一致。
 - Oracle JDBC 作为 legacy 依赖留在 `dependencyManagement`，后续逐步移除业务模块中的直接依赖。
+- 已提升到 `backend/source-modules` 的可编译模块不得直接声明 Oracle JDBC；默认源码路径也不能带入 Oracle 运行配置或 mapper 资源。
 
 可用 profile：
 
@@ -51,6 +52,7 @@ Makefile                        # 常用开发、验证、部署命令
 5. DAO/Mapper 层必须同时接受 PostgreSQL smoke 或 SQL audit。
 6. 业务逻辑和数据库方言分离，禁止在 service 层散落 `if oracle/postgres` 分支。
 7. 提升完成后，把模块加入 `backend/source-modules/pom.xml` 的 `<modules>`。
+8. Oracle 对照资料只能作为 legacy/backlog 资料保留在默认 `src/main` 外，不能进入默认构建产物。
 
 推荐模块结构：
 
@@ -93,7 +95,7 @@ make audit-postgres-mappings
 make audit-postgres-report
 ```
 
-`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、已提升 source module 编译测试、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。
+`make verify` 只验证 Maven reactor 和 Docker Compose 语法，不会启动容器，也不会修改数据库。`make ci` 会额外检查仓库治理规则、后端 source module 结构、source module 默认路径是否 Oracle-free、已提升 source module 编译测试、内容库存是否新鲜、恢复后端依赖库存是否新鲜、Oracle 迁移 backlog 是否新鲜、PostgreSQL 初始化脚本索引是否新鲜、Oracle 替换状态总账是否新鲜，以及 PostgreSQL 方言审计。
 
 `make audit-postgres-mappings` 是阻断式审计，发现 Oracle/MySQL/SQL Server 方言会返回非 0。`make audit-postgres-report` 用于生成阶段性报告，不阻断当前工作。
 

@@ -50,13 +50,14 @@ backend/modules/<group>/<artifact>/<version>/
 - 使用父 POM 里的 Spring、Spring Cloud、PostgreSQL JDBC 版本。
 - 不复制恢复 POM 中的私服、父工程、Oracle 驱动和无关插件。
 - Oracle 只允许出现在明确的 legacy profile 或迁移说明中。
+- 默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源；`make source-module-check` 会阻断。
 
 ### 4. 处理数据库
 
 模块提升时必须同步处理数据库：
 
 - Mapper SQL 默认走 PostgreSQL。
-- Oracle SQL 保留为参考，不进入默认运行路径。
+- Oracle SQL 保留为参考，不进入默认运行路径，也不放入默认 `src/main`。
 - 幂等 SQL 放在 `deploy/database/<module>/postgres/` 或当前 Docker init 补丁序列中。
 - 更新 [Oracle 迁移 Backlog](oracle-migration-backlog.md)。
 - 更新 `docs/backend-table-audit/` 中的落表报告。
@@ -107,6 +108,6 @@ make smoke-business
 - `make source-module-test` 通过。
 - 相关恢复模块依赖已在 [后端恢复模块依赖库存](backend-module-dependency-inventory.md) 中可追溯。
 - `mvn -q -DskipTests validate` 通过。
-- Oracle 默认依赖和默认配置已移除。
+- Oracle 默认依赖、默认配置、默认 mapper/resource 路径已移除。
 - 数据库表/字段映射已记录到落表报告。
 - PostgreSQL smoke 或等价验证证据已记录。

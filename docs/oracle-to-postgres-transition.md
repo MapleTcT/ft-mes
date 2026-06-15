@@ -18,6 +18,7 @@ Oracle 相关配置没有删除，保留在 `deploy/docker/.env.oracle-legacy.ex
 - Oracle 兼容必须显式开启，不允许成为隐式默认值。
 - 业务逻辑层不直接判断数据库类型。
 - 数据库方言差异集中在 Mapper、Repository、migration SQL 或数据库适配层。
+- 已提升的源码模块默认 `src/main` 必须保持 PostgreSQL-first，不允许带入 Oracle driver、JDBC URL、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每次迁移一个模块，必须有 smoke 或 SQL audit 证据。
 
 ## 阶段计划
@@ -99,6 +100,7 @@ make oracle-replacement-check
 - 先提升基础平台关键模块：认证、RBAC、组织、系统配置、流程。
 - 每个模块在 `backend/source-modules/<module>` 建独立 Maven 模块。
 - PostgreSQL SQL 放主路径；Oracle SQL 如仍需要，放 legacy profile 或隔离资源目录。
+- `make source-module-check` 会阻断默认构建路径中的 Oracle JDBC 依赖、默认数据库配置和 Oracle mapper/resource 路径。
 
 ### 阶段 3：迁移脚本产品化
 
@@ -124,6 +126,7 @@ make oracle-replacement-check
 
 - `make verify-pom`
 - `make compose-config`
+- `make source-module-check`
 - `make backend-dependency-check`
 - `make audit-postgres-mappings`
 - `make postgres-migration-check`

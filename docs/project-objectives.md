@@ -53,7 +53,7 @@
 - GitHub Actions 验证 Maven reactor 和 Compose 语法。
 - `scripts/verify-sustainable-repo.py` 验证仓库治理硬约束。
 - `scripts/create-backend-source-module.py` 创建标准后端源码模块。
-- `scripts/verify-source-modules.py` 校验已提升后端源码模块。
+- `scripts/verify-source-modules.py` 校验已提升后端源码模块，并阻止默认源码路径重新带入 Oracle 驱动、配置和 mapper 资源。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
 - `scripts/generate-backend-dependency-inventory.py` 生成恢复后端模块依赖库存。
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
@@ -74,6 +74,7 @@
 - PostgreSQL 是默认路径。
 - Oracle 只允许显式 legacy profile 或 `.env.oracle-legacy.example`。
 - 方言差异集中到 DAO/Mapper/migration 层。
+- 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每个模块必须有审计结果、迁移脚本和 smoke 证据。
 
 ### 3. 后端落表业务排查
@@ -109,7 +110,7 @@
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。
-- Oracle 配置只出现在 legacy 文档、模板或待迁移清单中。
+- Oracle 配置只出现在 legacy 文档、模板、默认源码路径之外的对照资料或待迁移清单中。
 
 数据库迁移验收：
 

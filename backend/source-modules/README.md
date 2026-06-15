@@ -35,6 +35,7 @@ make ci
 - 模块 `artifactId` 和目录名不一致。
 - 模块直接声明 Oracle JDBC。
 - 模块默认数据库类型写成 Oracle。
+- 模块默认 `src/main` 带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。
 
 ## 当前已提升模块
 
@@ -50,3 +51,4 @@ make ci
 4. 先提升 `common/api/dao/service/webapi` 中最小可构建闭环。
 5. DAO/Mapper 层优先 PostgreSQL，Oracle SQL 只能保留在 legacy 说明或迁移 backlog。
 6. 每个已提升模块补最小测试或 smoke 证据。
+7. 如确实需要保留 Oracle 对照 SQL，放在默认 `src/main` 之外，并在迁移 backlog 中记录 PostgreSQL 替代路径。
