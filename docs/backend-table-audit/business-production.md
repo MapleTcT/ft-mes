@@ -1,0 +1,72 @@
+# 生产模块落表排查
+
+## 结论
+
+当前生产模块已经有真实浏览器页面 smoke 证据，但还没有完成动作级落库验收。后续专门线程应以 [生产模块功能测试用例矩阵](../production-module-functional-test-cases.md) 为入口，逐条补页面/API/Controller/Service/Mapper/表/字段链路。
+
+## 已验证
+
+| 能力 | 证据 | 状态 |
+| --- | --- | --- |
+| WOM 制造任务列表打开 | `/msService/WOM/produceTask/produceTask/makeTaskList` 浏览器 smoke | PASS |
+| WOM 退料 PDA 列表打开 | `/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` 浏览器 smoke | PASS |
+| RM 批量配方列表打开 | `/msService/RM/formula/formula/batchFormulaList` 浏览器 smoke | PASS |
+| craftGraph 工艺基础信息打开 | `/msService/craftGraph/basicInfo/basicInfo/basicInfoList` 浏览器 smoke | PASS |
+| craftGraph 按钮配置打开 | `/msService/craftGraph/operationButton/buttonConfig/buttonConfList` 浏览器 smoke | PASS |
+| WTS 作业许可列表打开 | `/msService/WTS/workPermit/workPermit/workPermitList` 浏览器 smoke | PASS |
+| workAppointment 作业计划列表打开 | `/msService/workAppointment/workPlan/workTicketPlan/workPlanList` 浏览器 smoke | PASS |
+| QCS 制造检验列表打开 | `/msService/QCS/inspect/inspect/manuInspectList` 浏览器 smoke | PASS |
+
+证据文件：
+
+- API/layout smoke：`/tmp/adp-business-module-smoke-20260615184508.json`
+- 页面 smoke：`/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json`
+
+## 未验证
+
+| 业务动作 | 当前状态 | 后续验收要求 |
+| --- | --- | --- |
+| 新建生产工单或制造任务 | NOT_RUN | 用 marker 创建记录，捕获请求并查询 PostgreSQL |
+| 工单下发、暂停、恢复、关闭 | NOT_RUN | 查询状态字段变化，确认流程/待办联动 |
+| 制造指令单生成或维护 | NOT_RUN | 先定位准确页面和目标表 |
+| 工序、人员、班组派工 | NOT_RUN | 准备人员/班组数据，确认派工表 |
+| 退料申请提交、审核或回写库存 | NOT_RUN | 查询退料单据、库存和状态字段 |
+| 批量配方导入、编辑、删除 | NOT_RUN | 使用真实模板和 marker 行查库 |
+| 工艺路线新增、编辑、删除 | NOT_RUN | 查询工艺主表和明细表 |
+| 作业许可新建、提交、审批、关闭 | NOT_RUN | 查询许可表、流程表和待办状态 |
+| 作业计划新建、调整、取消 | NOT_RUN | 查询计划表和状态字段 |
+| 制造检验结果录入和生产状态回写 | NOT_RUN | 查询 QCS 表和生产状态字段 |
+| 批次/物料/工单追溯 | BLOCKED | 当前未定位完整追溯页面和表链路 |
+| 工序报工 | BLOCKED | 当前未定位明确报工页面和目标表 |
+| 完工入库或库存回写 | BLOCKED | 需要仓储/库存模块包和表结构 |
+
+## 初始页面/API 入口
+
+| 领域 | 页面 | 已知入口 | 备注 |
+| --- | --- | --- | --- |
+| 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList` | 需要继续捕获列表数据 XHR |
+| 退料 | 退料 PDA | `GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` | 需要确认提交/审核接口 |
+| 配方 | 批量配方 | `GET /msService/RM/formula/formula/batchFormulaList` | 静态 patch 暴露 `downloadXls`、`importMainXls`、`delete` |
+| 工艺 | 基础信息 | `GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList` | 需要确认主表/明细表 |
+| 作业许可 | 作业许可 | `GET /msService/WTS/workPermit/workPermit/workPermitList` | 需要确认流程表/待办表 |
+| 作业计划 | 作业计划 | `GET /msService/workAppointment/workPlan/workTicketPlan/workPlanList` | 需要确认计划表和状态字段 |
+| 质量联动 | 制造检验 | `GET /msService/QCS/inspect/inspect/manuInspectList` | 需要确认 QCS 与生产状态联动 |
+
+## PostgreSQL backlog 规则
+
+排查过程中每发现一个缺口，必须进入下面任一路径：
+
+- 幂等 SQL：`deploy/docker/postgres/init/0xx-*.sql`
+- 模块报告 backlog：本文件新增 `## Backlog` 明细
+- 全局 Oracle backlog：`docs/oracle-migration-backlog.md`
+
+禁止用清库重建绕过缺表、缺列、类型不兼容或 Oracle 方言残留。
+
+## Backlog
+
+| ID | 类型 | 问题 | 当前处理 |
+| --- | --- | --- | --- |
+| PROD-DB-001 | 缺映射 | WOM 制造任务写操作目标表未确认 | 等待 `PROD-002` 前端动作捕获 |
+| PROD-DB-002 | 缺映射 | 报工页面和目标表未定位 | 等待业务包/菜单继续排查 |
+| PROD-DB-003 | 缺映射 | 完工入库或库存回写链路未定位 | 等待仓储/库存模块包 |
+| PROD-DB-004 | 缺映射 | 追溯页面和目标表未定位 | 等待菜单和运行包排查 |

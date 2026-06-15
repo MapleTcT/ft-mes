@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T18:58:46+08:00",
+  "repoCommit": "146c3c9e80b7194adc36081ce9e2efad7ceb2733",
+  "database": "PostgreSQL",
+  "module": "production",
+  "status": "ACTION_ACCEPTANCE_MATRIX_ESTABLISHED",
+  "evidence": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
+    "browserPageSmokeReport": "/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json",
+    "apiLayoutSmoke": {
+      "total": 53,
+      "passed": 53,
+      "failed": 0
+    },
+    "browserPageSmoke": {
+      "total": 53,
+      "passed": 53,
+      "failed": 0
+    }
+  },
+  "summary": {
+    "totalCases": 23,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 3,
+    "notRun": 12,
+    "requiresPersistence": 13,
+    "routeSmokePass": 18
+  },
+  "requiredCoverageTags": [
+    "master-data",
+    "recipe",
+    "process",
+    "work-order",
+    "instruction",
+    "dispatch",
+    "material",
+    "work-permit",
+    "execution",
+    "report-work",
+    "return-material",
+    "quality",
+    "traceability",
+    "inventory",
+    "import-export",
+    "status-flow",
+    "persistence",
+    "postgres"
+  ],
+  "cases": [
+    {
+      "id": "PROD-001",
+      "domain": "工单/任务",
+      "name": "制造任务列表打开和基础查询",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/produceTask/makeTaskList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Capture list query XHR and map it to Controller/Mapper/table in business-production audit.",
+      "coverageTags": [
+        "work-order",
+        "execution"
+      ]
+    },
+    {
+      "id": "PROD-002",
+      "domain": "工单/任务",
+      "name": "新建生产工单或制造任务",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No marker-based create action has been executed yet.",
+      "issues": [
+        "Need business seed data, create endpoint, target table, and required field list."
+      ],
+      "nextAction": "Create ADP_E2E marker work order through UI, capture request, then query PostgreSQL.",
+      "coverageTags": [
+        "work-order",
+        "master-data",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-003",
+      "domain": "状态流转",
+      "name": "工单下发、暂停、恢复、关闭",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "status-change",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No state transition has been executed yet.",
+      "issues": [
+        "Need status enum, button permission, and workflow preconditions."
+      ],
+      "nextAction": "Use a marker work order and verify status columns before and after each transition.",
+      "coverageTags": [
+        "status-flow",
+        "work-order",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-004",
+      "domain": "指令",
+      "name": "制造指令单生成或维护",
+      "route": "",
+      "operationType": "create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "NOT_APPLICABLE",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "route-not-confirmed",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Manufacturing instruction tab has been observed in UI, but the exact write action and backend table are not mapped.",
+      "issues": [
+        "Need exact route, form fields, and persistence table."
+      ],
+      "nextAction": "Open manufacturing instruction entry, capture network calls, and add route smoke target if stable.",
+      "coverageTags": [
+        "instruction",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-005",
+      "domain": "派工",
+      "name": "工序、人员、班组派工",
+      "route": "",
+      "operationType": "update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "NOT_APPLICABLE",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "route-not-confirmed",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "TeamInfo pages are smoke-tested, but production dispatch action has not been mapped.",
+      "issues": [
+        "Need team, position, staff, and dispatch target record seed data."
+      ],
+      "nextAction": "Map dispatch button/action from production task page and verify assigned staff/team columns.",
+      "coverageTags": [
+        "dispatch",
+        "master-data",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-006",
+      "domain": "退料",
+      "name": "退料 PDA 页面打开",
+      "route": "/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Capture list query endpoint and map retirement data tables.",
+      "coverageTags": [
+        "return-material",
+        "material"
+      ]
+    },
+    {
+      "id": "PROD-007",
+      "domain": "退料",
+      "name": "退料申请提交、审核或回写库存",
+      "route": "/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList",
+      "operationType": "create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No return-material write action has been executed yet.",
+      "issues": [
+        "Need material/batch seed data and inventory table mapping."
+      ],
+      "nextAction": "Submit marker return-material action and verify document plus inventory/status fields.",
+      "coverageTags": [
+        "return-material",
+        "material",
+        "inventory",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-008",
+      "domain": "配方",
+      "name": "批量配方列表打开",
+      "route": "/msService/RM/formula/formula/batchFormulaList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/RM/formula/formula/batchFormulaList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map list data endpoint and recipe tables.",
+      "coverageTags": [
+        "recipe"
+      ]
+    },
+    {
+      "id": "PROD-009",
+      "domain": "配方",
+      "name": "批量配方导入模板下载和 Excel 导入",
+      "route": "/msService/RM/formula/formula/batchFormulaList",
+      "operationType": "import",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [
+        "GET /msService/RM/formula/formula/downloadXls",
+        "POST /msService/RM/formula/formula/importMainXls"
+      ],
+      "backendTraceStatus": "static-page-endpoints-known",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Static RM patch exposes downloadXls and importMainXls endpoints, but no real file import has been executed.",
+      "issues": [
+        "Need real template, upload payload, and target table mapping."
+      ],
+      "nextAction": "Download template, import marker row, verify recipe rows in PostgreSQL.",
+      "coverageTags": [
+        "recipe",
+        "import-export",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-010",
+      "domain": "配方",
+      "name": "批量配方编辑和删除",
+      "route": "/msService/RM/formula/formula/batchFormulaList",
+      "operationType": "update-delete",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [
+        "POST /msService/RM/formula/formula/delete"
+      ],
+      "backendTraceStatus": "static-page-endpoints-known",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Static RM patch exposes delete endpoint, but no marker recipe has been created and deleted.",
+      "issues": [
+        "Need marker recipe creation path before delete can be safely tested."
+      ],
+      "nextAction": "Create marker recipe, edit it, delete it, and verify soft/hard delete semantics.",
+      "coverageTags": [
+        "recipe",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-011",
+      "domain": "工艺",
+      "name": "工艺基础信息列表打开",
+      "route": "/msService/craftGraph/basicInfo/basicInfo/basicInfoList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map craftGraph list endpoint and process master tables.",
+      "coverageTags": [
+        "process"
+      ]
+    },
+    {
+      "id": "PROD-012",
+      "domain": "工艺",
+      "name": "工艺路线或基础信息新增、编辑、删除",
+      "route": "/msService/craftGraph/basicInfo/basicInfo/basicInfoList",
+      "operationType": "create-update-delete",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No craftGraph write action has been executed yet.",
+      "issues": [
+        "Need target table, unique code, and delete semantics."
+      ],
+      "nextAction": "Create marker process record, edit/delete it, and verify PostgreSQL rows.",
+      "coverageTags": [
+        "process",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-013",
+      "domain": "工艺",
+      "name": "工艺按钮配置列表打开",
+      "route": "/msService/craftGraph/operationButton/buttonConfig/buttonConfList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/craftGraph/operationButton/buttonConfig/buttonConfList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map button configuration tables and permissions.",
+      "coverageTags": [
+        "process",
+        "status-flow"
+      ]
+    },
+    {
+      "id": "PROD-014",
+      "domain": "作业许可",
+      "name": "作业许可列表打开",
+      "route": "/msService/WTS/workPermit/workPermit/workPermitList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WTS/workPermit/workPermit/workPermitList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map WTS list query and workflow tables.",
+      "coverageTags": [
+        "work-permit"
+      ]
+    },
+    {
+      "id": "PROD-015",
+      "domain": "作业许可",
+      "name": "作业许可新建、提交、审批、关闭",
+      "route": "/msService/WTS/workPermit/workPermit/workPermitList",
+      "operationType": "workflow",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No work-permit workflow action has been executed yet.",
+      "issues": [
+        "Need approver, flow definition, safety work data, and todo linkage."
+      ],
+      "nextAction": "Create marker work permit and verify permit table plus workflow/todo state.",
+      "coverageTags": [
+        "work-permit",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-016",
+      "domain": "作业计划",
+      "name": "作业计划列表打开",
+      "route": "/msService/workAppointment/workPlan/workTicketPlan/workPlanList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/workAppointment/workPlan/workTicketPlan/workPlanList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map work plan query and scheduling tables.",
+      "coverageTags": [
+        "execution"
+      ]
+    },
+    {
+      "id": "PROD-017",
+      "domain": "作业计划",
+      "name": "作业计划新建、调整、取消",
+      "route": "/msService/workAppointment/workPlan/workTicketPlan/workPlanList",
+      "operationType": "create-update-status",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No work plan write action has been executed yet.",
+      "issues": [
+        "Need plan target object, schedule fields, and cancel status mapping."
+      ],
+      "nextAction": "Create marker work plan and verify scheduling/status columns.",
+      "coverageTags": [
+        "execution",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-018",
+      "domain": "质量联动",
+      "name": "制造检验列表打开",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/QCS/inspect/inspect/manuInspectList"
+      ],
+      "backendTraceStatus": "pending-table-audit",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "issues": [],
+      "nextAction": "Map QCS query to inspection tables and production linkage.",
+      "coverageTags": [
+        "quality"
+      ]
+    },
+    {
+      "id": "PROD-019",
+      "domain": "质量联动",
+      "name": "制造检验结果录入、判定和回写生产状态",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operationType": "create-update-status",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Route smoke only. No QCS result write-back action has been executed yet.",
+      "issues": [
+        "Need QC/QA boundary, inspection data model, and production status linkage."
+      ],
+      "nextAction": "Record marker inspection result and verify QCS rows plus production status fields.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-020",
+      "domain": "追溯",
+      "name": "批次、物料、工单追溯查询",
+      "route": "",
+      "operationType": "read",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "NOT_APPLICABLE",
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [],
+      "backendTraceStatus": "route-not-confirmed",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "No complete traceability page/API/table chain has been identified in the current recovered package.",
+      "issues": [
+        "Need module package or menu mapping for traceability."
+      ],
+      "nextAction": "Search new business packages and menu data for traceability routes, then add smoke target.",
+      "coverageTags": [
+        "traceability"
+      ]
+    },
+    {
+      "id": "PROD-021",
+      "domain": "报工",
+      "name": "工序报工、产量、不良数登记",
+      "route": "",
+      "operationType": "create-update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "NOT_APPLICABLE",
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [],
+      "backendTraceStatus": "route-not-confirmed",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "No explicit report-work route has been identified in the current recovered package.",
+      "issues": [
+        "Need route/API/table mapping for report-work."
+      ],
+      "nextAction": "Locate report-work menu/API in runtime package or new business package, then execute marker report action.",
+      "coverageTags": [
+        "report-work",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-022",
+      "domain": "入库",
+      "name": "完工入库或库存回写",
+      "route": "",
+      "operationType": "create-update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "NOT_APPLICABLE",
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [],
+      "backendTraceStatus": "route-not-confirmed",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "Warehouse/inventory completion route and target tables are not mapped in the current recovered package.",
+      "issues": [
+        "Need warehouse or inventory module package and table mapping."
+      ],
+      "nextAction": "Add inventory module route smoke, then verify completion inbound marker rows.",
+      "coverageTags": [
+        "inventory",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-023",
+      "domain": "导出",
+      "name": "生产相关列表导出",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "export",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "NOT_RUN",
+      "apiEndpoints": [],
+      "backendTraceStatus": "not-traced",
+      "targetTables": [],
+      "verificationSql": "",
+      "evidence": "List routes are smoke-tested, but export buttons/endpoints/files have not been exercised.",
+      "issues": [
+        "Need per-page export endpoint, file response, and permission result."
+      ],
+      "nextAction": "Click export from WOM/RM/WTS/QCS pages, capture response status and file metadata.",
+      "coverageTags": [
+        "import-export",
+        "work-order"
+      ]
+    }
+  ]
+}

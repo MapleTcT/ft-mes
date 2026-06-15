@@ -16,7 +16,7 @@
 | `platform-entity-config.md` | 待开始 | `ec_*` 元数据、实体配置、动态页面 |
 | `platform-flow-todo.md` | 待开始 | 流程、待办、任务调度 |
 | `business-quality-lims-qcs.md` | 待开始 | LIMS、QCS、Qualify 质量域 |
-| `business-production.md` | 待开始 | 生产、工单、报工、追溯 |
+| `business-production.md` | 测试矩阵已建立 | 生产、工单、报工、追溯；动作级落库仍需逐项补 |
 | `business-equipment-energy-ehs.md` | 待开始 | 设备、能源、安环 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |
 

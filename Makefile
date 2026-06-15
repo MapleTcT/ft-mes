@@ -26,7 +26,7 @@ PLATFORM_MENU_LIMIT ?= 40
 ORGANIZATION_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -37,6 +37,7 @@ help:
 	@printf '%s\n' '  make runtime-script-check    Validate smoke and runtime patch scripts parse'
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
 	@printf '%s\n' '  make persistence-acceptance-check Validate functional/persistence acceptance assets'
+	@printf '%s\n' '  make production-testcase-check Validate production module action test matrix'
 	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
 	@printf '%s\n' '  make source-module-test      Compile and test promoted backend source modules'
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
@@ -70,7 +71,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify runtime-script-check sustainable-check persistence-acceptance-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -98,6 +99,9 @@ sustainable-check:
 
 persistence-acceptance-check:
 	$(PYTHON) scripts/verify-persistence-acceptance.py
+
+production-testcase-check:
+	$(PYTHON) scripts/verify-production-module-test-cases.py
 
 source-module-check:
 	$(PYTHON) scripts/verify-source-modules.py
