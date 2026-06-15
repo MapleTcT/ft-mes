@@ -16,7 +16,7 @@
     "watchCount": 2,
     "plannedCount": 1,
     "sourceModuleCount": 1,
-    "oracleBacklogReferenceCount": 752,
+    "oracleBacklogReferenceCount": 768,
     "directOracleDependencyCount": 2,
     "postgresMigrationCount": 69,
     "postgresMigrationHighRiskCount": 0,
@@ -73,7 +73,7 @@
   "oracleBacklogCategoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 130,
+    "documentation-or-workflow": 137,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -82,7 +82,7 @@
     "recovered-source-backlog": 266,
     "runtime-config-backlog": 2,
     "runtime-patch-backlog": 9,
-    "tooling-or-audit-code": 126
+    "tooling-or-audit-code": 135
   },
   "backendDirectOracleModules": [
     {
@@ -94,6 +94,32 @@
       "key": "com.supcon.supfusion:auth-upgrade",
       "path": "backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/META-INF/maven/com.supcon.supfusion/auth-upgrade/pom.xml",
       "oracleDependencyCount": 1
+    }
+  ],
+  "backendDirectOracleDependencies": [
+    {
+      "from": "com.supcon.supfusion.flow:flow-common",
+      "fromPath": "backend/modules/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE/META-INF/maven/com.supcon.supfusion.flow/flow-common/pom.xml",
+      "fromFamily": "flow",
+      "fromLayer": "common",
+      "dependency": "com.oracle.jdbc:ojdbc7",
+      "version": "12.1.0.2",
+      "scope": null,
+      "replacement": "org.postgresql:postgresql only where the promoted module really opens JDBC connections",
+      "migrationAction": "提升为 source module 时删除直接 Oracle JDBC；common/DTO 模块默认不应打开厂商连接，需要数据库连接时由 DAO/service 层通过父 POM 管理 PostgreSQL JDBC。",
+      "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用流程/待办 smoke 覆盖调用链。"
+    },
+    {
+      "from": "com.supcon.supfusion:auth-upgrade",
+      "fromPath": "backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/META-INF/maven/com.supcon.supfusion/auth-upgrade/pom.xml",
+      "fromFamily": "auth",
+      "fromLayer": "upgrade",
+      "dependency": "com.oracle.jdbc:ojdbc6",
+      "version": null,
+      "scope": null,
+      "replacement": "org.postgresql:postgresql only where the promoted module really opens JDBC connections",
+      "migrationAction": "把 Oracle driver 从默认 POM 移到显式 legacy profile 或独立迁移工具；默认 PostgreSQL 目标库写入使用标准 `java.sql` API，避免 `oracle.sql.*`。",
+      "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
     }
   ],
   "postgresMigrationWatchCount": 44,
@@ -110,7 +136,7 @@
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 752 tracked references.",
+      "evidence": "Oracle migration backlog has 768 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },

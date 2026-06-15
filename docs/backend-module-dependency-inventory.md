@@ -107,6 +107,13 @@
 | com.supcon.supfusion.flow:flow-common | 1 | backend/modules/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE/META-INF/maven/com.supcon.supfusion.flow/flow-common/pom.xml |
 | com.supcon.supfusion:auth-upgrade | 1 | backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/META-INF/maven/com.supcon.supfusion/auth-upgrade/pom.xml |
 
+## 直接 Oracle 依赖退场动作
+
+| Module | Dependency | Replacement | Migration Action | Verification |
+| --- | --- | --- | --- | --- |
+| com.supcon.supfusion.flow:flow-common | com.oracle.jdbc:ojdbc7 | org.postgresql:postgresql only where the promoted module really opens JDBC connections | 提升为 source module 时删除直接 Oracle JDBC；common/DTO 模块默认不应打开厂商连接，需要数据库连接时由 DAO/service 层通过父 POM 管理 PostgreSQL JDBC。 | 提升模块后运行 `make source-module-check`、`make source-module-test`，并用流程/待办 smoke 覆盖调用链。 |
+| com.supcon.supfusion:auth-upgrade | com.oracle.jdbc:ojdbc6 | org.postgresql:postgresql only where the promoted module really opens JDBC connections | 把 Oracle driver 从默认 POM 移到显式 legacy profile 或独立迁移工具；默认 PostgreSQL 目标库写入使用标准 `java.sql` API，避免 `oracle.sql.*`。 | 提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。 |
+
 ## 重复模块坐标
 
 | Module | Count | Versions |

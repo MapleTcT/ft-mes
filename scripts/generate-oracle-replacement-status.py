@@ -252,6 +252,7 @@ def build_status() -> dict[str, Any]:
         "postgresMapperAudit": mapping_audit,
         "oracleBacklogCategoryCounts": oracle_audit["categoryCounts"],
         "backendDirectOracleModules": backend_deps["oracleModules"],
+        "backendDirectOracleDependencies": backend_deps.get("oracleDependencies", []),
         "postgresMigrationWatchCount": postgres_migrations["watchStatementCount"],
         "checks": checks,
     }
@@ -294,6 +295,17 @@ def render_markdown(status: dict[str, Any]) -> str:
     for item in status["backendDirectOracleModules"]:
         oracle_rows.append([item["key"], str(item["oracleDependencyCount"]), item["path"]])
 
+    oracle_dependency_rows = [["Module", "Dependency", "Action", "Verification"]]
+    for item in status["backendDirectOracleDependencies"]:
+        oracle_dependency_rows.append(
+            [
+                item["from"],
+                item["dependency"],
+                item["migrationAction"],
+                item["verification"],
+            ]
+        )
+
     mapper = status["postgresMapperAudit"]
     mapper_top_rows = [["File", "Findings"]]
     for item in mapper.get("topFiles", [])[:10]:
@@ -333,6 +345,10 @@ def render_markdown(status: dict[str, Any]) -> str:
             "## 直接 Oracle 依赖模块",
             "",
             table(oracle_rows) if len(oracle_rows) > 1 else "当前没有恢复 POM 直接声明 Oracle JDBC。",
+            "",
+            "## 直接 Oracle 依赖退场动作",
+            "",
+            table(oracle_dependency_rows) if len(oracle_dependency_rows) > 1 else "当前没有直接 Oracle JDBC 退场动作。",
             "",
             "## PostgreSQL Mapper Audit Top Files",
             "",

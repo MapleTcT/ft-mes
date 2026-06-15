@@ -943,6 +943,32 @@
       "oracleDependencyCount": 1
     }
   ],
+  "oracleDependencies": [
+    {
+      "from": "com.supcon.supfusion.flow:flow-common",
+      "fromPath": "backend/modules/com/supcon/supfusion/flow/flow-common/1.0.0-RELEASE/META-INF/maven/com.supcon.supfusion.flow/flow-common/pom.xml",
+      "fromFamily": "flow",
+      "fromLayer": "common",
+      "dependency": "com.oracle.jdbc:ojdbc7",
+      "version": "12.1.0.2",
+      "scope": null,
+      "replacement": "org.postgresql:postgresql only where the promoted module really opens JDBC connections",
+      "migrationAction": "提升为 source module 时删除直接 Oracle JDBC；common/DTO 模块默认不应打开厂商连接，需要数据库连接时由 DAO/service 层通过父 POM 管理 PostgreSQL JDBC。",
+      "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用流程/待办 smoke 覆盖调用链。"
+    },
+    {
+      "from": "com.supcon.supfusion:auth-upgrade",
+      "fromPath": "backend/modules/com/supcon/supfusion/auth-upgrade/1.0.1.RELEASE/META-INF/maven/com.supcon.supfusion/auth-upgrade/pom.xml",
+      "fromFamily": "auth",
+      "fromLayer": "upgrade",
+      "dependency": "com.oracle.jdbc:ojdbc6",
+      "version": null,
+      "scope": null,
+      "replacement": "org.postgresql:postgresql only where the promoted module really opens JDBC connections",
+      "migrationAction": "把 Oracle driver 从默认 POM 移到显式 legacy profile 或独立迁移工具；默认 PostgreSQL 目标库写入使用标准 `java.sql` API，避免 `oracle.sql.*`。",
+      "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
+    }
+  ],
   "jdbcDependencies": [
     {
       "from": "com.supcon.supfusion.flow:flow-common",

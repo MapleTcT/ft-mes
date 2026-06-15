@@ -139,6 +139,40 @@ def parse_dependency(dep: ET.Element, module_key: str, internal_keys: set[str]) 
     }
 
 
+def oracle_dependency_action(dep: dict[str, Any], module: dict[str, Any]) -> dict[str, Any]:
+    layer = module["layer"]
+    if layer == "common":
+        action = (
+            "提升为 source module 时删除直接 Oracle JDBC；common/DTO 模块默认不应打开厂商连接，"
+            "需要数据库连接时由 DAO/service 层通过父 POM 管理 PostgreSQL JDBC。"
+        )
+        verification = "提升模块后运行 `make source-module-check`、`make source-module-test`，并用流程/待办 smoke 覆盖调用链。"
+    elif layer == "upgrade":
+        action = (
+            "把 Oracle driver 从默认 POM 移到显式 legacy profile 或独立迁移工具；"
+            "默认 PostgreSQL 目标库写入使用标准 `java.sql` API，避免 `oracle.sql.*`。"
+        )
+        verification = "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
+    else:
+        action = (
+            "删除默认直接 Oracle JDBC；只有明确需要回连旧库对比时，才放入 legacy profile 或默认构建外的工具模块。"
+        )
+        verification = "提升模块后运行 `make source-module-check`、`make source-module-test` 和相关页面/API smoke。"
+
+    return {
+        "from": dep["from"],
+        "fromPath": module["path"],
+        "fromFamily": module["family"],
+        "fromLayer": module["layer"],
+        "dependency": dep["key"],
+        "version": dep["version"],
+        "scope": dep["scope"],
+        "replacement": "org.postgresql:postgresql only where the promoted module really opens JDBC connections",
+        "migrationAction": action,
+        "verification": verification,
+    }
+
+
 def parse_pom(path: Path) -> dict[str, Any]:
     try:
         root = ET.parse(path).getroot()
@@ -189,9 +223,13 @@ def build_inventory() -> dict[str, Any]:
     internal_keys = {item["key"] for item in modules}
 
     dependencies: list[dict[str, Any]] = []
+    oracle_dependencies: list[dict[str, Any]] = []
     for item in modules:
         for dep in item.pop("dependencyElements"):
-            dependencies.append(parse_dependency(dep, item["key"], internal_keys))
+            dependency = parse_dependency(dep, item["key"], internal_keys)
+            dependencies.append(dependency)
+            if dependency["oracle"]:
+                oracle_dependencies.append(oracle_dependency_action(dependency, item))
 
     for item in modules:
         own_deps = [dep for dep in dependencies if dep["from"] == item["key"]]
@@ -238,7 +276,6 @@ def build_inventory() -> dict[str, Any]:
         for dep in dependencies
         if dep["jdbc"]
     ]
-
     return {
         "schemaVersion": 1,
         "sourceRoot": str(MODULE_ROOT.relative_to(ROOT)),
@@ -267,6 +304,10 @@ def build_inventory() -> dict[str, Any]:
         "duplicateModules": duplicate_modules,
         "parseErrors": parse_errors,
         "oracleModules": sorted(oracle_modules, key=lambda item: (item["key"], item["path"])),
+        "oracleDependencies": sorted(
+            oracle_dependencies,
+            key=lambda item: (item["from"], item["dependency"], item["fromPath"]),
+        ),
         "jdbcDependencies": sorted(jdbc_dependencies, key=lambda item: (item["from"], item["key"])),
         "modules": sorted(modules, key=lambda item: (item["family"], item["layer"], item["key"], item["path"])),
         "dependencies": sorted(dependencies, key=lambda item: (item["from"], item["internal"], item["key"])),
@@ -303,6 +344,18 @@ def render_markdown(inventory: dict[str, Any]) -> str:
     oracle_rows = [["Module", "Oracle deps", "Path"]]
     for item in inventory["oracleModules"]:
         oracle_rows.append([item["key"], str(item["oracleDependencyCount"]), item["path"]])
+
+    oracle_dependency_rows = [["Module", "Dependency", "Replacement", "Migration Action", "Verification"]]
+    for item in inventory["oracleDependencies"]:
+        oracle_dependency_rows.append(
+            [
+                item["from"],
+                item["dependency"],
+                item["replacement"],
+                item["migrationAction"],
+                item["verification"],
+            ]
+        )
 
     duplicate_rows = [["Module", "Count", "Versions"]]
     for item in inventory["duplicateModules"][:30]:
@@ -361,6 +414,10 @@ def render_markdown(inventory: dict[str, Any]) -> str:
         "## Oracle/JDBC 风险",
         "",
         table(oracle_rows) if len(oracle_rows) > 1 else "当前恢复 POM 没有直接 Oracle JDBC 依赖。",
+        "",
+        "## 直接 Oracle 依赖退场动作",
+        "",
+        table(oracle_dependency_rows) if len(oracle_dependency_rows) > 1 else "当前没有直接 Oracle JDBC 退场动作。",
         "",
         "## 重复模块坐标",
         "",

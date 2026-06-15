@@ -46,6 +46,7 @@ backend/modules/<group>/<artifact>/<version>/
 新模块只声明真实需要的依赖：
 
 - 先查看 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，确认原模块 family/layer、内部依赖、外部依赖、重复坐标和 Oracle/JDBC 风险。
+- 如原模块出现在依赖库存的“直接 Oracle 依赖退场动作”中，按表内 action/verification 先消化，再进入默认 source module。
 - 继承根 `ft-mes-parent`。
 - 使用父 POM 里的 Spring、Spring Cloud、PostgreSQL JDBC 版本。
 - 不复制恢复 POM 中的私服、父工程、Oracle 驱动和无关插件。

@@ -63,7 +63,7 @@ make backend-dependency-inventory
 make backend-dependency-check
 ```
 
-报告见 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，其中会列出直接 Oracle/JDBC 依赖、重复模块坐标和内部依赖关系。
+报告见 [后端恢复模块依赖库存](backend-module-dependency-inventory.md)，其中会列出直接 Oracle/JDBC 依赖、退场动作、重复模块坐标和内部依赖关系。
 
 PostgreSQL 初始化和兼容 SQL 也要维护脚本索引：
 
