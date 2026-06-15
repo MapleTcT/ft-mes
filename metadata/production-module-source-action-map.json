@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-15T19:32:13+08:00",
+  "repoCommit": "c782cf4abff82aa9a76c2a0a2c1b1e0440beddda",
+  "database": "PostgreSQL",
+  "module": "production",
+  "sourcePackage": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4",
+  "liveDiscoveryReport": "/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
+  "summary": {
+    "sourceActions": 12,
+    "liveRoutesProbed": 8,
+    "liveRoutesPass": 2,
+    "liveRoutesWithErrors": 6,
+    "actionsReadyForMarkerPersistence": 0,
+    "blockedByRuntimeLayout": 10
+  },
+  "runtimeFindings": [
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "status": "PASS_READ_ONLY",
+      "evidence": "Real browser navigation 200; visible buttons 查询, 仅查待办, 清空; POST /makeTaskList-pending returned 200; no safe create button."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList",
+      "status": "PASS_READ_ONLY",
+      "evidence": "Real browser navigation 200; visible buttons 查询, 清空; POST /prepareMakeTaskList-query returned 200; source generatePrepareNeed button is not exposed in current runtime view."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit",
+      "status": "FAIL_RUNTIME_LAYOUT",
+      "evidence": "Navigation 200, but GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskEdit&isEs5=true returned 500 {\"code\":500,\"data\":null,\"message\":\"服务器异常\"}."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskSubmitView",
+      "status": "FAIL_RUNTIME_LAYOUT",
+      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskSubmitView returned 500."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskView",
+      "status": "FAIL_RUNTIME_LAYOUT",
+      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskView returned 500."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
+      "status": "FAIL_RUNTIME_LAYOUT",
+      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskBatchView returned 500."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
+      "status": "FAIL_RUNTIME_LAYOUT",
+      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_easyTaskOperateView returned 500."
+    },
+    {
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskGraphList",
+      "status": "FAIL_NOT_FOUND",
+      "evidence": "Real browser navigation returned 404 document response."
+    }
+  ],
+  "actions": [
+    {
+      "id": "WOM-PROD-ACTION-001",
+      "name": "制造任务待办列表查询",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "sourceEvent": "layout/query",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "controllerEntry": "runtime list query",
+      "serviceEntry": "runtime list query",
+      "targetTables": ["WOM_PRODUCE_TASKS", "wfm_task_pending"],
+      "requiresPersistence": false,
+      "acceptanceStatus": "PASS_READ_ONLY",
+      "evidence": "Captured by live browser discovery with status 200 and pageNo/pageSize payload.",
+      "blockers": []
+    },
+    {
+      "id": "WOM-PROD-ACTION-002",
+      "name": "备料退料候选列表查询",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_prepareMakeTaskList",
+      "sourceEvent": "layout/query",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList-query",
+      "controllerEntry": "runtime list query",
+      "serviceEntry": "runtime list query",
+      "targetTables": ["WOM_PRODUCE_TASKS"],
+      "requiresPersistence": false,
+      "acceptanceStatus": "PASS_READ_ONLY",
+      "evidence": "Captured by live browser discovery with status 200.",
+      "blockers": []
+    },
+    {
+      "id": "WOM-PROD-ACTION-003",
+      "name": "生成备料需求",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_prepareMakeTaskList",
+      "sourceEvent": "prePareNeed(event)",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/generatePrepareNeed",
+      "controllerEntry": "WOMProduceTaskController.generatePrepareNeed",
+      "serviceEntry": "WOMProduceTaskServiceImpl.generatePrepareNeed",
+      "targetTables": ["WOM_PRODUCE_TASKS", "WOM_TASK_MATERIALS"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source customEvent.js posts selected ids to generatePrepareNeed; live prepareMakeTaskList page exposes only 查询/清空 in current runtime.",
+      "blockers": ["Action button not exposed in current runtime view; cannot run marker-based write acceptance."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-004",
+      "name": "制造任务开始/暂停/恢复",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "sourceEvent": "startTaskEvent / pauseTaskEvent / recoveryTaskEvent",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/updateTaskState",
+      "controllerEntry": "WOMProduceTaskController.updateTaskState",
+      "serviceEntry": "WOMProduceTaskServiceImpl.updateTaskState",
+      "targetTables": ["WOM_PRODUCE_TASKS", "WOM_TASK_PROCESSES", "WOM_TASK_ACTIVES"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source customEvent.js uses updateTaskState for start/pause/recovery; controller and service entries exist in WOM_6.1.3.4 source.",
+      "blockers": ["Current runtime makeTaskList has layoutDatagrid.buttons=[] and no visible state buttons."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-005",
+      "name": "制造任务完工报工并结束",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "sourceEvent": "stopTaskEvent(event)",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
+      "controllerEntry": "WOMProduceTaskController.addOutputByOutPutDetails",
+      "serviceEntry": "WOMProduceTaskServiceImpl.addOutputByOutPutDetails",
+      "targetTables": ["WOM_PROC_REPORTS", "WOM_PRODUCE_TASKS", "WOM_TASK_ACTIVES", "WOM_TASK_PROCESSES"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source stopTaskEvent opens outPutCommonTaskEdit and posts procReportId/taskId to addOutputByOutPutDetails after save.",
+      "blockers": ["Runtime makeTaskList does not expose finish/report-work button; cannot create marker proc report from UI."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-006",
+      "name": "提前放料确认",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "sourceEvent": "earlyPutInFunc(event)",
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/produceTask/setAdvanceTrue/{orderId}",
+      "controllerEntry": "WOMProduceTaskController.setAdvanceTrue",
+      "serviceEntry": "WOMProduceTaskServiceImpl.setAdvanceTrue or equivalent service path",
+      "targetTables": ["WOM_PRODUCE_TASKS"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source customEvent.js calls setAdvanceTrue after taskRunState/runing and advanceCharge checks.",
+      "blockers": ["Runtime makeTaskList does not expose early put-in action button."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-007",
+      "name": "制造请检下推",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "sourceEvent": "manuInspect(event)",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/createManuInspect",
+      "controllerEntry": "WOMProduceTaskController.createManuInspect",
+      "serviceEntry": "WOMProduceTaskServiceImpl.createManuInspect",
+      "targetTables": ["WOM_PRODUCE_TASKS", "QCS inspection tables"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source customEvent.js checks findCheckMsgByBatch then posts taskId to createManuInspect.",
+      "blockers": ["Runtime makeTaskList does not expose inspection action; QCS target tables still need table-level trace."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-008",
+      "name": "工序开始/结束",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskView",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskView",
+      "sourceEvent": "startProcessEvent / endProcessEvent",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/taskProcess/start/{id}; /msService/WOM/produceTask/taskProcess/end/{id}",
+      "controllerEntry": "WOM taskProcess controller",
+      "serviceEntry": "WOM taskProcess service",
+      "targetTables": ["WOM_TASK_PROCESSES"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source makeTaskView and makeTaskBatchView customEvent.js call taskProcess start/end endpoints.",
+      "blockers": ["Live makeTaskView layoutJson returns 500, so the action UI cannot render."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-009",
+      "name": "工序工作单元设置",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskView",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskView",
+      "sourceEvent": "setUnitEvent(event)",
+      "method": "FORM_SAVE",
+      "endpoint": "/msService/WOM/produceTask/taskProcess/processUnitEdit?id={processId}",
+      "controllerEntry": "runtime edit form save",
+      "serviceEntry": "runtime edit form save",
+      "targetTables": ["WOM_TASK_PROCESSES"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source customEvent.js opens processUnitEdit dialog and calls submitFormData('save').",
+      "blockers": ["Live makeTaskView/makeTaskBatchView layoutJson returns 500."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-010",
+      "name": "活动开始/结束",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskBatchView",
+      "sourceEvent": "startActive(event) / endActiveEvent(event)",
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/produceTask/startActive; /msService/WOM/produceTask/produceTask/endActive",
+      "controllerEntry": "WOMProduceTaskController.startActive / endActive",
+      "serviceEntry": "WOMProduceTaskServiceImpl.startActive / endActive",
+      "targetTables": ["WOM_TASK_ACTIVES", "WOM_TASK_PROCESSES", "WOM_PRODUCE_TASKS"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source makeTaskBatchView customEvent.js calls startActive/endActive and refreshes taskActive/queryByProcess.",
+      "blockers": ["Live makeTaskBatchView layoutJson returns 500."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-011",
+      "name": "简易活动报工",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
+      "sourceViewCode": "WOM_1.0.0_produceTask_easyTaskOperateView",
+      "sourceEvent": "reportEvent(event)",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/endEasyActive/{id}",
+      "controllerEntry": "WOMProduceTaskController.endEasyActive",
+      "serviceEntry": "WOMProduceTaskServiceImpl.endEasyActive",
+      "targetTables": ["WOM_TASK_ACTIVES", "WOM_PROC_REPORTS"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source easyTaskOperateView customEvent.js posts selected active id to endEasyActive.",
+      "blockers": ["Live easyTaskOperateView layoutJson returns 500."]
+    },
+    {
+      "id": "WOM-PROD-ACTION-012",
+      "name": "检验单生成",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
+      "sourceViewCode": "WOM_1.0.0_produceTask_easyTaskOperateView",
+      "sourceEvent": "generateCheckoutBillFunc(event)",
+      "method": "GET",
+      "endpoint": "/msService/WOM/produceTask/produceTask/checkoutBill/generate/{activeId}",
+      "controllerEntry": "WOM/QCS checkout generation controller",
+      "serviceEntry": "WOM/QCS checkout generation service",
+      "targetTables": ["WOM_TASK_ACTIVES", "QCS checkout tables"],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "evidence": "Source easyTaskOperateView customEvent.js calls checkoutBill/generate and refreshes activity grids.",
+      "blockers": ["Live easyTaskOperateView layoutJson returns 500; QCS checkout target tables still need table-level trace."]
+    }
+  ]
+}

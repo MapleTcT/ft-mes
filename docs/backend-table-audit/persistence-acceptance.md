@@ -10,10 +10,10 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 验收动作 | 4 |
+| 验收动作 | 5 |
 | PASS | 3 |
 | FAIL | 0 |
-| BLOCKED | 1 |
+| BLOCKED | 2 |
 | NOT_APPLICABLE | 0 |
 
 ## 落库验收明细
@@ -24,6 +24,7 @@
 | 编辑部门 | 已登录组织页面上下文同源请求 | `PUT /inter-api/organization/v1/department` | `DepartmentInterController.updateDepartment -> DepartmentService.updateDepartment -> updateDepartmentWithoutKafka -> MyBatis Plus updateById` | `org_department` | 同上，按 code 查询同一 id | 返回 `200`；同一 id 名称变为 `ADP_E2E_20260615103620_ORGDEP_EDIT`，描述变为 update marker，`valid=1` | PASS |
 | 删除部门 | 已登录组织页面上下文同源请求 | `DELETE /inter-api/organization/v1/department/6587462000591376` | `DepartmentInterController.deleteDep -> DepartmentService.deleteDepById -> updateBatchById` | `org_department` | 同上，按 code 查询同一 id | 返回 `200`；同一 id 保留但 `valid=0`，证明为软删除 | PASS |
 | 新建生产工单或制造任务 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 未发现创建接口；仅捕获 `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` 列表查询 | 未进入后端写链路；运行时视图 `buttons` 为空 | 待确认写表，读模型为 `WOM_PRODUCE_TASKS` / `wfm_task_pending` | 未执行。当前页面无新增入口，不能生成 marker 写动作 | 真实浏览器页面 `200`，无错误；可见按钮只有“查询 / 仅查待办 / 清空”；兼容运行时视图按钮为空；无法执行落库验收 | BLOCKED |
+| 生产状态流转、报工、活动执行 | WOM `makeTaskList`、`prepareMakeTaskList`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | 源码定位到 `updateTaskState`、`addOutputByOutPutDetails`、`generatePrepareNeed`、`startActive/endActive`、`endEasyActive`，但当前页面按钮缺失或 `layoutJson` 500 | `WOMProduceTaskController -> WOMProduceTaskServiceImpl` 对应方法已在 WOM 6.1.3.4 源码定位 | `WOM_PRODUCE_TASKS`、`WOM_TASK_PROCESSES`、`WOM_TASK_ACTIVES`、`WOM_PROC_REPORTS`、`WOM_TASK_MATERIALS` | 未执行。动作视图无法稳定渲染，不能从真实前端提交 marker 写动作 | 多入口真实浏览器探测中 `makeTaskEdit/Submit/View/Batch/EasyOperate` 的 `layoutJson` 返回 500，`makeTaskGraphList` 404；当前只能记录源链路，不能认定落库成功 | BLOCKED |
 
 ## 本轮请求和落库摘要
 
@@ -34,6 +35,8 @@
 - 最终 PostgreSQL 行：`6587462000591376|ADP_E2E_20260615103620_ORGDEP_DEP|ADP_E2E_20260615103620_ORGDEP_EDIT|sys_department_type/general|ADP_E2E_20260615103620_ORGDEP update via browser-context API|1000|0|1|/默认公司/ADP_E2E_20260615103620_ORGDEP_EDIT|6587462000591376`
 - 原始脚本报告：`/tmp/adp-organization-persistence-20260615183619.json`
 - WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json`
+- WOM 生产动作候选页探测：`/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json`
+- WOM 生产动作源地图：`metadata/production-module-source-action-map.json`
 
 ## 证据要求
 

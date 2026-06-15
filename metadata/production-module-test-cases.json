@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T19:11:59+08:00",
-  "repoCommit": "bf325594aaef46e0a6f17e7c031637bc15a226f5",
+  "generatedAt": "2026-06-15T19:32:13+08:00",
+  "repoCommit": "c782cf4abff82aa9a76c2a0a2c1b1e0440beddda",
   "database": "PostgreSQL",
   "module": "production",
-  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_PROD002_DISCOVERY",
+  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_SOURCE_ACTION_MAP",
   "evidence": {
     "baseUrl": "http://10.11.100.17:18080",
     "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
@@ -20,14 +20,16 @@
       "failed": 0
     },
     "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
-    "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png"
+    "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png",
+    "productionActionCandidateDiscoveryReport": "/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
+    "productionSourceActionMap": "metadata/production-module-source-action-map.json"
   },
   "summary": {
     "totalCases": 23,
     "pass": 8,
     "fail": 0,
-    "blocked": 4,
-    "notRun": 11,
+    "blocked": 5,
+    "notRun": 10,
     "requiresPersistence": 13,
     "routeSmokePass": 18
   },
@@ -117,16 +119,25 @@
       "operationType": "status-change",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
+      "acceptanceStatus": "BLOCKED",
       "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No state transition has been executed yet.",
-      "issues": [
-        "Need status enum, button permission, and workflow preconditions."
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState"
       ],
-      "nextAction": "Use a marker work order and verify status columns before and after each transition.",
+      "backendTraceStatus": "source-traced-runtime-action-not-exposed",
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "WOM_TASK_PROCESSES",
+        "WOM_TASK_ACTIVES"
+      ],
+      "verificationSql": "",
+      "evidence": "WOM 6.1.3.4 source customEvent.js defines startTaskEvent/pauseTaskEvent/recoveryTaskEvent calling POST /msService/WOM/produceTask/produceTask/updateTaskState, and WOMProduceTaskController.updateTaskState delegates to WOMProduceTaskServiceImpl.updateTaskState. Real browser discovery still shows current makeTaskList only exposes 查询/仅查待办/清空 because runtime layoutDatagrid.buttons is empty; no marker state transition was executed.",
+      "issues": [
+        "Current runtime makeTaskList does not expose the source-defined state transition buttons.",
+        "Need marker production task with valid status/taskRunState preconditions before executing state transition.",
+        "No PostgreSQL before/after field verification has been executed yet."
+      ],
+      "nextAction": "Restore WOM makeTaskList action buttons or RBAC button authority, then use a marker work order and verify WOM_PRODUCE_TASKS/TASK_RUN_STATE plus process/activity state fields before and after each transition.",
       "coverageTags": [
         "status-flow",
         "work-order",
@@ -547,17 +558,29 @@
       "route": "",
       "operationType": "create-update",
       "requiresPersistence": true,
-      "routeSmokeStatus": "NOT_APPLICABLE",
+      "routeSmokeStatus": "FAIL",
       "acceptanceStatus": "BLOCKED",
-      "apiEndpoints": [],
-      "backendTraceStatus": "route-not-confirmed",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "No explicit report-work route has been identified in the current recovered package.",
-      "issues": [
-        "Need route/API/table mapping for report-work."
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
+        "POST /msService/WOM/produceTask/produceTask/endEasyActive/{id}",
+        "GET /msService/WOM/produceTask/produceTask/startActive",
+        "GET /msService/WOM/produceTask/produceTask/endActive"
       ],
-      "nextAction": "Locate report-work menu/API in runtime package or new business package, then execute marker report action.",
+      "backendTraceStatus": "source-traced-runtime-layout-blocked",
+      "targetTables": [
+        "WOM_PROC_REPORTS",
+        "WOM_TASK_ACTIVES",
+        "WOM_TASK_PROCESSES",
+        "WOM_PRODUCE_TASKS"
+      ],
+      "verificationSql": "",
+      "evidence": "WOM 6.1.3.4 source maps report-work and activity execution through stopTaskEvent/addOutputByOutPutDetails, easyTaskOperateView/reportEvent/endEasyActive, and makeTaskView/makeTaskBatchView startActive/endActive. Real browser candidate probing found makeTaskView, makeTaskBatchView, and easyTaskOperateView navigation 200 but their layoutJson calls return 500, so the report-work UI cannot render in the current runtime. Report: /tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
+      "issues": [
+        "Report-work source routes and endpoints are identified, but current runtime layoutJson fails with 500 for the required action views.",
+        "No marker report-work action has been submitted through the real frontend.",
+        "Need PostgreSQL verification for WOM_PROC_REPORTS and related task/process/activity state fields after runtime view recovery."
+      ],
+      "nextAction": "Restore makeTaskView/makeTaskBatchView/easyTaskOperateView runtime layouts, seed a marker task/process/activity, execute report-work from the frontend, and query WOM_PROC_REPORTS plus state fields.",
       "coverageTags": [
         "report-work",
         "execution",

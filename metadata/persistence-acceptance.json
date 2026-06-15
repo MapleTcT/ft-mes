@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-15T19:11:59+08:00",
-  "repoCommit": "bf325594aaef46e0a6f17e7c031637bc15a226f5",
+  "generatedAt": "2026-06-15T19:32:13+08:00",
+  "repoCommit": "c782cf4abff82aa9a76c2a0a2c1b1e0440beddda",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_RECORDED",
+  "status": "PARTIAL_ACCEPTANCE_WITH_PRODUCTION_ACTION_RUNTIME_BLOCKERS",
   "summary": {
-    "testedFeatures": 6,
+    "testedFeatures": 7,
     "pass": 5,
     "fail": 0,
-    "blocked": 1,
+    "blocked": 2,
     "notApplicable": 0
   },
   "items": [
@@ -58,6 +58,31 @@
         "Current WOM makeTaskList route appears to be a pending-task/list page, not the production work-order creation entry.",
         "Runtime compatibility view exposes no grid buttons, so the current rendered page cannot initiate create.",
         "Need to locate the real create page, menu permission, or button authority source before marker-based persistence acceptance can run."
+      ]
+    },
+    {
+      "module": "生产模块",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/produceTask/prepareMakeTaskList; /msService/WOM/produceTask/produceTask/makeTaskView; /msService/WOM/produceTask/produceTask/makeTaskBatchView; /msService/WOM/produceTask/produceTask/easyTaskOperateView",
+      "operation": "生产状态流转、备料生成、报工、活动开始/结束等写动作落库验收",
+      "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState; POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails; POST /msService/WOM/produceTask/produceTask/generatePrepareNeed; GET /msService/WOM/produceTask/produceTask/startActive; GET /msService/WOM/produceTask/produceTask/endActive; POST /msService/WOM/produceTask/produceTask/endEasyActive/{id}",
+      "method": "MIXED",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController -> WOMProduceTaskServiceImpl methods traced from WOM_6.1.3.4 source; see metadata/production-module-source-action-map.json",
+      "tables": [
+        "WOM_PRODUCE_TASKS",
+        "WOM_TASK_PROCESSES",
+        "WOM_TASK_ACTIVES",
+        "WOM_PROC_REPORTS",
+        "WOM_TASK_MATERIALS"
+      ],
+      "marker": "",
+      "verificationSql": "",
+      "status": "BLOCKED",
+      "evidence": "Source action map identifies production write endpoints and target tables, but real browser probing showed the current runtime cannot render action pages: makeTaskEdit, makeTaskSubmitView, makeTaskView, makeTaskBatchView, and easyTaskOperateView all return layoutJson 500; makeTaskGraphList returns document 404. Current makeTaskList and prepareMakeTaskList expose only query/clear buttons. Report: /tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json; source map: metadata/production-module-source-action-map.json",
+      "issues": [
+        "Cannot execute marker-based write operation from the real frontend until runtime layoutJson 500 errors are fixed.",
+        "Current production list pages do not expose the source-defined action buttons.",
+        "QCS checkout/inspection target tables need deeper table-level trace before those actions can be accepted."
       ]
     },
     {

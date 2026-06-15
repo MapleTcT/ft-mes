@@ -26,8 +26,10 @@ PLATFORM_MENU_LIMIT ?= 40
 ORGANIZATION_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
 PRODUCTION_DISCOVERY_OUTPUT ?= /tmp/adp-production-action-discovery
+PRODUCTION_DISCOVERY_TARGETS ?=
+PRODUCTION_DISCOVERY_CLICK_CREATE ?= true
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check production-action-map-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -39,6 +41,7 @@ help:
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
 	@printf '%s\n' '  make persistence-acceptance-check Validate functional/persistence acceptance assets'
 	@printf '%s\n' '  make production-testcase-check Validate production module action test matrix'
+	@printf '%s\n' '  make production-action-map-check Validate production source action map'
 	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
 	@printf '%s\n' '  make source-module-test      Compile and test promoted backend source modules'
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
@@ -73,7 +76,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check production-action-map-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -105,6 +108,9 @@ persistence-acceptance-check:
 
 production-testcase-check:
 	$(PYTHON) scripts/verify-production-module-test-cases.py
+
+production-action-map-check:
+	$(PYTHON) scripts/verify-production-action-map.py
 
 source-module-check:
 	$(PYTHON) scripts/verify-source-modules.py
@@ -203,7 +209,7 @@ smoke-business-page:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_OUTPUT_DIR=$(BUSINESS_PAGE_SMOKE_OUTPUT) $(NODE) deploy/docker/scripts/adp-business-page-smoke.js
 
 discover-production-actions:
-	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_PRODUCTION_DISCOVERY_OUTPUT=$(PRODUCTION_DISCOVERY_OUTPUT) $(NODE) deploy/docker/scripts/adp-production-action-discovery.js
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_PRODUCTION_DISCOVERY_OUTPUT=$(PRODUCTION_DISCOVERY_OUTPUT) ADP_PRODUCTION_DISCOVERY_TARGETS='$(PRODUCTION_DISCOVERY_TARGETS)' ADP_PRODUCTION_DISCOVERY_CLICK_CREATE=$(PRODUCTION_DISCOVERY_CLICK_CREATE) $(NODE) deploy/docker/scripts/adp-production-action-discovery.js
 
 audit-postgres-mappings:
 	$(PYTHON) deploy/docker/scripts/audit-postgres-mappings.py backend/modules deploy/docker/postgres/init

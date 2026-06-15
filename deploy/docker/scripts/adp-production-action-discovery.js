@@ -13,12 +13,15 @@ const headless = process.env.ADP_HEADLESS !== "false";
 const outputDir =
   process.env.ADP_PRODUCTION_DISCOVERY_OUTPUT ||
   path.join("/tmp", `adp-production-action-discovery-${timestamp}`);
+const clickCreate = process.env.ADP_PRODUCTION_DISCOVERY_CLICK_CREATE !== "false";
 
-const target = {
-  id: "PROD-002",
-  label: "WOM make task create discovery",
-  url: "/msService/WOM/produceTask/produceTask/makeTaskList",
-};
+const defaultTargets = [
+  {
+    id: "PROD-002",
+    label: "WOM make task create discovery",
+    url: "/msService/WOM/produceTask/produceTask/makeTaskList",
+  },
+];
 
 const visibleErrorPattern =
   /(系统错误|系统异常|发生未知异常|SQLGrammarException|could not extract ResultSet|404_NOT_FOUND|500 INTERNAL|\bHTTP\s*(404|500)\b|\b(404|500)\s+(Not Found|Internal Server Error)\b|Caused by:|\b[\w.]+Exception(?::|\s+at\b)|Invalid bound statement|relation .* does not exist|column .* does not exist)/i;
@@ -33,6 +36,37 @@ function ensureDir(dir) {
 
 function normalizeUrl(targetUrl) {
   return new URL(targetUrl, `${baseUrl}/`).toString();
+}
+
+function parseTargets() {
+  const raw = process.env.ADP_PRODUCTION_DISCOVERY_TARGETS || "";
+  const values = raw
+    .split(/[\n,]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (!values.length) {
+    return defaultTargets;
+  }
+
+  return values.map((value, index) => {
+    const parts = value.split("|").map((part) => part.trim());
+    const url = parts[0];
+    return {
+      id: parts[1] || `PROD-DISCOVERY-${String(index + 1).padStart(2, "0")}`,
+      label: parts[2] || `production route discovery ${index + 1}`,
+      url,
+    };
+  });
+}
+
+function targetSlug(target, index) {
+  const raw = `${String(index + 1).padStart(2, "0")}-${target.id}-${target.url}`;
+  return raw
+    .replace(/^https?:\/\//i, "")
+    .replace(/[^a-z0-9._-]+/gi, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
 }
 
 function findTicket(payload) {
@@ -269,38 +303,10 @@ function isPotentialWrite(entry) {
   return !isQueryLikePost(entry);
 }
 
-async function main() {
-  ensureDir(outputDir);
-  const reportPath = path.join(outputDir, "production-action-discovery.json");
-  const initialScreenshot = path.join(outputDir, "wom-make-task-list.png");
-  const afterCreateScreenshot = path.join(outputDir, "wom-make-task-create-open.png");
-
-  const api = await request.newContext({ ignoreHTTPSErrors: true });
-  const ticket = await login(api);
-  await api.dispose();
-
-  const browser = await chromium.launch({ headless });
-  const context = await browser.newContext({
-    baseURL: baseUrl,
-    ignoreHTTPSErrors: true,
-    viewport: { width: 1440, height: 960 },
-    extraHTTPHeaders: {
-      Authorization: `Bearer ${ticket}`,
-    },
-  });
-  await context.addCookies([
-    { name: "suposTicket", value: ticket, url: baseUrl },
-    { name: "SUPOS_TICKET", value: ticket, url: baseUrl },
-  ]);
-  await context.addInitScript((token) => {
-    window.localStorage.setItem("suposTicket", token);
-    window.localStorage.setItem("SUPOS_TICKET", token);
-    window.localStorage.setItem("token", token);
-    window.sessionStorage.setItem("suposTicket", token);
-    window.sessionStorage.setItem("SUPOS_TICKET", token);
-    window.sessionStorage.setItem("token", token);
-  }, ticket);
-
+async function discoverTarget(context, target, index) {
+  const slug = targetSlug(target, index);
+  const initialScreenshot = path.join(outputDir, `${slug}-initial.png`);
+  const afterCreateScreenshot = path.join(outputDir, `${slug}-after-create-click.png`);
   const page = await context.newPage();
   const network = [];
   const consoleErrors = [];
@@ -370,7 +376,7 @@ async function main() {
   let buttonsAfterClick = [];
   let visibleErrorAfter = null;
   let afterClickNetworkStart = network.length;
-  if (safeCreateButton) {
+  if (safeCreateButton && clickCreate) {
     clickedCreate = safeCreateButton;
     try {
       await page.locator(`[data-adp-discovery-id="${safeCreateButton.discoveryId}"]`).click({ timeout: 8000 });
@@ -389,17 +395,18 @@ async function main() {
 
   const nonGetRequests = network.filter((entry) => entry.method !== "GET");
   const potentialWriteRequests = network.filter(isPotentialWrite);
+  const networkErrors = network.filter((entry) => entry.errorLike);
   const discoveryStatus = clickError
     ? "CREATE_BUTTON_CLICK_FAILED"
-    : safeCreateButton && (dialogsAfterClick.length || fieldsAfterClick.length)
+    : safeCreateButton && !clickCreate
+      ? "CREATE_BUTTON_FOUND_NOT_CLICKED"
+      : safeCreateButton && (dialogsAfterClick.length || fieldsAfterClick.length)
       ? "CREATE_ENTRY_DISCOVERED"
       : safeCreateButton
         ? "CREATE_BUTTON_CLICKED_NO_FORM_DETECTED"
         : "NO_SAFE_CREATE_BUTTON_FOUND";
 
-  const report = {
-    generatedAt: new Date().toISOString(),
-    baseUrl,
+  const result = {
     target,
     resolvedUrl,
     navigationStatus: navigation ? navigation.status() : null,
@@ -409,6 +416,7 @@ async function main() {
       afterCreateClick: fs.existsSync(afterCreateScreenshot) ? afterCreateScreenshot : "",
     },
     safety: {
+      createClickEnabled: clickCreate,
       submittedBusinessData: false,
       clickedOnlySafeCreateCandidate: Boolean(clickedCreate),
       nonGetRequests,
@@ -419,8 +427,10 @@ async function main() {
     consoleErrors,
     pageErrors,
     requestFailures,
+    networkErrors,
     buttonsBefore,
     fieldsBefore,
+    safeCreateCandidate: safeCreateButton || null,
     clickedCreate,
     clickError,
     dialogsAfterClick,
@@ -434,21 +444,97 @@ async function main() {
         : "Locate the create entry manually or inspect static page/runtime metadata before attempting marker-based create.",
   };
 
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   await page.close();
+  return result;
+}
+
+function resultHasErrors(result) {
+  return Boolean(
+    result.visibleErrorBefore ||
+      result.visibleErrorAfter ||
+      result.consoleErrors.length ||
+      result.pageErrors.length ||
+      result.requestFailures.length ||
+      result.networkErrors.length,
+  );
+}
+
+async function main() {
+  ensureDir(outputDir);
+  const reportPath = path.join(outputDir, "production-action-discovery.json");
+  const targets = parseTargets();
+
+  const api = await request.newContext({ ignoreHTTPSErrors: true });
+  const ticket = await login(api);
+  await api.dispose();
+
+  const browser = await chromium.launch({ headless });
+  const context = await browser.newContext({
+    baseURL: baseUrl,
+    ignoreHTTPSErrors: true,
+    viewport: { width: 1440, height: 960 },
+    extraHTTPHeaders: {
+      Authorization: `Bearer ${ticket}`,
+    },
+  });
+  await context.addCookies([
+    { name: "suposTicket", value: ticket, url: baseUrl },
+    { name: "SUPOS_TICKET", value: ticket, url: baseUrl },
+  ]);
+  await context.addInitScript((token) => {
+    window.localStorage.setItem("suposTicket", token);
+    window.localStorage.setItem("SUPOS_TICKET", token);
+    window.localStorage.setItem("token", token);
+    window.sessionStorage.setItem("suposTicket", token);
+    window.sessionStorage.setItem("SUPOS_TICKET", token);
+    window.sessionStorage.setItem("token", token);
+  }, ticket);
+
+  const results = [];
+  for (const [index, item] of targets.entries()) {
+    results.push(await discoverTarget(context, item, index));
+  }
+
+  const errorCount = results.filter(resultHasErrors).length;
+  const report = {
+    generatedAt: new Date().toISOString(),
+    baseUrl,
+    clickCreate,
+    targets,
+    summary: {
+      totalTargets: results.length,
+      targetsWithErrors: errorCount,
+      createEntriesDiscovered: results.filter((item) => item.discoveryStatus === "CREATE_ENTRY_DISCOVERED").length,
+      createButtonsFoundNotClicked: results.filter((item) => item.discoveryStatus === "CREATE_BUTTON_FOUND_NOT_CLICKED")
+        .length,
+      potentialWriteRequests: results.reduce((total, item) => total + item.safety.potentialWriteRequests.length, 0),
+    },
+    targetResults: results,
+  };
+
+  if (results.length === 1) {
+    Object.assign(report, results[0]);
+  } else {
+    report.discoveryStatus = errorCount ? "MULTI_TARGET_DISCOVERY_WITH_ERRORS" : "MULTI_TARGET_DISCOVERY_COMPLETE";
+  }
+
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   await context.close();
   await browser.close();
 
-  console.log(`DISCOVERY_STATUS ${discoveryStatus}`);
+  console.log(`DISCOVERY_STATUS ${report.discoveryStatus}`);
   console.log(`REPORT ${reportPath}`);
-  if (report.screenshots.initial) {
-    console.log(`SCREENSHOT_INITIAL ${report.screenshots.initial}`);
-  }
-  if (report.screenshots.afterCreateClick) {
-    console.log(`SCREENSHOT_AFTER_CREATE ${report.screenshots.afterCreateClick}`);
+  for (const result of results) {
+    console.log(`DISCOVERY_TARGET ${result.target.id} ${result.discoveryStatus} ${result.target.url}`);
+    if (result.screenshots.initial) {
+      console.log(`SCREENSHOT_INITIAL ${result.target.id} ${result.screenshots.initial}`);
+    }
+    if (result.screenshots.afterCreateClick) {
+      console.log(`SCREENSHOT_AFTER_CREATE ${result.target.id} ${result.screenshots.afterCreateClick}`);
+    }
   }
 
-  if (visibleErrorBefore || visibleErrorAfter || consoleErrors.length || pageErrors.length || requestFailures.length) {
+  if (errorCount) {
     process.exitCode = 1;
   }
 }
