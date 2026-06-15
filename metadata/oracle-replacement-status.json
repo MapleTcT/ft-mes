@@ -16,7 +16,7 @@
     "watchCount": 2,
     "plannedCount": 1,
     "sourceModuleCount": 1,
-    "oracleBacklogReferenceCount": 729,
+    "oracleBacklogReferenceCount": 730,
     "directOracleDependencyCount": 2,
     "postgresMigrationCount": 69,
     "postgresMigrationHighRiskCount": 0,
@@ -73,7 +73,7 @@
   "oracleBacklogCategoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 120,
+    "documentation-or-workflow": 121,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -110,7 +110,7 @@
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 729 tracked references.",
+      "evidence": "Oracle migration backlog has 730 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },

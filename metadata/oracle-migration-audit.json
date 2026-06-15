@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "findingCount": 729,
+  "findingCount": 730,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 120,
+    "documentation-or-workflow": 121,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -18,7 +18,7 @@
   "patternCounts": {
     "from-dual": 139,
     "ojdbc": 14,
-    "oracle-keyword": 403,
+    "oracle-keyword": 404,
     "rownum": 40,
     "sysdate": 133
   },
@@ -3994,6 +3994,14 @@
       "excerpt": "5. DAO/Mapper 层优先 PostgreSQL，Oracle SQL 只能保留在 legacy 说明或迁移 backlog。"
     },
     {
+      "file": "backend/source-modules/basicmanagement-auditlog/README.md",
+      "line": 14,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- No Oracle or JDBC dependency is declared in this promoted module."
+    },
+    {
       "file": "deploy/README.md",
       "line": 40,
       "pattern": "oracle-keyword",
@@ -4615,7 +4623,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- Oracle backlog 引用：`729`。"
+      "excerpt": "- Oracle backlog 引用：`730`。"
     },
     {
       "file": "docs/oracle-replacement-status.md",
@@ -4639,7 +4647,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 729 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
+      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 730 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
     },
     {
       "file": "docs/oracle-replacement-status.md",
