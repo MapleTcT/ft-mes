@@ -21,7 +21,9 @@ REQUIRED_PATHS = [
     "docs/oracle-to-postgres-transition.md",
     "docs/backend-table-audit-handoff.md",
     "docs/current-content-inventory.md",
+    "docs/oracle-migration-backlog.md",
     "metadata/current-content-inventory.json",
+    "metadata/oracle-migration-audit.json",
     ".github/workflows/verify.yml",
 ]
 

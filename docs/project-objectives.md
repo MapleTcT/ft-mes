@@ -53,6 +53,7 @@
 - GitHub Actions 验证 Maven reactor 和 Compose 语法。
 - `scripts/verify-sustainable-repo.py` 验证仓库治理硬约束。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
+- `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
 
 后续增强：
 
@@ -94,6 +95,7 @@
 - `make ci` 通过。
 - `make sustainable-check` 通过。
 - `make inventory-check` 通过。
+- `make oracle-audit-check` 通过。
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。

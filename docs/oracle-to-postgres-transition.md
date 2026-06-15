@@ -46,6 +46,15 @@ make audit-postgres-report
 
 审计脚本按 `error` / `warning` 分级。`to_char` 这类 PostgreSQL 也支持、但在 Oracle 迁移中仍值得人工确认的函数会作为 warning 记录，不作为阻断项。
 
+同时用下面命令维护 Oracle 依赖和方言引用 backlog：
+
+```bash
+make oracle-audit
+make oracle-audit-check
+```
+
+报告见 [Oracle 迁移 Backlog](oracle-migration-backlog.md)，机器可读结果在 `metadata/oracle-migration-audit.json`。
+
 重点处理：
 
 - `rownum`

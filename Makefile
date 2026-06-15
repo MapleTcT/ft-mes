@@ -18,7 +18,7 @@ SERVICE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check inventory inventory-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check inventory inventory-check oracle-audit oracle-audit-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -29,6 +29,8 @@ help:
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
 	@printf '%s\n' '  make inventory               Regenerate current content inventory'
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
+	@printf '%s\n' '  make oracle-audit            Regenerate Oracle migration backlog'
+	@printf '%s\n' '  make oracle-audit-check      Check Oracle migration backlog is fresh'
 	@printf '%s\n' '  make render-config           Render Nacos configs from deploy/docker/.env'
 	@printf '%s\n' '  make prepare-runtime         Prepare static assets and runtime patch assets'
 	@printf '%s\n' '  make up-infra                Start infrastructure services only'
@@ -42,7 +44,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check inventory-check audit-postgres-mappings
+ci: verify sustainable-check inventory-check oracle-audit-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -60,6 +62,12 @@ inventory:
 
 inventory-check:
 	$(PYTHON) scripts/generate-current-content-inventory.py --check
+
+oracle-audit:
+	$(PYTHON) scripts/generate-oracle-migration-audit.py
+
+oracle-audit-check:
+	$(PYTHON) scripts/generate-oracle-migration-audit.py --check
 
 render-config:
 	cd $(DEPLOY_DIR) && $(PYTHON) scripts/render-nacos-configs.py
