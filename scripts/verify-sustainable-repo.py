@@ -52,6 +52,7 @@ REQUIRED_PATHS = [
     "scripts/verify-persistence-acceptance.py",
     "scripts/verify-production-module-test-cases.py",
     "deploy/docker/scripts/adp-platform-validation-smoke.js",
+    "deploy/docker/scripts/adp-production-action-discovery.js",
     "deploy/docker/scripts/patch-eam-reactapi-ready.py",
 ]
 

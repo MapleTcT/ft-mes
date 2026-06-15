@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-06-15T18:48:53+08:00",
-  "repoCommit": "123b460f98c9e7cdda34b7bc8adf96339a8e6a25",
+  "generatedAt": "2026-06-15T19:11:59+08:00",
+  "repoCommit": "bf325594aaef46e0a6f17e7c031637bc15a226f5",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_RECORDED",
   "summary": {
-    "testedFeatures": 5,
+    "testedFeatures": 6,
     "pass": 5,
     "fail": 0,
-    "blocked": 0,
+    "blocked": 1,
     "notApplicable": 0
   },
   "items": [
@@ -40,6 +40,25 @@
       "status": "PASS",
       "evidence": "2026-06-15 business module API/layout smoke and Playwright browser page smoke on http://10.11.100.17:18080 both passed 53/53. Browser report showed no visible error, network error, console error, page error, or request failure. Production-related entries included WOM make task, WOM retirement PDA, RM batch formula, craftGraph, WTS work permit, and workAppointment work plan. Reports: /tmp/adp-business-module-smoke-20260615184508.json and /tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json. This proves route/API/page reachability only; action-level persistence remains untested.",
       "issues": []
+    },
+    {
+      "module": "生产模块",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "定位新建生产工单或制造任务入口",
+      "api": "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; no create endpoint observed)",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "not entered: current route exposed only list/query UI, no create action; runtime view layoutDatagrid.buttons is empty",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "BLOCKED",
+      "evidence": "Real browser discovery opened WOM makeTaskList with navigation status 200 and no visible/network/console/page/request errors. Visible buttons were 查询, 仅查待办, 清空; no safe 新增/新建/添加/创建 button was present. Runtime view JSON for WOM_1.0.0_produceTask_makeTaskList has layoutDatagrid.buttons=[]. Only non-GET request was list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending. Read model identifies WOM_PRODUCE_TASKS and wfm_task_pending, but create write table is not accepted until a create route is found. Report: /tmp/adp-production-action-discovery-202606151930/production-action-discovery.json; screenshot: /tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png",
+      "issues": [
+        "Current WOM makeTaskList route appears to be a pending-task/list page, not the production work-order creation entry.",
+        "Runtime compatibility view exposes no grid buttons, so the current rendered page cannot initiate create.",
+        "Need to locate the real create page, menu permission, or button authority source before marker-based persistence acceptance can run."
+      ]
     },
     {
       "module": "组织管理",

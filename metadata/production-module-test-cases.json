@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T18:58:46+08:00",
-  "repoCommit": "146c3c9e80b7194adc36081ce9e2efad7ceb2733",
+  "generatedAt": "2026-06-15T19:11:59+08:00",
+  "repoCommit": "bf325594aaef46e0a6f17e7c031637bc15a226f5",
   "database": "PostgreSQL",
   "module": "production",
-  "status": "ACTION_ACCEPTANCE_MATRIX_ESTABLISHED",
+  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_PROD002_DISCOVERY",
   "evidence": {
     "baseUrl": "http://10.11.100.17:18080",
     "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
@@ -18,14 +18,16 @@
       "total": 53,
       "passed": 53,
       "failed": 0
-    }
+    },
+    "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
+    "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png"
   },
   "summary": {
     "totalCases": 23,
     "pass": 8,
     "fail": 0,
-    "blocked": 3,
-    "notRun": 12,
+    "blocked": 4,
+    "notRun": 11,
     "requiresPersistence": 13,
     "routeSmokePass": 18
   },
@@ -60,14 +62,18 @@
       "routeSmokeStatus": "PASS",
       "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "GET /msService/WOM/produceTask/produceTask/makeTaskList"
+        "GET /msService/WOM/produceTask/produceTask/makeTaskList",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending"
       ],
-      "backendTraceStatus": "pending-table-audit",
-      "targetTables": [],
+      "backendTraceStatus": "list-query-endpoint-captured",
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "wfm_task_pending"
+      ],
       "verificationSql": "",
-      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "evidence": "Browser page smoke passed. Production action discovery captured list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending with pageNo/pageSize payload and no visible/network/console/page errors. Runtime metadata maps WOM_1.0.0_produceTask_ProduceTask to WOM_PRODUCE_TASKS and pending filtering to wfm_task_pending. Report: /tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
       "issues": [],
-      "nextAction": "Capture list query XHR and map it to Controller/Mapper/table in business-production audit.",
+      "nextAction": "Trace makeTaskList-pending handler and confirm read SQL shape against WOM_PRODUCE_TASKS and wfm_task_pending.",
       "coverageTags": [
         "work-order",
         "execution"
@@ -81,16 +87,21 @@
       "operationType": "create",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; no create endpoint observed)"
+      ],
+      "backendTraceStatus": "create-entry-not-found-on-current-route",
       "targetTables": [],
       "verificationSql": "",
-      "evidence": "Route smoke only. No marker-based create action has been executed yet.",
+      "evidence": "Real browser discovery opened WOM makeTaskList and captured visible buttons: 查询, 仅查待办, 清空. Runtime view JSON for WOM_1.0.0_produceTask_makeTaskList has layoutDatagrid.buttons=[]. No safe 新增/新建/添加/创建 button was present, and no create endpoint was observed. Read model identifies WOM_PRODUCE_TASKS, but create write table is not accepted until a create route is found. Screenshot: /tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png. Report: /tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
       "issues": [
-        "Need business seed data, create endpoint, target table, and required field list."
+        "Current WOM makeTaskList route appears to be a pending-task/list page, not the create entry for production work orders.",
+        "Runtime compatibility view for WOM_1.0.0_produceTask_makeTaskList exposes no grid buttons, so the current rendered page cannot initiate create.",
+        "Need to locate the real manufacturing order/task creation page, menu permission, or button authority source before marker-based create can run.",
+        "Need target table and required field mapping after create route is found."
       ],
-      "nextAction": "Create ADP_E2E marker work order through UI, capture request, then query PostgreSQL.",
+      "nextAction": "Search menu/runtime metadata for produceTask create routes and button permissions; verify whether admin lacks create authority or the create flow lives in another page.",
       "coverageTags": [
         "work-order",
         "master-data",

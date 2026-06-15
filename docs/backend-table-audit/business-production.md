@@ -21,12 +21,14 @@
 
 - API/layout smoke：`/tmp/adp-business-module-smoke-20260615184508.json`
 - 页面 smoke：`/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json`
+- WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json`
+- 运行时视图来源：`deploy/docker/postgres/init/065-business-view-runtime-json.sql` 中 `WOM_1.0.0_produceTask_makeTaskList` 的 `layoutDatagrid.buttons` 为 `[]`
 
 ## 未验证
 
 | 业务动作 | 当前状态 | 后续验收要求 |
 | --- | --- | --- |
-| 新建生产工单或制造任务 | NOT_RUN | 用 marker 创建记录，捕获请求并查询 PostgreSQL |
+| 新建生产工单或制造任务 | BLOCKED | 当前 WOM 制造任务列表只发现“查询 / 仅查待办 / 清空”，未发现新增入口；需定位真正创建页面或按钮权限来源 |
 | 工单下发、暂停、恢复、关闭 | NOT_RUN | 查询状态字段变化，确认流程/待办联动 |
 | 制造指令单生成或维护 | NOT_RUN | 先定位准确页面和目标表 |
 | 工序、人员、班组派工 | NOT_RUN | 准备人员/班组数据，确认派工表 |
@@ -44,7 +46,7 @@
 
 | 领域 | 页面 | 已知入口 | 备注 |
 | --- | --- | --- | --- |
-| 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList` | 需要继续捕获列表数据 XHR |
+| 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList`；`POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` | 已捕获列表查询；运行时视图按钮为空；读模型识别到 `WOM_PRODUCE_TASKS`，待办筛选关联 `wfm_task_pending`；当前页面未发现创建入口 |
 | 退料 | 退料 PDA | `GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` | 需要确认提交/审核接口 |
 | 配方 | 批量配方 | `GET /msService/RM/formula/formula/batchFormulaList` | 静态 patch 暴露 `downloadXls`、`importMainXls`、`delete` |
 | 工艺 | 基础信息 | `GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList` | 需要确认主表/明细表 |
@@ -66,7 +68,7 @@
 
 | ID | 类型 | 问题 | 当前处理 |
 | --- | --- | --- | --- |
-| PROD-DB-001 | 缺映射 | WOM 制造任务写操作目标表未确认 | 等待 `PROD-002` 前端动作捕获 |
+| PROD-DB-001 | 缺入口 | WOM 制造任务当前列表页未发现新增入口；运行时视图 `buttons` 为空 | 读模型已定位 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending`；继续排查菜单、按钮权限、原始创建视图或真实创建页面 |
 | PROD-DB-002 | 缺映射 | 报工页面和目标表未定位 | 等待业务包/菜单继续排查 |
 | PROD-DB-003 | 缺映射 | 完工入库或库存回写链路未定位 | 等待仓储/库存模块包 |
 | PROD-DB-004 | 缺映射 | 追溯页面和目标表未定位 | 等待菜单和运行包排查 |

@@ -16,6 +16,7 @@ make production-testcase-check
 | --- | --- | --- |
 | 业务模块 API/layout smoke | `53/53` PASS | `/tmp/adp-business-module-smoke-20260615184508.json` |
 | 业务模块真实浏览器页面 smoke | `53/53` PASS | `/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json` |
+| WOM 制造任务动作发现 | 未发现新增入口 | `/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json` |
 
 生产相关已打开页面包括：
 
@@ -34,8 +35,8 @@ make production-testcase-check
 
 | ID | 领域 | 用例 | 前端入口 | 是否落库 | 当前状态 | 阻断/下一步 |
 | --- | --- | --- | --- | --- | --- | --- |
-| PROD-001 | 工单/任务 | 制造任务列表打开和基础查询 | WOM 制造任务列表 | 否 | PASS | 已有页面/API smoke 证据 |
-| PROD-002 | 工单/任务 | 新建生产工单或制造任务 | WOM 制造任务列表 | 是 | NOT_RUN | 需要业务前置数据、目标表和创建接口确认 |
+| PROD-001 | 工单/任务 | 制造任务列表打开和基础查询 | WOM 制造任务列表 | 否 | PASS | 已捕获列表查询接口 `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending`；读模型识别到 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending` |
+| PROD-002 | 工单/任务 | 新建生产工单或制造任务 | WOM 制造任务列表 | 是 | BLOCKED | 当前页面只发现“查询 / 仅查待办 / 清空”，运行时视图 `buttons` 为空，没有新增入口，需要定位真正创建页面或按钮权限来源 |
 | PROD-003 | 状态流转 | 工单下发、暂停、恢复、关闭 | WOM 制造任务列表 | 是 | NOT_RUN | 需要状态枚举、按钮权限和 Mapper 链路 |
 | PROD-004 | 指令 | 制造指令单生成或维护 | WOM/制造指令入口待确认 | 是 | NOT_RUN | 需要定位实际指令单页面和表 |
 | PROD-005 | 派工 | 工序/人员/班组派工 | WOM/TeamInfo 相关入口 | 是 | NOT_RUN | 需要班组、岗位、人员测试数据 |
@@ -71,7 +72,7 @@ make production-testcase-check
 
 ## 后续优先级
 
-1. 先补 `PROD-002` 工单/制造任务创建，因为它是生产主流程的上游。
+1. 先继续定位 `PROD-002` 的真正创建入口、原始创建视图或按钮权限来源，因为当前 WOM 制造任务列表没有新增入口，且兼容运行时视图 `buttons` 为空。
 2. 再补 `PROD-003` 状态流转和 `PROD-021` 报工，确认生产执行闭环。
 3. 同步补 `PROD-009` 配方导入、`PROD-015` 作业许可审批、`PROD-019` 质量判定回写。
 4. 最后补追溯和完工入库，需要业务模块包和表级地图更完整后推进。

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "findingCount": 815,
+  "findingCount": 818,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 154,
+    "documentation-or-workflow": 157,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -18,7 +18,7 @@
   "patternCounts": {
     "from-dual": 139,
     "ojdbc": 14,
-    "oracle-keyword": 487,
+    "oracle-keyword": 490,
     "rownum": 41,
     "sysdate": 134
   },
@@ -235,7 +235,7 @@
     },
     {
       "file": "Makefile",
-      "line": 29,
+      "line": 30,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -243,7 +243,7 @@
     },
     {
       "file": "Makefile",
-      "line": 49,
+      "line": 50,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -251,7 +251,7 @@
     },
     {
       "file": "Makefile",
-      "line": 50,
+      "line": 51,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -259,7 +259,7 @@
     },
     {
       "file": "Makefile",
-      "line": 53,
+      "line": 54,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -267,7 +267,7 @@
     },
     {
       "file": "Makefile",
-      "line": 54,
+      "line": 55,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 74,
+      "line": 76,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -283,7 +283,7 @@
     },
     {
       "file": "Makefile",
-      "line": 133,
+      "line": 136,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -291,7 +291,7 @@
     },
     {
       "file": "Makefile",
-      "line": 134,
+      "line": 137,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -299,7 +299,7 @@
     },
     {
       "file": "Makefile",
-      "line": 136,
+      "line": 139,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -307,7 +307,7 @@
     },
     {
       "file": "Makefile",
-      "line": 137,
+      "line": 140,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -315,7 +315,7 @@
     },
     {
       "file": "Makefile",
-      "line": 145,
+      "line": 148,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -323,7 +323,7 @@
     },
     {
       "file": "Makefile",
-      "line": 146,
+      "line": 149,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -331,7 +331,7 @@
     },
     {
       "file": "Makefile",
-      "line": 148,
+      "line": 151,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -339,7 +339,7 @@
     },
     {
       "file": "Makefile",
-      "line": 149,
+      "line": 152,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -4658,6 +4658,22 @@
       "excerpt": "- [Oracle 到 PostgreSQL 替换路线](../oracle-to-postgres-transition.md)"
     },
     {
+      "file": "docs/backend-table-audit/business-production.md",
+      "line": 63,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 全局 Oracle backlog：`docs/oracle-migration-backlog.md`"
+    },
+    {
+      "file": "docs/backend-table-audit/business-production.md",
+      "line": 65,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "禁止用清库重建绕过缺表、缺列、类型不兼容或 Oracle 方言残留。"
+    },
+    {
       "file": "docs/current-content-inventory.md",
       "line": 15,
       "pattern": "oracle-keyword",
@@ -4727,7 +4743,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- Oracle backlog 引用：`815`。"
+      "excerpt": "- Oracle backlog 引用：`818`。"
     },
     {
       "file": "docs/oracle-replacement-status.md",
@@ -4759,7 +4775,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 815 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
+      "excerpt": "| oracle-legacy-only | watch | no | Oracle migration backlog has 818 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |"
     },
     {
       "file": "docs/oracle-replacement-status.md",
@@ -5088,6 +5104,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- `make oracle-replacement-check`"
+    },
+    {
+      "file": "docs/production-module-functional-test-cases.md",
+      "line": 71,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "6. 如果发现缺表、缺列、类型不兼容或 Oracle 方言残留，必须补幂等 SQL 或记录到模块 backlog。"
     },
     {
       "file": "docs/project-objectives.md",
@@ -6611,7 +6635,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 118,
+      "line": 119,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6619,7 +6643,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 155,
+      "line": 156,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6627,7 +6651,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 164,
+      "line": 165,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6635,7 +6659,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 168,
+      "line": 169,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6643,7 +6667,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 175,
+      "line": 176,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6651,7 +6675,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 183,
+      "line": 184,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6659,7 +6683,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 184,
+      "line": 185,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

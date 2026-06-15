@@ -25,8 +25,9 @@ PLATFORM_SMOKE_OUTPUT ?= /tmp/adp-platform-validation-smoke
 PLATFORM_MENU_LIMIT ?= 40
 ORGANIZATION_PERSISTENCE_OUTPUT ?= /tmp/adp-organization-persistence-acceptance.json
 BUSINESS_PAGE_SMOKE_OUTPUT ?= /tmp/adp-business-page-smoke
+PRODUCTION_DISCOVERY_OUTPUT ?= /tmp/adp-production-action-discovery
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check persistence-acceptance-check production-testcase-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization acceptance-organization-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -68,6 +69,7 @@ help:
 	@printf '%s\n' '  make smoke-rbac-authority    Run role/user authority editor API smoke'
 	@printf '%s\n' '  make smoke-business          Run API/layout smoke for restored business module routes'
 	@printf '%s\n' '  make smoke-business-page     Run browser page smoke for restored business module routes'
+	@printf '%s\n' '  make discover-production-actions Discover safe production create-entry UI actions'
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
@@ -90,6 +92,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-rbac-authority-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-module-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-page-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-production-action-discovery.js
 	$(NODE) --check deploy/docker/scripts/adp-platform-validation-smoke.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-orgmanagement-rbac-permission-mapper.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-reactapi-ready.py
@@ -198,6 +201,9 @@ smoke-business:
 
 smoke-business-page:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_OUTPUT_DIR=$(BUSINESS_PAGE_SMOKE_OUTPUT) $(NODE) deploy/docker/scripts/adp-business-page-smoke.js
+
+discover-production-actions:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_PRODUCTION_DISCOVERY_OUTPUT=$(PRODUCTION_DISCOVERY_OUTPUT) $(NODE) deploy/docker/scripts/adp-production-action-discovery.js
 
 audit-postgres-mappings:
 	$(PYTHON) deploy/docker/scripts/audit-postgres-mappings.py backend/modules deploy/docker/postgres/init
