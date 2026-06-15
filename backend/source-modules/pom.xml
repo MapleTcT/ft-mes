@@ -16,4 +16,8 @@
 
     <name>FT MES Source Modules</name>
     <description>Entry point for buildable backend modules. Recovered sources remain under backend/modules until promoted.</description>
+
+    <modules>
+        <module>basicmanagement-auditlog</module>
+    </modules>
 </project>

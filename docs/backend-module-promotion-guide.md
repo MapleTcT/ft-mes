@@ -67,6 +67,7 @@ backend/modules/<group>/<artifact>/<version>/
 
 ```bash
 make source-module-check
+make source-module-test
 make backend-dependency-check
 make audit-postgres-mappings
 make oracle-audit
@@ -103,6 +104,7 @@ make smoke-business
 - 模块存在于 `backend/source-modules/<module>`。
 - 聚合 POM 已包含该模块。
 - `make source-module-check` 通过。
+- `make source-module-test` 通过。
 - 相关恢复模块依赖已在 [后端恢复模块依赖库存](backend-module-dependency-inventory.md) 中可追溯。
 - `mvn -q -DskipTests validate` 通过。
 - Oracle 默认依赖和默认配置已移除。

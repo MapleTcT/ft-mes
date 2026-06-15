@@ -100,6 +100,7 @@
 - `make ci` 通过。
 - `make sustainable-check` 通过。
 - `make source-module-check` 通过。
+- `make source-module-test` 通过。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
 - `make oracle-audit-check` 通过。

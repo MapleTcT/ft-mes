@@ -20,7 +20,7 @@ PACKAGE ?=
 
 POSTGRES_AUDIT_REPORT ?= /tmp/adp-postgres-mapping-audit.json
 
-.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config sustainable-check source-module-check source-module-test create-backend-module inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -30,6 +30,7 @@ help:
 	@printf '%s\n' '  make compose-config          Validate Docker Compose rendering'
 	@printf '%s\n' '  make sustainable-check       Validate repository governance invariants'
 	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
+	@printf '%s\n' '  make source-module-test      Compile and test promoted backend source modules'
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
 	@printf '%s\n' '  make inventory               Regenerate current content inventory'
 	@printf '%s\n' '  make inventory-check         Check current content inventory is fresh'
@@ -54,7 +55,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify sustainable-check source-module-check inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify sustainable-check source-module-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -69,6 +70,9 @@ sustainable-check:
 
 source-module-check:
 	$(PYTHON) scripts/verify-source-modules.py
+
+source-module-test:
+	$(MVN) -q -pl backend/source-modules -am test
 
 create-backend-module:
 	@test -n "$(MODULE)" || { echo "MODULE is required, e.g. make create-backend-module MODULE=platform-auth"; exit 2; }

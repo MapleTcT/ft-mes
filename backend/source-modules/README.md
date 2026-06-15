@@ -23,6 +23,7 @@ make create-backend-module MODULE=platform-auth PACKAGE=com.mapletct.ftmes.platf
 
 ```bash
 make source-module-check
+make source-module-test
 make backend-dependency-check
 make ci
 ```
@@ -34,6 +35,12 @@ make ci
 - 模块 `artifactId` 和目录名不一致。
 - 模块直接声明 Oracle JDBC。
 - 模块默认数据库类型写成 Oracle。
+
+## 当前已提升模块
+
+| Module | Source | Status |
+| --- | --- | --- |
+| `basicmanagement-auditlog` | `backend/modules/com/supcon/supfusion/basicmanagement-auditlog/1.0-SNAPSHOT` | 可编译占位模块，保留原恢复源码中的 auditlog wiring 注释状态。 |
 
 ## 提升原则
 

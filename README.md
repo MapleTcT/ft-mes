@@ -53,6 +53,7 @@ make verify-pom
 make compose-config
 make sustainable-check
 make source-module-check
+make source-module-test
 make inventory-check
 make backend-dependency-check
 make oracle-audit-check
