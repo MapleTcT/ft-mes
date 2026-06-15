@@ -88,6 +88,7 @@ compose-config:
 	$(COMPOSE) config --quiet
 
 runtime-script-check:
+	sh -n deploy/database/production-migration/scripts/run-target-preflight.sh
 	$(NODE) --check deploy/docker/scripts/adp-platform-api-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-menu-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-home-todo-smoke.js

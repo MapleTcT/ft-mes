@@ -1,0 +1,13 @@
+# One table per line. Use schema.table when possible.
+# Replace this with the signed production migration table list before rehearsal.
+public.auth_user
+public.iam_account
+public.org_department
+public.org_person
+public.rbac_roleuser
+public.wfm_task_pending
+public.WOM_PRODUCE_TASKS
+public.WOM_TASK_PROCESSES
+public.WOM_TASK_ACTIVES
+public.WOM_PROC_REPORTS
+public.WOM_TASK_MATERIALS

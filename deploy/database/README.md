@@ -41,3 +41,21 @@ deploy/database/<module>/oracle-legacy/
 ```
 
 Keep PostgreSQL as the default path and put Oracle-only SQL in `oracle-legacy` until it can be retired.
+
+## Production migration preparation
+
+Production migration preparation lives under:
+
+```text
+deploy/database/production-migration/
+```
+
+That directory contains target PostgreSQL preflight templates and a safe
+schema/row-count inventory runner. It is not a production cutover script and it
+does not make the migration track `READY`; readiness remains controlled by:
+
+```text
+docs/production-migration-readiness.md
+metadata/production-migration-readiness.json
+make production-migration-readiness-check
+```

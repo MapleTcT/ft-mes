@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,19 @@ TRACK_REQUIRED_KEYS = [
     "artifacts",
 ]
 
+FORBIDDEN_SECRET_LITERALS = [
+    "ft123456789",
+    "BEGIN PRIVATE KEY",
+    "BEGIN RSA PRIVATE KEY",
+    "BEGIN OPENSSH PRIVATE KEY",
+    "AKIA",
+]
+
+SECRET_ASSIGNMENT_RE = re.compile(
+    r"(?im)^\s*(password|passwd|secret|token|access[_-]?key|secret[_-]?key)\s*[:=]\s*"
+    r"(?!CHANGE_ME|TBD|TODO|<|\$\{|\$)[^\s#]{8,}"
+)
+
 
 def fail(failures: list[str], message: str) -> None:
     failures.append(message)
@@ -50,6 +64,39 @@ def fail(failures: list[str], message: str) -> None:
 
 def as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def check_artifact_path(track_id: str, artifact: Any, failures: list[str]) -> None:
+    if not isinstance(artifact, str) or not artifact.strip():
+        fail(failures, f"{track_id}.artifacts must contain non-empty relative paths")
+        return
+
+    relative = Path(artifact)
+    if relative.is_absolute() or ".." in relative.parts:
+        fail(failures, f"{track_id} artifact must stay inside the repository: {artifact}")
+        return
+
+    path = ROOT / relative
+    if not path.exists():
+        fail(failures, f"{track_id} artifact does not exist: {artifact}")
+        return
+
+    if path.is_dir():
+        fail(failures, f"{track_id} artifact must point to a file, not a directory: {artifact}")
+        return
+
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        fail(failures, f"{track_id} artifact must be text and reviewable: {artifact}")
+        return
+
+    for literal in FORBIDDEN_SECRET_LITERALS:
+        if literal in text:
+            fail(failures, f"{track_id} artifact appears to contain a forbidden secret literal: {artifact}")
+
+    if SECRET_ASSIGNMENT_RE.search(text):
+        fail(failures, f"{track_id} artifact appears to contain a non-placeholder secret assignment: {artifact}")
 
 
 def read_json(failures: list[str]) -> dict[str, Any]:
@@ -117,11 +164,17 @@ def check_track(index: int, track: Any, failures: list[str]) -> str | None:
     if not as_list(track.get("requiredEvidence")):
         fail(failures, f"{track_id} must list requiredEvidence")
 
+    artifacts = as_list(track.get("artifacts"))
+    for artifact in artifacts:
+        check_artifact_path(track_id, artifact, failures)
+
     if status == "READY":
         if not as_list(track.get("currentEvidence")):
             fail(failures, f"{track_id} READY must include currentEvidence")
         if as_list(track.get("blockingIssues")):
             fail(failures, f"{track_id} READY must not include blockingIssues")
+        if not artifacts:
+            fail(failures, f"{track_id} READY must include at least one artifact")
     else:
         if not as_list(track.get("blockingIssues")):
             fail(failures, f"{track_id} {status} must include blockingIssues")

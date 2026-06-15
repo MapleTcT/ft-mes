@@ -85,6 +85,8 @@ docker compose --env-file .env up -d
 - [Oracle 迁移 Backlog](docs/oracle-migration-backlog.md)
 - [Oracle 替换状态总账](docs/oracle-replacement-status.md)
 - [PostgreSQL 迁移脚本索引](docs/postgres-migration-index.md)
+- [生产迁移就绪账本](docs/production-migration-readiness.md)
+- [生产迁移交接模板](docs/production-migration/README.md)
 - [后端模块提升指南](docs/backend-module-promotion-guide.md)
 - [可持续开发仓库说明](docs/sustainable-development.md)
 - [后端模块依赖地图](docs/backend-module-dependency-map.md)

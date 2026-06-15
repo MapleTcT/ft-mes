@@ -1,0 +1,18 @@
+-- Critical-table checksum template.
+-- This file is intentionally manual because each business table needs a stable
+-- primary key and business-significant columns.
+--
+-- Example:
+-- select
+--   'public.org_department' as table_name,
+--   count(*) as row_count,
+--   md5(string_agg(
+--     concat_ws('|', id, code, name, valid),
+--     E'\n' order by id
+--   )) as checksum
+-- from public.org_department;
+--
+-- Rules:
+-- - Order by a stable primary key or deterministic business key.
+-- - Exclude volatile audit columns unless they are part of the acceptance.
+-- - Compare source and target outputs in the rehearsal report.
