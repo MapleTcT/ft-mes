@@ -49,6 +49,58 @@ def source_module_count() -> int:
     return sum(1 for item in list(modules) if strip_namespace(item.tag) == "module")
 
 
+def direct_children(element: ET.Element | None, name: str) -> list[ET.Element]:
+    if element is None:
+        return []
+    return [item for item in list(element) if strip_namespace(item.tag) == name]
+
+
+def direct_text(element: ET.Element | None, name: str) -> str:
+    if element is None:
+        return ""
+    item = child(element, name)
+    return (item.text or "").strip() if item is not None else ""
+
+
+def dependency_keys(parent: ET.Element | None) -> list[str]:
+    dependencies = child(parent, "dependencies") if parent is not None else None
+    keys = []
+    for dependency in direct_children(dependencies, "dependency"):
+        keys.append(f"{direct_text(dependency, 'groupId')}:{direct_text(dependency, 'artifactId')}".lower())
+    return keys
+
+
+def is_oracle_dependency(key: str) -> bool:
+    return "oracle" in key or ":ojdbc" in key
+
+
+def parent_pom_oracle_policy() -> dict[str, Any]:
+    root = ET.parse(ROOT / "pom.xml").getroot()
+    default_dependency_management = child(root, "dependencyManagement")
+    default_oracle_dependencies = [
+        key for key in dependency_keys(default_dependency_management) if is_oracle_dependency(key)
+    ]
+
+    oracle_legacy = None
+    profiles = child(root, "profiles")
+    for profile in direct_children(profiles, "profile"):
+        if direct_text(profile, "id") == "oracle-legacy":
+            oracle_legacy = profile
+            break
+
+    legacy_dependency_management = child(oracle_legacy, "dependencyManagement") if oracle_legacy is not None else None
+    legacy_oracle_dependencies = [
+        key for key in dependency_keys(legacy_dependency_management) if is_oracle_dependency(key)
+    ]
+    return {
+        "defaultOracleDependencyManagementCount": len(default_oracle_dependencies),
+        "defaultOracleDependencies": default_oracle_dependencies,
+        "oracleLegacyProfilePresent": oracle_legacy is not None,
+        "oracleLegacyDependencyManagementCount": len(legacy_oracle_dependencies),
+        "oracleLegacyDependencies": legacy_oracle_dependencies,
+    }
+
+
 def run_postgres_mapping_audit() -> tuple[dict[str, Any], int]:
     result = subprocess.run(
         [
@@ -115,6 +167,7 @@ def build_status() -> dict[str, Any]:
     mapping_audit, mapping_returncode = run_postgres_mapping_audit()
     defaults = compose_defaults(content)
     promoted_source_modules = source_module_count()
+    parent_oracle_policy = parent_pom_oracle_policy()
 
     source_counts = {
         "backendSourceJars": content["backend"]["sourceJarCount"],
@@ -143,6 +196,11 @@ def build_status() -> dict[str, Any]:
     mapping_errors = mapping_audit.get("errorCount")
     mapper_audit_ok = mapping_returncode == 0 and mapping_errors == 0
     dependency_parse_ok = backend_deps["parseErrorCount"] == 0
+    parent_pom_oracle_policy_ok = (
+        parent_oracle_policy["defaultOracleDependencyManagementCount"] == 0
+        and parent_oracle_policy["oracleLegacyProfilePresent"]
+        and parent_oracle_policy["oracleLegacyDependencyManagementCount"] > 0
+    )
 
     checks = [
         status_item(
@@ -156,6 +214,18 @@ def build_status() -> dict[str, Any]:
             ),
             "保持 `.env.example` 和 Compose 默认值指向 PostgreSQL。",
             blocking=not postgres_default_ok,
+        ),
+        status_item(
+            "parent-pom-oracle-legacy-profile",
+            "父 POM 默认依赖管理不提供 Oracle JDBC",
+            "pass" if parent_pom_oracle_policy_ok else "fail",
+            (
+                f"defaultOracleDeps={parent_oracle_policy['defaultOracleDependencyManagementCount']}, "
+                f"legacyProfile={parent_oracle_policy['oracleLegacyProfilePresent']}, "
+                f"legacyOracleDeps={parent_oracle_policy['oracleLegacyDependencyManagementCount']}"
+            ),
+            "Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。",
+            blocking=not parent_pom_oracle_policy_ok,
         ),
         status_item(
             "oracle-legacy-only",
@@ -249,6 +319,7 @@ def build_status() -> dict[str, Any]:
         },
         "sourceCounts": source_counts,
         "composeDefaults": defaults,
+        "parentPomOraclePolicy": parent_oracle_policy,
         "postgresMapperAudit": mapping_audit,
         "oracleBacklogCategoryCounts": oracle_audit["categoryCounts"],
         "backendDirectOracleModules": backend_deps["oracleModules"],

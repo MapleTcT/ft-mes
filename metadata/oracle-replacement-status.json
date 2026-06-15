@@ -16,7 +16,7 @@
     "watchCount": 2,
     "plannedCount": 1,
     "sourceModuleCount": 1,
-    "oracleBacklogReferenceCount": 768,
+    "oracleBacklogReferenceCount": 783,
     "directOracleDependencyCount": 2,
     "postgresMigrationCount": 69,
     "postgresMigrationHighRiskCount": 0,
@@ -40,6 +40,15 @@
     "envExamplePostgres": true,
     "envExamplePostgresHost": true,
     "oracleLegacyTemplatePresent": true
+  },
+  "parentPomOraclePolicy": {
+    "defaultOracleDependencyManagementCount": 0,
+    "defaultOracleDependencies": [],
+    "oracleLegacyProfilePresent": true,
+    "oracleLegacyDependencyManagementCount": 1,
+    "oracleLegacyDependencies": [
+      "com.oracle.database.jdbc:ojdbc8"
+    ]
   },
   "postgresMapperAudit": {
     "findingCount": 3,
@@ -73,7 +82,7 @@
   "oracleBacklogCategoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 137,
+    "documentation-or-workflow": 142,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -82,7 +91,7 @@
     "recovered-source-backlog": 266,
     "runtime-config-backlog": 2,
     "runtime-patch-backlog": 9,
-    "tooling-or-audit-code": 135
+    "tooling-or-audit-code": 145
   },
   "backendDirectOracleModules": [
     {
@@ -133,10 +142,18 @@
       "blocking": false
     },
     {
+      "id": "parent-pom-oracle-legacy-profile",
+      "title": "父 POM 默认依赖管理不提供 Oracle JDBC",
+      "status": "pass",
+      "evidence": "defaultOracleDeps=0, legacyProfile=True, legacyOracleDeps=1",
+      "nextAction": "Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。",
+      "blocking": false
+    },
+    {
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 768 tracked references.",
+      "evidence": "Oracle migration backlog has 783 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },

@@ -32,13 +32,13 @@ Makefile                        # 常用开发、验证、部署命令
 - Spring Cloud `Greenwich.SR2`。
 - Spring Cloud Alibaba `2.1.1.RELEASE`。
 - PostgreSQL JDBC `42.2.8`，和当前 Docker 运行补丁保持一致。
-- Oracle JDBC 作为 legacy 依赖留在 `dependencyManagement`，后续逐步移除业务模块中的直接依赖。
+- 默认 `dependencyManagement` 不管理 Oracle JDBC；Oracle JDBC 只保留在 `oracle-legacy` profile 中，用于老库对比或显式迁移工具。
 - 已提升到 `backend/source-modules` 的可编译模块不得直接声明 Oracle JDBC；默认源码路径也不能带入 Oracle 运行配置或 mapper 资源。
 
 可用 profile：
 
 - `postgres-first`：默认启用，表示新模块优先按 PostgreSQL 适配。
-- `oracle-legacy`：仅用于保留老模块回连 Oracle 的兼容构建。
+- `oracle-legacy`：仅用于保留老模块回连 Oracle 的兼容构建，默认构建不会启用。
 - `business-modules`：给后续业务模块批量构建/测试预留的开关。
 
 ## 模块提升规则

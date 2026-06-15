@@ -9,7 +9,7 @@
 - 关注项：`2`。
 - 计划项：`1`。
 - 已提升源码模块：`1`。
-- Oracle backlog 引用：`768`。
+- Oracle backlog 引用：`783`。
 - 直接 Oracle 依赖：`2`。
 - PostgreSQL migration 脚本：`69`。
 - PostgreSQL mapper audit：`0` error / `3` warning。
@@ -20,7 +20,8 @@
 | ID | Status | Blocking | Evidence | Next Action |
 | --- | --- | --- | --- | --- |
 | runtime-default-postgresql | pass | no | content inventory default=postgresql, compose postgres default=True, env example postgres=True | 保持 `.env.example` 和 Compose 默认值指向 PostgreSQL。 |
-| oracle-legacy-only | watch | no | Oracle migration backlog has 768 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
+| parent-pom-oracle-legacy-profile | pass | no | defaultOracleDeps=0, legacyProfile=True, legacyOracleDeps=1 | Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。 |
+| oracle-legacy-only | watch | no | Oracle migration backlog has 783 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
 | backend-direct-oracle-deps | gap | no | 250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies. | 模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。 |
 | mapper-postgres-audit | pass | no | errors=0, warnings=3, findings=3 | 任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。 |
 | postgres-migration-governance | pass | no | 69 scripts, range=001-069, highRisk=0, watch=44 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
@@ -47,7 +48,7 @@
 | --- | --- |
 | allowed-legacy-contract | 6 |
 | decompiled-runtime-backlog | 16 |
-| documentation-or-workflow | 137 |
+| documentation-or-workflow | 142 |
 | frontend-row-index-noise | 4 |
 | legacy-ojdbc-dependency | 6 |
 | legacy-oracle-sql-resource | 160 |
@@ -56,7 +57,7 @@
 | recovered-source-backlog | 266 |
 | runtime-config-backlog | 2 |
 | runtime-patch-backlog | 9 |
-| tooling-or-audit-code | 135 |
+| tooling-or-audit-code | 145 |
 
 ## 直接 Oracle 依赖模块
 

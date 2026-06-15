@@ -406,5 +406,5 @@
 - `backend/modules` 是恢复源码参考区，不直接纳入 Maven reactor。
 - 提升模块前先查看本清单中的 family、layer、内部依赖和 Oracle/JDBC 风险。
 - 新模块复制到 `backend/source-modules/<module>` 后，使用根父 POM 重新声明最小依赖。
-- Oracle JDBC 只能保留在 legacy profile 或迁移说明中，不能进入默认 PostgreSQL 路径。
+- Oracle JDBC 只能保留在 `oracle-legacy` profile、默认构建外的迁移工具或迁移说明中，不能进入默认 PostgreSQL 路径。
 - 修改恢复 POM、提升模块或新增来源包后，运行 `make backend-dependency-inventory`。

@@ -50,7 +50,7 @@ backend/modules/<group>/<artifact>/<version>/
 - 继承根 `ft-mes-parent`。
 - 使用父 POM 里的 Spring、Spring Cloud、PostgreSQL JDBC 版本。
 - 不复制恢复 POM 中的私服、父工程、Oracle 驱动和无关插件。
-- Oracle 只允许出现在明确的 legacy profile 或迁移说明中。
+- Oracle JDBC 只允许出现在明确的 `oracle-legacy` profile、默认构建外的迁移工具或迁移说明中。
 - 默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源；`make source-module-check` 会阻断。
 
 ### 4. 处理数据库

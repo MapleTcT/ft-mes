@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -58,9 +59,47 @@ BINARY_SUFFIXES = {
 }
 
 
+MAVEN_NS = "http://maven.apache.org/POM/4.0.0"
+
+
 def fail(message: str, failures: list[str]) -> None:
     failures.append(message)
     print(f"FAIL: {message}", file=sys.stderr)
+
+
+def q(name: str) -> str:
+    return f"{{{MAVEN_NS}}}{name}"
+
+
+def direct_child(element: ET.Element, name: str) -> ET.Element | None:
+    return element.find(q(name))
+
+
+def direct_children(element: ET.Element, name: str) -> list[ET.Element]:
+    return list(element.findall(q(name)))
+
+
+def text(element: ET.Element | None, name: str) -> str:
+    if element is None:
+        return ""
+    child = direct_child(element, name)
+    return (child.text or "").strip() if child is not None else ""
+
+
+def dependency_keys(parent: ET.Element | None) -> list[str]:
+    if parent is None:
+        return []
+    dependencies = direct_child(parent, "dependencies")
+    if dependencies is None:
+        return []
+    keys = []
+    for dependency in direct_children(dependencies, "dependency"):
+        keys.append(f"{text(dependency, 'groupId')}:{text(dependency, 'artifactId')}".lower())
+    return keys
+
+
+def is_oracle_dependency(key: str) -> bool:
+    return "oracle" in key or ":ojdbc" in key
 
 
 def git_ls_files() -> list[str]:
@@ -81,13 +120,43 @@ def check_required_paths(failures: list[str]) -> None:
 
 
 def check_maven_structure(failures: list[str]) -> None:
-    pom = (ROOT / "pom.xml").read_text(encoding="utf-8")
+    pom_path = ROOT / "pom.xml"
+    pom = pom_path.read_text(encoding="utf-8")
     for module in ("<module>backend</module>", "<module>deploy</module>"):
         if module not in pom:
             fail(f"root pom missing module declaration: {module}", failures)
     source_modules = (ROOT / "backend/source-modules/pom.xml").read_text(encoding="utf-8")
     if "<packaging>pom</packaging>" not in source_modules:
         fail("backend/source-modules/pom.xml must remain an aggregator pom", failures)
+
+    root = ET.parse(pom_path).getroot()
+    default_dependency_management = direct_child(root, "dependencyManagement")
+    default_oracle_dependencies = [
+        key for key in dependency_keys(default_dependency_management) if is_oracle_dependency(key)
+    ]
+    if default_oracle_dependencies:
+        fail(
+            "root default dependencyManagement must not manage Oracle JDBC: "
+            + ", ".join(default_oracle_dependencies),
+            failures,
+        )
+
+    profiles = direct_child(root, "profiles")
+    oracle_legacy = None
+    if profiles is not None:
+        for profile in direct_children(profiles, "profile"):
+            if text(profile, "id") == "oracle-legacy":
+                oracle_legacy = profile
+                break
+    if oracle_legacy is None:
+        fail("root pom must keep an explicit oracle-legacy profile for old-database comparisons", failures)
+        return
+    legacy_dependency_management = direct_child(oracle_legacy, "dependencyManagement")
+    legacy_oracle_dependencies = [
+        key for key in dependency_keys(legacy_dependency_management) if is_oracle_dependency(key)
+    ]
+    if not legacy_oracle_dependencies:
+        fail("oracle-legacy profile must be the only place that manages Oracle JDBC", failures)
 
 
 def check_postgres_defaults(failures: list[str]) -> None:

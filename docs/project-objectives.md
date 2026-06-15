@@ -73,6 +73,7 @@
 
 - PostgreSQL 是默认路径。
 - Oracle 只允许显式 legacy profile 或 `.env.oracle-legacy.example`。
+- 父 POM 默认 `dependencyManagement` 不管理 Oracle JDBC，Oracle 驱动只能在 `oracle-legacy` profile 下出现。
 - 方言差异集中到 DAO/Mapper/migration 层。
 - 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每个模块必须有审计结果、迁移脚本和 smoke 证据。
@@ -110,6 +111,7 @@
 - GitHub Actions `Verify` 通过。
 - 新模块能继承父 POM 并纳入 `backend/source-modules`。
 - Docker Compose 默认渲染为 PostgreSQL。
+- 父 POM 默认依赖管理不暴露 Oracle JDBC。
 - Oracle 配置只出现在 legacy 文档、模板、默认源码路径之外的对照资料或待迁移清单中。
 
 数据库迁移验收：
