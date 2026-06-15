@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`71`。
-- 编号范围：`001` 到 `071`。
+- 脚本数量：`72`。
+- 编号范围：`001` 到 `072`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -17,26 +17,26 @@
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 25 |
+| auth-rbac-org | 26 |
 | business | 9 |
-| compatibility | 40 |
+| compatibility | 41 |
 | configuration | 18 |
 | general | 3 |
 | notification | 9 |
-| platform | 20 |
+| platform | 21 |
 | workflow | 6 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9118 |
+| alter-table | 9119 |
 | create-function | 38 |
-| create-index | 662 |
-| create-table | 480 |
+| create-index | 664 |
+| create-table | 481 |
 | create-view | 91 |
-| insert | 3578 |
-| update | 3564 |
+| insert | 3579 |
+| update | 3566 |
 
 ## 脚本清单
 
@@ -113,6 +113,7 @@
 | 069 | 069-organization-manager-compat.sql | auth-rbac-org, compatibility | 21 | create-table:1, create-index:3 | - |
 | 070 | 070-test-admin-default-password.sql | general | 47 | create-table:1, insert:1, update:1 | - |
 | 071 | 071-organization-person-profile-compat.sql | auth-rbac-org, compatibility | 20 | create-index:3, alter-table:7 | - |
+| 072 | 072-rbac-authority-page-compat.sql | platform, auth-rbac-org, compatibility | 43 | create-table:1, create-index:2, alter-table:1, insert:1, update:2 | - |
 
 ## 规则
 

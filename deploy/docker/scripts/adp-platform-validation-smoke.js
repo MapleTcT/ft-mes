@@ -18,6 +18,7 @@ const skipMenu = process.env.ADP_SKIP_MENU_SMOKE === "true";
 const skipTodo = process.env.ADP_SKIP_TODO_SMOKE === "true";
 const skipApi = process.env.ADP_SKIP_API_SMOKE === "true";
 const skipOrganization = process.env.ADP_SKIP_ORGANIZATION_SMOKE === "true";
+const skipRbacAuthority = process.env.ADP_SKIP_RBAC_AUTHORITY_SMOKE === "true";
 
 const sections = [
   {
@@ -53,6 +54,17 @@ const sections = [
       ADP_ORGANIZATION_SMOKE_OUTPUT: path.join(outputDir, "organization", "organization-smoke-results.json"),
     },
     reportPath: path.join(outputDir, "organization", "organization-smoke-results.json"),
+  },
+  {
+    id: "rbac-authority",
+    title: "RBAC authority editor smoke",
+    requiredFor: ["role-permission-page", "user-permission-page", "menu-permission-tree"],
+    skip: skipRbacAuthority,
+    script: "adp-rbac-authority-smoke.js",
+    env: {
+      ADP_RBAC_AUTHORITY_SMOKE_OUTPUT: path.join(outputDir, "rbac-authority-smoke.json"),
+    },
+    reportPath: path.join(outputDir, "rbac-authority-smoke.json"),
   },
   {
     id: "menu-pages",
@@ -129,6 +141,18 @@ function summarizeReport(section, parsed) {
       browserNetworkErrorCount:
         parsed.browser && Array.isArray(parsed.browser.networkErrors) ? parsed.browser.networkErrors.length : null,
       browserVisibleError: parsed.browser ? parsed.browser.visibleError : null,
+    };
+  }
+  if (section.id === "rbac-authority") {
+    return {
+      total: parsed.total,
+      passed: parsed.passed,
+      failed: parsed.failed,
+      roleId: parsed.roleId,
+      menuCount: parsed.menuCount,
+      selectedMenus: Array.isArray(parsed.selectedMenus)
+        ? parsed.selectedMenus.map((menu) => ({ code: menu.code, id: menu.id }))
+        : null,
     };
   }
   return parsed;

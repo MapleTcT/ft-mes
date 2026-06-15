@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 71,
+  "migrationCount": 72,
   "firstNumber": 1,
-  "lastNumber": 71,
+  "lastNumber": 72,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "watchStatementCount": 44,
   "statementTotals": {
-    "alter-table": 9118,
+    "alter-table": 9119,
     "create-function": 38,
-    "create-index": 662,
-    "create-table": 480,
+    "create-index": 664,
+    "create-table": 481,
     "create-view": 91,
-    "insert": 3578,
-    "update": 3564
+    "insert": 3579,
+    "update": 3566
   },
   "tagTotals": {
-    "auth-rbac-org": 25,
+    "auth-rbac-org": 26,
     "business": 9,
-    "compatibility": 40,
+    "compatibility": 41,
     "configuration": 18,
     "general": 3,
     "notification": 9,
-    "platform": 20,
+    "platform": 21,
     "workflow": 6
   },
   "migrations": [
@@ -1952,6 +1952,31 @@
         "alter-table": 7,
         "insert": 0,
         "update": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/072-rbac-authority-page-compat.sql",
+      "name": "072-rbac-authority-page-compat.sql",
+      "number": 72,
+      "slug": "rbac-authority-page-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 43,
+      "sha256": "0f3bfe766e31e61158754bb38029adcb329b0eb1cd6af2dfe27b1618bb9d6f3d",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 1,
+        "insert": 1,
+        "update": 2
       },
       "highRiskStatements": [],
       "watchStatements": []
