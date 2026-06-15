@@ -14,7 +14,8 @@
 | 前端事件 | `service/src/main/resources/custom/WOM/produceTask/produceTask/**/eventJs/customEvent.js` |
 | 模型表 | `service/src/main/resources/META-INF/init/init.xml` |
 | 后端入口 | `WOMProduceTaskController`、`WOMProduceTaskServiceImpl` |
-| 真实浏览器探测 | `/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json` |
+| 真实浏览器探测 | `/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json` |
+| runtime JSON / pageType 直连复验 | 5 个动作 viewCode 均 `layoutJson` 200，pageType 为 `EDIT/VIEW`，但真实浏览器仍 React #130 |
 
 ## 真实页面探测
 
@@ -22,11 +23,11 @@
 | --- | --- | --- | --- |
 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 页面 200；按钮只有“查询 / 仅查待办 / 清空” | `POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` 200 | PASS_READ_ONLY |
 | `/msService/WOM/produceTask/produceTask/prepareMakeTaskList` | 页面 200；按钮只有“查询 / 清空” | `POST /msService/WOM/produceTask/produceTask/prepareMakeTaskList-query` 200 | PASS_READ_ONLY |
-| `/msService/WOM/produceTask/produceTask/makeTaskEdit` | 外层页面 200，内部布局失败 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskEdit&isEs5=true` 500 | FAIL_RUNTIME_LAYOUT |
-| `/msService/WOM/produceTask/produceTask/makeTaskSubmitView` | 外层页面 200，内部布局失败 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskSubmitView&isEs5=true` 500 | FAIL_RUNTIME_LAYOUT |
-| `/msService/WOM/produceTask/produceTask/makeTaskView` | 外层页面 200，内部布局失败 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskView&isEs5=true` 500 | FAIL_RUNTIME_LAYOUT |
-| `/msService/WOM/produceTask/produceTask/makeTaskBatchView` | 外层页面 200，内部布局失败 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskBatchView&isEs5=true` 500 | FAIL_RUNTIME_LAYOUT |
-| `/msService/WOM/produceTask/produceTask/easyTaskOperateView` | 外层页面 200，内部布局失败 | `layoutJson?viewCode=WOM_1.0.0_produceTask_easyTaskOperateView&isEs5=true` 500 | FAIL_RUNTIME_LAYOUT |
+| `/msService/WOM/produceTask/produceTask/makeTaskEdit` | 外层页面 200；`layoutJson` 200；真实浏览器 React #130 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskEdit&isEs5=true` 200，但无表单、按钮或写请求 | FAIL_RUNTIME_LAYOUT |
+| `/msService/WOM/produceTask/produceTask/makeTaskSubmitView` | 外层页面 200；`layoutJson` 200；真实浏览器 React #130 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskSubmitView&isEs5=true` 200，但无表单、按钮或写请求 | FAIL_RUNTIME_LAYOUT |
+| `/msService/WOM/produceTask/produceTask/makeTaskView` | 外层页面 200；`layoutJson` 200；真实浏览器 React #130 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskView&isEs5=true` 200；pageType 热补丁为 `VIEW` 后仍 React #130 | FAIL_RUNTIME_LAYOUT |
+| `/msService/WOM/produceTask/produceTask/makeTaskBatchView` | 外层页面 200；`layoutJson` 200；真实浏览器 React #130 | `layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskBatchView&isEs5=true` 200，但无表单、按钮或写请求 | FAIL_RUNTIME_LAYOUT |
+| `/msService/WOM/produceTask/produceTask/easyTaskOperateView` | 外层页面 200；`layoutJson` 200；真实浏览器 React #130 | `layoutJson?viewCode=WOM_1.0.0_produceTask_easyTaskOperateView&isEs5=true` 200，但无表单、按钮或写请求 | FAIL_RUNTIME_LAYOUT |
 | `/msService/WOM/produceTask/produceTask/makeTaskGraphList` | 页面 404 | document 404 | FAIL_NOT_FOUND |
 
 ## 动作级地图
@@ -50,7 +51,7 @@
 
 这些动作从 `BLOCKED` 变为 `PASS` 前，必须先完成：
 
-1. 恢复或补齐 `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 runtime layout，解决 `layoutJson` 500。
+1. 恢复或补齐 `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的真实 desktop edit/view 组件树，解决 `layoutJson` 200 后仍 React #130 的前端渲染阻断。
 2. 恢复 `makeTaskList` 和 `prepareMakeTaskList` 的动作按钮或按钮权限，不能只靠调用接口绕过前端。
 3. 准备一条带 marker 的生产任务、工序、活动、物料和检验前置数据。
 4. 在真实前端执行动作，捕获 method、URL、payload、response。
@@ -60,7 +61,7 @@
 
 | ID | 问题 | 处理方向 |
 | --- | --- | --- |
-| PROD-ACTION-001 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 `layoutJson` 返回 500 | 从 `WOM_6.1.3.4/service/src/main/resources/META-INF/bap/module.xml` 恢复这些 viewCode 的 runtime view JSON |
+| PROD-ACTION-001 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 `layoutJson` 已返回 200，但生成组件树仍触发 React #130 | 从原始 runtime/static/template 中恢复这些 viewCode 的真实 edit/view component metadata，避免继续用 list-style datagrid JSON 冒充动作表单 |
 | PROD-ACTION-002 | `makeTaskList` 当前运行时 `layoutDatagrid.buttons=[]`，源码里的状态/报工/请检动作没有显示 | 对齐旧 `module.xml` 按钮元数据、RBAC 按钮权限和 runtime view 生成逻辑 |
 | PROD-ACTION-003 | `makeTaskGraphList` 当前路由 404 | 判断该图形化入口是否应上架菜单；如果应上架，需要补页面路由和 runtime view |
 | PROD-ACTION-004 | QCS 目标表还没有从 `createManuInspect` / `checkoutBill/generate` 追到底 | 继续进入 QCS 源包和 PostgreSQL 元数据排查 |

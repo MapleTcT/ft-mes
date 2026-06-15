@@ -45,6 +45,12 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "LIMSSteady_6.0.4.1_envCondition_envConditionList",
     "QCS_5.0.0.0_inspect_manuInspectList",
     "WOM_1.0.0_produceTask_makeTaskList",
+    "WOM_1.0.0_produceTask_prepareMakeTaskList",
+    "WOM_1.0.0_produceTask_makeTaskEdit",
+    "WOM_1.0.0_produceTask_makeTaskSubmitView",
+    "WOM_1.0.0_produceTask_makeTaskView",
+    "WOM_1.0.0_produceTask_makeTaskBatchView",
+    "WOM_1.0.0_produceTask_easyTaskOperateView",
     "WOM_1.0.0_batchMaterial_baRetireMentPDAList",
     "RM_1.0.0_formula_batchFormulaList",
     "craftGraph_1.0_basicInfo_basicInfoList",
@@ -848,33 +854,40 @@ def extract_fill(item: ET.Element) -> Optional[Dict[str, str]]:
 
 def extract_fields(view: ViewDef) -> List[FieldDef]:
     fields: List[FieldDef] = []
-    seen = set()
-    for item in iter_region_items(view, "LISTPT"):
-        key = direct_text(item, "key") or direct_text(item, "name") or direct_text(item, "layRec")
-        property_code = direct_text(item, "propertyCode")
-        if not key and not property_code:
-            continue
-        key = key or property_code.rsplit("_", 1)[-1] or "id"
-        if key in seen:
-            continue
-        seen.add(key)
-        none_marker = direct_text(item, "none").lower()
-        field = FieldDef(
-            key=key,
-            namekey=direct_text(item, "namekey") or direct_text(item, "displayName") or key,
-            show_type=direct_text(item, "showType", "TEXTFIELD") or "TEXTFIELD",
-            show_format=direct_text(item, "showFormat", "TEXT") or "TEXT",
-            width=int_text(direct_text(item, "width"), 120),
-            hidden=bool_text(direct_text(item, "isHidden")) or none_marker == "hide",
-            column_type=direct_text(item, "columnType", "TEXT") or "TEXT",
-            model_code=direct_text(item, "modelCode") or direct_text(item, "modelcode"),
-            fill=extract_fill(item),
-        )
-        fields.append(field)
-        if len(fields) >= 80:
-            break
-    if fields:
-        return fields
+    seen: Dict[str, int] = {}
+    for region_type in ("LISTPT", "DATAGRID", "EDIT"):
+        for item in iter_region_items(view, region_type):
+            element = item.find("element")
+            field_source = element if element is not None else item
+            key = direct_text(field_source, "key") or direct_text(field_source, "name") or direct_text(item, "name") or direct_text(item, "layRec")
+            property_code = direct_text(field_source, "propertyCode") or direct_text(item, "propertyCode")
+            if not key and not property_code:
+                continue
+            key = key or property_code.rsplit("_", 1)[-1] or "id"
+            none_marker = direct_text(field_source, "none").lower() or direct_text(item, "none").lower()
+            field = FieldDef(
+                key=key,
+                namekey=direct_text(field_source, "namekey") or direct_text(field_source, "displayName") or key,
+                show_type=direct_text(field_source, "showType", "TEXTFIELD") or "TEXTFIELD",
+                show_format=direct_text(field_source, "showFormat", "TEXT") or "TEXT",
+                width=int_text(direct_text(field_source, "width") or direct_text(item, "width"), 120),
+                hidden=bool_text(direct_text(field_source, "isHidden") or direct_text(item, "isHidden")) or none_marker == "hide",
+                column_type=direct_text(field_source, "columnType", "TEXT") or "TEXT",
+                model_code=direct_text(field_source, "modelCode") or direct_text(field_source, "modelcode") or direct_text(item, "modelCode") or direct_text(item, "modelcode"),
+                fill=extract_fill(field_source) or extract_fill(item),
+            )
+            if key in seen:
+                existing_index = seen[key]
+                existing = fields[existing_index]
+                if existing.show_type == "LABEL" and field.show_type != "LABEL":
+                    fields[existing_index] = field
+                continue
+            seen[key] = len(fields)
+            fields.append(field)
+            if len(fields) >= 80:
+                break
+        if fields:
+            return fields
 
     fallback_key = "name"
     return [
@@ -902,10 +915,11 @@ def model_code_for(view: ViewDef, fields: Sequence[FieldDef]) -> str:
 
 
 def field_json(field: FieldDef) -> Dict[str, object]:
+    show_type = "TEXTFIELD" if field.show_type == "LABEL" else field.show_type
     result: Dict[str, object] = {
         "key": field.key,
         "namekey": field.namekey,
-        "showType": field.show_type,
+        "showType": show_type,
         "showFormat": field.show_format,
         "width": field.width,
         "isHidden": field.hidden,
@@ -922,14 +936,17 @@ def data_grid_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str
     main_display = "name"
     if not any(field.key == "name" for field in visible_fields):
         main_display = visible_fields[0].key if visible_fields else fields[0].key
+    datagrid_code = first_datagrid_code(view) or view.code
     grid: Dict[str, object] = {
         "type": "layoutDatagrid",
         "layoutmethod": "container",
         "ratio_h": 100,
+        "DataGridCode": datagrid_code,
         "modelCode": model_code_for(view, fields),
         "hasFastQuery": True,
         "mainDisplayName": main_display,
         "idPrefix": "compat_" + (parent_code or view.code),
+        "listPT": False,
         "buttons": [],
         "fields": [field_json(field) for field in fields],
     }
@@ -940,9 +957,23 @@ def data_grid_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str
     return grid
 
 
+def first_datagrid_code(view: ViewDef) -> str:
+    for item in iter_region_items(view, "DATAGRID"):
+        code = direct_text(item, "datagridCode") or direct_text(item, "dataGridCode")
+        if code:
+            return code
+    return ""
+
+
+def runtime_page_type(view: ViewDef) -> str:
+    if view.view_type in {"EDIT", "VIEW"} and view.show_type == "SINGLE":
+        return view.view_type
+    return "LIST"
+
+
 def list_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str, object]:
     return {
-        "pageType": "LIST",
+        "pageType": runtime_page_type(view),
         "title": view.title,
         "url": view.url,
         "isMain": True,
@@ -2137,7 +2168,7 @@ def runtime_view_sql(view: ViewDef) -> str:
     columns = (
         "code, ec_env, version, create_time, modify_time, valid, type, show_type, title, "
         "display_name, name, url, module_code, entity_code, ass_model_code, has_attachment, "
-        "only_for_query, main_view, main_ref, mobile, mobile_enable_flag, move_flag, is_shadow"
+        "only_for_query, main_view, main_ref, mobile, mobile_enable_flag, move_flag, extra_view, is_shadow"
     )
     values = [
         sql_str(view.code),
@@ -2162,6 +2193,7 @@ def runtime_view_sql(view: ViewDef) -> str:
         sql_bool(view.mobile),
         sql_bool(view.mobile_enable_flag),
         sql_bool(view.move_flag),
+        sql_str(view.code),
         "false",
     ]
     return (
@@ -2187,6 +2219,7 @@ def runtime_view_sql(view: ViewDef) -> str:
         "    mobile = EXCLUDED.mobile,\n"
         "    mobile_enable_flag = EXCLUDED.mobile_enable_flag,\n"
         "    move_flag = EXCLUDED.move_flag,\n"
+        "    extra_view = EXCLUDED.extra_view,\n"
         "    is_shadow = false;"
     )
 

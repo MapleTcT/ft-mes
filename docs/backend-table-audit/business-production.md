@@ -20,9 +20,11 @@
 证据文件：
 
 - API/layout smoke：`/tmp/adp-business-module-smoke-20260615184508.json`
-- 页面 smoke：`/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json`
-- WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json`
+- 页面 smoke：`/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json`
+- WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
 - WOM 生产动作候选页探测：`/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json`
+- WOM runtime JSON 修复后复验：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
+- WOM layoutJson 直连复验：5 个动作 viewCode 均 `200`，pageType 为 `EDIT/VIEW`
 - WOM 生产动作源地图：[`business-production-action-map.md`](business-production-action-map.md)
 - WOM 生产动作机器记录：`metadata/production-module-source-action-map.json`
 - 运行时视图来源：`deploy/docker/postgres/init/065-business-view-runtime-json.sql` 中 `WOM_1.0.0_produceTask_makeTaskList` 的 `layoutDatagrid.buttons` 为 `[]`
@@ -42,7 +44,7 @@
 | 作业计划新建、调整、取消 | NOT_RUN | 查询计划表和状态字段 |
 | 制造检验结果录入和生产状态回写 | NOT_RUN | 查询 QCS 表和生产状态字段 |
 | 批次/物料/工单追溯 | BLOCKED | 当前未定位完整追溯页面和表链路 |
-| 工序报工 | BLOCKED | 源事件已定位 `addOutputByOutPutDetails`、`endEasyActive` 和 `WOM_PROC_REPORTS`，但 `makeTaskView/makeTaskBatchView/easyTaskOperateView` 当前 `layoutJson` 500 |
+| 工序报工 | BLOCKED | 源事件已定位 `addOutputByOutPutDetails`、`endEasyActive` 和 `WOM_PROC_REPORTS`；`makeTaskView/makeTaskBatchView/easyTaskOperateView` 的 `layoutJson` 已修复为 200，但真实浏览器仍 React #130，未渲染出动作表单或按钮 |
 | 完工入库或库存回写 | BLOCKED | 需要仓储/库存模块包和表结构 |
 
 ## 初始页面/API 入口
@@ -51,7 +53,7 @@
 | --- | --- | --- | --- |
 | 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList`；`POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` | 已捕获列表查询；运行时视图按钮为空；读模型识别到 `WOM_PRODUCE_TASKS`，待办筛选关联 `wfm_task_pending`；当前页面未发现创建入口 |
 | 工单/任务 | 备料列表 | `GET /msService/WOM/produceTask/produceTask/prepareMakeTaskList`；`POST /msService/WOM/produceTask/produceTask/prepareMakeTaskList-query` | 已捕获列表查询；源码存在 `generatePrepareNeed` 写动作，但当前页面只暴露查询/清空 |
-| 工单/任务 | 状态流转/报工动作视图 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | 真实浏览器打开时 `layoutJson` 返回 500；当前不能做 marker 落库 |
+| 工单/任务 | 状态流转/报工动作视图 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | `layoutJson` 已返回 200，并带 `DataGridCode` 与真实 `produceTask` 字段键；真实浏览器仍 React #130，当前不能做 marker 落库 |
 | 退料 | 退料 PDA | `GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` | 需要确认提交/审核接口 |
 | 配方 | 批量配方 | `GET /msService/RM/formula/formula/batchFormulaList` | 静态 patch 暴露 `downloadXls`、`importMainXls`、`delete` |
 | 工艺 | 基础信息 | `GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList` | 需要确认主表/明细表 |
@@ -74,7 +76,7 @@
 | ID | 类型 | 问题 | 当前处理 |
 | --- | --- | --- | --- |
 | PROD-DB-001 | 缺入口 | WOM 制造任务当前列表页未发现新增入口；运行时视图 `buttons` 为空 | 读模型已定位 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending`；继续排查菜单、按钮权限、原始创建视图或真实创建页面 |
-| PROD-DB-002 | 缺 runtime view | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 `layoutJson` 返回 500 | 从 WOM 6.1.3.4 的 `module.xml` 恢复这些 viewCode 的 runtime view JSON |
+| PROD-DB-002 | runtime render 阻断 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 `layoutJson` 已返回 200，但生成组件树仍触发 React #130 | 从原始 runtime/static/template 中恢复真实 edit/view component metadata，避免继续用 list-style datagrid JSON 冒充动作表单 |
 | PROD-DB-005 | 缺按钮/权限 | WOM 源码存在 `updateTaskState`、`addOutputByOutPutDetails`、`generatePrepareNeed`、`createManuInspect` 等动作，但当前页面按钮未暴露 | 对齐旧 BAP 按钮元数据、RBAC 按钮权限和 runtime view 生成逻辑 |
 | PROD-DB-006 | 缺映射 | QCS 检验单目标表未追到底 | 从 `createManuInspect`、`checkoutBill/generate` 继续追 QCS 源包和 PostgreSQL 元数据 |
 | PROD-DB-003 | 缺映射 | 完工入库或库存回写链路未定位 | 等待仓储/库存模块包 |

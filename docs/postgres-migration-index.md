@@ -30,13 +30,13 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9119 |
+| alter-table | 9179 |
 | create-function | 38 |
-| create-index | 664 |
-| create-table | 481 |
-| create-view | 91 |
-| insert | 3579 |
-| update | 3566 |
+| create-index | 667 |
+| create-table | 482 |
+| create-view | 92 |
+| insert | 3662 |
+| update | 3649 |
 
 ## 脚本清单
 
@@ -106,7 +106,7 @@
 | 062 | 062-wts-business-schema-from-initxml.sql | business | 2784 | create-table:64, create-index:192, alter-table:2460 | - |
 | 063 | 063-disable-legacy-external-scheduler-jobs.sql | workflow | 33 | update:2 | watch:1 |
 | 064 | 064-craftgraph-business-schema-from-initxml.sql | business | 1329 | create-table:32, create-index:96, alter-table:1165 | - |
-| 065 | 065-business-view-runtime-json.sql | platform, configuration, business | 180770 | create-table:57, create-view:62, create-function:11, create-index:169, alter-table:3808, insert:3508, update:3508 | watch:4 |
+| 065 | 065-business-view-runtime-json.sql | platform, configuration, business | 184083 | create-table:58, create-view:63, create-function:11, create-index:172, alter-table:3868, insert:3591, update:3591 | watch:4 |
 | 066 | 066-lims-qcs-test-config.sql | business | 27 | insert:1, update:1 | - |
 | 067 | 067-qcs-table-types-postgres.sql | business | 118 | create-table:1, create-index:3, alter-table:2, insert:2 | - |
 | 068 | 068-organization-position-role-compat.sql | auth-rbac-org, compatibility | 33 | create-table:1, create-view:1, create-index:3 | - |

@@ -219,7 +219,7 @@
     },
     {
       "file": "AGENTS.md",
-      "line": 18,
+      "line": 26,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -227,7 +227,7 @@
     },
     {
       "file": "AGENTS.md",
-      "line": 104,
+      "line": 113,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4659,7 +4659,7 @@
     },
     {
       "file": "docs/backend-table-audit/business-production.md",
-      "line": 68,
+      "line": 70,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4667,7 +4667,7 @@
     },
     {
       "file": "docs/backend-table-audit/business-production.md",
-      "line": 70,
+      "line": 72,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4699,7 +4699,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 18,
+      "line": 36,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4707,7 +4707,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 104,
+      "line": 122,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5107,7 +5107,7 @@
     },
     {
       "file": "docs/production-module-functional-test-cases.md",
-      "line": 77,
+      "line": 79,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

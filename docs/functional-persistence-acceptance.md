@@ -11,6 +11,24 @@
 - 形成可交接、可复验、可继续推进的测试与落库验收报告。
 - 必要时修复阻断问题，但不能跳过验证。
 
+## 本轮执行口径
+
+这条规则用于约束当前 ADP/MES 恢复仓库后续所有功能验证任务。进入验收时，优先级如下：
+
+1. 先启动或访问真实系统，确认前端、后端、PostgreSQL 的实际运行状态。
+2. 再通过浏览器或等效 E2E 操作当前页面功能。
+3. 对写业务数据的操作，用唯一 marker、HTTP 请求记录、后端链路追踪和 PostgreSQL 查询闭环证明。
+4. 最后更新报告和机器可读记录。
+
+不允许把这些事情替换成：
+
+- 继续补治理层文档。
+- 只跑静态检查、`make ci` 或脚本语法检查。
+- 只凭源码、Mapper、接口返回 200 或 mock 数据判断功能可用。
+- 因启动失败、页面报错或权限不足就跳到写总结结束。
+
+如果前端、后端或数据库无法启动，启动失败本身就是最高优先级阻断项；必须优先修复，无法立即修复时也要按 `BLOCKED` 写入验收资产。
+
 ## 固定上下文
 
 - 仓库路径：`/Users/zhangchu/Documents/ADP/adp-source-repo`
@@ -111,6 +129,62 @@
 - [前端功能测试报告](frontend-functional-test-report.md)
 - [后端落库验收报告](backend-table-audit/persistence-acceptance.md)
 - [机器可读落库验收记录](../metadata/persistence-acceptance.json)
+
+### 前端功能测试报告最低格式
+
+`docs/frontend-functional-test-report.md` 至少保留或补齐下面字段：
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+每条记录都要说明 console error、network error、实际页面表现和是否需要落库；不能只写“已检查”。
+
+### 后端落库验收报告最低格式
+
+`docs/backend-table-audit/persistence-acceptance.md` 至少保留或补齐下面字段：
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+
+写动作必须包含 marker、请求摘要、后端 Controller/Service/Mapper/DAO 追踪和 PostgreSQL 查询摘要。
+
+### 机器可读记录最低格式
+
+`metadata/persistence-acceptance.json` 至少包含：
+
+```json
+{
+  "generatedAt": "...",
+  "repoCommit": "...",
+  "database": "PostgreSQL",
+  "summary": {
+    "testedFeatures": 0,
+    "pass": 0,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "items": [
+    {
+      "module": "",
+      "route": "",
+      "operation": "",
+      "api": "",
+      "method": "",
+      "requiresPersistence": true,
+      "backendEntry": "",
+      "tables": [],
+      "marker": "",
+      "verificationSql": "",
+      "status": "PASS",
+      "evidence": "",
+      "issues": []
+    }
+  ]
+}
+```
+
+`repoCommit` 必须写实际验收时的仓库 HEAD。如果任务说明里的同步 commit 和本地 HEAD 不一致，先把差异写进 evidence 或 issues，不要擅自回滚。
 
 机器可读记录必须能通过：
 

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T19:32:13+08:00",
-  "repoCommit": "c782cf4abff82aa9a76c2a0a2c1b1e0440beddda",
+  "generatedAt": "2026-06-15T20:48:01+08:00",
+  "repoCommit": "0fcdda693a89cd73b449c253f28596338b22f0ba",
   "database": "PostgreSQL",
   "module": "production",
   "sourcePackage": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4",
-  "liveDiscoveryReport": "/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
+  "liveDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
   "summary": {
     "sourceActions": 12,
     "liveRoutesProbed": 8,
@@ -28,27 +28,27 @@
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit",
       "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200, but GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskEdit&isEs5=true returned 500 {\"code\":500,\"data\":null,\"message\":\"服务器异常\"}."
+      "evidence": "Navigation 200. After runtime_extra_view JSON patch, GET layoutJson for WOM_1.0.0_produceTask_makeTaskEdit returned 200 with DataGridCode and real produceTask field keys. Real browser still failed with visible error banner and React error #130; no buttons or fields rendered. Direct layoutJson verification returns pageType EDIT; real browser still fails with React #130."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskSubmitView",
       "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskSubmitView returned 500."
+      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the page still fails in the desktop renderer with ErrorBoundary React #130 and exposes no actionable controls."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskView",
       "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskView returned 500."
+      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch. Direct layoutJson verification returns pageType VIEW; real browser still fails with React #130 and no fields/buttons render."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
       "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_makeTaskBatchView returned 500."
+      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the action page still renders the generic error banner and React #130, so batch process/activity UI is unavailable."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
       "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200, but layoutJson for WOM_1.0.0_produceTask_easyTaskOperateView returned 500."
+      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the easy activity/report-work page still fails with React #130 before controls render."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskGraphList",
@@ -67,7 +67,10 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/makeTaskList-pending",
       "controllerEntry": "runtime list query",
       "serviceEntry": "runtime list query",
-      "targetTables": ["WOM_PRODUCE_TASKS", "wfm_task_pending"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "wfm_task_pending"
+      ],
       "requiresPersistence": false,
       "acceptanceStatus": "PASS_READ_ONLY",
       "evidence": "Captured by live browser discovery with status 200 and pageNo/pageSize payload.",
@@ -83,7 +86,9 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList-query",
       "controllerEntry": "runtime list query",
       "serviceEntry": "runtime list query",
-      "targetTables": ["WOM_PRODUCE_TASKS"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS"
+      ],
       "requiresPersistence": false,
       "acceptanceStatus": "PASS_READ_ONLY",
       "evidence": "Captured by live browser discovery with status 200.",
@@ -99,11 +104,16 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/generatePrepareNeed",
       "controllerEntry": "WOMProduceTaskController.generatePrepareNeed",
       "serviceEntry": "WOMProduceTaskServiceImpl.generatePrepareNeed",
-      "targetTables": ["WOM_PRODUCE_TASKS", "WOM_TASK_MATERIALS"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "WOM_TASK_MATERIALS"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source customEvent.js posts selected ids to generatePrepareNeed; live prepareMakeTaskList page exposes only 查询/清空 in current runtime.",
-      "blockers": ["Action button not exposed in current runtime view; cannot run marker-based write acceptance."]
+      "blockers": [
+        "Action button not exposed in current runtime view; cannot run marker-based write acceptance."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-004",
@@ -115,11 +125,17 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/updateTaskState",
       "controllerEntry": "WOMProduceTaskController.updateTaskState",
       "serviceEntry": "WOMProduceTaskServiceImpl.updateTaskState",
-      "targetTables": ["WOM_PRODUCE_TASKS", "WOM_TASK_PROCESSES", "WOM_TASK_ACTIVES"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "WOM_TASK_PROCESSES",
+        "WOM_TASK_ACTIVES"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source customEvent.js uses updateTaskState for start/pause/recovery; controller and service entries exist in WOM_6.1.3.4 source.",
-      "blockers": ["Current runtime makeTaskList has layoutDatagrid.buttons=[] and no visible state buttons."]
+      "blockers": [
+        "Current runtime makeTaskList has layoutDatagrid.buttons=[] and no visible state buttons."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-005",
@@ -131,11 +147,18 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
       "controllerEntry": "WOMProduceTaskController.addOutputByOutPutDetails",
       "serviceEntry": "WOMProduceTaskServiceImpl.addOutputByOutPutDetails",
-      "targetTables": ["WOM_PROC_REPORTS", "WOM_PRODUCE_TASKS", "WOM_TASK_ACTIVES", "WOM_TASK_PROCESSES"],
+      "targetTables": [
+        "WOM_PROC_REPORTS",
+        "WOM_PRODUCE_TASKS",
+        "WOM_TASK_ACTIVES",
+        "WOM_TASK_PROCESSES"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source stopTaskEvent opens outPutCommonTaskEdit and posts procReportId/taskId to addOutputByOutPutDetails after save.",
-      "blockers": ["Runtime makeTaskList does not expose finish/report-work button; cannot create marker proc report from UI."]
+      "blockers": [
+        "Runtime makeTaskList does not expose finish/report-work button; cannot create marker proc report from UI."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-006",
@@ -147,11 +170,15 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/setAdvanceTrue/{orderId}",
       "controllerEntry": "WOMProduceTaskController.setAdvanceTrue",
       "serviceEntry": "WOMProduceTaskServiceImpl.setAdvanceTrue or equivalent service path",
-      "targetTables": ["WOM_PRODUCE_TASKS"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source customEvent.js calls setAdvanceTrue after taskRunState/runing and advanceCharge checks.",
-      "blockers": ["Runtime makeTaskList does not expose early put-in action button."]
+      "blockers": [
+        "Runtime makeTaskList does not expose early put-in action button."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-007",
@@ -163,11 +190,16 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/createManuInspect",
       "controllerEntry": "WOMProduceTaskController.createManuInspect",
       "serviceEntry": "WOMProduceTaskServiceImpl.createManuInspect",
-      "targetTables": ["WOM_PRODUCE_TASKS", "QCS inspection tables"],
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "QCS inspection tables"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source customEvent.js checks findCheckMsgByBatch then posts taskId to createManuInspect.",
-      "blockers": ["Runtime makeTaskList does not expose inspection action; QCS target tables still need table-level trace."]
+      "blockers": [
+        "Runtime makeTaskList does not expose inspection action; QCS target tables still need table-level trace."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-008",
@@ -179,11 +211,15 @@
       "endpoint": "/msService/WOM/produceTask/taskProcess/start/{id}; /msService/WOM/produceTask/taskProcess/end/{id}",
       "controllerEntry": "WOM taskProcess controller",
       "serviceEntry": "WOM taskProcess service",
-      "targetTables": ["WOM_TASK_PROCESSES"],
+      "targetTables": [
+        "WOM_TASK_PROCESSES"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source makeTaskView and makeTaskBatchView customEvent.js call taskProcess start/end endpoints.",
-      "blockers": ["Live makeTaskView layoutJson returns 500, so the action UI cannot render."]
+      "blockers": [
+        "Live makeTaskView action pages render React #130 after layoutJson 200, so the action UI cannot render."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-009",
@@ -195,11 +231,15 @@
       "endpoint": "/msService/WOM/produceTask/taskProcess/processUnitEdit?id={processId}",
       "controllerEntry": "runtime edit form save",
       "serviceEntry": "runtime edit form save",
-      "targetTables": ["WOM_TASK_PROCESSES"],
+      "targetTables": [
+        "WOM_TASK_PROCESSES"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source customEvent.js opens processUnitEdit dialog and calls submitFormData('save').",
-      "blockers": ["Live makeTaskView/makeTaskBatchView layoutJson returns 500."]
+      "blockers": [
+        "Live makeTaskView/makeTaskBatchView action pages render React #130 after layoutJson 200."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-010",
@@ -211,11 +251,17 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/startActive; /msService/WOM/produceTask/produceTask/endActive",
       "controllerEntry": "WOMProduceTaskController.startActive / endActive",
       "serviceEntry": "WOMProduceTaskServiceImpl.startActive / endActive",
-      "targetTables": ["WOM_TASK_ACTIVES", "WOM_TASK_PROCESSES", "WOM_PRODUCE_TASKS"],
+      "targetTables": [
+        "WOM_TASK_ACTIVES",
+        "WOM_TASK_PROCESSES",
+        "WOM_PRODUCE_TASKS"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source makeTaskBatchView customEvent.js calls startActive/endActive and refreshes taskActive/queryByProcess.",
-      "blockers": ["Live makeTaskBatchView layoutJson returns 500."]
+      "blockers": [
+        "Live makeTaskBatchView action pages render React #130 after layoutJson 200."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-011",
@@ -227,11 +273,16 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/endEasyActive/{id}",
       "controllerEntry": "WOMProduceTaskController.endEasyActive",
       "serviceEntry": "WOMProduceTaskServiceImpl.endEasyActive",
-      "targetTables": ["WOM_TASK_ACTIVES", "WOM_PROC_REPORTS"],
+      "targetTables": [
+        "WOM_TASK_ACTIVES",
+        "WOM_PROC_REPORTS"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source easyTaskOperateView customEvent.js posts selected active id to endEasyActive.",
-      "blockers": ["Live easyTaskOperateView layoutJson returns 500."]
+      "blockers": [
+        "Live easyTaskOperateView action pages render React #130 after layoutJson 200."
+      ]
     },
     {
       "id": "WOM-PROD-ACTION-012",
@@ -243,11 +294,16 @@
       "endpoint": "/msService/WOM/produceTask/produceTask/checkoutBill/generate/{activeId}",
       "controllerEntry": "WOM/QCS checkout generation controller",
       "serviceEntry": "WOM/QCS checkout generation service",
-      "targetTables": ["WOM_TASK_ACTIVES", "QCS checkout tables"],
+      "targetTables": [
+        "WOM_TASK_ACTIVES",
+        "QCS checkout tables"
+      ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
       "evidence": "Source easyTaskOperateView customEvent.js calls checkoutBill/generate and refreshes activity grids.",
-      "blockers": ["Live easyTaskOperateView layoutJson returns 500; QCS checkout target tables still need table-level trace."]
+      "blockers": [
+        "Live easyTaskOperateView action pages render React #130 after layoutJson 200; QCS checkout target tables still need table-level trace."
+      ]
     }
   ]
 }

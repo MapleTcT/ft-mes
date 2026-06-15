@@ -10,13 +10,13 @@
   "highRiskStatementCount": 0,
   "watchStatementCount": 44,
   "statementTotals": {
-    "alter-table": 9119,
+    "alter-table": 9179,
     "create-function": 38,
-    "create-index": 664,
-    "create-table": 481,
-    "create-view": 91,
-    "insert": 3579,
-    "update": 3566
+    "create-index": 667,
+    "create-table": 482,
+    "create-view": 92,
+    "insert": 3662,
+    "update": 3649
   },
   "tagTotals": {
     "auth-rbac-org": 26,
@@ -1780,16 +1780,16 @@
         "configuration",
         "business"
       ],
-      "lineCount": 180770,
-      "sha256": "a56a688072daf2988cfe96b74ac4368eae09fdc460ad7e2560daaf28c0081851",
+      "lineCount": 184083,
+      "sha256": "079f2719247cfb0d1cc3600909ab68f2fb162a1279bd794defb6e2a3d7234f7f",
       "statementCounts": {
-        "create-table": 57,
-        "create-view": 62,
+        "create-table": 58,
+        "create-view": 63,
         "create-function": 11,
-        "create-index": 169,
-        "alter-table": 3808,
-        "insert": 3508,
-        "update": 3508
+        "create-index": 172,
+        "alter-table": 3868,
+        "insert": 3591,
+        "update": 3591
       },
       "highRiskStatements": [],
       "watchStatements": [

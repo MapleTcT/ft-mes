@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T19:32:13+08:00",
-  "repoCommit": "c782cf4abff82aa9a76c2a0a2c1b1e0440beddda",
+  "generatedAt": "2026-06-15T20:48:01+08:00",
+  "repoCommit": "0fcdda693a89cd73b449c253f28596338b22f0ba",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_SOURCE_ACTION_MAP",
   "evidence": {
     "baseUrl": "http://10.11.100.17:18080",
     "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
-    "browserPageSmokeReport": "/tmp/adp-business-page-smoke-make-202606151849/business-page-smoke-results.json",
+    "browserPageSmokeReport": "/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json",
     "apiLayoutSmoke": {
       "total": 53,
       "passed": 53,
@@ -19,10 +19,12 @@
       "passed": 53,
       "failed": 0
     },
-    "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
+    "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
     "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png",
-    "productionActionCandidateDiscoveryReport": "/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
-    "productionSourceActionMap": "metadata/production-module-source-action-map.json"
+    "productionActionCandidateDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
+    "productionSourceActionMap": "metadata/production-module-source-action-map.json",
+    "productionActionPageTypeProbeReport": "direct layoutJson probe: 5 WOM action viewCodes returned 200 with pageType EDIT/VIEW",
+    "productionActionRuntimePatch": "deploy/docker/postgres/init/065-business-view-runtime-json.sql"
   },
   "summary": {
     "totalCases": 23,
@@ -73,7 +75,7 @@
         "wfm_task_pending"
       ],
       "verificationSql": "",
-      "evidence": "Browser page smoke passed. Production action discovery captured list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending with pageNo/pageSize payload and no visible/network/console/page errors. Runtime metadata maps WOM_1.0.0_produceTask_ProduceTask to WOM_PRODUCE_TASKS and pending filtering to wfm_task_pending. Report: /tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
+      "evidence": "Browser page smoke passed. Production action discovery captured list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending with pageNo/pageSize payload and no visible/network/console/page errors. Runtime metadata maps WOM_1.0.0_produceTask_ProduceTask to WOM_PRODUCE_TASKS and pending filtering to wfm_task_pending. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
       "issues": [],
       "nextAction": "Trace makeTaskList-pending handler and confirm read SQL shape against WOM_PRODUCE_TASKS and wfm_task_pending.",
       "coverageTags": [
@@ -96,7 +98,7 @@
       "backendTraceStatus": "create-entry-not-found-on-current-route",
       "targetTables": [],
       "verificationSql": "",
-      "evidence": "Real browser discovery opened WOM makeTaskList and captured visible buttons: 查询, 仅查待办, 清空. Runtime view JSON for WOM_1.0.0_produceTask_makeTaskList has layoutDatagrid.buttons=[]. No safe 新增/新建/添加/创建 button was present, and no create endpoint was observed. Read model identifies WOM_PRODUCE_TASKS, but create write table is not accepted until a create route is found. Screenshot: /tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png. Report: /tmp/adp-production-action-discovery-202606151930/production-action-discovery.json",
+      "evidence": "Real browser discovery opened WOM makeTaskList and captured visible buttons: 查询, 仅查待办, 清空. Runtime view JSON for WOM_1.0.0_produceTask_makeTaskList has layoutDatagrid.buttons=[]. No safe 新增/新建/添加/创建 button was present, and no create endpoint was observed. Read model identifies WOM_PRODUCE_TASKS, but create write table is not accepted until a create route is found. Screenshot: /tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
       "issues": [
         "Current WOM makeTaskList route appears to be a pending-task/list page, not the create entry for production work orders.",
         "Runtime compatibility view for WOM_1.0.0_produceTask_makeTaskList exposes no grid buttons, so the current rendered page cannot initiate create.",
@@ -120,7 +122,6 @@
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
       "acceptanceStatus": "BLOCKED",
-      "apiEndpoints": [],
       "apiEndpoints": [
         "POST /msService/WOM/produceTask/produceTask/updateTaskState"
       ],
@@ -566,7 +567,7 @@
         "GET /msService/WOM/produceTask/produceTask/startActive",
         "GET /msService/WOM/produceTask/produceTask/endActive"
       ],
-      "backendTraceStatus": "source-traced-runtime-layout-blocked",
+      "backendTraceStatus": "source-traced-layoutjson-fixed-frontend-render-blocked",
       "targetTables": [
         "WOM_PROC_REPORTS",
         "WOM_TASK_ACTIVES",
@@ -574,13 +575,13 @@
         "WOM_PRODUCE_TASKS"
       ],
       "verificationSql": "",
-      "evidence": "WOM 6.1.3.4 source maps report-work and activity execution through stopTaskEvent/addOutputByOutPutDetails, easyTaskOperateView/reportEvent/endEasyActive, and makeTaskView/makeTaskBatchView startActive/endActive. Real browser candidate probing found makeTaskView, makeTaskBatchView, and easyTaskOperateView navigation 200 but their layoutJson calls return 500, so the report-work UI cannot render in the current runtime. Report: /tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json",
+      "evidence": "WOM 6.1.3.4 source maps report-work and activity execution through stopTaskEvent/addOutputByOutPutDetails, easyTaskOperateView/reportEvent/endEasyActive, and makeTaskView/makeTaskBatchView startActive/endActive. Runtime JSON patch fixed backend layoutJson 500 for makeTaskView, makeTaskBatchView, and easyTaskOperateView: layoutJson now returns 200. Real browser probing still shows the action pages fail in the desktop renderer with visible 出错了 banner and React error #130, with zero fields/buttons and no write requests. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json; direct layoutJson verification returned 200 with pageType EDIT/VIEW for the action viewCodes",
       "issues": [
-        "Report-work source routes and endpoints are identified, but current runtime layoutJson fails with 500 for the required action views.",
+        "Report-work source routes and endpoints are identified, and layoutJson 500 is fixed, but the generated action-view component tree still crashes the desktop renderer with React #130.",
         "No marker report-work action has been submitted through the real frontend.",
-        "Need PostgreSQL verification for WOM_PROC_REPORTS and related task/process/activity state fields after runtime view recovery."
+        "Need PostgreSQL verification for WOM_PROC_REPORTS and related task/process/activity state fields after action view component metadata is recovered."
       ],
-      "nextAction": "Restore makeTaskView/makeTaskBatchView/easyTaskOperateView runtime layouts, seed a marker task/process/activity, execute report-work from the frontend, and query WOM_PROC_REPORTS plus state fields.",
+      "nextAction": "Recover the real desktop edit/view component metadata for makeTaskView/makeTaskBatchView/easyTaskOperateView, then seed a marker task/process/activity, execute report-work from the frontend, and query WOM_PROC_REPORTS plus state fields.",
       "coverageTags": [
         "report-work",
         "execution",
