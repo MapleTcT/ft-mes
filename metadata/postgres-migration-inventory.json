@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 70,
+  "migrationCount": 71,
   "firstNumber": 1,
-  "lastNumber": 70,
+  "lastNumber": 71,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "watchStatementCount": 44,
   "statementTotals": {
-    "alter-table": 9111,
+    "alter-table": 9118,
     "create-function": 38,
-    "create-index": 659,
+    "create-index": 662,
     "create-table": 480,
     "create-view": 91,
     "insert": 3578,
     "update": 3564
   },
   "tagTotals": {
-    "auth-rbac-org": 24,
+    "auth-rbac-org": 25,
     "business": 9,
-    "compatibility": 39,
+    "compatibility": 40,
     "configuration": 18,
     "general": 3,
     "notification": 9,
@@ -1928,6 +1928,30 @@
         "alter-table": 0,
         "insert": 1,
         "update": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/071-organization-person-profile-compat.sql",
+      "name": "071-organization-person-profile-compat.sql",
+      "number": 71,
+      "slug": "organization-person-profile-compat",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 20,
+      "sha256": "6f31d66b468d25c04230bd4eb05df71550f7ee571eaadfaff8d68f4a20f553d2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 7,
+        "insert": 0,
+        "update": 0
       },
       "highRiskStatements": [],
       "watchStatements": []

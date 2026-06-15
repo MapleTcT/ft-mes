@@ -259,7 +259,7 @@
     },
     {
       "file": "Makefile",
-      "line": 65,
+      "line": 66,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -267,7 +267,7 @@
     },
     {
       "file": "Makefile",
-      "line": 115,
+      "line": 117,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -275,7 +275,7 @@
     },
     {
       "file": "Makefile",
-      "line": 116,
+      "line": 118,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -283,7 +283,7 @@
     },
     {
       "file": "Makefile",
-      "line": 118,
+      "line": 120,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -291,7 +291,7 @@
     },
     {
       "file": "Makefile",
-      "line": 119,
+      "line": 121,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -299,7 +299,7 @@
     },
     {
       "file": "Makefile",
-      "line": 127,
+      "line": 129,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -307,7 +307,7 @@
     },
     {
       "file": "Makefile",
-      "line": 128,
+      "line": 130,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -315,7 +315,7 @@
     },
     {
       "file": "Makefile",
-      "line": 130,
+      "line": 132,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -323,7 +323,7 @@
     },
     {
       "file": "Makefile",
-      "line": 131,
+      "line": 133,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -5203,7 +5203,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 78,
+      "line": 80,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5211,7 +5211,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 81,
+      "line": 83,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5219,7 +5219,7 @@
     },
     {
       "file": "docs/runtime-validation-scope.md",
-      "line": 91,
+      "line": 93,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

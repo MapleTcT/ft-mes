@@ -24,7 +24,7 @@ INTAKE_REPORT ?= /tmp/adp-module-intake-precheck.json
 PLATFORM_SMOKE_OUTPUT ?= /tmp/adp-platform-validation-smoke
 PLATFORM_MENU_LIMIT ?= 40
 
-.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-business audit-postgres-mappings audit-postgres-report
+.PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check source-module-check source-module-test create-backend-module module-intake-check inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization smoke-business audit-postgres-mappings audit-postgres-report
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -59,6 +59,7 @@ help:
 	@printf '%s\n' '  make smoke-api               Run API smoke against ADP_BASE_URL'
 	@printf '%s\n' '  make smoke-menu              Run browser menu smoke against ADP_BASE_URL'
 	@printf '%s\n' '  make smoke-todo              Run home Todo smoke against ADP_BASE_URL'
+	@printf '%s\n' '  make smoke-organization      Run organization department click/API smoke'
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
@@ -76,6 +77,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-platform-api-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-menu-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-home-todo-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-organization-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-module-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-page-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-platform-validation-smoke.js
@@ -165,6 +167,9 @@ smoke-menu:
 
 smoke-todo:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) $(NODE) deploy/docker/scripts/adp-home-todo-smoke.js
+
+smoke-organization:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) $(NODE) deploy/docker/scripts/adp-organization-smoke.js
 
 smoke-business:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) $(NODE) deploy/docker/scripts/adp-business-module-smoke.js

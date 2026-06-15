@@ -42,17 +42,19 @@ make smoke-platform ADP_BASE_URL=http://10.11.100.17:18080 ADP_USERNAME=admin AD
 
 - `adp-platform-api-smoke.js`：登录、当前用户、权限、菜单、待办 API、基础配置、实体配置。
 - `adp-home-todo-smoke.js`：登录页、主页框架、顶部待办、可见错误和网络错误。
+- `adp-organization-smoke.js`：组织管理入口、部门树、部门详情、部门关联人员接口，并用浏览器点击一个部门节点。
 - `adp-menu-smoke.js`：当前用户菜单返回的可导航页面。`make smoke-platform` 默认巡检前 40 个目标，完整页面巡检可运行 `make smoke-menu`，或用 `PLATFORM_MENU_LIMIT=0 make smoke-platform` 关闭限制。
 
 统一报告默认写入 `/tmp/adp-platform-validation-smoke/platform-validation-summary.json`。单项报告会放在同一目录下，便于后续线程按失败项继续追查。
 
-2026-06-15 测试环境 `10.11.100.17:18080` 验证结果：`/tmp/adp-platform-validation-final-20260615/platform-validation-summary.json`，API 16/16、首页待办通过、菜单页面抽样 40/40 通过。
+2026-06-15 测试环境 `10.11.100.17:18080` 验证结果：`/tmp/adp-platform-validation-org-fix-20260615/platform-validation-summary.json`，API 16/16、首页待办通过、组织管理部门点击和关联人员接口通过、菜单页面抽样 40/40 通过。
 
 如果只是临时定位 API 或页面问题，可以继续单独运行：
 
 ```bash
 make smoke-api
 make smoke-todo
+make smoke-organization
 make smoke-menu
 ```
 

@@ -18,7 +18,7 @@
     "sourceModuleCount": 1,
     "oracleBacklogReferenceCount": 810,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 70,
+    "postgresMigrationCount": 71,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 3
@@ -177,7 +177,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "70 scripts, range=001-070, highRisk=0, watch=44",
+      "evidence": "71 scripts, range=001-071, highRisk=0, watch=44",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },

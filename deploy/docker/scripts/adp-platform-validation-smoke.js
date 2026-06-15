@@ -17,6 +17,7 @@ const platformMenuLimit = process.env.ADP_PLATFORM_MENU_LIMIT || "40";
 const skipMenu = process.env.ADP_SKIP_MENU_SMOKE === "true";
 const skipTodo = process.env.ADP_SKIP_TODO_SMOKE === "true";
 const skipApi = process.env.ADP_SKIP_API_SMOKE === "true";
+const skipOrganization = process.env.ADP_SKIP_ORGANIZATION_SMOKE === "true";
 
 const sections = [
   {
@@ -40,6 +41,18 @@ const sections = [
       ADP_OUTPUT_DIR: path.join(outputDir, "home-todo"),
     },
     reportPath: path.join(outputDir, "home-todo", "home-todo-smoke-results.json"),
+  },
+  {
+    id: "organization",
+    title: "Organization department smoke",
+    requiredFor: ["organization-menu", "department-tree", "department-detail", "department-related-persons"],
+    skip: skipOrganization,
+    script: "adp-organization-smoke.js",
+    env: {
+      ADP_OUTPUT_DIR: path.join(outputDir, "organization"),
+      ADP_ORGANIZATION_SMOKE_OUTPUT: path.join(outputDir, "organization", "organization-smoke-results.json"),
+    },
+    reportPath: path.join(outputDir, "organization", "organization-smoke-results.json"),
   },
   {
     id: "menu-pages",
@@ -103,6 +116,19 @@ function summarizeReport(section, parsed) {
       networkErrorCount: Array.isArray(parsed.networkErrors) ? parsed.networkErrors.length : null,
       consoleErrorCount: Array.isArray(parsed.consoleErrors) ? parsed.consoleErrors.length : null,
       pageErrorCount: Array.isArray(parsed.pageErrors) ? parsed.pageErrors.length : null,
+    };
+  }
+  if (section.id === "organization") {
+    return {
+      ok: parsed.ok,
+      selectedDepartment: parsed.selectedDepartment,
+      failedApis: Array.isArray(parsed.apiResults)
+        ? parsed.apiResults.filter((result) => !result.ok).map((result) => result.name)
+        : null,
+      browserOk: parsed.browser ? parsed.browser.ok : null,
+      browserNetworkErrorCount:
+        parsed.browser && Array.isArray(parsed.browser.networkErrors) ? parsed.browser.networkErrors.length : null,
+      browserVisibleError: parsed.browser ? parsed.browser.visibleError : null,
     };
   }
   return parsed;
@@ -198,6 +224,7 @@ function main() {
         "users-organizations-permissions",
         "menus",
         "todo",
+        "organization-department-click",
         "basic-configuration",
         "nacos-keycloak-postgresql-runtime-patch-through-smoke",
       ],
