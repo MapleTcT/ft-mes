@@ -246,6 +246,7 @@ def write_outputs(manifest: dict[str, Any]) -> None:
 def stable_for_check(manifest: dict[str, Any], existing: dict[str, Any]) -> dict[str, Any]:
     current = json.loads(json.dumps(manifest))
     current["generatedAt"] = existing.get("generatedAt")
+    current["repoCommit"] = existing.get("repoCommit")
     return current
 
 

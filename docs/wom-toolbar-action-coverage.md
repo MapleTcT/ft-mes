@@ -429,6 +429,21 @@ immutable`。WOM 页面 HTML、`i18n-value.js`、`body.js` 和 `body-es5.js` 仍
 `makeTaskList/body.js` 仍返回 `private, no-store, no-cache, must-revalidate,
 proxy-revalidate`。
 
+2026-06-22 20:26 再次执行真实浏览器整排 smoke：
+`ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_USERNAME=admin ADP_PASSWORD=123456 WOM_TOOLBAR_PAGE_TIMEOUT_MS=240000 make smoke-wom-toolbar-row`。
+最新 marker 为 `ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART`，taskId
+`9000006310674877`，`metadata/wom-toolbar-row-smoke.json` 记录
+`generatedAt=2026-06-22T12:26:48.679Z`、`PASS_WITH_KNOWN_BLOCKERS`。
+复验确认左侧筛选显示 `全部`，`查询/仅查待办` 均 `HTTP 200`，`清空`
+可点击；无选中时 8 个行操作按钮均显示 `请先选择一条指令单！` 且不发起
+行级业务请求；选中 marker 后 `保持/重启` 均 `HTTP 200`，`结束` 打开真实
+`指令单完工报工` 页面。PostgreSQL 回读 `wom_produce_tasks.id=9000006310674877`
+最终 `task_run_state=WOM_runState/runing/status=99/version=5`，
+`wom_wait_put_records.proc_report_id=757989262755072`。页面仍无
+`WOM.custom...` 或 `ec.common.tableNo` 泄漏；`生产过程追溯` 和 `生成二维码`
+继续显示中文依赖提示，业务状态仍因缺 ProcessAnalysis 和 WOM printManage
+运行包接口保持 `BLOCKED`。
+
 ## 动作矩阵
 
 | 动作 | API | 验收状态 | 点击证据 | 生产用例 | 落库/后端结论 | 问题 |

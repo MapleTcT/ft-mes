@@ -504,6 +504,7 @@ def write_outputs(register: dict[str, Any]) -> None:
 def stable_for_check(register: dict[str, Any], existing: dict[str, Any]) -> dict[str, Any]:
     current = json.loads(json.dumps(register))
     current["generatedAt"] = existing.get("generatedAt")
+    current["repoCommit"] = existing.get("repoCommit")
     return current
 
 

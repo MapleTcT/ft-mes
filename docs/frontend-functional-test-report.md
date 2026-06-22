@@ -48,6 +48,19 @@ PostgreSQL 回读最终 `task_run_state=WOM_runState/runing/status=99/version=5`
 `task_run_state=WOM_runState/runing/status=99/version=5`，
 `wom_wait_put_records.proc_report_id=757960994657536`。
 
+2026-06-22 20:26 再次复跑同一工具栏 smoke，命令为
+`ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_USERNAME=admin ADP_PASSWORD=123456 WOM_TOOLBAR_PAGE_TIMEOUT_MS=240000 make smoke-wom-toolbar-row`。
+最新 marker `ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART` / taskId
+`9000006310674877`，`metadata/wom-toolbar-row-smoke.json` 记录
+`generatedAt=2026-06-22T12:26:48.679Z`、状态 `PASS_WITH_KNOWN_BLOCKERS`。
+页面无 `WOM.custom...` 或 `ec.common.tableNo` 泄漏；左侧筛选兜底为 `全部`；
+`查询/仅查待办` 均 200，`清空` 可点击，无选中 8 个按钮统一提示
+`请先选择一条指令单！`；选中 marker 后 `保持/重启` 均 200，`结束` 打开
+真实 `指令单完工报工` 页面。PostgreSQL 回读最终
+`wom_produce_tasks.id=9000006310674877 task_run_state=WOM_runState/runing/status=99/version=5`，
+`wom_wait_put_records.proc_report_id=757989262755072`。追溯和二维码仍是缺包
+blocker，但当前点击只显示中文依赖提示，不再发起缺失服务请求。
+
 ## 当前状态
 
 本文件是功能验收记录入口。当前已记录一轮平台基础 smoke、组织部门 CRUD 落库验收、组织组管理 CRUD、组织岗位 CRUD、组织岗位关联角色、组织公司 CRUD、组织人员 CRUD、组织人员创建账号、独立用户管理账号、RBAC 权限、基础配置-系统编码、基础配置-系统配置、基础配置低代码自定义字段模型映射、业务模块 53 个入口的 API/layout 与真实浏览器页面 smoke、WOM 制造任务创建入口发现、WOM 列表动作按钮恢复、WOM 生产动作页渲染复验，以及 WOM 制造指令单开始/保持/重启/结束最小路径、完工报工产出明细、投入明细报工、生产请检、下推备料需求、工序开始/结束、活动开始/结束和简易活动报工落库验收。QCS 制造检验申请 `bulkSubmit` 到生效、报告编辑页 `layoutJson/editStates/data`、真实浏览器渲染、结果保存、合格报告生效/WOM 回写、不合格报告生效/WOM 回写、不合格处理单自动生成以及处理单审核生效/WOM 不合格处理回写均已通过。本轮新增 QCS 产品紧急放行专项验收：`124-qcs-inspect-release-runtime-json.sql` 修复 edit/view `layoutJson`，`125-qcs-inspect-release-action-compat.sql` 补齐 PostgreSQL 明细表、监督视图和工作流任务/迁移/权限配置后，真实浏览器公网入口保存草稿 marker `ADP_E2E_20260618_INSP_RELEASE_SAVE_797449` 返回 `200` 并写入 `qcs_inspect_releases/ec_table_info/wfm_task_pending`；随后提交 marker `ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449` 返回 `200`，PostgreSQL 回查确认生成审核待办 `TaskEvent_0fkkhcq` 和 `wf_deal_info.outcome_des=审核`。2026-06-18 补充 WOM 退料/拒收物料列表专项页面测试：`materiaRejectList`、`prePareRejectList`、`batchRejectList`、`batchRejectPrtList` 在公网入口均 `200` 且无 console/page/network/request error；同时定位 WOM “生产过程追溯”按钮指向 `ProcessAnalysis` 模块，真实浏览器请求 `isProdprocessView` 与 `processBatchViewOut` 均返回 `503`，远端元数据未发现 `ProcessAnalysis` 视图/表。同日外出办公后测试地址切到 `100.99.133.43`，该地址 SSH/DB/容器可用，但浏览器直连大静态 bundle 明显慢；本轮页面级证据继续使用同环境公网入口 `222.88.185.146:18080`。已复验组织部门、组织岗位、组织岗位-角色关联、RBAC 权限在新地址对应 PostgreSQL 上真实落库；WorkAppointment 恢复静态 HTML 补齐 `vendors.sesgis.js` 后，`workPlanEdit` 和 `workActionEdit` 不再空白并无前端错误。`136-workappointment-workplan-workflow-config.sql` 补齐 `waps_work_ticket_plans_sv` 的 `main_obj/id/version/valid` 兼容列、`ticketPlan` 工作流配置和待办清理触发器后，作业计划保存并删除清理已通过浏览器页面上下文和 PostgreSQL 落库验收。`148-runtime-visible-business-buttons.sql` 和 `149-workappointment-i18n-resource-fixups.sql` 已让 WorkAppointment 作业计划列表显示中文 `新增/删除`，真实浏览器点击 `新增` 成功打开 `workPlanEdit`，无 console/page/request failure；随后 `WAPSCommon` 补齐列表初始化 `datagridCode`，可见表单保存/删除清理已通过；调整、作废和审批专项验收已通过，见 marker `ADP_E2E_20260619161920_WAPS_WORKPLAN` 和 `ADP_E2E_20260619162733_WAPS_WORKPLAN`。`137-wom-reject-material-workflow-config.sql` 补齐 WOM 退料工作流、DI/SV 兼容视图和待办清理触发器后，备料退料草稿保存、删除清理和提交生效已通过浏览器页面上下文和 PostgreSQL 落库验收；本轮追加车间物料退料发起、接收、生效和车间库存扣减，以及批次退料生效后配料需求/指令/明细回写专项验收。QCS 不合格处理方式已补齐 `degradedRelease(11010)` 和 `return(11011)` 配置，让步放行和拒收两种处理方式均已通过真实前端上下文审核/生效并回写 WOM 批次 `deal_type`。`148-runtime-visible-business-buttons.sql` 已恢复 craftGraph/WTS/WorkAppointment 三个列表的 `layoutJson` 按钮；WorkAppointment、craftGraph 和 WTS 的可见 `新增` 入口真实点击均已通过。craftGraph 工艺基础信息本轮已从可见新增推进到物料参照纯 UI 选择、可见保存、可见修改和可见删除落库 PASS；参照页直接复验显示 `共 118 项` 且能选择物料，修改保存 marker `ADP_E2E_20260619071722_CRAFTGRAPH` 已确认 `craft_basic_infos.version=1`。当前剩余 blocker 收窄为不良数登记、库存/入库相关回写、缺失 `ProcessAnalysis` 模块导致的追溯查询，以及导出入口确认；WTS 动火正常关闭主流程已通过完整前端和落库验收，WOM 退料主链路也已通过三条专项落库验收。

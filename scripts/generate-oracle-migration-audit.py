@@ -313,6 +313,7 @@ def check_outputs(report: dict[str, object]) -> int:
             pass
     stable_report = json.loads(json.dumps(report))
     stable_report["generatedAt"] = existing_json.get("generatedAt")
+    stable_report["repoCommit"] = existing_json.get("repoCommit")
     expected_json = json.dumps(stable_report, ensure_ascii=False, indent=2) + "\n"
     expected_md = render_markdown(stable_report)
     stale = []

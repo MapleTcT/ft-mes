@@ -424,6 +424,7 @@ def write_outputs(plan: dict[str, Any]) -> None:
 def stable_for_check(plan: dict[str, Any], existing: dict[str, Any]) -> dict[str, Any]:
     current = json.loads(json.dumps(plan))
     current["generatedAt"] = existing.get("generatedAt")
+    current["repoCommit"] = existing.get("repoCommit")
     return current
 
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T12:14:33+00:00",
-  "repoCommit": "df880ec235a5b6d8a517010f070f4cd8e3438a0a",
+  "generatedAt": "2026-06-22T12:37:50+00:00",
+  "repoCommit": "35f0491b1112e949c79fa783f6e3ed9a0cf48e7c",
   "findingCount": 958,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -4940,7 +4940,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 87,
+      "line": 100,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -6364,7 +6364,7 @@
     },
     {
       "file": "scripts/generate-oracle-migration-audit.py",
-      "line": 324,
+      "line": 325,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6372,7 +6372,7 @@
     },
     {
       "file": "scripts/generate-oracle-migration-audit.py",
-      "line": 325,
+      "line": 326,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6380,7 +6380,7 @@
     },
     {
       "file": "scripts/generate-oracle-migration-audit.py",
-      "line": 327,
+      "line": 328,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6388,7 +6388,7 @@
     },
     {
       "file": "scripts/generate-oracle-migration-audit.py",
-      "line": 332,
+      "line": 333,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6476,7 +6476,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 324,
+      "line": 325,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6484,7 +6484,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 325,
+      "line": 326,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6492,7 +6492,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 332,
+      "line": 333,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6500,7 +6500,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 336,
+      "line": 337,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6508,7 +6508,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 337,
+      "line": 338,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6516,7 +6516,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 345,
+      "line": 346,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6524,7 +6524,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 349,
+      "line": 350,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6532,7 +6532,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 350,
+      "line": 351,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6540,7 +6540,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 352,
+      "line": 353,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6548,7 +6548,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 356,
+      "line": 357,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6556,7 +6556,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 357,
+      "line": 358,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6564,7 +6564,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 366,
+      "line": 367,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6572,7 +6572,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 370,
+      "line": 371,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6580,7 +6580,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 371,
+      "line": 372,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6588,7 +6588,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 375,
+      "line": 376,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6596,7 +6596,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 378,
+      "line": 379,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6604,7 +6604,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 424,
+      "line": 425,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6612,7 +6612,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 425,
+      "line": 426,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6620,7 +6620,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 428,
+      "line": 429,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6628,7 +6628,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 520,
+      "line": 521,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6636,7 +6636,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 554,
+      "line": 555,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6644,7 +6644,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 556,
+      "line": 557,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6652,7 +6652,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 567,
+      "line": 568,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6660,7 +6660,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 568,
+      "line": 569,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6668,7 +6668,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 569,
+      "line": 570,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6676,7 +6676,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 572,
+      "line": 573,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6684,7 +6684,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 573,
+      "line": 574,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6692,15 +6692,15 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 574,
+      "line": 575,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
-      "excerpt": "f\"- Oracle audit commit matches HEAD：`{summary['oracleAuditRepoCommitMatchesHead']}`。\","
+      "excerpt": "f\"- Oracle audit commit recorded：`{summary['oracleAuditRepoCommitRecorded']}`。\","
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 575,
+      "line": 576,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6708,7 +6708,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 585,
+      "line": 586,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6716,7 +6716,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 589,
+      "line": 590,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6724,7 +6724,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 591,
+      "line": 592,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6732,7 +6732,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 593,
+      "line": 594,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6740,7 +6740,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 595,
+      "line": 596,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6748,7 +6748,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 601,
+      "line": 602,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6756,7 +6756,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 606,
+      "line": 607,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6764,7 +6764,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 612,
+      "line": 613,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6772,7 +6772,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 614,
+      "line": 615,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6780,7 +6780,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 640,
+      "line": 642,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6788,7 +6788,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 648,
+      "line": 650,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6796,7 +6796,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 650,
+      "line": 652,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -6804,7 +6804,7 @@
     },
     {
       "file": "scripts/generate-oracle-replacement-status.py",
-      "line": 655,
+      "line": 657,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

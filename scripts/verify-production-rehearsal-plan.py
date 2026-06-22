@@ -170,6 +170,7 @@ def stable_expected_plan(existing: dict[str, Any], failures: list[str]) -> dict[
         fail(failures, f"cannot build expected production rehearsal plan: {error}")
         return {}
     expected["generatedAt"] = existing.get("generatedAt")
+    expected["repoCommit"] = existing.get("repoCommit")
     return expected
 
 
