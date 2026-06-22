@@ -7,18 +7,18 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-06-22T11:35:22+00:00` |
-| Repo Commit | `d06ae37a4bd875291d4009f640f905be17c53b30` |
+| Generated At | `2026-06-22T12:15:05+00:00` |
+| Repo Commit | `df880ec235a5b6d8a517010f070f4cd8e3438a0a` |
 | Database Target | `PostgreSQL` |
 | Total Files | `327` |
-| Total Bytes | `24781463` |
+| Total Bytes | `24781623` |
 
 ## Categories
 
 | Category | Files | Bytes | Description |
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42767 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
-| `nginx-runtime-config` | 2 | 10117 | Nginx runtime configuration used by the Docker frontend gateway. |
+| `nginx-runtime-config` | 2 | 10277 | Nginx runtime configuration used by the Docker frontend gateway. |
 | `postgres-init-sql` | 171 | 24107238 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 8 | 107237 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 21 | 82088 | Source or template files used to rebuild runtime patch payloads. |
@@ -73,7 +73,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 826 | `f65fbed840930370267deefda87bd8d76201fcd19fafdcc117ecba8697a97f88` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1710 | `28e62fb82a6827d073a3fbc55eb7c6964d6b3b8bac7a99602bab93891e3f2dff` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 644 | `ddf48db6f359b143fe3a2eff3aa60d8c278fb0532754ed96651facd293046ff6` |
-| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 9897 | `c57dfc5f3b9660c78035c137c59d96f0ca69ea116c53acf6dafa0e0815a972d9` |
+| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 10057 | `7436e19df73801a25f887a3c611a78c7fa2f5a75c2894e3c22ba4eae227dcc58` |
 | `nginx-runtime-config` | `deploy/docker/nginx/gzip.conf` | 220 | `605130384f1677fdd26d0ea7514d87b8ad2619c794548a3a1cf200a3aa0d0a64` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/001-adp-postgres-compat.sql` | 4430 | `cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/002-sms-jincang.sql` | 612 | `43007e1051a191caa4b6eb1238520600530c2605258ce166d0b00cdd0a32e598` |
