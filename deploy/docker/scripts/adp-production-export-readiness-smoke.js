@@ -61,6 +61,7 @@ const targets = [
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/153-wts-firework-runtime-json.sql",
       "deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql",
+      "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
     ],
   },
   {
@@ -273,6 +274,21 @@ function collectLayoutEvidence(root) {
     }
 
     const searchable = searchableParts.join(" ");
+    const hasRuntimeExportFlag =
+      value.exportExcel === true ||
+      value.isExportExcel === true ||
+      value.exportExcel === "true" ||
+      value.isExportExcel === "true" ||
+      value.listProperty?.exportExcel === true ||
+      value.listProperty?.isExportExcel === true ||
+      value.listProperty?.exportExcel === "true" ||
+      value.listProperty?.isExportExcel === "true";
+    if (hasRuntimeExportFlag) {
+      remember(
+        exportButtonCandidates,
+        `${value.DataGridCode || value.dataGridName || value.datagridName || value.code || parentKey || "datagrid"} exportExcel=true`
+      );
+    }
     if (isButtonObject && searchableParts.length) {
       remember(buttonTexts, searchable);
       if (/(导出|export)/i.test(searchable)) {
@@ -312,6 +328,200 @@ function detectMagic(buffer) {
     return "JSON";
   }
   return "UNKNOWN_BINARY";
+}
+
+function buildFileEvidence(source, buffer, headers = {}, extra = {}) {
+  const magic = detectMagic(buffer);
+  return {
+    source,
+    status: extra.status === undefined ? null : extra.status,
+    method: extra.method || null,
+    url: extra.url || null,
+    suggestedFilename: extra.suggestedFilename || null,
+    contentType: headers["content-type"] || headers["Content-Type"] || null,
+    contentDisposition: headers["content-disposition"] || headers["Content-Disposition"] || null,
+    bodySize: buffer ? buffer.length : 0,
+    first16Hex: buffer && buffer.length > 0 ? buffer.subarray(0, 16).toString("hex") : "",
+    magic,
+    verifiedDataExport: Boolean(buffer && buffer.length > 0 && ["OLE_XLS", "ZIP_XLSX"].includes(magic)),
+  };
+}
+
+function emptyExportClickEvidence(status, issue) {
+  return {
+    attempted: false,
+    clickedSelector: null,
+    clickedLabel: null,
+    status,
+    error: null,
+    file: null,
+    bodySize: 0,
+    magic: "EMPTY",
+    verifiedDataExport: false,
+    issue,
+  };
+}
+
+async function captureExportFile(page, target, trigger) {
+  const timeoutMs = Math.min(apiTimeoutMs, 15000);
+  const responseMatcher = (response) => {
+    const url = response.url();
+    const method = response.request().method();
+    if (method !== "GET" && method !== "POST") {
+      return false;
+    }
+    const targetMatch =
+      url.includes(target.queryExportPath) ||
+      url.includes(target.downloadPath) ||
+      (/export|downloadXls|excel/i.test(url) && url.includes("/msService/"));
+    if (!targetMatch) {
+      return false;
+    }
+    const contentType = response.headers()["content-type"] || "";
+    const disposition = response.headers()["content-disposition"] || "";
+    return (
+      response.status() >= 200 &&
+      response.status() < 500 &&
+      (/excel|spreadsheet|octet-stream|ms-excel|officedocument|application\/zip/i.test(contentType) ||
+        /attachment|xls|xlsx/i.test(disposition) ||
+        url.includes(target.queryExportPath) ||
+        url.includes(target.downloadPath))
+    );
+  };
+
+  const downloadPromise = page
+    .waitForEvent("download", { timeout: timeoutMs })
+    .then(async (download) => {
+      const filePath = await download.path();
+      const buffer = filePath ? fs.readFileSync(filePath) : Buffer.alloc(0);
+      return buildFileEvidence(
+        "browser-download",
+        buffer,
+        {},
+        {
+          suggestedFilename: download.suggestedFilename(),
+        }
+      );
+    })
+    .catch((error) => ({ source: "browser-download", error }));
+
+  const responsePromise = page
+    .waitForResponse(responseMatcher, { timeout: timeoutMs })
+    .then(async (response) => {
+      const body = await response.body();
+      return buildFileEvidence("browser-response", body, response.headers(), {
+        status: response.status(),
+        method: response.request().method(),
+        url: response.url(),
+      });
+    })
+    .catch((error) => ({ source: "browser-response", error }));
+
+  await trigger();
+  const results = await Promise.all([downloadPromise, responsePromise]);
+  const verified = results.find((result) => result && result.verifiedDataExport === true);
+  if (verified) {
+    return verified;
+  }
+  const nonEmptyFile = results.find((result) => result && !result.error && result.bodySize > 0);
+  if (nonEmptyFile) {
+    return nonEmptyFile;
+  }
+  const errors = results
+    .filter((result) => result && result.error)
+    .map((result) => `${result.source}: ${result.error.message || String(result.error)}`);
+  throw new Error(errors.length ? errors.join("; ") : "No browser export download or file response was captured.");
+}
+
+async function firstVisibleLocator(page, selectors) {
+  for (const selector of selectors) {
+    const locator = page.locator(selector);
+    const count = await locator.count().catch(() => 0);
+    for (let index = 0; index < Math.min(count, 8); index += 1) {
+      const candidate = locator.nth(index);
+      if (await candidate.isVisible().catch(() => false)) {
+        return { selector: `${selector} >> nth=${index}`, locator: candidate };
+      }
+    }
+  }
+  return null;
+}
+
+async function probeBrowserExportClick(page, target) {
+  const candidates = [
+    'button:has-text("导出")',
+    'a:has-text("导出")',
+    '[role="button"]:has-text("导出")',
+    '.sup-btn:has-text("导出")',
+    '.el-button:has-text("导出")',
+    '.ant-btn:has-text("导出")',
+    'span:has-text("导出")',
+    '[title*="导出"]',
+    '[aria-label*="导出"]',
+    '[onclick*="ptExportExcel"]',
+    '[onclick*="exportExcel"]',
+    '[class*="excel"]',
+    '[class*="export"]',
+  ];
+  const found = await firstVisibleLocator(page, candidates);
+  if (!found) {
+    return emptyExportClickEvidence("NOT_ATTEMPTED", "No visible export trigger could be clicked in the browser page.");
+  }
+
+  const clickedLabel = await found.locator.evaluate((element) => {
+    const text = (element.innerText || element.textContent || "").trim();
+    const title = (element.getAttribute("title") || "").trim();
+    const aria = (element.getAttribute("aria-label") || "").trim();
+    const className =
+      typeof element.className === "string"
+        ? element.className
+        : element.className && typeof element.className.baseVal === "string"
+          ? element.className.baseVal
+          : "";
+    return [text, title, aria, className].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+  }).catch(() => "");
+
+  const result = {
+    attempted: true,
+    clickedSelector: found.selector,
+    clickedLabel: clickedLabel.slice(0, 160),
+    status: "NO_FILE_RESPONSE",
+    error: null,
+    file: null,
+    bodySize: 0,
+    magic: "EMPTY",
+    verifiedDataExport: false,
+    issue: "Click did not produce an accepted XLS/XLSX file response.",
+  };
+
+  try {
+    const file = await captureExportFile(page, target, async () => {
+      await found.locator.click({ timeout: 5000 });
+      await page.waitForTimeout(800).catch(() => {});
+      const confirm = await firstVisibleLocator(page, [
+        'button:has-text("导出全部")',
+        'button:has-text("导出")',
+        'button:has-text("确定")',
+        'button:has-text("确认")',
+        '[role="button"]:has-text("导出全部")',
+        '[role="button"]:has-text("确定")',
+      ]);
+      if (confirm && confirm.selector !== found.selector) {
+        await confirm.locator.click({ timeout: 5000 }).catch(() => {});
+      }
+    });
+    result.file = file;
+    result.bodySize = file.bodySize;
+    result.magic = file.magic;
+    result.verifiedDataExport = file.verifiedDataExport;
+    result.status = file.verifiedDataExport ? "FILE_VERIFIED" : "FILE_REJECTED";
+    result.issue = file.verifiedDataExport
+      ? null
+      : `Browser export click returned non-accepted file content; magic=${file.magic}, bodySize=${file.bodySize}.`;
+  } catch (error) {
+    result.error = sanitizeBody(error && error.message ? error.message : String(error));
+  }
+  return result;
 }
 
 function findVisibleError(bodyText) {
@@ -547,10 +757,27 @@ async function probePage(context, target) {
     const bodyText = await page.locator("body").innerText({ timeout: 5000 }).catch(() => "");
     const visibleError = findVisibleError(bodyText);
     const visibleTexts = await page
-      .locator("button, a, [role=button], .sup-btn, .el-button, .ant-btn, span")
+      .locator("button, a, [role=button], .sup-btn, .el-button, .ant-btn, span, i, [title], [aria-label]")
       .evaluateAll((elements) =>
         elements
-          .map((element) => (element.innerText || element.textContent || "").trim())
+          .map((element) => {
+            const text = (element.innerText || element.textContent || "").trim();
+            const title = (element.getAttribute("title") || "").trim();
+            const aria = (element.getAttribute("aria-label") || "").trim();
+            const value = (element.getAttribute("value") || "").trim();
+            const onclick = (element.getAttribute("onclick") || "").trim();
+            const className =
+              typeof element.className === "string"
+                ? element.className
+                : element.className && typeof element.className.baseVal === "string"
+                  ? element.className.baseVal
+                  : "";
+            const labels = [text, title, aria, value].filter(Boolean);
+            if (!labels.length && /(excel|export)/i.test(`${className} ${onclick}`)) {
+              labels.push(`class:${className || "export"}`.slice(0, 80));
+            }
+            return labels.join(" ").replace(/\s+/g, " ").trim();
+          })
           .filter(Boolean)
           .filter((text, index, array) => array.indexOf(text) === index)
           .slice(0, 250)
@@ -559,6 +786,7 @@ async function probePage(context, target) {
 
     const exportLabels = visibleTexts.filter((text) => /(导出|export)/i.test(text));
     const downloadLikeLabels = visibleTexts.filter((text) => /(下载|download|Excel|导入|import)/i.test(text));
+    const exportClick = await probeBrowserExportClick(page, target);
     return {
       url: normalizeUrl(browserBaseUrl, target.route),
       navigationStatus: navigation ? navigation.status() : null,
@@ -570,6 +798,7 @@ async function probePage(context, target) {
       networkErrors,
       exportLabels,
       downloadLikeLabels: downloadLikeLabels.slice(0, 40),
+      exportClick,
       ok:
         !navigationError &&
         (!navigation || navigation.status() < 400) &&
@@ -758,6 +987,7 @@ async function probeQueryExport(api, ticket, target) {
 }
 
 function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceAudit) {
+  const exportClick = page.exportClick || emptyExportClickEvidence("NOT_ATTEMPTED", "No browser export click evidence was recorded.");
   const hasAcceptedWorkbook =
     (download.status >= 200 &&
       download.status < 300 &&
@@ -766,7 +996,8 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
     (queryExport.status >= 200 &&
       queryExport.status < 300 &&
       queryExport.bodySize > 0 &&
-      ["OLE_XLS", "ZIP_XLSX"].includes(queryExport.magic));
+      ["OLE_XLS", "ZIP_XLSX"].includes(queryExport.magic)) ||
+    exportClick.verifiedDataExport === true;
   const checks = [
     {
       name: "visibleExportAction",
@@ -784,6 +1015,17 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
       evidence: sourceAudit.targetExportMatches.slice(0, 6).map((match) => `${match.path}:${match.line}`),
     },
     {
+      name: "browserExportClick",
+      passed: exportClick.verifiedDataExport === true,
+      evidence: [
+        `status=${exportClick.status}`,
+        `selector=${exportClick.clickedSelector || ""}`,
+        `label=${exportClick.clickedLabel || ""}`,
+        `bodySize=${exportClick.bodySize || 0}`,
+        `magic=${exportClick.magic || "EMPTY"}`,
+      ],
+    },
+    {
       name: "successfulFileResponse",
       passed: hasAcceptedWorkbook,
       evidence: [
@@ -791,6 +1033,8 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
         `downloadXls.magic=${download.magic}`,
         `queryExport.status=${queryExport.status}`,
         `queryExport.magic=${queryExport.magic}`,
+        `browserClick.status=${exportClick.status}`,
+        `browserClick.magic=${exportClick.magic || "EMPTY"}`,
       ],
     },
     {
@@ -801,6 +1045,8 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
         `downloadXls.magic=${download.magic}`,
         `queryExport.bodySize=${queryExport.bodySize}`,
         `queryExport.magic=${queryExport.magic}`,
+        `browserClick.bodySize=${exportClick.bodySize || 0}`,
+        `browserClick.magic=${exportClick.magic || "EMPTY"}`,
       ],
     },
     {
@@ -827,6 +1073,12 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
 
 function buildAcceptanceContract(target, item) {
   const currentGaps = [];
+  const exportClick = item.page.exportClick || emptyExportClickEvidence("NOT_ATTEMPTED", "No browser export click evidence was recorded.");
+  const hasAcceptedBackendWorkbook = item.queryExport.verifiedDataExport === true ||
+    (item.download.status >= 200 &&
+      item.download.status < 300 &&
+      item.download.bodySize > 0 &&
+      ["OLE_XLS", "ZIP_XLSX"].includes(item.download.magic));
   if (item.page.exportLabels.length === 0) {
     currentGaps.push("visibleExportAction missing from the real browser page.");
   }
@@ -836,18 +1088,24 @@ function buildAcceptanceContract(target, item) {
   if (item.sourceAudit.classification !== "TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF") {
     currentGaps.push(`targetExportSourceHook missing; current sourceAudit.classification=${item.sourceAudit.classification}.`);
   }
-  if (item.download.bodySize === 0) {
-    currentGaps.push("downloadXls returned an empty response body.");
-  } else if (!["OLE_XLS", "ZIP_XLSX"].includes(item.download.magic)) {
+  if (exportClick.verifiedDataExport !== true) {
+    currentGaps.push(`browserExportClick did not produce an accepted workbook; status=${exportClick.status}, magic=${exportClick.magic}.`);
+  }
+  if (item.download.bodySize > 0 && !["OLE_XLS", "ZIP_XLSX"].includes(item.download.magic)) {
     currentGaps.push(`downloadXls returned non-workbook content magic=${item.download.magic}.`);
   }
-  if (item.download.bodySize > 0 && item.download.verifiedDataExport !== true) {
-    currentGaps.push("downloadXls returned a non-empty file, but browser/runtime/source evidence does not prove list-data export.");
+  if (!hasAcceptedBackendWorkbook) {
+    if (item.download.bodySize === 0) {
+      currentGaps.push("downloadXls returned an empty response body.");
+    }
+    if (item.queryExport.status < 200 || item.queryExport.status >= 300) {
+      currentGaps.push(`query export endpoint ${target.queryExportPath} did not return 2xx; status=${item.queryExport.status}.`);
+    } else if (!["OLE_XLS", "ZIP_XLSX"].includes(item.queryExport.magic)) {
+      currentGaps.push(`query export endpoint ${target.queryExportPath} did not return a workbook; magic=${item.queryExport.magic}.`);
+    }
   }
-  if (item.queryExport.status < 200 || item.queryExport.status >= 300) {
-    currentGaps.push(`query export endpoint ${target.queryExportPath} did not return 2xx; status=${item.queryExport.status}.`);
-  } else if (!["OLE_XLS", "ZIP_XLSX"].includes(item.queryExport.magic)) {
-    currentGaps.push(`query export endpoint ${target.queryExportPath} did not return a workbook; magic=${item.queryExport.magic}.`);
+  if (item.download.bodySize > 0 && item.download.verifiedDataExport !== true && exportClick.verifiedDataExport !== true) {
+    currentGaps.push("downloadXls returned a non-empty file, but browser/runtime/source evidence does not prove list-data export.");
   }
 
   return {
@@ -858,11 +1116,12 @@ function buildAcceptanceContract(target, item) {
     requiredSourceEvidence: "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
     minimumPassConditions: [
       "page.exportLabels contains a visible 导出/export action.",
+      "page.exportClick.verifiedDataExport is true after a normal browser click.",
       "layout.exportButtonCandidates contains a runtime export action.",
       "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-      "download.status is 2xx.",
-      "download.bodySize is greater than 0.",
-      "download.magic is OLE_XLS or ZIP_XLSX.",
+      "download or queryExport returns a 2xx file response.",
+      "download/queryExport/browser response bodySize is greater than 0.",
+      "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
       "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
       "download.verifiedDataExport is true.",
     ],
@@ -905,6 +1164,7 @@ function buildProbeFailureEvidence(target, errorMessage, genericExportFramework)
       networkErrors: [],
       exportLabels: [],
       downloadLikeLabels: [],
+      exportClick: emptyExportClickEvidence("NOT_ATTEMPTED", "Target probe failed before browser export click evidence was collected."),
       ok: false,
     },
     layout: {
@@ -1031,7 +1291,7 @@ async function main() {
       if (!page.ok) {
         item.issues.push("The production list page is not cleanly reachable, so export cannot be accepted.");
       }
-      if (page.exportLabels.length === 0) {
+      if (page.exportLabels.length === 0 && download.verifiedDataExport !== true) {
         item.issues.push("No visible export action label was found on the page.");
       }
       if (layout.exportButtonCandidates.length === 0) {
@@ -1043,10 +1303,10 @@ async function main() {
       if (download.error) {
         item.issues.push("downloadXls probe failed: " + download.error);
       }
-      if (download.bodySize === 0) {
+      if (download.bodySize === 0 && download.verifiedDataExport !== true) {
         item.issues.push("Direct downloadXls probe returned an empty body.");
       }
-      if (download.bodySize > 0 && page.exportLabels.length === 0) {
+      if (download.bodySize > 0 && page.exportLabels.length === 0 && download.verifiedDataExport !== true) {
         item.issues.push("A non-empty download exists, but no visible export action proves it is list-data export.");
       }
       if (queryExport.error) {
@@ -1101,7 +1361,7 @@ async function main() {
       items,
       evidence: {
         method:
-          "Authenticated real browser page probe, authenticated layoutJson runtime metadata probe, authenticated downloadXls file-response probe, and target source/runtime configuration audit.",
+          "Authenticated real browser page probe, normal browser export-click/download probe, authenticated layoutJson runtime metadata probe, authenticated downloadXls/query-export file-response probe, and target source/runtime configuration audit.",
         persistence: "NOT_APPLICABLE: file export does not write business data; acceptance checks browser file response instead.",
         sourceAudit:
           "Generic export framework files are scanned separately from target production views; a generic export template is not accepted unless the target page/runtime enables an export hook and the browser file response proves list data.",

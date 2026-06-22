@@ -8,8 +8,8 @@ It does not mark the system ready for production.
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-06-22T10:37:46+00:00` |
-| Repo Commit | `8a072c75a795c0027ed53a52a9a74e3ea3cbf794` |
+| Generated At | `2026-06-22T11:28:19+00:00` |
+| Repo Commit | `d06ae37a4bd875291d4009f640f905be17c53b30` |
 | Database Target | `PostgreSQL` |
 | Status | `REHEARSAL_BLOCKED` |
 | Test SSH Host | `100.99.133.43` |
@@ -27,16 +27,16 @@ It does not mark the system ready for production.
 | --- | --- | --- | --- | --- |
 | `businessDependencyReadiness` | `metadata/business-dependency-readiness-smoke.json` | `2026-06-22T01:36:29.672Z` | `BLOCKED` | baseUrl=http://100.99.133.43:18080, blocked=2, dependencies=2, ready=0, sshHost=100.99.133.43 |
 | `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `2026-06-20T16:05:25Z` | `BLOCKED_NO_IMPLEMENTATION_CANDIDATE` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=2, candidateDependencies=0, filesVisited=58889, nestedArchivesScanned=2139 |
-| `cutoverGate` | `metadata/production-cutover-gate.json` | `2026-06-22T07:40:40+00:00` | `NOT_READY_FOR_PRODUCTION_CUTOVER` | blocked=1, notStarted=0, planned=8, productionBacklogItems=9, productionBlockers=6, ready=0, totalGates=9 |
+| `cutoverGate` | `metadata/production-cutover-gate.json` | `2026-06-22T11:28:19+00:00` | `NOT_READY_FOR_PRODUCTION_CUTOVER` | blocked=1, notStarted=0, planned=8, productionBacklogItems=9, productionBlockers=6, ready=0, totalGates=9 |
 | `keycloakJwtSmoke` | `metadata/keycloak-jwt-runtime-smoke.json` | `2026-06-21T00:09:24.536Z` | `PASS` | checks=19, clientScopes=10, expectedClients=2, fail=0, gatewayMenuTargets=374, keycloakPublicKeySha256Prefix=9e9cea84527f841b, nacosHealthyKeycloakHosts=2, nacosJwtSha256Prefix=9e9cea84527f841b, pass=19, status=PASS, suposMappers=17 |
-| `migrationReadiness` | `metadata/production-migration-readiness.json` | `2026-06-22T07:40:40+00:00` | `NOT_READY_FOR_PRODUCTION_MIGRATION` | blocked=1, notStarted=0, planned=8, ready=0, totalTracks=9 |
+| `migrationReadiness` | `metadata/production-migration-readiness.json` | `2026-06-22T11:28:19+00:00` | `NOT_READY_FOR_PRODUCTION_MIGRATION` | blocked=1, notStarted=0, planned=8, ready=0, totalTracks=9 |
 | `minioRuntimeSmoke` | `metadata/minio-runtime-smoke.json` | `2026-06-21T00:09:14.970Z` | `PASS` | bucketCount=2, bucketsWithObjects=2, fail=0, inspectedBucketCount=2, pass=8, status=PASS, totalChecks=8, totalObjects=31, totalSizeBytes=104285 |
 | `nacosConfigSmoke` | `metadata/nacos-config-drift-smoke.json` | `2026-06-21T00:09:15.729Z` | `PASS` | criticalChecks=20, criticalFail=0, criticalPass=20, dataIds=44, drifted=27, exactMatches=17, expectedServices=18, failedServices=0, healthyServices=18, missingLocal=0, missingRemote=0, nacosServiceCount=91, oracleResidueFiles=0, remoteFetched=44, status=PASS |
 | `platformValidationSmoke` | `metadata/platform-validation-smoke.json` | `2026-06-21T12:13:01.954Z` | `PASS` | baseUrl=http://100.99.133.43:18080, browserBaseUrl=http://100.99.133.43:18080, failed=0, ok=True, passed=6, total=6 |
 | `postgresRuntimeSmoke` | `metadata/postgres-runtime-smoke.json` | `2026-06-21T00:09:10.911Z` | `PASS` | databaseSizeBytes=590593383, expectedColumns=15, expectedIndexes=8, expectedTables=32, fail=0, missingExpectedTables=0, pass=8, presentExpectedColumns=15, presentExpectedIndexes=8, presentExpectedTables=32, publicTableCount=1474, publicViewCount=150, status=PASS, totalChecks=8 |
 | `productionBacklog` | `metadata/production-module-backlog.json` | `2026-06-22T01:27:49.172Z` | `BLOCKED` | blocked=9, failBacklog=0, totalItems=9 |
 | `productionBlockers` | `metadata/production-module-blockers.json` | `2026-06-21T15:13:16+00:00` | `BLOCKED` | blockedCases=6, blockers=6 |
-| `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `2026-06-22T01:50:35.404Z` | `BLOCKED` | actionRequired=1, blocked=5, pagePass=6, ready=0, runtimeExportActions=0, targets=6, verifiedDataExports=0, visibleExportActions=0 |
+| `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `2026-06-22T11:24:47.554Z` | `BLOCKED` | actionRequired=0, blocked=5, pagePass=6, ready=1, runtimeExportActions=1, targets=6, verifiedDataExports=1, visibleExportActions=1 |
 | `testEnvironmentSmoke` | `metadata/test-environment-smoke.json` | `2026-06-21T01:28:43.256Z` | `PASS` | baseUrl=http://100.99.133.43:18080, expectedContainerCount=6, fail=0, pass=9, runningExpectedContainers=6, sshHost=100.99.133.43, totalChecks=9 |
 
 ## Track Checklist

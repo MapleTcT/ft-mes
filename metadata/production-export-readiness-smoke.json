@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T01:50:35.404Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-06-22T11:24:47.554Z",
+  "repoCommit": "d06ae37a4bd875291d4009f640f905be17c53b30",
   "database": "PostgreSQL",
   "module": "production",
   "caseId": "PROD-023",
@@ -19,14 +19,14 @@
     "status": "BLOCKED",
     "targets": 6,
     "pagePass": 6,
-    "visibleExportActions": 0,
-    "runtimeExportActions": 0,
+    "visibleExportActions": 1,
+    "runtimeExportActions": 1,
     "nonEmptyDownloads": 1,
     "backendQueryExportWorkbooks": 1,
     "backendQueryExportErrors": 4,
-    "verifiedDataExports": 0,
-    "ready": 0,
-    "actionRequired": 1,
+    "verifiedDataExports": 1,
+    "ready": 1,
+    "actionRequired": 0,
     "blocked": 5
   },
   "items": [
@@ -46,6 +46,18 @@
         "networkErrors": [],
         "exportLabels": [],
         "downloadLikeLabels": [],
+        "exportClick": {
+          "attempted": false,
+          "clickedSelector": null,
+          "clickedLabel": null,
+          "status": "NOT_ATTEMPTED",
+          "error": null,
+          "file": null,
+          "bodySize": 0,
+          "magic": "EMPTY",
+          "verifiedDataExport": false,
+          "issue": "No visible export trigger could be clicked in the browser page."
+        },
         "ok": true
       },
       "layout": {
@@ -100,13 +112,26 @@
               "evidence": []
             },
             {
+              "name": "browserExportClick",
+              "passed": false,
+              "evidence": [
+                "status=NOT_ATTEMPTED",
+                "selector=",
+                "label=",
+                "bodySize=0",
+                "magic=EMPTY"
+              ]
+            },
+            {
               "name": "successfulFileResponse",
               "passed": false,
               "evidence": [
                 "downloadXls.status=200",
                 "downloadXls.magic=EMPTY",
                 "queryExport.status=500",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.status=NOT_ATTEMPTED",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -116,7 +141,9 @@
                 "downloadXls.bodySize=0",
                 "downloadXls.magic=EMPTY",
                 "queryExport.bodySize=52",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.bodySize=0",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -135,6 +162,7 @@
             "visibleExportAction is not proven",
             "runtimeExportAction is not proven",
             "targetExportSourceHook is not proven",
+            "browserExportClick is not proven",
             "successfulFileResponse is not proven",
             "nonEmptyWorkbook is not proven",
             "backendQueryExport is not proven"
@@ -389,11 +417,12 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
@@ -401,6 +430,7 @@
           "visibleExportAction missing from the real browser page.",
           "runtimeExportAction missing from layoutJson metadata.",
           "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
+          "browserExportClick did not produce an accepted workbook; status=NOT_ATTEMPTED, magic=EMPTY.",
           "downloadXls returned an empty response body.",
           "query export endpoint /msService/WOM/produceTask/produceTask/makeTaskList-query did not return 2xx; status=500."
         ],
@@ -416,6 +446,7 @@
         "Export acceptance check failed: visibleExportAction is not proven",
         "Export acceptance check failed: runtimeExportAction is not proven",
         "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: browserExportClick is not proven",
         "Export acceptance check failed: successfulFileResponse is not proven",
         "Export acceptance check failed: nonEmptyWorkbook is not proven",
         "Export acceptance check failed: backendQueryExport is not proven",
@@ -443,6 +474,18 @@
           "下载模板",
           "导入Excel"
         ],
+        "exportClick": {
+          "attempted": false,
+          "clickedSelector": null,
+          "clickedLabel": null,
+          "status": "NOT_ATTEMPTED",
+          "error": null,
+          "file": null,
+          "bodySize": 0,
+          "magic": "EMPTY",
+          "verifiedDataExport": false,
+          "issue": "No visible export trigger could be clicked in the browser page."
+        },
         "ok": true
       },
       "layout": {
@@ -491,13 +534,26 @@
               "evidence": []
             },
             {
+              "name": "browserExportClick",
+              "passed": false,
+              "evidence": [
+                "status=NOT_ATTEMPTED",
+                "selector=",
+                "label=",
+                "bodySize=0",
+                "magic=EMPTY"
+              ]
+            },
+            {
               "name": "successfulFileResponse",
               "passed": true,
               "evidence": [
                 "downloadXls.status=200",
                 "downloadXls.magic=OLE_XLS",
                 "queryExport.status=200",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.status=NOT_ATTEMPTED",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -507,7 +563,9 @@
                 "downloadXls.bodySize=8704",
                 "downloadXls.magic=OLE_XLS",
                 "queryExport.bodySize=205",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.bodySize=0",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -526,6 +584,7 @@
             "visibleExportAction is not proven",
             "runtimeExportAction is not proven",
             "targetExportSourceHook is not proven",
+            "browserExportClick is not proven",
             "backendQueryExport is not proven"
           ]
         },
@@ -686,11 +745,12 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
@@ -698,8 +758,8 @@
           "visibleExportAction missing from the real browser page.",
           "runtimeExportAction missing from layoutJson metadata.",
           "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
-          "downloadXls returned a non-empty file, but browser/runtime/source evidence does not prove list-data export.",
-          "query export endpoint /msService/RM/formula/formula/batchFormulaList-query did not return a workbook; magic=JSON."
+          "browserExportClick did not produce an accepted workbook; status=NOT_ATTEMPTED, magic=EMPTY.",
+          "downloadXls returned a non-empty file, but browser/runtime/source evidence does not prove list-data export."
         ],
         "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
       },
@@ -713,6 +773,7 @@
         "Export acceptance check failed: visibleExportAction is not proven",
         "Export acceptance check failed: runtimeExportAction is not proven",
         "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: browserExportClick is not proven",
         "Export acceptance check failed: backendQueryExport is not proven",
         "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
         "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
@@ -733,8 +794,35 @@
         "pageErrors": [],
         "requestFailures": [],
         "networkErrors": [],
-        "exportLabels": [],
+        "exportLabels": [
+          "导出",
+          "class:sup-btn-icon sup-btn-export"
+        ],
         "downloadLikeLabels": [],
+        "exportClick": {
+          "attempted": true,
+          "clickedSelector": "span:has-text(\"导出\") >> nth=0",
+          "clickedLabel": "导出 sup-datagrid-button-item",
+          "status": "FILE_VERIFIED",
+          "error": null,
+          "file": {
+            "source": "browser-download",
+            "status": null,
+            "method": null,
+            "url": null,
+            "suggestedFilename": "WTS_workPermitList.xls",
+            "contentType": null,
+            "contentDisposition": null,
+            "bodySize": 8704,
+            "first16Hex": "d0cf11e0a1b11ae10000000000000000",
+            "magic": "OLE_XLS",
+            "verifiedDataExport": true
+          },
+          "bodySize": 8704,
+          "magic": "OLE_XLS",
+          "verifiedDataExport": true,
+          "issue": null
+        },
         "ok": true
       },
       "layout": {
@@ -745,13 +833,17 @@
         "code": 200,
         "message": "操作成功",
         "hasPayload": true,
-        "exportButtonCandidates": [],
+        "exportButtonCandidates": [
+          "components exportExcel=true",
+          "listProperty exportExcel=true"
+        ],
         "downloadXlsFields": [
           "/msService/WTS/workPermit/workPermit/downloadXls"
         ],
         "buttonTexts": [
           "workPermitList_add_add_WTS_1.0.0_workPermit_workPermitList 新增 新增 WTS_1.0.0_workPermit_workPermitList_BUTTON_add",
-          "workPermitList_edit_modify_WTS_1.0.0_workPermit_workPermitList 修改 修改 WTS_1.0.0_workPermit_workPermitList_BUTTON_edit"
+          "workPermitList_edit_modify_WTS_1.0.0_workPermit_workPermitList 修改 修改 WTS_1.0.0_workPermit_workPermitList_BUTTON_edit",
+          "/msService/WTS/workPermit/workPermit/workPermitList-query workPermitList_export_exportExcel_WTS_1.0.0_workPermit_workPermitList 导出 导出 WTS_1.0.0_workPermit_workPermitList_BUTTON_exportExcel"
         ]
       },
       "download": {
@@ -765,22 +857,44 @@
         "first16Hex": "",
         "magic": "EMPTY",
         "verification": {
-          "verifiedDataExport": false,
+          "verifiedDataExport": true,
           "checks": [
             {
               "name": "visibleExportAction",
-              "passed": false,
-              "evidence": []
+              "passed": true,
+              "evidence": [
+                "导出",
+                "class:sup-btn-icon sup-btn-export"
+              ]
             },
             {
               "name": "runtimeExportAction",
-              "passed": false,
-              "evidence": []
+              "passed": true,
+              "evidence": [
+                "components exportExcel=true",
+                "listProperty exportExcel=true"
+              ]
             },
             {
               "name": "targetExportSourceHook",
-              "passed": false,
-              "evidence": []
+              "passed": true,
+              "evidence": [
+                "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql:3",
+                "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql:67",
+                "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql:189",
+                "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql:190"
+              ]
+            },
+            {
+              "name": "browserExportClick",
+              "passed": true,
+              "evidence": [
+                "status=FILE_VERIFIED",
+                "selector=span:has-text(\"导出\") >> nth=0",
+                "label=导出 sup-datagrid-button-item",
+                "bodySize=8704",
+                "magic=OLE_XLS"
+              ]
             },
             {
               "name": "successfulFileResponse",
@@ -789,7 +903,9 @@
                 "downloadXls.status=200",
                 "downloadXls.magic=EMPTY",
                 "queryExport.status=200",
-                "queryExport.magic=OLE_XLS"
+                "queryExport.magic=OLE_XLS",
+                "browserClick.status=FILE_VERIFIED",
+                "browserClick.magic=OLE_XLS"
               ]
             },
             {
@@ -799,7 +915,9 @@
                 "downloadXls.bodySize=0",
                 "downloadXls.magic=EMPTY",
                 "queryExport.bodySize=8704",
-                "queryExport.magic=OLE_XLS"
+                "queryExport.magic=OLE_XLS",
+                "browserClick.bodySize=8704",
+                "browserClick.magic=OLE_XLS"
               ]
             },
             {
@@ -814,14 +932,10 @@
               ]
             }
           ],
-          "failureReasons": [
-            "visibleExportAction is not proven",
-            "runtimeExportAction is not proven",
-            "targetExportSourceHook is not proven"
-          ]
+          "failureReasons": []
         },
-        "verifiedDataExport": false,
-        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+        "verifiedDataExport": true,
+        "issue": null
       },
       "queryExport": {
         "method": "POST",
@@ -872,6 +986,10 @@
           {
             "path": "deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql",
             "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "exists": true
           }
         ],
         "downloadTemplateMatches": [
@@ -886,9 +1004,66 @@
               "importMainXls"
             ],
             "snippet": "...ARE runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"WTS.viewtitle.randon1574731248071\",\"url\":\"/msService/WTS/workPermit/workPermit/workPermitList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"quer..."
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 35,
+            "matched": [
+              "/msService/WTS/workPermit/workPermit/downloadXls",
+              "downloadXls"
+            ],
+            "snippet": "'downloadXls', '/msService/WTS/workPermit/workPermit/downloadXls',"
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 196,
+            "matched": [
+              "/msService/WTS/workPermit/workPermit/downloadXls",
+              "downloadXls"
+            ],
+            "snippet": "'downloadXls', '/msService/WTS/workPermit/workPermit/downloadXls'"
           }
         ],
-        "targetExportMatches": [],
+        "targetExportMatches": [
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 3,
+            "matched": [
+              "WTS_1.0.0_workPermit_workPermitList",
+              "/msService/WTS/workPermit/workPermit/workPermitList",
+              "exportExcel",
+              "导出"
+            ],
+            "snippet": "-- SourceAudit target hook: WTS_1.0.0_workPermit_workPermitList exportExcel 导出 /msService/WTS/workPermit/workPermit/workPermitList-query."
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 67,
+            "matched": [
+              "WTS_1.0.0_workPermit_workPermitList",
+              "exportExcel"
+            ],
+            "snippet": "OR COALESCE(button_value->>'buttonoperationcode', button_value->>'CODE', '') = 'workPermitList_export_exportExcel_WTS_1.0.0_workPermit_workPermitList'"
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 189,
+            "matched": [
+              "WTS_1.0.0_workPermit_workPermitList",
+              "exportExcel"
+            ],
+            "snippet": "'buttonoperationcode', 'workPermitList_export_exportExcel_WTS_1.0.0_workPermit_workPermitList',"
+          },
+          {
+            "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+            "line": 190,
+            "matched": [
+              "WTS_1.0.0_workPermit_workPermitList",
+              "exportExcel"
+            ],
+            "snippet": "'CODE', 'workPermitList_export_exportExcel_WTS_1.0.0_workPermit_workPermitList',"
+          }
+        ],
         "genericExportFrameworkAvailable": true,
         "genericExportFrameworkMatches": [
           {
@@ -948,11 +1123,9 @@
             "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
           }
         ],
-        "classification": "DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY",
+        "classification": "TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF",
         "issues": [
-          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
-          "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
-          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+          "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action."
         ]
       },
       "acceptanceContract": {
@@ -963,34 +1136,22 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
-        "currentGaps": [
-          "visibleExportAction missing from the real browser page.",
-          "runtimeExportAction missing from layoutJson metadata.",
-          "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
-          "downloadXls returned an empty response body."
-        ],
+        "currentGaps": [],
         "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
       },
-      "status": "ACTION_REQUIRED",
+      "status": "READY",
       "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
       "issues": [
-        "No visible export action label was found on the page.",
-        "No runtime layout button candidate for export was found.",
-        "Direct downloadXls probe returned an empty body.",
-        "Export acceptance check failed: visibleExportAction is not proven",
-        "Export acceptance check failed: runtimeExportAction is not proven",
-        "Export acceptance check failed: targetExportSourceHook is not proven",
-        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
-        "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
-        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action."
       ]
     },
     {
@@ -1009,6 +1170,18 @@
         "networkErrors": [],
         "exportLabels": [],
         "downloadLikeLabels": [],
+        "exportClick": {
+          "attempted": false,
+          "clickedSelector": null,
+          "clickedLabel": null,
+          "status": "NOT_ATTEMPTED",
+          "error": null,
+          "file": null,
+          "bodySize": 0,
+          "magic": "EMPTY",
+          "verifiedDataExport": false,
+          "issue": "No visible export trigger could be clicked in the browser page."
+        },
         "ok": true
       },
       "layout": {
@@ -1054,13 +1227,26 @@
               "evidence": []
             },
             {
+              "name": "browserExportClick",
+              "passed": false,
+              "evidence": [
+                "status=NOT_ATTEMPTED",
+                "selector=",
+                "label=",
+                "bodySize=0",
+                "magic=EMPTY"
+              ]
+            },
+            {
               "name": "successfulFileResponse",
               "passed": false,
               "evidence": [
                 "downloadXls.status=200",
                 "downloadXls.magic=EMPTY",
                 "queryExport.status=500",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.status=NOT_ATTEMPTED",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1070,7 +1256,9 @@
                 "downloadXls.bodySize=0",
                 "downloadXls.magic=EMPTY",
                 "queryExport.bodySize=52",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.bodySize=0",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1089,6 +1277,7 @@
             "visibleExportAction is not proven",
             "runtimeExportAction is not proven",
             "targetExportSourceHook is not proven",
+            "browserExportClick is not proven",
             "successfulFileResponse is not proven",
             "nonEmptyWorkbook is not proven",
             "backendQueryExport is not proven"
@@ -1223,11 +1412,12 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
@@ -1235,6 +1425,7 @@
           "visibleExportAction missing from the real browser page.",
           "runtimeExportAction missing from layoutJson metadata.",
           "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "browserExportClick did not produce an accepted workbook; status=NOT_ATTEMPTED, magic=EMPTY.",
           "downloadXls returned an empty response body.",
           "query export endpoint /msService/QCS/inspectReport/inspectReport/manuInspReportList-query did not return 2xx; status=500."
         ],
@@ -1250,6 +1441,7 @@
         "Export acceptance check failed: visibleExportAction is not proven",
         "Export acceptance check failed: runtimeExportAction is not proven",
         "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: browserExportClick is not proven",
         "Export acceptance check failed: successfulFileResponse is not proven",
         "Export acceptance check failed: nonEmptyWorkbook is not proven",
         "Export acceptance check failed: backendQueryExport is not proven",
@@ -1273,6 +1465,18 @@
         "networkErrors": [],
         "exportLabels": [],
         "downloadLikeLabels": [],
+        "exportClick": {
+          "attempted": false,
+          "clickedSelector": null,
+          "clickedLabel": null,
+          "status": "NOT_ATTEMPTED",
+          "error": null,
+          "file": null,
+          "bodySize": 0,
+          "magic": "EMPTY",
+          "verifiedDataExport": false,
+          "issue": "No visible export trigger could be clicked in the browser page."
+        },
         "ok": true
       },
       "layout": {
@@ -1318,13 +1522,26 @@
               "evidence": []
             },
             {
+              "name": "browserExportClick",
+              "passed": false,
+              "evidence": [
+                "status=NOT_ATTEMPTED",
+                "selector=",
+                "label=",
+                "bodySize=0",
+                "magic=EMPTY"
+              ]
+            },
+            {
               "name": "successfulFileResponse",
               "passed": false,
               "evidence": [
                 "downloadXls.status=200",
                 "downloadXls.magic=EMPTY",
                 "queryExport.status=500",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.status=NOT_ATTEMPTED",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1334,7 +1551,9 @@
                 "downloadXls.bodySize=0",
                 "downloadXls.magic=EMPTY",
                 "queryExport.bodySize=52",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.bodySize=0",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1353,6 +1572,7 @@
             "visibleExportAction is not proven",
             "runtimeExportAction is not proven",
             "targetExportSourceHook is not proven",
+            "browserExportClick is not proven",
             "successfulFileResponse is not proven",
             "nonEmptyWorkbook is not proven",
             "backendQueryExport is not proven"
@@ -1487,11 +1707,12 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
@@ -1499,6 +1720,7 @@
           "visibleExportAction missing from the real browser page.",
           "runtimeExportAction missing from layoutJson metadata.",
           "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "browserExportClick did not produce an accepted workbook; status=NOT_ATTEMPTED, magic=EMPTY.",
           "downloadXls returned an empty response body.",
           "query export endpoint /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query did not return 2xx; status=500."
         ],
@@ -1514,6 +1736,7 @@
         "Export acceptance check failed: visibleExportAction is not proven",
         "Export acceptance check failed: runtimeExportAction is not proven",
         "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: browserExportClick is not proven",
         "Export acceptance check failed: successfulFileResponse is not proven",
         "Export acceptance check failed: nonEmptyWorkbook is not proven",
         "Export acceptance check failed: backendQueryExport is not proven",
@@ -1537,6 +1760,18 @@
         "networkErrors": [],
         "exportLabels": [],
         "downloadLikeLabels": [],
+        "exportClick": {
+          "attempted": false,
+          "clickedSelector": null,
+          "clickedLabel": null,
+          "status": "NOT_ATTEMPTED",
+          "error": null,
+          "file": null,
+          "bodySize": 0,
+          "magic": "EMPTY",
+          "verifiedDataExport": false,
+          "issue": "No visible export trigger could be clicked in the browser page."
+        },
         "ok": true
       },
       "layout": {
@@ -1582,13 +1817,26 @@
               "evidence": []
             },
             {
+              "name": "browserExportClick",
+              "passed": false,
+              "evidence": [
+                "status=NOT_ATTEMPTED",
+                "selector=",
+                "label=",
+                "bodySize=0",
+                "magic=EMPTY"
+              ]
+            },
+            {
               "name": "successfulFileResponse",
               "passed": false,
               "evidence": [
                 "downloadXls.status=200",
                 "downloadXls.magic=EMPTY",
                 "queryExport.status=500",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.status=NOT_ATTEMPTED",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1598,7 +1846,9 @@
                 "downloadXls.bodySize=0",
                 "downloadXls.magic=EMPTY",
                 "queryExport.bodySize=52",
-                "queryExport.magic=JSON"
+                "queryExport.magic=JSON",
+                "browserClick.bodySize=0",
+                "browserClick.magic=EMPTY"
               ]
             },
             {
@@ -1617,6 +1867,7 @@
             "visibleExportAction is not proven",
             "runtimeExportAction is not proven",
             "targetExportSourceHook is not proven",
+            "browserExportClick is not proven",
             "successfulFileResponse is not proven",
             "nonEmptyWorkbook is not proven",
             "backendQueryExport is not proven"
@@ -1751,11 +2002,12 @@
         "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
         "minimumPassConditions": [
           "page.exportLabels contains a visible 导出/export action.",
+          "page.exportClick.verifiedDataExport is true after a normal browser click.",
           "layout.exportButtonCandidates contains a runtime export action.",
           "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
-          "download.status is 2xx.",
-          "download.bodySize is greater than 0.",
-          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "download or queryExport returns a 2xx file response.",
+          "download/queryExport/browser response bodySize is greater than 0.",
+          "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
           "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
           "download.verifiedDataExport is true."
         ],
@@ -1763,6 +2015,7 @@
           "visibleExportAction missing from the real browser page.",
           "runtimeExportAction missing from layoutJson metadata.",
           "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "browserExportClick did not produce an accepted workbook; status=NOT_ATTEMPTED, magic=EMPTY.",
           "downloadXls returned an empty response body.",
           "query export endpoint /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query did not return 2xx; status=500."
         ],
@@ -1778,6 +2031,7 @@
         "Export acceptance check failed: visibleExportAction is not proven",
         "Export acceptance check failed: runtimeExportAction is not proven",
         "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: browserExportClick is not proven",
         "Export acceptance check failed: successfulFileResponse is not proven",
         "Export acceptance check failed: nonEmptyWorkbook is not proven",
         "Export acceptance check failed: backendQueryExport is not proven",
@@ -1787,7 +2041,7 @@
     }
   ],
   "evidence": {
-    "method": "Authenticated real browser page probe, authenticated layoutJson runtime metadata probe, authenticated downloadXls file-response probe, and target source/runtime configuration audit.",
+    "method": "Authenticated real browser page probe, normal browser export-click/download probe, authenticated layoutJson runtime metadata probe, authenticated downloadXls/query-export file-response probe, and target source/runtime configuration audit.",
     "persistence": "NOT_APPLICABLE: file export does not write business data; acceptance checks browser file response instead.",
     "sourceAudit": "Generic export framework files are scanned separately from target production views; a generic export template is not accepted unless the target page/runtime enables an export hook and the browser file response proves list data.",
     "genericExportFramework": {

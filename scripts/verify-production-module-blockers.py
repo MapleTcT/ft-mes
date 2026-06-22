@@ -374,8 +374,10 @@ def check_export_readiness(report: dict[str, Any], blockers: dict[str, dict[str,
     page_pass = summary.get("pagePass")
     if not isinstance(page_pass, int) or page_pass < 0 or page_pass > targets:
         fail(failures, "production export readiness summary.pagePass must be an integer between 0 and targets")
-    if summary.get("verifiedDataExports") != 0:
-        fail(failures, "production export readiness summary.verifiedDataExports must remain 0")
+    verified = summary.get("verifiedDataExports")
+    if not isinstance(verified, int) or verified < 0 or verified > targets:
+        fail(failures, "production export readiness summary.verifiedDataExports must be an integer between 0 and targets")
+        verified = 0
     blocked = summary.get("blocked")
     action_required = summary.get("actionRequired", 0)
     ready = summary.get("ready", 0)
@@ -390,10 +392,18 @@ def check_export_readiness(report: dict[str, Any], blockers: dict[str, dict[str,
         ready = 0
     if blocked + action_required + ready != targets:
         fail(failures, "production export readiness blocked/actionRequired/ready counts must equal targets")
-    if blocked <= 0:
-        fail(failures, "production export readiness must still have blocked targets while PROD-023 is BLOCKED")
-    if summary.get("visibleExportActions") != 0 or summary.get("runtimeExportActions") != 0:
-        fail(failures, "production export readiness must not claim visible/runtime export actions while PROD-023 is BLOCKED")
+    if ready >= targets:
+        fail(failures, "production export readiness must not have all targets READY while PROD-023 is BLOCKED")
+    if blocked + action_required <= 0:
+        fail(failures, "production export readiness must still have unresolved targets while PROD-023 is BLOCKED")
+    if verified != ready:
+        fail(failures, "production export readiness verifiedDataExports must match READY target count")
+    for key in ("visibleExportActions", "runtimeExportActions"):
+        value = summary.get(key)
+        if not isinstance(value, int) or value < 0 or value > targets:
+            fail(failures, f"production export readiness summary.{key} must be an integer between 0 and targets")
+        elif value < ready:
+            fail(failures, f"production export readiness summary.{key} must cover READY targets")
 
 
 def check_latest_evidence(

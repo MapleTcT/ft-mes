@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-06-22T10:36:46+00:00` |
-| Repo Commit | `8a072c75a795c0027ed53a52a9a74e3ea3cbf794` |
+| Generated At | `2026-06-22T11:38:33+00:00` |
+| Repo Commit | `d06ae37a4bd875291d4009f640f905be17c53b30` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `11` |
@@ -17,8 +17,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | Production Backlog Items | `9` |
 | Business Dependency Status | `BLOCKED` |
 | Production Export Status | `BLOCKED` |
-| Production Export Ready / Action Required / Blocked | `0 / 1 / 5` |
-| Production Export Verified Data Files | `0` |
+| Production Export Ready / Action Required / Blocked | `1 / 0 / 5` |
+| Production Export Verified Data Files | `1` |
 | Production Migration Status | `NOT_READY_FOR_PRODUCTION_MIGRATION` |
 | Cutover Gate Status | `NOT_READY_FOR_PRODUCTION_CUTOVER` |
 | Rehearsal Status | `REHEARSAL_BLOCKED` |

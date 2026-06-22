@@ -283,7 +283,6 @@
       "exportTargetIds": [
         "wom-make-task",
         "rm-batch-formula",
-        "wts-work-permit",
         "qcs-inspect-report",
         "qcs-unqualified-deal",
         "qcs-inspect-release"

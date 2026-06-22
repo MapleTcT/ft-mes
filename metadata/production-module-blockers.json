@@ -15,7 +15,7 @@
     "missingExportImplementation": 1
   },
   "latestEvidence": {
-    "lastRemoteRecheckAt": "2026-06-22T01:50:35.404Z",
+    "lastRemoteRecheckAt": "2026-06-22T11:24:47.554Z",
     "businessDependencyReadinessGeneratedAt": "2026-06-22T01:36:29.672Z",
     "businessDependencyReadinessStatus": "BLOCKED",
     "businessDependencyReady": 0,
@@ -23,9 +23,9 @@
     "businessPackageScanGeneratedAt": "2026-06-20T16:05:25Z",
     "businessPackageScanStatus": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
     "businessPackageScanCandidateDependencies": 0,
-    "productionExportReadinessGeneratedAt": "2026-06-22T01:50:35.404Z",
+    "productionExportReadinessGeneratedAt": "2026-06-22T11:24:47.554Z",
     "productionExportReadinessStatus": "BLOCKED",
-    "productionExportVerifiedDataExports": 0,
+    "productionExportVerifiedDataExports": 1,
     "productionExportPagePass": 6
   },
   "blockers": [

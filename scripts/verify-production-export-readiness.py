@@ -133,6 +133,7 @@ def check_page(target_id: str, page: Any, expected_browser_base_urls: set[str], 
         "networkErrors",
         "exportLabels",
         "downloadLikeLabels",
+        "exportClick",
         "ok",
     ):
         if key not in page:
@@ -148,6 +149,49 @@ def check_page(target_id: str, page: Any, expected_browser_base_urls: set[str], 
     for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors", "exportLabels", "downloadLikeLabels"):
         if not isinstance(page.get(key), list):
             fail(failures, f"{target_id}.page.{key} must be a list")
+    check_export_click(target_id, page.get("exportClick"), failures)
+
+
+def check_export_click(target_id: str, export_click: Any, failures: list[str]) -> None:
+    if not isinstance(export_click, dict):
+        fail(failures, f"{target_id}.page.exportClick must be an object")
+        return
+    for key in (
+        "attempted",
+        "clickedSelector",
+        "clickedLabel",
+        "status",
+        "error",
+        "file",
+        "bodySize",
+        "magic",
+        "verifiedDataExport",
+        "issue",
+    ):
+        if key not in export_click:
+            fail(failures, f"{target_id}.page.exportClick missing {key}")
+    if not isinstance(export_click.get("attempted"), bool):
+        fail(failures, f"{target_id}.page.exportClick.attempted must be boolean")
+    if not isinstance(export_click.get("status"), str) or not export_click.get("status"):
+        fail(failures, f"{target_id}.page.exportClick.status must be a non-empty string")
+    if not isinstance(export_click.get("bodySize"), int) or export_click.get("bodySize", -1) < 0:
+        fail(failures, f"{target_id}.page.exportClick.bodySize must be a non-negative integer")
+    if export_click.get("magic") not in {"EMPTY", "OLE_XLS", "ZIP_XLSX", "HTML", "JSON", "UNKNOWN_BINARY"}:
+        fail(failures, f"{target_id}.page.exportClick.magic has invalid value: {export_click.get('magic')!r}")
+    if not isinstance(export_click.get("verifiedDataExport"), bool):
+        fail(failures, f"{target_id}.page.exportClick.verifiedDataExport must be boolean")
+    file_evidence = export_click.get("file")
+    if file_evidence is not None:
+        if not isinstance(file_evidence, dict):
+            fail(failures, f"{target_id}.page.exportClick.file must be an object or null")
+        else:
+            for key in ("source", "bodySize", "magic", "verifiedDataExport"):
+                if key not in file_evidence:
+                    fail(failures, f"{target_id}.page.exportClick.file missing {key}")
+            if file_evidence.get("verifiedDataExport") != export_click.get("verifiedDataExport"):
+                fail(failures, f"{target_id}.page.exportClick.file.verifiedDataExport must match page.exportClick")
+    if export_click.get("verifiedDataExport") is False and not export_click.get("issue"):
+        fail(failures, f"{target_id}.page.exportClick.issue must explain unverified browser click export")
 
 
 def check_layout(target_id: str, layout: Any, failures: list[str]) -> None:
@@ -230,6 +274,7 @@ def check_download(target_id: str, download: Any, failures: list[str]) -> None:
                 "visibleExportAction",
                 "runtimeExportAction",
                 "targetExportSourceHook",
+                "browserExportClick",
                 "successfulFileResponse",
                 "nonEmptyWorkbook",
                 "backendQueryExport",
@@ -391,9 +436,10 @@ def check_acceptance_contract(target_id: str, contract: Any, item: dict[str, Any
         joined_conditions = " ".join(str(value) for value in conditions)
         for fragment in (
             "page.exportLabels",
+            "page.exportClick.verifiedDataExport",
             "layout.exportButtonCandidates",
             "sourceAudit.classification",
-            "download.bodySize",
+            "bodySize",
             "queryExport.verifiedDataExport",
             "download.verifiedDataExport",
         ):

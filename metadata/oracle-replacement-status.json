@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T10:40:27+00:00",
-  "repoCommit": "8a072c75a795c0027ed53a52a9a74e3ea3cbf794",
+  "generatedAt": "2026-06-22T11:39:45+00:00",
+  "repoCommit": "d06ae37a4bd875291d4009f640f905be17c53b30",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -24,7 +24,7 @@
     "sourceModuleOraclePolicyPass": true,
     "oracleBacklogReferenceCount": 958,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 170,
+    "postgresMigrationCount": 171,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 0,
@@ -82,8 +82,8 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-06-22T10:39:07+00:00",
-    "repoCommit": "8a072c75a795c0027ed53a52a9a74e3ea3cbf794",
+    "generatedAt": "2026-06-22T11:36:06+00:00",
+    "repoCommit": "d06ae37a4bd875291d4009f640f905be17c53b30",
     "findingCount": 958,
     "categoryTotal": 958,
     "unclassifiedReferenceCount": 0
@@ -177,7 +177,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-06-22T10:39:07+00:00, repoCommit=8a072c75a795c0027ed53a52a9a74e3ea3cbf794, unclassified=0, findingCount=958, categoryTotal=958",
+      "evidence": "generatedAt=2026-06-22T11:36:06+00:00, repoCommit=d06ae37a4bd875291d4009f640f905be17c53b30, unclassified=0, findingCount=958, categoryTotal=958",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -201,7 +201,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "170 scripts, range=001-170, highRisk=0, watch=60",
+      "evidence": "171 scripts, range=001-171, highRisk=0, watch=60",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },

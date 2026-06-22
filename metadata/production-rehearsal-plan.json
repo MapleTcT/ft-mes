@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T10:37:46+00:00",
-  "repoCommit": "8a072c75a795c0027ed53a52a9a74e3ea3cbf794",
+  "generatedAt": "2026-06-22T11:28:19+00:00",
+  "repoCommit": "d06ae37a4bd875291d4009f640f905be17c53b30",
   "database": "PostgreSQL",
   "status": "REHEARSAL_BLOCKED",
   "environment": {
@@ -29,7 +29,7 @@
   "sourceEvidence": {
     "migrationReadiness": {
       "path": "metadata/production-migration-readiness.json",
-      "generatedAt": "2026-06-22T07:40:40+00:00",
+      "generatedAt": "2026-06-22T11:28:19+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
       "metrics": {
         "totalTracks": 9,
@@ -41,7 +41,7 @@
     },
     "cutoverGate": {
       "path": "metadata/production-cutover-gate.json",
-      "generatedAt": "2026-06-22T07:40:40+00:00",
+      "generatedAt": "2026-06-22T11:28:19+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
       "metrics": {
         "totalGates": 9,
@@ -203,16 +203,16 @@
     },
     "productionExportReadiness": {
       "path": "metadata/production-export-readiness-smoke.json",
-      "generatedAt": "2026-06-22T01:50:35.404Z",
+      "generatedAt": "2026-06-22T11:24:47.554Z",
       "status": "BLOCKED",
       "metrics": {
         "targets": 6,
         "pagePass": 6,
-        "visibleExportActions": 0,
-        "runtimeExportActions": 0,
-        "verifiedDataExports": 0,
-        "ready": 0,
-        "actionRequired": 1,
+        "visibleExportActions": 1,
+        "runtimeExportActions": 1,
+        "verifiedDataExports": 1,
+        "ready": 1,
+        "actionRequired": 0,
         "blocked": 5
       }
     }

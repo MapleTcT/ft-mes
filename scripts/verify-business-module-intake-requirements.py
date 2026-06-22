@@ -281,8 +281,11 @@ def check_cross_refs(
 
     export_summary = as_dict(export_gap.get("summary"))
     verified_exports = export_summary.get("verifiedDataExports")
-    if export_summary.get("status") != "BLOCKED" or not isinstance(verified_exports, int) or verified_exports != 0:
-        fail(failures, "PROD-023 intake requirement expects export gap breakdown to remain BLOCKED with verifiedDataExports=0")
+    targets = export_summary.get("targets")
+    if export_summary.get("status") != "BLOCKED" or not isinstance(verified_exports, int):
+        fail(failures, "PROD-023 intake requirement expects export gap breakdown to remain BLOCKED with an integer verifiedDataExports count")
+    elif isinstance(targets, int) and verified_exports >= targets:
+        fail(failures, "PROD-023 intake requirement expects at least one export target to remain unresolved while the blocker is active")
 
     toolbar_text = text_blob(wom_toolbar)
     if "generate-qrcode" not in toolbar_text or "blocked" not in toolbar_text:

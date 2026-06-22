@@ -1719,6 +1719,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3740,7 +3746,7 @@
       "tracked": 2
     },
     "deploy": {
-      "tracked": 449
+      "tracked": 450
     },
     "docs": {
       "tracked": 53
@@ -3761,8 +3767,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 620,
-    "tracked": 620,
+    "totalFiles": 621,
+    "tracked": 621,
     "untracked": 0
   },
   "untrackedByDirectory": []

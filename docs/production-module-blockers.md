@@ -11,7 +11,7 @@ make production-export-gap-breakdown-check
 
 该账本不替代真实前端验收，也不把当前 BLOCKED 项改为 PASS。每个阻断项变更状态前，仍必须按 `docs/production-module-functional-test-cases.md` 的动作级验收规则执行真实浏览器/API/PostgreSQL 复验。
 
-最近一次业务依赖复验时间：`2026-06-22T01:36:29.672Z`。本次复验仍显示 `material-service` 与 `process-analysis` 为 `2/2 BLOCKED`、ready=0；material 的 `checkProdResult`、`generateProduceOutSing` 仍返回 tenant-service `503`，Nacos material/wms/warehouse/inventory 等别名健康实例均为 0；ProcessAnalysis 的 5 个追溯端点仍返回 tenant-service `503`，Nacos ProcessAnalysis/Traceability 等别名健康实例均为 0，PostgreSQL `processAnalysisTableCount/runtimeView/menu` 仍为 0。最近一次生产导出复验时间：`2026-06-22T01:50:35.404Z`，API base 为 `http://100.99.133.43:18080`，浏览器入口为同一测试环境公网地址 `http://222.88.185.146:18080`，6 个目标页面全部通过页面 smoke，仍为 `BLOCKED`、`ready=0`、`actionRequired=1`、`blocked=5`、`verifiedDataExports=0`。导出阻断已从“页面超时”收敛为“无可见/runtime 导出动作、targetExportMatches=0、downloadXls 为空或无法证明是列表数据导出”。逐目标导出缺口由 `production-export-gap-breakdown` 从 smoke 报告生成：当前 6 个目标都缺可见/runtime 导出动作，其中 WOM 与 3 个 QCS 后端 `queryExport` 返回 500/JSON，RM 目标返回 200/JSON 且不能证明是工作簿列表数据导出；WTS `workPermitList-query?exportFlag=true` 返回 `200/OLE_XLS/8704`，但真实页面没有可见导出动作、layoutJson 没有 runtime 导出动作、sourceAudit 仍归类为 `DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY`，所以只能降为 `ACTION_REQUIRED`，不能按 PASS 验收。机器账本中的 `latestEvidence` 会和这三份报告的 `generatedAt`、状态和关键计数对账，防止报告刷新后 blocker 总账仍引用旧证据。
+最近一次业务依赖复验时间：`2026-06-22T01:36:29.672Z`。本次复验仍显示 `material-service` 与 `process-analysis` 为 `2/2 BLOCKED`、ready=0；material 的 `checkProdResult`、`generateProduceOutSing` 仍返回 tenant-service `503`，Nacos material/wms/warehouse/inventory 等别名健康实例均为 0；ProcessAnalysis 的 5 个追溯端点仍返回 tenant-service `503`，Nacos ProcessAnalysis/Traceability 等别名健康实例均为 0，PostgreSQL `processAnalysisTableCount/runtimeView/menu` 仍为 0。最近一次生产导出复验时间：`2026-06-22T11:24:47.554Z`，API base 为 `http://100.99.133.43:18080`，浏览器入口为同一测试环境公网地址 `http://222.88.185.146:18080`，6 个目标页面全部通过页面 smoke，整体仍为 `BLOCKED`、`ready=1`、`actionRequired=0`、`blocked=5`、`verifiedDataExports=1`。WTS 作业许可已由 `171-wts-workpermit-export-action.sql` 补齐 runtime 导出按钮和自定义点击函数，真实浏览器点击 `导出` 生成 `WTS_workPermitList.xls`，`bodySize=8704`、`magic=OLE_XLS`，因此 WTS 单项为 `READY`。剩余导出阻断收敛为 5 个目标：WOM 与 3 个 QCS 后端 `queryExport` 返回 500/JSON，RM 目标返回 200/JSON 且不能证明是工作簿列表数据导出；这些目标仍缺目标级可见/runtime/source 导出闭环。机器账本中的 `latestEvidence` 会和这三份报告的 `generatedAt`、状态和关键计数对账，防止报告刷新后 blocker 总账仍引用旧证据。
 
 ## 当前摘要
 
@@ -37,12 +37,12 @@ make production-export-gap-breakdown-check
 ## 更新规则
 
 - `make production-blocker-check` 必须保证本账本与 `metadata/production-module-test-cases.json` 中的 BLOCKED 用例完全一致。
-- `make production-blocker-check` 还会把本账本与 `metadata/business-dependency-readiness-smoke.json`、`metadata/business-dependency-package-scan.json`、`metadata/production-export-readiness-smoke.json` 交叉校验：material / ProcessAnalysis 阻断必须仍有 Nacos healthy=0、tenant-service 503、包扫描无实现候选等证据；导出阻断必须仍有 `verifiedDataExports=0` 的浏览器/runtime/download/sourceAudit/acceptanceContract 证据。
+- `make production-blocker-check` 还会把本账本与 `metadata/business-dependency-readiness-smoke.json`、`metadata/business-dependency-package-scan.json`、`metadata/production-export-readiness-smoke.json` 交叉校验：material / ProcessAnalysis 阻断必须仍有 Nacos healthy=0、tenant-service 503、包扫描无实现候选等证据；导出阻断允许逐目标 READY，但在 `PROD-023` 整体仍 BLOCKED 时必须保留未解决目标，并要求 `verifiedDataExports` 与 READY 目标数一致。
 - 每个 blocker 必须有仓库内证据引用、复验命令、PASS 条件、下一步和明确的非解法。
 - `material` 和 `ProcessAnalysis` 相关阻断项必须引用 `metadata/business-dependency-package-scan.json`、`metadata/business-dependency-readiness-smoke.json` 以及对应专项分析文档。
 - `material` 和 `ProcessAnalysis` 新业务包到位前，必须先通过 `make business-dependency-contract-check` 保持接入契约与 readiness/package scan/blocker/backlog 一致；到位后按 `docs/business-dependency-contracts.md` 的准入顺序补 Nacos、端点、后端链路、目标表和 marker 落库证据。
 - 新业务包导入后，先运行 `make business-package-scan`；若出现实现候选，再运行 `make smoke-business-dependencies` 和真实前端 marker 落库验收。
 - `PROD-023` 导出阻断项必须引用 `metadata/production-export-readiness-smoke.json`，并通过 `make smoke-production-export-readiness` 重新捕获浏览器文件响应、目标源码/运行时 sourceAudit 和逐目标 `acceptanceContract` 后才能改状态。
 - `PROD-023` 的逐目标导出缺口必须用 `make production-export-gap-breakdown` 从最新 smoke 报告生成，并用 `make production-export-gap-breakdown-check` 校验；不能手写一份会漂移的导出结论。
-- 2026-06-22 复验：WTS 作业许可 `workPermitList-query` 已从后端 500 修复为 `200/OLE_XLS/8704`，但真实页面仍没有可见导出动作，layoutJson 也没有 runtime 导出动作，因此 `PROD-023` 仍为总体 BLOCKED，WTS 单项在导出报告中降为 `ACTION_REQUIRED`。
+- 2026-06-22 复验：WTS 作业许可 `workPermitList-query` 已通过真实浏览器点击 `导出` 生成 `WTS_workPermitList.xls`，`200/OLE_XLS/8704`，WTS 单项在导出报告中为 `READY`；`PROD-023` 仍为总体 BLOCKED，因为 WOM、RM 和 QCS 的 5 个导出目标尚未完成同等证据闭环。
 - 不允许用 HTTP 200、静态页面可打开、临时 SQL 或假按钮把 BLOCKED 项改成 PASS。

@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`170`。
-- 编号范围：`001` 到 `170`。
+- 脚本数量：`171`。
+- 编号范围：`001` 到 `171`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -21,7 +21,7 @@
 | Tag | Count |
 | --- | --- |
 | auth-rbac-org | 36 |
-| business | 33 |
+| business | 34 |
 | compatibility | 73 |
 | configuration | 41 |
 | general | 22 |
@@ -34,20 +34,20 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 9324 |
-| create-function | 67 |
+| create-function | 68 |
 | create-index | 840 |
 | create-table | 523 |
 | create-view | 107 |
 | insert | 3874 |
-| update | 3931 |
+| update | 3936 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 171 |
+| create-or-replace | 172 |
 | do-block | 272 |
-| if-exists | 88 |
+| if-exists | 89 |
 | if-not-exists | 11246 |
 | on-conflict | 3838 |
 | to-regclass | 152 |
@@ -227,6 +227,7 @@
 | 168 | 168-wom-maketasklist-toolbar-interaction-compat.sql | compatibility | 252 | create-function:1, insert:1, update:4 | 3 | - |
 | 169 | 169-custom-property-project-property-compat.sql | configuration, compatibility | 10 | create-view:1 | 1 | - |
 | 170 | 170-rbac-pstaff-pposition-compat.sql | auth-rbac-org, compatibility | 104 | create-table:4, create-view:4, create-index:4 | 12 | - |
+| 171 | 171-wts-workpermit-export-action.sql | business | 308 | create-function:1, update:5 | 2 | - |
 
 ## 规则
 

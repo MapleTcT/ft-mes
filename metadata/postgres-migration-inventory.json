@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 170,
+  "migrationCount": 171,
   "firstNumber": 1,
-  "lastNumber": 170,
+  "lastNumber": 171,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -13,17 +13,17 @@
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 9324,
-    "create-function": 67,
+    "create-function": 68,
     "create-index": 840,
     "create-table": 523,
     "create-view": 107,
     "insert": 3874,
-    "update": 3931
+    "update": 3936
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 171,
+    "create-or-replace": 172,
     "do-block": 272,
-    "if-exists": 88,
+    "if-exists": 89,
     "if-not-exists": 11246,
     "on-conflict": 3838,
     "to-regclass": 152,
@@ -31,7 +31,7 @@
   },
   "tagTotals": {
     "auth-rbac-org": 36,
-    "business": 33,
+    "business": 34,
     "compatibility": 73,
     "configuration": 41,
     "general": 22,
@@ -6378,6 +6378,39 @@
         "do-block": 0,
         "to-regclass": 0,
         "create-or-replace": 4,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+      "name": "171-wts-workpermit-export-action.sql",
+      "number": 171,
+      "slug": "wts-workpermit-export-action",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 308,
+      "sha256": "9a030b54bec7942f3e497826e2ef609e0a3c85c5e80599a7d0f9b4ac3ec34876",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
         "where-not-exists": 0
       },
       "highRiskStatements": [],
