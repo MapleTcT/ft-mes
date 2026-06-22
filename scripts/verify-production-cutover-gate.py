@@ -10,6 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = ROOT / "metadata/production-cutover-gate.json"
+DOC_PATH = ROOT / "docs/production-cutover-gate.md"
 
 REQUIRED_GATE_IDS = {
     "postgres-data-migration",
@@ -516,11 +517,124 @@ def check_report(data: dict[str, Any], failures: list[str]) -> None:
             fail(failures, "non-ready cutover gate must include an explicit no-cutover releaseRule")
 
     check_source_evidence(data, failures)
+    check_doc(data, failures)
+
+
+def markdown_list(values: list[Any]) -> str:
+    rendered = [str(value).strip() for value in values if str(value).strip()]
+    if not rendered:
+        return "`none`"
+    return "<br>".join(f"`{value}`" for value in rendered)
+
+
+def render_markdown(data: dict[str, Any]) -> str:
+    summary = as_dict(data.get("summary"))
+    lines = [
+        "# Production Cutover Gate",
+        "",
+        "This file is generated from `metadata/production-cutover-gate.json`.",
+        "Regenerate it with `python3 scripts/verify-production-cutover-gate.py --write-doc`.",
+        "",
+        "It is a no-cutover control surface, not a production approval.",
+        "",
+        "## Summary",
+        "",
+        "| Field | Value |",
+        "| --- | --- |",
+        f"| Generated At | `{data.get('generatedAt')}` |",
+        f"| Repo Commit | `{data.get('repoCommit')}` |",
+        f"| Database | `{data.get('database')}` |",
+        f"| Status | `{data.get('status')}` |",
+        f"| Gates | `{summary.get('totalGates')}` |",
+        f"| Ready / Planned / Blocked / Not Started | `{summary.get('ready')} / {summary.get('planned')} / {summary.get('blocked')} / {summary.get('notStarted')}` |",
+        f"| Production Blockers | `{summary.get('productionBlockers')}` |",
+        f"| Production Backlog Items | `{summary.get('productionBacklogItems')}` |",
+        "",
+        "## Release Rule",
+        "",
+        str(data.get("releaseRule") or "").strip(),
+        "",
+        "## Gate Matrix",
+        "",
+        "| Gate | Status | Ready Evidence Commands | Blocking Reason |",
+        "| --- | --- | --- | --- |",
+    ]
+    for gate in as_list(data.get("gates")):
+        if not isinstance(gate, dict):
+            continue
+        lines.append(
+            "| "
+            + str(gate.get("id"))
+            + " | `"
+            + str(gate.get("status"))
+            + "` | "
+            + markdown_list(as_list(gate.get("readyEvidenceCommands")))
+            + " | "
+            + (str(gate.get("blockingReason") or "").replace("\n", " ").strip() or "`none`")
+            + " |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Source Evidence",
+            "",
+            "| Ledger | Path | Status | Metrics |",
+            "| --- | --- | --- | --- |",
+        ]
+    )
+    for key, evidence in as_dict(data.get("sourceEvidence")).items():
+        if not isinstance(evidence, dict):
+            continue
+        metrics = as_dict(evidence.get("metrics"))
+        metric_text = ", ".join(f"{metric_key}={metric_value}" for metric_key, metric_value in sorted(metrics.items()))
+        lines.append(
+            f"| `{key}` | `{evidence.get('path')}` | `{evidence.get('status')}` | {metric_text or '`none`'} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Verification",
+            "",
+            "```bash",
+            "make production-cutover-gate-check",
+            "make production-rehearsal-plan-check",
+            "make production-evidence-ready-gate-regression-check",
+            "```",
+            "",
+            "Do not change this document by hand. Update `metadata/production-cutover-gate.json` or its source ledgers, regenerate the document, then run the verification commands.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def check_doc(data: dict[str, Any], failures: list[str]) -> None:
+    try:
+        actual = DOC_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        fail(failures, f"missing production cutover gate document: {DOC_PATH.relative_to(ROOT)}")
+        return
+    expected = render_markdown(data)
+    if actual != expected:
+        fail(
+            failures,
+            f"{DOC_PATH.relative_to(ROOT)} is stale; run python3 scripts/verify-production-cutover-gate.py --write-doc",
+        )
 
 
 def main() -> int:
+    write_doc = "--write-doc" in sys.argv[1:]
+    unknown = [argument for argument in sys.argv[1:] if argument != "--write-doc"]
+    if unknown:
+        print("usage: verify-production-cutover-gate.py [--write-doc]", file=sys.stderr)
+        return 2
+
     failures: list[str] = []
     data = read_json(REPORT_PATH, "production cutover gate", failures)
+    if write_doc and data:
+        DOC_PATH.write_text(render_markdown(data), encoding="utf-8")
     if REPORT_PATH.exists():
         check_secret_hygiene(REPORT_PATH, failures)
     if data:

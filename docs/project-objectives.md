@@ -127,6 +127,8 @@
 - [机器可读业务模块接入要求](../metadata/business-module-intake-requirements.json)
 - [生产迁移就绪账本](production-migration-readiness.md)
 - [机器可读生产迁移就绪记录](../metadata/production-migration-readiness.json)
+- [生产切换总闸门](production-cutover-gate.md)
+- [机器可读生产切换总闸门](../metadata/production-cutover-gate.json)
 
 原则：
 

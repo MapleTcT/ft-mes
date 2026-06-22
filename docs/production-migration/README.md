@@ -7,14 +7,18 @@ Authoritative status remains:
 
 - `docs/production-migration-readiness.md`
 - `metadata/production-migration-readiness.json`
+- `docs/production-cutover-gate.md`
+- `metadata/production-cutover-gate.json`
 - `metadata/production-rehearsal-plan.json`
 - `make production-migration-readiness-check`
+- `make production-cutover-gate-check`
 - `make production-rehearsal-plan-check`
 
 Each template is designed to be filled during rehearsal or production planning:
 
 | File | Purpose |
 | --- | --- |
+| `../production-cutover-gate.md` | Generated no-cutover/cutover gate summary for handoff review |
 | `rehearsal-plan.md` | Generated execution checklist for collecting one production rehearsal evidence set |
 | `../../deploy/database/production-migration/README.md` | Source inventory, target PostgreSQL preflight, and row-count comparison entry |
 | `../../deploy/minio/production-migration/README.md` | MinIO bucket/object inventory and comparison entry |

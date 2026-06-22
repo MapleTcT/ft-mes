@@ -40,6 +40,7 @@ REQUIRED_PATHS = [
     "docs/oracle-replacement-status.md",
     "docs/postgres-migration-index.md",
     "docs/production-migration-readiness.md",
+    "docs/production-cutover-gate.md",
     "docs/production-migration/README.md",
     "docs/production-migration/rehearsal-plan.md",
     "docs/production-migration/rollback-runbook.md",

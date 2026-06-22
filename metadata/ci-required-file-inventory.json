@@ -2907,6 +2907,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/production-cutover-gate.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/production-export-gap-breakdown.md",
       "state": "tracked",
       "tracked": true
@@ -3749,7 +3755,7 @@
       "tracked": 450
     },
     "docs": {
-      "tracked": 53
+      "tracked": 54
     },
     "metadata": {
       "tracked": 67
@@ -3767,8 +3773,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 621,
-    "tracked": 621,
+    "totalFiles": 622,
+    "tracked": 622,
     "untracked": 0
   },
   "untrackedByDirectory": []

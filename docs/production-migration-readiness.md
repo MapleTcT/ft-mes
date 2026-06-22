@@ -16,6 +16,16 @@ make production-migration-readiness-check
 make production-cutover-gate-check
 ```
 
+人读版总闸门见 `docs/production-cutover-gate.md`。该文件由
+`metadata/production-cutover-gate.json` 生成，刷新命令：
+
+```bash
+make production-cutover-gate-doc
+```
+
+`make production-cutover-gate-check` 会校验人读版与机器账本完全一致；如果只改
+JSON 或只改 Markdown，门禁会失败。
+
 生产演练证据清单见 `metadata/production-rehearsal-plan.json` 和
 `docs/production-migration/rehearsal-plan.md`，校验命令：
 

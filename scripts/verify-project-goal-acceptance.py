@@ -1138,6 +1138,7 @@ def check_migration_alignment(items_by_id: dict[str, dict[str, Any]], failures: 
         items_by_id,
         {
             "metadata/production-migration-readiness.json",
+            "docs/production-cutover-gate.md",
             "metadata/production-cutover-gate.json",
             "metadata/production-rehearsal-plan.json",
             "docs/production-migration/rehearsal-plan.md",
