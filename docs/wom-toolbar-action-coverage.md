@@ -407,6 +407,28 @@ PostgreSQL 回读 `wom_produce_tasks.id=9000006242571780`
 最终 `task_run_state=WOM_runState/runing/status=99/version=5`，
 `wom_wait_put_records.proc_report_id=757960994657536`。
 
+2026-06-22 20:05 针对外出办公后直连
+`http://100.99.133.43:18080` 仍看到 `WOM.custom.randon...` 的现场截图补充排查：
+远端 Nginx 和静态卷均已存在当前修复版 `i18n-value.js/body.js`，`100.99` 和
+`222.88.185.146` 两个入口直接请求
+`/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js`
+都包含 `WOM.custom.randon1575958246066 -> 只有【待执行】的指令单可以开始！`；
+`body.js` 也包含整排按钮守卫和二维码/追溯中文兜底。差异出在浏览器主静态包链路：
+公网入口 `222.88.185.146` 下载 `vendors.core.js.gz`、`vendors.antd.js.gz`、
+`vendors.commons.js.gz`、`vendors.sesgis.js.gz`、`list.js.gz` 均约 `0.3-0.5s`；
+`100.99` 直连压缩后 `vendors.core.js.gz` 和 `vendors.antd.js.gz` 仍分别约 `13s`，
+更大的 `vendors.commons.js.gz` 会拖到 60s 以上。为降低外出直连反复加载大包导致
+旧 iframe/旧 token/按钮兜底脚本未完整初始化的概率，`deploy/docker/nginx/adp.conf`
+新增 `/greenDill/static/scripts/` 强缓存：`Cache-Control: public, max-age=31536000,
+immutable`。WOM 页面 HTML、`i18n-value.js`、`body.js` 和 `body-es5.js` 仍保持
+`no-store`，确保后续按钮修复不会被浏览器缓存住。当前仍建议用新登录窗口刷新页面；
+如果页面已打开在旧 tab 中，需要强制刷新或清站点缓存后再点工具栏。
+配置已同步到 `100.99.133.43` 测试机 Nginx 容器，`nginx -t` 通过并 reload；
+复查 `vendors.core.js?v=1663120692297` 响应头已带
+`Cache-Control: public, max-age=31536000, immutable`，而
+`makeTaskList/body.js` 仍返回 `private, no-store, no-cache, must-revalidate,
+proxy-revalidate`。
+
 ## 动作矩阵
 
 | 动作 | API | 验收状态 | 点击证据 | 生产用例 | 落库/后端结论 | 问题 |
