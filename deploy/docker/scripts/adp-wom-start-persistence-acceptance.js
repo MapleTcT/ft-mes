@@ -107,6 +107,27 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+async function captureScreenshot(page, filePath, evidence, label) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  try {
+    await page.screenshot({
+      path: filePath,
+      fullPage: true,
+      timeout: Math.min(pageTimeoutMs, 30000),
+    });
+    return { ok: true, path: filePath };
+  } catch (error) {
+    const item = {
+      label,
+      path: filePath,
+      error: error.message,
+    };
+    evidence.screenshotFailures = evidence.screenshotFailures || [];
+    evidence.screenshotFailures.push(item);
+    return { ok: false, ...item };
+  }
+}
+
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
@@ -714,7 +735,7 @@ async function runAdvanceReleaseTransition(page, config, selection, evidence) {
 
   await page.waitForTimeout(800);
   evidence.screenshots.advanceReleaseConfirm = path.join(outputDir, `wom-${transitionName}-advance-release-confirm.png`);
-  await page.screenshot({ path: evidence.screenshots.advanceReleaseConfirm, fullPage: true });
+  await captureScreenshot(page, evidence.screenshots.advanceReleaseConfirm, evidence, "advanceReleaseConfirm");
 
   const confirmButton = page.locator(
     ".ant-modal:visible .ant-btn-primary, .ant-modal:visible button, .ant-modal-confirm:visible button, .sup-modal:visible button"
@@ -832,7 +853,7 @@ async function runStopTransition(page, config, selection, evidence, transition =
   );
   await page.waitForTimeout(800);
   evidence.screenshots.stopDialog = path.join(outputDir, `wom-${transitionName}-stop-dialog.png`);
-  await page.screenshot({ path: evidence.screenshots.stopDialog, fullPage: true });
+  await captureScreenshot(page, evidence.screenshots.stopDialog, evidence, "stopDialog");
 
   const addOutput = await page.evaluate(
     async ({ procReportId: reportId, taskId }) => {
@@ -963,7 +984,7 @@ async function runBrowser(ticket, evidence) {
 	    evidence.navigation = { status: nav && nav.status(), domContentLoaded };
 	    evidence.beforeBodyHasMarker = (await page.locator("body").innerText()).includes(marker);
 	    evidence.screenshots.before = path.join(outputDir, `wom-${transitionName}-before.png`);
-	    await page.screenshot({ path: evidence.screenshots.before, fullPage: true });
+	    await captureScreenshot(page, evidence.screenshots.before, evidence, "before");
 
 	    for (const transition of transitions) {
 	      const config = transitionConfigs[transition];
@@ -1027,7 +1048,7 @@ async function runBrowser(ticket, evidence) {
 	        await page.waitForTimeout(800);
 	        const screenshotKey = `${transition}Confirm`;
 	        evidence.screenshots[screenshotKey] = path.join(outputDir, `wom-${transitionName}-${transition}-confirm.png`);
-	        await page.screenshot({ path: evidence.screenshots[screenshotKey], fullPage: true });
+	        await captureScreenshot(page, evidence.screenshots[screenshotKey], evidence, screenshotKey);
 
 	        const confirmButton = page
 	          .locator(".ant-modal-confirm-btns button, .ant-modal button, button")
@@ -1094,7 +1115,7 @@ async function runBrowser(ticket, evidence) {
 	    evidence.updateTaskState = evidence.updateTaskStateByTransition[0] && evidence.updateTaskStateByTransition[0].response;
 	    evidence.afterBody = (await page.locator("body").innerText()).slice(0, 5000);
 	    evidence.screenshots.after = path.join(outputDir, `wom-${transitionName}-after.png`);
-	    await page.screenshot({ path: evidence.screenshots.after, fullPage: true });
+	    await captureScreenshot(page, evidence.screenshots.after, evidence, "after");
     await context.close();
   } finally {
     await browser.close();

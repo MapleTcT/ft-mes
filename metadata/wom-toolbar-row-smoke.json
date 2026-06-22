@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
   "reportKind": "wom-toolbar-row-smoke",
-  "generatedAt": "2026-06-22T12:26:48.679Z",
+  "generatedAt": "2026-06-22T13:21:24.930Z",
   "database": "PostgreSQL",
   "baseUrl": "http://100.99.133.43:18080",
   "browserBaseUrl": "http://222.88.185.146:18080",
   "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
-  "marker": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART",
-  "taskId": "9000006310674877",
-  "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
-  "batchNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH",
+  "marker": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART",
+  "taskId": "9000006343993284",
+  "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
+  "batchNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH",
   "seedEvidencePath": "/tmp/adp-wom-toolbar-row-smoke-seed.json",
   "pageTimeoutMs": 240000,
   "gridTimeoutMs": 240000,
   "login": {
-    "ticket": "26963ab8-41d5-460b-816a-48b6fe56ef42",
+    "ticket": "c63a866c-71f6-42cf-891f-98bc8d461c87",
     "status": 200
   },
   "navigation": {
@@ -40,12 +40,12 @@
           },
           {
             "method": "GET",
-            "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.6966034141531933",
+            "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.11576840770634367",
             "status": 200
           },
           {
             "method": "GET",
-            "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.35066258104707604",
+            "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.5082364688862607",
             "status": 200
           },
           {
@@ -105,23 +105,39 @@
         "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-query",
         "status": 200,
         "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}",
-        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782131172259,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000006310674876,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000006310674877,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000006310674879,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1782048365366,\"planNum\":1.000000,\"planStartTime\":1782044765366,\"produceBatchNum\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000006310674875,\"name\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000006310674877,\"tableNo\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784720934435,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622114844_WOMSTART_HOLD",
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782134416703,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000006343993283,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000006343993284,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000006343993286,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1782051609163,\"planNum\":1.000000,\"planStartTime\":1782048009163,\"produceBatchNum\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000006343993282,\"name\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000006343993284,\"tableNo\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784725994613,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622131306_WOMSTART_HOLD",
         "json": {
           "code": 200,
           "message": "操作成功",
           "data": {
             "pageNo": 1,
             "pageSize": 20,
-            "totalCount": 200,
-            "totalPages": 10,
+            "totalCount": 202,
+            "totalPages": 11,
             "resultCount": 20,
             "resultSample": [
+              {
+                "id": 9000006343993284,
+                "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
+                "taskRunState": "WOM_runState/runing",
+                "status": 99,
+                "version": 3,
+                "produceBatchNum": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH"
+              },
+              {
+                "id": 9000006339864476,
+                "tableNo": "ADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_TASK_TN",
+                "taskRunState": "WOM_runState/waitForRun",
+                "status": 99,
+                "version": 0,
+                "produceBatchNum": "ADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_BATCH"
+              },
               {
                 "id": 9000006310674877,
                 "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
                 "taskRunState": "WOM_runState/runing",
                 "status": 99,
-                "version": 3,
+                "version": 5,
                 "produceBatchNum": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH"
               },
               {
@@ -139,22 +155,6 @@
                 "status": 99,
                 "version": 5,
                 "produceBatchNum": "ADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_BATCH"
-              },
-              {
-                "id": 9000006229150923,
-                "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
-                "taskRunState": "WOM_runState/runing",
-                "status": 99,
-                "version": 5,
-                "produceBatchNum": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_BATCH"
-              },
-              {
-                "id": 9000006216972059,
-                "tableNo": "ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_TASK_TN",
-                "taskRunState": "WOM_runState/runing",
-                "status": 99,
-                "version": 5,
-                "produceBatchNum": "ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_BATCH"
               }
             ]
           }
@@ -168,23 +168,39 @@
         "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
         "status": 200,
         "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}",
-        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782131172259,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000006310674876,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000006310674877,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000006310674879,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1782048365366,\"planNum\":1.000000,\"planStartTime\":1782044765366,\"produceBatchNum\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000006310674875,\"name\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000006310674877,\"tableNo\":\"ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784720934435,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622114844_W",
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782134416703,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000006343993283,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000006343993284,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000006343993286,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1782051609163,\"planNum\":1.000000,\"planStartTime\":1782048009163,\"produceBatchNum\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000006343993282,\"name\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000006343993284,\"tableNo\":\"ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784725994613,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260622131306_W",
         "json": {
           "code": 200,
           "message": "操作成功",
           "data": {
             "pageNo": 1,
             "pageSize": 20,
-            "totalCount": 145,
+            "totalCount": 147,
             "totalPages": 8,
             "resultCount": 20,
             "resultSample": [
+              {
+                "id": 9000006343993284,
+                "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
+                "taskRunState": "WOM_runState/runing",
+                "status": 99,
+                "version": 3,
+                "produceBatchNum": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH"
+              },
+              {
+                "id": 9000006339864476,
+                "tableNo": "ADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_TASK_TN",
+                "taskRunState": "WOM_runState/waitForRun",
+                "status": 99,
+                "version": 0,
+                "produceBatchNum": "ADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_BATCH"
+              },
               {
                 "id": 9000006310674877,
                 "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
                 "taskRunState": "WOM_runState/runing",
                 "status": 99,
-                "version": 3,
+                "version": 5,
                 "produceBatchNum": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH"
               },
               {
@@ -202,22 +218,6 @@
                 "status": 99,
                 "version": 5,
                 "produceBatchNum": "ADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_BATCH"
-              },
-              {
-                "id": 9000006229150923,
-                "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
-                "taskRunState": "WOM_runState/runing",
-                "status": 99,
-                "version": 5,
-                "produceBatchNum": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_BATCH"
-              },
-              {
-                "id": 9000006216972059,
-                "tableNo": "ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_TASK_TN",
-                "taskRunState": "WOM_runState/runing",
-                "status": 99,
-                "version": 5,
-                "produceBatchNum": "ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_BATCH"
               }
             ]
           }
@@ -366,7 +366,7 @@
         "method": "POST",
         "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
         "status": 200,
-        "postData": "state=hold&taskId=9000006310674877",
+        "postData": "state=hold&taskId=9000006343993284",
         "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"exeState\":{\"id\":\"WOM_runState/iskeep\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781280175568,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":\"6579611765194992\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"已保持\",\"leaf\":false,\"leaf2\":false,\"type\":null,\"code\":\"iskeep\",\"entityCode\":\"WOM_runState\",\"value\":\"已保持\",\"attribute\":false,\"memo\":\"\",\"sort\":13,\"defaultFlag\":false,\"zhCnValue\":null,\"codeDesA\":\"\",\"codeDesB\":\"\",\"codeDesC\":\"\",\"seqId\":null,\"uniqueCode\":\"WOM_runState/iskeep\",\"root\":true,\"children2\":[],\"isParent\":true}},\"message\":\"操作成功\"}",
         "json": {
           "code": 200,
@@ -422,7 +422,7 @@
         "method": "POST",
         "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
         "status": 200,
-        "postData": "state=restart&taskId=9000006310674877",
+        "postData": "state=restart&taskId=9000006343993284",
         "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"exeState\":{\"id\":\"WOM_runState/runing\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781280175568,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":\"6579611764769008\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"执行中\",\"leaf\":true,\"leaf2\":false,\"type\":null,\"code\":\"runing\",\"entityCode\":\"WOM_runState\",\"value\":\"执行中\",\"attribute\":false,\"memo\":\"\",\"sort\":96,\"defaultFlag\":false,\"zhCnValue\":null,\"codeDesA\":\"\",\"codeDesB\":\"\",\"codeDesC\":\"\",\"seqId\":null,\"uniqueCode\":\"WOM_runState/runing\",\"root\":true,\"children2\":[],\"isParent\":false}},\"message\":\"操作成功\"}",
         "json": {
           "code": 200,
@@ -488,17 +488,17 @@
       "clicked": true,
       "response": {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006310674877",
+        "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006343993284",
         "status": 200,
         "postData": null,
-        "body": "{\"result\":\"757989262755072\"}",
+        "body": "{\"result\":\"758002551887104\"}",
         "json": {
-          "result": "757989262755072"
+          "result": "758002551887104"
         }
       },
       "reportWorkResponse": {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006310674877&id=757989262755072&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006343993284&id=758002551887104&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
         "status": 200,
         "postData": null,
         "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--指令单完工报工-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"WOM_1.0.0_procReport_outPutCommonTaskEdit\", //  视图编码\n\t\t\t\"entityCode\":\"WOM_1.0.0_procReport\",// 实体编码\n\t\t\t\"menuCode\": \"WOM_1.0.0_procReport_outPutCommonTaskEdit\",\n\t\t\t\"viewName\": \"指令单完工报工\",// 视图名称\n\t\t\t\"viewType\": \"EDIT\",// 视图类型\n\t\t\t\"modelCode\": \"WOM_1.0.0_procReport_ProcReport\",// 模型编码\n\t\t\t\"moduleCode\": \"WOM_1.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"procReport\",// 模型别名\n",
@@ -930,8 +930,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -942,8 +942,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -967,8 +967,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -979,8 +979,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1004,8 +1004,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/iskeep",
       "status": 99,
       "batchContral": false,
@@ -1016,8 +1016,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/iskeep",
         "status": 99,
         "batchContral": false,
@@ -1041,8 +1041,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -1053,8 +1053,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1078,8 +1078,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -1090,8 +1090,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1115,8 +1115,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -1127,8 +1127,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1152,8 +1152,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -1164,8 +1164,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1189,8 +1189,8 @@
       "ok": true,
       "rowIndex": 0,
       "selectedCount": 1,
-      "selectedId": "9000006310674877",
-      "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "selectedId": "9000006343993284",
+      "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "taskRunState": "WOM_runState/runing",
       "status": 99,
       "batchContral": false,
@@ -1201,8 +1201,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1231,8 +1231,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1243,8 +1243,8 @@
           "ok": true,
           "rowIndex": 0,
           "selectedCount": 1,
-          "selectedId": "9000006310674877",
-          "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+          "selectedId": "9000006343993284",
+          "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
           "taskRunState": "WOM_runState/runing",
           "status": 99,
           "batchContral": false,
@@ -1270,8 +1270,8 @@
         "ok": true,
         "rowIndex": 0,
         "selectedCount": 1,
-        "selectedId": "9000006310674877",
-        "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "selectedId": "9000006343993284",
+        "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "taskRunState": "WOM_runState/runing",
         "status": 99,
         "batchContral": false,
@@ -1282,8 +1282,8 @@
           "ok": true,
           "rowIndex": 0,
           "selectedCount": 1,
-          "selectedId": "9000006310674877",
-          "tableNo": "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+          "selectedId": "9000006343993284",
+          "tableNo": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
           "taskRunState": "WOM_runState/runing",
           "status": 99,
           "batchContral": false,
@@ -1324,49 +1324,49 @@
     }
   },
   "persistence": {
-    "raw": "task|9000006310674877|ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN|WOM_runState/runing|99|5|2026-06-22 20:26:12.259|2026-06-22 20:27:35.495\nwait|9000006310674878|9000006310674877|WOM_runState/runing|757989262755072|WOM_BatchSyncStatus/done|2026-06-22 20:26:12.357",
+    "raw": "task|9000006343993284|ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN|WOM_runState/runing|99|5|2026-06-22 21:20:16.703|2026-06-22 21:22:13.457\nwait|9000006343993285|9000006343993284|WOM_runState/runing|758002551887104|WOM_BatchSyncStatus/done|2026-06-22 21:20:16.773",
     "rows": [
       [
         "task",
-        "9000006310674877",
-        "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+        "9000006343993284",
+        "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
         "WOM_runState/runing",
         "99",
         "5",
-        "2026-06-22 20:26:12.259",
-        "2026-06-22 20:27:35.495"
+        "2026-06-22 21:20:16.703",
+        "2026-06-22 21:22:13.457"
       ],
       [
         "wait",
-        "9000006310674878",
-        "9000006310674877",
+        "9000006343993285",
+        "9000006343993284",
         "WOM_runState/runing",
-        "757989262755072",
+        "758002551887104",
         "WOM_BatchSyncStatus/done",
-        "2026-06-22 20:26:12.357"
+        "2026-06-22 21:20:16.773"
       ]
     ],
     "task": [
       "task",
-      "9000006310674877",
-      "ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN",
+      "9000006343993284",
+      "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN",
       "WOM_runState/runing",
       "99",
       "5",
-      "2026-06-22 20:26:12.259",
-      "2026-06-22 20:27:35.495"
+      "2026-06-22 21:20:16.703",
+      "2026-06-22 21:22:13.457"
     ],
     "wait": [
       "wait",
-      "9000006310674878",
-      "9000006310674877",
+      "9000006343993285",
+      "9000006343993284",
       "WOM_runState/runing",
-      "757989262755072",
+      "758002551887104",
       "WOM_BatchSyncStatus/done",
-      "2026-06-22 20:26:12.357"
+      "2026-06-22 21:20:16.773"
     ]
   },
-  "verificationSql": "SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000006310674877;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, ''), coalesce(actual_start_time::text, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000006310674877;",
+  "verificationSql": "SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000006343993284;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, ''), coalesce(actual_start_time::text, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000006343993284;",
   "requests": [
     {
       "method": "GET",
@@ -1375,12 +1375,12 @@
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.6966034141531933",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.11576840770634367",
       "postData": null
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.35066258104707604",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.5082364688862607",
       "postData": null
     },
     {
@@ -1426,7 +1426,7 @@
     {
       "method": "POST",
       "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
-      "postData": "state=hold&taskId=9000006310674877"
+      "postData": "state=hold&taskId=9000006343993284"
     },
     {
       "method": "POST",
@@ -1456,7 +1456,7 @@
     {
       "method": "POST",
       "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
-      "postData": "state=restart&taskId=9000006310674877"
+      "postData": "state=restart&taskId=9000006343993284"
     },
     {
       "method": "POST",
@@ -1505,27 +1505,27 @@
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006310674877",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006343993284",
       "postData": null
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006310674877&id=757989262755072&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006343993284&id=758002551887104&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
       "postData": null
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.03219361705819357",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.3472096007023705",
       "postData": null
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.1874748509396582",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.263649219638844",
       "postData": null
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=757989262755072",
+      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=758002551887104",
       "postData": null
     },
     {
@@ -1540,7 +1540,7 @@
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/baseService/workbench/upload-list?linkId=757989262755072&type=WOM_procReport_ProcReport&viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit",
+      "url": "http://222.88.185.146:18080/msService/WOM/baseService/workbench/upload-list?linkId=758002551887104&type=WOM_procReport_ProcReport&viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit",
       "postData": null
     }
   ],
@@ -1552,12 +1552,12 @@
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.6966034141531933",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.11576840770634367",
       "status": 200
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.35066258104707604",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.5082364688862607",
       "status": 200
     },
     {
@@ -1642,6 +1642,16 @@
     },
     {
       "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200
+    },
+    {
+      "method": "POST",
       "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-query",
       "status": 200
     },
@@ -1666,43 +1676,33 @@
       "status": 200
     },
     {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006343993284",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006343993284&id=758002551887104&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.3472096007023705",
+      "status": 200
+    },
+    {
       "method": "POST",
       "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
       "status": 200
     },
     {
-      "method": "POST",
-      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.263649219638844",
       "status": 200
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/findProcReportIdByTaskId?taskId=9000006310674877",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006310674877&id=757989262755072&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
-      "status": 200
-    },
-    {
-      "method": "POST",
-      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.03219361705819357",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.1874748509396582",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=757989262755072",
+      "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=758002551887104",
       "status": 200
     },
     {
@@ -1712,7 +1712,7 @@
     },
     {
       "method": "GET",
-      "url": "http://222.88.185.146:18080/msService/WOM/baseService/workbench/upload-list?linkId=757989262755072&type=WOM_procReport_ProcReport&viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit",
+      "url": "http://222.88.185.146:18080/msService/WOM/baseService/workbench/upload-list?linkId=758002551887104&type=WOM_procReport_ProcReport&viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit",
       "status": 200
     },
     {
@@ -1729,7 +1729,7 @@
   "failures": [],
   "reportWorkRender": {
     "checked": true,
-    "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006310674877&id=757989262755072&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+    "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006343993284&id=758002551887104&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
     "navigation": {
       "status": 200
     },
@@ -1742,22 +1742,22 @@
     "responses": [
       {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006310674877&id=757989262755072&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006343993284&id=758002551887104&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
         "status": 200
       },
       {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.053995233868024295",
+        "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/i18n-value.js?0.13573710644238535",
         "status": 200
       },
       {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.2954174355828836",
+        "url": "http://222.88.185.146:18080/greenDill/static/WOM/procReport/procReport/outPutCommonTaskEdit/body-es5.js?v=0.27573877694364235",
         "status": 200
       },
       {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=757989262755072",
+        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/editStates?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&id=758002551887104",
         "status": 200
       },
       {
@@ -1767,7 +1767,7 @@
       },
       {
         "method": "GET",
-        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/data/757989262755072",
+        "url": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/data/758002551887104",
         "status": 200
       }
     ],
@@ -1783,14 +1783,14 @@
       "hasExpectedMarker": true,
       "hasExpectedBatchNo": true,
       "inputCount": 4,
-      "snippet": " *制单人 虚拟人员 *制单时间 生产批号 ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH *产品编码 ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT *产品名称 ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material 计划数量 1.00 *生产线名称 *生产区域 序号"
+      "snippet": " *制单人 虚拟人员 *制单时间 生产批号 ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH *产品编码 ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_MAT *产品名称 ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART material 计划数量 1.00 *生产线名称 *生产区域 序号"
     },
     "screenshot": "metadata/adp-wom-toolbar-report-work-render.png"
   },
   "stopDialog": {
     "hasReportWorkText": true,
-    "snippet": "全部 查 询 仅查待办 清 空 开始 保持 重启 结束 提前放料 请检 生产过程追溯 生成二维码 序号 单据编号 产品编码 产品名称 生产批号 配方编码 配方属性 生产线名称 执行状态 检验状态 检验结论 计划数量 完成数量 批控 允许提前放料 是否提前放料 报工模式 计划开始 计划结束 实际开始 实际结束 备注 1 ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH ADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_FORM 普通配方 执行中 1 0 2026-06-21 20:26:05 2026-06-21 21:26:05 2026-06-22 20:26:12 2 ADP_E2E_"
+    "snippet": "全部 查 询 仅查待办 清 空 开始 保持 重启 结束 提前放料 请检 生产过程追溯 生成二维码 序号 单据编号 产品编码 产品名称 生产批号 配方编码 配方属性 生产线名称 执行状态 检验状态 检验结论 计划数量 完成数量 批控 允许提前放料 是否提前放料 报工模式 计划开始 计划结束 实际开始 实际结束 备注 1 ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_MAT ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART material ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_FORM 普通配方 执行中 1 0 2026-06-21 21:20:09 2026-06-21 22:20:09 2026-06-22 21:20:16 2 ADP_E2E_"
   },
-  "bodyAfter": "全部\n查 询\n仅查待办\n清 空\n开始\n保持\n重启\n结束\n提前放料\n请检\n生产过程追溯\n生成二维码\n序号\n单据编号\n产品编码\n产品名称\n生产批号\n配方编码\n配方属性\n生产线名称\n执行状态\n检验状态\n检验结论\n计划数量\n完成数量\n批控\n允许提前放料\n是否提前放料\n报工模式\n计划开始\n计划结束\n实际开始\n实际结束\n备注\n1\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 20:26:05\n2026-06-21 21:26:05\n2026-06-22 20:26:12\n2\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 19:48:54\n2026-06-21 20:48:54\n2026-07-22 19:48:54\n3\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 18:31:04\n2026-06-21 19:31:04\n2026-06-22 18:31:10\n4\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 18:08:41\n2026-06-21 19:08:41\n2026-06-22 18:08:47\n5\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 17:48:24\n2026-06-21 18:48:24\n2026-06-22 17:48:31\n6\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 17:31:06\n2026-06-21 18:31:06\n2026-06-22 17:31:11\n7\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 16:31:10\n2026-06-21 17:31:10\n2026-06-22 16:31:16\n8\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 15:51:14\n2026-06-21 16:51:14\n2026-06-22 15:51:21\n9\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 15:46:16\n2026-06-21 16:46:16\n2026-07-22 15:46:16\n10\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 15:41:09\n2026-06-21 16:41:09\n2026-07-22 15:41:09\n11\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 15:02:58\n2026-06-21 16:02:58\n2026-06-22 15:03:05\n12\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 12:37:09\n2026-06-21 13:37:09\n2026-06-22 12:37:15\n13\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 12:16:54\n2026-06-21 13:16:54\n2026-06-22 12:17:01\n14\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 12:04:20\n2026-06-21 13:04:20\n2026-07-22 12:04:20\n15\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 11:46:07\n2026-06-21 12:46:07\n2026-06-22 11:46:14\n16\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 10:57:58\n2026-06-21 11:57:58\n2026-06-22 11:09:18\n17\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 10:14:17\n2026-06-21 11:14:17\n2026-06-22 10:29:25\n18\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 07:17:23\n2026-06-21 08:17:23\n2026-06-22 07:17:38\n19\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 06:44:57\n2026-06-21 07:44:57\n2026-06-22 06:45:05\n20\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 06:26:44\n2026-06-21 07:26:44\n2026-06-22 06:27:03\n21\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 04:31:25\n2026-06-21 05:31:25\n2026-06-22 04:31:33\n22\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 04:17:29\n2026-06-21 05:17:29\n2026-06-22 04:17:36\n23\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 03:07:31\n2026-06-21 04:07:31\n2026-06-22 03:21:58\n24\nADP_E2E_20260621180558_WOMSTART_TASK_TN\nADP_E2E_20260621180558_WOMSTART_MAT\nADP_E2E_20260621180558_WOMSTART material\nADP_E2E_20260621180558_WOMSTART_BATCH\nADP_E2E_20260621180558_WOMSTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 02:06:05\n2026-06-21 03:06:05\n2026-06-22 02:06:12\n25\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 01:39:01\n2026-06-21 02:39:01\n2026-06-22 01:39:10\n共 145 项\n1\n指令单完工报工\n保存\n完成\n关闭",
+  "bodyAfter": "全部\n查 询\n仅查待办\n清 空\n开始\n保持\n重启\n结束\n提前放料\n请检\n生产过程追溯\n生成二维码\n序号\n单据编号\n产品编码\n产品名称\n生产批号\n配方编码\n配方属性\n生产线名称\n执行状态\n检验状态\n检验结论\n计划数量\n完成数量\n批控\n允许提前放料\n是否提前放料\n报工模式\n计划开始\n计划结束\n实际开始\n实际结束\n备注\n1\nADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622131959_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622131959_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 21:20:09\n2026-06-21 22:20:09\n2026-06-22 21:20:16\n2\nADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622131306_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622131306_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 21:13:14\n2026-06-21 22:13:14\n2026-07-22 21:13:14\n3\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622122427_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 20:26:05\n2026-06-21 21:26:05\n2026-06-22 20:26:12\n4\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622114844_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 19:48:54\n2026-06-21 20:48:54\n2026-07-22 19:48:54\n5\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622103057_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 18:31:04\n2026-06-21 19:31:04\n2026-06-22 18:31:10\n6\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 18:08:41\n2026-06-21 19:08:41\n2026-06-22 18:08:47\n7\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622094817_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 17:48:24\n2026-06-21 18:48:24\n2026-06-22 17:48:31\n8\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622093058_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 17:31:06\n2026-06-21 18:31:06\n2026-06-22 17:31:11\n9\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622083104_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 16:31:10\n2026-06-21 17:31:10\n2026-06-22 16:31:16\n10\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622075108_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 15:51:14\n2026-06-21 16:51:14\n2026-06-22 15:51:21\n11\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622074610_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 15:46:16\n2026-06-21 16:46:16\n2026-07-22 15:46:16\n12\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 15:41:09\n2026-06-21 16:41:09\n2026-07-22 15:41:09\n13\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622070250_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 15:02:58\n2026-06-21 16:02:58\n2026-06-22 15:03:05\n14\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622043703_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 12:37:09\n2026-06-21 13:37:09\n2026-06-22 12:37:15\n15\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622041648_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 12:16:54\n2026-06-21 13:16:54\n2026-06-22 12:17:01\n16\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622040413_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 12:04:20\n2026-06-21 13:04:20\n2026-07-22 12:04:20\n17\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622034601_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 11:46:07\n2026-06-21 12:46:07\n2026-06-22 11:46:14\n18\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622025750_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 10:57:58\n2026-06-21 11:57:58\n2026-06-22 11:09:18\n19\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART material\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260622021411_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 10:14:17\n2026-06-21 11:14:17\n2026-06-22 10:29:25\n20\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 07:17:23\n2026-06-21 08:17:23\n2026-06-22 07:17:38\n21\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621224453_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 06:44:57\n2026-06-21 07:44:57\n2026-06-22 06:45:05\n22\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621222639_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 06:26:44\n2026-06-21 07:26:44\n2026-06-22 06:27:03\n23\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621203121_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 04:31:25\n2026-06-21 05:31:25\n2026-06-22 04:31:33\n24\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621201723_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 04:17:29\n2026-06-21 05:17:29\n2026-06-22 04:17:36\n25\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621190726_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 03:07:31\n2026-06-21 04:07:31\n2026-06-22 03:21:58\n共 147 项\n1\n指令单完工报工\n保存\n完成\n关闭",
   "screenshot": "metadata/wom-toolbar-row-smoke.png"
 }

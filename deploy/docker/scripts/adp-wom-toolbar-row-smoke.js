@@ -60,6 +60,27 @@ function ensureDir(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
+async function captureScreenshot(page, filePath, owner, label) {
+  ensureDir(filePath);
+  try {
+    await page.screenshot({
+      path: filePath,
+      fullPage: true,
+      timeout: Math.min(pageTimeoutMs, 30000),
+    });
+    return { ok: true, path: filePath };
+  } catch (error) {
+    const item = {
+      label,
+      path: filePath,
+      error: error.message,
+    };
+    owner.screenshotFailures = owner.screenshotFailures || [];
+    owner.screenshotFailures.push(item);
+    return { ok: false, ...item };
+  }
+}
+
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
@@ -776,8 +797,7 @@ async function verifyReportWorkRender(page, operation) {
       },
       { expectedMarker: marker, expectedBatchNo: batchNo }
     );
-    ensureDir(reportWorkScreenshotPath);
-    await renderPage.screenshot({ path: reportWorkScreenshotPath, fullPage: true });
+    render.screenshotCapture = await captureScreenshot(renderPage, reportWorkScreenshotPath, render, "reportWorkRender");
   } finally {
     await renderPage.close();
   }
@@ -1394,8 +1414,7 @@ async function runBrowser(ticket, report) {
     });
 
     report.bodyAfter = await page.locator("body").innerText();
-    ensureDir(screenshotPath);
-    await page.screenshot({ path: screenshotPath, fullPage: true });
+    report.screenshotCapture = await captureScreenshot(page, screenshotPath, report, "toolbarRow");
     report.screenshot = screenshotPath;
     report.knownBlockers.processAnalysis = {
       expectedGuard: "front-end dependency guard before missing ProcessAnalysis request",

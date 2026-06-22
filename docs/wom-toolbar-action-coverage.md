@@ -444,6 +444,29 @@ proxy-revalidate`。
 继续显示中文依赖提示，业务状态仍因缺 ProcessAnalysis 和 WOM printManage
 运行包接口保持 `BLOCKED`。
 
+2026-06-22 21:21 针对用户外出办公后截图中“这一排交互都有问题”再次复跑。
+先直接使用 `ADP_BROWSER_BASE_URL=http://100.99.133.43:18080` 复现，种子页面
+在 `vendors.antdicons.js`、`vendors.antd.js` 等核心静态包上出现
+`net::ERR_CONTENT_LENGTH_MISMATCH`，本机 `tailscale ping 100.99.133.43`
+仍走 `DERP(lax)`，延迟约 `407-445ms`；手工 `curl --compressed` 也确认
+`100.99` 下 `vendors.antdicons.js.gz` 在 30 秒内只收到部分字节，而同一测试环境
+公网入口能完整下载。随后使用 API/DB/SSH 入口
+`http://100.99.133.43:18080`、浏览器入口
+`http://222.88.185.146:18080` 执行
+`make smoke-wom-toolbar-row`。最新 marker
+`ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
+`9000006343993284`，`metadata/wom-toolbar-row-smoke.json` 记录
+`generatedAt=2026-06-22T13:21:24.930Z`、状态
+`PASS_WITH_KNOWN_BLOCKERS`、`failures=[]`。复验确认左侧筛选兜底为
+`全部`；`查询/仅查待办` 均 200；无选中 8 个行操作按钮统一提示
+`请先选择一条指令单！`；选中 marker 后 `保持/重启` 均
+`HTTP 200/dealSuccessFlag=true`，`结束` 打开真实 `指令单完工报工` 页面；
+页面无 `WOM.custom...` 或 `ec.common.tableNo` 泄漏。PostgreSQL 回读
+`wom_produce_tasks.id=9000006343993284 task_run_state=WOM_runState/runing/status=99/version=5`，
+`wom_wait_put_records.proc_report_id=758002551887104`。当前结论不变：
+WOM 工具栏业务交互已通过同环境公网入口复验；`100.99` 直连浏览器入口是静态包
+DERP 慢链路阻断，不应用来判断按钮逻辑是否失败。
+
 ## 动作矩阵
 
 | 动作 | API | 验收状态 | 点击证据 | 生产用例 | 落库/后端结论 | 问题 |
