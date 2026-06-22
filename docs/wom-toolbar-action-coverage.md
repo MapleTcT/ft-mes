@@ -390,7 +390,7 @@ WOM `makeTaskList` 的 `runtime_extra_view.view_json` 中没有
 `wom_produce_tasks.task_run_state=WOM_runState/runing/status=99/version=5`，
 `wom_wait_put_records.proc_report_id=757950510773504`。
 
-2026-06-22 18:09 针对截图中“这一排交互都有问题”的无选中路径追加前置守卫：
+2026-06-22 18:31 针对截图中“这一排交互都有问题”的无选中路径追加前置守卫：
 `makeTaskList/body.js` 与 `body-es5.js` 在整排行操作按钮点击前统一检查
 SupDataGrid 选择状态。无选中时，`开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码`
 都会先显示 `请先选择一条指令单！`，并阻止后续业务请求，避免继续出现
@@ -398,14 +398,14 @@ SupDataGrid 选择状态。无选中时，`开始/保持/重启/结束/提前放
 `100.99.133.43`，并重新执行：
 `ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_USERNAME=admin ADP_PASSWORD=123456 WOM_TOOLBAR_PAGE_TIMEOUT_MS=240000 make smoke-wom-toolbar-row`。
 结果 `PASS_WITH_KNOWN_BLOCKERS`，marker
-`ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART` / taskId `9000006229150923`。
+`ADP_E2E_20260622103057_WOMSTART_HOLD_RESTART` / taskId `9000006242571780`。
 `metadata/wom-toolbar-row-smoke.json` 记录 8 个按钮无选中均
 `selectedCount=0`、提示 `请先选择一条指令单！`、`raw=false`；选中 marker 后
 `查询/仅查待办` 均 `HTTP 200`，`清空` 可点击，`保持/重启` 均
 `HTTP 200/dealSuccessFlag=true`，`结束` 打开真实“指令单完工报工”页面。
-PostgreSQL 回读 `wom_produce_tasks.id=9000006229150923`
+PostgreSQL 回读 `wom_produce_tasks.id=9000006242571780`
 最终 `task_run_state=WOM_runState/runing/status=99/version=5`，
-`wom_wait_put_records.proc_report_id=757955491001600`。
+`wom_wait_put_records.proc_report_id=757960994657536`。
 
 ## 动作矩阵
 

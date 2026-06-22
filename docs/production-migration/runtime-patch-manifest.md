@@ -7,8 +7,8 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-06-22T10:16:59+00:00` |
-| Repo Commit | `1c06d331de47644110a73be7f439fbf3ecfa3461` |
+| Generated At | `2026-06-22T10:38:12+00:00` |
+| Repo Commit | `8a072c75a795c0027ed53a52a9a74e3ea3cbf794` |
 | Database Target | `PostgreSQL` |
 | Total Files | `326` |
 | Total Bytes | `24769482` |

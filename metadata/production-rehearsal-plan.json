@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T07:40:40+00:00",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-06-22T10:37:46+00:00",
+  "repoCommit": "8a072c75a795c0027ed53a52a9a74e3ea3cbf794",
   "database": "PostgreSQL",
   "status": "REHEARSAL_BLOCKED",
   "environment": {

@@ -4,8 +4,8 @@
 
 ## 摘要
 
-- Generated At：`2026-06-22T10:19:55+00:00`。
-- Repo Commit：`1c06d331de47644110a73be7f439fbf3ecfa3461`。
+- Generated At：`2026-06-22T10:40:27+00:00`。
+- Repo Commit：`8a072c75a795c0027ed53a52a9a74e3ea3cbf794`。
 - CI 阻断问题：`0`。
 - 迁移缺口：`1`。
 - 关注项：`2`。
@@ -29,7 +29,7 @@
 | parent-pom-oracle-legacy-profile | pass | no | defaultOracleDeps=0, legacyProfile=True, legacyOracleDeps=1 | Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。 |
 | runtime-config-no-oracle-defaults | pass | no | activeOracle=0, source=0, rendered=0, files=88 | Nacos source templates and rendered configs must default to PostgreSQL; Oracle-like defaults can only remain in comments, backlog, or explicit legacy templates. |
 | oracle-legacy-only | watch | no | Oracle migration backlog has 958 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
-| oracle-audit-current-and-classified | pass | no | generatedAt=2026-06-22T10:18:45+00:00, repoCommit=1c06d331de47644110a73be7f439fbf3ecfa3461, unclassified=0, findingCount=958, categoryTotal=958 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
+| oracle-audit-current-and-classified | pass | no | generatedAt=2026-06-22T10:39:07+00:00, repoCommit=8a072c75a795c0027ed53a52a9a74e3ea3cbf794, unclassified=0, findingCount=958, categoryTotal=958 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
 | backend-direct-oracle-deps | gap | no | 250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies. | 模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。 |
 | mapper-postgres-audit | pass | no | errors=0, warnings=0, findings=0 | 任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。 |
 | postgres-migration-governance | pass | no | 170 scripts, range=001-170, highRisk=0, watch=60 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
