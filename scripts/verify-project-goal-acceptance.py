@@ -206,6 +206,40 @@ def check_doc(failures: list[str]) -> None:
             fail(failures, f"goal acceptance document missing required text: {fragment}")
 
 
+def markdown_table_row(text: str, row_id: str) -> str:
+    prefix = f"| {row_id} |"
+    for line in text.splitlines():
+        if line.startswith(prefix):
+            return line
+    return ""
+
+
+def check_doc_wom_toolbar_row_evidence(
+    row_smoke: dict[str, Any],
+    failures: list[str],
+) -> None:
+    if not DOC_PATH.exists():
+        return
+    marker = str(row_smoke.get("marker") or "").strip()
+    task_id = str(row_smoke.get("taskId") or "").strip()
+    generated_at = str(row_smoke.get("generatedAt") or "").strip()
+    if not marker or not task_id or not generated_at:
+        return
+
+    text = DOC_PATH.read_text(encoding="utf-8")
+    for item_id in ("G-013", "G-018"):
+        row = markdown_table_row(text, item_id)
+        if not row:
+            fail(failures, f"goal acceptance document missing {item_id} table row")
+            continue
+        for fragment in (marker, task_id, generated_at):
+            if fragment not in row:
+                fail(
+                    failures,
+                    f"goal acceptance document {item_id} row must include latest WOM toolbar row smoke value: {fragment}",
+                )
+
+
 def check_artifact(item_id: str, artifact: Any, failures: list[str]) -> None:
     if not isinstance(artifact, str) or not artifact.strip():
         fail(failures, f"{item_id}.artifacts must contain non-empty relative paths")
@@ -827,6 +861,8 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
     persistence = read_json_file(PERSISTENCE_ACCEPTANCE_PATH, failures, "persistence acceptance report")
     row_smoke = read_json_file(WOM_TOOLBAR_ROW_SMOKE_PATH, failures, "WOM toolbar row smoke report")
     action_coverage = read_json_file(WOM_TOOLBAR_ACTION_COVERAGE_PATH, failures, "WOM toolbar action coverage report")
+    if row_smoke:
+        check_doc_wom_toolbar_row_evidence(row_smoke, failures)
     if not matrix:
         return
 
