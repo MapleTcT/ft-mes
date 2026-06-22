@@ -6,7 +6,10 @@
 
 ## 摘要
 
-- 总引用数：`827`。
+- Generated At：`2026-06-22T10:18:45+00:00`。
+- Repo Commit：`1c06d331de47644110a73be7f439fbf3ecfa3461`。
+- 总引用数：`958`。
+- 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
 
@@ -16,32 +19,32 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 165 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 186 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
-| postgres-compat-reference | 1 | PostgreSQL compatibility SQL may mention Oracle as source context. |
-| postgres-conversion-tooling | 26 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
+| postgres-compat-reference | 6 | PostgreSQL compatibility SQL may mention Oracle as source context. |
+| postgres-conversion-tooling | 35 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
-| runtime-config-backlog | 2 | Source Nacos config still carries Oracle fallback; rendered Docker config must override to PostgreSQL. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 166 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 264 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 
 | File | Findings |
 | --- | --- |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/oracle/rbac_1.sql | 61 |
-| scripts/generate-oracle-migration-audit.py | 39 |
-| scripts/generate-oracle-replacement-status.py | 35 |
+| scripts/generate-oracle-replacement-status.py | 52 |
+| scripts/generate-oracle-migration-audit.py | 47 |
+| scripts/verify-project-goal-acceptance.py | 38 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mysql/syscode_1.sql | 34 |
+| scripts/verify-module-intake-precheck.py | 33 |
 | docs/oracle-to-postgres-transition.md | 30 |
 | scripts/generate-backend-dependency-inventory.py | 24 |
 | backend/modules/com/supcon/supfusion/flow/flow-dao/1.0.0-RELEASE/META-INF/oracle/flow_1.sql | 20 |
+| docs/project-objectives.md | 20 |
 | scripts/precheck-module-intake.py | 20 |
-| docs/oracle-replacement-status.md | 18 |
-| docs/project-objectives.md | 18 |
 | backend/modules/com/supcon/supfusion/notification/admin-dao/1.0.0-SNAPSHOT/META-INF/oracle/ntfm_1.sql | 17 |
 | scripts/verify-source-modules.py | 17 |
 | docs/sustainable-development.md | 15 |
@@ -50,8 +53,8 @@
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mariadb/systemconfig_1.sql | 12 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |
 | deploy/docker/scripts/audit-postgres-mappings.py | 12 |
+| docs/backend-module-promotion-guide.md | 12 |
 | backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql | 11 |
-| docs/backend-module-promotion-guide.md | 11 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTaskServiceImpl.java | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mariadb/rbac_1.sql | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mysql/rbac_1.sql | 9 |
@@ -59,8 +62,7 @@
 | docs/backend-module-dependency-inventory.md | 9 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml | 8 |
 | backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java | 8 |
-| .github/ISSUE_TEMPLATE/oracle-postgres-migration.yml | 7 |
-| backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/META-INF/oracle/i18n_1.sql | 7 |
+| deploy/docker/scripts/adp-nacos-config-drift-smoke.js | 8 |
 
 ## 优先 Backlog 样例
 
@@ -112,10 +114,10 @@
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/scheduler/datasourceEdit.ftl | 32 | recovered-source-backlog | oracle-keyword | <option value="ORACLE"<#if schedulerDatasource?? && schedulerDatasource.datasourceType = "ORACLE">selected</#if>>${getText('ec.scheduler.datasource.datasourceType.oracle')}</option> |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/META-INF/keyFile/keyfile-db.txt | 6 | recovered-source-backlog | rownum | RAW ,RENAME ,RESOURCE, REVOKE, ROW, ROWID ,ROWNUM, ROWS ,SELECT ,SESSION, SET, SHARE ,SIZE ,SMALLINT, START , |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/META-INF/keyFile/keyfile-db.txt | 7 | recovered-source-backlog | sysdate | SUCCESSFUL ,SYNONYM ,SYSDATE, TABLE, THEN ,TO ,TRIGGER, UID ,UNION, UNIQUE, UPDATE, USER, VALIDATE, VALUES ,VARCHAR, |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java | 551 | recovered-source-backlog | oracle-keyword | } else if (entityDao.getDBType() == IBaseDao.DBTYPE.ORACLE) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1006 | recovered-source-backlog | oracle-keyword | } else if (dbName.startsWith("oracle")) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1024 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1025 | recovered-source-backlog | oracle-keyword | dbName = "oracle"; |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/EntityServiceImpl.java | 557 | recovered-source-backlog | oracle-keyword | } else if (entityDao.getDBType() == IBaseDao.DBTYPE.ORACLE) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1012 | recovered-source-backlog | oracle-keyword | } else if (dbName.startsWith("oracle")) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1030 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ModelServiceImpl.java | 1031 | recovered-source-backlog | oracle-keyword | dbName = "oracle"; |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 78 | recovered-source-backlog | oracle-keyword | } else if ("oracle".equals(sqlModel.getCurrentDbType())) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 94 | recovered-source-backlog | oracle-keyword | sqlModel.setOracleView(getDbViewSql(sqlModel.getCurrentDbSql(), "oracle", tableName, inherents, isMain)); |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/SqlModelServiceImpl.java | 99 | recovered-source-backlog | oracle-keyword | sqlModel.setOracleView(getDbViewSql(sqlModel.getOracleSql(), "oracle", tableName, inherents, isMain)); |

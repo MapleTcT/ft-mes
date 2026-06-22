@@ -499,8 +499,12 @@ DECLARE
   msg_table text;
 BEGIN
   FOR month_suffix IN
-    SELECT to_char(date_trunc('month', current_date) + make_interval(months => delta_month), 'YYYYMM')
-    FROM generate_series(-1, 1) AS gs(delta_month)
+    SELECT EXTRACT(YEAR FROM month_start)::integer::text ||
+           lpad(EXTRACT(MONTH FROM month_start)::integer::text, 2, '0')
+    FROM (
+      SELECT date_trunc('month', current_date) + make_interval(months => delta_month) AS month_start
+      FROM generate_series(-1, 1) AS gs(delta_month)
+    ) AS generated_months
   LOOP
     task_table := 'notice_task_' || month_suffix;
     msg_table := 'notice_msg_' || month_suffix;

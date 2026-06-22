@@ -25,9 +25,19 @@
 make module-intake-check INTAKE=/path/to/package-or-dir
 ```
 
-该检查会扫描目录、源码文件和 zip/jar 包，但不会解包或修改候选内容。阻断项包括默认路径里的 Oracle JDBC 依赖、Oracle URL/driver/dialect 和 Oracle mapper/resource 路径；关注项包括二进制包和常见 SQL 方言风险。
+该检查会扫描目录、源码文件和 zip/jar/war/ear 包，并对业务包中常见的内层 zip/jar/war/ear 做有界递归读取；它不会解包到磁盘，也不会修改候选内容。报告中的内层文件会以 `outer.zip!inner.jar!path` 形式展示。无法检查的压缩包，例如 `.7z`、`.rar`、`.tar.gz`，会作为阻断项处理，必须先重新打包为可检查格式或单独完成准入报告。其他阻断项包括默认路径里的 Oracle JDBC 依赖、Oracle URL/driver/dialect 和 Oracle mapper/resource 路径；关注项包括二进制包和常见 SQL 方言风险。
+
+每份准入报告都必须保留 `scanPolicy` 和 `scanCoverage`。如果 `textCoverageComplete=false` 或 `hasUnsupportedArchives=true`，说明候选包仍存在未完整读取或不可检查内容；即使阻断项已经被识别，也不能直接进入默认源码区，必须先重打包、补人工审计，或登记到模块 backlog。
 
 阻断项不能直接带入 `backend/source-modules`。如果只是考古对比，运行脚本时可以加 `--report-only` 保留报告，再把问题落到幂等 SQL 或模块 backlog。
+
+当前 `MES包/最新基础模块` 已有仓库内 report-only 准入账本：
+`metadata/module-intake-latest-basic-modules.json` 和
+`docs/module-intake-latest-basic-modules.md`。该账本记录 7z 不可检查包和
+`DataSet_6.1.2.2` 中 `jdbc:oracle:thin` 默认连接阻断项；扫描覆盖为
+`textScanned=9784/9806`、`textSkippedLarge=22`、`nestedFileCount=13990`、
+`maxArchiveDepthSeen=2`、`unsupportedArchiveCount=1`。这些阻断项和覆盖缺口处理前，
+相关包只能作为业务包证据或 backlog 输入，不能直接提升到默认源码区。
 
 ### 1. 建模块
 
@@ -121,6 +131,8 @@ make smoke-business
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
 - 接入来源已通过 `make module-intake-check`，或已有 report-only 报告和 backlog。
+- 真实候选包 report-only 账本通过 `make module-intake-candidate-report-check`。
+- 如果模块用于关闭生产 backlog，`make business-module-intake-requirements-check` 通过，且对应项已补真实浏览器/API/PostgreSQL 或文件响应证据。
 - 相关恢复模块依赖已在 [后端恢复模块依赖库存](backend-module-dependency-inventory.md) 中可追溯。
 - `mvn -q -DskipTests validate` 通过。
 - Oracle 默认依赖、默认配置、默认 mapper/resource 路径已移除。

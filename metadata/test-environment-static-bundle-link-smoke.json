@@ -1,0 +1,279 @@
+{
+  "generatedAt": "2026-06-22T10:09:22.203Z",
+  "database": "PostgreSQL",
+  "summary": {
+    "status": "PARTIAL",
+    "direct10099": "BLOCKED_BY_DERP_STATIC_BUNDLE_TRANSFER",
+    "publicIngress": "PASS_WITH_KNOWN_BLOCKERS",
+    "recommendation": "Use http://222.88.185.146:18080 for browser testing until Tailscale direct routing is fixed; keep SSH/API/DB verification on 100.99.133.43."
+  },
+  "tailscale": {
+    "target": "100.99.133.43",
+    "observedPath": "DERP relay lax from local Mac; direct connection not established",
+    "pingLatencyMsObservedRange": "453-797"
+  },
+  "direct10099": {
+    "baseUrl": "http://100.99.133.43:18080",
+    "browserBaseUrl": "http://100.99.133.43:18080",
+    "status": "FAIL",
+    "navigation": {
+      "status": 200,
+      "domContentLoaded": {
+        "ok": false,
+        "error": "page.waitForLoadState: Timeout 60000ms exceeded."
+      }
+    },
+    "failures": [
+      "page.waitForFunction: Timeout 180000ms exceeded.\n    at waitForGrid (/Users/zhangchu/Documents/ADP/adp-source-repo/deploy/docker/scripts/adp-wom-toolbar-row-smoke.js:257:14)\n    at runBrowser (/Users/zhangchu/Documents/ADP/adp-source-repo/deploy/docker/scripts/adp-wom-toolbar-row-smoke.js:703:11)\n    at async main (/Users/zhangchu/Documents/ADP/adp-source-repo/deploy/docker/scripts/adp-wom-toolbar-row-smoke.js:864:5)"
+    ],
+    "requestFailures": [
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/greenDill/static/scripts/vendors.echarts.js?v=1663120692297",
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/greenDill/static/scripts/vendors.antdicons.js?v=1663120692297",
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/greenDill/static/scripts/vendors.sesgis.js?v=1663120692297",
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/greenDill/static/scripts/vendors.commons.js?v=1663120692297",
+        "failure": "net::ERR_CONTENT_LENGTH_MISMATCH"
+      }
+    ],
+    "console": [
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_CONTENT_LENGTH_MISMATCH"
+      },
+      {
+        "type": "error",
+        "text": "Failed to load resource: net::ERR_CONTENT_LENGTH_MISMATCH"
+      }
+    ]
+  },
+  "publicIngress": {
+    "baseUrl": "http://100.99.133.43:18080",
+    "browserBaseUrl": "http://222.88.185.146:18080",
+    "status": "PASS_WITH_KNOWN_BLOCKERS",
+    "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+    "taskId": "9000006229150923",
+    "i18n": {
+      "rawStart": "WOM.custom.randon1575958246066",
+      "rawTableNo": "ec.common.tableNo",
+      "getTextStart": "只有【待执行】的指令单可以开始！",
+      "getTextTableNo": "单据编号",
+      "guardInstalled": true,
+      "stateSyncPatched": true,
+      "translateInstalled": true,
+      "bodyTranslateInstalled": true,
+      "hasRawWomCustom": false,
+      "hasTableNoKey": false
+    },
+    "knownBlockers": {
+      "processAnalysis": {
+        "expectedGuard": "front-end dependency guard before missing ProcessAnalysis request",
+        "observed": true,
+        "guardedWithoutRequest": true,
+        "response": null,
+        "messageObserved": true,
+        "message": "生产过程追溯服务未部署或暂不可用！",
+        "dependencyStatus": "BLOCKED",
+        "businessBlocker": "ProcessAnalysis service/runtime metadata/menu/schema is still missing; the toolbar guard only prevents a broken click path."
+      },
+      "qrcode": {
+        "expectedGuard": "front-end dependency guard before missing WOM printManage QR request",
+        "observed": true,
+        "guardedWithoutRequest": true,
+        "response": null,
+        "messageObserved": true,
+        "message": "二维码生成页面未部署或暂不可用！",
+        "dependencyStatus": "BLOCKED",
+        "businessBlocker": "WOM printManage QR endpoint/package is still missing; route probe remains the backend blocker evidence."
+      }
+    },
+    "persistence": {
+      "raw": "task|9000006229150923|ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN|WOM_runState/runing|99|5|2026-06-22 18:08:47.253|2026-06-22 18:10:09.518\nwait|9000006229150924|9000006229150923|WOM_runState/runing|757955491001600|WOM_BatchSyncStatus/done|2026-06-22 18:08:47.298",
+      "rows": [
+        [
+          "task",
+          "9000006229150923",
+          "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "WOM_runState/runing",
+          "99",
+          "5",
+          "2026-06-22 18:08:47.253",
+          "2026-06-22 18:10:09.518"
+        ],
+        [
+          "wait",
+          "9000006229150924",
+          "9000006229150923",
+          "WOM_runState/runing",
+          "757955491001600",
+          "WOM_BatchSyncStatus/done",
+          "2026-06-22 18:08:47.298"
+        ]
+      ],
+      "task": [
+        "task",
+        "9000006229150923",
+        "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+        "WOM_runState/runing",
+        "99",
+        "5",
+        "2026-06-22 18:08:47.253",
+        "2026-06-22 18:10:09.518"
+      ],
+      "wait": [
+        "wait",
+        "9000006229150924",
+        "9000006229150923",
+        "WOM_runState/runing",
+        "757955491001600",
+        "WOM_BatchSyncStatus/done",
+        "2026-06-22 18:08:47.298"
+      ]
+    },
+    "dependencyGuardEvidence": {
+      "generatedAt": "2026-06-22T10:09:22.203Z",
+      "baseUrl": "http://100.99.133.43:18080",
+      "browserBaseUrl": "http://222.88.185.146:18080",
+      "source": "metadata/wom-toolbar-row-smoke.json",
+      "screenshot": "metadata/wom-toolbar-row-smoke.png",
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "taskId": "9000006229150923",
+      "staticBundle": {
+        "nginxGzipStaticOverride": "deploy/docker/nginx/adp.conf",
+        "guardedBody": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "guardedBodyEs5": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      },
+      "guardedButtons": {
+        "processAnalysis": {
+          "buttonId": "btn-prodprocessView",
+          "message": "生产过程追溯服务未部署或暂不可用！",
+          "missingRequestPrevented": true,
+          "forbiddenRequestFragments": [
+            "ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
+            "ProcessAnalysis/traceability"
+          ],
+          "requestsAfterClick": [
+            {
+              "method": "POST",
+              "status": 200,
+              "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending"
+            }
+          ],
+          "consoleErrors": [],
+          "failures": []
+        },
+        "qrcode": {
+          "buttonId": "btn-generateCode",
+          "message": "二维码生成页面未部署或暂不可用！",
+          "missingRequestPrevented": true,
+          "forbiddenRequestFragments": [
+            "WOM/printManage/printDate/generateCode",
+            "WOM/printManage/generateQrCode",
+            "WOM/printManage/backfill-printInfo"
+          ],
+          "requestsAfterClick": [],
+          "consoleErrors": [],
+          "failures": []
+        }
+      }
+    },
+    "latestToolbarRowSmoke": {
+      "generatedAt": "2026-06-22T10:09:22.203Z",
+      "report": "metadata/wom-toolbar-row-smoke.json",
+      "screenshot": "metadata/wom-toolbar-row-smoke.png",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "browserBaseUrl": "http://222.88.185.146:18080",
+      "baseUrl": "http://100.99.133.43:18080"
+    },
+    "generatedAt": "2026-06-22T10:09:22.203Z",
+    "source": "metadata/wom-toolbar-row-smoke.json",
+    "screenshot": "metadata/wom-toolbar-row-smoke.png"
+  },
+  "assetTransferEvidence": [
+    {
+      "host": "222.88.185.146",
+      "asset": "vendors.echarts.js.gz",
+      "contentLength": 283891,
+      "downloadResult": "complete",
+      "elapsedSeconds": 1
+    },
+    {
+      "host": "222.88.185.146",
+      "asset": "vendors.antdicons.js.gz",
+      "contentLength": 298025,
+      "downloadResult": "complete",
+      "elapsedSeconds": 0
+    },
+    {
+      "host": "222.88.185.146",
+      "asset": "vendors.commons.js.gz",
+      "contentLength": 718834,
+      "downloadResult": "complete",
+      "elapsedSeconds": 1
+    },
+    {
+      "host": "222.88.185.146",
+      "asset": "list.js.gz",
+      "contentLength": 123328,
+      "downloadResult": "complete",
+      "elapsedSeconds": 0
+    },
+    {
+      "host": "100.99.133.43",
+      "asset": "vendors.echarts.js.gz",
+      "contentLength": 283891,
+      "downloadResult": "timeout_partial",
+      "receivedBytes": 84429,
+      "elapsedSeconds": 45,
+      "error": "unexpected end of file"
+    },
+    {
+      "host": "100.99.133.43",
+      "asset": "vendors.antdicons.js.gz",
+      "contentLength": 298025,
+      "downloadResult": "complete_slow",
+      "elapsedSeconds": 41
+    },
+    {
+      "host": "100.99.133.43",
+      "asset": "vendors.commons.js.gz",
+      "contentLength": 718834,
+      "downloadResult": "timeout_partial",
+      "receivedBytes": 353361,
+      "elapsedSeconds": 45,
+      "error": "unexpected end of file"
+    },
+    {
+      "host": "100.99.133.43",
+      "asset": "list.js.gz",
+      "contentLength": 123328,
+      "downloadResult": "complete_slow",
+      "elapsedSeconds": 26
+    }
+  ],
+  "evidenceFiles": {
+    "directReport": "/tmp/adp-wom-toolbar-row-smoke-10099-current.json",
+    "publicReport": "metadata/wom-toolbar-row-smoke.json",
+    "publicScreenshot": "/tmp/adp-wom-toolbar-row-smoke.png"
+  }
+}

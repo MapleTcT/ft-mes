@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-06-20T00:00:00+08:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "host": "100.99.133.43",
+  "status": "NO_DEDICATED_BAD_QUANTITY_ENTRY_FOUND",
+  "summary": {
+    "sourceHits": 4,
+    "runtimeViews": 6,
+    "explicitBadColumns": 4,
+    "acceptedQcsWomPaths": 5,
+    "remainingBlockers": 2
+  },
+  "sourceEvidence": [
+    {
+      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/core/src/main/java/com/supcon/orchid/QCS/entities/QCSUnQlfDeal.java",
+      "lines": "120-151",
+      "finding": "QCSUnQlfDeal stores report/material/batch/reason/dealer fields, not a numeric bad quantity."
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/service/src/main/java/com/supcon/orchid/QCS/controllers/QCSUnQlfDealController.java",
+      "lines": "727-740, 1766-1769",
+      "finding": "Controller exposes treatment save/submit and public createUnQlfDeal; no standalone bad quantity endpoint was found."
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/service/src/main/java/com/supcon/orchid/QCS/services/impl/QCSUnQlfDealServiceImpl.java",
+      "lines": "8275-8534",
+      "finding": "createUnQlfDealForOtherModule creates a treatment document from an effective unqualified inspection report and workflow config."
+    },
+    {
+      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMQCSServiceImpl.java",
+      "lines": "848-898",
+      "finding": "Unqualified pass-check returns needRejectReport=1; a code comment still marks bad product treatment as a follow-up path."
+    }
+  ],
+  "runtimeEvidence": [
+    {
+      "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportList",
+      "label": "产品检验报告列表",
+      "status": "present"
+    },
+    {
+      "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportEdit",
+      "label": "产品检验报告编辑",
+      "status": "present"
+    },
+    {
+      "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
+      "label": "产品不合格品处理列表",
+      "status": "present-query-delete-no-add-button"
+    },
+    {
+      "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealEdit",
+      "label": "产品不合格品处理编辑",
+      "status": "present-no-quantity-field-in-runtime-json"
+    }
+  ],
+  "databaseEvidence": {
+    "explicitBadColumnSql": "select table_name,column_name,data_type from information_schema.columns where table_schema='public' and (table_name like 'qcs_%' or table_name like 'wom_%') and (lower(column_name) like '%bad%' or lower(column_name) like '%defect%' or lower(column_name) like '%scrap%' or lower(column_name) like '%unqualified%' or lower(column_name) like '%unqlf%' or lower(column_name) like '%un_qlf%') order by table_name, ordinal_position;",
+    "explicitBadColumnRows": [
+      {
+        "table": "qcs_inspect_reports",
+        "column": "un_qlf_deal_flag",
+        "type": "boolean"
+      },
+      {
+        "table": "qcs_table_types",
+        "column": "un_qlf_code_rule",
+        "type": "oid"
+      },
+      {
+        "table": "qcs_table_types",
+        "column": "un_qlf_code_rule_text_backup",
+        "type": "text"
+      },
+      {
+        "table": "qcs_un_qlf_deals",
+        "column": "un_qlf_reason",
+        "type": "character varying"
+      }
+    ],
+    "quantityAndResultColumns": [
+      "qcs_inspects.quantity",
+      "qcs_inspect_reports.check_result",
+      "qcs_inspect_reports.un_qlf_deal_flag",
+      "qcs_report_coms.check_result",
+      "wom_produce_tasks.finish_num",
+      "wom_produce_tasks.check_result",
+      "wom_produce_tasks.rejects_deal_id",
+      "wom_produce_task_exelog.finish_num",
+      "wom_produce_task_exelog.check_result",
+      "wom_produce_task_exelog.rejects_deal_id",
+      "baseset_batch_infos.check_result",
+      "baseset_batch_infos.is_available",
+      "baseset_batch_infos.active_batch_state_id",
+      "baseset_batch_infos.rejects_deal_id"
+    ]
+  },
+  "acceptedEvidence": [
+    {
+      "marker": "ADP_E2E_20260618_UNQLF_AUTO_DEAL_3",
+      "status": "PASS",
+      "meaning": "QCS unqualified report effective state automatically generated qcs_un_qlf_deals and pending task."
+    },
+    {
+      "marker": "ADP_E2E_20260618_UNQLF_DEAL_EFFECT",
+      "status": "PASS",
+      "meaning": "QCS unqualified treatment effective state backfilled WOM rejects_deal_id."
+    },
+    {
+      "marker": "ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE",
+      "status": "PASS",
+      "meaning": "degradedRelease treatment decision persisted and backfilled WOM/batch state."
+    },
+    {
+      "marker": "ADP_E2E_20260619_QCS_RETURN_1",
+      "status": "PASS",
+      "meaning": "return treatment decision persisted and backfilled WOM/batch state."
+    },
+    {
+      "marker": "ADP_E2E_20260619_QCSBAD",
+      "status": "PASS",
+      "meaning": "Direct unqualified syncInspectReport backfilled WOM task/exelog/wait and batch availability."
+    }
+  ],
+  "remainingBlockers": [
+    {
+      "blocker": "standaloneBadQuantity",
+      "status": "BLOCKED",
+      "reason": "No recovered frontend route, runtime button, source endpoint, or PostgreSQL table column maps to an independent bad quantity registration action."
+    },
+    {
+      "blocker": "inventoryStockIn",
+      "status": "BLOCKED",
+      "reason": "material tenant service is absent from current deployment, so checkProdResult and generateProduceOutSing return 503."
+    }
+  ]
+}

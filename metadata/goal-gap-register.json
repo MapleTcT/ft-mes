@@ -1,0 +1,1722 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T10:14:45+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "status": "IN_PROGRESS_NOT_COMPLETE",
+  "sourceLedgers": {
+    "projectGoalAcceptance": "metadata/project-goal-acceptance.json",
+    "productionModuleTestCases": "metadata/production-module-test-cases.json",
+    "productionModuleBlockers": "metadata/production-module-blockers.json",
+    "productionModuleBacklog": "metadata/production-module-backlog.json",
+    "businessDependencyReadiness": "metadata/business-dependency-readiness-smoke.json",
+    "businessPackageScan": "metadata/business-dependency-package-scan.json",
+    "productionExportReadiness": "metadata/production-export-readiness-smoke.json",
+    "productionMigrationReadiness": "metadata/production-migration-readiness.json",
+    "productionCutoverGate": "metadata/production-cutover-gate.json",
+    "productionRehearsalPlan": "metadata/production-rehearsal-plan.json",
+    "persistenceAcceptance": "metadata/persistence-acceptance.json"
+  },
+  "summary": {
+    "goalItems": 20,
+    "readyGoals": 9,
+    "partialGoals": 9,
+    "blockedGoals": 2,
+    "goalGaps": 11,
+    "productionCasesByStatus": {
+      "PASS": 37,
+      "BLOCKED": 6
+    },
+    "productionBlockedCases": 6,
+    "productionBlockers": 6,
+    "productionBacklogItems": 9,
+    "dependencyStatus": "BLOCKED",
+    "dependencyBlocked": 2,
+    "productionExportStatus": "BLOCKED",
+    "productionExportReady": 0,
+    "productionExportActionRequired": 1,
+    "productionExportBlocked": 5,
+    "productionExportVerifiedDataExports": 0,
+    "migrationReadinessStatus": "NOT_READY_FOR_PRODUCTION_MIGRATION",
+    "migrationTracksPlanned": 8,
+    "migrationTracksBlocked": 1,
+    "cutoverGateStatus": "NOT_READY_FOR_PRODUCTION_CUTOVER",
+    "cutoverGatesPlanned": 8,
+    "cutoverGatesBlocked": 1,
+    "rehearsalStatus": "REHEARSAL_BLOCKED",
+    "rehearsalTracksPlanned": 8,
+    "rehearsalTracksBlocked": 1
+  },
+  "goalGaps": [
+    {
+      "id": "G-002",
+      "title": "当前内容迁移",
+      "status": "PARTIAL",
+      "scope": "把 Windows 交付包中可恢复的前端、后端、部署、SQL 和文档资产迁入新仓库。",
+      "currentEvidence": [
+        "current content inventory is tracked and checked by make inventory-check"
+      ],
+      "blockingIssues": [
+        "业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。"
+      ],
+      "nextActions": [
+        "后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。"
+      ],
+      "artifacts": [
+        "docs/current-content-inventory.md",
+        "metadata/current-content-inventory.json",
+        "frontend/README.md",
+        "backend/README.md"
+      ]
+    },
+    {
+      "id": "G-003",
+      "title": "Oracle 替换为 PostgreSQL 默认路径",
+      "status": "PARTIAL",
+      "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
+      "currentEvidence": [
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=958, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 958 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears.",
+        "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
+        "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
+        "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
+        "WOM updateTaskState dependency WOM_WAIT_PUT_RECORDS is covered by deploy/docker/postgres/init/079-wom-wait-put-records-table.sql and was verified on 10.11.100.17",
+        "WOM outPutCommonTaskEdit runtime linkage is covered by deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql and 085-wom-output-common-task-edit-view-linkage.sql and was verified on 10.11.100.17",
+        "WOM output-detail finish_num sync is covered by deploy/docker/postgres/init/101-wom-output-finish-num-sync.sql after real output-detail report-work acceptance",
+        "WOM process start/end PostgreSQL gaps are covered by deploy/docker/postgres/init/104-rm-process-actives-table.sql, deploy/docker/postgres/init/105-wom-process-procsort-convert-compat.sql, and deploy/docker/postgres/init/106-wom-process-wait-end-time-sync.sql after real frontend process acceptance.",
+        "真实候选包准入报告 metadata/module-intake-latest-basic-modules.json 现在记录 scanPolicy/scanCoverage：2026-06-22 复扫 /Users/zhangchu/Documents/MES包/最新基础模块 为 report-only，fileCount=13996、nestedFileCount=13990、maxArchiveDepthSeen=2、textScanned=9784/9806、textSkippedLarge=22、unsupportedArchiveCount=1；3 个阻断项仍是 1 个 7z 不可检查包和 DataSet DbUtils.java 两处 jdbc:oracle:thin，由 make module-intake-candidate-report-check 和 make module-intake-precheck-regression-check 校验。"
+      ],
+      "blockingIssues": [
+        "Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies."
+      ],
+      "nextActions": [
+        "逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。"
+      ],
+      "artifacts": [
+        "docs/oracle-replacement-status.md",
+        "metadata/oracle-replacement-status.json",
+        "scripts/generate-oracle-replacement-status.py",
+        "docs/oracle-migration-backlog.md",
+        "metadata/oracle-migration-audit.json",
+        "scripts/generate-oracle-migration-audit.py",
+        "deploy/nacos-config",
+        "deploy/docker/nacos-rendered",
+        "deploy/docker/.env.oracle-legacy.example",
+        "scripts/precheck-module-intake.py",
+        "scripts/verify-module-intake-precheck.py",
+        "scripts/verify-module-intake-candidate-report.py",
+        "metadata/module-intake-latest-basic-modules.json",
+        "docs/module-intake-latest-basic-modules.md"
+      ]
+    },
+    {
+      "id": "G-012",
+      "title": "基础配置",
+      "status": "PARTIAL",
+      "scope": "基础配置、实体配置、系统配置和配置类页面 CRUD。",
+      "currentEvidence": [
+        "configuration-related PostgreSQL init scripts and business page smoke exist",
+        "system code dictionary entity/value CRUD has marker ADP_E2E_20260615161445_SYSCODE PostgreSQL evidence for sys_entity and sys_code create/update/soft-delete",
+        "system config app catalog/config/value create, update/read, and delete cleanup passed with marker ADP_E2E_20260620005540_SCFG against systemconfig_config_catalog, systemconfig_config_info, and systemconfig_config_version",
+        "2026-06-20 current-address system code dictionary entity/value CRUD passed on public browser ingress http://222.88.185.146:18080 with API/baseUrl http://100.99.133.43:18080 and PostgreSQL verification on 100.99.133.43; marker ADP_E2E_20260620072542_SYSCODE, report /tmp/adp-systemcode-persistence-1009913343-current.json.",
+        "2026-06-20 current-address system config app catalog/config/value create, update/read, and delete cleanup passed on public browser ingress http://222.88.185.146:18080 with API/baseUrl http://100.99.133.43:18080 and PostgreSQL verification on 100.99.133.43; marker ADP_E2E_20260620073225_SCFG, report /tmp/adp-systemconfig-persistence-1009913343-current.json and metadata/systemconfig-persistence-acceptance.json.",
+        "2026-06-21 current-address systemconfig built-in catalog read-only smoke passed for 7/7 expected built-in catalogs. Browser route /systemconfig/#/sysconfig returned 200, catalog list/detail APIs passed, PostgreSQL systemconfig_config_catalog rows were verified, browserErrors=0, 4 sensitive catalogs are read-only, edit-policy boundaries are recorded, and config values are saved only as count/hash summaries; evidence metadata/systemconfig-builtins-readiness-smoke.json.",
+        "2026-06-21 current-address QCS controlled runtime config acceptance passed for reportShowIndexRange: real /systemconfig/#/sysconfig browser context saved ADP_E2E_*_SCFG_QCS_RUNTIME through PUT /inter-api/systemconfig/v1/config/catalog/value, detail API and module/key read returned the marker, PostgreSQL systemconfig_config_info saw the marker, rollback restored qualityStd, and remote PostgreSQL was rechecked after rollback; evidence metadata/systemconfig-controlled-runtime-config-acceptance.json.",
+        "2026-06-21 QCS controlled-config rollback follow-up regression passed for WOM checkoutBill quality-active inspection generation: marker ADP_E2E_20260621055313_WOM_CHECKOUTBILL returned HTTP 200/code=200 and PostgreSQL verified wom_task_actives, wom_wait_put_records, wom_proc_reports, wom_acti_exelogs, qcs_inspects, qcs_inspect_stds, qcs_inspect_coms and baseset_batch_infos. The run exposed PostgreSQL legacy LIKE typing issues in EC_MODULE.code LIKE 'QCS_%', fixed by SQL 166 and 167; evidence metadata/qcs-runtime-config-wom-checkoutbill-regression.json.",
+        "2026-06-21 current-address runtime configuration readiness smoke passed: metadata/runtime-configuration-readiness-smoke.json verifies 5/5 read-only configuration APIs/pages, 4/4 real browser configuration pages, PostgreSQL ec_entity/ec_model/ec_field/ec_view/runtime_view/runtime_extra_view/runtime_button metadata, and rbac_menuinfo configuration menus with API base and browser base both http://100.99.133.43:18080.",
+        "2026-06-20 Nacos/Keycloak test-environment runtime smoke is now included in G-012 basic-config coverage: metadata/nacos-config-drift-smoke.json verifies 100.99.133.43 Nacos prod group configs, PostgreSQL datasource checks, JWT checks and 18/18 expected critical services healthy; metadata/keycloak-jwt-runtime-smoke.json verifies 19/19 Keycloak/JWT checks including realm public key, Nacos JWT hash sync, gateway login and current-user menu.",
+        "metadata/basic-config-coverage.json records G-012 as PARTIAL across 6 areas: 3 PASS, 3 PARTIAL, 0 NOT_RUN; make basic-config-coverage-check now prevents systemcode/systemconfig PASS evidence, test-environment Nacos/Keycloak runtime smoke, runtime configuration read-only readiness smoke, and built-in catalog read-only evidence from being misread as full basic-config completion.",
+        "metadata/basic-config-action-matrix.json records 16 basic-config actions as 6 PASS, 4 READ_ONLY_GUARDED, 3 CONTROLLED_MARKER_REQUIRED and 3 PLANNED; make basic-config-action-matrix-check cross-checks high-risk built-in catalogs, dedicated marker requirements, runtime readiness evidence, the G-012 coverage ledger, and QCS/RM/BaseSet controlled runtime config contracts against metadata/production-module-test-cases.json.",
+        "2026-06-21 systemconfig built-in catalog readiness passed 7/7 and runtime configuration readiness passed api=5/5 browser=4/4 with API base and browser base both http://100.99.133.43:18080.",
+        "2026-06-21 QCS controlled-config rollback follow-up regression passed for WOM createManuInspect manufacturing inspection creation: marker ADP_E2E_20260621061644_WOM_MANU_INSPECT returned HTTP 200/code=200/data.success=true and PostgreSQL verified wom_produce_tasks, wom_wait_put_records, wom_produce_task_exelog, baseset_batch_infos, qcs_inspects, qcs_inspect_stds and qcs_inspect_coms. Evidence metadata/qcs-runtime-config-wom-manu-inspect-regression.json.",
+        "2026-06-21 QCS controlled-config rollback follow-up regression passed for QCS report save/effective qualified chain: marker ADP_E2E_20260621065620_QCS_REPORT_QUAL saved and submitted qcs_inspect_reports.id=757554686948608 to status=99/check_result=合格 and PostgreSQL verified qcs_report_coms, wfm_task_pending, WOM task/wait/exelog and baseset batch qualified write-back. Evidence metadata/qcs-report-chain-qualified-current.json.",
+        "2026-06-21 QCS controlled-config rollback follow-up regression passed for QCS report save/effective unqualified chain: marker ADP_E2E_20260621070426_QCS_UNQLF saved and submitted qcs_inspect_reports.id=757556653315328 to status=99/check_result=不合格, wrote WOM/batch unqualified state, and auto-created qcs_un_qlf_deals.id=757556916282624. Evidence metadata/qcs-report-chain-unqualified-current.json.",
+        "2026-06-21 current-address RM.MQ controlled runtime config acceptance passed for brokerUrl: real /systemconfig/#/sysconfig browser context saved ADP_E2E_20260621072600_SCFG_RM_RUNTIME through PUT /inter-api/systemconfig/v1/config/catalog/value, detail API and module/key read returned the marker, PostgreSQL systemconfig_config_info saw the marker, rollback restored localhost, and remote PostgreSQL was rechecked after rollback; evidence metadata/systemconfig-controlled-runtime-config-rm-current.json.",
+        "2026-06-21 RM controlled-config rollback follow-up regression passed for RM batch sync/delete: marker ADP_E2E_20260621073500_RM_CFG_REG wrote rm_formulas.id=757563696166144 valid=true/status=88 through /batch/sync, then /batch/delete soft-deleted the same row to valid=false/status=0 with active rm_process_actives count 0. Evidence metadata/rm-runtime-config-batch-sync-regression.json.",
+        "BaseSet.isEnable controlled config evidence: metadata/systemconfig-controlled-runtime-config-baseset-current.json toggled true -> false -> true through the real systemconfig page, detail API, module read API and PostgreSQL before/after SQL.",
+        "BaseSet rollback regression evidence: metadata/baseset-runtime-config-wom-start-regression.json passed WOM start persistence and metadata/baseset-runtime-config-wom-manu-inspect-regression.json passed WOM createManuInspect/QCS inspection generation.",
+        "2026-06-22 customProperty low-code model mapping acceptance passed: real /supplant/#/customFieldModelManage browser context enabled TeamInfo_1.0.0_schedual_Schedule_bigintparama, edited ADP_E2E_20260621184706_CUSTOM_PROPERTY display metadata, verified base_cp_model_mapping plus runtime_property/project_property synchronization in PostgreSQL, restored/disabled and cleaned the test-created mapping. Evidence metadata/custom-property-persistence-acceptance.json; PostgreSQL compatibility SQL 169 exposes legacy project_property over runtime_property.",
+        "2026-06-22 entity/model config CRUD acceptance passed: marker ADP_E2E_202606221433_ENTITY_MODEL opened real browser-page context /msService/ec/engine/msManage, entity/model create/edit/delete requests all returned HTTP 200/success=true, backend trace covers EntityController/EntityServiceImpl/ModelController/ModelServiceImpl/DtoUtils and PostgreSQL verified ec_entity=1, ec_model=1, inherent ec_property=3, edit markers, soft-delete, and controlled cleanup to 0; evidence metadata/entity-model-config-crud-persistence-acceptance.json. PostgreSQL physical table auto-create is not claimed: the report records ModelSyncDBUtils has no PostgreSQL auto-create branch for DS_E2E_063301.",
+        "2026-06-22 PostgreSQL physical model table auto-create gap is now machine-tracked: basic config action entity-model-postgres-physical-table-autocreate remains PLANNED and coverage area configuration-physical-model-table remains PARTIAL until a real frontend marker proves information_schema.tables contains and then cleans the generated physical model table; evidence is tied to metadata/entity-model-config-crud-persistence-acceptance.json."
+      ],
+      "blockingIssues": [
+        "QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射和实体/模型元数据 CRUD 已分别完成 marker/typed mutation 保存、回读、PostgreSQL before/after 和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、PostgreSQL 物理模型表自动创建能力、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。"
+      ],
+      "nextActions": [
+        "继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。",
+        "低代码模型 PostgreSQL 物理表自动创建已登记为 action=entity-model-postgres-physical-table-autocreate / area=configuration-physical-model-table；需要补齐 ModelSyncDBUtils PostgreSQL 分支或产品风险接受、回滚方案和真实前端/落库验收，当前已验收的是实体/模型/内置属性元数据 CRUD。",
+        "继续把 Nacos/Keycloak 生产配置链路按 G-020 生产迁移前置项补齐 export/diff、迁移、登录 smoke 和回退证据。",
+        "保持 make acceptance-systemcode-persistence、make acceptance-systemconfig-persistence、make basic-config-coverage-check、make basic-config-action-matrix-check 和实体/模型 CRUD persistence 报告作为基础配置回归入口。"
+      ],
+      "artifacts": [
+        "docs/frontend-functional-test-report.md",
+        "docs/postgres-migration-index.md",
+        "docs/postgres-migration-watch-rationale.md",
+        "metadata/postgres-migration-inventory.json",
+        "deploy/docker/scripts/adp-systemcode-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js",
+        "metadata/systemconfig-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-systemconfig-builtins-readiness-smoke.js",
+        "metadata/systemconfig-builtins-readiness-smoke.json",
+        "deploy/docker/scripts/adp-systemconfig-controlled-runtime-config-acceptance.js",
+        "metadata/systemconfig-controlled-runtime-config-acceptance.json",
+        "metadata/qcs-runtime-config-wom-checkoutbill-regression.json",
+        "deploy/docker/postgres/init/166-postgres-legacy-bigint-text-like-operator.sql",
+        "deploy/docker/postgres/init/167-postgres-legacy-varchar-text-like-operator.sql",
+        "metadata/nacos-config-drift-smoke.json",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "deploy/docker/scripts/adp-runtime-configuration-readiness-smoke.js",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "docs/basic-config-coverage.md",
+        "metadata/basic-config-coverage.json",
+        "scripts/verify-basic-config-coverage.py",
+        "docs/basic-config-action-matrix.md",
+        "metadata/basic-config-action-matrix.json",
+        "scripts/verify-basic-config-action-matrix.py",
+        "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+        "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js",
+        "metadata/qcs-report-chain-qualified-current.json",
+        "metadata/qcs-report-chain-unqualified-current.json",
+        "metadata/systemconfig-controlled-runtime-config-rm-current.json",
+        "metadata/rm-runtime-config-batch-sync-regression.json",
+        "deploy/docker/scripts/adp-custom-property-persistence-acceptance.js",
+        "metadata/custom-property-persistence-acceptance.json",
+        "deploy/docker/postgres/init/169-custom-property-project-property-compat.sql",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/entity-model-config-crud-persistence-acceptance.json"
+      ]
+    },
+    {
+      "id": "G-013",
+      "title": "生产模块完整功能",
+      "status": "BLOCKED",
+      "scope": "生产模块主流程、状态流转、备料、投料、报工、退料、质量和追溯。",
+      "currentEvidence": [
+        "生产模块测试矩阵已更新为 43 条，当前 37 PASS / 6 BLOCKED / 0 NOT_RUN，其中 41 条 route smoke PASS。",
+        "metadata/production-module-blockers.json tracks all 6 BLOCKED production cases with blocker category, evidence refs, recheck commands, pass criteria, next actions, and non-solutions; make production-blocker-check enforces exact alignment with the test matrix and latestEvidence alignment with business-dependency readiness, package scan, and production-export readiness generatedAt/status/key counts.",
+        "metadata/production-module-backlog.json tracks 9 unresolved production backlog items, including the 6 BLOCKED production cases, WOM visible manual create/import scope confirmation, the public produceTaskCreated explicit-disabled product decision blocker, and WOM makeTaskList QR runtime endpoint 404; make production-module-backlog-check enforces coverage against the production matrix, blocker ledger, persistence FAIL/BLOCKED rows, and WOM toolbar BLOCKED actions without production case IDs.",
+        "动作源码地图登记 15 个 source action，12 个已具备 marker 落库条件。",
+        "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
+        "投入明细 wom_mat_consum_recods=0 已解释为当前人工投料源码路径行为。",
+        "ProcessAnalysis 追溯已形成专项缺失证据：100.99.133.43 Nacos 无实例，认证入口 503，PostgreSQL 无 runtime_view/rbac_menuinfo/目标表。",
+        "business dependency package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; no material-service or process-analysis implementation candidates were found.",
+        "metadata/business-dependency-contracts.json records material-service and process-analysis intake contracts as 2/2 BLOCKED, 4 unique production blocked cases, 7 required endpoint probes, 22 required acceptance stages, 2 startup compatibility evidence contracts and 8 startup smoke commands; make business-dependency-contract-check cross-checks the contracts against readiness smoke, package scan, production blocker ledger, production backlog and startup adaptation rules.",
+        "metadata/business-dependency-package-scan.json 以只读方式扫描 /Users/zhangchu/Documents/MES包，当前 material-service 与 process-analysis 均为 BLOCKED_NO_IMPLEMENTATION_CANDIDATE，candidateDependencies=0。",
+        "metadata/business-dependency-readiness-smoke.json 以只读方式复验 material-service 与 process-analysis 两个外部依赖，2026-06-21T13:46:42.816Z 当前地址刷新后仍为 2/2 BLOCKED：Nacos 无健康实例，material 两个认证依赖端点和 ProcessAnalysis 五个认证依赖端点仍返回 503，ProcessAnalysis DB/runtime/menu 元数据为 0；同步证据 /tmp/adp-business-dependency-readiness-smoke-current.json。",
+        "metadata/production-export-readiness-smoke.json 以真实浏览器页面、layoutJson 运行时元数据、downloadXls 文件响应和 sourceAudit 四层复验 PROD-023，2026-06-22T01:50:35.404Z 当前地址 API base=http://100.99.133.43:18080, browser base=http://222.88.185.146:18080，当前 5 BLOCKED / 1 ACTION_REQUIRED：pagePass=6、visibleExportActions=0、runtimeExportActions=0、nonEmptyDownloads=1、backendQueryExportWorkbooks=1、backendQueryExportErrors=4、verifiedDataExports=0、targetExportMatches=0；6 个目标页面全部可达，页面超时不再是当前导出阻断；WTS 作业许可后端 query-export 返回 200/OLE_XLS/8704，但仍缺可见/runtime 导出动作和目标导出 hook，其他生产导出目标仍有后端文件模式或 500 阻断。",
+        "2026-06-21 business module API/layout smoke passed 53/53 and browser page smoke passed 53/53. TeamInfo schedule plan marker ADP_E2E_20260620174940_TEAMINFO_SCHEDULE_PLAN and WOM start marker ADP_E2E_20260620180136_WOMSTART both passed PostgreSQL persistence. material service and ProcessAnalysis remain BLOCKED missing service packages/registrations.",
+        "2026-06-22 18:09 WOM makeTaskList 工具栏无选中和整排真实行点击复验完成：证据 metadata/wom-toolbar-row-smoke.json，截图 metadata/wom-toolbar-row-smoke.png；generatedAt=2026-06-22T10:09:22.203Z、status=PASS_WITH_KNOWN_BLOCKERS；marker=ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART，taskId=9000006229150923；API base=http://100.99.133.43:18080，browser base=http://222.88.185.146:18080；清空 SupDataGrid 选择后，开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 8 个按钮均显示“请先选择一条指令单！”且 raw=false、未发起行级业务请求；选中 marker 后，查询/仅查待办均 HTTP 200，清空可点击，开始/提前放料/请检均显示中文业务提示且无 WOM.custom/ec.common raw key，保持和重启 POST /updateTaskState 返回 200，结束打开真实指令单完工报工入口；PostgreSQL 回读 wom_produce_tasks.id=9000006229150923 最终 task_run_state=WOM_runState/runing/status=99/version=5，wom_wait_put_records.proc_report_id=757955491001600；生产过程追溯和生成二维码继续由前端守卫显示中文依赖提示且 guardedWithoutRequest=true，两者仍 BLOCKED 的根因是缺 ProcessAnalysis 服务和 WOM printManage 二维码运行包接口。"
+      ],
+      "blockingIssues": [
+        "剩余 6 条生产用例仍 BLOCKED：RM 批量配方外部 Batch 客户端编辑入口、material 物料/库存入库服务、ProcessAnalysis 追溯服务、完整报工中的独立不良数/库存边界、生产相关导出实现和产品范围确认仍缺真实 marker 或业务包证据。"
+      ],
+      "nextActions": [
+        "补齐外部 Batch 客户端、物料/库存、ProcessAnalysis 等业务包和入口后，先运行 make business-package-scan、make smoke-business-dependencies 和 make smoke-production-export-readiness，再从真实前端复验剩余 6 条 BLOCKED 用例并查 PostgreSQL。"
+      ],
+      "artifacts": [
+        "docs/production-module-functional-test-cases.md",
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-blockers.md",
+        "metadata/production-module-blockers.json",
+        "scripts/verify-production-module-blockers.py",
+        "docs/production-module-backlog.md",
+        "metadata/production-module-backlog.json",
+        "scripts/verify-production-module-backlog.py",
+        "metadata/production-module-source-action-map.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md",
+        "metadata/processanalysis-dependency-analysis.json",
+        "scripts/scan-business-dependency-packages.py",
+        "scripts/verify-business-dependency-package-scan.py",
+        "metadata/business-dependency-package-scan.json",
+        "docs/business-dependency-contracts.md",
+        "metadata/business-dependency-contracts.json",
+        "scripts/verify-business-dependency-contracts.py",
+        "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
+        "metadata/business-dependency-readiness-smoke.json",
+        "deploy/docker/scripts/adp-production-export-readiness-smoke.js",
+        "metadata/production-export-readiness-smoke.json",
+        "scripts/verify-production-export-readiness.py",
+        "metadata/persistence-acceptance.json",
+        "docs/wom-toolbar-action-coverage.md",
+        "metadata/wom-toolbar-action-coverage.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "scripts/verify-wom-toolbar-action-coverage.py"
+      ]
+    },
+    {
+      "id": "G-014",
+      "title": "Nacos 配置链路",
+      "status": "PARTIAL",
+      "scope": "Nacos 配置渲染、发布、生产差异、漂移检查和回退。",
+      "currentEvidence": [
+        "test deployment has render and publish scripts",
+        "make smoke-nacos-config can fetch running Nacos group prod over SSH",
+        "metadata/nacos-config-drift-smoke.json fetched 44/44 dataIds from 100.99.133.43 with 20/20 critical checks PASS and zero non-comment Oracle residue; group prod has 91 registered services and 18/18 expected platform/business services have healthy instances; 27 hash drifts remain for production review",
+        "make runtime-smoke-reports-check verifies the committed Nacos drift smoke report remains PASS for host 100.99.133.43, expected group prod/service checks, Oracle residue absence, and secret hygiene.",
+        "2026-06-21 Nacos config drift smoke PASS: 44 dataIds fetched, critical checks 20/20, expected services 18/18 healthy, oracleResidueFiles=0."
+      ],
+      "blockingIssues": [
+        "测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。"
+      ],
+      "nextActions": [
+        "导出生产 Nacos 配置，和 rendered 配置做差异账本。",
+        "生产发布前复跑 make smoke-nacos-config 指向目标环境，并逐项审阅 hash drift。"
+      ],
+      "artifacts": [
+        "deploy/docker/scripts/render-nacos-configs.py",
+        "deploy/docker/scripts/publish-nacos-configs.sh",
+        "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "metadata/nacos-config-drift-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ]
+    },
+    {
+      "id": "G-015",
+      "title": "Keycloak/JWT 链路",
+      "status": "PARTIAL",
+      "scope": "Keycloak realm、用户、client、JWT public key 同步和登录链路。",
+      "currentEvidence": [
+        "login smoke passed and Keycloak helper scripts exist",
+        "Keycloak source/target realm inventory and comparison tooling exists under deploy/keycloak/production-migration",
+        "metadata/keycloak-jwt-runtime-smoke.json passed 19/19 checks on 100.99.133.43: realm dt, pc_dt/mobile_dt, supos mappers, Nacos healthy keycloak registration, Keycloak public key to Nacos JWT hash sync, gateway login, and current-user menu",
+        "make runtime-smoke-reports-check verifies the committed Keycloak/JWT smoke report remains PASS for realm dt, client/scope expectations, public key hash consistency, gateway login/menu checks, and secret hygiene.",
+        "2026-06-21 Keycloak/JWT runtime smoke PASS: 19/19 checks, expected clients=2, supos mappers=17, Nacos JWT public key hash matches Keycloak."
+      ],
+      "blockingIssues": [
+        "测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。"
+      ],
+      "nextActions": [
+        "用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。",
+        "用 production-keycloak-compare 对账 clients、roles、client scopes、components 和 JWT key fingerprint。",
+        "做 realm export/import rehearsal，并验证 Nacos JWT public key 同步后登录/currentuser/menu/RBAC。",
+        "生产发布前复跑 make smoke-keycloak-jwt 指向目标环境，并补 secret 轮换和数据库备份恢复证据。"
+      ],
+      "artifacts": [
+        "deploy/docker/scripts/init-keycloak-realm.sh",
+        "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
+        "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "docs/production-migration/keycloak-production-runbook.md",
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+        "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py"
+      ]
+    },
+    {
+      "id": "G-016",
+      "title": "PostgreSQL 运行与迁移治理",
+      "status": "PARTIAL",
+      "scope": "PostgreSQL 默认运行、init SQL、mapper 方言审计和生产数据迁移。",
+      "currentEvidence": [
+        "make ci checks PostgreSQL migration inventory and mapper audit",
+        "make postgres-migration-check now verifies destructive reset statements are absent and watch statements are protected as DROP ... IF EXISTS or DELETE ... WHERE; docs/postgres-migration-watch-rationale.md currently records 60 watch statements with 0 safety issues.",
+        "PostgreSQL init SQL scripts are indexed, including 073-auth-user-lock-status-compat.sql for auth_user.error_count compatibility, 074-rbac-roleuser-valid-default.sql for rbac_roleuser.valid default compatibility, 075-rbac-data-resource-permission-tables.sql for RBAC data resource permissions, and 079-wom-wait-put-records-table.sql for WOM_WAIT_PUT_RECORDS",
+        "084-wom-output-common-task-edit-runtime-json.sql and 085-wom-output-common-task-edit-view-linkage.sql cover WOM outPutCommonTaskEdit runtime extra view/linkage for PostgreSQL default runtime",
+        "101-wom-output-finish-num-sync.sql covers WOM output-detail finish_num sync on PostgreSQL.",
+        "104-rm-process-actives-table.sql, 105-wom-process-procsort-convert-compat.sql, and 106-wom-process-wait-end-time-sync.sql cover WOM process start/end PostgreSQL compatibility found during real frontend acceptance.",
+        "107-qcs-inspect-detail-tables.sql covers QCS inspect/report detail and deal-info tables required by WOM inspection acceptance.",
+        "metadata/postgres-runtime-smoke.json passed 8/8 checks on 100.99.133.43: PostgreSQL 15.18, 1474 public tables, 150 views, 32/32 key tables, 15/15 compatibility columns, and 8/8 compatibility indexes.",
+        "make runtime-smoke-reports-check verifies the committed PostgreSQL runtime report remains PASS for host 100.99.133.43, expected key tables, compatibility columns/indexes, and secret hygiene.",
+        "2026-06-21 PostgreSQL runtime smoke PASS: publicTableCount=1474, publicViewCount=150, expected tables/columns/indexes all present.",
+        "166-postgres-legacy-bigint-text-like-operator.sql and 167-postgres-legacy-varchar-text-like-operator.sql cover PostgreSQL legacy LIKE operator resolution exposed by WOM checkoutBill/generate: EC_MODULE.code LIKE 'QCS_%' now stays text-compatible and returned count=1 on 100.99.133.43 before the QCS checkoutBill regression passed."
+      ],
+      "blockingIssues": [
+        "生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。"
+      ],
+      "nextActions": [
+        "用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。",
+        "生产发布前复跑 make smoke-postgres-runtime 指向目标/生产副本环境，并保存 runtime smoke 结果。"
+      ],
+      "artifacts": [
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json",
+        "deploy/docker/postgres/init/001-adp-postgres-compat.sql",
+        "deploy/database/production-migration/README.md",
+        "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+        "metadata/postgres-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "deploy/docker/postgres/init/166-postgres-legacy-bigint-text-like-operator.sql",
+        "deploy/docker/postgres/init/167-postgres-legacy-varchar-text-like-operator.sql"
+      ]
+    },
+    {
+      "id": "G-017",
+      "title": "runtime patch",
+      "status": "PARTIAL",
+      "scope": "运行包兼容 patch、页面 runtime metadata、回退和生产化。",
+      "currentEvidence": [
+        "runtime patch scripts exist",
+        "WOM action view JSON, reference view JSON, list button JSON SQL, and outPutCommonTaskEdit runtime JSON/linkage SQL are established",
+        "084/085 were applied to 10.11.100.17 and the minimal stop acceptance no longer has layoutJson frontend errors",
+        "WOM config default patch and WOMMs-prod test config support output-detail report-work acceptance.",
+        "metadata/runtime-patch-manifest.json and docs/production-migration/runtime-patch-manifest.md record current runtime patch, PostgreSQL init SQL, and Nacos template checksums.",
+        "Nacos/runtime patch 生产 evidence manifest 和 strict READY 校验器已建立。"
+      ],
+      "blockingIssues": [
+        "生产签名 patch 包、生产 Nacos diff、回退演练未补；QCS 请检明细表缺口已补齐，但 WOM 请检、质量/入库等动作仍缺 marker 业务数据验收。"
+      ],
+      "nextActions": [
+        "用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。",
+        "补生产 Nacos export/diff 和回滚步骤。",
+        "在 marker 数据准备后执行真实前端写动作并补 PostgreSQL before/after 证据。",
+        "用 production-nacos-runtime-patch-ready-check 把生产 Nacos export/diff、签名 patch 包、post-publish smoke 和回滚演练补成 READY evidence。"
+      ],
+      "artifacts": [
+        "deploy/docker/scripts/prepare-runtime-patches.sh",
+        "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "metadata/runtime-patch-manifest.json",
+        "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/nacos/production-migration/README.md",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py"
+      ]
+    },
+    {
+      "id": "G-018",
+      "title": "业务模块完整测试用例",
+      "status": "PARTIAL",
+      "scope": "业务模块页面、动作级测试用例、真实前端 smoke 和落库验收。",
+      "currentEvidence": [
+        "53 business pages have API/layout and browser smoke evidence",
+        "production module test matrix has 43 cases: 37 PASS, 6 BLOCKED, 0 NOT_RUN",
+        "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 6 BLOCKED cases from the production test matrix.",
+        "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 9 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
+        "persistence acceptance ledger has 119 tested features: 115 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
+        "business dependency package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it has 2/2 BLOCKED_NO_IMPLEMENTATION_CANDIDATE dependencies: material-service and process-analysis have no implementation candidates in the current bounded package scan.",
+        "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
+        "business dependency readiness smoke was refreshed on 100.99.133.43 at 2026-06-21T13:46:42.816Z and has 2/2 BLOCKED external dependencies: material-service and process-analysis are not ready for marker acceptance. Evidence: /tmp/adp-business-dependency-readiness-smoke-current.json.",
+        "production export readiness smoke was refreshed on the current address at 2026-06-22T01:50:35.404Z: API base=http://100.99.133.43:18080, browser base=http://222.88.185.146:18080; it has 5 BLOCKED targets and 1 ACTION_REQUIRED target, pagePass=6, visibleExportActions=0, runtimeExportActions=0, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=0 and targetExportMatches=0. All 6 target pages are now reachable, so the remaining blocker is missing visible/runtime export actions, target export hooks, backend query-export file mode on 5 targets, and verified browser list-data downloads. WTS work-permit query export returns a non-empty OLE_XLS workbook, but it still lacks visible/runtime export actions and target export hooks. Evidence: metadata/production-export-readiness-smoke.json.",
+        "2026-06-21 production module browser/API smoke and marker persistence evidence added to docs/frontend-functional-test-report.md, docs/backend-table-audit/persistence-acceptance.md, and metadata/persistence-acceptance.json latestRevalidation.",
+        "The latest WOM toolbar row-click smoke verified query, pending-only, clear, start negative prompt translation, hold, restart, stop-dialog, advance-release and manufacturing-inspection business prompts through the real browser; backend evidence confirmed hold/restart writes reached wom_produce_tasks and wom_wait_put_records, while ProcessAnalysis and QR are now front-end guarded without issuing the missing dependency requests; the backend service/package gaps remain blockers.",
+        "2026-06-22 18:09 WOM makeTaskList 工具栏无选中和整排真实行点击复验完成：证据 metadata/wom-toolbar-row-smoke.json，截图 metadata/wom-toolbar-row-smoke.png；generatedAt=2026-06-22T10:09:22.203Z、status=PASS_WITH_KNOWN_BLOCKERS；marker=ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART，taskId=9000006229150923；API base=http://100.99.133.43:18080，browser base=http://222.88.185.146:18080；清空 SupDataGrid 选择后，开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 8 个按钮均显示“请先选择一条指令单！”且 raw=false、未发起行级业务请求；选中 marker 后，查询/仅查待办均 HTTP 200，清空可点击，开始/提前放料/请检均显示中文业务提示且无 WOM.custom/ec.common raw key，保持和重启 POST /updateTaskState 返回 200，结束打开真实指令单完工报工入口；PostgreSQL 回读 wom_produce_tasks.id=9000006229150923 最终 task_run_state=WOM_runState/runing/status=99/version=5，wom_wait_put_records.proc_report_id=757955491001600；生产过程追溯和生成二维码继续由前端守卫显示中文依赖提示且 guardedWithoutRequest=true，两者仍 BLOCKED 的根因是缺 ProcessAnalysis 服务和 WOM printManage 二维码运行包接口。"
+      ],
+      "blockingIssues": [
+        "剩余 6 条生产用例、3 个动作级 backlog 和业务负责人签字未完成。"
+      ],
+      "nextActions": [
+        "按生产矩阵继续执行剩余 BLOCKED 用例；业务包部署后先运行 make business-package-scan、make smoke-business-dependencies 和 make smoke-production-export-readiness，再补齐 before/after SQL、文件响应和业务签字 evidence。"
+      ],
+      "artifacts": [
+        "docs/production-module-functional-test-cases.md",
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-blockers.md",
+        "metadata/production-module-blockers.json",
+        "scripts/verify-production-module-blockers.py",
+        "docs/production-module-backlog.md",
+        "metadata/production-module-backlog.json",
+        "scripts/verify-production-module-backlog.py",
+        "scripts/scan-business-dependency-packages.py",
+        "scripts/verify-business-dependency-package-scan.py",
+        "metadata/business-dependency-package-scan.json",
+        "docs/business-dependency-contracts.md",
+        "metadata/business-dependency-contracts.json",
+        "scripts/verify-business-dependency-contracts.py",
+        "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
+        "metadata/business-dependency-readiness-smoke.json",
+        "deploy/docker/scripts/adp-production-export-readiness-smoke.js",
+        "metadata/production-export-readiness-smoke.json",
+        "scripts/verify-production-export-readiness.py",
+        "docs/wom-toolbar-action-coverage.md",
+        "metadata/wom-toolbar-action-coverage.json",
+        "scripts/verify-wom-toolbar-action-coverage.py",
+        "docs/frontend-functional-test-report.md",
+        "metadata/wom-toolbar-row-smoke.json"
+      ]
+    },
+    {
+      "id": "G-019",
+      "title": "PostgreSQL 缺口进入幂等 SQL/backlog",
+      "status": "PARTIAL",
+      "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
+      "currentEvidence": [
+        "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
+        "metadata/persistence-acceptance.json currently has 119 tested features: 115 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
+        "metadata/production-module-backlog.json covers those unresolved persistence rows with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED",
+        "metadata/postgres-migration-inventory.json currently has 170 scripts, highRiskStatementCount=0, watchStatementCount=60, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 60 watch statements and 0 watch safety issues.",
+        "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
+        "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
+        "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",
+        "2026-06-21 current blocker classification preserved: material/WMS/warehouse/inventory and ProcessAnalysis probes return tenant-service 503 with Nacos healthyHostCount=0, tracked as module backlog rather than PostgreSQL SQL patches.",
+        "2026-06-21 WOM makeTaskList toolbar row-click smoke introduced no new PostgreSQL compatibility patch: the remaining toolbar blockers are missing ProcessAnalysis and missing WOM printManage QR implementation, tracked as service/package/runtime endpoint backlog rather than init SQL; current toolbar clicks are front-end guarded and no longer issue those missing requests.",
+        "真实候选包准入报告 metadata/module-intake-latest-basic-modules.json 现在记录 scanPolicy/scanCoverage：2026-06-22 复扫 /Users/zhangchu/Documents/MES包/最新基础模块 为 report-only，fileCount=13996、nestedFileCount=13990、maxArchiveDepthSeen=2、textScanned=9784/9806、textSkippedLarge=22、unsupportedArchiveCount=1；3 个阻断项仍是 1 个 7z 不可检查包和 DataSet DbUtils.java 两处 jdbc:oracle:thin，由 make module-intake-candidate-report-check 和 make module-intake-precheck-regression-check 校验。"
+      ],
+      "blockingIssues": [
+        "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
+      ],
+      "nextActions": [
+        "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
+      ],
+      "artifacts": [
+        "docs/oracle-migration-backlog.md",
+        "docs/postgres-migration-index.md",
+        "docs/postgres-migration-watch-rationale.md",
+        "metadata/oracle-migration-audit.json",
+        "metadata/postgres-migration-inventory.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "metadata/persistence-acceptance.json",
+        "scripts/verify-persistence-acceptance.py",
+        "docs/production-module-backlog.md",
+        "metadata/production-module-backlog.json",
+        "scripts/verify-production-module-backlog.py",
+        "scripts/precheck-module-intake.py",
+        "scripts/verify-module-intake-precheck.py",
+        "scripts/verify-module-intake-candidate-report.py",
+        "metadata/module-intake-latest-basic-modules.json"
+      ]
+    },
+    {
+      "id": "G-020",
+      "title": "生产迁移前置项",
+      "status": "BLOCKED",
+      "scope": "数据迁移脚本、回滚、license、MinIO、Keycloak、端口/TLS、安全加固和业务 smoke 签字。",
+      "currentEvidence": [
+        "production migration templates and readiness gate exist",
+        "metadata/production-cutover-gate.json is the production cutover gate: current status NOT_READY_FOR_PRODUCTION_CUTOVER, 9 gates tracked, 8 PLANNED, 1 BLOCKED, productionBlockers=6, productionBacklogItems=9, and make production-cutover-gate-check cross-checks metadata/production-migration-readiness.json, metadata/production-module-blockers.json, metadata/production-module-backlog.json, metadata/business-dependency-readiness-smoke.json, metadata/business-dependency-package-scan.json, and metadata/production-export-readiness-smoke.json.",
+        "metadata/production-rehearsal-plan.json and docs/production-migration/rehearsal-plan.md are generated from readiness, cutover, runtime smoke and production blocker/backlog ledgers; scripts/verify-production-rehearsal-plan.py now validates the generated plan structure, 9-track coverage, sourceEvidence freshness, command fragments, secret hygiene, and READY evidence rules; current status is REHEARSAL_BLOCKED with 9 tracks, 8 PLANNED, 1 BLOCKED, productionBlockers=6 and productionBacklogItems=9.",
+        "database source/target inventory plus row-count and checksum comparison tooling exists; metadata/postgres-runtime-smoke.json verifies the current 100.99.133.43 PostgreSQL runtime with 8/8 PASS but production data migration rehearsal remains missing",
+        "MinIO bucket/object inventory, migration evidence manifest and strict READY validator exist; metadata/minio-runtime-smoke.json verifies the current 100.99.133.43 test MinIO runtime with 8/8 PASS, 2 buckets and 31 objects; make production-minio-migration-ready-check requires source/target inventories, object comparison, migration dry-run, sample downloads, runtime smoke and rollback/source-read fallback evidence.",
+        "Keycloak source/target realm inventory, comparison tooling, migration evidence manifest and strict READY validator exist; make production-keycloak-migration-ready-check requires source/target realm inventory, comparison review, database backup/restore rehearsal, secret rotation, JWT/Nacos sync, auth smoke and rollback evidence.",
+        "rollback evidence manifest and strict READY validator exist",
+        "runtime patch checksum manifest exists and is checked by make runtime-patch-manifest-check",
+        "Nacos/runtime patch evidence manifest and strict READY validator now exist; make production-nacos-runtime-patch-ready-check requires rendered config baseline, target Nacos export, diff review, signed patch package, post-publish smoke and rollback evidence.",
+        "license decision template and strict READY validator exist",
+        "network/TLS evidence template and strict READY validator exist; metadata/test-environment-smoke.json verifies the current 100.99.133.43 test entrypoint with 9/9 PASS for HTTP, SSH, and core Docker containers",
+        "make runtime-smoke-reports-check verifies committed test-environment, PostgreSQL, Nacos, Keycloak/JWT, and MinIO runtime smoke reports for PASS status, host 100.99.133.43, expected checks, and secret hygiene.",
+        "security hardening evidence template and strict READY validator exist",
+        "business smoke signoff evidence template and strict READY validator exist",
+        "make production-evidence-ready-gate-regression-check is in CI and verifies rollback/license/network/security/business smoke/MinIO migration/Keycloak migration template evidence, production migration readiness template evidence, cutover gate template evidence, and 100.99.133.43 test-environment evidence are rejected before READY.",
+        "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis are still 2/2 BLOCKED external dependencies on 100.99.133.43; latest evidence /tmp/adp-business-dependency-readiness-smoke-current.json generated at 2026-06-21T13:46:42.816Z.",
+        "metadata/production-module-backlog.json confirms 9 unresolved production backlog items, including 0 FAIL_BACKLOG, 9 BLOCKED items, and the WOM QR runtime endpoint blocker that must be resolved or explicitly risk-accepted before business smoke signoff can become READY.",
+        "business smoke signoff validator now cross-checks metadata/production-module-blockers.json, metadata/production-module-backlog.json, and metadata/production-export-gap-breakdown.json; READY requires coverage of all 6 PROD-* blockers, all 9 backlog items, and every unresolved export target id, or explicit structured riskAcceptance per unresolved item with decision=ACCEPTED, acceptedBy, signedAt and real evidence."
+      ],
+      "blockingIssues": [
+        "production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION.",
+        "production cutover gate remains NOT_READY_FOR_PRODUCTION_CUTOVER.",
+        "production rehearsal plan remains REHEARSAL_BLOCKED.",
+        "database migration, rollback, license decision, MinIO, Keycloak, production domain/TLS, production security hardening and business smoke signoff still need real rehearsal evidence.",
+        "business smoke signoff is blocked by production action persistence gaps, production backlog items, and missing material/ProcessAnalysis dependencies.",
+        "business smoke signoff cannot become READY while production-module blockers or backlog items remain unresolved unless every remaining item has structured signed riskAcceptance with decision=ACCEPTED, acceptedBy, signedAt and real evidence."
+      ],
+      "nextActions": [
+        "用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。",
+        "生产发布前复跑 smoke-postgres-runtime 指向目标/生产副本环境，并保存 PostgreSQL runtime smoke 结果。",
+        "用 production-minio-source-inventory / production-minio-target-inventory / production-minio-compare 建立 MinIO 证据。",
+        "用 production-minio-migration-ready-check 校验真实 MinIO 文件迁移生产或 rehearsal evidence。",
+        "生产发布前复跑 smoke-minio-runtime 指向目标环境，并保存 runtime bucket inventory 结果。",
+        "用 production-keycloak-source-export / production-keycloak-target-export / production-keycloak-compare 建立 Keycloak 证据。",
+        "用 production-keycloak-migration-ready-check 校验真实 Keycloak 生产库迁移或 rehearsal evidence。",
+        "用 production-rollback-ready-check 校验真实回滚演练 evidence。",
+        "用 production-license-ready-check 校验真实生产 license 决策 evidence。",
+        "用 production-nacos-runtime-patch-ready-check 校验真实 Nacos/runtime patch 生产或 rehearsal evidence。",
+        "生产发布前复跑 smoke-test-environment 指向目标环境，并保存 HTTP/SSH/Docker 入口 smoke 结果。",
+        "用 production-network-tls-ready-check 校验真实生产域名/TLS evidence。",
+        "用 production-security-hardening-ready-check 校验真实生产安全加固 evidence。",
+        "业务包部署后先运行 make smoke-business-dependencies，再进入 marker 验收和业务签字。",
+        "用 production-business-smoke-signoff-ready-check 校验真实生产业务 smoke 签字 evidence。",
+        "用 production-rehearsal-plan-check 确认生产演练计划仍与 readiness、cutover、runtime smoke、生产 blocker/backlog 账本一致。",
+        "用 production-evidence-ready-gate-regression-check 确认单项 strict-ready、生产迁移 readiness 总账和 cutover 总闸门都拒绝模板 evidence 和测试环境 evidence 冒充 READY。",
+        "用 production-cutover-gate-check 校验生产切换总闸门；只有所有 gate READY、productionBlockers=0 且 productionBacklogItems=0 时才能改为 READY_FOR_PRODUCTION_CUTOVER。",
+        "完成生产迁移 rehearsal、回滚演练和业务 smoke 签字前不得改为 READY。",
+        "用 production-business-smoke-signoff-ready-check 校验真实签字时，确认所有 metadata/production-module-blockers.json 中的 PROD-* 阻断 case、metadata/production-module-backlog.json 中的 backlog 项，以及 metadata/production-export-gap-breakdown.json 中的未解决导出 target 已解决或逐项签署结构化风险接受。"
+      ],
+      "artifacts": [
+        "docs/production-migration-readiness.md",
+        "metadata/production-migration-readiness.json",
+        "metadata/production-cutover-gate.json",
+        "metadata/production-rehearsal-plan.json",
+        "scripts/verify-production-cutover-gate.py",
+        "scripts/generate-production-rehearsal-plan.py",
+        "scripts/verify-production-rehearsal-plan.py",
+        "scripts/verify-runtime-smoke-reports.py",
+        "docs/production-migration/README.md",
+        "docs/production-migration/rehearsal-plan.md",
+        "deploy/database/production-migration/README.md",
+        "deploy/database/production-migration/scripts/run-source-inventory.sh",
+        "deploy/database/production-migration/scripts/run-target-preflight.sh",
+        "deploy/database/production-migration/scripts/compare-row-counts.py",
+        "deploy/database/production-migration/scripts/compare-checksums.py",
+        "deploy/database/production-migration/source-checksums.example.tsv",
+        "deploy/database/production-migration/target-checksums.example.tsv",
+        "deploy/minio/production-migration/README.md",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json",
+        "deploy/minio/production-migration/scripts/run-bucket-inventory.sh",
+        "deploy/minio/production-migration/scripts/compare-bucket-inventory.py",
+        "deploy/minio/production-migration/scripts/validate-minio-migration-evidence.py",
+        "deploy/docker/scripts/adp-minio-runtime-smoke.js",
+        "metadata/minio-runtime-smoke.json",
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+        "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py",
+        "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "deploy/rollback/production-migration/README.md",
+        "deploy/rollback/production-migration/rollback-evidence.example.json",
+        "deploy/rollback/production-migration/scripts/validate-rollback-evidence.py",
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "deploy/nacos/production-migration/README.md",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py",
+        "metadata/runtime-patch-manifest.json",
+        "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/license/production-migration/README.md",
+        "deploy/license/production-migration/license-decision.example.json",
+        "deploy/license/production-migration/scripts/validate-license-decision.py",
+        "deploy/network/production-migration/README.md",
+        "deploy/network/production-migration/network-tls-plan.example.json",
+        "deploy/network/production-migration/scripts/validate-network-tls-plan.py",
+        "deploy/docker/scripts/adp-test-environment-smoke.js",
+        "metadata/test-environment-smoke.json",
+        "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+        "metadata/postgres-runtime-smoke.json",
+        "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
+        "metadata/nacos-config-drift-smoke.json",
+        "deploy/security/production-migration/README.md",
+        "deploy/security/production-migration/security-hardening-plan.example.json",
+        "deploy/security/production-migration/scripts/validate-security-hardening-plan.py",
+        "deploy/business-smoke/production-migration/README.md",
+        "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+        "deploy/business-smoke/production-migration/scripts/validate-business-smoke-signoff.py",
+        "scripts/verify-production-evidence-ready-gates.py",
+        "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/production-export-readiness-smoke.json",
+        "docs/production-module-blockers.md",
+        "metadata/production-module-blockers.json",
+        "docs/production-module-backlog.md",
+        "metadata/production-module-backlog.json",
+        "scripts/verify-production-module-backlog.py"
+      ]
+    }
+  ],
+  "productionBlockers": [
+    {
+      "caseId": "PROD-010",
+      "title": "批量配方可见显式编辑入口",
+      "status": "BLOCKED",
+      "category": "external-client-required",
+      "dependency": "External Batch client / IE ActiveX / WebSocket push path",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md"
+      ],
+      "recheckCommands": [
+        "make smoke-business-page",
+        "manual: provision external Batch client, trigger WebSocket push to batchFormulaEdit, then run a marker save/submit and query rm_formulas/rm_formula_processes/rm_process_actives"
+      ],
+      "passCriteria": [
+        "A real user-visible or external-client driven edit entry opens batchFormulaEdit without adding a fake platform-only button.",
+        "The edit/save/submit action uses a unique ADP_E2E marker.",
+        "PostgreSQL proves the marker write in rm_formulas and related batch formula process/activity tables."
+      ],
+      "nextActions": [
+        "Connect the external Batch client/server path described by the product documentation.",
+        "Capture WebSocket/browser/API evidence for the real edit flow.",
+        "Promote the case to PASS only after marker persistence is proven."
+      ],
+      "nonSolutions": [
+        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
+        "Do not mark PASS from batch/sync import evidence alone; that is covered by a separate accepted case."
+      ]
+    },
+    {
+      "caseId": "PROD-019",
+      "title": "QCS 不良数和库存/入库相关回写",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "dependency": "material service package plus product confirmation for any standalone bad-quantity entry",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, run checkProdResult/generateProduceOutSing with marker inventory data and query material stock-in/inventory tables"
+      ],
+      "passCriteria": [
+        "material service has at least one healthy Nacos prod instance.",
+        "Authenticated material checkProdResult and generateProduceOutSing endpoints return HTTP 2xx and no longer return tenant-service 503.",
+        "A marker flow proves inventory/stock-in target table writes in PostgreSQL.",
+        "If standalone bad quantity is required, a product package or manual identifies the field, route, and target table before acceptance."
+      ],
+      "nextActions": [
+        "Deploy the material warehouse/inventory service package or map the correct serviceName.",
+        "Re-run business dependency readiness smoke.",
+        "Only reopen standalone bad-quantity acceptance if a later business package or product manual supplies the missing route/table."
+      ],
+      "nonSolutions": [
+        "Do not treat accepted QCS qualified/unqualified WOM state backfill as inventory stock-in proof.",
+        "Do not invent a bad-quantity database column when the recovered package has no route/table mapping."
+      ]
+    },
+    {
+      "caseId": "PROD-020",
+      "title": "批次、物料、工单追溯查询",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "dependency": "ProcessAnalysis / Traceability service package, runtime metadata, menu, permissions, and PostgreSQL schema",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after ProcessAnalysis deployment, open isProdprocessView/processBatchViewOut from the real WOM trace button with a marker batch"
+      ],
+      "passCriteria": [
+        "ProcessAnalysis or traceability service has at least one healthy Nacos prod instance.",
+        "ProcessAnalysis runtime_view/menu/table counts are non-zero and mapped to the deployed module.",
+        "Authenticated traceability endpoints return HTTP 2xx successful responses instead of 503.",
+        "The real WOM trace button opens processBatchViewOut and any target query tables are verified in PostgreSQL."
+      ],
+      "nextActions": [
+        "Recover or deploy the ProcessAnalysis module package.",
+        "Apply module runtime views, menus, permissions, and PostgreSQL tables.",
+        "Run marker browser/API/DB acceptance before changing PROD-020 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not patch WOM alone and call traceability done; the target module is absent.",
+        "Do not use a direct URL smoke without ProcessAnalysis service registration and DB evidence."
+      ]
+    },
+    {
+      "caseId": "PROD-021",
+      "title": "完整工序报工、产量、不良数登记",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "dependency": "material service package plus product confirmation for standalone bad-quantity entry",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: rerun accepted WOM report-work marker flows, then add inventory/material marker acceptance once material service is available"
+      ],
+      "passCriteria": [
+        "Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity, and check activity.",
+        "The material/inventory service path is available and marker stock-in or inventory write-back is proven.",
+        "If product requires standalone bad quantity, the dedicated field/route/table is recovered and marker-tested."
+      ],
+      "nextActions": [
+        "Keep existing report-work PASS evidence as regression coverage.",
+        "Complete material service acceptance for the inventory boundary.",
+        "Only add a standalone bad-quantity case after product/package evidence exists."
+      ],
+      "nonSolutions": [
+        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
+        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
+      ]
+    },
+    {
+      "caseId": "PROD-022",
+      "title": "完工入库或库存回写",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "dependency": "material warehouse/inventory service package and target stock-in table map",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
+      ],
+      "passCriteria": [
+        "serviceName=material or the confirmed warehouse service has healthy Nacos prod instances.",
+        "checkProdResult and generateProduceOutSing return HTTP 2xx and no longer return 503.",
+        "Controller/service/DAO/SQL path is traced.",
+        "PostgreSQL target inventory or stock-in tables show marker writes."
+      ],
+      "nextActions": [
+        "Deploy and register the material warehouse/inventory package.",
+        "Build the material-service table map.",
+        "Run marker stock-in/inventory acceptance before changing PROD-022 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
+        "Do not mark PASS from HTTP 200 alone without database write proof."
+      ]
+    },
+    {
+      "caseId": "PROD-023",
+      "title": "生产相关列表导出",
+      "status": "BLOCKED",
+      "category": "missing-export-implementation",
+      "dependency": "Product decision and backend data-export implementation for production list pages",
+      "evidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/production-export-readiness-smoke.json",
+        "docs/production-module-functional-test-cases.md"
+      ],
+      "recheckCommands": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000",
+        "manual: after export button/backend implementation is recovered, capture browser file response, filename, size, and workbook sample"
+      ],
+      "passCriteria": [
+        "Product owner confirms which production lists must support data export.",
+        "Runtime button/menu metadata exposes an export action for each required list.",
+        "Target source/runtime sourceAudit finds exportExcel/excelExport/导出 hooks for each required list.",
+        "Backend export endpoints return non-empty files with list data, not empty template-download placeholders.",
+        "PostgreSQL persistence is NOT_APPLICABLE for file export; acceptance evidence must instead prove the browser file response and sample workbook content.",
+        "Browser network evidence captures filename, response status, size, and sample workbook content."
+      ],
+      "nextActions": [
+        "Confirm export scope with product owner.",
+        "Recover or implement data-export service methods and runtime buttons for required lists; current public browser ingress already proves page reachability for all 6 target lists.",
+        "Run real browser file-response and sourceAudit acceptance before changing PROD-023 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not accept empty HTTP 200 downloadXls responses as data export.",
+        "Do not confuse import-template download with list-data export."
+      ]
+    }
+  ],
+  "productionBacklog": [
+    {
+      "id": "PROD-ACTION-006",
+      "title": "WOM visible manual production-task create or import entry is not exposed",
+      "status": "BLOCKED",
+      "category": "product-scope-confirmation",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [],
+      "evidenceRefs": [
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "docs/production-module-functional-test-cases.md"
+      ],
+      "recheckCommands": [
+        "make discover-production-actions ADP_BROWSER_BASE_URL=http://222.88.185.146:18080",
+        "manual: after product decision, either expose a real create/import entry and run marker persistence, or mark the visible manual-create entry out of scope with documented product evidence"
+      ],
+      "passCriteria": [
+        "Product owner confirms whether visible manual create/import is in scope, or whether produceTaskCreated2/day-plan generation is the only supported creation path.",
+        "If in scope, runtime/menu/button metadata exposes a real create/import entry without bypassing the product flow.",
+        "A browser/API marker action writes wom_produce_tasks and required workflow tables, with PostgreSQL verification.",
+        "If out of scope, persistence acceptance is reclassified with explicit product evidence and does not hide the public produceTaskCreated no-op."
+      ],
+      "nextActions": [
+        "Confirm the intended product entry for manufacturing task creation.",
+        "If manual create/import is required, recover the missing menu/button/runtime entry and capture payload.",
+        "If daily-plan generation is intended, document the scope decision and keep produceTaskCreated2 as the accepted creation path."
+      ],
+      "nonSolutions": [
+        "Do not mark the visible manual create entry PASS from produceTaskCreated2 alone.",
+        "Do not expose a fake save button without a product-confirmed payload and PostgreSQL marker proof."
+      ]
+    },
+    {
+      "id": "PROD-ACTION-007",
+      "title": "public produceTaskCreated explicitly disabled pending product decision",
+      "status": "BLOCKED",
+      "category": "product-scope-confirmation",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [],
+      "evidenceRefs": [
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "metadata/wom-public-produce-task-created-analysis.json",
+        "docs/backend-table-audit/wom-public-produce-task-created-analysis.md",
+        "metadata/wom-public-produce-task-created-noop-probe.json"
+      ],
+      "recheckCommands": [
+        "make probe-wom-public-produce-task-created-noop",
+        "manual: after product decision or implementation recovery, call POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated with a unique ADP_E2E marker and query wom_produce_tasks",
+        "make persistence-acceptance-check"
+      ],
+      "passCriteria": [
+        "Product owner confirms whether the public endpoint is still a supported contract.",
+        "If supported, WOMProduceTaskServiceImpl.creatProTask is restored or replaced and a marker request writes wom_produce_tasks plus required workflow tables.",
+        "If deprecated, the explicit disabled/failure response is documented as the supported behavior and the endpoint is removed from create acceptance scope.",
+        "The accepted replacement path produceTaskCreated2 remains separate and cannot be used to mark this public endpoint PASS."
+      ],
+      "nextActions": [
+        "Latest explicit-disabled evidence refreshed at 2026-06-22T07:29:05.735Z with marker ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP; endpoint returned HTTP 200/code=400 and PostgreSQL marker count 0 -> 0.",
+        "Decide supported-vs-deprecated product status for the public endpoint.",
+        "If supported, restore the real create implementation in source and rerun marker API/browser/PostgreSQL acceptance.",
+        "If deprecated, keep/document the disabled response and remove it from supported integration docs."
+      ],
+      "nonSolutions": [
+        "Do not mark this endpoint PASS from an explicit disabled response.",
+        "Do not accept HTTP 200 transport status without checking business code and PostgreSQL marker rows.",
+        "Do not count produceTaskCreated2 evidence as proof that the public endpoint works."
+      ]
+    },
+    {
+      "id": "PROD-ACTION-008",
+      "title": "WOM makeTaskList QR code generation endpoint is missing",
+      "status": "BLOCKED",
+      "category": "missing-runtime-endpoint",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [],
+      "evidenceRefs": [
+        "metadata/wom-toolbar-action-coverage.json",
+        "docs/wom-toolbar-action-coverage.md",
+        "metadata/wom-qrcode-route-probe.json",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "recheckCommands": [
+        "make probe-wom-qrcode-route",
+        "make wom-toolbar-action-coverage-check",
+        "manual: after the WOM printManage QR endpoint/package is restored, click 生成二维码 from the real makeTaskList toolbar with a marker WOM task and capture generateQrCode/startPrint/backfill-printInfo requests plus PostgreSQL QR/print table evidence where applicable"
+      ],
+      "passCriteria": [
+        "The real WOM makeTaskList 生成二维码 toolbar action no longer calls missing 404 printManage endpoints.",
+        "The recovered WOM package or source module exposes /WOM/printManage/generateQrCode and any required print/backfill endpoints through the normal gateway path.",
+        "A real browser click captures request payload, response body and visible success/failure feedback without raw i18n keys.",
+        "If the flow persists QR or print metadata, PostgreSQL marker queries prove target table writes; if it only returns a file/print command, persistence is explicitly marked NOT_APPLICABLE with file/print evidence.",
+        "Printer and QR type configuration prerequisites are documented and seeded through normal configuration paths rather than direct ad hoc database writes."
+      ],
+      "nextActions": [
+        "Recover or implement the WOM printManage QR endpoint/package that matches the existing toolbar target.",
+        "Confirm required printer, QR type and package configuration prerequisites.",
+        "Rerun make probe-wom-qrcode-route and the real browser toolbar click smoke.",
+        "Update wom-toolbar-action-coverage and persistence/file-response acceptance assets before reclassifying the action."
+      ],
+      "nonSolutions": [
+        "Do not count the QR dialog shell opening as PASS while generateCode/generateQrCode still returns 404.",
+        "Do not seed printer rows alone and call the flow complete without the missing WOM endpoint implementation.",
+        "Do not classify this as a PostgreSQL compatibility gap unless a real restored endpoint reaches a missing table, column, type cast or Oracle dialect issue."
+      ]
+    },
+    {
+      "id": "PROD-010",
+      "title": "Batch formula visible manual edit entry requires external Batch client",
+      "status": "BLOCKED",
+      "category": "external-client-required",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-010"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "recheckCommands": [
+        "make smoke-business-page",
+        "manual: provision external Batch client, trigger WebSocket/ActiveX edit flow, then save with an ADP_E2E marker and query rm_formulas"
+      ],
+      "passCriteria": [
+        "The real external-client driven edit entry opens batchFormulaEdit without a fake platform-only button.",
+        "A unique marker proves edit/save persistence in rm_formulas and related RM process/activity tables.",
+        "Browser, API, backend and PostgreSQL evidence are added to the acceptance reports."
+      ],
+      "nextActions": [
+        "Recover or provision the external Batch client/server workflow.",
+        "Capture WebSocket/browser/API evidence for the real edit flow.",
+        "Move the production case to PASS only after marker persistence is proven."
+      ],
+      "nonSolutions": [
+        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
+        "Do not mark PASS from batch/sync import evidence alone."
+      ]
+    },
+    {
+      "id": "PROD-019",
+      "title": "QCS bad-quantity and material inventory write-back remain unresolved",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-019"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, verify checkProdResult/generateProduceOutSing with marker inventory data and query material stock-in tables"
+      ],
+      "passCriteria": [
+        "material service has a healthy Nacos prod instance.",
+        "checkProdResult and generateProduceOutSing no longer return tenant-service 503.",
+        "Marker flow proves inventory or stock-in target table writes in PostgreSQL.",
+        "If standalone bad quantity is required, a product package or manual identifies its field, route and target table first."
+      ],
+      "nextActions": [
+        "Deploy the material warehouse/inventory package or map the correct serviceName.",
+        "Re-run business dependency readiness smoke.",
+        "Only reopen standalone bad-quantity acceptance if product/package evidence supplies the missing route/table."
+      ],
+      "nonSolutions": [
+        "Do not treat accepted QCS qualified/unqualified WOM state backfill as inventory proof.",
+        "Do not invent a bad-quantity database column without a recovered product route/table."
+      ]
+    },
+    {
+      "id": "PROD-020",
+      "title": "ProcessAnalysis traceability service is missing",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-020"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after ProcessAnalysis deployment, open isProdprocessView/processBatchViewOut from the real WOM trace button with a marker batch"
+      ],
+      "passCriteria": [
+        "ProcessAnalysis or traceability service has a healthy Nacos prod instance.",
+        "ProcessAnalysis runtime_view, menu and table counts are non-zero and mapped to the deployed module.",
+        "Authenticated traceability endpoints return successful responses instead of 503.",
+        "The real WOM trace button opens processBatchViewOut and target query tables are verified in PostgreSQL where applicable."
+      ],
+      "nextActions": [
+        "Recover or deploy the ProcessAnalysis module package.",
+        "Apply module runtime views, menus, permissions and PostgreSQL tables.",
+        "Run marker browser/API/DB acceptance before changing PROD-020 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not patch WOM alone and call traceability done; the target module is absent.",
+        "Do not use direct URL reachability without service registration and DB evidence."
+      ]
+    },
+    {
+      "id": "PROD-021",
+      "title": "Full report-work remains blocked at bad-quantity scope and material boundary",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-021"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make smoke-business-dependencies",
+        "manual: rerun accepted WOM report-work marker flows, then add inventory/material marker acceptance once material service is available"
+      ],
+      "passCriteria": [
+        "Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity and check activity.",
+        "The material/inventory service path is available and marker stock-in or inventory write-back is proven.",
+        "If product requires standalone bad quantity, the dedicated field/route/table is recovered and marker-tested."
+      ],
+      "nextActions": [
+        "Keep existing report-work PASS evidence as regression coverage.",
+        "Complete material service acceptance for the inventory boundary.",
+        "Only add standalone bad-quantity acceptance after product/package evidence exists."
+      ],
+      "nonSolutions": [
+        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
+        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
+      ]
+    },
+    {
+      "id": "PROD-022",
+      "title": "Material warehouse/inventory service package is missing",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-022"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
+      ],
+      "passCriteria": [
+        "serviceName=material or the confirmed warehouse service has a healthy Nacos prod instance.",
+        "checkProdResult and generateProduceOutSing no longer return 503.",
+        "Controller/service/DAO/SQL path is traced.",
+        "PostgreSQL target inventory or stock-in tables show marker writes."
+      ],
+      "nextActions": [
+        "Deploy and register the material warehouse/inventory package.",
+        "Build the material-service table map.",
+        "Run marker stock-in/inventory acceptance before changing PROD-022 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
+        "Do not mark PASS from HTTP 200 alone without database write proof."
+      ]
+    },
+    {
+      "id": "PROD-023",
+      "title": "Production list data export implementation is missing",
+      "status": "BLOCKED",
+      "category": "missing-export-implementation",
+      "disposition": "module-backlog",
+      "isPostgresCompatibilityGap": false,
+      "productionCaseIds": [
+        "PROD-023"
+      ],
+      "evidenceRefs": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/production-export-readiness-smoke.json",
+        "docs/production-module-functional-test-cases.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "recheckCommands": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=120000 ADP_API_TIMEOUT_MS=30000",
+        "manual: after export button/backend implementation is recovered, capture browser file response, filename, size and workbook sample"
+      ],
+      "passCriteria": [
+        "Product owner confirms which production lists must support data export.",
+        "Runtime button/menu metadata exposes an export action for each required list.",
+        "Target source/runtime sourceAudit finds exportExcel/excelExport/导出 hooks for each required list.",
+        "Backend export endpoints return non-empty files with list data, not empty template-download placeholders.",
+        "PostgreSQL persistence is NOT_APPLICABLE for file export; acceptance evidence must prove browser file response and sample workbook content."
+      ],
+      "nextActions": [
+        "Confirm export scope with product owner.",
+        "Recover or implement data-export service methods and runtime buttons for required lists; current public browser ingress already proves page reachability for all 6 target lists.",
+        "Run real browser file-response and sourceAudit acceptance before changing PROD-023 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not accept empty HTTP 200 downloadXls responses as data export.",
+        "Do not confuse import-template download with list-data export."
+      ]
+    }
+  ],
+  "dependencyReadiness": [
+    {
+      "id": "material-service",
+      "title": "Material warehouse/inventory service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-019",
+        "PROD-021",
+        "PROD-022",
+        "WOM/QCS inventory and stock-in write-back"
+      ],
+      "readyWhen": "serviceName=material has a healthy Nacos instance and marker inventory endpoints stop returning tenant-service 503.",
+      "services": [
+        {
+          "serviceName": "material",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "MATERIAL",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "wms",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "WMS",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "warehouse",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "Warehouse",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "inventory",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "Inventory",
+          "healthyHostCount": 0
+        }
+      ],
+      "endpoints": [
+        {
+          "name": "checkProdResult",
+          "method": "POST",
+          "path": "/msService/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
+          "status": 503,
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "generateProduceOutSing",
+          "method": "POST",
+          "path": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+          "status": 503,
+          "tenantServiceMissing": true
+        }
+      ],
+      "issues": [
+        "No healthy Nacos service instance was found for the expected dependency aliases.",
+        "Authenticated endpoint probe still returns tenant-service 503."
+      ],
+      "nextAction": "Deploy/register the warehouse/material service package, map target stock-in tables, then rerun marker inventory acceptance."
+    },
+    {
+      "id": "process-analysis",
+      "title": "ProcessAnalysis traceability service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-020",
+        "WOM production process traceability"
+      ],
+      "readyWhen": "ProcessAnalysis has healthy service registration, runtime/menu metadata, PostgreSQL target tables, and authenticated endpoints no longer return tenant-service 503.",
+      "services": [
+        {
+          "serviceName": "ProcessAnalysis",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "processanalysis",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "PROCESSANALYSIS",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "Traceability",
+          "healthyHostCount": 0
+        },
+        {
+          "serviceName": "traceability",
+          "healthyHostCount": 0
+        }
+      ],
+      "endpoints": [
+        {
+          "name": "isProdprocessView",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_DEPENDENCY_SMOKE_BATCH",
+          "status": 503,
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "processBatchViewOut",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_DEPENDENCY_SMOKE_BATCH&productNo=ADP_DEPENDENCY_SMOKE_MAT",
+          "status": 503,
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "analysisiTask",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+          "status": 503,
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "manualStatActive",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=1",
+          "status": 503,
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "manualStatProcess",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=1",
+          "status": 503,
+          "tenantServiceMissing": true
+        }
+      ],
+      "issues": [
+        "No healthy Nacos service instance was found for the expected dependency aliases.",
+        "Authenticated endpoint probe still returns tenant-service 503.",
+        "No ProcessAnalysis runtime_view metadata was found."
+      ],
+      "nextAction": "Deploy/recover the ProcessAnalysis package and schema, then rerun traceability browser/API/DB marker acceptance from the WOM button."
+    }
+  ],
+  "productionMigrationGaps": [
+    {
+      "id": "postgres-data-migration",
+      "title": "PostgreSQL 数据迁移脚本",
+      "owner": "backend-db-migration-thread",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json",
+        "docs/oracle-migration-backlog.md",
+        "deploy/database/production-migration/README.md",
+        "deploy/database/production-migration/scripts/run-target-preflight.sh",
+        "deploy/database/production-migration/scripts/run-source-inventory.sh",
+        "deploy/database/production-migration/scripts/compare-row-counts.py",
+        "deploy/database/production-migration/scripts/compare-checksums.py",
+        "deploy/database/production-migration/migration-evidence.example.json",
+        "deploy/database/production-migration/scripts/validate-migration-evidence.py",
+        "deploy/database/production-migration/source-checksums.example.tsv",
+        "deploy/database/production-migration/target-checksums.example.tsv",
+        "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+        "metadata/postgres-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "requiredEvidence": [
+        "生产源库 inventory",
+        "全量迁移脚本",
+        "增量或冻结窗口方案",
+        "行数和 checksum 校验 SQL/对账报告",
+        "数据库迁移演练 evidence manifest strict-ready 校验通过",
+        "至少一次 rehearsal 报告"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-source-inventory",
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-target-preflight",
+        "make production-rowcount-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-checksum-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-db-migration-ready-check DB_MIGRATION_EVIDENCE=/secure/path/adp-db-migration-evidence.json"
+      ],
+      "blockingIssues": [
+        "当前新增的是源库 row-count inventory、目标 PostgreSQL 预检、行数/checksum 对比入口和测试环境 PostgreSQL runtime smoke，不是完整生产数据搬迁执行脚本。",
+        "deploy/database/production-migration/migration-evidence.example.json 只是 PLANNED 结构模板；make production-db-migration-ready-check 必须使用真实演练 evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 PostgreSQL smoke 报告结构和 PASS 状态，不替代生产数据迁移 rehearsal。",
+        "仍缺增量同步或冻结窗口设计、表级迁移顺序、生产 checksum 实填、数据量评估和 rehearsal 结果。",
+        "Production source inventory, production checksum outputs, strict database migration evidence, migration rehearsal and rollback evidence are missing."
+      ],
+      "nextActions": [
+        "用 deploy/database/production-migration/scripts/run-source-inventory.sh 建立生产源库 row-count inventory。",
+        "用 deploy/database/production-migration/scripts/run-target-preflight.sh 建立目标库预检报告，再用 compare-row-counts.py 输出 source/target 行数对比。",
+        "按模块输出表级迁移顺序和 checksum SQL，再用 compare-checksums.py 输出 source/target checksum 对比。",
+        "把 source inventory、target preflight、row-count/checksum 对账、target PostgreSQL runtime smoke 和 rollback 证据写入数据库迁移 evidence manifest，并用 production-db-migration-ready-check 做 strict-ready 校验。",
+        "生产发布前复跑 make smoke-postgres-runtime 指向目标/生产副本环境，并保存 runtime smoke 结果。",
+        "在测试副本执行 rehearsal 并记录报告。"
+      ]
+    },
+    {
+      "id": "rollback-plan",
+      "title": "回滚方案",
+      "owner": "release-manager",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "docs/runtime-validation-scope.md",
+        "docs/production-migration/rollback-runbook.md",
+        "deploy/rollback/production-migration/README.md",
+        "deploy/rollback/production-migration/rollback-evidence.example.json",
+        "deploy/rollback/production-migration/scripts/validate-rollback-evidence.py"
+      ],
+      "requiredEvidence": [
+        "备份命令",
+        "恢复命令",
+        "回切流程",
+        "回滚演练报告",
+        "负责人和时间窗"
+      ],
+      "readyEvidenceCommands": [
+        "make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json"
+      ],
+      "blockingIssues": [
+        "当前新增的是回滚证据 manifest 模板和 READY 校验器，不是生产回滚演练结果。",
+        "仍缺生产级备份、恢复、回切、DNS/端口回滚和演练时间窗的真实证据文件。",
+        "Only the rollback evidence template exists; real restore and cutback rehearsal evidence is missing."
+      ],
+      "nextActions": [
+        "按 deploy/rollback/production-migration/rollback-evidence.example.json 填写真实回滚证据文件。",
+        "在测试环境演练 PostgreSQL restore、MinIO 对象回滚、Keycloak realm 回滚、Nacos 配置回滚、runtime patch 回滚和域名/TLS 回退。",
+        "用 make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json 校验演练证据。"
+      ]
+    },
+    {
+      "id": "license-strategy",
+      "title": "license 策略",
+      "owner": "platform-owner",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/nacos-config/supfusion-license.properties",
+        "deploy/docker/scripts/seed-test-license.sh",
+        "docs/runtime-validation-scope.md",
+        "docs/production-migration/license-strategy.md",
+        "deploy/license/production-migration/README.md",
+        "deploy/license/production-migration/license-decision.example.json",
+        "deploy/license/production-migration/scripts/validate-license-decision.py"
+      ],
+      "requiredEvidence": [
+        "正式授权方案",
+        "过期行为说明",
+        "应急 bypass 审批路径",
+        "license 配置备份恢复方法"
+      ],
+      "readyEvidenceCommands": [
+        "make production-license-ready-check LICENSE_DECISION=/secure/path/adp-license-decision.json"
+      ],
+      "blockingIssues": [
+        "当前新增的是 license decision 模板和 READY 校验器，不是生产授权或应急审批证据。",
+        "测试环境可以 bypass，但生产正式授权、失效行为、应急 bypass 审批、审计规则和合法性确认尚未形成真实 evidence。",
+        "Production license decision and legal/operational signoff are missing."
+      ],
+      "nextActions": [
+        "按 deploy/license/production-migration/license-decision.example.json 填写真实生产 license 决策 evidence。",
+        "确认是否采购正式 license、接入受支持 license 服务，或使用受审批的限时应急 bypass。",
+        "用 make production-license-ready-check LICENSE_DECISION=/secure/path/adp-license-decision.json 校验真实生产决策。"
+      ]
+    },
+    {
+      "id": "minio-file-migration",
+      "title": "MinIO 文件迁移",
+      "owner": "storage-migration-thread",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "历史包线索：MinIO mes / transfer bucket",
+        "docs/production-migration/minio-migration-runbook.md",
+        "deploy/minio/production-migration/README.md",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json",
+        "deploy/minio/production-migration/scripts/validate-minio-migration-evidence.py",
+        "deploy/minio/production-migration/scripts/run-bucket-inventory.sh",
+        "deploy/minio/production-migration/scripts/compare-bucket-inventory.py",
+        "deploy/docker/scripts/adp-minio-runtime-smoke.js",
+        "metadata/minio-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "requiredEvidence": [
+        "bucket inventory",
+        "对象数量和大小统计",
+        "对象迁移脚本",
+        "hash 或 etag 校验结果",
+        "抽样下载验证",
+        "MinIO migration evidence manifest strict-ready 校验通过",
+        "回滚或双写策略"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-source-inventory",
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-target-inventory",
+        "make production-minio-compare MINIO_MIGRATION_REPORT_DIR=/secure/path/adp-minio-migration-preflight",
+        "make production-minio-migration-ready-check MINIO_MIGRATION_EVIDENCE=/secure/path/adp-minio-migration-evidence.json"
+      ],
+      "blockingIssues": [
+        "当前新增的是 MinIO 源/目标 bucket inventory、对象清单对账工具和测试环境 runtime smoke，不是生产对象迁移执行证据。",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json 只是 PLANNED 结构模板；make production-minio-migration-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 MinIO smoke 报告结构、bucket 摘要和 secret hygiene，不替代生产对象迁移 dry-run。",
+        "仍缺生产 endpoint 的 bucket inventory、对象迁移 dry-run、断点续传、抽样下载和回滚策略演练证据。",
+        "Production bucket inventory, object compare, strict MinIO migration evidence and migration dry-run are missing."
+      ],
+      "nextActions": [
+        "用 deploy/minio/production-migration/scripts/run-bucket-inventory.sh 导出生产源/目标 bucket object 清单。",
+        "用 deploy/minio/production-migration/scripts/compare-bucket-inventory.py 输出对象数量、大小和 etag 对账结果。",
+        "生产发布前复跑 make smoke-minio-runtime 指向目标环境，并保存 runtime smoke 结果。",
+        "把 source inventory、target inventory、object comparison、dry-run、sample download、runtime smoke 和 rollback evidence 写入 MinIO migration evidence manifest，并用 production-minio-migration-ready-check 做 strict-ready 校验。",
+        "在非生产目标执行迁移 dry-run、抽样下载验证和回滚演练。"
+      ]
+    },
+    {
+      "id": "keycloak-production-db",
+      "title": "Keycloak 生产库策略",
+      "owner": "identity-platform-owner",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/docker/scripts/init-keycloak-realm.sh",
+        "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
+        "deploy/docker/scripts/register-keycloak-nacos.sh",
+        "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "make smoke-keycloak-jwt",
+        "docs/production-migration/keycloak-production-runbook.md",
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+        "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py"
+      ],
+      "requiredEvidence": [
+        "realm export/import",
+        "生产库备份恢复",
+        "admin 和 client secret 轮换",
+        "JWT public key 同步验证",
+        "用户/角色/组织映射策略",
+        "Keycloak migration evidence manifest strict-ready 校验通过"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-source-export",
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-target-export",
+        "make production-keycloak-compare KEYCLOAK_MIGRATION_REPORT_DIR=/secure/path/adp-keycloak-migration-preflight",
+        "make production-keycloak-migration-ready-check KEYCLOAK_MIGRATION_EVIDENCE=/secure/path/adp-keycloak-migration-evidence.json"
+      ],
+      "blockingIssues": [
+        "当前新增的是 Keycloak source/target realm inventory 和对账工具，不是生产 realm 导入或数据库恢复演练证据。",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json 只是 PLANNED 结构模板；make production-keycloak-migration-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 Keycloak/JWT smoke 报告结构和 PASS 状态，不替代生产 realm export/import 或 secret 轮换演练。",
+        "测试环境 Keycloak/JWT runtime smoke 已经证明 100.99.133.43 的 realm、client、mapper、Nacos JWT 同步和网关登录/菜单链路通过，但仍缺生产或生产副本的 export/import、Keycloak 数据库备份恢复、admin/client secret 轮换和生产 JWT 同步后的登录 smoke 证据。",
+        "Production realm export/import, database restore rehearsal, strict Keycloak migration evidence and secret rotation evidence are missing."
+      ],
+      "nextActions": [
+        "用 deploy/keycloak/production-migration/scripts/export-realm-inventory.sh 导出 source/target realm inventory。",
+        "用 deploy/keycloak/production-migration/scripts/compare-realm-inventory.py 对账 clients、roles、client scopes、components 和 JWT key fingerprint。",
+        "在测试副本执行 realm export/import、Keycloak 数据库备份恢复和 JWT 同步验证。",
+        "生产发布前复跑 make smoke-keycloak-jwt 指向目标环境，并保存 runtime smoke 结果。",
+        "把 source inventory、target inventory、realm comparison、database backup/restore、secret rotation、JWT/Nacos sync、auth smoke 和 rollback evidence 写入 Keycloak migration evidence manifest，并用 production-keycloak-migration-ready-check 做 strict-ready 校验。",
+        "把生产用户、角色、组织映射关系和 secret 轮换结果补入 runbook。"
+      ]
+    },
+    {
+      "id": "nacos-runtime-patch",
+      "title": "Nacos / runtime patch 生产化",
+      "owner": "runtime-platform-owner",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/docker/scripts/render-nacos-configs.py",
+        "deploy/docker/scripts/prepare-runtime-patches.sh",
+        "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "deploy/nacos/production-migration/README.md",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py",
+        "metadata/runtime-patch-manifest.json",
+        "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
+        "metadata/nacos-config-drift-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "metadata/nacos-config-drift-smoke.json shows 44/44 fetched dataIds, 20/20 critical config checks PASS, zero non-comment Oracle residue, 91 group prod registered services, and 18/18 expected platform/business services healthy",
+        "make smoke-nacos-config",
+        "make runtime-patch-manifest-check"
+      ],
+      "requiredEvidence": [
+        "生产 Nacos 配置差异清单",
+        "runtime patch 版本和影响清单",
+        "签名生产 patch 包 manifest",
+        "Nacos/runtime patch evidence manifest strict-ready 校验通过",
+        "回退脚本",
+        "重启顺序",
+        "健康检查结果"
+      ],
+      "readyEvidenceCommands": [
+        "make runtime-patch-manifest-check",
+        "make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host",
+        "make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json"
+      ],
+      "blockingIssues": [
+        "当前仓库已有 runtime patch checksum manifest，但测试环境 runtime patch 仍是运行包兼容层。",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json 只是 PLANNED 结构模板；make production-nacos-runtime-patch-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 Nacos drift smoke 报告结构、group prod/service 健康和 secret hygiene，不替代生产 Nacos export/diff、签名 patch 包或回退演练。",
+        "测试环境 Nacos drift smoke 已经证明 100.99.133.43 运行态 group prod 可取、关键 PostgreSQL/JWT/Nacos 配置通过且关键服务健康注册通过，但生产 Nacos export/diff、签名 patch 包、升级策略和回退演练证据未形成。",
+        "Production Nacos export/diff, strict Nacos/runtime patch evidence, signed patch package and rollback rehearsal are missing."
+      ],
+      "nextActions": [
+        "输出生产 Nacos/rendered 配置 diff。",
+        "用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。",
+        "为每个 runtime patch 记录业务影响、版本号、checksum 和回退方式。",
+        "生产发布前复跑 make smoke-nacos-config 指向目标环境，并人工审阅 metadata/nacos-config-drift-smoke.json 中的 hash drift。",
+        "把 rendered config baseline、target Nacos export、diff review、signed patch package、post-publish smoke 和 rollback evidence 写入 Nacos/runtime patch evidence manifest，并用 production-nacos-runtime-patch-ready-check 做 strict-ready 校验。",
+        "演练 Nacos 配置和 runtime patch 回退。"
+      ]
+    },
+    {
+      "id": "ports-domain-tls",
+      "title": "端口 / 域名 / TLS",
+      "owner": "infrastructure-owner",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "deploy/docker/docker-compose.yml",
+        "deploy/docker/.env.example",
+        "docs/production-migration/network-tls-checklist.md",
+        "deploy/network/production-migration/README.md",
+        "deploy/network/production-migration/network-tls-plan.example.json",
+        "deploy/network/production-migration/scripts/validate-network-tls-plan.py",
+        "deploy/docker/scripts/adp-test-environment-smoke.js",
+        "metadata/test-environment-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "requiredEvidence": [
+        "生产域名清单",
+        "TLS 证书来源和续期方案",
+        "反向代理配置",
+        "端口暴露边界",
+        "防火墙或安全组规则"
+      ],
+      "readyEvidenceCommands": [
+        "make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json"
+      ],
+      "blockingIssues": [
+        "已有 network/TLS evidence 模板、strict READY 校验器和 100.99.133.43 测试环境 HTTP/SSH/Docker smoke，但缺真实生产域名、证书、反向代理、防火墙/安全组、HSTS、证书续期和外部 HTTPS smoke 证据。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境入口 smoke 报告结构、HTTP/SSH/Docker PASS 状态和 secret hygiene，不替代生产域名/TLS 证据。",
+        "Production domain, TLS certificate, proxy and firewall evidence are missing."
+      ],
+      "nextActions": [
+        "生产发布前复跑 make smoke-test-environment 指向目标环境，确认测试/目标入口可达性。",
+        "按 deploy/network/production-migration/network-tls-plan.example.json 填写真实生产 network/TLS evidence。",
+        "补 nginx / gateway / Keycloak / MinIO / Nacos / PostgreSQL 暴露边界。",
+        "用 make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json 校验真实生产域名/TLS evidence。"
+      ]
+    },
+    {
+      "id": "security-hardening",
+      "title": "安全加固",
+      "owner": "security-owner",
+      "statuses": {
+        "readiness": "PLANNED",
+        "cutoverGate": "PLANNED",
+        "rehearsal": "PLANNED"
+      },
+      "currentEvidence": [
+        "docs/oracle-replacement-status.md",
+        "metadata/oracle-replacement-status.json",
+        "docs/production-migration/security-hardening-checklist.md",
+        "deploy/security/production-migration/README.md",
+        "deploy/security/production-migration/security-hardening-plan.example.json",
+        "deploy/security/production-migration/scripts/validate-security-hardening-plan.py"
+      ],
+      "requiredEvidence": [
+        "默认账号处理记录",
+        "密码和 secret 轮换记录",
+        "最小权限矩阵",
+        "镜像扫描报告",
+        "日志审计和告警策略"
+      ],
+      "readyEvidenceCommands": [
+        "make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json"
+      ],
+      "blockingIssues": [
+        "测试账号和测试配置不能直接进入生产。",
+        "缺生产账号轮换、测试账号清理、密钥管理、数据库账号拆分、镜像扫描、容器运行用户、审计日志和告警证据。",
+        "Production hardening evidence is missing."
+      ],
+      "nextActions": [
+        "按 deploy/security/production-migration/security-hardening-plan.example.json 填写真实生产安全加固 evidence。",
+        "补最小权限和默认账号清理 checklist 的实际执行证据。",
+        "用 make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json 校验真实生产安全加固 evidence。"
+      ]
+    },
+    {
+      "id": "business-smoke-signoff",
+      "title": "业务 smoke 签字",
+      "owner": "business-owner",
+      "statuses": {
+        "readiness": "BLOCKED",
+        "cutoverGate": "BLOCKED",
+        "rehearsal": "BLOCKED"
+      },
+      "currentEvidence": [
+        "平台和 53 个业务页面 smoke 有证据。",
+        "生产模块测试矩阵当前 43 条，37 PASS / 6 BLOCKED / 0 NOT_RUN，其中 41 条 route smoke PASS。",
+        "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
+        "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis remain BLOCKED on 100.99.133.43: no healthy Nacos dependency instances, authenticated dependency endpoints return 503, and ProcessAnalysis PostgreSQL/runtime/menu metadata is absent.",
+        "metadata/production-module-blockers.json records the 6 unresolved production blocker cases and is now a required business smoke signoff gate.",
+        "metadata/production-module-backlog.json records 9 unresolved production backlog items, including public produceTaskCreated explicit-disabled product decision blocker, visible WOM manual-create/import scope, and WOM makeTaskList QR runtime endpoint 404, and is now a required business smoke signoff gate.",
+        "docs/production-migration/business-smoke-signoff-template.md 已建立。",
+        "deploy/business-smoke/production-migration/README.md",
+        "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+        "deploy/business-smoke/production-migration/scripts/validate-business-smoke-signoff.py"
+      ],
+      "requiredEvidence": [
+        "平台 smoke PASS",
+        "基础配置 smoke PASS",
+        "生产模块完整主流程 PASS",
+        "所有写动作 PostgreSQL 落库 PASS",
+        "业务负责人签字"
+      ],
+      "readyEvidenceCommands": [
+        "make business-package-scan",
+        "make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url",
+        "make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url",
+        "make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json"
+      ],
+      "blockingIssues": [
+        "剩余 6 条生产用例仍 BLOCKED：RM 批量配方显式编辑入口、物料服务/库存入库、ProcessAnalysis 追溯、完整报工中的独立不良数/库存边界、生产相关导出入口，以及可见手工创建入口仍缺真实 marker 或业务包证据。",
+        "business smoke signoff READY 校验必须覆盖 metadata/production-module-blockers.json 的每个 PROD-* 阻断 case；未解决 case 需要逐项签署结构化风险接受，riskAcceptance 必须包含 decision=ACCEPTED、acceptedBy、signedAt 和真实 evidence。",
+        "business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。",
+        "business smoke signoff is blocked by production action persistence gaps and missing material/ProcessAnalysis external dependencies.",
+        "业务负责人尚未基于真实主流程签字。",
+        "Production module blocker ledger still contains 6 BLOCKED cases and production backlog still contains 9 unresolved items."
+      ],
+      "nextActions": [
+        "补齐外部 Batch 客户端、物料/库存、ProcessAnalysis 等业务包和入口。",
+        "After deploying material/ProcessAnalysis packages, rerun make smoke-business-dependencies before marker acceptance/signoff.",
+        "从真实前端执行剩余 6 条 BLOCKED 用例并查 PostgreSQL。",
+        "把结果填入业务 smoke 签字模板。",
+        "用 make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json 校验真实生产业务签字 evidence。"
+      ]
+    }
+  ],
+  "releaseRule": "Do not mark the project complete while any goal gap, production blocker, production backlog item, business dependency blocker, production export blocker, or production migration gap remains open. A local PASS must be backed by real browser/API/database or file-response evidence and the relevant source ledger must be regenerated before this register can change."
+}

@@ -52,7 +52,7 @@ make ps
 Open:
 
 ```text
-http://10.11.100.17:18080/
+http://100.99.133.43:18080/
 ```
 
 Default test login:
@@ -84,7 +84,7 @@ NODE_PATH=/Users/zhangchu/.cache/codex-runtimes/codex-primary-runtime/dependenci
 Optional environment variables:
 
 ```text
-ADP_BASE_URL=http://10.11.100.17:18080
+ADP_BASE_URL=http://100.99.133.43:18080
 ADP_USERNAME=admin
 ADP_PASSWORD=123456
 ADP_HEADLESS=false

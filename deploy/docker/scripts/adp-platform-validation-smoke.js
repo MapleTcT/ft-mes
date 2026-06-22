@@ -7,12 +7,21 @@ const { spawnSync } = require("child_process");
 
 const rootDir = path.resolve(__dirname, "../../..");
 const scriptDir = __dirname;
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
+const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
-const outputDir =
+const requestedOutput =
   process.env.ADP_PLATFORM_OUTPUT_DIR || path.join("/tmp", `adp-platform-validation-${timestamp}`);
+const requestedOutputIsJson = /\.json$/i.test(requestedOutput);
+const outputDir = requestedOutputIsJson
+  ? path.join("/tmp", `adp-platform-validation-${timestamp}`)
+  : requestedOutput;
+const summaryReportPath = requestedOutputIsJson
+  ? path.resolve(rootDir, requestedOutput)
+  : path.join(outputDir, "platform-validation-summary.json");
 const platformMenuLimit = process.env.ADP_PLATFORM_MENU_LIMIT || "40";
+const sectionTimeoutMs = Number(process.env.ADP_PLATFORM_SECTION_TIMEOUT_MS || 300000);
 
 const skipMenu = process.env.ADP_SKIP_MENU_SMOKE === "true";
 const skipTodo = process.env.ADP_SKIP_TODO_SMOKE === "true";
@@ -138,6 +147,10 @@ function summarizeReport(section, parsed) {
         ? parsed.apiResults.filter((result) => !result.ok).map((result) => result.name)
         : null,
       browserOk: parsed.browser ? parsed.browser.ok : null,
+      browserNavigationError: parsed.browser ? parsed.browser.navigationError : null,
+      browserFinalUrl: parsed.browser ? parsed.browser.finalUrl : null,
+      browserTitle: parsed.browser ? parsed.browser.pageTitle : null,
+      browserBodyTextSnippet: parsed.browser ? parsed.browser.bodyTextSnippet : null,
       browserNetworkErrorCount:
         parsed.browser && Array.isArray(parsed.browser.networkErrors) ? parsed.browser.networkErrors.length : null,
       browserVisibleError: parsed.browser ? parsed.browser.visibleError : null,
@@ -175,13 +188,17 @@ function runSection(section) {
     ...process.env,
     ...section.env,
     ADP_BASE_URL: baseUrl,
+    ADP_BROWSER_BASE_URL: browserBaseUrl,
   };
   const result = spawnSync(process.execPath, [scriptPath], {
     cwd: rootDir,
     env,
     encoding: "utf8",
+    timeout: sectionTimeoutMs,
+    killSignal: "SIGTERM",
   });
   const parsed = readJson(section.reportPath);
+  const timedOut = result.error && result.error.code === "ETIMEDOUT";
   const ok = result.status === 0 && !result.error;
   return {
     id: section.id,
@@ -192,6 +209,8 @@ function runSection(section) {
     command: `node ${path.relative(rootDir, scriptPath)}`,
     exitCode: result.status,
     signal: result.signal,
+    timedOut: Boolean(timedOut),
+    timeoutMs: sectionTimeoutMs,
     error: result.error ? result.error.message : null,
     reportPath: section.reportPath,
     summary: summarizeReport(section, parsed),
@@ -234,6 +253,7 @@ function main() {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     baseUrl,
+    browserBaseUrl,
     username,
     outputDir,
     ok: failed.length === 0 && failedPrerequisites.length === 0,
@@ -258,15 +278,15 @@ function main() {
     results,
   };
 
-  const reportPath = path.join(outputDir, "platform-validation-summary.json");
-  fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+  ensureDir(path.dirname(summaryReportPath));
+  fs.writeFileSync(summaryReportPath, `${JSON.stringify(report, null, 2)}\n`);
 
   for (const result of allResults) {
     const summary = result.summary ? ` ${JSON.stringify(result.summary)}` : "";
     console.log(`${result.ok ? "OK" : "FAIL"} ${result.id} status=${result.status}${summary}`);
   }
   console.log(`SUMMARY total=${report.total} passed=${report.passed} failed=${report.failed} skipped=${report.skipped}`);
-  console.log(`REPORT ${reportPath}`);
+  console.log(`REPORT ${summaryReportPath}`);
 
   if (failed.length || failedPrerequisites.length) {
     process.exitCode = 1;

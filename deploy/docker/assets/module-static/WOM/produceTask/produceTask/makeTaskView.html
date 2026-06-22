@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title></title>
+	<!--制造指令单-->
+	<script>
+		var loadScript = function(url, placeBody) {
+			function loadUrlContent(url, successCallback, errorCallback) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, false);
+				if ("overrideMimeType" in xhr) {
+					xhr.overrideMimeType("text/plain");
+				}
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4) {
+					if (xhr.status === 0 || xhr.status === 200) {
+						successCallback(xhr.responseText);
+					} else {
+						errorCallback && errorCallback();
+						throw new Error("Could not load " + url);
+					}
+					}
+				};
+				return xhr.send(null);
+			}
+			var isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+			if (!isChrome) {
+				url += '-es5';
+			}
+			url += '.js?v=' + Math.random();
+
+			loadUrlContent(url, function(content){
+				var parentEl = document.getElementsByTagName('head')[0];
+				var s = document.createElement('script');
+				s.text = content;
+				parentEl.appendChild(s);
+			});
+		};
+	</script>
+
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- head.html--start -->
+
+	<!-- head.html--end -->
+	<script>
+
+
+		document.write("<script src='/greenDill/static/WOM/produceTask/produceTask/makeTaskView/i18n-value.js?" + Math.random() + "' ><\/script>");
+	</script>
+	<script type="text/javascript">
+		var pageConfig = {
+			"prefix": "/msService",// url前缀
+			"viewCode": "WOM_1.0.0_produceTask_makeTaskView", //  视图编码
+			"entityCode":"WOM_1.0.0_produceTask",// 实体编码
+			"menuCode": "WOM_1.0.0_produceTask_makeTaskView",
+			"viewName": "制造指令单",// 视图名称
+			"viewType": "VIEW",// 视图类型
+			"modelCode": "WOM_1.0.0_produceTask_ProduceTask",// 模型编码
+			"moduleCode": "WOM_1.0.0",// 模块编码
+			"isMain":true,// 主模型
+			"permissionCode":null, // 视图权限操作码（主要参照视图使用）
+
+
+			"showType": "SINGLE",// 视图展示类型
+			"modelAlias": "produceTask",// 模型别名
+			"workflowEnabled": true,// 启用工作流
+			"listButtons":{
+			},
+			"interfaceApi": {
+				"downloadFile":"/WOM/baseService/workbench/download",//  下载附件接口
+				"uploadList": "/WOM/baseService/workbench/upload-list", //  附件列表
+				"PreviewAttachments":"/WOM/baseService/workbench/preview",//附件预览
+                "PreviewPicture":"/WOM/baseService/workbench/preview/picture",//图片预览
+                "authenticationMessage":"/msService/WOM/baseService/workbench/download/getAuthenticationMessage",//附件下载预览鉴权信息
+				"recall":"/msService/WOM/produceTask/produceTask/recall",//  流程单据撤回（基础单据无效）
+				"retrial":"/msService/WOM/produceTask/produceTask/retrial",//  流程单据弃审（基础单据无效）
+				"sourceData": "/msService/WOM/produceTask/produceTask/data", //  表单数据
+				"datagridData": "/msService/WOM/produceTask/produceTask/data-", //  表格数据源
+				"submit": "/msService/WOM/produceTask/produceTask/makeTaskView/submit", //  表单提交
+				"save": "/msService/WOM/produceTask/produceTask/makeTaskView/save", //  表单保存
+				"dealInfoList": "/msService/WOM/produceTask/produceTask/dealInfo-list", //  意见处理
+				"editStates": "/msService/WOM/produceTask/produceTask/editStates", //  配置信息
+				"echartsData": "/msService/WOM/produceTask/produceTask/echartsData", //  图表数据源
+			},
+			"baseServiceApi": {
+				"flowRoot": "/msService/baseService/workflow/flowRoot", //  路由数据
+				"layoutJson": "/msService/baseService/view/layoutJson", //  布局数据
+				"systemCodeJson": "/inter-api/systemcode/v1/systemCodeJson", //  系统编码
+				"uploadFile": "/inter-api/file-server/v1/file/upload/file", //  附件上传
+				"deleteFile": "/inter-api/file-server/v1/file/delete", //  附件删除
+				"mneClient": "/msService/baseService/workbench/common/mneClient", //  助记码
+			},
+		}
+	</script>
+</head>
+
+<body class="supos-container">
+	<div id="app"></div>
+	<script src="/greenDill/static/scripts/styles.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.core.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.antdicons.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.antd.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/i18n.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.commons.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.echarts.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.sesgis.js?v=1663120692297"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/edit.js?v=1663120692297"></script>
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- body.html--start -->
+
+	<!-- body.html--end -->
+	<script>
+		loadScript('/greenDill/static/WOM/produceTask/produceTask/makeTaskView/body');
+	</script>
+</body>
+</html>

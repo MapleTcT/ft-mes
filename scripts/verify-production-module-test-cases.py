@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_PATH = ROOT / "metadata/production-module-test-cases.json"
 DOC_PATH = ROOT / "docs/production-module-functional-test-cases.md"
 AUDIT_PATH = ROOT / "docs/backend-table-audit/business-production.md"
+NOOP_ANALYSIS_JSON = ROOT / "metadata/wom-public-produce-task-created-analysis.json"
 
 ALLOWED_STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN"}
 ALLOWED_ROUTE_SMOKE_STATUSES = {"PASS", "FAIL", "BLOCKED", "NOT_RUN", "NOT_APPLICABLE"}
@@ -77,6 +78,22 @@ def read_json(failures: list[str]) -> dict[str, Any]:
     return data
 
 
+def read_json_path(path: Path, failures: list[str]) -> dict[str, Any]:
+    try:
+        with path.open(encoding="utf-8") as handle:
+            data = json.load(handle)
+    except FileNotFoundError:
+        fail(failures, f"missing analysis report: {path.relative_to(ROOT)}")
+        return {}
+    except json.JSONDecodeError as error:
+        fail(failures, f"invalid JSON in {path.relative_to(ROOT)}: {error}")
+        return {}
+    if not isinstance(data, dict):
+        fail(failures, f"analysis report must be an object: {path.relative_to(ROOT)}")
+        return {}
+    return data
+
+
 def check_docs(failures: list[str]) -> None:
     for path in (DOC_PATH, AUDIT_PATH):
         if not path.exists():
@@ -99,6 +116,55 @@ def check_docs(failures: list[str]) -> None:
 
 def as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def check_public_produce_noop_contract(failures: list[str]) -> None:
+    data = read_json_path(NOOP_ANALYSIS_JSON, failures)
+    if not data:
+        return
+    if data.get("status") != "BLOCKED_EXPLICIT_DISABLED":
+        fail(failures, "public produceTaskCreated analysis must remain BLOCKED_EXPLICIT_DISABLED")
+    if data.get("classification") != "explicit-disabled-pending-product-decision":
+        fail(failures, "public produceTaskCreated analysis must classify the endpoint as explicitly disabled pending product decision")
+    if data.get("isPostgresCompatibilityGap") is not False:
+        fail(failures, "public produceTaskCreated disabled path must not be treated as a PostgreSQL migration gap")
+    if "producetaskcreated2" not in str(data.get("acceptedReplacementEndpoint", "")).lower():
+        fail(failures, "public produceTaskCreated analysis must name produceTaskCreated2 as accepted path")
+    if not any(entry.get("id") == "PROD-ACTION-007" for entry in as_list(data.get("backlog")) if isinstance(entry, dict)):
+        fail(failures, "public produceTaskCreated analysis must keep backlog id PROD-ACTION-007")
+    evidence = data.get("evidence") if isinstance(data.get("evidence"), dict) else {}
+    backlog_probe = {}
+    for entry in as_list(data.get("backlog")):
+        if isinstance(entry, dict) and entry.get("id") == "PROD-ACTION-007" and isinstance(entry.get("latestProbe"), dict):
+            backlog_probe = entry["latestProbe"]
+            break
+    if evidence.get("latestProbeStatus") != "EXPLICIT_REJECTION_NO_PERSISTENCE" or backlog_probe.get("status") != "EXPLICIT_REJECTION_NO_PERSISTENCE":
+        fail(failures, "public produceTaskCreated latest probe must prove explicit rejection without persistence")
+    if backlog_probe.get("responseCode") != 400:
+        fail(failures, "public produceTaskCreated latest probe must return code=400 instead of false success")
+
+
+def check_case_public_produce_guard(case_id: str, case: dict[str, Any], failures: list[str]) -> None:
+    text = json.dumps(case, ensure_ascii=False, sort_keys=True).lower()
+    mentions_public_endpoint = (
+        "/public/wom/producetask/producetask/producetaskcreated" in text
+        or "public /producetaskcreated" in text
+        or "public producetaskcreated" in text
+    )
+    if not mentions_public_endpoint:
+        return
+
+    if "producetaskcreated2" not in text:
+        fail(failures, f"{case_id} mentions public produceTaskCreated but not the accepted produceTaskCreated2 path")
+
+    no_op_terms = ("no-op", "不落库", "not accepted", "不能作为", "查库为 0", "显式禁用", "已禁用", "code=400")
+    if not any(term in text for term in no_op_terms):
+        fail(failures, f"{case_id} mentions public produceTaskCreated without explicit no-op/not-accepted wording")
+
+    if case.get("acceptanceStatus") == "PASS":
+        evidence = str(case.get("evidence", "")).lower()
+        if "producetaskcreated2" not in evidence:
+            fail(failures, f"{case_id} PASS must base creation evidence on produceTaskCreated2")
 
 
 def check_case(index: int, case: Any, failures: list[str]) -> str | None:
@@ -156,10 +222,13 @@ def check_case(index: int, case: Any, failures: list[str]) -> str | None:
     if status == "BLOCKED" and not str(case.get("backendTraceStatus", "")).strip():
         fail(failures, f"{case_id} BLOCKED must include backendTraceStatus")
 
+    check_case_public_produce_guard(case_id or f"cases[{index}]", case, failures)
     return status
 
 
 def check_report(data: dict[str, Any], failures: list[str]) -> None:
+    check_public_produce_noop_contract(failures)
+
     for key in ("schemaVersion", "generatedAt", "repoCommit", "database", "summary", "cases"):
         if key not in data:
             fail(failures, f"report missing required top-level key: {key}")

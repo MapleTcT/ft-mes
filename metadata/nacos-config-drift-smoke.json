@@ -1,0 +1,1031 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-06-21T00:09:15.729Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "target": {
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "nacosContainer": "adp-mes-newbase-nacos-1",
+    "nacosGroup": "prod"
+  },
+  "local": {
+    "configDir": "deploy/docker/nacos-rendered"
+  },
+  "summary": {
+    "dataIds": 44,
+    "remoteFetched": 44,
+    "missingRemote": 0,
+    "missingLocal": 0,
+    "exactMatches": 17,
+    "drifted": 27,
+    "oracleResidueFiles": 0,
+    "criticalChecks": 20,
+    "criticalPass": 20,
+    "criticalFail": 0,
+    "expectedServices": 18,
+    "healthyServices": 18,
+    "failedServices": 0,
+    "nacosServiceCount": 91,
+    "status": "PASS"
+  },
+  "criticalChecks": [
+    {
+      "dataId": "WOMMs-prod.properties",
+      "name": "wom-kafka-service-name",
+      "status": "PASS",
+      "evidence": "WOM kafka endpoint uses kafka:9092"
+    },
+    {
+      "dataId": "WOMMs-prod.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "name": "datasource-db-type-postgresql",
+      "status": "PASS",
+      "evidence": "db-type=postgresql"
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "name": "datasource-host-postgres",
+      "status": "PASS",
+      "evidence": "host=postgres"
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "name": "datasource-port-5432",
+      "status": "PASS",
+      "evidence": "port=5432"
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "name": "datasource-validation-select-1",
+      "status": "PASS",
+      "evidence": "validationQuerySql is SELECT 1"
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-gateway.properties",
+      "name": "gateway-keycloak-client-present",
+      "status": "PASS",
+      "evidence": "keycloak.client is present"
+    },
+    {
+      "dataId": "supfusion-gateway.properties",
+      "name": "gateway-jwt-secret-present",
+      "status": "PASS",
+      "evidence": "jwt.secret is present"
+    },
+    {
+      "dataId": "supfusion-gateway.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-jwt-common.properties",
+      "name": "jwt-secret-present",
+      "status": "PASS",
+      "evidence": "sha256Prefix=9e9cea84527f841b; length=392"
+    },
+    {
+      "dataId": "supfusion-jwt-common.properties",
+      "name": "jwt-token-head-bearer",
+      "status": "PASS",
+      "evidence": "tokenHead=Bearer"
+    },
+    {
+      "dataId": "supfusion-jwt-common.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-license.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-mybatis-common.properties",
+      "name": "mybatis-uses-runtime-db-type",
+      "status": "PASS",
+      "evidence": "mapperLocations=4"
+    },
+    {
+      "dataId": "supfusion-mybatis-common.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-registry.properties",
+      "name": "registry-group-prod",
+      "status": "PASS",
+      "evidence": "registry.group=prod"
+    },
+    {
+      "dataId": "supfusion-registry.properties",
+      "name": "discovery-group-prod",
+      "status": "PASS",
+      "evidence": "discovery.group=prod"
+    },
+    {
+      "dataId": "supfusion-registry.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    },
+    {
+      "dataId": "supfusion-systemConfig.properties",
+      "name": "no-oracle-residue",
+      "status": "PASS",
+      "evidence": "non-comment Oracle residue count is zero"
+    }
+  ],
+  "services": {
+    "group": "prod",
+    "listFetchStatus": "PASS",
+    "serviceCount": 91,
+    "expectedServiceCount": 18,
+    "items": [
+      {
+        "serviceName": "supos-gateway",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8008
+        ],
+        "instanceIds": [
+          "172.25.0.19#8008#DEFAULT#prod@@supos-gateway"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "FoundationMs",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.57#8080#DEFAULT#prod@@FoundationMs"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "baseService",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          30020
+        ],
+        "instanceIds": [
+          "172.25.0.56#30020#DEFAULT#prod@@baseService"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "auth",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          30215
+        ],
+        "instanceIds": [
+          "172.25.0.33#30215#DEFAULT#prod@@auth"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "organization",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          30215
+        ],
+        "instanceIds": [
+          "172.25.0.33#30215#DEFAULT#prod@@organization"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "rbac",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          30215
+        ],
+        "instanceIds": [
+          "172.25.0.33#30215#DEFAULT#prod@@rbac"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "systemconfig",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 2,
+        "healthyHosts": 1,
+        "unhealthyHosts": 1,
+        "ports": [
+          30220
+        ],
+        "instanceIds": [
+          "172.25.0.30#30220#DEFAULT#prod@@systemconfig",
+          "172.25.0.29#30220#DEFAULT#prod@@systemconfig"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "keycloak",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 2,
+        "healthyHosts": 2,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.7#8080#DEFAULT#prod@@keycloak",
+          "172.25.0.7#8080#DEFAULT#prod@@keycloak"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "WOMMs",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.55#8080#DEFAULT#prod@@WOMMs"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "WOM",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.55#8080#DEFAULT#prod@@WOM"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "QCS",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.53#8080#DEFAULT#prod@@QCS"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "LIMSBasic",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 2,
+        "healthyHosts": 2,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.53#8080#DEFAULT#prod@@LIMSBasic",
+          "172.25.0.54#8080#DEFAULT#prod@@LIMSBasic"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "WTS",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.36#8080#DEFAULT#prod@@WTS"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "workAppointment",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.44#8080#DEFAULT#prod@@workAppointment"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "RM",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.51#8080#DEFAULT#prod@@RM"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "RMMs",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 1,
+        "healthyHosts": 1,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080
+        ],
+        "instanceIds": [
+          "172.25.0.51#8080#DEFAULT#prod@@RMMs"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "TeamInfo",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 2,
+        "healthyHosts": 2,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080,
+          8951
+        ],
+        "instanceIds": [
+          "172.25.0.57#8080#DEFAULT#prod@@TeamInfo",
+          "172.25.0.42#8951#DEFAULT#prod@@TeamInfo"
+        ],
+        "status": "PASS",
+        "issues": []
+      },
+      {
+        "serviceName": "BaseSet",
+        "listed": true,
+        "fetched": true,
+        "totalHosts": 2,
+        "healthyHosts": 2,
+        "unhealthyHosts": 0,
+        "ports": [
+          8080,
+          30111
+        ],
+        "instanceIds": [
+          "172.25.0.57#8080#DEFAULT#prod@@BaseSet",
+          "172.25.0.39#30111#DEFAULT#prod@@BaseSet"
+        ],
+        "status": "PASS",
+        "issues": []
+      }
+    ]
+  },
+  "items": [
+    {
+      "dataId": "WOMMs-prod.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 89,
+      "remoteBytes": 89,
+      "localSha256": "7622535e87a1451f6f57937a5deb2da009f2a995ec4c5f84941952cf60f7db88",
+      "remoteSha256": "7622535e87a1451f6f57937a5deb2da009f2a995ec4c5f84941952cf60f7db88",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "greendill-auth.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 661,
+      "remoteBytes": 661,
+      "localSha256": "2791a49d2616ca355d35c6dda08bb2f66b2368a9b978dda3ea6008ffa1a6cf28",
+      "remoteSha256": "2791a49d2616ca355d35c6dda08bb2f66b2368a9b978dda3ea6008ffa1a6cf28",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-adp-lite.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 3039,
+      "remoteBytes": 3130,
+      "localSha256": "37c3f6b1a6e7f62bae1def2f6ffd5cad5d41b6068b47cd7e93a18bd32ea00549",
+      "remoteSha256": "8e55adab6d3a9cefcfd1db63913499b9f28cf0fd1d003e20fdb451f90dddf50a",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-auth.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 583,
+      "remoteBytes": 583,
+      "localSha256": "583782b1607cdebca316dc52996822bbd96c5fca545b154b7d9ee458623ffe4f",
+      "remoteSha256": "583782b1607cdebca316dc52996822bbd96c5fca545b154b7d9ee458623ffe4f",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-baseApplications.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 2405,
+      "remoteBytes": 2911,
+      "localSha256": "755b35ff56217406053ab8c41c20cf3022949f1431df029e60ffcbf69c2cc78f",
+      "remoteSha256": "f8f0e934d03bbdb05234e507bfcccae4190e0e323f9045a7e49b4796e87dcee8",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-baseService.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 472,
+      "remoteBytes": 472,
+      "localSha256": "eef5bfd10ad4d034d278c9a8e0a85064fd27ca466c5bf17315ce82a43443747f",
+      "remoteSha256": "eef5bfd10ad4d034d278c9a8e0a85064fd27ca466c5bf17315ce82a43443747f",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-config-center-system.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 83,
+      "remoteBytes": 83,
+      "localSha256": "8a16cd3f6fd1bb32bacabc386c058c3410fc9d5976e9938fcc5f2d222a6cb3b1",
+      "remoteSha256": "8a16cd3f6fd1bb32bacabc386c058c3410fc9d5976e9938fcc5f2d222a6cb3b1",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-configuration-services.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 634,
+      "remoteBytes": 790,
+      "localSha256": "c25e8ad6f866084e84f5667be98355d0f08596fad17fef1c1af02cb9e789dfa9",
+      "remoteSha256": "46907d5814ef2017902bd5f166672b66df87db6ebb81d6bcd8ac1ea61b8c7a5c",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-counter.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 544,
+      "remoteBytes": 544,
+      "localSha256": "045580c877176487fce21f64d390861d9930483c65667b538e8e639adc1b1d4d",
+      "remoteSha256": "fd4bcef5a87f1157d0d980a012a5862876b89cd966a088b8620b81f13033e57c",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-coustom-property.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 598,
+      "remoteBytes": 598,
+      "localSha256": "ffd5d0b77ca7b2c052e0d29b8244d30b9867dfa7de3492b6eccc2e559f52ae71",
+      "remoteSha256": "ffd5d0b77ca7b2c052e0d29b8244d30b9867dfa7de3492b6eccc2e559f52ae71",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-datasource-system.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1427,
+      "remoteBytes": 1515,
+      "localSha256": "a3b5160bc0cb89a8cd7e8c8c8f4d0ca29427e1d7d9772329a96f3567c4d8a4f4",
+      "remoteSha256": "8730acda80574526773e28c169f5d56734dec20401ec7c1021eadd2c88c58980",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-entityconf.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1101,
+      "remoteBytes": 1101,
+      "localSha256": "0e55c8f23b92b0e250d20a6323bf12c8238f49204ad64a255368667bccf76374",
+      "remoteSha256": "65b74c182e0bec9d39182b14deee51e8231e22cd780a4a0f4924555341f3cd21",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-file-server.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 928,
+      "remoteBytes": 897,
+      "localSha256": "c9c8706b99decc6f3d6e5f9c65476232aaf3e12979481eb149039a31c01bb81a",
+      "remoteSha256": "28e102dd89473e44665eac4caf514ef59906d750bf5532ea3032f6445fb6e15c",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-flow.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 590,
+      "remoteBytes": 590,
+      "localSha256": "112a56f1af1f67b304f44369b1a45b26481a1ede40e1f86febd4201e2a9fb556",
+      "remoteSha256": "112a56f1af1f67b304f44369b1a45b26481a1ede40e1f86febd4201e2a9fb556",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-gateway.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 9613,
+      "remoteBytes": 10103,
+      "localSha256": "a19dd34f95e74b9ddfbca1079bb98431fae6e2b15ef4a8c849d9ed8e5535027a",
+      "remoteSha256": "88674ec91e08a4c556ee632e275efa37feddbc7461f4c6fb21ca56bc611b57cb",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-i18n-system.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 135,
+      "remoteBytes": 217,
+      "localSha256": "72018809b2f372ffd7f7ed574612e57a3acd1fc75ed75e66e92243f841d85d41",
+      "remoteSha256": "f20b611780d2d6fa4c4b63e1b8f879848c40b90586b1fd70fcf210e52a06cc7e",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-i18n.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1541,
+      "remoteBytes": 1503,
+      "localSha256": "ed08fdc36c6db1b28d2aa71859d65b098fc0d0c82839fd865becef857a77f9bb",
+      "remoteSha256": "416e00104c64d6c2bbcfb35317347396f2785fcd7b1905a9adbf1705da01676d",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-iam.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 571,
+      "remoteBytes": 571,
+      "localSha256": "6adc049847e07faba26630e1c1a8da09cb80bbf258f99df8ed730572a6c1aa15",
+      "remoteSha256": "6adc049847e07faba26630e1c1a8da09cb80bbf258f99df8ed730572a6c1aa15",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-integration.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 2603,
+      "remoteBytes": 2603,
+      "localSha256": "a8713031c8a9bce21438911eee4fc51c1a929c2800c424564a8a1513e9da1edb",
+      "remoteSha256": "a8713031c8a9bce21438911eee4fc51c1a929c2800c424564a8a1513e9da1edb",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-jwt-common.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 232,
+      "remoteBytes": 605,
+      "localSha256": "1d06218449a63d1dbbd32d4e4be1feff0108c0548aa8ced986a440da2954a4d2",
+      "remoteSha256": "e8adf07fb465e20f956d670fadb42cf38ed83e5c42fe578ecfd13bc483f8ac61",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-kafka-system.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 346,
+      "remoteBytes": 432,
+      "localSha256": "753d948f63389506980f29cb434636e08c1f523be9805ce7049360db4d1b4e11",
+      "remoteSha256": "6ee69265f305663b0b49a3490e170d11fb6fb2b0894ff07f06911cbea1b971de",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-license.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 59,
+      "remoteBytes": 287,
+      "localSha256": "9febb8ac0fe9de899f7fcdf30b3975d1260ca07c9fec184b34c967636c51692c",
+      "remoteSha256": "d2c468170767f6512df40f3a7903a78b36719198281f63ed7ae43bd7c0798a82",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-module-registry.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 338,
+      "remoteBytes": 338,
+      "localSha256": "c11193d1cefa5d03171e583a3a3753c0fe93c832a6f7a7e686bdb91a8b39dd32",
+      "remoteSha256": "70b5fec5df55abb5f27e6c94943fd94228f52dcc11472b4a6d98dbbbba130a32",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-mongodb-system.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 153,
+      "remoteBytes": 153,
+      "localSha256": "b79884351f5d4cc13d2903d7f63bd57cdb6e64033d2fc0850dedcdffd065028d",
+      "remoteSha256": "b79884351f5d4cc13d2903d7f63bd57cdb6e64033d2fc0850dedcdffd065028d",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-mybatis-common.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 635,
+      "remoteBytes": 635,
+      "localSha256": "1f0499ab418dc58ff60b611d36ec67e91221f512972ff607c3c80db9b6c4493a",
+      "remoteSha256": "1f0499ab418dc58ff60b611d36ec67e91221f512972ff607c3c80db9b6c4493a",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-notification-admin.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1048,
+      "remoteBytes": 1096,
+      "localSha256": "7897b149162fa0426234f2e3f31f3745ae311c736f8a696650b2000f5aeedd19",
+      "remoteSha256": "a663315c4767151725ea4d1e09c92774cc8aa948c1c4733f7e8ab626a9148967",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-notification-apiserver.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 788,
+      "remoteBytes": 850,
+      "localSha256": "1ce83f8f4f3e7d9b59bdda60b38e8da1f7fe50b37b9ea68f6be5bd601f86ed51",
+      "remoteSha256": "9c566ad9842a13a456f4cd8bd5ef23e9527c8953599e480800cafa4dbff34c05",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-notification-app.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 94,
+      "remoteBytes": 94,
+      "localSha256": "1700e17769ad954bd73eca9f7cd61b0a314ea8f87121e0d8c6d21c53ae31e14d",
+      "remoteSha256": "1700e17769ad954bd73eca9f7cd61b0a314ea8f87121e0d8c6d21c53ae31e14d",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-notification-engine.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 873,
+      "remoteBytes": 935,
+      "localSha256": "74dc4e345f8b65335052a2203037b717d76e13f035e5eae42299bc4abda30841",
+      "remoteSha256": "942a75320c2d2f14a53187a723aeca8c4be59a4b600b6b69cf2596d671e912e0",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-notification-mobile.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 97,
+      "remoteBytes": 97,
+      "localSha256": "403e2654a02dfcf04bc1eb9b798fd3d7364a4d4aeca57aeb70e1c12c862e18e9",
+      "remoteSha256": "403e2654a02dfcf04bc1eb9b798fd3d7364a4d4aeca57aeb70e1c12c862e18e9",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-organization.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 403,
+      "remoteBytes": 403,
+      "localSha256": "81af18a9de24ba7bcc026aecee3acdced0d95549fb6af051dac8b66014979bad",
+      "remoteSha256": "81af18a9de24ba7bcc026aecee3acdced0d95549fb6af051dac8b66014979bad",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-portal.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1432,
+      "remoteBytes": 1420,
+      "localSha256": "0666ef0615638a158317f841b3f9dc4eabc4c81f692b97fd8ca62a33983361ca",
+      "remoteSha256": "d69cefccb08201bd85c5b9e9a59d2b0101931475b68be7596e52258bd976d094",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-printer.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 307,
+      "remoteBytes": 307,
+      "localSha256": "03d8e620fb273aed17cdbed8fac238088f26247e98291b867a053a8ac8944d5c",
+      "remoteSha256": "65732501739d0353b5c64e8134cdb1a8d87ec37454abc0c167b7a48cef78a374",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-rbac.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1012,
+      "remoteBytes": 1012,
+      "localSha256": "1135ad241f17fbe91ab2c0018d334559e1556fc98d69cd03b078d285ca1cbc87",
+      "remoteSha256": "b416918cc350f55d323df6ebf9ab19a247d118dd5f3972d99d060fc8234338fd",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-redis-system.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 691,
+      "remoteBytes": 791,
+      "localSha256": "978bf6d05fdb96bc611ee2af068cedb6d30cab14cca66b8f5d34f6acbafb1dab",
+      "remoteSha256": "945bb63ed1e3b27bea9161a0daee1f161d8cfd6e08c92244f41865d52c6ea408",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-registry.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 430,
+      "remoteBytes": 430,
+      "localSha256": "671f9802ff8e36410c0f6c27cffb40d427f8e2816d758687d7a64db001a0fa0e",
+      "remoteSha256": "671f9802ff8e36410c0f6c27cffb40d427f8e2816d758687d7a64db001a0fa0e",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-signature.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1163,
+      "remoteBytes": 1337,
+      "localSha256": "12729b57d80bf109b703043b03093b6b1403ae4c453d6705d4416935516e9150",
+      "remoteSha256": "0cd9b73241debb21a29c23bd489de250919637c523409c2d834c9f13ae621278",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-sms-jincang.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 421,
+      "remoteBytes": 628,
+      "localSha256": "ca88b30348cc73726bc3ee09f3d1c118664ceb209ca611041cd8c4838bdcc7b9",
+      "remoteSha256": "ebbdea8b57d72b4b790f272db9740dd17b3092cf277941ff14d2551c611bd684",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-sms-jindi.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 419,
+      "remoteBytes": 419,
+      "localSha256": "df68f2698f635d1bf98d00c668673f4eca78ca08b6de5a6c4210fa09e8a93c19",
+      "remoteSha256": "df68f2698f635d1bf98d00c668673f4eca78ca08b6de5a6c4210fa09e8a93c19",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-system-classified.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 34,
+      "remoteBytes": 34,
+      "localSha256": "66c2b48ee8a6cd00eaa90e8d9f67f2e4e0ccce6929481ea48b622c56fb8ceb7a",
+      "remoteSha256": "66c2b48ee8a6cd00eaa90e8d9f67f2e4e0ccce6929481ea48b622c56fb8ceb7a",
+      "exactMatch": true,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-systemCode.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 741,
+      "remoteBytes": 741,
+      "localSha256": "1f32321b04edf3a6f70c8bd09f5579499798893fb60d98a771e6128366bc492a",
+      "remoteSha256": "52a5de29d5dc4bbb893a26e2f1290ec166d77a8c1b19156cb4da58c28006c2ca",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-systemConfig.properties",
+      "critical": true,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 781,
+      "remoteBytes": 781,
+      "localSha256": "2c88d5050b8755fbc745bb239ba8b97f29234ca51456a0a3cb5a6917d86c9c80",
+      "remoteSha256": "07467465e9396c8a314a32a60cadce98397dc5c54995404c54292826f0c41328",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-task-scheduler.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 1668,
+      "remoteBytes": 1647,
+      "localSha256": "79b7a629e25d7deab51544b3bf9353d05070d8bc410b00970ee2a42dc9e05f29",
+      "remoteSha256": "4282bd20e66f7451df9c510e582a902685e89d50436b0b9f75d3a2885b5d48b8",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    },
+    {
+      "dataId": "supfusion-theme.properties",
+      "critical": false,
+      "localExists": true,
+      "remoteFetched": true,
+      "localBytes": 606,
+      "remoteBytes": 650,
+      "localSha256": "21b6645fd35f584dffad68033b26946e395203e5e8b29f6802a0b150098e00e0",
+      "remoteSha256": "5f0fd33f3f19560c371953e9daeb44ae9049d349c3d9dc042474a203ba9e94fe",
+      "exactMatch": false,
+      "oracleResidueCount": 0,
+      "issues": []
+    }
+  ]
+}

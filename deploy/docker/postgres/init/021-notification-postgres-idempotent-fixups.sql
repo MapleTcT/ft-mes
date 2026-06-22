@@ -213,7 +213,8 @@ DECLARE
   msg_table text;
 BEGIN
   WHILE month_cursor <= end_month LOOP
-    month_value := to_char(month_cursor, 'YYYYMM');
+    month_value := EXTRACT(YEAR FROM month_cursor)::integer::text ||
+                   lpad(EXTRACT(MONTH FROM month_cursor)::integer::text, 2, '0');
     task_table := 'notice_task_' || month_value;
     task_protocol_table := 'notice_task_protocol_' || month_value;
 

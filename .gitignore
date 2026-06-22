@@ -6,6 +6,7 @@ __pycache__/
 /metadata/tools/
 /metadata/*.log
 /metadata/*.cache
+/test-environment-smoke.json
 
 # Keep the recovered repository source-focused.
 *.class
@@ -23,6 +24,7 @@ __pycache__/
 /dist/
 /target/
 **/target/
+/deploy/docker/patches/*/build/
 /node_modules/
 
 # Local Docker deployment overrides.

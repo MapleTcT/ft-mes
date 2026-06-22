@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "PLANNED",
+  "owner": "runtime-platform-owner",
+  "repoCommit": "TBD",
+  "targetNacosGroup": "prod",
+  "publishWindow": "TBD",
+  "runtimePatchManifest": "metadata/runtime-patch-manifest.json",
+  "phases": [
+    {
+      "id": "rendered-config-baseline",
+      "title": "Rendered production config baseline captured",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "renderedDataIds": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Production rendered Nacos baseline has not been captured."
+      ],
+      "nextActions": [
+        "Render production Nacos configs from approved production placeholders and attach hash-only evidence."
+      ]
+    },
+    {
+      "id": "production-nacos-export",
+      "title": "Production or rehearsal Nacos export captured",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "exportedDataIds": 0,
+        "exportedServices": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Production Nacos export evidence is missing."
+      ],
+      "nextActions": [
+        "Export target Nacos dataIds and service registry summary without secret values."
+      ]
+    },
+    {
+      "id": "nacos-diff-review",
+      "title": "Nacos diff reviewed and accepted",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "reviewedDataIds": 0,
+        "criticalDrift": 0,
+        "oracleDefaults": 0,
+        "secretLeaks": 0,
+        "approvedBy": "TBD"
+      },
+      "blockingIssues": [
+        "Production Nacos diff review has not been signed."
+      ],
+      "nextActions": [
+        "Review rendered-vs-target drift, confirm no Oracle defaults or secret leakage, and attach owner approval."
+      ]
+    },
+    {
+      "id": "runtime-patch-package",
+      "title": "Runtime patch package built and signed",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "metadata/runtime-patch-manifest.json",
+        "TBD"
+      ],
+      "summary": {
+        "packageRef": "TBD",
+        "manifestEntryCount": 0,
+        "sha256": "TBD",
+        "signatureEvidence": "TBD"
+      },
+      "blockingIssues": [
+        "Signed production runtime patch package evidence is missing."
+      ],
+      "nextActions": [
+        "Build or archive the production patch bundle, record its sha256 and attach signature or approval evidence."
+      ]
+    },
+    {
+      "id": "publish-window",
+      "title": "Publish window and restart sequence approved",
+      "status": "PLANNED",
+      "owner": "release-manager",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "windowApproved": false,
+        "restartSequenceApproved": false,
+        "rollbackWindowApproved": false
+      },
+      "blockingIssues": [
+        "Production publish window and restart sequence approval are missing."
+      ],
+      "nextActions": [
+        "Attach approved publish window, restart order and rollback time window."
+      ]
+    },
+    {
+      "id": "post-publish-nacos-smoke",
+      "title": "Post-publish Nacos runtime smoke passed",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "checks": 0,
+        "passed": 0,
+        "oracleResiduals": 0,
+        "criticalServicesHealthy": 0
+      },
+      "blockingIssues": [
+        "Post-publish Nacos config and service registry smoke has not passed."
+      ],
+      "nextActions": [
+        "Run Nacos config drift smoke against production or rehearsal and attach sanitized report."
+      ]
+    },
+    {
+      "id": "post-publish-platform-smoke",
+      "title": "Post-publish platform smoke passed",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "checks": 0,
+        "passed": 0
+      },
+      "blockingIssues": [
+        "Post-publish platform smoke evidence is missing."
+      ],
+      "nextActions": [
+        "Run login, menu, todo and representative runtime page smoke after Nacos publish and runtime restart."
+      ]
+    },
+    {
+      "id": "rollback-link",
+      "title": "Nacos/runtime rollback evidence linked",
+      "status": "PLANNED",
+      "owner": "release-manager",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "rollbackEvidence": "TBD"
+      },
+      "blockingIssues": [
+        "Nacos/runtime patch rollback evidence is missing."
+      ],
+      "nextActions": [
+        "Attach Nacos restore evidence, previous patch bundle manifest and rollback rehearsal result."
+      ]
+    }
+  ],
+  "openIssues": [
+    {
+      "id": "NACOS-RUNTIME-PATCH-001",
+      "severity": "BLOCKER",
+      "description": "This example is only a template and cannot be used as production READY evidence.",
+      "owner": "runtime-platform-owner",
+      "nextAction": "Create a real evidence file outside git and run the strict-ready validator."
+    }
+  ]
+}

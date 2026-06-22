@@ -1,0 +1,716 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T06:37:19.684Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "goalId": "G-012",
+  "areaId": "configuration-entity-runtime",
+  "status": "PASS",
+  "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "route": "/msService/ec/engine/msManage",
+  "mutationAttempted": true,
+  "summary": {
+    "checks": 7,
+    "pass": 7,
+    "fail": 0,
+    "entityRowsAfterCreate": 1,
+    "modelRowsAfterCreate": 1,
+    "propertyRowsAfterCreate": 3,
+    "cleanupEntityRows": 0,
+    "cleanupModelRows": 0,
+    "cleanupPropertyRows": 0
+  },
+  "identifiers": {
+    "moduleCode": "DataSet_1.0.0",
+    "entityName": "E2eEnt063301",
+    "entityCode": "DataSet_1.0.0_E2eEnt063301",
+    "modelName": "E2eMod063301",
+    "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+    "tableName": "DS_E2E_063301"
+  },
+  "checks": [
+    {
+      "name": "browser-page-context",
+      "status": "PASS",
+      "evidence": "navigationStatus=200; visibleError=none"
+    },
+    {
+      "name": "http-requests",
+      "status": "PASS",
+      "evidence": "entityCreate=200/true; modelCreate=200/true; entityEdit=200/true; modelEdit=200/true; modelDelete=200/true; entityDelete=200/true"
+    },
+    {
+      "name": "entity-created",
+      "status": "PASS",
+      "evidence": "entityRows=1; valid=1"
+    },
+    {
+      "name": "model-created-with-inherent-properties",
+      "status": "PASS",
+      "evidence": "modelRows=1; propertyRows=3"
+    },
+    {
+      "name": "entity-model-edited",
+      "status": "PASS",
+      "evidence": "entityDescription=ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity; modelDescription=ADP_E2E_202606221433_ENTITY_MODEL_EDIT model"
+    },
+    {
+      "name": "entity-model-deleted-or-disabled",
+      "status": "PASS",
+      "evidence": "entityRows=1; modelRows=1; propertyRows=3"
+    },
+    {
+      "name": "controlled-cleanup",
+      "status": "PASS",
+      "evidence": "entityRows=0; modelRows=0; propertyRows=0; physicalTables=0"
+    }
+  ],
+  "requests": {
+    "entityCreate": {
+      "method": "POST",
+      "url": "/msService/ec/entity/save",
+      "requestPayload": {
+        "entity.version": "0",
+        "entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "entity.module.code": "DataSet_1.0.0",
+        "entity.isControl": "false",
+        "entity.payCloseAttention": "false",
+        "entity.crossCompanyFlag": "false",
+        "entity.mobile": "false",
+        "entity.enableRest": "false",
+        "entity.enableWs": "false",
+        "entity.enableFieldsPermissionConf": "false",
+        "entity.entityName": "E2eEnt063301",
+        "entity.prefix": "E2E",
+        "entity.name": "ADP_E2E_202606221433_ENTITY_MODEL entity create",
+        "entity.isBase": "true",
+        "entity.groupEnabled": "false",
+        "entity.workflowEnabled": "false",
+        "entity.description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE entity"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "modelCreate": {
+      "method": "POST",
+      "url": "/msService/ec/model/save",
+      "requestPayload": {
+        "model.version": "0",
+        "model.code": "",
+        "entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "model.entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "model.moduleCode": "DataSet_1.0.0",
+        "model.orgTableName": "",
+        "model.modelName": "E2eMod063301",
+        "model.tableName": "DS_E2E_063301",
+        "model.name": "ADP_E2E_202606221433_ENTITY_MODEL model create",
+        "model.dataType": "1",
+        "model.isMain": "false",
+        "model.isExtraCol": "false",
+        "model.isCache": "false",
+        "model.enableSync": "false",
+        "model.type": "0",
+        "model.description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE model"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "entityEdit": {
+      "method": "POST",
+      "url": "/msService/ec/entity/save",
+      "requestPayload": {
+        "entity.version": "0",
+        "entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "entity.module.code": "DataSet_1.0.0",
+        "entity.isControl": "false",
+        "entity.payCloseAttention": "false",
+        "entity.crossCompanyFlag": "false",
+        "entity.mobile": "false",
+        "entity.enableRest": "false",
+        "entity.enableWs": "false",
+        "entity.enableFieldsPermissionConf": "false",
+        "entity.entityName": "E2eEnt063301",
+        "entity.prefix": "E2E",
+        "entity.name": "ADP_E2E_202606221433_ENTITY_MODEL entity edit",
+        "entity.isBase": "true",
+        "entity.groupEnabled": "false",
+        "entity.workflowEnabled": "false",
+        "entity.description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "modelEdit": {
+      "method": "POST",
+      "url": "/msService/ec/model/save",
+      "requestPayload": {
+        "model.version": "0",
+        "model.code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+        "entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "model.entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "model.moduleCode": "DataSet_1.0.0",
+        "model.orgTableName": "DS_E2E_063301",
+        "model.modelName": "E2eMod063301",
+        "model.tableName": "DS_E2E_063301",
+        "model.name": "ADP_E2E_202606221433_ENTITY_MODEL model edit",
+        "model.dataType": "1",
+        "model.isMain": "false",
+        "model.isExtraCol": "false",
+        "model.isCache": "false",
+        "model.enableSync": "false",
+        "model.type": "0",
+        "model.description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT model"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "modelDelete": {
+      "method": "POST",
+      "url": "/msService/ec/model/ordinaryDelete",
+      "requestPayload": {
+        "model.code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+        "model.version": "0",
+        "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+        "version": "0"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "entityDelete": {
+      "method": "POST",
+      "url": "/msService/ec/entity/ordinaryDelete",
+      "requestPayload": {
+        "entity.code": "DataSet_1.0.0_E2eEnt063301",
+        "entity.version": "0",
+        "code": "DataSet_1.0.0_E2eEnt063301",
+        "version": "0"
+      },
+      "responseStatus": 200,
+      "ok": true,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    }
+  },
+  "states": {
+    "browser": {
+      "url": "http://222.88.185.146:18080/msService/ec/engine/msManage",
+      "navigationStatus": 200,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "networkErrors": [],
+      "visibleError": null
+    },
+    "before": {
+      "label": "before",
+      "entity": [],
+      "model": [],
+      "properties": [],
+      "physicalTables": []
+    },
+    "afterEntityCreate": {
+      "label": "afterEntityCreate",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity create",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE entity",
+          "deleteTime": ""
+        }
+      ],
+      "model": [],
+      "properties": [],
+      "physicalTables": []
+    },
+    "afterModelCreate": {
+      "label": "afterModelCreate",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity create",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE entity",
+          "deleteTime": ""
+        }
+      ],
+      "model": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL model create",
+          "valueZhCn": "",
+          "modelName": "E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "tableName": "DS_E2E_063301",
+          "isMain": "0",
+          "dataType": "1",
+          "type": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE model",
+          "deleteTime": ""
+        }
+      ],
+      "properties": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_id",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "id",
+          "displayName": "ec.common.ID",
+          "type": "LONG",
+          "columnName": "ID",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_sort",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "sort",
+          "displayName": "ec.common.sort",
+          "type": "LONG",
+          "columnName": "SORT",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_version",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "version",
+          "displayName": "ec.common.version",
+          "type": "INTEGER",
+          "columnName": "VERSION",
+          "isInherent": "1",
+          "deleteTime": ""
+        }
+      ],
+      "physicalTables": []
+    },
+    "afterEntityEdit": {
+      "label": "afterEntityEdit",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity edit",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity",
+          "deleteTime": ""
+        }
+      ],
+      "model": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL model create",
+          "valueZhCn": "",
+          "modelName": "E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "tableName": "DS_E2E_063301",
+          "isMain": "0",
+          "dataType": "1",
+          "type": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_CREATE model",
+          "deleteTime": ""
+        }
+      ],
+      "properties": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_id",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "id",
+          "displayName": "ec.common.ID",
+          "type": "LONG",
+          "columnName": "ID",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_sort",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "sort",
+          "displayName": "ec.common.sort",
+          "type": "LONG",
+          "columnName": "SORT",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_version",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "version",
+          "displayName": "ec.common.version",
+          "type": "INTEGER",
+          "columnName": "VERSION",
+          "isInherent": "1",
+          "deleteTime": ""
+        }
+      ],
+      "physicalTables": []
+    },
+    "afterModelEdit": {
+      "label": "afterModelEdit",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity edit",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity",
+          "deleteTime": ""
+        }
+      ],
+      "model": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL model edit",
+          "valueZhCn": "",
+          "modelName": "E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "tableName": "DS_E2E_063301",
+          "isMain": "0",
+          "dataType": "1",
+          "type": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT model",
+          "deleteTime": ""
+        }
+      ],
+      "properties": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_id",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "id",
+          "displayName": "ec.common.ID",
+          "type": "LONG",
+          "columnName": "ID",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_sort",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "sort",
+          "displayName": "ec.common.sort",
+          "type": "LONG",
+          "columnName": "SORT",
+          "isInherent": "1",
+          "deleteTime": ""
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_version",
+          "version": "0",
+          "valid": "1",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "version",
+          "displayName": "ec.common.version",
+          "type": "INTEGER",
+          "columnName": "VERSION",
+          "isInherent": "1",
+          "deleteTime": ""
+        }
+      ],
+      "physicalTables": []
+    },
+    "afterModelDelete": {
+      "label": "afterModelDelete",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "1",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity edit",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity",
+          "deleteTime": ""
+        }
+      ],
+      "model": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "version": "0",
+          "valid": "0",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL model edit",
+          "valueZhCn": "",
+          "modelName": "E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "tableName": "DS_E2E_063301",
+          "isMain": "0",
+          "dataType": "1",
+          "type": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT model",
+          "deleteTime": "2026-06-22 14:35:49.799"
+        }
+      ],
+      "properties": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_id",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "id",
+          "displayName": "ec.common.ID",
+          "type": "LONG",
+          "columnName": "ID",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:35:49.685"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_sort",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "sort",
+          "displayName": "ec.common.sort",
+          "type": "LONG",
+          "columnName": "SORT",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:35:49.798"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_version",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "version",
+          "displayName": "ec.common.version",
+          "type": "INTEGER",
+          "columnName": "VERSION",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:35:49.741"
+        }
+      ],
+      "physicalTables": []
+    },
+    "afterEntityDelete": {
+      "label": "afterEntityDelete",
+      "entity": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301",
+          "version": "0",
+          "valid": "0",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL entity edit",
+          "valueZhCn": "",
+          "entityName": "E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "isBase": "1",
+          "workflowEnabled": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT entity",
+          "deleteTime": "2026-06-22 14:36:15.138"
+        }
+      ],
+      "model": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "version": "0",
+          "valid": "0",
+          "name": "ADP_E2E_202606221433_ENTITY_MODEL model edit",
+          "valueZhCn": "",
+          "modelName": "E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "moduleCode": "DataSet_1.0.0",
+          "tableName": "DS_E2E_063301",
+          "isMain": "0",
+          "dataType": "1",
+          "type": "0",
+          "description": "ADP_E2E_202606221433_ENTITY_MODEL_EDIT model",
+          "deleteTime": "2026-06-22 14:36:15.137"
+        }
+      ],
+      "properties": [
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_id",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "id",
+          "displayName": "ec.common.ID",
+          "type": "LONG",
+          "columnName": "ID",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:36:15.041"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_sort",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "sort",
+          "displayName": "ec.common.sort",
+          "type": "LONG",
+          "columnName": "SORT",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:36:15.137"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eEnt063301_E2eMod063301_version",
+          "version": "0",
+          "valid": "0",
+          "modelCode": "DataSet_1.0.0_E2eEnt063301_E2eMod063301",
+          "entityCode": "DataSet_1.0.0_E2eEnt063301",
+          "name": "version",
+          "displayName": "ec.common.version",
+          "type": "INTEGER",
+          "columnName": "VERSION",
+          "isInherent": "1",
+          "deleteTime": "2026-06-22 14:36:15.089"
+        }
+      ],
+      "physicalTables": []
+    }
+  },
+  "cleanupSql": "begin; delete from public.ec_property where model_code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' or entity_code='DataSet_1.0.0_E2eEnt063301' or code::text like 'DataSet_1.0.0_E2eEnt063301_E2eMod063301_%'; delete from public.ec_model where code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' or entity_code='DataSet_1.0.0_E2eEnt063301' or description::text like 'ADP_E2E_202606221433_ENTITY_MODEL%'; delete from public.ec_entity where code='DataSet_1.0.0_E2eEnt063301' or description::text like 'ADP_E2E_202606221433_ENTITY_MODEL%'; drop table if exists public.\"ds_e2e_063301\" cascade; commit;",
+  "verificationSql": {
+    "entity": "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(value_zh_cn::text,''), coalesce(entity_name::text,''), coalesce(module_code::text,''), coalesce(is_base::text,''), coalesce(workflow_enabled::text,''), coalesce(description::text,''), coalesce(delete_time::text,'') from public.ec_entity where code='DataSet_1.0.0_E2eEnt063301' order by modify_time desc nulls last, create_time desc nulls last;",
+    "model": "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(name::text,''), coalesce(value_zh_cn::text,''), coalesce(model_name::text,''), coalesce(entity_code::text,''), coalesce(module_code::text,''), coalesce(table_name::text,''), coalesce(is_main::text,''), coalesce(data_type::text,''), coalesce(type::text,''), coalesce(description::text,''), coalesce(delete_time::text,'') from public.ec_model where code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' order by modify_time desc nulls last, create_time desc nulls last;",
+    "property": "select code::text, coalesce(version::text,'0'), coalesce(valid::text,''), coalesce(model_code::text,''), coalesce(entity_code::text,''), coalesce(name::text,''), coalesce(display_name::text,''), coalesce(type::text,''), coalesce(column_name::text,''), coalesce(is_inherent::text,''), coalesce(delete_time::text,'') from public.ec_property where model_code='DataSet_1.0.0_E2eEnt063301_E2eMod063301' or entity_code='DataSet_1.0.0_E2eEnt063301' order by code::text;",
+    "physicalTable": "select table_schema::text, table_name::text from information_schema.tables where table_schema='public' and lower(table_name)=lower('DS_E2E_063301') order by table_name;"
+  },
+  "backendTrace": {
+    "entityCreateEdit": {
+      "apiEndpoint": "/msService/ec/entity/save",
+      "controller": "EntityController.save(HttpServletRequest)",
+      "dto": "DtoUtils.getEntity(HttpServletRequest)",
+      "service": "EntityServiceImpl.saveEntity(Entity)",
+      "persistence": "entityDao.merge(entity)",
+      "tables": [
+        "ec_entity"
+      ]
+    },
+    "modelCreateEdit": {
+      "apiEndpoint": "/msService/ec/model/save",
+      "controller": "ModelController.save(String,HttpServletRequest)",
+      "dto": "DtoUtils.getModelVO(HttpServletRequest), ModelController.prepare(Model)",
+      "service": "ModelServiceImpl.saveModel(Model)",
+      "persistence": "modelDao.save(model), createInherentProperties(model), propertyDao.save(property)",
+      "postgresNote": "ModelSyncDBUtils.modelSyncToDb has oracle/sqlserver/mysql/mariadb branches only; PostgreSQL does not auto-create physical model tables in the current code path.",
+      "tables": [
+        "ec_model",
+        "ec_property"
+      ]
+    },
+    "deleteOrDisable": {
+      "apiEndpoint": "/msService/ec/model/ordinaryDelete and /msService/ec/entity/ordinaryDelete",
+      "controller": "ModelController.ordinaryDelete(Model), EntityController.ordinaryDelete(Entity,HttpServletRequest)",
+      "service": "ModelServiceImpl.deleteModel(Model), EntityServiceImpl.deleteEntity(Entity)",
+      "persistence": "scaffold soft delete for marker rows, followed by controlled marker SQL cleanup",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_property"
+      ]
+    }
+  },
+  "conclusion": "Entity/model create, edit, delete/disable and marker cleanup were verified through browser-page-context HTTP requests and PostgreSQL before/after SQL.",
+  "issues": []
+}

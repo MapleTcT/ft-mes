@@ -293,7 +293,7 @@ public class MenuInfoServiceImpl implements MenuInfoService {
     @Override
     public void deleteMenuOperateByEntity(String entityCode) {
         menuOperateDao.flush();
-        String opHql = "from MenuOperate mo where  mo.entityCode=?";
+        String opHql = "from MenuOperate mo where  mo.entityCode=?0";
         List<MenuOperate> opList = menuOperateDao.findByHql(opHql, entityCode);
 //        List<MenuOperate> opList = menuOperateService.getByEntityCode(entityCode,null);
         for (MenuOperate sys : opList) {
@@ -302,7 +302,7 @@ public class MenuInfoServiceImpl implements MenuInfoService {
             menuOperateService.delete(sys.getId());
         }
 
-        String menuInfoHql = "from MenuInfo m where m.entityCode=?";
+        String menuInfoHql = "from MenuInfo m where m.entityCode=?0";
         List<MenuInfo> miList = menuInfoDao.findByHql(menuInfoHql, entityCode);
 
 //        List<MenuInfo> miList = this.getByEntityCode(entityCode);

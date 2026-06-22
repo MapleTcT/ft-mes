@@ -1,0 +1,1 @@
+window.InternationalResource = window.InternationalResource || {};

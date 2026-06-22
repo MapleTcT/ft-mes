@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "BLOCKED",
+  "owner": "business-owner",
+  "targetRelease": "TBD",
+  "repoCommit": "TBD",
+  "database": "PostgreSQL",
+  "frontendUrl": "TBD",
+  "backendBuild": "TBD",
+  "testWindow": "TBD",
+  "blockerLedger": "metadata/production-module-blockers.json",
+  "backlogLedger": "metadata/production-module-backlog.json",
+  "basicConfigCoverageLedger": "metadata/basic-config-coverage.json",
+  "exportGapBreakdown": "metadata/production-export-gap-breakdown.json",
+  "smokeSuites": [
+    {
+      "id": "platform-login-auth",
+      "title": "Platform login and authentication",
+      "status": "PLANNED",
+      "routeOrArea": "Login / current user / auth API",
+      "evidence": "TBD",
+      "requiresPersistence": false,
+      "owner": "platform-owner",
+      "blockingIssues": [
+        "Production login/current-user smoke evidence is missing."
+      ],
+      "nextActions": [
+        "Run real browser login and API smoke against the production domain or cutover rehearsal environment."
+      ]
+    },
+    {
+      "id": "user-organization-rbac",
+      "title": "User, organization and RBAC",
+      "status": "PLANNED",
+      "routeOrArea": "User management / organization / permissions",
+      "evidence": "TBD",
+      "requiresPersistence": true,
+      "owner": "platform-owner",
+      "blockingIssues": [
+        "Production user, organization and permission CRUD persistence signoff is missing."
+      ],
+      "nextActions": [
+        "Attach marker-based CRUD and PostgreSQL before/after evidence for user, organization and RBAC actions."
+      ]
+    },
+    {
+      "id": "menu-todo-dashboard",
+      "title": "Menu, todo and dashboard",
+      "status": "PLANNED",
+      "routeOrArea": "Home / menu navigation / todo",
+      "evidence": "TBD",
+      "requiresPersistence": false,
+      "owner": "platform-owner",
+      "blockingIssues": [
+        "Production menu/todo/dashboard browser smoke evidence is missing."
+      ],
+      "nextActions": [
+        "Run browser smoke with console and network error capture."
+      ]
+    },
+    {
+      "id": "basic-configuration",
+      "title": "Basic configuration",
+      "status": "PLANNED",
+      "routeOrArea": "System code / base configuration / config pages",
+      "evidence": "metadata/basic-config-coverage.json",
+      "requiresPersistence": true,
+      "owner": "platform-owner",
+      "blockingIssues": [
+        "Basic configuration browser smoke and persistence signoff are incomplete; see metadata/basic-config-coverage.json."
+      ],
+      "nextActions": [
+        "Complete every non-PASS area in metadata/basic-config-coverage.json or attach signed risk acceptance before production business smoke signoff."
+      ]
+    },
+    {
+      "id": "nacos-keycloak-postgresql-runtime",
+      "title": "Nacos, Keycloak, PostgreSQL and runtime patch",
+      "status": "PLANNED",
+      "routeOrArea": "Runtime platform health",
+      "evidence": "TBD",
+      "requiresPersistence": false,
+      "owner": "runtime-platform-owner",
+      "blockingIssues": [
+        "Runtime health, Nacos config, Keycloak login and PostgreSQL checks are not signed."
+      ],
+      "nextActions": [
+        "Attach health checks, config export/diff and runtime patch manifest evidence."
+      ]
+    },
+    {
+      "id": "production-wom-main-flow",
+      "title": "Production WOM main flow",
+      "status": "BLOCKED",
+      "routeOrArea": "Manufacturing order / material prep / activity / report work",
+      "evidence": "metadata/persistence-acceptance.json",
+      "requiresPersistence": true,
+      "owner": "production-business-owner",
+      "blockingIssues": [
+        "Material/inventory service write-back, defect-quantity scope, final stock-in and remaining production blockers still need marker PostgreSQL before/after evidence or signed risk acceptance."
+      ],
+      "nextActions": [
+        "Prepare WOM/material marker data, execute remaining real frontend write actions, query PostgreSQL, and keep existing QCS report-chain evidence separate from unresolved inventory boundaries."
+      ]
+    },
+    {
+      "id": "quality-qcs-lims",
+      "title": "Quality QCS/LIMS flow",
+      "status": "BLOCKED",
+      "routeOrArea": "QCS inspection / LIMS quality result / report generation",
+      "evidence": "docs/backend-table-audit/business-quality-lims-qcs.md",
+      "requiresPersistence": true,
+      "owner": "quality-business-owner",
+      "blockingIssues": [
+        "Current test-environment QCS report save/effective qualified and unqualified chains have marker evidence, but production or cutover-rehearsal QCS/LIMS signoff is not attached."
+      ],
+      "nextActions": [
+        "Attach the latest QCS/LIMS marker evidence, rerun it against the production rehearsal environment when available, or attach signed risk acceptance for any unavailable flow."
+      ]
+    },
+    {
+      "id": "import-export-upload",
+      "title": "Import, export and upload if used",
+      "status": "PLANNED",
+      "routeOrArea": "File import/export/upload surfaces used by the production process",
+      "evidence": "TBD",
+      "requiresPersistence": true,
+      "owner": "business-owner",
+      "blockingIssues": [
+        "Import/export/upload applicability and evidence are not recorded."
+      ],
+      "nextActions": [
+        "Mark NOT_APPLICABLE with a reason if not used, otherwise attach browser and file evidence."
+      ]
+    },
+    {
+      "id": "business-page-coverage",
+      "title": "Business page coverage",
+      "status": "PLANNED",
+      "routeOrArea": "Production, quality, device, energy and EHS menus restored in this repository",
+      "evidence": "docs/frontend-functional-test-report.md",
+      "requiresPersistence": false,
+      "owner": "business-owner",
+      "blockingIssues": [
+        "Production business page coverage has not been signed by the business owner."
+      ],
+      "nextActions": [
+        "Attach page smoke result summary with console/network status."
+      ]
+    },
+    {
+      "id": "postgres-gap-ledger",
+      "title": "PostgreSQL gap ledger",
+      "status": "PLANNED",
+      "routeOrArea": "PostgreSQL init SQL / Oracle backlog / mapper audit",
+      "evidence": "docs/oracle-migration-backlog.md",
+      "requiresPersistence": false,
+      "owner": "database-owner",
+      "blockingIssues": [
+        "Open PostgreSQL and Oracle-compatibility gaps have not been reviewed for production signoff."
+      ],
+      "nextActions": [
+        "Review remaining gaps, idempotent SQL and accepted risks before production cutover."
+      ]
+    }
+  ],
+  "persistenceScopes": [
+    {
+      "id": "platform-crud-persistence",
+      "title": "Platform CRUD persistence",
+      "status": "PLANNED",
+      "tables": [
+        "auth_user",
+        "org_person",
+        "org_department",
+        "rbac_role",
+        "sys_code"
+      ],
+      "evidence": "metadata/persistence-acceptance.json",
+      "owner": "platform-owner",
+      "blockingIssues": [
+        "Production cutover signoff has not revalidated marker CRUD evidence."
+      ],
+      "nextActions": [
+        "Attach latest marker run or accepted carry-forward evidence."
+      ]
+    },
+    {
+      "id": "production-write-actions",
+      "title": "Production and quality write actions",
+      "status": "BLOCKED",
+      "tables": [
+        "wom_*",
+        "qcs_*",
+        "rm_*"
+      ],
+      "evidence": "metadata/persistence-acceptance.json",
+      "owner": "production-business-owner",
+      "blockingIssues": [
+        "Remaining quality and inventory write actions do not have complete PostgreSQL before/after evidence."
+      ],
+      "nextActions": [
+        "Complete marker validation for quality judgement, defect quantity, final stock-in and inventory write-back."
+      ]
+    },
+    {
+      "id": "postgres-gap-closure",
+      "title": "PostgreSQL compatibility gap closure",
+      "status": "PLANNED",
+      "tables": [
+        "deploy/docker/postgres/init/*.sql",
+        "docs/oracle-migration-backlog.md"
+      ],
+      "evidence": "metadata/oracle-migration-audit.json",
+      "owner": "database-owner",
+      "blockingIssues": [
+        "Remaining Oracle/PostgreSQL compatibility warnings have not been signed for production."
+      ],
+      "nextActions": [
+        "Review mapper audit warnings and any open init SQL/backlog items."
+      ]
+    }
+  ],
+  "openIssues": [
+    {
+      "id": "BUS-SIGNOFF-001",
+      "severity": "BLOCKER",
+      "description": "Quality judgement, defect quantity, final stock-in and inventory write-back actions still lack complete marker PostgreSQL before/after evidence.",
+      "source": "metadata/production-module-blockers.json",
+      "blockerCaseIds": [
+        "PROD-010",
+        "PROD-019",
+        "PROD-020",
+        "PROD-021",
+        "PROD-022",
+        "PROD-023"
+      ],
+      "owner": "production-business-owner",
+      "riskAcceptance": "TBD",
+      "nextAction": "Execute remaining real frontend write actions and attach PostgreSQL evidence."
+    },
+    {
+      "id": "BUS-SIGNOFF-002",
+      "severity": "BLOCKER",
+      "description": "Production module backlog still contains unresolved action-level gaps, including visible WOM manual create/import scope, public produceTaskCreated false-success behavior and the WOM QR-code runtime endpoint gap.",
+      "source": "metadata/production-module-backlog.json",
+      "backlogItemIds": [
+        "PROD-ACTION-006",
+        "PROD-ACTION-007",
+        "PROD-ACTION-008",
+        "PROD-010",
+        "PROD-019",
+        "PROD-020",
+        "PROD-021",
+        "PROD-022",
+        "PROD-023"
+      ],
+      "owner": "production-business-owner",
+      "riskAcceptance": "TBD",
+      "nextAction": "Resolve the backlog items or attach signed risk acceptance before production business smoke signoff can become READY."
+    },
+    {
+      "id": "BUS-SIGNOFF-003",
+      "severity": "BLOCKER",
+      "description": "Basic configuration coverage remains partial and cannot be silently carried into production signoff.",
+      "source": "metadata/basic-config-coverage.json",
+      "basicConfigAreaIds": [
+        "systemconfig-built-in-catalogs",
+        "configuration-physical-model-table",
+        "nacos-keycloak-production-config"
+      ],
+      "owner": "platform-owner",
+      "riskAcceptance": "TBD",
+      "nextAction": "Complete marker acceptance or signed risk acceptance for built-in systemconfig catalogs; finish PostgreSQL physical model table auto-create evidence or risk acceptance; finish or formally risk-accept production Nacos/Keycloak configuration evidence."
+    },
+    {
+      "id": "BUS-SIGNOFF-004",
+      "severity": "BLOCKER",
+      "description": "Production export readiness is blocked per target page; each target export gap must be resolved or explicitly risk-accepted before business smoke signoff can become READY.",
+      "source": "metadata/production-export-gap-breakdown.json",
+      "exportTargetIds": [
+        "wom-make-task",
+        "rm-batch-formula",
+        "wts-work-permit",
+        "qcs-inspect-report",
+        "qcs-unqualified-deal",
+        "qcs-inspect-release"
+      ],
+      "owner": "business-owner",
+      "riskAcceptance": "TBD",
+      "nextAction": "Restore or implement target export buttons/runtime hooks/backend file responses, rerun smoke-production-export-readiness, regenerate production-export-gap-breakdown, then attach browser file evidence or signed risk acceptance for every unresolved target."
+    }
+  ],
+  "signoffs": [
+    {
+      "role": "business-owner",
+      "name": "TBD",
+      "decision": "BLOCKED",
+      "signedAt": "TBD",
+      "evidence": "TBD",
+      "notes": "Business main flow is not complete."
+    },
+    {
+      "role": "technical-owner",
+      "name": "TBD",
+      "decision": "BLOCKED",
+      "signedAt": "TBD",
+      "evidence": "TBD",
+      "notes": "Runtime and persistence evidence must be reviewed."
+    },
+    {
+      "role": "database-owner",
+      "name": "TBD",
+      "decision": "BLOCKED",
+      "signedAt": "TBD",
+      "evidence": "TBD",
+      "notes": "PostgreSQL gap closure is not production signed."
+    },
+    {
+      "role": "release-owner",
+      "name": "TBD",
+      "decision": "BLOCKED",
+      "signedAt": "TBD",
+      "evidence": "TBD",
+      "notes": "Production migration rehearsal and rollback evidence are required."
+    }
+  ]
+}

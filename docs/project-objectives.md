@@ -19,6 +19,10 @@
 
 总目标完成状态见 [项目总目标验收总账](project-goal-acceptance.md)。该总账把可持续开发仓库、Oracle 替换、平台验证、生产模块完整验证、PostgreSQL 缺口治理和生产迁移前置项统一到机器可读账本 `metadata/project-goal-acceptance.json`，并由 `make project-goal-acceptance-check` 校验。总账为 `IN_PROGRESS_NOT_COMPLETE` 时，不能宣称当前目标已全部完成。
 
+当前仍未闭合的目标缺口见 [目标缺口总账](goal-gap-register.md) 和
+`metadata/goal-gap-register.json`，由 `make goal-gap-register-check` 校验。后续新线程接手业务包、
+后端落表或生产迁移时，应先看这份总账，避免把局部页面/API smoke 通过误判为整体完成。
+
 ## 当前项目定位
 
 当前仓库主体是 ADP/BAP 平台运行包，不是完整 MES 业务产品包。
@@ -61,11 +65,12 @@
 - `scripts/verify-sustainable-repo.py` 验证仓库治理硬约束。
 - `scripts/create-backend-source-module.py` 创建标准后端源码模块。
 - `scripts/precheck-module-intake.py` 对新业务包或恢复模块做只读准入预检。
+- `metadata/module-intake-latest-basic-modules.json` / `docs/module-intake-latest-basic-modules.md` 记录真实 `MES包/最新基础模块` 的 report-only 准入结果、扫描覆盖和阻断项。
 - `scripts/verify-source-modules.py` 校验已提升后端源码模块，并阻止默认源码路径重新带入 Oracle 驱动、配置和 mapper 资源。
 - `scripts/generate-current-content-inventory.py` 生成当前迁移内容库存。
 - `scripts/generate-backend-dependency-inventory.py` 生成恢复后端模块依赖库存。
 - `scripts/generate-oracle-migration-audit.py` 生成 Oracle 迁移 backlog。
-- `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引。
+- `scripts/generate-postgres-migration-inventory.py` 生成 PostgreSQL 初始化脚本索引和 watch 语句说明。
 - `scripts/generate-oracle-replacement-status.py` 生成 Oracle 替换状态总账。
 - `deploy/docker/scripts/adp-platform-validation-smoke.js` 汇总平台 API、菜单和待办 smoke，输出统一平台验证报告。
 
@@ -73,6 +78,7 @@
 
 - 每提升一个后端模块，就给模块补单元测试或最小集成测试。
 - 每新增一个业务运行包，先跑 `make module-intake-check INTAKE=/path/to/package-or-dir`，再补对应 smoke 脚本或测试清单。
+- 已存在的 `MES包/最新基础模块` 先按准入账本处理 7z 不可检查包和 `DataSet_6.1.2.2` 中的 `jdbc:oracle:thin` 阻断项，再进入默认源码区。
 - 每次测试环境修复后，优先跑 `make smoke-platform` 形成平台验证报告，再进入业务模块 smoke。
 
 ### 2. Oracle 替换
@@ -87,7 +93,7 @@
 - 方言差异集中到 DAO/Mapper/migration 层。
 - 可编译源码模块的默认 `src/main` 不允许带入 Oracle JDBC URL、driver、Hibernate dialect 或 `mapper/oracle` 资源。
 - 每个模块必须有审计结果、迁移脚本和 smoke 证据。
-- 每个 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，都落到幂等 SQL 或模块 backlog，不用清库重建掩盖。
+- 每个 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，都落到幂等 SQL 或模块 backlog，不用清库重建掩盖；`make postgres-migration-check` 会阻断清库类高风险语句，并要求 watch 语句是 `DROP ... IF EXISTS` 或 `DELETE ... WHERE`。
 
 ### 3. 后端落表业务排查
 
@@ -115,6 +121,10 @@
 - [前端功能测试报告](frontend-functional-test-report.md)
 - [后端落库验收报告](backend-table-audit/persistence-acceptance.md)
 - [机器可读落库验收记录](../metadata/persistence-acceptance.json)
+- [生产模块 Backlog 账本](production-module-backlog.md)
+- [机器可读生产模块 Backlog](../metadata/production-module-backlog.json)
+- [业务模块接入验收要求](business-module-intake-requirements.md)
+- [机器可读业务模块接入要求](../metadata/business-module-intake-requirements.json)
 - [生产迁移就绪账本](production-migration-readiness.md)
 - [机器可读生产迁移就绪记录](../metadata/production-migration-readiness.json)
 
@@ -133,14 +143,20 @@
 - `make ci` 通过。
 - `make sustainable-check` 通过。
 - `make project-goal-acceptance-check` 通过。
+- `make goal-gap-register-check` 通过。
 - `make source-module-check` 通过。
 - `make source-module-test` 通过。
 - `make runtime-script-check` 通过。
 - `make persistence-acceptance-check` 通过。
 - `make production-testcase-check` 通过。
+- `make production-blocker-check` 通过。
+- `make production-module-backlog-check` 通过。
+- `make business-module-intake-requirements-check` 通过。
 - `make production-action-map-check` 通过。
 - `make production-migration-readiness-check` 通过。
 - `make module-intake-check` 对新接入业务包或模块通过，或已有 report-only 证据和 backlog。
+- `make module-intake-precheck-regression-check` 通过，证明准入预检能拦住 Oracle POM 和 `mapper/oracle` 默认路径污染。
+- `make module-intake-candidate-report-check` 通过，证明真实候选包准入阻断项和扫描覆盖已进入仓库账本。
 - `make inventory-check` 通过。
 - `make backend-dependency-check` 通过。
 - `make oracle-audit-check` 通过。
@@ -164,6 +180,7 @@
 
 - 每个业务模块有菜单/API/表/字段/流程说明。
 - 生产模块有完整功能测试用例矩阵，并按真实前端操作逐项验收。
+- 生产模块未闭合项必须进入 Backlog；接口 `200` 但不落库的动作不得混入已完成项。
 - 每条核心业务链路有输入、操作、状态变化和数据库结果。
 - 每个会改变业务数据的前端动作都有 PostgreSQL 落库验收记录。
 - 未验证或缺包的部分明确标注，不混进已完成功能。

@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T15:13:16+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "production",
+  "sourceMatrix": "metadata/production-module-test-cases.json",
+  "summary": {
+    "blockedCases": 6,
+    "blockers": 6,
+    "externalClientRequired": 1,
+    "missingServicePackage": 2,
+    "productScopeConfirmation": 0,
+    "compositeServiceAndScope": 2,
+    "missingExportImplementation": 1
+  },
+  "latestEvidence": {
+    "lastRemoteRecheckAt": "2026-06-22T01:50:35.404Z",
+    "businessDependencyReadinessGeneratedAt": "2026-06-22T01:36:29.672Z",
+    "businessDependencyReadinessStatus": "BLOCKED",
+    "businessDependencyReady": 0,
+    "businessDependencyBlocked": 2,
+    "businessPackageScanGeneratedAt": "2026-06-20T16:05:25Z",
+    "businessPackageScanStatus": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+    "businessPackageScanCandidateDependencies": 0,
+    "productionExportReadinessGeneratedAt": "2026-06-22T01:50:35.404Z",
+    "productionExportReadinessStatus": "BLOCKED",
+    "productionExportVerifiedDataExports": 0,
+    "productionExportPagePass": 6
+  },
+  "blockers": [
+    {
+      "caseId": "PROD-010",
+      "title": "批量配方可见显式编辑入口",
+      "status": "BLOCKED",
+      "category": "external-client-required",
+      "blockerCategory": "external-client-required",
+      "dependency": "External Batch client / IE ActiveX / WebSocket push path",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md"
+      ],
+      "recheckCommands": [
+        "make smoke-business-page",
+        "manual: provision external Batch client, trigger WebSocket push to batchFormulaEdit, then run a marker save/submit and query rm_formulas/rm_formula_processes/rm_process_actives"
+      ],
+      "passCriteria": [
+        "A real user-visible or external-client driven edit entry opens batchFormulaEdit without adding a fake platform-only button.",
+        "The edit/save/submit action uses a unique ADP_E2E marker.",
+        "PostgreSQL proves the marker write in rm_formulas and related batch formula process/activity tables."
+      ],
+      "nextActions": [
+        "Connect the external Batch client/server path described by the product documentation.",
+        "Capture WebSocket/browser/API evidence for the real edit flow.",
+        "Promote the case to PASS only after marker persistence is proven."
+      ],
+      "nonSolutions": [
+        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
+        "Do not mark PASS from batch/sync import evidence alone; that is covered by a separate accepted case."
+      ]
+    },
+    {
+      "caseId": "PROD-019",
+      "title": "QCS 不良数和库存/入库相关回写",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "blockerCategory": "composite-service-and-scope",
+      "dependency": "material service package plus product confirmation for any standalone bad-quantity entry",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, run checkProdResult/generateProduceOutSing with marker inventory data and query material stock-in/inventory tables"
+      ],
+      "passCriteria": [
+        "material service has at least one healthy Nacos prod instance.",
+        "Authenticated material checkProdResult and generateProduceOutSing endpoints return HTTP 2xx and no longer return tenant-service 503.",
+        "A marker flow proves inventory/stock-in target table writes in PostgreSQL.",
+        "If standalone bad quantity is required, a product package or manual identifies the field, route, and target table before acceptance."
+      ],
+      "nextActions": [
+        "Deploy the material warehouse/inventory service package or map the correct serviceName.",
+        "Re-run business dependency readiness smoke.",
+        "Only reopen standalone bad-quantity acceptance if a later business package or product manual supplies the missing route/table."
+      ],
+      "nonSolutions": [
+        "Do not treat accepted QCS qualified/unqualified WOM state backfill as inventory stock-in proof.",
+        "Do not invent a bad-quantity database column when the recovered package has no route/table mapping."
+      ]
+    },
+    {
+      "caseId": "PROD-020",
+      "title": "批次、物料、工单追溯查询",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "blockerCategory": "missing-service-package",
+      "dependency": "ProcessAnalysis / Traceability service package, runtime metadata, menu, permissions, and PostgreSQL schema",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after ProcessAnalysis deployment, open isProdprocessView/processBatchViewOut from the real WOM trace button with a marker batch"
+      ],
+      "passCriteria": [
+        "ProcessAnalysis or traceability service has at least one healthy Nacos prod instance.",
+        "ProcessAnalysis runtime_view/menu/table counts are non-zero and mapped to the deployed module.",
+        "Authenticated traceability endpoints return HTTP 2xx successful responses instead of 503.",
+        "The real WOM trace button opens processBatchViewOut and any target query tables are verified in PostgreSQL."
+      ],
+      "nextActions": [
+        "Recover or deploy the ProcessAnalysis module package.",
+        "Apply module runtime views, menus, permissions, and PostgreSQL tables.",
+        "Run marker browser/API/DB acceptance before changing PROD-020 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not patch WOM alone and call traceability done; the target module is absent.",
+        "Do not use a direct URL smoke without ProcessAnalysis service registration and DB evidence."
+      ]
+    },
+    {
+      "caseId": "PROD-021",
+      "title": "完整工序报工、产量、不良数登记",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "blockerCategory": "composite-service-and-scope",
+      "dependency": "material service package plus product confirmation for standalone bad-quantity entry",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/wom-bad-quantity-analysis.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: rerun accepted WOM report-work marker flows, then add inventory/material marker acceptance once material service is available"
+      ],
+      "passCriteria": [
+        "Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity, and check activity.",
+        "The material/inventory service path is available and marker stock-in or inventory write-back is proven.",
+        "If product requires standalone bad quantity, the dedicated field/route/table is recovered and marker-tested."
+      ],
+      "nextActions": [
+        "Keep existing report-work PASS evidence as regression coverage.",
+        "Complete material service acceptance for the inventory boundary.",
+        "Only add a standalone bad-quantity case after product/package evidence exists."
+      ],
+      "nonSolutions": [
+        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
+        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
+      ]
+    },
+    {
+      "caseId": "PROD-022",
+      "title": "完工入库或库存回写",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "blockerCategory": "missing-service-package",
+      "dependency": "material warehouse/inventory service package and target stock-in table map",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "docs/production-module-functional-test-cases.md",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after material service deployment, run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
+      ],
+      "passCriteria": [
+        "serviceName=material or the confirmed warehouse service has healthy Nacos prod instances.",
+        "checkProdResult and generateProduceOutSing return HTTP 2xx and no longer return 503.",
+        "Controller/service/DAO/SQL path is traced.",
+        "PostgreSQL target inventory or stock-in tables show marker writes."
+      ],
+      "nextActions": [
+        "Deploy and register the material warehouse/inventory package.",
+        "Build the material-service table map.",
+        "Run marker stock-in/inventory acceptance before changing PROD-022 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
+        "Do not mark PASS from HTTP 200 alone without database write proof."
+      ]
+    },
+    {
+      "caseId": "PROD-023",
+      "title": "生产相关列表导出",
+      "status": "BLOCKED",
+      "category": "missing-export-implementation",
+      "blockerCategory": "missing-export-implementation",
+      "dependency": "Product decision and backend data-export implementation for production list pages",
+      "currentEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/production-export-readiness-smoke.json",
+        "docs/production-module-functional-test-cases.md"
+      ],
+      "recheckCommands": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000",
+        "manual: after export button/backend implementation is recovered, capture browser file response, filename, size, and workbook sample"
+      ],
+      "passCriteria": [
+        "Product owner confirms which production lists must support data export.",
+        "Runtime button/menu metadata exposes an export action for each required list.",
+        "Target source/runtime sourceAudit finds exportExcel/excelExport/导出 hooks for each required list.",
+        "Backend export endpoints return non-empty files with list data, not empty template-download placeholders.",
+        "PostgreSQL persistence is NOT_APPLICABLE for file export; acceptance evidence must instead prove the browser file response and sample workbook content.",
+        "Browser network evidence captures filename, response status, size, and sample workbook content."
+      ],
+      "nextActions": [
+        "Confirm export scope with product owner.",
+        "Recover or implement data-export service methods and runtime buttons for required lists; current public browser ingress already proves page reachability for all 6 target lists.",
+        "Run real browser file-response and sourceAudit acceptance before changing PROD-023 to PASS."
+      ],
+      "nonSolutions": [
+        "Do not accept empty HTTP 200 downloadXls responses as data export.",
+        "Do not confuse import-template download with list-data export."
+      ]
+    }
+  ]
+}

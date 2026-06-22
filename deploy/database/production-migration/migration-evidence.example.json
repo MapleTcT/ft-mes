@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-20T00:00:00+08:00",
+  "status": "PLANNED",
+  "database": "PostgreSQL",
+  "environment": "production-rehearsal-template",
+  "owner": "backend-db-migration-thread",
+  "repoCommit": "TBD",
+  "migrationWindow": "TBD",
+  "sourceSnapshot": {
+    "type": "TBD",
+    "capturedAt": "TBD",
+    "evidence": "TBD"
+  },
+  "targetSnapshot": {
+    "type": "PostgreSQL",
+    "capturedAt": "TBD",
+    "evidence": "TBD"
+  },
+  "phases": [
+    {
+      "id": "source-inventory",
+      "title": "Source row-count inventory",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "deploy/database/production-migration/table-list.example.txt"
+      ],
+      "commands": [
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-source-inventory"
+      ],
+      "summary": {
+        "totalTables": 0,
+        "ok": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Real production or production-rehearsal source row-count inventory has not been captured."
+      ],
+      "nextActions": [
+        "Run source inventory against the agreed source snapshot and attach the generated source-row-counts.tsv."
+      ]
+    },
+    {
+      "id": "target-preflight",
+      "title": "Target PostgreSQL schema and row-count preflight",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "deploy/database/production-migration/table-list.example.txt"
+      ],
+      "commands": [
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-target-preflight"
+      ],
+      "summary": {
+        "totalTables": 0,
+        "ok": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Real target PostgreSQL preflight has not been captured."
+      ],
+      "nextActions": [
+        "Run target preflight against the production-rehearsal PostgreSQL database and attach target-schema-inventory.txt plus target-row-counts.tsv."
+      ]
+    },
+    {
+      "id": "row-count-comparison",
+      "title": "Source/target row-count comparison",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "deploy/database/production-migration/table-list.example.txt"
+      ],
+      "commands": [
+        "make production-rowcount-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight"
+      ],
+      "summary": {
+        "totalTables": 0,
+        "match": 0,
+        "mismatch": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Real source/target row-count comparison output has not been attached."
+      ],
+      "nextActions": [
+        "Attach row-count-comparison.json and row-count-comparison.tsv from the rehearsal report directory."
+      ]
+    },
+    {
+      "id": "checksum-comparison",
+      "title": "Critical-table checksum comparison",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "deploy/database/production-migration/source-checksums.example.tsv",
+        "deploy/database/production-migration/target-checksums.example.tsv"
+      ],
+      "commands": [
+        "make production-checksum-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight"
+      ],
+      "summary": {
+        "totalTables": 0,
+        "match": 0,
+        "mismatch": 0,
+        "missing": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Critical table checksum SQL has not been filled with real production-rehearsal data."
+      ],
+      "nextActions": [
+        "Fill checksum SQL for agreed critical tables and attach checksum-comparison.json plus checksum-comparison.tsv."
+      ]
+    },
+    {
+      "id": "postgres-runtime-smoke",
+      "title": "Target PostgreSQL runtime smoke",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "metadata/postgres-runtime-smoke.json"
+      ],
+      "commands": [
+        "make smoke-postgres-runtime ADP_SSH_HOST=/secure/target-host"
+      ],
+      "summary": {
+        "status": "TBD",
+        "checks": 0,
+        "passed": 0
+      },
+      "blockingIssues": [
+        "Current committed runtime smoke is for the test host and does not replace production-rehearsal target smoke."
+      ],
+      "nextActions": [
+        "Run smoke-postgres-runtime against the production-rehearsal target and attach the generated report."
+      ]
+    },
+    {
+      "id": "rollback-link",
+      "title": "Database rollback rehearsal linkage",
+      "status": "PLANNED",
+      "evidenceRefs": [
+        "deploy/rollback/production-migration/rollback-evidence.example.json"
+      ],
+      "commands": [
+        "make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json"
+      ],
+      "summary": {
+        "status": "TBD"
+      },
+      "blockingIssues": [
+        "Rollback rehearsal evidence has not been linked to the database migration rehearsal."
+      ],
+      "nextActions": [
+        "Attach rollback rehearsal evidence that covers PostgreSQL backup and restore for the same migration window."
+      ]
+    }
+  ],
+  "releaseRule": "Do not mark this evidence READY until source inventory, target preflight, row-count comparison, checksum comparison, target PostgreSQL runtime smoke, and rollback linkage are all READY with non-template evidence."
+}

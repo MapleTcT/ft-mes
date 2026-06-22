@@ -5,12 +5,16 @@ const fs = require("fs");
 const path = require("path");
 const { chromium, request } = require("playwright");
 
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
+const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const headless = process.env.ADP_HEADLESS !== "false";
 const screenshotMode = process.env.ADP_SCREENSHOTS || "failures";
 const menuLimit = Number.parseInt(process.env.ADP_MENU_LIMIT || "", 10);
+const apiTimeoutMs = Number(process.env.ADP_API_TIMEOUT_MS || 90000);
+const apiRetries = Number(process.env.ADP_API_RETRIES || 3);
+const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 90000);
 const outputDir =
   process.env.ADP_OUTPUT_DIR ||
   path.join("/tmp", `adp-menu-smoke-${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`);
@@ -30,7 +34,7 @@ function safeName(value) {
 }
 
 function normalizeUrl(targetUrl) {
-  return new URL(targetUrl, `${baseUrl}/`).toString();
+  return new URL(targetUrl, `${browserBaseUrl}/`).toString();
 }
 
 function findTicket(payload) {
@@ -57,6 +61,32 @@ async function readJsonSafe(response) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientApiError(error) {
+  return /Timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|socket hang up|network/i.test(
+    error && error.message ? error.message : String(error)
+  );
+}
+
+async function withApiRetries(label, operation) {
+  const errors = [];
+  for (let attempt = 1; attempt <= apiRetries; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      errors.push(error && error.message ? error.message : String(error));
+      if (attempt >= apiRetries || !isTransientApiError(error)) {
+        throw error;
+      }
+      await sleep(Math.min(1000 * attempt, 5000));
+    }
+  }
+  throw new Error(`${label} failed after ${apiRetries} attempts: ${errors.join(" | ")}`);
+}
+
 async function login(api) {
   const attempts = [
     { userName: username, password, clientId: "pc_dt" },
@@ -65,17 +95,19 @@ async function login(api) {
 
   const errors = [];
   for (const body of attempts) {
-    const response = await api.post(`${baseUrl}/inter-api/auth/login`, {
-      data: body,
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=UTF-8",
-      },
-    });
+    const response = await withApiRetries("auth login", () =>
+      api.post(`${baseUrl}/inter-api/auth/login`, {
+        data: body,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+      })
+    );
     const parsed = await readJsonSafe(response);
     const ticket = response.ok() ? findTicket(parsed.json) : null;
     if (ticket) {
-      return ticket;
+      return { ticket, loginPayload: parsed.json };
     }
     errors.push({
       status: response.status(),
@@ -181,13 +213,16 @@ function applyMenuLimit(targets) {
 }
 
 async function fetchMenus(api, ticket) {
-  const response = await api.get(`${baseUrl}/inter-api/rbac/v1/menus/currentUser`, {
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      Authorization: `Bearer ${ticket}`,
-      Cookie: `suposTicket=${encodeURIComponent(ticket)}`,
-    },
-  });
+  const response = await withApiRetries("menus currentUser", () =>
+    api.get(`${baseUrl}/inter-api/rbac/v1/menus/currentUser`, {
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        Authorization: `Bearer ${ticket}`,
+        Cookie: `suposTicket=${encodeURIComponent(ticket)}`,
+        langu_code: "zh_CN",
+      },
+    })
+  );
   const parsed = await readJsonSafe(response);
   if (!response.ok()) {
     throw new Error(`Menu API failed with ${response.status()}: ${parsed.text.slice(0, 500)}`);
@@ -208,6 +243,8 @@ function findVisibleError(bodyText) {
 
 async function smokePage(context, target, index) {
   const page = await context.newPage();
+  page.setDefaultTimeout(pageTimeoutMs);
+  page.setDefaultNavigationTimeout(pageTimeoutMs);
   const networkErrors = [];
   const consoleErrors = [];
   const pageErrors = [];
@@ -258,7 +295,8 @@ async function smokePage(context, target, index) {
   let navigation = null;
   let navigationError = null;
   try {
-    navigation = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+    navigation = await page.goto(url, { waitUntil: "commit", timeout: pageTimeoutMs });
+    await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {});
     await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
     await page.waitForTimeout(1500);
   } catch (error) {
@@ -276,11 +314,15 @@ async function smokePage(context, target, index) {
     pageErrors.length > 0 ||
     requestFailures.length > 0 ||
     Boolean(visibleError);
+  const capturedNetworkErrors = networkErrors.slice();
+  const capturedConsoleErrors = consoleErrors.slice();
+  const capturedPageErrors = pageErrors.slice();
+  const capturedRequestFailures = requestFailures.slice();
 
   let screenshot = null;
   if (screenshotMode === "all" || (screenshotMode === "failures" && failed)) {
     screenshot = path.join(outputDir, `${String(index + 1).padStart(2, "0")}-${safeName(target.label)}.png`);
-    await page.screenshot({ path: screenshot, fullPage: true }).catch(() => {
+    await page.screenshot({ path: screenshot, fullPage: true, timeout: 10000 }).catch(() => {
       screenshot = null;
     });
   }
@@ -295,10 +337,10 @@ async function smokePage(context, target, index) {
     navigationStatus,
     navigationError,
     visibleError: visibleError || null,
-    networkErrors,
-    consoleErrors,
-    pageErrors,
-    requestFailures,
+    networkErrors: capturedNetworkErrors,
+    consoleErrors: capturedConsoleErrors,
+    pageErrors: capturedPageErrors,
+    requestFailures: capturedRequestFailures,
     screenshot,
   };
 }
@@ -306,15 +348,15 @@ async function smokePage(context, target, index) {
 async function main() {
   ensureDir(outputDir);
 
-  const api = await request.newContext({ ignoreHTTPSErrors: true });
-  const ticket = await login(api);
+  const api = await request.newContext({ ignoreHTTPSErrors: true, timeout: apiTimeoutMs });
+  const { ticket, loginPayload } = await login(api);
   const discoveredTargets = await fetchMenus(api, ticket);
   const targets = applyMenuLimit(discoveredTargets);
   await api.dispose();
 
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
-    baseURL: baseUrl,
+    baseURL: browserBaseUrl,
     ignoreHTTPSErrors: true,
     viewport: { width: 1440, height: 960 },
     extraHTTPHeaders: {
@@ -322,17 +364,29 @@ async function main() {
     },
   });
   await context.addCookies([
-    { name: "suposTicket", value: ticket, url: baseUrl },
-    { name: "SUPOS_TICKET", value: ticket, url: baseUrl },
+    { name: "suposTicket", value: ticket, url: browserBaseUrl },
+    { name: "SUPOS_TICKET", value: ticket, url: browserBaseUrl },
   ]);
-  await context.addInitScript((token) => {
+  await context.addInitScript(({ token, loginPayload: loginPayloadValue }) => {
     window.localStorage.setItem("suposTicket", token);
     window.localStorage.setItem("SUPOS_TICKET", token);
     window.localStorage.setItem("token", token);
+    window.localStorage.setItem("ticket", token);
     window.sessionStorage.setItem("suposTicket", token);
     window.sessionStorage.setItem("SUPOS_TICKET", token);
     window.sessionStorage.setItem("token", token);
-  }, ticket);
+    window.sessionStorage.setItem("ticket", token);
+    if (loginPayloadValue) {
+      window.localStorage.setItem("loginMsg", JSON.stringify(loginPayloadValue));
+      window.sessionStorage.setItem("loginMsg", JSON.stringify(loginPayloadValue));
+    }
+    window.localStorage.setItem("language", "zh_CN");
+    window.localStorage.setItem("langu_code", "zh_CN");
+    window.localStorage.setItem("locale", "zh-cn");
+    window.sessionStorage.setItem("language", "zh_CN");
+    window.sessionStorage.setItem("langu_code", "zh_CN");
+    window.sessionStorage.setItem("locale", "zh-cn");
+  }, { token: ticket, loginPayload });
 
   const results = [];
   for (const [index, target] of targets.entries()) {
@@ -347,6 +401,7 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     baseUrl,
+    browserBaseUrl,
     username,
     discoveredTotal: discoveredTargets.length,
     menuLimit: Number.isFinite(menuLimit) && menuLimit > 0 ? menuLimit : null,

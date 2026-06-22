@@ -1,0 +1,326 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T05:05:12.228Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "areaId": "systemconfig-controlled-runtime-config",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "route": "/systemconfig/#/sysconfig",
+  "username": "admin",
+  "summary": {
+    "status": "PASS",
+    "targetCount": 1,
+    "pass": 1,
+    "fail": 0,
+    "browserErrors": 0,
+    "rollbackVerified": true
+  },
+  "targets": [
+    {
+      "actionId": "builtin-qcs-runtime-config",
+      "catalogName": "质量检验配置",
+      "catalogId": "117000",
+      "configId": "117001",
+      "configCode": "reportShowIndexRange",
+      "marker": "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME",
+      "status": "PASS",
+      "regressionStatus": "ROLLBACK_ONLY; QCS production chain regression is required before this action can become PASS.",
+      "issues": [],
+      "before": {
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='117001';",
+        "rows": [
+          {
+            "id": "117001",
+            "catalogId": "117000",
+            "catalogCode": "QCS",
+            "catalogName": "QCS.ocd.QCS",
+            "configCode": "reportShowIndexRange",
+            "configName": "QCS.ocd.reportShowIndexRange",
+            "widgetType": "1",
+            "widgetValue": "qualityStd",
+            "tidModuleKey": "dt/QCS/QCS",
+            "configVersion": "dt/QCS/QCS/20260621-125832",
+            "modifyTime": "2026-06-21 04:58:32.642"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "reportShowIndexRange",
+                  "name": "过滤指标项目",
+                  "typeConfig": {
+                    "tip": "QCS report items read from quality standard in the recovered PostgreSQL test runtime"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "qualityStd"
+                  ],
+                  "configId": "117001"
+                },
+                {
+                  "code": "autoReportStaff",
+                  "name": "报告检验员获取",
+                  "typeConfig": {
+                    "tip": "Use current login staff when auto-generating QCS report documents"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "currentUser"
+                  ],
+                  "configId": "117002"
+                },
+                {
+                  "code": "autoReport",
+                  "name": "自动生成QCS检验报告",
+                  "typeConfig": {
+                    "tip": "Enable automatic report generation for manufacturing inspection in test env"
+                  },
+                  "type": 1,
+                  "value": [
+                    "manuCheck"
+                  ],
+                  "configId": "117003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "qualityStd"
+      },
+      "markerUpdate": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 117000,
+          "config": [
+            {
+              "configId": 117001,
+              "value": [
+                "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='117001';",
+        "rows": [
+          {
+            "id": "117001",
+            "catalogId": "117000",
+            "catalogCode": "QCS",
+            "catalogName": "QCS.ocd.QCS",
+            "configCode": "reportShowIndexRange",
+            "configName": "QCS.ocd.reportShowIndexRange",
+            "widgetType": "1",
+            "widgetValue": "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME",
+            "tidModuleKey": "dt/QCS/QCS",
+            "configVersion": "dt/QCS/QCS/20260621-130456",
+            "modifyTime": "2026-06-21 05:04:56.331"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "reportShowIndexRange",
+                  "name": "过滤指标项目",
+                  "typeConfig": {
+                    "tip": "QCS report items read from quality standard in the recovered PostgreSQL test runtime"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME"
+                  ],
+                  "configId": "117001"
+                },
+                {
+                  "code": "autoReportStaff",
+                  "name": "报告检验员获取",
+                  "typeConfig": {
+                    "tip": "Use current login staff when auto-generating QCS report documents"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "currentUser"
+                  ],
+                  "configId": "117002"
+                },
+                {
+                  "code": "autoReport",
+                  "name": "自动生成QCS检验报告",
+                  "typeConfig": {
+                    "tip": "Enable automatic report generation for manufacturing inspection in test env"
+                  },
+                  "type": 1,
+                  "value": [
+                    "manuCheck"
+                  ],
+                  "configId": "117003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME",
+        "moduleRead": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "code": 100000000,
+            "message": "操作成功",
+            "data": {
+              "reportShowIndexRange": "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME"
+            }
+          }
+        },
+        "moduleReadValue": "ADP_E2E_20260621050304_SCFG_QCS_RUNTIME"
+      },
+      "rollback": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 117000,
+          "config": [
+            {
+              "configId": 117001,
+              "value": [
+                "qualityStd"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='117001';",
+        "rows": [
+          {
+            "id": "117001",
+            "catalogId": "117000",
+            "catalogCode": "QCS",
+            "catalogName": "QCS.ocd.QCS",
+            "configCode": "reportShowIndexRange",
+            "configName": "QCS.ocd.reportShowIndexRange",
+            "widgetType": "1",
+            "widgetValue": "qualityStd",
+            "tidModuleKey": "dt/QCS/QCS",
+            "configVersion": "dt/QCS/QCS/20260621-130505",
+            "modifyTime": "2026-06-21 05:05:05.537"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "reportShowIndexRange",
+                  "name": "过滤指标项目",
+                  "typeConfig": {
+                    "tip": "QCS report items read from quality standard in the recovered PostgreSQL test runtime"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "qualityStd"
+                  ],
+                  "configId": "117001"
+                },
+                {
+                  "code": "autoReportStaff",
+                  "name": "报告检验员获取",
+                  "typeConfig": {
+                    "tip": "Use current login staff when auto-generating QCS report documents"
+                  },
+                  "verify": [
+                    {
+                      "isRequire": true,
+                      "msg": "必填"
+                    }
+                  ],
+                  "type": 1,
+                  "value": [
+                    "currentUser"
+                  ],
+                  "configId": "117002"
+                },
+                {
+                  "code": "autoReport",
+                  "name": "自动生成QCS检验报告",
+                  "typeConfig": {
+                    "tip": "Enable automatic report generation for manufacturing inspection in test env"
+                  },
+                  "type": 1,
+                  "value": [
+                    "manuCheck"
+                  ],
+                  "configId": "117003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "qualityStd"
+      }
+    }
+  ],
+  "browser": {
+    "navigationStatus": 200,
+    "navigationError": null,
+    "visibleError": null,
+    "consoleMessages": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "evidence": {
+    "method": "Authenticated real browser route plus in-browser systemconfig PUT/GET calls, direct PostgreSQL before/after verification, and immediate rollback.",
+    "boundary": "This report proves controlled save/read/rollback for the listed runtime config only. It does not promote the whole built-in runtime config action to PASS without production-chain regression evidence.",
+    "secretHandling": "Login token and password are used only in memory and are not written to this report."
+  }
+}

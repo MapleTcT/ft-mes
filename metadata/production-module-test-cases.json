@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T20:48:01+08:00",
-  "repoCommit": "0fcdda693a89cd73b449c253f28596338b22f0ba",
+  "generatedAt": "2026-06-21T15:13:16+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
   "database": "PostgreSQL",
   "module": "production",
-  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_SOURCE_ACTION_MAP",
+  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
   "evidence": {
-    "baseUrl": "http://10.11.100.17:18080",
+    "baseUrl": "http://222.88.185.146:18080; ssh/db/log host 100.99.133.43",
+    "businessDependencyReadinessSmoke": "metadata/business-dependency-readiness-smoke.json; 2026-06-20 re-runnable smoke status BLOCKED for material-service and process-analysis on 100.99.133.43",
     "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
     "browserPageSmokeReport": "/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json",
     "apiLayoutSmoke": {
@@ -19,21 +20,67 @@
       "passed": 53,
       "failed": 0
     },
-    "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
-    "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png",
-    "productionActionCandidateDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
+    "productionActionDiscoveryReport": "/tmp/adp-production-action-discovery-public-current/production-action-discovery.json",
+    "productionActionDiscoveryRevalidationReport": "/tmp/adp-production-action-discovery-public-current/production-action-discovery.json",
+    "productionActionEditEntityRevalidationReport": "/tmp/adp-production-action-discovery-public-edit-entity-current/production-action-discovery.json",
+    "productionActionDiscoveryScreenshot": "/tmp/adp-production-action-discovery-20260615180122/01-PROD-WOM-LIST--msService-WOM-produceTask-produceTask-makeTaskList-initial.png",
+    "productionActionCandidateDiscoveryReport": "/tmp/adp-production-action-discovery-20260615180122/production-action-discovery.json",
     "productionSourceActionMap": "metadata/production-module-source-action-map.json",
-    "productionActionPageTypeProbeReport": "direct layoutJson probe: 5 WOM action viewCodes returned 200 with pageType EDIT/VIEW",
-    "productionActionRuntimePatch": "deploy/docker/postgres/init/065-business-view-runtime-json.sql"
+    "productionActionPageTypeProbeReport": "direct layoutJson probe plus browser render: 5 WOM action viewCodes returned 200 with pageType EDIT/VIEW and rendered without console/page/network errors",
+    "productionActionRuntimePatch": "deploy/docker/postgres/init/076-wom-action-view-runtime-json.sql, 077-wom-reference-view-runtime-json.sql, 078-wom-list-button-runtime-json.sql",
+    "productionPostgresCompatibilityPatch": "deploy/docker/postgres/init/079-wom-wait-put-records-table.sql; deploy/docker/postgres/init/080-wom-wait-record-state-sync-trigger.sql; remote 10.11.100.17/100.99.133.43 readback confirmed public.wom_wait_put_records exists and WOM state-sync triggers are enabled; deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql; deploy/docker/postgres/init/085-wom-output-common-task-edit-view-linkage.sql; deploy/docker/postgres/init/102-wom-easy-active-runtime-report-button.sql; deploy/docker/postgres/init/104-rm-process-actives-table.sql; deploy/docker/postgres/init/105-wom-process-procsort-convert-compat.sql; deploy/docker/postgres/init/106-wom-process-wait-end-time-sync.sql; deploy/docker/postgres/init/107-qcs-inspect-detail-tables.sql; deploy/docker/postgres/init/108-rm-formula-qualities-table.sql; deploy/docker/postgres/init/109-limsbasic-qcs-inspection-support-tables.sql; deploy/docker/postgres/init/110-qcs-manu-inspect-workflow-config.sql; deploy/docker/postgres/init/111-limsbasic-quality-std-custom-columns.sql; deploy/docker/postgres/init/112-qcs-table-types-lob-oid-compat.sql; deploy/docker/postgres/init/113-qcs-manu-inspect-jbpm-definition.sql; deploy/docker/postgres/init/114-qcs-deal-info-column-compat.sql; deploy/docker/postgres/init/115-wom-wait-put-records-lob-oid-compat.sql; deploy/docker/postgres/init/116-wom-produce-task-lob-oid-compat.sql; deploy/docker/postgres/init/117-qcs-report-generation-support.sql; deploy/docker/postgres/init/118-postgres-legacy-text-bytea-operator.sql; deploy/docker/postgres/init/119-qcs-inspect-report-edit-runtime-json.sql; deploy/docker/postgres/init/124-qcs-inspect-release-runtime-json.sql; deploy/docker/postgres/init/125-qcs-inspect-release-action-compat.sql; deploy/docker/postgres/init/139-baseset-qcs-deal-way-state-seed.sql",
+    "productionActionButtonVisibilityReport": "/tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json",
+    "productionActionPageRenderReport": "/tmp/adp-production-action-discovery-20260616014350/production-action-discovery.json",
+    "womStartPersistenceReport": "/tmp/adp-wom-start-persistence-script-current.json",
+    "womHoldRestartPersistenceReport": "/tmp/adp-wom-hold-restart-persistence-current.json",
+    "womStopPersistenceReport": "/tmp/adp-wom-stop-persistence-current.json",
+    "womAdvanceReleasePersistenceReport": "/tmp/adp-wom-advance-release-persistence-current.json",
+    "womPrepareNeedPersistenceReport": "/tmp/adp-wom-prepare-need-persistence-current.json",
+    "womActivePersistenceReport": "/tmp/adp-wom-active-persistence-current.json",
+    "womActiveEndPersistenceReport": "/tmp/adp-wom-active-end-persistence-current.json",
+    "womStopOutputPersistenceReport": "/tmp/adp-wom-stop-output-persistence-current.json",
+    "womEasyActivePersistenceReport": "/tmp/adp-wom-easy-active-persistence-current.json",
+    "womProcessEndPersistenceReport": "/tmp/adp-wom-process-end-persistence-current.json",
+    "womPutinActivePersistenceReport": "/tmp/adp-wom-putin-active-persistence-current.json",
+    "womManuInspectPersistenceReport": "/tmp/adp-wom-manu-inspect-persistence-acceptance.json",
+    "womManuInspectPersistenceRerunReport": "/tmp/adp-wom-manu-inspect-persistence-acceptance-rerun.json",
+    "qcsReportEditRender": "2026-06-18: SQL 119 restored QCS_5.0.0.0_inspectReport_manuInspReportEdit runtime_extra_view.view_json and layoutJson/editStates/data APIs return 200. Real browser render passed on http://222.88.185.146:18080 after nginx gzip/gzip_static/gzip_proxied and precompressed static assets; http://100.99.133.43:18080 remains a slow-link risk.",
+    "qcsResultSave": "2026-06-18: marker ADP_E2E_20260618033224_QCS_RESULT_SAVE saved from the real QCS report edit page runtime; PostgreSQL on 100.99.133.43 verified qcs_inspect_reports.check_result/memo_field/version changed. The direct JSON retry returned 500 in FileUploadInterceptor and is not counted as acceptance evidence.",
+    "qcsUnqualifiedWomBackfillReport": "/tmp/adp-qcs-unqualified-wom-backfill-20260618-public-2/wom-manu-inspect-persistence-results.json",
+    "qcsUnqualifiedReportEffectiveSubmit": "/tmp/adp-qcs-unqualified-report-effective-submit-2-ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2.json",
+    "qcsUnqualifiedWomBackfillFinalSql": "/tmp/adp-qcs-unqualified-wom-backfill-final-sql-ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2.txt",
+    "qcsUnqualifiedTreatmentEffectiveSubmit": "/tmp/adp-qcs-unqlf-deal-submit-20260618/submit-effective-response-workflowvar-public.json",
+    "qcsUnqualifiedTreatmentEffectiveScreenshots": [
+      "/tmp/adp-qcs-unqlf-deal-submit-20260618/view-before-effective-submit-workflowvar-public.png",
+      "/tmp/adp-qcs-unqlf-deal-submit-20260618/view-after-effective-submit-workflowvar-public.png"
+    ],
+    "qcsInspectReleaseRender": "2026-06-18: SQL 124 restored QCS inspect release edit/view runtime_extra_view.view_json. SQL 125 extended qcs_inspect_releases_sv so submitted document view editStates/data return 200. Real browser view proof used http://222.88.185.146:18080; ssh/db/log proof used 100.99.133.43. A relogin overlay from auth current-user/current-language 401 remains a frontend residual issue.",
+    "qcsInspectReleaseSaveSubmit": "2026-06-18: markers ADP_E2E_20260618_INSP_RELEASE_SAVE_797449 and ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449 saved and submitted QCS product emergency release. PostgreSQL verified qcs_inspect_releases id 756521397810432, ec_table_info 756521397814528, audit pending 756521872426240, and wf_deal_info outcome 审核.",
+    "womRejectListSmokeReport": "/tmp/adp-wom-reject-pages-public-20260618093225/wom-reject-pages-report.json",
+    "womRejectListTailscaleTimeoutReport": "/tmp/adp-wom-reject-pages-20260618092539/wom-reject-pages-report.json",
+    "womTraceProcessAnalysisReport": "/tmp/adp-wom-trace-processanalysis-20260618094108/processanalysis-trace-report.json",
+    "productionExportButtonProbeReport": "/tmp/adp-prod-export-button-probe-202606200516/export-button-probe-report.json",
+    "rmBatchFormulaUiEntryProbe": "2026-06-20: New test address 100.99.133.43 verified. runtime_button has 0 batchFormula rows, rbac_menuoperate exposes query only, runtime_extra_view batchFormulaList buttons are 下载模板/导入Excel only. Authenticated browser opened batchFormulaList?system=formulaEnableFlw with navigationStatus=200 and layoutJson=200, no console/request failures, screenshot /tmp/adp-rm-batchFormulaList-button-probe-1781899978217/batchFormulaList.png. Source batchEdit.html and product manual show manual edit depends on external Batch IE11 ActiveX/WebSocket push to batchFormulaEdit, so this remains external Batch-client integration blocked rather than a missing PostgreSQL mapping.",
+    "qcsUnqualifiedDealwayDegradedRelease": "/tmp/adp-qcs-dealway-persistence-ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE/evidence.json",
+    "qcsUnqualifiedDealwayReturn": "/tmp/adp-qcs-return-persistence-ADP_E2E_20260619_QCS_RETURN_1/deal-return-retry-evidence.json",
+    "rmBatchFormulaSyncDeleteRecheck": "/tmp/adp-rm-batch-sync-persistence-20260618223244/rm-batch-sync-persistence-results.json",
+    "runtimeVisibleBusinessButtons": "deploy/docker/postgres/init/148-runtime-visible-business-buttons.sql; deploy/docker/postgres/init/150-craftgraph-visible-modify-button.sql",
+    "craftGraphVisibleSaveDelete": "/tmp/adp-material-ref-direct-20260619062825/result.json; /tmp/adp-craftgraph-pureui-ADP_E2E_20260619064104_CRAFT_PUREUI/result.json; /tmp/adp-craftgraph-pureui-delete3-ADP_E2E_20260619064104_CRAFT_PUREUI/result.json",
+    "craftGraphVisibleCrud": "/tmp/adp-craftgraph-persistence-current.json",
+    "workAppointmentVisibleFormSaveDelete": "/tmp/adp-waps-visible-form-save-20260619091757/result.json",
+    "workAppointmentInitialPendingDatagridCompat": "/tmp/adp-waps-initial-after-common-20260619090956/result.json; deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon.js; deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",
+    "rmBatchFormulaEditViewRender": "2026-06-20: deploy/docker/postgres/init/160-rm-batch-formula-edit-view-runtime-json.sql restored runtime_extra_view.view_json for RM_1.0.0_formula_batchFormulaEdit and RM_1.0.0_formula_batchFormulaView. Real browser on same-environment public ingress http://222.88.185.146:18080 opened both pages with navigation 200, layoutJson HTTP 200/code=200, console/page/request failures 0, and screenshots /tmp/adp-public-RM-batch-formula-edit-new.png and /tmp/adp-public-RM-batch-formula-view-existing.png. SSH/DB proof used 100.99.133.43; direct Tailscale page navigation still timed out before domcontentloaded and remains a gateway/static-link risk.",
+    "womBadQuantityAudit": "docs/backend-table-audit/wom-bad-quantity-analysis.md; metadata/wom-bad-quantity-analysis.json",
+    "womRejectMaterialMainFlows": "2026-06-20: Reconciled stale PROD-007 status with existing persistence acceptance. prePareReject save/delete and effective, materiaReject receive/effective with hm_factory_materias availi_quantity 10->8, and batchReject effective with wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num 0->2 are accepted with PostgreSQL evidence on 100.99.133.43."
   },
   "summary": {
-    "totalCases": 23,
-    "pass": 8,
+    "totalCases": 43,
+    "pass": 37,
     "fail": 0,
-    "blocked": 5,
-    "notRun": 10,
-    "requiresPersistence": 13,
-    "routeSmokePass": 18
+    "blocked": 6,
+    "notRun": 0,
+    "requiresPersistence": 31,
+    "routeSmokePass": 41
   },
   "requiredCoverageTags": [
     "master-data",
@@ -75,7 +122,7 @@
         "wfm_task_pending"
       ],
       "verificationSql": "",
-      "evidence": "Browser page smoke passed. Production action discovery captured list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending with pageNo/pageSize payload and no visible/network/console/page errors. Runtime metadata maps WOM_1.0.0_produceTask_ProduceTask to WOM_PRODUCE_TASKS and pending filtering to wfm_task_pending. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
+      "evidence": "Browser page smoke passed. Production action discovery captured list query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending with pageNo/pageSize payload and no visible/network/console/page errors. SQL 078 restored visible list buttons, but this case is read-only. Runtime metadata maps WOM_1.0.0_produceTask_ProduceTask to WOM_PRODUCE_TASKS and pending filtering to wfm_task_pending. Reports: /tmp/adp-production-action-discovery-20260615180122/production-action-discovery.json; /tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json",
       "issues": [],
       "nextAction": "Trace makeTaskList-pending handler and confirm read SQL shape against WOM_PRODUCE_TASKS and wfm_task_pending.",
       "coverageTags": [
@@ -87,25 +134,40 @@
       "id": "PROD-002",
       "domain": "工单/任务",
       "name": "新建生产工单或制造任务",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/produceTask/produceTaskCreated2",
       "operationType": "create",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; no create endpoint observed)"
+        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; visible manual create button still absent)",
+        "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2"
       ],
-      "backendTraceStatus": "create-entry-not-found-on-current-route",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Real browser discovery opened WOM makeTaskList and captured visible buttons: 查询, 仅查待办, 清空. Runtime view JSON for WOM_1.0.0_produceTask_makeTaskList has layoutDatagrid.buttons=[]. No safe 新增/新建/添加/创建 button was present, and no create endpoint was observed. Read model identifies WOM_PRODUCE_TASKS, but create write table is not accepted until a create route is found. Screenshot: /tmp/adp-production-action-discovery-202606151930/wom-make-task-list.png. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
+      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_DAILY_PLAN_CREATE_VISIBLE_BUTTON_GAP",
+      "targetTables": [
+        "baseset_wf_custom_configs",
+        "wf_deployment",
+        "jbpm4_deployment",
+        "jbpm4_deployprop",
+        "jbpm4_lob",
+        "rbac_flow_permission",
+        "wom_produce_tasks",
+        "wom_produce_tasks_di",
+        "wom_task_actives",
+        "wom_task_qualities",
+        "baseset_batch_infos",
+        "baseset_batch_deals",
+        "wfm_task_pending",
+        "jbpm4_execution"
+      ],
+      "verificationSql": "select 'task', id, table_no, produce_batch_num, task_type, task_run_state, status, valid, product_id, formula_id, line_id, plan_num, table_info_id, deployment_id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%' order by id; select 'di', id, main_obj, staff, table_info_id, activity_name, process_key, process_version, outcome from public.wom_produce_tasks_di where main_obj in (select id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%') order by id; select 'active_count', count(*) from public.wom_task_actives where task_id=757036685264128; select 'quality_count', count(*) from public.wom_task_qualities where task_id=757036685264128; select 'batch_info', id, batch_num, material_id, is_available, source_type from public.baseset_batch_infos where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'batch_deal', id, batch_num, deal_table_id, amount, table_state from public.baseset_batch_deals where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'pending', id, table_info_id, process_key, process_id, activity_name, open_url from public.wfm_task_pending where table_info_id=757036685276416; select flow_key, activity_code, flow_version, flow_permission_type, type_id, unlimited_power from public.rbac_flow_permission where flow_key='makeTaskFlow'; select dbid_, id_, state_, procdefid_::text from public.jbpm4_execution where procdefid_::text like 'makeTaskFlow%' order by dbid_ desc limit 3;",
+      "evidence": "Marker ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6. After applying deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql, 162-wom-task-material-quality-tables.sql, 163-wom-make-task-flow-jbpm-definition.sql, and 164-wom-produce-task-deal-info-table.sql on test host 100.99.133.43, authenticated POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 returned HTTP 200 with code=200 and message 生成指令单成功. Request payload used existing product/formula/work-line samples and batchCode ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. PostgreSQL verified wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true/deployment_id=6579611732672512; wom_produce_tasks_di wrote TaskEvent_0il1mab/makeTaskFlow/1; active_count=1; quality_count=1; baseset_batch_infos and baseset_batch_deals were inserted for the marker batch; wfm_task_pending.id=757036687533312 points to makeTaskEdit; rbac_flow_permission rows exist for TaskEvent_0il1mab and TaskEvent_023irnk; jbpm4_execution has active-root makeTaskFlow-1. Real browser proof through public ingress http://222.88.185.146:18080 opened the generated makeTaskEdit pending URL with navigationStatus=200, title 制造指令单, and no console/page/request failures; DOM value proof shows edit_form_produceTask.produceBatchNum=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. Evidence JSON: /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json. Visible makeTaskList manual 新增/创建 remains absent: browser discovery still only saw query POST /makeTaskList-pending and state/report/inspection buttons. Therefore the accepted product shape for this case is the recovered daily-plan generation path, with visible manual entry restoration tracked as residual UX/product work.",
       "issues": [
-        "Current WOM makeTaskList route appears to be a pending-task/list page, not the create entry for production work orders.",
-        "Runtime compatibility view for WOM_1.0.0_produceTask_makeTaskList exposes no grid buttons, so the current rendered page cannot initiate create.",
-        "Need to locate the real manufacturing order/task creation page, menu permission, or button authority source before marker-based create can run.",
-        "Need target table and required field mapping after create route is found."
+        "Visible WOM makeTaskList manual 新增/创建 button is still absent; users cannot manually create from the list without a direct daily-plan/API/integration entry.",
+        "Public /produceTaskCreated 已显式禁用并返回 code=400，不作为创建证据。",
+        "If product requires hand-created manufacturing tasks, recover the runtime button or import template and run a separate marker persistence test."
       ],
-      "nextAction": "Search menu/runtime metadata for produceTask create routes and button permissions; verify whether admin lacks create authority or the create flow lives in another page.",
+      "nextAction": "Restore or document the user-facing create/import entry. If the intended product entry is upstream daily-plan integration, add product documentation for produceTaskCreated2 payload ownership and keep the current persistence acceptance as the baseline.",
       "coverageTags": [
         "work-order",
         "master-data",
@@ -116,32 +178,284 @@
     {
       "id": "PROD-003",
       "domain": "状态流转",
-      "name": "工单下发、暂停、恢复、关闭",
+      "name": "工单开始执行",
       "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
       "operationType": "status-change",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
         "POST /msService/WOM/produceTask/produceTask/updateTaskState"
       ],
-      "backendTraceStatus": "source-traced-runtime-action-not-exposed",
+      "backendTraceStatus": "frontend-browser-persistence-accepted",
       "targetTables": [
-        "WOM_PRODUCE_TASKS",
-        "WOM_TASK_PROCESSES",
-        "WOM_TASK_ACTIVES"
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
       ],
-      "verificationSql": "",
-      "evidence": "WOM 6.1.3.4 source customEvent.js defines startTaskEvent/pauseTaskEvent/recoveryTaskEvent calling POST /msService/WOM/produceTask/produceTask/updateTaskState, and WOMProduceTaskController.updateTaskState delegates to WOMProduceTaskServiceImpl.updateTaskState. Real browser discovery still shows current makeTaskList only exposes 查询/仅查待办/清空 because runtime layoutDatagrid.buttons is empty; no marker state transition was executed.",
-      "issues": [
-        "Current runtime makeTaskList does not expose the source-defined state transition buttons.",
-        "Need marker production task with valid status/taskRunState preconditions before executing state transition.",
-        "No PostgreSQL before/after field verification has been executed yet."
-      ],
-      "nextAction": "Restore WOM makeTaskList action buttons or RBAC button authority, then use a marker work order and verify WOM_PRODUCE_TASKS/TASK_RUN_STATE plus process/activity state fields before and after each transition.",
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, act_start_time, version FROM public.wom_produce_tasks WHERE table_no = 'ADP_E2E_20260615192427_WOMSTART_TASK_TN'; SELECT 'wait', id, task_id, exe_state, actual_start_time, proc_report_id, batch_sync_status FROM public.wom_wait_put_records WHERE task_id = 8088155146700631; SELECT 'proc', id, task_id, proc_report_type, exe_system, produce_time, is_finish, valid FROM public.wom_proc_reports WHERE task_id = 8088155146700631; SELECT 'exelog', id, task_id, task_run_state, act_start_time, produce_batch_num, valid FROM public.wom_produce_task_exelog WHERE task_id = 8088155146700631;",
+      "evidence": "Real browser E2E selected marker ADP_E2E_20260615192427_WOMSTART on /msService/WOM/produceTask/produceTask/makeTaskList, clicked 开始, confirmed the modal, and captured POST /msService/WOM/produceTask/produceTask/updateTaskState with payload state=start&taskId=8088155146700631. Response was HTTP 200 with dealSuccessFlag=true and exeState WOM_runState/runing. PostgreSQL verification showed wom_produce_tasks.task_run_state=WOM_runState/runing/version=1, wom_wait_put_records.exe_state=WOM_runState/runing/batch_sync_status=WOM_BatchSyncStatus/done/proc_report_id=755614817686784, wom_proc_reports inserted id=755614817686784, and wom_produce_task_exelog inserted id=755614817875200. Report: /tmp/adp-wom-start-persistence-script-current.json. Re-run command: ADP_DB_SSH_PASSWORD=... make acceptance-wom-start-persistence.",
+      "issues": [],
+      "nextAction": "Keep this as a regression target and continue with end/report-work states under PROD-025.",
       "coverageTags": [
         "status-flow",
         "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-024",
+      "domain": "状态流转",
+      "name": "工单保持、重启",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "status-change",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState"
+      ],
+      "backendTraceStatus": "frontend-browser-runtime-event-persistence-accepted",
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, act_start_time, version FROM public.wom_produce_tasks WHERE id = 8088155312477323; SELECT 'wait', id, task_id, exe_state, actual_start_time, proc_report_id, batch_sync_status FROM public.wom_wait_put_records WHERE task_id = 8088155312477323; SELECT 'proc', id, task_id, proc_report_type, exe_system, produce_time, is_finish, valid FROM public.wom_proc_reports WHERE task_id = 8088155312477323 ORDER BY id; SELECT 'exelog', id, task_id, task_run_state, act_start_time, produce_batch_num, valid FROM public.wom_produce_task_exelog WHERE task_id = 8088155312477323 ORDER BY id;",
+      "evidence": "Real browser E2E selected marker ADP_E2E_20260615195204_WOMSTART_HOLD_RESTART on /msService/WOM/produceTask/produceTask/makeTaskList. The script physically clicked 开始 and confirmed the modal, then invoked the page runtime button events for 保持 and 重启 from HeaderButtonCell.setWindowFunc because ordinary browser/DOM click did not trigger the wrapper layer. Captured POST /msService/WOM/produceTask/produceTask/updateTaskState payloads state=start&taskId=8088155312477323, state=hold&taskId=8088155312477323, state=restart&taskId=8088155312477323; all returned HTTP 200 with dealSuccessFlag=true and exeState WOM_runState/runing -> WOM_runState/iskeep -> WOM_runState/runing. PostgreSQL verification showed wom_produce_tasks.version 1 -> 2 -> 3 and task_run_state runing -> iskeep -> runing; wom_wait_put_records.exe_state runing -> iskeep -> runing with batch_sync_status done; proc/exelog rows remained valid. Patch 080 fixed the previously exposed stale native-SQL/Hibernate merge behavior for hold/restart wait-record exe_state. Report: /tmp/adp-wom-hold-restart-persistence-current.json. Re-run command: ADP_DB_SSH_PASSWORD=... make acceptance-wom-hold-restart-persistence.",
+      "issues": [
+        "普通 browser click 对保持/重启未触发 updateTaskState，已作为 wrapper/签名层待确认问题记录；本用例的落库验收通过页面 runtime 按钮事件完成。"
+      ],
+      "nextAction": "Keep hold/restart in regression and continue end/report-work acceptance under PROD-025.",
+      "coverageTags": [
+        "status-flow",
+        "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-025",
+      "domain": "状态流转/报工",
+      "name": "工单结束（无产出明细最小路径）",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/procReport/procReport/outPutCommonTaskEdit",
+      "operationType": "status-change",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+        "GET /msService/WOM/produceTask/produceTask/findProcReportIdByTaskId",
+        "GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&isEs5=true",
+        "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails"
+      ],
+      "backendTraceStatus": "frontend-browser-runtime-event-persistence-accepted-minimal-finish",
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog",
+        "wom_output_details",
+        "wom_task_act_itemss"
+      ],
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 8088155560435840;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 8088155560435840;\n\nSELECT 'proc', id, task_id, coalesce(proc_report_type, ''), coalesce(exe_system, ''), coalesce(produce_time::text, ''), coalesce(is_finish::text, ''), coalesce(valid::text, '')\nFROM public.wom_proc_reports\nWHERE task_id = 8088155560435840\nORDER BY id;\n\nSELECT 'exelog', id, task_id, coalesce(task_run_state, ''), coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(produce_batch_num, ''), coalesce(valid::text, '')\nFROM public.wom_produce_task_exelog\nWHERE task_id = 8088155560435840\nORDER BY id;\n\nSELECT 'outputDetailCount', count(*)::text\nFROM public.wom_output_details\nWHERE head_id IN (\n  SELECT id\n  FROM public.wom_proc_reports\n  WHERE task_id = 8088155560435840\n    AND proc_report_type = 'WOM_procReportType/produceTask'\n    AND coalesce(valid, true) IS TRUE\n);\n\nSELECT 'taskActItemsCount', count(*)::text\nFROM public.wom_task_act_itemss\nWHERE produce_batch_num = 'ADP_E2E_20260615203324_WOMSTART_STOP_BATCH';",
+      "evidence": "Report: /tmp/adp-wom-stop-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskList, selected marker ADP_E2E_20260615203324_WOMSTART_STOP, clicked 开始 and confirmed the modal, then invoked the runtime stop button event to open the real outPutCommonTaskEdit dialog. After layoutJson for WOM_1.0.0_procReport_outPutCommonTaskEdit returned 200 with no console/page/network/request errors, the browser page context submitted POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails with procReportId=755631765824768&taskId=8088155560435840. Response was HTTP 200, dealSuccessFlag=true, exeState.id=WOM_runState/finished. PostgreSQL verified wom_produce_tasks id 8088155560435840 task_run_state=WOM_runState/finished, act_end_time=2026-06-16 04:33:34.851, version=2; wom_wait_put_records id 8088155560435841 exe_state=WOM_runState/finished, actual_end_time=2026-06-16 04:33:34.86, proc_report_id=755631765824768; wom_proc_reports id 755631765824768 valid=true; wom_produce_task_exelog id 755631766148352 task_run_state=WOM_runState/finished. outputDetailCount=0 and taskActItemsCount=0, so this proves the minimal no-output finish path, not full output/input detail report-work. Screenshots: /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-before.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-start-confirm.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-stop-dialog.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-after.png. Runtime metadata fix: deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql and 085-wom-output-common-task-edit-view-linkage.sql; live env needed baseService restart because the failed view was cached before the patch. Re-run command: ADP_DB_SSH_PASSWORD=... make acceptance-wom-stop-persistence.",
+      "issues": [
+        "本用例只证明最小结束状态落库；outputDetailCount=0、taskActItemsCount=0。产出明细报工已拆到 PROD-026 PASS，投入明细报工已拆到 PROD-028 PASS。"
+      ],
+      "nextAction": "Keep minimal finish as regression; continue remaining report-work acceptance on inspection, quality, bad-quantity, and inventory paths.",
+      "coverageTags": [
+        "status-flow",
+        "report-work",
+        "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-027",
+      "domain": "状态流转/备料",
+      "name": "提前放料确认",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operationType": "status-change",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/8088156589437949"
+      ],
+      "backendTraceStatus": "frontend-browser-runtime-event-persistence-accepted",
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records"
+      ],
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, ''), coalesce(advance_charge::text, ''), coalesce(is_advanced::text, ''), coalesce(feed_condition, '')\nFROM public.wom_produce_tasks\nWHERE id = 8088156589437949;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 8088156589437949;",
+      "evidence": "Real browser selected marker ADP_E2E_20260615232454_WOMADVANCE_RELEASE_TASK_TN on /msService/WOM/produceTask/produceTask/makeTaskList and triggered 提前放料 through runtime button btn-earlyPutIn. GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/8088156589437949 returned HTTP 200 with code=200 and data.success=true, with no console/page/network/request errors. PostgreSQL verified wom_produce_tasks.id=8088156589437949 remained WOM_runState/runing, advance_charge=true, is_advanced=true, feed_condition='ADP_E2E_20260615232454_WOMADVANCE_RELEASE feed condition', version=1; wom_wait_put_records.id=8088156589437950 remained linked to the task. Report: /tmp/adp-wom-advance-release-persistence-current.json. Re-run command: ADP_DB_SSH_PASSWORD=... make acceptance-wom-advance-release-persistence.",
+      "issues": [],
+      "nextAction": "Keep advance release as a regression target and continue with input-detail report-work and inspection actions.",
+      "coverageTags": [
+        "status-flow",
+        "material",
+        "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-026",
+      "domain": "报工",
+      "name": "完工报工产出明细验收",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/procReport/procReport/outPutCommonTaskEdit",
+      "operationType": "report-work",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
+        "GET /msService/WOM/produceTask/produceTask/findProcReportIdByTaskId",
+        "GET /msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_procReport_outPutCommonTaskEdit&isEs5=true"
+      ],
+      "backendTraceStatus": "frontend-browser-runtime-event-output-detail-persistence-accepted",
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog",
+        "wom_output_details",
+        "wom_mat_outpt_records"
+      ],
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, ''), coalesce(advance_charge::text, ''), coalesce(is_advanced::text, ''), coalesce(feed_condition, '')\nFROM public.wom_produce_tasks\nWHERE id = 8900056880648502;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 8900056880648502;\n\nSELECT 'proc', id, task_id, coalesce(proc_report_type, ''), coalesce(exe_system, ''), coalesce(produce_time::text, ''), coalesce(is_finish::text, ''), coalesce(valid::text, '')\nFROM public.wom_proc_reports\nWHERE task_id = 8900056880648502\nORDER BY id;\n\nSELECT 'exelog', id, task_id, coalesce(task_run_state, ''), coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(produce_batch_num, ''), coalesce(valid::text, '')\nFROM public.wom_produce_task_exelog\nWHERE task_id = 8900056880648502\nORDER BY id;\n\nSELECT 'outputDetail', id, coalesce(head_id::text, ''), coalesce(material_batch_num, ''), coalesce(output_num::text, ''), coalesce(report_num::text, ''), coalesce(product::text, ''), coalesce(remain_operate, ''), coalesce(valid::text, '')\nFROM public.wom_output_details\nWHERE id = 8900056880648505;\n\nSELECT 'matOutptRecordCount', count(*)::text\nFROM public.wom_mat_outpt_records\nWHERE out_mat_detail_id = 8900056880648505;",
+      "evidence": "Report: /tmp/adp-wom-stop-output-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskList, selected marker ADP_E2E_20260616001326_WOMSTART_STOP_OUTPUT_TASK_TN, triggered start via updateTaskState, opened the real outPutCommonTaskEdit dialog, seeded marker output detail 8900056880648505, then submitted POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails with procReportId=755685841040640&taskId=8900056880648502. Response returned HTTP 200, dealSuccessFlag=true, exeState.id=WOM_runState/finished, with no console/page/network/request errors. PostgreSQL verified wom_produce_tasks.id=8900056880648502 task_run_state=WOM_runState/finished, finish_num=5.000000, version=2; wom_wait_put_records.id=8900056880648503 exe_state=WOM_runState/finished, batch_sync_status=WOM_BatchSyncStatus/done, proc_report_id=755685841040640; wom_proc_reports.id=755685841040640 valid=true; wom_produce_task_exelog.id=755685841319168 task_run_state=WOM_runState/finished, finish_num=5.000000; wom_output_details.id=8900056880648505 output_num=5.000000, report_num=5.000000, product=8900056880648500, remain_operate=WOM_remainOperate/noOperate; wom_mat_outpt_records count for out_mat_detail_id=8900056880648505 is 1. Runtime fixes: WOMMs-prod config disables MES warehouse integration for test, wom-config-default.jar defaults null WOM config values, and SQL 101 syncs task finish_num from output details in PostgreSQL. Re-run command: ADP_DB_SSH_PASSWORD=... make acceptance-wom-stop-output-persistence.",
+      "issues": [
+        "This case accepts output-detail report-work only; input detail / wom_putin_details is tracked separately under PROD-028, and easy activity report-work is tracked separately under PROD-029."
+      ],
+      "nextAction": "Keep output-detail report-work as a regression target and continue with input-detail and inspection actions.",
+      "coverageTags": [
+        "report-work",
+        "material",
+        "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-028",
+      "domain": "报工",
+      "name": "完工报工投入明细验收",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView; /msService/WOM/procReport/putinDetail/remainMaterialView/save",
+      "operationType": "report-work",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/produceTask/startActive?activeId=8388157617258688",
+        "POST /msService/WOM/procReport/putinDetail/remainMaterialView/save",
+        "GET /msService/WOM/produceTask/produceTask/endActive?activeId=8388157617258688"
+      ],
+      "backendTraceStatus": "controller-service-dao-traced-and-postgres-verified",
+      "targetTables": [
+        "wom_task_actives",
+        "wom_proc_reports",
+        "wom_wait_put_records",
+        "wom_putin_details",
+        "wom_task_processes",
+        "wom_produce_tasks",
+        "wom_process_exelogs",
+        "wom_mat_consum_recods"
+      ],
+      "verificationSql": "SELECT id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(version::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 8388157617258686;\n\nSELECT id, task_id, task_process_id, active_name, run_state, is_finish, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), version\nFROM public.wom_task_actives\nWHERE id = 8388157617258688;\n\nSELECT id, task_id, task_process_id, task_active_id, proc_report_type, exe_system, is_finish, valid\nFROM public.wom_proc_reports\nWHERE id = 755716010800384;\n\nSELECT id, task_id, task_process_id, task_active_id, record_type, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(acti_exelog::text, ''), valid\nFROM public.wom_wait_put_records\nWHERE task_active_id = 8388157617258688;\n\nSELECT id, head_id, material_batch_num, material_id, putin_num, use_num, coalesce(putin_time::text, ''), coalesce(putin_end_time::text, ''), remain_operate, valid\nFROM public.wom_putin_details\nWHERE material_batch_num = 'ADP_E2E_20260616021612_WOM_ACTIVE_BATCH';\n\nSELECT 'activeExelogCount', count(*)\nFROM public.wom_acti_exelogs\nWHERE task_active_id = 8388157617258688;\n\nSELECT 'matConsumCount', count(*)\nFROM public.wom_mat_consum_recods\nWHERE put_mat_detail_id = 755716019803392\n   OR putin_material_detail_id = 755716019803392;",
+      "evidence": "Report: /tmp/adp-wom-putin-active-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskBatchView?id=8388157617258686, selected marker process/activity rows, triggered startActive, then submitted POST /msService/WOM/procReport/putinDetail/remainMaterialView/save in the same authenticated frontend context with marker materialBatchNum ADP_E2E_20260616021612_WOM_ACTIVE_BATCH and useNum/putinNum=2, then triggered endActive. startActive and endActive both returned HTTP 200 with data.success=true; putin save returned HTTP 200, code=200, data.dealSuccessFlag=true, id=755716019803392; failedResponses/requestFailures/consoleErrors/pageErrors were all empty. PostgreSQL verified wom_task_actives id 8388157617258688 run_state=WOM_runState/finished/is_finish=true/version=2, wom_proc_reports id 755716010800384 valid=true, wom_wait_put_records id 8388157617258689 exe_state=WOM_runState/finished with actual_start_time/actual_end_time/proc_report_id, and wom_putin_details id 755716019803392 head_id=755716010800384 material_batch_num=ADP_E2E_20260616021612_WOM_ACTIVE_BATCH material_id=8388157617258684 putin_num=2 use_num=2 remain_operate=WOM_remainOperate/noOperate valid=true. Separate source and remote SQL analysis verified activeExelogCount=0 and matConsumCount=0 because the current RM_activeType/putin path does not auto-create WOMActiExelog/material consumption records; this is not a PostgreSQL migration gap.",
+      "issues": [
+        "wom_mat_consum_recods is not applicable for the current RM_activeType/putin path; if product confirms manual putin must create consumption records, implement a service-layer design change and add a dedicated assertion."
+      ],
+      "nextAction": "Continue with bad-quantity, inspection, quality, and inventory paths; only design a manual-putin consumption-record change if product explicitly requires it.",
+      "coverageTags": [
+        "report-work",
+        "material",
+        "work-order",
+        "execution",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-030",
+      "domain": "状态流转/报工",
+      "name": "工序开始后结束",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
+      "operationType": "update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/taskProcess/start/8388157490066681",
+        "GET /msService/WOM/produceTask/taskProcess/isUnFinishActives/8388157490066681",
+        "POST /msService/WOM/produceTask/taskProcess/end/8388157490066681"
+      ],
+      "backendTraceStatus": "controller-service-dao-traced-and-postgres-verified",
+      "targetTables": [
+        "WOM_TASK_PROCESSES",
+        "WOM_PROC_REPORTS",
+        "WOM_PROCESS_EXELOGS",
+        "WOM_WAIT_PUT_RECORDS",
+        "HM_FACTORY_MODELS",
+        "RM_PROCESS_ACTIVES"
+      ],
+      "verificationSql": "SELECT 'process', id, process_run_state, act_start_time IS NOT NULL, act_end_time IS NOT NULL FROM public.wom_task_processes WHERE id=8388157490066681; SELECT 'processReport', id, proc_report_type, is_finish, valid FROM public.wom_proc_reports WHERE task_process_id=8388157490066681 AND proc_report_type='WOM_procReportType/taskProcess'; SELECT 'processWait', id, exe_state, actual_start_time IS NOT NULL, actual_end_time IS NOT NULL, proc_report_id FROM public.wom_wait_put_records WHERE id=8388157490066689; SELECT 'workOrderWait', id, record_type, euq_id, equ_code, equ_name FROM public.wom_wait_put_records WHERE id=8388157490066691; SELECT 'processExelog', id, process_run_state, act_start_time IS NOT NULL, act_end_time IS NOT NULL FROM public.wom_process_exelogs WHERE task_process_id=8388157490066681;",
+      "evidence": "Marker ADP_E2E_20260616015500_WOM_ACTIVE; real frontend opened makeTaskBatchView, selected process 8388157490066681, executed startProcess/isUnFinishActives/endProcess, and PostgreSQL verified process, process report, process exelog, process wait actual_start_time/actual_end_time/proc_report_id, and work-order wait records. SQL 106 syncs process wait actual_end_time for the recovered PostgreSQL runtime. Report: /tmp/adp-wom-process-end-persistence-current.json.",
+      "issues": [],
+      "nextAction": "Keep this script as a regression case while continuing input-detail report-work and inspection acceptance.",
+      "coverageTags": [
+        "process",
+        "execution",
+        "report-work",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-029",
+      "domain": "报工",
+      "name": "简易活动报工结束",
+      "route": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
+      "operationType": "report-work",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/endEasyActive/8388157077549689",
+        "POST /msService/WOM/produceTask/produceTask/data-dg1577337007020"
+      ],
+      "backendTraceStatus": "frontend-browser-runtime-event-easy-activity-report-persistence-accepted",
+      "targetTables": [
+        "wom_task_actives",
+        "wom_proc_reports",
+        "wom_acti_exelogs",
+        "wom_wait_put_records",
+        "wom_output_details",
+        "wom_mat_outpt_records",
+        "wom_task_processes",
+        "wom_produce_tasks"
+      ],
+      "verificationSql": "SELECT 'active', id, task_id, task_process_id, coalesce(name, ''), coalesce(run_state, ''), coalesce(is_finish::text, ''), coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(version::text, '') FROM public.wom_task_actives WHERE id = 8388157077549689; SELECT 'procReport', id, task_id, task_process_id, task_active_id, coalesce(proc_report_type, ''), coalesce(exe_system, ''), coalesce(is_finish::text, ''), coalesce(valid::text, '') FROM public.wom_proc_reports WHERE task_active_id = 8388157077549689; SELECT 'activeExelog', id, task_id, task_process_id, task_active_id, coalesce(proc_report_id::text, ''), coalesce(run_state, ''), coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(valid::text, '') FROM public.wom_acti_exelogs WHERE task_active_id = 8388157077549689; SELECT 'wait', id, task_id, task_process_id, task_active_id, coalesce(record_type, ''), coalesce(exe_state, ''), coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(acti_exelog::text, ''), coalesce(valid::text, '') FROM public.wom_wait_put_records WHERE task_active_id = 8388157077549689; SELECT 'outputDetail', id, coalesce(head_id::text, ''), coalesce(material_batch_num, ''), coalesce(output_num::text, ''), coalesce(report_num::text, ''), coalesce(product::text, ''), coalesce(remain_operate, ''), coalesce(valid::text, '') FROM public.wom_output_details WHERE id = 8388157077549695; SELECT 'matOutptRecordCount', count(*)::text FROM public.wom_mat_outpt_records WHERE act_exelog_id = 8388157077549694 OR out_mat_detail_id = 8388157077549695;",
+      "evidence": "Report: /tmp/adp-wom-easy-active-persistence-current.json; marker ADP_E2E_20260616004615_WOM_ACTIVE. Real browser opened easyTaskOperateView?id=8388157077549687, refreshed the easy report datagrid, selected marker active 8388157077549689, and invoked runtime button btn-report / 结束报工 from reportEvent(event). POST /msService/WOM/produceTask/produceTask/endEasyActive/8388157077549689 returned HTTP 200 with code=200, dealSuccessFlag=true, exeState.id=WOM_runState/finished. frontendClean PASS with no failed responses, request failures, console errors, or page errors. PostgreSQL verified wom_task_actives.is_finish=true with act_end_time, wom_proc_reports.is_finish=true, wom_acti_exelogs.run_state=finished, wom_wait_put_records.exe_state=finished with actual_end_time/proc_report_id/acti_exelog, output detail output_num/report_num=3, and wom_mat_outpt_records count=1. SQL 102 restored the easyTaskOperateView report button and live baseService was restarted to clear layout cache.",
+      "issues": [
+        "wom_acti_exelogs.act_end_time stayed empty while run_state became finished; keep as a production data-quality follow-up."
+      ],
+      "nextAction": "Keep easy activity report-work as a regression target and continue with input-detail report-work and inspection actions.",
+      "coverageTags": [
+        "report-work",
+        "material",
+        "execution",
         "persistence",
         "postgres"
       ]
@@ -150,20 +464,45 @@
       "id": "PROD-004",
       "domain": "指令",
       "name": "制造指令单生成或维护",
-      "route": "",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit; /msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/produceTask/prepareMakeTaskList",
       "operationType": "create",
       "requiresPersistence": true,
-      "routeSmokeStatus": "NOT_APPLICABLE",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "route-not-confirmed",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Manufacturing instruction tab has been observed in UI, but the exact write action and backend table are not mapped.",
-      "issues": [
-        "Need exact route, form fields, and persistence table."
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/produceTask/makeTaskEdit",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/save",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit",
+        "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2",
+        "POST /public/WOM/produceTask/produceTask/produceTaskCreated",
+        "GET /msService/WOM/produceTask/produceTask/importMainXls",
+        "GET /msService/WOM/produceTask/produceTask/downloadXls"
       ],
-      "nextAction": "Open manufacturing instruction entry, capture network calls, and add route smoke target if stable.",
+      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_DAILY_PLAN_CREATE",
+      "targetTables": [
+        "baseset_wf_custom_configs",
+        "wf_deployment",
+        "jbpm4_deployment",
+        "jbpm4_deployprop",
+        "jbpm4_lob",
+        "rbac_flow_permission",
+        "wom_produce_tasks",
+        "wom_produce_tasks_di",
+        "wom_task_actives",
+        "wom_task_qualities",
+        "baseset_batch_infos",
+        "baseset_batch_deals",
+        "wfm_task_pending",
+        "jbpm4_execution"
+      ],
+      "verificationSql": "select 'task', id, table_no, produce_batch_num, task_type, task_run_state, status, valid, product_id, formula_id, line_id, plan_num, table_info_id, deployment_id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%' order by id; select 'di', id, main_obj, staff, table_info_id, activity_name, process_key, process_version, outcome from public.wom_produce_tasks_di where main_obj in (select id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%') order by id; select 'active_count', count(*) from public.wom_task_actives where task_id=757036685264128; select 'quality_count', count(*) from public.wom_task_qualities where task_id=757036685264128; select 'batch_info', id, batch_num, material_id, is_available, source_type from public.baseset_batch_infos where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'batch_deal', id, batch_num, deal_table_id, amount, table_state from public.baseset_batch_deals where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'pending', id, table_info_id, process_key, process_id, activity_name, open_url from public.wfm_task_pending where table_info_id=757036685276416; select flow_key, activity_code, flow_version, flow_permission_type, type_id, unlimited_power from public.rbac_flow_permission where flow_key='makeTaskFlow'; select dbid_, id_, state_, procdefid_::text from public.jbpm4_execution where procdefid_::text like 'makeTaskFlow%' order by dbid_ desc limit 3;",
+      "evidence": "Marker ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6. After applying deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql, 162-wom-task-material-quality-tables.sql, 163-wom-make-task-flow-jbpm-definition.sql, and 164-wom-produce-task-deal-info-table.sql on test host 100.99.133.43, authenticated POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 returned HTTP 200 with code=200 and message 生成指令单成功. Request payload used existing product/formula/work-line samples and batchCode ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. PostgreSQL verified wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true/deployment_id=6579611732672512; wom_produce_tasks_di wrote TaskEvent_0il1mab/makeTaskFlow/1; active_count=1; quality_count=1; baseset_batch_infos and baseset_batch_deals were inserted for the marker batch; wfm_task_pending.id=757036687533312 points to makeTaskEdit; rbac_flow_permission rows exist for TaskEvent_0il1mab and TaskEvent_023irnk; jbpm4_execution has active-root makeTaskFlow-1. Real browser proof through public ingress http://222.88.185.146:18080 opened the generated makeTaskEdit pending URL with navigationStatus=200, title 制造指令单, and no console/page/request failures; DOM value proof shows edit_form_produceTask.produceBatchNum=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. Evidence JSON: /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json. makeTaskEdit route rendering is also verified for the generated pending URL, not only a blank direct edit page. Public /produceTaskCreated 已显式禁用并返回 code=400，visible list save/import buttons remain absent, so those are not counted as accepted creation channels.",
+      "issues": [
+        "The generated makeTaskEdit pending page loads and shows marker values, but the list still lacks a visible save/import/create entry.",
+        "Public /produceTaskCreated 已显式禁用，最新 probe 返回 code=400 且查库为 0，仍需产品确认是否恢复。",
+        "Need follow-up UI/product decision for manual maintenance path if users are expected to edit/save manufacturing orders from the list."
+      ],
+      "nextAction": "Use produceTaskCreated2 as the accepted daily-plan generation baseline. Separately recover visible manual save/import buttons or document that manufacturing instructions are generated upstream only.",
       "coverageTags": [
         "instruction",
         "persistence",
@@ -174,20 +513,28 @@
       "id": "PROD-005",
       "domain": "派工",
       "name": "工序、人员、班组派工",
-      "route": "",
+      "route": "/msService/WOM/produceTask/taskProcess/processUnitEdit; /msService/TeamInfo/team/team/teamList; /msService/TeamInfo/schedulePlan/schedulePlan/schedulePlanList",
       "operationType": "update",
       "requiresPersistence": true,
-      "routeSmokeStatus": "NOT_APPLICABLE",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "route-not-confirmed",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "TeamInfo pages are smoke-tested, but production dispatch action has not been mapped.",
-      "issues": [
-        "Need team, position, staff, and dispatch target record seed data."
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/taskProcess/processUnitEdit?id={processId}",
+        "POST /msService/WOM/produceTask/taskProcess/processUnitEdit/submit",
+        "GET /msService/TeamInfo/team/team/teamList",
+        "GET /msService/TeamInfo/schedulePlan/schedulePlan/schedulePlanList"
       ],
-      "nextAction": "Map dispatch button/action from production task page and verify assigned staff/team columns.",
+      "backendTraceStatus": "WOMTaskProcessController.processUnitEditView/submit -> WOMTaskProcessServiceImpl.afterSaveTaskProcess -> WOMProduceTaskServiceImpl.modifyTaskWorkUnitByProcess; TeamInfo deployed as team/schedule master-data module, not an independent WOM dispatch document.",
+      "targetTables": [
+        "WOM_TASK_PROCESSES",
+        "WOM_WAIT_PUT_RECORDS",
+        "TEAM_SCHEDULE_PLANS",
+        "HM_FACTORY_MODELS"
+      ],
+      "verificationSql": "select p.id, p.equipment_id, m.code, m.name from public.wom_task_processes p left join public.hm_factory_models m on m.id=p.equipment_id where p.id=8388189129735082; select id, record_type, euq_id, equ_code, equ_name, valid from public.wom_wait_put_records where task_process_id=8388189129735082 or task_id=8388189129735081 order by record_type, id;",
+      "evidence": "2026-06-20 remote/browser proof: SQL 159 restored WOM_1.0.0_produceTask_processUnitEdit runtime_extra_view.view_json and runtime_view.extra_view/ec_env linkage, then baseService was restarted to clear layout cache. Real browser used http://222.88.185.146:18080, logged in as admin, opened /msService/WOM/produceTask/taskProcess/processUnitEdit?id=8388189129735082; layoutJson/editStates/upload-list all returned 200 with no console/page/request failures. POST /msService/WOM/produceTask/taskProcess/processUnitEdit/submit?id=8388189129735082 returned HTTP 200/code=200/dealSuccessFlag=true. PostgreSQL on 100.99.133.43 verified marker ADP_E2E_20260619174817_WOM_ACTIVE_WU saved to wom_task_processes.equipment_id and synchronized wom_wait_put_records process/workOrder rows euq_id/equ_code/equ_name. Evidence: /tmp/adp-wom-process-unit-persistence-current.json. TeamInfo schedule-plan master-data save remains independently PASS with marker ADP_E2E_20260619030900_TEAMINFO_SCHEDULE_PLAN. No independent WOM personnel/team dispatch document has been found in runtime metadata; if a later business package adds one, add a separate acceptance case instead of reopening this work-unit persistence proof.",
+      "issues": [],
+      "nextAction": "If a later business package adds an independent WOM personnel/team dispatch document or menu, add a new marker-based frontend/API/PostgreSQL acceptance case for that entry.",
       "coverageTags": [
         "dispatch",
         "master-data",
@@ -210,7 +557,7 @@
       "backendTraceStatus": "pending-table-audit",
       "targetTables": [],
       "verificationSql": "",
-      "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
+      "evidence": "2026-06-20 recheck found workPermitList-query had been failing after runtime config recovery because runtime_extra_view.config/full_config was NULL and historical wts_work_permits.payload rows contained numeric strings such as 202062. SQL 165-wts-workpermit-list-runtime-compat.sql restores minimal LISTPT config/full_config and normalizes payload into {\"workTickets\":{\"fireWork\":ticketId}}. Authenticated POST /msService/WTS/workPermit/workPermit/workPermitList-query returned HTTP 200/code=200/message=操作成功/total=8. Browser export probe also opened WTS work permit list with nav=200 and no failed responses/console/page errors.",
       "issues": [],
       "nextAction": "Capture list query endpoint and map retirement data tables.",
       "coverageTags": [
@@ -222,20 +569,44 @@
       "id": "PROD-007",
       "domain": "退料",
       "name": "退料申请提交、审核或回写库存",
-      "route": "/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList",
-      "operationType": "create",
+      "route": "/msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList; /msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList; /msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList; /msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
+      "operationType": "create-update",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No return-material write action has been executed yet.",
-      "issues": [
-        "Need material/batch seed data and inventory table mapping."
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList-pending",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectList-pending",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/batchRejectList-pending",
+        "POST /msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList-query",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit/save",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit/submit?id=756655464850688",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectEdit/save",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectEdit/submit?id=756670413997312",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/materiaEditableEdit/submit?id=756670413997312",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit/save",
+        "POST /msService/WOM/rejectMaterilal/rejectMaterial/batchRejectEdit/submit?id=756677581907200"
       ],
-      "nextAction": "Submit marker return-material action and verify document plus inventory/status fields.",
+      "backendTraceStatus": "main-reject-material-flows-accepted",
+      "targetTables": [
+        "wom_reject_materials",
+        "wom_reject_materials_di",
+        "wom_reject_materials_sv",
+        "wom_rejct_matal_parts",
+        "wfm_task_pending",
+        "hm_factory_materias",
+        "wom_bat_materil_parts",
+        "wom_batch_materils",
+        "wom_batch_mat_needs"
+      ],
+      "verificationSql": "prePareReject: select id,version,valid,status,effect_time,table_info_id,table_no,process_key,process_version from public.wom_reject_materials where id=756655464850688; select count(*) from public.wfm_task_pending where table_info_id=756655464875264 or model_id=756655464850688 or table_no='rejectMaterilal_20260619_004'; materiaReject: select id,version,valid,status,process_key,reject_type from public.wom_reject_materials where id=756670413997312; select id,head_id,factory_materia_id,reject_num from public.wom_rejct_matal_parts where head_id=756670413997312; select id,availi_quantity,charparama from public.hm_factory_materias where id=1781809163401314; batchReject: select id,version,valid,status,process_key,reject_type from public.wom_reject_materials where id=756677581907200; select id,head_id,batching_part_id,material_batch_num,reject_num from public.wom_rejct_matal_parts where head_id=756677581907200; select id,return_num,charparama from public.wom_batch_mat_needs where id=1781810918144454; select id,return_num,charparama from public.wom_batch_materils where id=1781810918144455; select id,return_num,retirement_state,charparama from public.wom_bat_materil_parts where id=1781810918144456;",
+      "evidence": "The original list/query smoke remains PASS for materiaRejectList, prePareRejectList, batchRejectList, and batchRejectPrtList. Subsequent persistence acceptance already proved the main reject-material write flows on 100.99.133.43. prePareReject marker ADP_E2E_20260618175855_WOM_REJECT_MATERIAL saved and submitted with workFlowVar.outcomeMap SequenceFlow_1nu8kl7/生效; PostgreSQL verified wom_reject_materials id 756655464850688 moved to status=99, effect_time set, pending_count=0, DI outcome persisted, and JBPM history ended at end_xwzcjr1. materiaReject marker ADP_E2E_20260618185904_WOM_REJECT_MATERIAL saved, submitted to receive, and receive-effective submitted; PostgreSQL verified wom_reject_materials id 756670413997312 status=99, wom_rejct_matal_parts reject_num=2.000000, DI outcomes SequenceFlow_1ubtbie/提交 and SequenceFlow_0igvfiq/生效, and hm_factory_materias id 1781809163401314 availi_quantity changed from 10.00 to 8.00. batchReject marker ADP_E2E_20260618192824_WOM_REJECT_MATERIAL saved and submitted effective; PostgreSQL verified wom_reject_materials id 756677581907200 status=99, wom_rejct_matal_parts reject_num=2.000000, DI SequenceFlow_1dghow0/生效, and wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num changed from 0 to 2 with retirement_state WOM_retirementState/returned. Evidence files: /tmp/adp-wom-reject-material-persistence-20260618175855/wom-reject-material-persistence-results.json, /tmp/adp-wom-reject-material-persistence-20260618185904/wom-reject-material-persistence-results.json, /tmp/adp-wom-reject-material-persistence-20260618192824/wom-reject-material-persistence-results.json.",
+      "issues": [
+        "List pages still do not expose a visible create button in menu metadata; accepted proof uses the recovered edit routes in authenticated real browser/page context.",
+        "This PASS covers prePareReject, materiaReject, and batchReject main flows plus their PostgreSQL effects. Final material-service stock-in/inventory paths remain tracked separately under PROD-022.",
+        "A submit payload without workFlowVar.outcomeMap can return HTTP 200 while leaving status=88; database verification remains mandatory."
+      ],
+      "nextAction": "Keep material-service stock-in and final inventory ledger acceptance under PROD-022. If a later business package introduces additional reject variants beyond prePareReject/materiaReject/batchReject, add a dedicated marker case rather than reopening this accepted main-flow item.",
       "coverageTags": [
         "return-material",
         "material",
@@ -274,19 +645,23 @@
       "operationType": "import",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "GET /msService/RM/formula/formula/downloadXls",
-        "POST /msService/RM/formula/formula/importMainXls"
+        "POST /inter-api/file-server/v1/file/upload/file",
+        "GET /msService/RM/formula/formula/importMainXls?filePath=temp%2F1781834329399%2Frm-import-ui.xls&viewCode=RM_1.0.0_formula_batchFormulaList&isReplace=false&isIgnore=false",
+        "GET /msService/RM/formula/formula/downloadXls"
       ],
-      "backendTraceStatus": "static-page-endpoints-known",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Static RM patch exposes downloadXls and importMainXls endpoints, but no real file import has been executed.",
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "rm_formulas"
+      ],
+      "verificationSql": "select id, table_no, formual_code, formula_name, batch_formulaid, batch_formula_code, formula_edtion, nor_size, description, valid, status from public.rm_formulas where formual_code ilike '%ADP_E2E_20260619085807_RM_UI_IMPORT%' or formula_name ilike '%ADP_E2E_20260619085807_RM_UI_IMPORT%' or description ilike '%ADP_E2E_20260619085807_RM_UI_IMPORT%' order by id desc;",
+      "evidence": "Recovered batchFormulaList runtime page as LIST/list.js and restored downloadXls/importMainXls entry. Real browser on same-environment public ingress http://222.88.185.146:18080 showed 下载模板/导入Excel, clicked import, selected /tmp/adp-rm-ui-import-20260619085807/rm-import-ui.xls, uploaded temp/1781834329399/rm-import-ui.xls, and importMainXls returned success|导入成功！共导入1行记录！. PostgreSQL on 100.99.133.43 verified rm_formulas id 756773410223360/table_no formula_20260619_005/formual_code ADP_E2E_20260619085807_RM_UI_IMPORT_FCODE/formula_name ADP_E2E_20260619085807_RM_UI_IMPORT_FNAME/status 99. Browser evidence: /tmp/adp-rm-ui-browser-import-public-staticpatched-20260619095601/result.json.",
       "issues": [
-        "Need real template, upload payload, and target table mapping."
+        "Tailscale URL http://100.99.133.43:18080 still has intermittent large static bundle transfer instability; browser proof used the same environment public ingress while SSH/DB proof used 100.99.133.43.",
+        "One transient i18n-value.js 503/ERR_ABORTED occurred during the successful run and recovered immediately to HTTP 200; not blocking this import acceptance."
       ],
-      "nextAction": "Download template, import marker row, verify recipe rows in PostgreSQL.",
+      "nextAction": "Keep PROD-010 separate for visible manual add/edit maintenance; continue export coverage under PROD-023.",
       "coverageTags": [
         "recipe",
         "import-export",
@@ -297,27 +672,77 @@
     {
       "id": "PROD-010",
       "domain": "配方",
-      "name": "批量配方编辑和删除",
+      "name": "批量配方可见显式编辑入口",
       "route": "/msService/RM/formula/formula/batchFormulaList",
-      "operationType": "update-delete",
+      "operationType": "visible-ui-update",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
+      "acceptanceStatus": "BLOCKED",
       "apiEndpoints": [
-        "POST /msService/RM/formula/formula/delete"
+        "GET /msService/RM/formula/formula/batchFormulaList",
+        "GET /msService/RM/formula/formula/batchFormulaEdit?entityCode=RM_1.0.0_formula",
+        "GET /msService/RM/formula/formula/batchFormulaView?entityCode=RM_1.0.0_formula&id=8991071330917339",
+        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaList",
+        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaEdit",
+        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaView",
+        "runtime_button batchFormula rows = 0",
+        "rbac_menuoperate exposes query only for batchFormulaList",
+        "batchFormulaList runtime buttons are 下载模板/导入Excel only",
+        "manual edit is pushed by external Batch ActiveX/WebSocket via custom batchEdit.html",
+        "POST /msService/RM/formula/formula/batch/sync accepted separately under PROD-043",
+        "POST /msService/RM/formula/formula/batch/delete accepted separately under PROD-043"
       ],
-      "backendTraceStatus": "static-page-endpoints-known",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Static RM patch exposes delete endpoint, but no marker recipe has been created and deleted.",
+      "backendTraceStatus": "external-batch-client-edit-push-required",
+      "targetTables": [
+        "rm_formulas",
+        "rm_formula_qualities",
+        "rm_formula_types"
+      ],
+      "verificationSql": "select 'runtime_button_count', count(*) from public.runtime_button where view_code ilike '%batchFormula%'; select 'rbac', code, coalesce(url,''), coalesce(action_url,''), coalesce(view_code,'') from public.rbac_menuoperate where view_code ilike '%batchFormula%' or code ilike '%batchFormula%' order by code; select 'extra_buttons_has_add', position('新增' in convert_from(lo_get(view_json::oid), 'UTF8')), position('batchFormulaEdit' in convert_from(lo_get(view_json::oid), 'UTF8')) from public.runtime_extra_view where code='RM_1.0.0_formula_batchFormulaList';",
+      "evidence": "SQL 160 restored runtime JSON for batchFormulaEdit and batchFormulaView. After applying it on 100.99.133.43 and restarting baseService, PostgreSQL showed both runtime_extra_view.view_json values as OID. Real browser on same-environment public ingress http://222.88.185.146:18080 opened batchFormulaEdit and batchFormulaView with nav=200, layoutJson HTTP 200/code=200, and console/page/request failure counts all 0. On 2026-06-20 the new test address 100.99.133.43 was rechecked: runtime_button has 0 batchFormula rows; rbac_menuoperate only exposes query; parsed batchFormulaList runtime JSON contains only 下载模板 and 导入Excel buttons; authenticated Playwright opened batchFormulaList?system=formulaEnableFlw with navigationStatus=200/layoutJson=200 and no console/request failures. Screenshot /tmp/adp-rm-batchFormulaList-button-probe-1781899978217/batchFormulaList.png. Source batchEdit.html and product manual show manual edit depends on IE11 ActiveX, external Batch server, and WebSocket push to batchFormulaEdit, so the remaining gap is external Batch-client integration, not PostgreSQL mapping.",
       "issues": [
-        "Need marker recipe creation path before delete can be safely tested."
+        "Current test environment has no external Batch client/IE ActiveX path to trigger the manual edit WebSocket push.",
+        "batchFormulaList intentionally exposes 下载模板/导入Excel only in current runtime metadata; adding a fake platform edit button would not represent the real product workflow.",
+        "batch/sync create and batch/delete cleanup are already accepted under PROD-043 and do not replace external-client manual edit acceptance."
       ],
-      "nextAction": "Create marker recipe, edit it, delete it, and verify soft/hard delete semantics.",
+      "nextAction": "Provision or connect the external Batch client/server path described in product documentation, trigger a real Batch edit push that opens batchFormulaEdit through WebSocket, then save/submit a marker formula and verify rm_formulas/rm_formula_processes/rm_process_actives in PostgreSQL.",
       "coverageTags": [
         "recipe",
         "persistence",
         "postgres"
+      ]
+    },
+    {
+      "id": "PROD-043",
+      "domain": "配方",
+      "name": "批控配方同步新增和删除清理",
+      "route": "/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+      "operationType": "create-delete-soft-delete",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/RM/formula/formula/batch/sync",
+        "POST /msService/RM/formula/formula/batch/delete?batchFormulaId=1781821964465576"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "rm_formulas",
+        "rm_formulas_di",
+        "rm_process_actives"
+      ],
+      "verificationSql": "select id,batch_formulaid,batch_status,formula_name,formula_edtion,batch_server_id,product_id,valid,status,coalesce(description,'') from public.rm_formulas where batch_formulaid='1781821964465576'; select id,main_obj,activity_name,outcome,outcome_des,process_key,process_version,user_id,table_info_id from public.rm_formulas_di where main_obj=756722825766144 order by id; select id,batch_formulaid,valid,status,coalesce(description,'') from public.rm_formulas where batch_formulaid='1781821964465576'; select count(*) from public.rm_process_actives where formula_id in (select id from public.rm_formulas where batch_formulaid='1781821964465576' and valid = true);",
+      "evidence": "Marker ADP_E2E_20260619063244_RMBATCH_RECHECK. Browser context on http://100.99.133.43:18080 opened /msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw with navigation 200, then submitted batch/sync with mqValue.ID=1781821964465576 and formula name ADP_E2E_20260619063244_RMBATCH_RECHECK_FORMULA. API returned HTTP 200/data.success=true and PostgreSQL verified rm_formulas id 756722825766144, batch_formulaid 1781821964465576, valid=true/status=88. The same browser context then submitted batch/delete, API returned HTTP 200/dealSuccessFlag=true, and PostgreSQL verified the same formula valid=false/status=0 with active rm_process_actives count=0. Console/page/request failures were 0. Evidence: /tmp/adp-rm-batch-sync-persistence-20260618223244/rm-batch-sync-persistence-results.json.",
+      "issues": [
+        "This accepts the batch integration sync/delete path, not the missing visible manual edit button workflow.",
+        "Excel import is now accepted separately under PROD-009."
+      ],
+      "nextAction": "Keep PROD-010 for visible manual edit entry; use PROD-009 for import and this PASS only as evidence that batch formula integration create/delete writes are functional.",
+      "coverageTags": [
+        "recipe",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
       ]
     },
     {
@@ -350,16 +775,31 @@
       "operationType": "create-update-delete",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No craftGraph write action has been executed yet.",
-      "issues": [
-        "Need target table, unique code, and delete semantics."
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList",
+        "POST /msService/craftGraph/basicInfo/basicInfo/basicInfoList-query",
+        "GET /msService/craftGraph/basicInfo/basicInfo/basicInfoEdit",
+        "GET /msService/craftGraph/basicInfo/basicInfo/editStates?viewCode=craftGraph_1.0_basicInfo_basicInfoEdit",
+        "GET /msService/baseService/view/layoutJson?viewCode=craftGraph_1.0_basicInfo_basicInfoEdit&isEs5=true",
+        "POST /msService/craftGraph/basicInfo/basicInfo/basicInfoEdit/submit",
+        "POST /msService/craftGraph/basicInfo/basicInfo/delete",
+        "POST /msService/BaseSet/material/material/materialRef-query"
       ],
-      "nextAction": "Create marker process record, edit/delete it, and verify PostgreSQL rows.",
+      "backendTraceStatus": "visible-create-update-delete-pass",
+      "targetTables": [
+        "craft_basic_infos",
+        "craft_tree_structures",
+        "baseset_materials"
+      ],
+      "verificationSql": "select id, craft_code, craft_name, version_info, remark, product, valid, status, version from craft_basic_infos where craft_code='ADP_E2E_20260619071722_CRAFTGRAPH'; select tree_node_id, valid, status, version from craft_tree_structures where tree_node_id::text='756851757360384';",
+      "evidence": "Visible create/update/delete PASS. 148-runtime-visible-business-buttons.sql restored add/delete, 150-craftgraph-visible-modify-button.sql restored modify, and baseService was restarted to clear layout cache. Existing marker ADP_E2E_20260619064104_CRAFT_PUREUI proved product reference pure UI selection, visible save, and visible delete. New marker ADP_E2E_20260619071722_CRAFTGRAPH used /tmp/adp-craftgraph-persistence-current.json: public browser opened /basicInfoList, saw 新增/修改/删除, created row id 756851757360384, selected the visible marker row, clicked 修改, opened basicInfoEdit?id=756851757360384, saved ADP_E2E_20260619071722_CRAFTGRAPH_UPDATED_NAME / V2 / updated ADP_E2E_20260619071722_CRAFTGRAPH, received POST /basicInfoEdit/submit?id=756851757360384 response operate=edit/dealSuccessFlag=true, and PostgreSQL verified craft_basic_infos 756851757360384|ADP_E2E_20260619071722_CRAFTGRAPH|ADP_E2E_20260619071722_CRAFTGRAPH_UPDATED_NAME|V2|updated ADP_E2E_20260619071722_CRAFTGRAPH|8991071330917338|true|99|1 plus craft_tree_structures 756851757360384|true||1. Screenshots live under /tmp/adp-craftgraph-persistence-20260619071722.",
+      "issues": [
+        "PASS covers visible create/save, visible edit/update, visible delete, product reference selection, and PostgreSQL verification.",
+        "Edit modal right side is visually clipped; track as display polish, not persistence blocker.",
+        "craft_tree_structures remains valid after main row soft delete; business confirmation still needed."
+      ],
+      "nextAction": "Confirm whether craft_tree_structures should soft-delete with craft_basic_infos and polish the clipped edit modal layout if product wants UI cleanup.",
       "coverageTags": [
         "process",
         "persistence",
@@ -406,7 +846,7 @@
       "verificationSql": "",
       "evidence": "Browser page smoke and API/layout smoke passed without visible, network, console, page, or request errors.",
       "issues": [],
-      "nextAction": "Map WTS list query and workflow tables.",
+      "nextAction": "Keep WTS list query in regression; if product confirms an independent cancel/delete entry, add a separate action case.",
       "coverageTags": [
         "work-permit"
       ]
@@ -419,21 +859,56 @@
       "operationType": "workflow",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No work-permit workflow action has been executed yet.",
-      "issues": [
-        "Need approver, flow definition, safety work data, and todo linkage."
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WTS/workPermit/workPermit/workPermitList",
+        "GET /msService/WTS/workPermit/workPermit/workPermitEdit",
+        "POST /msService/WTS/workPermit/workPermit/permitUltraSubmit",
+        "POST /msService/WTS/workTicket/workTicket/fireworkEdit/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkGas/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkRisk/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkApproval/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkDeal/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkClose/submit?id=6599234028094016",
+        "POST /msService/WTS/workTicket/workTicket/fireworkDeal/submit?id=6599277438911040 (WTS_processing/stop)",
+        "POST /msService/WTS/workTicket/workTicket/fireworkDeal/submit?id=6599277438911040 (TaskEvent_02aitou 终止通知)",
+        "POST /msService/WTS/workTicket/workTicket/fireworkDeal/submit?id=6599277438911040 (TaskEvent_16rrw0a 终止通知)"
       ],
-      "nextAction": "Create marker work permit and verify permit table plus workflow/todo state.",
+      "backendTraceStatus": "full-firework-normal-close-validation-and-stop-persistence-pass",
+      "targetTables": [
+        "wts_work_permits",
+        "wts_work_tickets",
+        "base_department",
+        "base_staff",
+        "base_systemcode",
+        "wts_work_tickets_di",
+        "wfm_task_pending",
+        "wf_deployment",
+        "wf_task",
+        "wf_transition",
+        "jbpm4_deployment",
+        "jbpm4_deployprop",
+        "jbpm4_lob",
+        "rbac_flow_permission",
+        "wf_deal_info",
+        "jbpm4_hist_actinst",
+        "runtime_extra_view",
+        "runtime_view",
+        "sys_code"
+      ],
+      "verificationSql": "Normal close: SELECT id, version, valid, status, table_info_id, table_no, work_ticket_no, ticket_no, job_status, process_method, check_results_value FROM public.wts_work_tickets WHERE id = 6599234028094016; SELECT count(*) FROM public.wfm_task_pending WHERE table_info_id = 6599234030682688 AND coalesce(task_status, 88) = 88; Stop: SELECT id, version, valid, status, table_info_id, table_no, work_ticket_no, ticket_no, job_status, process_method, check_results_value FROM public.wts_work_tickets WHERE id = 6599277438911040; SELECT count(*) FROM public.wfm_task_pending WHERE table_info_id = 6599277439271488 AND coalesce(task_status, 88) = 88;",
+      "evidence": "Marker ADP_E2E_20260619142344_WTS_FIREWORK. Public browser E2E on http://222.88.185.146:18080 (SSH/DB/log verification on 100.99.133.43) logged in as admin/123456, created a WTS work permit with fireWork child ticket, submitted fireworkEdit, fireworkGas, fireworkRisk, three fireworkApproval nodes, verified direct fireworkDeal submit without processMethod returns HTTP 200 with data.success=false/data.code=400/message=请选择作业票处理方式 and no dirty DB advance, then submitted fireworkDeal with processMethod=WTS_processing/close and fireworkClose effective. Final PostgreSQL state: wts_work_tickets.id=6599234028094016/version=3/valid=true/status=99/table_no=workTicket_20260619_006/work_ticket_no=ADP_E2E_20260619142344_WTS_FIREWORK_FIRE/ticket_no=ADP_E2E_20260619142344_WTS_FIREWORK/job_status=WTS_jobStatus/normalClose/process_method=WTS_processing/close/check_results_value=ADP_E2E_20260619142344_WTS_FIREWORK_CLOSE_ACCEPT; active pending count=0. Evidence: /tmp/adp-wts-firework-persistence-20260619142344/wts-firework-persistence-results.json. Runtime backup: WTSs-1.0.0.jar.bak-wts-validation-20260619221829. Stop branch supplement: marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP used public browser E2E and SSH/DB/log proof on 100.99.133.43. It completed fireworkEdit/fireworkGas/fireworkRisk/fireworkApproval, submitted fireworkDeal with processMethod=WTS_processing/stop, then completed TaskEvent_02aitou and TaskEvent_16rrw0a stop notifications. PostgreSQL verified wts_work_tickets.id=6599277438911040 status=99 job_status=WTS_jobStatus/errorClose process_method=WTS_processing/stop and active pending count=0. Evidence /tmp/adp-wts-firework-persistence-20260619144549/wts-firework-persistence-results.json.",
+      "issues": [
+        "Direct browser ingress on 100.99.133.43:18080 is still unstable for large WTS low-code pages; use public ingress for browser E2E and 100.99.133.43 for SSH/DB/log proof until fixed.",
+        "WTS_processing/stop termination branch is now PASS. A separate product cancel/delete/void entry, if distinct from stop termination, still needs confirmation before it can be claimed."
+      ],
+      "nextAction": "Confirm whether product has a separate cancel/delete/void entry distinct from WTS_processing/stop; otherwise continue with remaining production blockers such as bad quantity and inventory/inbound write-back.",
       "coverageTags": [
         "work-permit",
         "status-flow",
         "persistence",
-        "postgres"
+        "postgres",
+        "stop-termination"
       ]
     },
     {
@@ -461,26 +936,38 @@
     {
       "id": "PROD-017",
       "domain": "作业计划",
-      "name": "作业计划新建、调整、取消",
+      "name": "作业计划新建、调整、作废、审批生效",
       "route": "/msService/workAppointment/workPlan/workTicketPlan/workPlanList",
       "operationType": "create-update-status",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No work plan write action has been executed yet.",
-      "issues": [
-        "Need plan target object, schedule fields, and cancel status mapping."
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/workAppointment/workPlan/workPlan/workPlanUltraSubmit",
+        "POST /msService/workAppointment/workPlan/workTicketPlan/workPlanEdit/submit",
+        "POST /msService/workAppointment/workPlan/workTicketPlan/workPlanApprove/submit",
+        "GET /msService/workAppointment/baseService/workbench/upload-list",
+        "POST /msService/workAppointment/workPlan/workTicketPlan/delete"
       ],
-      "nextAction": "Create marker work plan and verify scheduling/status columns.",
+      "backendTraceStatus": "WorkPlanViewController.workPlanUltraSubmit -> WorkAppointmentWorkTicketPlanController.submit -> WorkAppointmentWorkTicketPlanServiceImpl.submit -> TaskServiceImpl.takeAndComplete -> ticketPlan workflow; upload-list compatibility patched and verified",
+      "targetTables": [
+        "waps_work_ticket_plans",
+        "waps_work_ticket_plans_di",
+        "waps_work_ticket_plans_sv",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "waps_work_actions"
+      ],
+      "verificationSql": "SELECT id, version, valid, status, table_info_id, table_no, plan_description FROM public.waps_work_ticket_plans WHERE id IN (6599460969235136, 6599477097022144) ORDER BY id; SELECT table_info_id, count(*) FROM public.wfm_task_pending WHERE table_info_id IN (6599460970545856, 6599477097054912) AND coalesce(task_status, 88) = 88 GROUP BY table_info_id; SELECT table_info_id, count(*) FROM public.waps_work_ticket_plans_di WHERE table_info_id IN (6599460970545856, 6599477097054912) GROUP BY table_info_id; SELECT activity_name, outcome, outcome_des, outcome_des_zh_cn FROM public.wf_deal_info WHERE table_info_id IN (6599460970545856, 6599477097054912) ORDER BY table_info_id, id;",
+      "evidence": "Visible create/save/delete remains PASS from marker ADP_E2E_20260619091757_WAPS_VISIBLE_FORM_SAVE. Additional WorkAppointment E2E on 2026-06-19 used public browser ingress for real pages and 100.99.133.43 PostgreSQL for DB proof. Marker ADP_E2E_20260619161920_WAPS_WORKPLAN created id=6599460969235136, adjusted to ADP_E2E_20260619161920_WAPS_WORKPLAN_ADJUSTED with version=2/pending_count=1/di_count=2/sv_count=1, then 作废 set status=0/pending_count=0/di_count=3 and wf_deal_info contains SequenceFlow_1wa5f0c/作废/INVALID. Marker ADP_E2E_20260619162733_WAPS_WORKPLAN_APPROVE created id=6599477097022144 and completed four workflow steps through 生效; PostgreSQL final status=99/pending_count=0/di_count=5. upload-list edit/approve returned HTTP 200 after deploy/docker/scripts/patch-workappointment-upload-list-runtime-compat.py. Evidence: /tmp/adp-waps-workplan-persistence-20260619161920/waps-workplan-persistence-results.json and /tmp/adp-waps-workplan-persistence-20260619162733/waps-workplan-persistence-results.json.",
+      "issues": [],
+      "nextAction": "If the product has a separate standalone cancel/delete entry outside this ticketPlan 作废 path, confirm the entry and run it as a separate case; current create, adjust, 作废, approval-to-effective main workflow is PASS.",
       "coverageTags": [
         "execution",
         "status-flow",
         "persistence",
-        "postgres"
+        "postgres",
+        "work-permit"
       ]
     },
     {
@@ -506,23 +993,317 @@
       ]
     },
     {
+      "id": "PROD-031",
+      "domain": "质量联动",
+      "name": "制造请检生成 QCS 请检单",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/QCS/inspect/inspect/manuInspectList",
+      "operationType": "create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/createManuInspect",
+        "GET /msService/QCS/inspect/inspect/manuInspectList"
+      ],
+      "backendTraceStatus": "frontend-browser-controller-service-dao-postgres-accepted",
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos",
+        "qcs_inspects",
+        "qcs_inspect_stds",
+        "rm_formula_qualities",
+        "limsba_quality_stds",
+        "limsba_std_versions",
+        "limsba_analy_prod_stds",
+        "wf_custom_config",
+        "wf_deployment"
+      ],
+      "verificationSql": "SELECT 'task', id, table_no, quality_std_id, check_state, check_times, inpect_deal_id FROM public.wom_produce_tasks WHERE id = 8990058608766755; SELECT 'wait', id, task_id, quality_std_id, check_state, check_times FROM public.wom_wait_put_records WHERE task_id = 8990058608766755; SELECT 'exelog', id, task_id, quality_std_id, check_state, check_times, inpect_deal_id FROM public.wom_produce_task_exelog WHERE task_id = 8990058608766755; SELECT 'batch', id, batch_code, check_state FROM public.baseset_batch_infos WHERE batch_code = 'ADP_E2E_20260616050127_WOM_MANU_INSPECT_BATCH'; SELECT 'inspect', id, source_table_id, table_no, batch_code, status FROM public.qcs_inspects WHERE id = 755756625425664; SELECT count(*) FROM public.qcs_inspect_stds WHERE head_id = 755756625425664;",
+      "evidence": "Report: /tmp/adp-wom-manu-inspect-persistence-acceptance-rerun.json; real Playwright frontend logged into http://10.11.100.17:18080, opened WOM makeTaskList, selected marker task ADP_E2E_20260616050127_WOM_MANU_INSPECT_TASK_TN, triggered the restored 请检 action, and captured POST /msService/WOM/produceTask/produceTask/createManuInspect payload taskId=8990058608766755. Response was HTTP 200 with code=200 and data.success=true. The script then opened QCS manuInspectList and confirmed the marker batch was visible. PostgreSQL verified task/wait/exelog check_state=待检 and check_times=1, qcs_inspects id=755756625425664 table_no=manuInspect_20260616_005 status=88, and qcs_inspect_stds count=1. Earlier accepted report /tmp/adp-wom-manu-inspect-persistence-acceptance.json also passed with marker ADP_E2E_20260616044904_WOM_MANU_INSPECT.",
+      "issues": [],
+      "nextAction": "Keep createManuInspect as a regression target; continue QCS inspection-result entry, quality judgement, bad-quantity, checkout-bill, and inventory write-back acceptance separately.",
+      "coverageTags": [
+        "quality",
+        "work-order",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-032",
+      "domain": "质量联动",
+      "name": "QCS 请检单提交到生效并生成报告",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "operationType": "status-change-create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/QCS/inspect/inspect/bulkSubmit"
+      ],
+      "backendTraceStatus": "frontend-equivalent-request-controller-service-dao-postgres-accepted",
+      "targetTables": [
+        "qcs_inspects",
+        "qcs_inspects_di",
+        "wfm_task_pending",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "limsba_std_ver_coms",
+        "limsba_std_ver_grades",
+        "limsba_spec_limits",
+        "baseset_wf_custom_configs",
+        "wf_task",
+        "wf_transition",
+        "rbac_flow_permission"
+      ],
+      "verificationSql": "select id, table_no, batch_code, status, need_lab, refable, check_state, source_table_id, prod_id from public.qcs_inspects where id = 755811472454912; select id, main_obj, activity_name, outcome_des from public.qcs_inspects_di where main_obj = 755811472454912 order by id; select id, table_no, batch_code, status, inspect_id, prod_id, std_ver_id, process_key, process_version from public.qcs_inspect_reports where inspect_id = 755811472454912 or batch_code = 'ADP_E2E_20260616084434_WOM_MANU_INSPECT_BATCH'; select id, report_id, std_ver_com_id, report_name, unit_name, valid from public.qcs_report_coms where report_id = 755811962860800; select id, activity_name, table_info_id, table_no, process_key, open_url from public.wfm_task_pending where table_info_id = 755811962864896; select count(*) from public.limsba_std_ver_grades where std_ver_id = 8990059947475305; select id, std_ver_com_id, standard_grade, disp_value, valid from public.limsba_spec_limits where std_ver_com_id = 8990059947475315;",
+      "evidence": "Report: /tmp/adp-wom-manu-inspect-persistence-acceptance-after-qcs-report-fix.json. Real Playwright frontend created marker ADP_E2E_20260616084434_WOM_MANU_INSPECT via POST /msService/WOM/produceTask/produceTask/createManuInspect payload taskId=8990059947475309, response HTTP 200 with data.success=true. QCS bulkSubmit then ran twice in the same accepted frontend/API context: pendingIds=755811473200384&activityName=TaskEvent_1b1kzjf and pendingIds=755811812603136&activityName=TaskEvent_1lwqfuu, both HTTP 200. PostgreSQL verified qcs_inspects id=755811472454912 status=99 refable=true check_state=QCS_checkState/reporting; qcs_inspects_di wrote save/audit/effective records; qcs_inspect_reports id=755811962860800 table_no=manuReport_20260616_002 was created; qcs_report_coms id=755811964515584 was created; wfm_task_pending id=755811963663616 was created for manuInspectReportWorkFlow edit task; limsba_std_ver_grades count=2 and limsba_spec_limits count=1. LIMS logs still include a syncEntity NullPointerException and notification deployment warning, but the report transaction committed.",
+      "issues": [
+        "LIMS still logs NullPointerException at QCSInspectServiceImpl.syncEntity(QCSInspectServiceImpl.java:2618), but latest verification shows report persistence committed.",
+        "Generated report edit page render is accepted under PROD-033, and report result field save is accepted under PROD-034; quality judgement/write-back remains blocked under PROD-019."
+      ],
+      "nextAction": "Keep report generation as a regression target; continue quality judgement, bad-quantity, production status, and inventory write-back acceptance under PROD-019.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-033",
+      "domain": "质量联动",
+      "name": "QCS 检验报告编辑页打开",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operationType": "render",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportEdit&tableInfoId=755811962864896&isEs5=true",
+        "GET /msService/QCS/inspectReport/inspectReport/editStates",
+        "GET /msService/QCS/inspectReport/inspectReport/data/755811962860800"
+      ],
+      "backendTraceStatus": "frontend-render-pass-after-runtime-metadata-fixed",
+      "targetTables": [
+        "runtime_extra_view",
+        "runtime_view",
+        "runtime_data_grid",
+        "qcs_inspect_reports_sv"
+      ],
+      "verificationSql": "select code, view_code, view_json is not null as has_view_json, case when view_json is null then 0 else length(lo_get(view_json)) end as view_json_bytes, position('layoutDatagrid' in convert_from(lo_get(view_json), 'UTF8')) > 0 as has_datagrid, position('QCS_5.0.0.0_inspectReport_manuInspReportEditdg1591145511105' in convert_from(lo_get(view_json), 'UTF8')) > 0 as has_target_dg from public.runtime_extra_view where code = 'QCS_5.0.0.0_inspectReport_manuInspReportEdit'; select * from public.qcs_inspect_reports_sv where main_obj = 755811962860800;",
+      "evidence": "2026-06-18: SQL 119 restored runtime_extra_view.view_json for QCS_5.0.0.0_inspectReport_manuInspReportEdit. PostgreSQL verified has_view_json=true, view_json_bytes=79795, has_datagrid=true, has_target_dg=true. After baseService restart, layoutJson, editStates, and data/755811962860800?pendingId=755811963663616 all returned HTTP 200/code 200/message 操作成功. Nginx gzip/gzip_static/gzip_proxied was enabled and core static .gz files were generated. Real Playwright browser against http://222.88.185.146:18080 rendered the report edit page in 83.878s with domcontentloaded=true, visibleReady=true, appReady=true, ReactAPI=true, inputCount=12, 保存 button visible, and zero failed responses/request failures/console errors/page errors. Evidence: /tmp/adp-qcs-report-edit-render-public-20260618031023/qcs-report-edit-render.json. Tailscale address http://100.99.133.43:18080 remains a slow-link risk.",
+      "issues": [
+        "The generated report can be persisted and fetched via data API, and the edit page renders through 222.88.185.146:18080.",
+        "100.99.133.43:18080 remains slow and previously produced content-length mismatches under concurrent browser loads; prefer the public address for acceptance until the Tailscale route is stable."
+      ],
+      "nextAction": "Keep report edit render as a regression target; report result field save is accepted under PROD-034, while judgement/write-back remains under PROD-019.",
+      "coverageTags": [
+        "quality",
+        "report-work",
+        "execution",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-034",
+      "domain": "质量联动",
+      "name": "QCS 检验报告结果保存",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operationType": "update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/QCS/inspectReport/inspectReport/manuInspReportEdit/submit"
+      ],
+      "backendTraceStatus": "frontend-runtime-submit-persistence-accepted",
+      "targetTables": [
+        "qcs_inspect_reports",
+        "qcs_report_coms"
+      ],
+      "verificationSql": "select 'report_after', id, table_no, coalesce(batch_code,''), coalesce(check_result,''), coalesce(memo_field,''), version, status, valid, modify_time from public.qcs_inspect_reports where id = 755811962860800; select 'com_after', report_id, id, coalesce(report_name,''), coalesce(disp_value,''), coalesce(check_result,''), version, valid, modify_time from public.qcs_report_coms where report_id = 755811962860800 order by id; select count(*) from public.qcs_inspect_reports where memo_field like '%ADP_E2E_20260618033224_QCS_RESULT_SAVE%';",
+      "evidence": "Marker ADP_E2E_20260618033224_QCS_RESULT_SAVE. Real rendered report edit page was previously opened through http://222.88.185.146:18080 and the page runtime submitted the report form. LIMS logs on 100.99.133.43 show admin calling /QCS/inspectReport/inspectReport/manuInspReportEdit/submit at 2026-06-18 11:32:33 CST and the request ended normally in 944 ms. PostgreSQL verified qcs_inspect_reports id=755811962860800 check_result=LIMSBasic_standardGrade/Qualified memo_field=ADP_E2E_20260618033224_QCS_RESULT_SAVE memo version=3 modify_time=2026-06-18 11:32:33.957; qcs_report_coms report_id=755811962860800 remains valid. A later full-page rerun timed out while waiting for ReactAPI and did not submit a new request. A manually constructed JSON save request returned HTTP 500 java.lang.Long cannot be cast to java.lang.String in FileUploadInterceptor and did not change the database, so it is recorded only as negative evidence that direct payload construction is not equivalent to the front-end form.",
+      "issues": [
+        "This case only proves report result field save. It does not prove quality judgement transition, bad-quantity registration, production status write-back, or inventory write-back.",
+        "Full-page rerun on the remote route timed out while waiting for ReactAPI and did not submit a second save request; keep the slow-link/static-load risk open."
+      ],
+      "nextAction": "Continue PROD-019 for quality judgement workflow transition, bad quantity, and production/inventory write-back.",
+      "coverageTags": [
+        "quality",
+        "report-work",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-035",
+      "domain": "质量联动",
+      "name": "QCS 检验报告生效并回写 WOM 合格状态",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit -> WOM syncInspectReport",
+      "operationType": "status-update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "/WOM/quality/quality/syncInspectReport"
+      ],
+      "backendTraceStatus": "traced",
+      "targetTables": [
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wf_deal_info",
+        "wfm_task_pending",
+        "qcs_inspects",
+        "wom_produce_tasks",
+        "baseset_batch_infos",
+        "baseset_act_bat_sta"
+      ],
+      "verificationSql": "select 'report_after' as section, id, version, status, valid, check_result, memo_field, table_no, modify_time from public.qcs_inspect_reports where id=755811962860800; select 'pending_after_count' as section, count(*) as pending_count from public.wfm_task_pending where table_no='manuReport_20260616_002'; select 'di_after_recent' as section, id, activity_name, outcome, outcome_des, dealinfo_type, main_obj, table_info_id, create_time from public.wf_deal_info where main_obj=755811962860800 or table_info_id=755811962864896 order by create_time desc limit 8; select 'inspect_after' as section, id, version, status, check_state, batch_code, source_table_id, modify_time from public.qcs_inspects where id=755811472454912; select 'wom_task_after' as section, id, version, task_run_state, check_state, check_result, check_result_id, check_times, inpect_deal_id, finish_num, modify_time from public.wom_produce_tasks where id=8990059947475309; select 'batch_after' as section, id, version, batch_num, active_batch_state_id, check_result, check_result_id, check_state, available_date, modify_time from public.baseset_batch_infos where batch_num='ADP_E2E_20260616084434_WOM_MANU_INSPECT_BATCH'; select id, code, name, deal_type, pass_state, valid, status, remark is null as remark_is_null from public.baseset_act_bat_sta where id in (11000,11003) order by id;",
+      "evidence": "Marker ADP_E2E_20260618044947_QCS_REPORT_EFFECTIVE_RETRY6; request evidence /tmp/adp-qcs-report-effective-submit-ADP_E2E_20260618044947_QCS_REPORT_EFFECTIVE_RETRY6.json. batchDealReports returned HTTP 200, LIMS log shows WOM syncInspectReport returned code=200/处理成功, and PostgreSQL confirmed qcs_inspect_reports status=99/version=6, pending count 0, wf_deal_info outcome_des=生效, qcs_inspects check_state=QCS_checkState/reported, WOM task 已检/合格, and baseset_batch_infos active_batch_state_id=11000/check_state=haveChecked/check_result=qualified.",
+      "issues": [
+        "Covers qualified report judgement/effective/backfill only; unqualified bad quantity/reject/inventory flows remain under PROD-019.",
+        "QCS syncEntity still logs a non-fatal NullPointerException before the successful backfill."
+      ],
+      "nextAction": "Prepare unqualified/bad-quantity marker data and execute the reject/deviation/inventory path for PROD-019.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-036",
+      "domain": "质量联动",
+      "name": "QCS 检验报告生效并回写 WOM 不合格状态",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit -> WOM syncInspectReport",
+      "operationType": "status-update",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "/msService/WOM/produceTask/produceTask/createManuInspect",
+        "/msService/QCS/inspect/inspect/bulkSubmit",
+        "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "/WOM/quality/quality/syncInspectReport"
+      ],
+      "backendTraceStatus": "traced",
+      "targetTables": [
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wf_deal_info",
+        "wfm_task_pending",
+        "qcs_inspects",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos",
+        "baseset_act_bat_sta",
+        "qcs_un_qlf_deals"
+      ],
+      "verificationSql": "select 'report_after', id, version, status, valid, check_result, memo_field, table_no, table_info_id, modify_time from public.qcs_inspect_reports where id=756471545455872; select 'report_com_after', id, version, report_id, report_name, disp_value, check_result, modify_time from public.qcs_report_coms where report_id=756471545455872; select 'report_pending_after_count', count(*) from public.wfm_task_pending where table_info_id=756471545464064 or table_no='manuReport_20260618_001'; select 'report_deal_info_recent', id, activity_name, outcome, outcome_des, dealinfo_type, main_obj, table_info_id, create_time from public.wf_deal_info where main_obj=756471545455872 or table_info_id=756471545464064 order by create_time desc limit 8; select 'inspect_after', id, version, status, check_state, batch_code, source_table_id, modify_time from public.qcs_inspects where id=756470445921536; select 'wom_task_after', id, version, task_run_state, check_state, check_result, check_result_id, check_times, inpect_deal_id, finish_num, modify_time from public.wom_produce_tasks where id=8990076031442301; select 'wom_wait_after', id, version, check_state, check_result, check_times, modify_time from public.wom_wait_put_records where task_id=8990076031442301; select 'wom_exelog_after', id, version, check_state, check_result, check_result_id, check_times, modify_time from public.wom_produce_task_exelog where task_id=8990076031442301; select 'batch_after', id, version, batch_num, active_batch_state_id, check_result, check_result_id, check_state, is_available, available_date, modify_time from public.baseset_batch_infos where batch_num='ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2_BATCH'; select 'active_state', id, code, name, deal_type, pass_state, valid, status, remark is null as remark_is_null from public.baseset_act_bat_sta where id in (11000,11003) order by id; select 'unqlf_deal_count', count(*) from public.qcs_un_qlf_deals where report_id=756471545455872;",
+      "evidence": "Marker ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2; real browser created the WOM manufacturing inspection and QCS request, two QCS bulkSubmit calls generated report 756471545455872, then two batchDealReports calls submitted the report as 不合格 to audit and effective. PostgreSQL confirmed qcs_inspect_reports status=99/check_result=不合格, report pending count 0, wf_deal_info outcome_des=生效, qcs_inspects check_state=QCS_checkState/reported, WOM task/wait/exelog 已检/不合格, and baseset_batch_infos active_batch_state_id=11003/check_result=BaseSet_checkResult/unqualified/is_available=false. qcs_un_qlf_deals count stayed 0 because unqualified treatment workflow/config is not enabled in this environment.",
+      "issues": [
+        "Covers unqualified report judgement/effective/WOM backfill only; automatic unqualified treatment document creation is accepted separately under PROD-037.",
+        "Bad quantity, reject/deviation, and inventory flows remain under PROD-019."
+      ],
+      "nextAction": "Configure or recover manuUnqlf/QCS.autoUnQlfDeal and execute the unqualified treatment document, bad-quantity, reject/deviation, and inventory path for PROD-019.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres"
+      ]
+    },
+    {
+      "id": "PROD-037",
+      "domain": "质量联动",
+      "name": "QCS 不合格报告自动生成不合格处理单",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit -> QCS manuUnQlfDealWorkFlow",
+      "operationType": "quality-unqualified-treatment-auto-create",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "/msService/WOM/produceTask/produceTask/createManuInspect",
+        "/msService/QCS/inspect/inspect/bulkSubmit",
+        "/msService/QCS/inspectReport/inspectReport/batchDealReports"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "qcs_inspect_reports",
+        "qcs_un_qlf_deals",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos",
+        "baseset_wf_custom_configs",
+        "wf_task",
+        "wf_transition",
+        "rbac_flow_permission"
+      ],
+      "verificationSql": "select id, status, check_result, un_qlf_deal_flag from public.qcs_inspect_reports where id=756483934967040; select id, status, table_no, report_id, batch_code from public.qcs_un_qlf_deals where report_id=756483934967040; select p.id, p.activity_name from public.wfm_task_pending p join public.qcs_un_qlf_deals d on d.table_info_id=p.table_info_id where d.report_id=756483934967040;",
+      "evidence": "Marker ADP_E2E_20260618_UNQLF_AUTO_DEAL_3; real browser created WOM manufacturing inspection, QCS bulkSubmit ran twice, then two batchDealReports requests submitted checkResult=不合格 to effective. LIMS logs show judgeResultUnqualified:true, autoUnQlfDeal:manu, 创建不合格品处理单, and WOM callback reportResult:false/needRejectReport:1. PostgreSQL confirmed report 756483934967040 status=99/check_result=不合格/un_qlf_deal_flag=true, qcs_un_qlf_deals 756484120581376 status=88/table_no=manuUnQlfDeal_20260618_001/report_id=756483934967040, and unqualified treatment pending 756484121699584/TaskEvent_18cp6xa. Evidence: /tmp/adp-qcs-unqlf-auto-deal-20260618-3/wom-manu-inspect-persistence-results.json, /tmp/adp-qcs-unqlf-auto-deal-workflow-ADP_E2E_20260618_UNQLF_AUTO_DEAL_3.json, /tmp/adp-qcs-unqlf-auto-deal-final-sql-ADP_E2E_20260618_UNQLF_AUTO_DEAL_3.txt.",
+      "issues": [
+        "This proves automatic treatment document creation and edit pending generation only; final treatment approval/effective, bad quantity, reject/deviation, and inventory write-back remain separate acceptance work."
+      ],
+      "nextAction": "Open or submit the generated treatment document, then verify treatment details, bad quantity, and inventory/write-back tables.",
+      "coverageTags": [
+        "qcs",
+        "unqualified",
+        "treatment-document",
+        "workflow",
+        "postgresql",
+        "frontend-e2e"
+      ]
+    },
+    {
       "id": "PROD-019",
       "domain": "质量联动",
-      "name": "制造检验结果录入、判定和回写生产状态",
-      "route": "/msService/QCS/inspect/inspect/manuInspectList",
+      "name": "QCS 不良数和库存/入库相关回写",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit; WOM/库存回写",
       "operationType": "create-update-status",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Route smoke only. No QCS result write-back action has been executed yet.",
-      "issues": [
-        "Need QC/QA boundary, inspection data model, and production status linkage."
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [
+        "No dedicated bad-quantity endpoint recovered in current QCS/WOM package; see metadata/wom-bad-quantity-analysis.json",
+        "Material service dependency evidence: metadata/material-service-dependency-analysis.json",
+        "inventory/inbound endpoints not accepted because material tenant service is missing",
+        "POST /msService/WOM/quality/quality/syncInspectReport",
+        "POST /msService/material/foreign/foreign/checkProdResult (503, material service missing)",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing (503, material service missing)"
       ],
-      "nextAction": "Record marker inspection result and verify QCS rows plus production status fields.",
+      "backendTraceStatus": "partial-qcs-wom-backfill-pass-no-dedicated-bad-quantity-entry-material-service-missing",
+      "targetTables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos",
+        "inventory tables",
+        "no dedicated bad quantity table/column found in current QCS/WOM schema audit"
+      ],
+      "verificationSql": "QCS direct WOM backfill proof: select id, check_state, check_result, check_result_id from public.wom_produce_tasks where id in (8990084171374044,8990084191051167); select id, check_state, check_result from public.wom_wait_put_records where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id from public.wom_produce_task_exelog where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id, is_available, active_batch_state_id from public.baseset_batch_infos where batch_num in ('ADP_E2E_20260619_QCSM2_BATCH','ADP_E2E_20260619_QCSBAD_BATCH'); Material blocker: Nacos prod group material hosts=[], authenticated material checkProdResult and generateProduceOutSing returned 503; package scan found no called material service implementation; PostgreSQL material-like tables are only foundation material/warehouse and WOM internal material tables. Bad quantity audit: select table_name,column_name,data_type from information_schema.columns where table_schema='public' and (table_name like 'qcs_%' or table_name like 'wom_%') and (lower(column_name) like '%bad%' or lower(column_name) like '%defect%' or lower(column_name) like '%scrap%' or lower(column_name) like '%unqualified%' or lower(column_name) like '%unqlf%' or lower(column_name) like '%un_qlf%') order by table_name, ordinal_position; result only contained qcs_inspect_reports.un_qlf_deal_flag, qcs_table_types.un_qlf_code_rule, qcs_table_types.un_qlf_code_rule_text_backup, and qcs_un_qlf_deals.un_qlf_reason.",
+      "evidence": "QCS manufacture inspection request, report generation, report edit rendering, report result save, qualified report effective/WOM backfill, unqualified report effective/WOM backfill, automatic unqualified treatment document creation, noDeal treatment effective, degradedRelease treatment effective (PROD-041), return treatment effective (PROD-042), inspect release save/submit, WOM quality activity checkout-bill generation, and WOM check activity generated check record are now accepted. Bad quantity and inventory/inbound write-back have not been executed from the frontend yet. 2026-06-19 new-address evidence: ADP_E2E_20260619_QCSM2 and ADP_E2E_20260619_QCSBAD proved direct syncInspectReport qualified/unqualified WOM state and batch availability persistence through PostgreSQL on 100.99.133.43. Inventory/inbound remains blocked by missing material service registration and package: Nacos prod group has no material instance; authenticated checkProdResult and generateProduceOutSing calls returned 503; BasicMs/BaseSet/LIMSMaterial alternatives returned 404; latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; the only adjacent material content remains LIMSMaterial, foundation material/warehouse master data, and SpareManage spare inventory content, not the invoked material/foreign or produceOutSingle service implementation. 2026-06-20 bad-quantity audit: docs/backend-table-audit/wom-bad-quantity-analysis.md and metadata/wom-bad-quantity-analysis.json confirmed no standalone bad-quantity frontend route, runtime button, source endpoint, or PostgreSQL target column was recovered. Current accepted product shape is QCS inspection quantity, check_result, unqualified treatment document, and WOM rejects_deal_id/batch availability write-back.",
+      "issues": [
+        "Current recovered QCS/WOM package does not expose a dedicated bad-quantity field or target table; only qcs_inspects.quantity, qcs_inspect_reports.check_result/un_qlf_deal_flag, qcs_un_qlf_deals, and WOM rejects_deal_id/batch availability state are present.",
+        "Inventory/inbound write-back target route and tables still need the material tenant service package and a dedicated marker acceptance run.",
+        "WOM check activity record generation is accepted separately and does not prove inventory/inbound write-back.",
+        "QCS syncInspectReport qualified/unqualified state backfill is accepted and should not remain part of this blocker.",
+        "If the product manual expects a separate bad quantity entry, a later business package must provide field, route, and table mapping before PASS."
+      ],
+      "nextAction": "Add/deploy the material warehouse/inventory service package or map the correct service name, then rerun checkProdResult/generateProduceOutSing with marker stock data. Only reopen bad-quantity acceptance if a product manual or later business package provides a dedicated field/route/table mapping.",
       "coverageTags": [
         "quality",
         "status-flow",
@@ -534,20 +1315,29 @@
       "id": "PROD-020",
       "domain": "追溯",
       "name": "批次、物料、工单追溯查询",
-      "route": "",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> prodprocessView -> /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView and /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
       "operationType": "read",
       "requiresPersistence": false,
-      "routeSmokeStatus": "NOT_APPLICABLE",
+      "routeSmokeStatus": "BLOCKED",
       "acceptanceStatus": "BLOCKED",
-      "apiEndpoints": [],
-      "backendTraceStatus": "route-not-confirmed",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "No complete traceability page/API/table chain has been identified in the current recovered package.",
-      "issues": [
-        "Need module package or menu mapping for traceability."
+      "apiEndpoints": [
+        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH",
+        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH&productNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_MAT"
       ],
-      "nextAction": "Search new business packages and menu data for traceability routes, then add smoke target.",
+      "backendTraceStatus": "button-route-confirmed-missing-processanalysis-module",
+      "targetTables": [
+        "ProcessAnalysis runtime_view not present",
+        "ProcessAnalysis rbac_menuinfo not present",
+        "ProcessAnalysis strict business tables not present"
+      ],
+      "verificationSql": "select table_name from information_schema.tables where table_schema='public' and (table_name ~* '^pa_' or table_name ~* 'process.*analysis' or table_name ~* 'trace' or table_name ~* 'process_batch') order by table_name; select count(*) from public.runtime_view where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%'; select count(*) from public.rbac_menuinfo where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%';",
+      "evidence": "WOM makeTaskList runtime button prodprocessView opens trace through ProcessAnalysis: first isProdprocessView(batchNo), then processBatchViewOut. Real browser request through http://222.88.185.146:18080 using marker batch ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH returned HTTP 503 for both URLs; body showed supplantFrontend.err503.info. 2026-06-20 revalidation on 100.99.133.43 used repository Playwright request login as admin and authenticated five ProcessAnalysis endpoints: isProdprocessView, processBatchViewOut, analysisiTask, manualStatActive, and manualStatProcess all returned HTTP 503 can not find any tenant app service. Nacos prod@@ProcessAnalysis/processanalysis/PROCESSANALYSIS/Traceability/traceability hosts=[] while WOMMs is healthy. Remote PostgreSQL found strict ProcessAnalysis-like tables=0, runtime_view rows=0, and rbac_menuinfo rows=0. Local source scan found only WOM caller-side event scripts and no ProcessAnalysis Java/controller/module implementation. Re-runnable readiness evidence in metadata/business-dependency-readiness-smoke.json confirms ProcessAnalysis aliases have 0 healthy Nacos instances, five authenticated endpoints return 503, and processAnalysis DB/runtime/menu counts are 0. Evidence: /tmp/adp-wom-trace-processanalysis-20260618094108/processanalysis-trace-report.json; docs/backend-table-audit/processanalysis-dependency-analysis.md; metadata/processanalysis-dependency-analysis.json; metadata/business-dependency-readiness-smoke.json.",
+      "issues": [
+        "Traceability button exists in WOM makeTaskList runtime JSON, but target ProcessAnalysis module is absent in the current deployment.",
+        "Local source/package scan found WOM caller-side event scripts only, with no ProcessAnalysis, processBatchViewOut, isProdprocessView, or traceability module implementation in the current material set.",
+        "Need ProcessAnalysis package/service/view metadata/tables before batch/material/work-order traceability can be accepted."
+      ],
+      "nextAction": "Deploy or recover the ProcessAnalysis module package, re-run the isProdprocessView precheck, then open processBatchViewOut with a marker batch and record API/page/DB evidence.",
       "coverageTags": [
         "traceability"
       ]
@@ -555,33 +1345,43 @@
     {
       "id": "PROD-021",
       "domain": "报工",
-      "name": "工序报工、产量、不良数登记",
+      "name": "完整工序报工、产量、不良数登记",
       "route": "",
       "operationType": "create-update",
       "requiresPersistence": true,
-      "routeSmokeStatus": "FAIL",
+      "routeSmokeStatus": "PASS",
       "acceptanceStatus": "BLOCKED",
       "apiEndpoints": [
+        "POST /msService/WOM/produceTask/taskProcess/start/{id}; POST /msService/WOM/produceTask/taskProcess/end/{id}",
         "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
-        "POST /msService/WOM/produceTask/produceTask/endEasyActive/{id}",
-        "GET /msService/WOM/produceTask/produceTask/startActive",
-        "GET /msService/WOM/produceTask/produceTask/endActive"
+        "POST /msService/WOM/procReport/putinDetail/remainMaterialView/save",
+        "GET /msService/WOM/produceTask/produceTask/endActive?activeId=8388184063665795"
       ],
-      "backendTraceStatus": "source-traced-layoutjson-fixed-frontend-render-blocked",
+      "backendTraceStatus": "source-traced-ui-rendered-check-record-pass-qcs-state-pass-no-dedicated-bad-quantity-entry-material-service-missing",
       "targetTables": [
         "WOM_PROC_REPORTS",
         "WOM_TASK_ACTIVES",
         "WOM_TASK_PROCESSES",
-        "WOM_PRODUCE_TASKS"
+        "WOM_PRODUCE_TASKS",
+        "WOM_PUTIN_DETAILS",
+        "WOM_MAT_CONSUM_RECODS",
+        "WOM_PRO_CHECK_DETAILS",
+        "WOM_CHECK_RECORDS",
+        "QCS_INSPECTS.quantity",
+        "QCS_INSPECT_REPORTS.check_result/un_qlf_deal_flag",
+        "QCS_UN_QLF_DEALS",
+        "no dedicated bad quantity table/column found in current QCS/WOM schema audit"
       ],
-      "verificationSql": "",
-      "evidence": "WOM 6.1.3.4 source maps report-work and activity execution through stopTaskEvent/addOutputByOutPutDetails, easyTaskOperateView/reportEvent/endEasyActive, and makeTaskView/makeTaskBatchView startActive/endActive. Runtime JSON patch fixed backend layoutJson 500 for makeTaskView, makeTaskBatchView, and easyTaskOperateView: layoutJson now returns 200. Real browser probing still shows the action pages fail in the desktop renderer with visible 出错了 banner and React error #130, with zero fields/buttons and no write requests. Report: /tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json; direct layoutJson verification returned 200 with pageType EDIT/VIEW for the action viewCodes",
+      "verificationSql": "Check activity PASS SQL: SELECT id, head_id, check_items, report_value, is_pass, valid FROM public.wom_pro_check_details WHERE id = 8388184063665806; SELECT id, check_items, report_num, produce_batch_num, data_source, valid, act_exelog_id FROM public.wom_check_records WHERE check_items = 'ADP_E2E_20260619034356_WOM_ACTIVE check item' OR report_num = 'ADP_E2E_20260619034356_WOM_ACTIVE report value' ORDER BY id DESC LIMIT 1. Bad quantity and inventory/inbound write-back SQL still not executed. Dedicated bad-quantity schema audit returned no bad/defect/scrap quantity target column; see metadata/wom-bad-quantity-analysis.json.",
+      "evidence": "WOM process start/end, activity start/end, output-detail report-work, input-detail report-work, easy activity report-work, and check activity end with generated check record now have separate PASS evidence: /tmp/adp-wom-process-end-persistence-current.json, /tmp/adp-wom-active-persistence-current.json, /tmp/adp-wom-active-end-persistence-current.json, /tmp/adp-wom-stop-output-persistence-current.json, /tmp/adp-wom-putin-active-persistence-current.json, /tmp/adp-wom-easy-active-persistence-current.json, and /tmp/adp-wom-check-active-persistence-make.json. Marker ADP_E2E_20260619034356_WOM_ACTIVE proved wom_pro_check_details and wom_check_records persistence after make acceptance-wom-check-active-persistence drove real browser endActive on RM_activeType/check. The missing wom_mat_consum_recods row after putin-end is explained as current RM_activeType/putin source behavior. Full process report-work remains BLOCKED for bad-quantity and final inventory/inbound paths. 2026-06-19 direct syncInspectReport proof with ADP_E2E_20260619_QCSM2/QCSBAD confirms QCS qualified/unqualified results update WOM task/exelog/wait and batch availability correctly; remaining report-work blocker is the product-specific bad-quantity registration and inventory/material service path, not ordinary QCS state backfill. 2026-06-20 audit docs/backend-table-audit/wom-bad-quantity-analysis.md confirmed the current recovered package has no independent bad-quantity registration entry. The executable acceptance boundary is production quantity/report-work, QCS result judgement, QCS unqualified treatment, and WOM/material inventory write-back once the material service is available.",
       "issues": [
-        "Report-work source routes and endpoints are identified, and layoutJson 500 is fixed, but the generated action-view component tree still crashes the desktop renderer with React #130.",
-        "No marker report-work action has been submitted through the real frontend.",
-        "Need PostgreSQL verification for WOM_PROC_REPORTS and related task/process/activity state fields after action view component metadata is recovered."
+        "Check activity result-record persistence is accepted; do not infer final inventory/inbound write-back from it.",
+        "Input-detail save persisted wom_putin_details; wom_mat_consum_recods remains not applicable for the current manual-putin path unless product requires a new consumption-record design.",
+        "No independent bad-quantity field, frontend route, runtime button, source endpoint, or PostgreSQL target table was recovered in the current package.",
+        "QCS qualified/unqualified state backfill and unqualified treatment are accepted; remaining full report-work blocker is material inventory/stock-in plus any later product-confirmed bad-quantity extension.",
+        "Inventory/material service path is blocked by missing material service registration."
       ],
-      "nextAction": "Recover the real desktop edit/view component metadata for makeTaskView/makeTaskBatchView/easyTaskOperateView, then seed a marker task/process/activity, execute report-work from the frontend, and query WOM_PROC_REPORTS plus state fields.",
+      "nextAction": "Continue inventory/material-service acceptance. Only add a bad-quantity marker case if the product manual or a new business package supplies the dedicated field, route, and target table.",
       "coverageTags": [
         "report-work",
         "execution",
@@ -593,20 +1393,32 @@
       "id": "PROD-022",
       "domain": "入库",
       "name": "完工入库或库存回写",
-      "route": "",
+      "route": "WOM/QCS -> material service",
       "operationType": "create-update",
       "requiresPersistence": true,
       "routeSmokeStatus": "NOT_APPLICABLE",
       "acceptanceStatus": "BLOCKED",
-      "apiEndpoints": [],
-      "backendTraceStatus": "route-not-confirmed",
-      "targetTables": [],
-      "verificationSql": "",
-      "evidence": "Warehouse/inventory completion route and target tables are not mapped in the current recovered package.",
-      "issues": [
-        "Need warehouse or inventory module package and table mapping."
+      "apiEndpoints": [
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
       ],
-      "nextAction": "Add inventory module route smoke, then verify completion inbound marker rows.",
+      "backendTraceStatus": "source-traced-material-service-missing",
+      "targetTables": [
+        "wom_mat_outpt_records",
+        "wom_mat_consum_recods",
+        "wom_put_matei_details",
+        "baseset_sync_logs",
+        "material service inventory/stock-in tables (missing)"
+      ],
+      "verificationSql": "No material inventory target table verified because the material service is absent. Runtime proof: Nacos prod group serviceName=material returned hosts=[]; authenticated POST /msService/material/foreign/foreign/checkProdResult and /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing returned 503 can not find any tenant app service. Package/database proof: latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0 and did not find the called material endpoint implementations; PostgreSQL table scan only found baseset_material*, baseset_warehouse*, hm_*stock/material*, and wom_*material* tables. Detailed 2026-06-20 evidence: metadata/material-service-dependency-analysis.json.",
+      "evidence": "Source trace: WOMQCSServiceImpl.checkResultToWms calls service material path /material/foreign/foreign/checkProdResult; WOMPutInMaterialServiceImpl.generateProducerOut and WOMMatConsumRecodServiceImpl call service material path /public/material/produceOutSingle/produceOutSing/generateProduceOutSing. Runtime proof on 100.99.133.43: Nacos prod group lists 91 services but material hosts=[], no material container is running, authenticated material endpoints return 503 can not find any tenant app service, and BasicMs/BaseSet/LIMSMaterial alternatives return 404. Package proof: latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it only shows LIMSMaterial, BaseSet material/warehouse master-data interfaces, HierarchicalMod material/stock records, and SpareManage spare inventory; targeted content search did not find checkProdResult, generateProduceOutSing, or material/foreign implementations. PostgreSQL material-like tables are foundation material/warehouse and WOM internal material tables, not a verified material-service inventory target. Re-runnable readiness evidence in metadata/business-dependency-readiness-smoke.json confirms material aliases have 0 healthy Nacos instances, both authenticated dependency endpoints return 503, and the material-like PostgreSQL tables are foundation/WOM tables rather than a verified material-service stock-in target. 2026-06-20 material dependency report: docs/backend-table-audit/material-service-dependency-analysis.md and metadata/material-service-dependency-analysis.json. Completion inbound/inventory write-back cannot pass until the warehouse/material module package is deployed and registered.",
+      "issues": [
+        "Missing material tenant service/package in current test environment.",
+        "Local source/package scan found only LIMSMaterial, foundation material/warehouse master-data modules, and SpareManage spare inventory, not the invoked material service endpoints.",
+        "Need warehouse/inventory target table map after material service is deployed.",
+        "Current WOM/QCS internal state PASS does not prove stock-in or inventory write-back."
+      ],
+      "nextAction": "Deploy/register the material warehouse/inventory service package, confirm Nacos serviceName=material has instances, then rerun checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables.",
       "coverageTags": [
         "inventory",
         "execution",
@@ -618,24 +1430,245 @@
       "id": "PROD-023",
       "domain": "导出",
       "name": "生产相关列表导出",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/RM/formula/formula/batchFormulaList; /msService/WTS/workPermit/workPermit/workPermitList; /msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList; /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList",
       "operationType": "export",
       "requiresPersistence": false,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "NOT_RUN",
-      "apiEndpoints": [],
-      "backendTraceStatus": "not-traced",
+      "acceptanceStatus": "BLOCKED",
+      "apiEndpoints": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000 -> summary BLOCKED targets=6 pagePass=6 visibleExportActions=0 runtimeExportActions=0 nonEmptyDownloads=1 backendQueryExportWorkbooks=1 backendQueryExportErrors=4 verifiedDataExports=0 targetExportMatches=0 actionRequired=1 blocked=5",
+        "No export/download data-export button or endpoint is exposed in runtime button metadata for checked production pages",
+        "sourceAudit proves the generic platform export framework exists, but the 6 checked production views have targetExportMatches=0",
+        "GET /msService/WOM/produceTask/produceTask/downloadXls?viewCode=WOM_1.0.0_produceTask_makeTaskList -> HTTP 200 bodySize=0",
+        "GET /msService/RM/formula/formula/downloadXls?viewCode=RM_1.0.0_formula_batchFormulaList -> HTTP 200 bodySize=8704 OLE_XLS, but page/runtime only expose 下载模板/导入Excel and no export action",
+        "POST /msService/WTS/workPermit/workPermit/workPermitList-query?exportFlag=true -> HTTP 200 bodySize=8704 OLE_XLS, but page/runtime/source evidence still lacks a user-visible list export action",
+        "GET /msService/QCS/inspectReport/inspectReport/downloadXls?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportList -> HTTP 200 bodySize=0",
+        "GET /msService/QCS/unQlfDeal/unQlfDeal/downloadXls?viewCode=QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList -> HTTP 200 bodySize=0",
+        "GET /msService/QCS/inspectRelease/inspectRelease/downloadXls?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseList -> HTTP 200 bodySize=0"
+      ],
+      "backendTraceStatus": "template-download-only-empty-export-hook",
       "targetTables": [],
       "verificationSql": "",
-      "evidence": "List routes are smoke-tested, but export buttons/endpoints/files have not been exercised.",
+      "evidence": "2026-06-22T01:50:35.404Z refreshed export readiness smoke with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. Authenticated real browser probed 6 production-related list pages with ADP_PAGE_TIMEOUT_MS=240000: WOM make task, RM batch formula, WTS work permit, QCS inspect report, QCS unqualified deal, and QCS inspect release. All 6 target pages reached HTTP/navigation success through the public browser ingress, so the current export blocker is not page reachability. The committed smoke summary remains BLOCKED with targets=6, pagePass=6, visibleExportActions=0, runtimeExportActions=0, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=0, actionRequired=1 and blocked=5. Runtime layout metadata has no export button candidate for all 6 targets. WTS work permit query-export now returns a non-empty 8704-byte OLE_XLS workbook, but the real page has no visible export action, layoutJson has no runtime export action, and sourceAudit still classifies the target as DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY; therefore WTS is ACTION_REQUIRED, not PASS. WOM and 3 QCS query-export endpoints still return 500/JSON, RM query-export returns 200/JSON, and direct downloadXls remains empty or import-template-only. Evidence: metadata/production-export-readiness-smoke.json and real browser run output captured by make smoke-production-export-readiness.",
       "issues": [
-        "Need per-page export endpoint, file response, and permission result."
+        "Runtime layout metadata has no export button candidate for the checked production pages.",
+        "sourceAudit has targetExportMatches=0 for all checked production pages; generic platform export templates are present but not enabled by these target views.",
+        "The exposed downloadXls endpoints are template-download or empty paths, not verified list-data export paths.",
+        "WTS work permit query-export returns a non-empty OLE_XLS workbook, but the visible/runtime/source evidence does not prove a user-triggerable list-data export.",
+        "Need product confirmation whether these lists should support export; if yes, add or recover the export button and a non-empty data-export implementation before file-response acceptance."
       ],
-      "nextAction": "Click export from WOM/RM/WTS/QCS pages, capture response status and file metadata.",
+      "nextAction": "If export is required, recover the runtime export button and backend data-export implementation for target list pages, then capture frontend file response status, filename, size, and sample workbook content with make smoke-production-export-readiness.",
       "coverageTags": [
         "import-export",
         "work-order"
       ]
+    },
+    {
+      "id": "PROD-038",
+      "domain": "质量联动",
+      "name": "QCS 不合格处理单审核生效并回写 WOM 处理单号",
+      "route": "/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView?id=756484120581376",
+      "operationType": "quality-unqualified-treatment-effective",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView/submit",
+        "POST /WOM/quality/quality/syncRejectReport"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "qcs_un_qlf_deals",
+        "qcs_un_qlf_deals_di",
+        "wfm_task_pending",
+        "wom_produce_tasks",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "verificationSql": "select id, version, status, act_bat_state_id, deal_dept_id, dealer_id, deal_time, un_qlf_reason, memo_field from public.qcs_un_qlf_deals where id=756484120581376; select count(*) as pending_count from public.wfm_task_pending where table_info_id=756484120614144; select id, activity_name, outcome, outcome_des, outcome_des_zh_cn, create_time from public.qcs_un_qlf_deals_di where business_id=756484120581376 order by create_time desc limit 5; select id, check_state, check_result, check_result_id, inpect_deal_id, rejects_deal_id from public.wom_produce_tasks where id=8990076354371584; select id, check_state, check_result, check_result_id, inpect_deal_id, rejects_deal_id from public.wom_produce_task_exelog where task_id=8990076354371584; select id, batch_num, active_batch_state_id, check_result, check_result_id, rejects_deal_id, check_state, is_available, deal_type from public.baseset_batch_infos where batch_num='ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH';",
+      "evidence": "Marker ADP_E2E_20260618_UNQLF_DEAL_EFFECT. Browser base http://222.88.185.146:18080 rendered the treatment page and submitted the correct workflowVar payload without consoleErrors/requestFailures/failedResponses. SSH/DB/log verification used 100.99.133.43. Response evidence /tmp/adp-qcs-unqlf-deal-submit-20260618/submit-effective-response-workflowvar-public.json shows HTTP 200/操作成功. PostgreSQL verified QCS treatment status=99, pending cleared, DI outcome_des=生效, and WOM task/exelog/batch rejects_deal_id=756484120581376. The WOM service NPE was fixed by null-safe getInsAfterManu handling plus PostgreSQL default false for wom_produce_tasks.ins_after_manu.",
+      "issues": [
+        "The first submit without workFlowVar was a false positive: HTTP 200 but no workflow completion or WOM reject backfill.",
+        "LIMS syncEntity still logs a caught NullPointerException during EndActivity; current persistence outcome is PASS, but this residual log should be cleaned in a later hardening pass.",
+        "Bad-quantity registration, reject/deviation decisioning, and inventory/inbound write-back remain separate blocked acceptance items."
+      ],
+      "nextAction": "Continue bad-quantity, reject/deviation, and inventory/inbound write-back acceptance.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
+      ]
+    },
+    {
+      "id": "PROD-041",
+      "domain": "质量联动",
+      "name": "QCS 不合格处理单让步放行处理方式生效并回写 WOM",
+      "route": "/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView",
+      "operationType": "quality-unqualified-treatment-degraded-release-effective",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/public/QCS/unQlfDeal/unQlfDeal/createUnQlfDeal",
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit/submit?id=756700072772864",
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView/submit?id=756700072772864",
+        "POST /WOM/quality/quality/syncRejectReport"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "baseset_act_bat_sta",
+        "qcs_un_qlf_deals",
+        "qcs_un_qlf_deals_di",
+        "wfm_task_pending",
+        "wom_produce_tasks",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "verificationSql": "select 'deal', id, status, act_bat_state_id, dealer_id, deal_dept_id, un_qlf_reason, memo_field from public.qcs_un_qlf_deals where id=756700072772864; select count(*) from public.wfm_task_pending where table_info_id=756700072781056 or model_id=756700072772864; select id, rejects_deal_id, check_state, check_result from public.wom_produce_tasks where id=8990076031442301; select id, rejects_deal_id, check_state, check_result from public.wom_produce_task_exelog where task_id=8990076031442301; select id, active_batch_state_id, deal_type, rejects_deal_id, check_result, is_available from public.baseset_batch_infos where id=8990076031442300;",
+      "evidence": "Marker ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE. SQL 139 seeded baseset_act_bat_sta degradedRelease(11010) and return(11011) with remark=NULL to avoid legacy PostgreSQL LOB/OID reads. Public browser page-context create/audit/effective submits returned HTTP 200. PostgreSQL on 100.99.133.43 verified qcs_un_qlf_deals status=99/act_bat_state_id=11010, pending cleared, WOM task/exelog/batch rejects_deal_id=756700072772864, and batch deal_type=BaseSet_dealType/degradedRelease. Evidence: /tmp/adp-qcs-dealway-persistence-ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE/evidence.json.",
+      "issues": [
+        "This case accepts degradedRelease/让步放行 only; return/拒收 is accepted independently under PROD-042.",
+        "The createUnQlfDeal payload must use numeric IDs for source/report/dealer/dept fields; string IDs failed with a Java String-to-Long cast error.",
+        "The create path requires creator context createStaffId/createPositionId/createDeptId, otherwise the service returns 创建人不存在."
+      ],
+      "nextAction": "Continue remaining QCS bad-quantity and inventory/inbound write-back acceptance; do not use this degradedRelease case as evidence for those separate write paths.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
+      ]
+    },
+    {
+      "id": "PROD-042",
+      "domain": "质量联动",
+      "name": "QCS 不合格处理单拒收 return 处理方式生效并回写 WOM",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit; /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView",
+      "operationType": "quality-unqualified-treatment-return-effective",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/createManuInspect",
+        "POST /msService/QCS/inspect/inspect/bulkSubmit",
+        "POST /msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit/submit?id=756714615715072",
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView/submit?id=756714615715072",
+        "POST /WOM/quality/quality/syncRejectReport"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "qcs_inspect_reports",
+        "qcs_un_qlf_deals",
+        "qcs_un_qlf_deals_di",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "verificationSql": "select 'report', id, version, status, valid, check_result, un_qlf_deal_flag, table_no, table_info_id from public.qcs_inspect_reports where id=756714487547136; select 'deal', d.id,d.version,d.status,d.valid,d.table_no,d.table_info_id,d.report_id,d.batch_code,d.act_bat_state_id,s.code,s.deal_type,s.active_end,s.pass_state,d.memo_field,d.un_qlf_reason from public.qcs_un_qlf_deals d left join public.baseset_act_bat_sta s on s.id=d.act_bat_state_id where d.id=756714615715072; select 'deal_pending_count', count(*) from public.wfm_task_pending where table_info_id=756714615715073; select 'wom_task', id, check_state, check_result, check_result_id, inpect_deal_id, rejects_deal_id from public.wom_produce_tasks where id=8990081965308919; select 'wait_put', id, check_state, check_result from public.wom_wait_put_records where id=8990081965308920; select 'task_exelog', id, check_state, check_result, check_result_id, inpect_deal_id, rejects_deal_id from public.wom_produce_task_exelog where id=8990081965308921; select 'batch', id, batch_num, active_batch_state_id, deal_type, check_result, check_result_id, check_state, is_available, rejects_deal_id from public.baseset_batch_infos where batch_num='ADP_E2E_20260619_QCS_RETURN_1_BATCH';",
+      "evidence": "Marker ADP_E2E_20260619_QCS_RETURN_1. Browser context on http://100.99.133.43:18080 created a WOM manufacture inspect request, advanced QCS inspect and report workflows to an unqualified effective report, and auto-generated unqualified treatment 756714615715072. Edit submit with ordinary date string returned 500 and was preserved as negative evidence; retry with frontend/Jackson-compatible yyyy-MM-dd'T'HH:mm:ss.SSSZ date format passed audit and effective submits with HTTP 200/操作成功. PostgreSQL verified report status=99/check_result=不合格/un_qlf_deal_flag=true, deal status=99/act_bat_state_id=11011, pending count=0, and WOM task/wait-put/exelog/batch rejects_deal_id plus batch deal_type=BaseSet_dealType/return. Evidence: /tmp/adp-wom-manu-inspect-persistence-20260618215413/wom-manu-inspect-persistence-results.json; /tmp/adp-qcs-return-persistence-ADP_E2E_20260619_QCS_RETURN_1/evidence.json; /tmp/adp-qcs-return-persistence-ADP_E2E_20260619_QCS_RETURN_1/deal-return-retry-evidence.json.",
+      "issues": [
+        "dealTime must use the frontend/Jackson-compatible yyyy-MM-dd'T'HH:mm:ss.SSSZ format on this legacy endpoint; plain yyyy-MM-dd HH:mm:ss failed deserialization.",
+        "This case accepts return/拒收 only; bad quantity and inventory/inbound write-back remain separate blocked cases."
+      ],
+      "nextAction": "Continue bad-quantity and inventory/inbound write-back marker acceptance; do not infer those write paths from this return treatment case.",
+      "coverageTags": [
+        "quality",
+        "status-flow",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
+      ]
+    },
+    {
+      "id": "PROD-039",
+      "domain": "质量联动",
+      "name": "QCS 产品紧急放行编辑/查看页打开",
+      "route": "/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit; /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseView",
+      "operationType": "quality-inspect-release-render",
+      "requiresPersistence": false,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseEdit&isEs5=true",
+        "GET /msService/QCS/inspectRelease/inspectRelease/editStates",
+        "GET /msService/QCS/inspectRelease/inspectRelease/data/{id}"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "runtime_extra_view",
+        "qcs_inspect_releases_sv",
+        "qcs_inspect_releases"
+      ],
+      "verificationSql": "select string_agg(column_name, ',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='qcs_inspect_releases_sv'; editStates-view and data-current HTTP 200 evidence in /tmp/adp-qcs-inspect-release-view-after-sv-fix-20260618/evidence.json.",
+      "evidence": "Browser base http://222.88.185.146:18080; SSH/DB/log host 100.99.133.43. Evidence /tmp/adp-qcs-inspect-release-view-after-sv-fix-20260618/evidence.json and PNG screenshot. SQL 124 restored edit/view runtime JSON; SQL 125 added qcs_inspect_releases_sv.main_obj and related inherited fields so submitted document editStates/data returned 200. Page title was 产品紧急放行 and core fields rendered.",
+      "issues": [
+        "This case is render/data acceptance only; write persistence is accepted separately under PROD-040.",
+        "The view page still triggers auth current-user/current-language 401 responses and shows a relogin overlay; QCS editStates/data endpoints are 200."
+      ],
+      "nextAction": "Track the relogin overlay/current-user 401 as a frontend auth-state issue, separate from QCS persistence.",
+      "coverageTags": [
+        "quality",
+        "execution",
+        "postgres",
+        "frontend-e2e"
+      ]
+    },
+    {
+      "id": "PROD-040",
+      "domain": "质量联动",
+      "name": "QCS 产品紧急放行保存草稿并提交审核",
+      "route": "/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit",
+      "operationType": "create-update-status",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "POST /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit/save",
+        "POST /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit/submit?id=756521397810432"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "qcs_inspect_releases",
+        "ec_table_info",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "qcs_insp_release_mats",
+        "qcs_inspect_releases_sv"
+      ],
+      "verificationSql": "select id, version, table_no, table_info_id, status, deployment_id, release_reason from public.qcs_inspect_releases where id=756521397810432; select id, activity_name, task_status, table_info_id, model_id, deployment_id, process_key from public.wfm_task_pending where table_info_id=756521397814528 or model_id=756521397810432 order by id; select id, main_obj, table_info_id, activity_name, outcome, outcome_des from public.wf_deal_info where main_obj=756521397810432 or table_info_id=756521397814528 order by create_time desc limit 5; select count(*) from public.qcs_insp_release_mats where inspect_release_id=756521397810432 or table_info_id=756521397814528;",
+      "evidence": "Marker ADP_E2E_20260618_INSP_RELEASE_SAVE_797449 saved a header-only QCS inspect release draft from the public browser ingress, response 200 returned id=756521397810432/tableInfoId=756521397814528/pendingId=756521399026944, and PostgreSQL verified qcs_inspect_releases, ec_table_info, and TaskEvent_1g5tdqv pending. Marker ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449 submitted the same document with workFlowVar.outcome=SequenceFlow_0ecewt8/outcomeDes=审核, response 200, and PostgreSQL verified release version=3, audit pending 756521872426240/TaskEvent_0fkkhcq, and wf_deal_info outcome 审核. Evidence: /tmp/adp-qcs-insp-release-save-ADP_E2E_20260618_INSP_RELEASE_SAVE_797449/evidence.json, /tmp/adp-qcs-insp-release-submit-ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449/submit-evidence.json, /tmp/adp-qcs-inspect-release-view-after-sv-fix-20260618/evidence.json.",
+      "issues": [
+        "Top-level deploymentId must be sent as a string for this legacy upload interceptor path; numeric top-level deploymentId failed and did not persist.",
+        "Page runtime still emits auth current-user/current-language 401 responses; business save/submit/data endpoints and PostgreSQL persistence passed.",
+        "Header-only draft produced qcs_insp_release_mats count=0; detail-row release material behavior still needs a separate detail-marker case if product requires it."
+      ],
+      "nextAction": "Add a detail-row marker case only if product confirms emergency release material details must be covered; otherwise continue with bad quantity, reject/deviation, and inventory acceptance.",
+      "coverageTags": [
+        "quality",
+        "workflow",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
+      ]
     }
-  ]
+  ],
+  "statusNotes": {
+    "workAppointmentRenderFix": "2026-06-19: WorkAppointment list static route now renders through nginx alias/static HTML. 148-runtime-visible-business-buttons.sql restores add/delete; 149-workappointment-i18n-resource-fixups.sql seeds resources; updated 148 namekey values make the legacy list render Chinese 新增/删除. Public browser click of 新增 opens workPlanEdit without console/page/request failures. Save/delete persistence remains PASS through browser page-context; full visible-form save, adjust/cancel, and approval remain pending.",
+    "currentTestAddress": "2026-06-19: Current office SSH/DB host is 100.99.133.43. Browser QA may use http://222.88.185.146:18080 for the same environment because direct Tailscale large static bundle loading is too slow from the current network.",
+    "qcsUnqualifiedDealway": "2026-06-19: QCS degradedRelease/让步放行 treatment decisioning accepted with marker ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE, and return/拒收 accepted with marker ADP_E2E_20260619_QCS_RETURN_1. Bad quantity and inventory/inbound write-back remain separate blocked paths.",
+    "rmBatchFormula": "2026-06-20: Batch formula import, batch/sync create, batch/delete cleanup, and edit/view rendering are accepted. Visible manual edit workflow requires external Batch client/IE ActiveX/WebSocket push; current test env lacks that client, so PROD-010 remains BLOCKED as an external integration gap.",
+    "rmBatchFormulaUiEntryProbe": "2026-06-20: New test address 100.99.133.43 verified. runtime_button has 0 batchFormula rows, rbac_menuoperate exposes query only, runtime_extra_view batchFormulaList buttons are 下载模板/导入Excel only. Authenticated browser opened batchFormulaList?system=formulaEnableFlw with navigationStatus=200 and layoutJson=200, no console/request failures, screenshot /tmp/adp-rm-batchFormulaList-button-probe-1781899978217/batchFormulaList.png. Source batchEdit.html and product manual show manual edit depends on external Batch IE11 ActiveX/WebSocket push to batchFormulaEdit, so this remains external Batch-client integration blocked rather than a missing PostgreSQL mapping.",
+    "runtimeVisibleBusinessButtons": "2026-06-19: 148-runtime-visible-business-buttons.sql patched runtime_extra_view/ec_extra_view and baseService was restarted. 150-craftgraph-visible-modify-button.sql then restored craftGraph visible 修改. layoutJson now returns WTS 新增/修改, craftGraph 新增/修改/删除, and WorkAppointment 新增/删除 buttons with Chinese namekey values. craftGraph visible create/update/delete is PASS; WorkAppointment and WTS full workflow clicks remain pending.",
+    "craftGraphVisibleSaveDelete": "2026-06-19: craftGraph basicInfo pure UI product selection, visible save, visible edit/update, and visible delete now have browser and PostgreSQL evidence. Product reference UI blocker is cleared; visible edit marker ADP_E2E_20260619071722_CRAFTGRAPH persisted version=1. PROD-012 is PASS. Remaining craftGraph notes are display clipping in edit modal and business confirmation on craft_tree_structures.valid after main soft delete.",
+    "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
+    "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Remaining material-service stock-in/inventory is tracked separately under PROD-022.",
+    "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance."
+  }
 }

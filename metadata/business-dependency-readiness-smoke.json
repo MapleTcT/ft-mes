@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T01:36:29.672Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "target": {
+    "baseUrl": "http://100.99.133.43:18080",
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "nacosContainer": "adp-mes-newbase-nacos-1",
+    "postgresContainer": "adp-mes-newbase-postgres-1",
+    "nacosGroup": "prod",
+    "apiTimeoutMs": 8000
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "dependencies": 2,
+    "ready": 0,
+    "actionRequired": 0,
+    "blocked": 2
+  },
+  "items": [
+    {
+      "id": "material-service",
+      "title": "Material warehouse/inventory service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-019",
+        "PROD-021",
+        "PROD-022",
+        "WOM/QCS inventory and stock-in write-back"
+      ],
+      "readyWhen": "serviceName=material has a healthy Nacos instance and marker inventory endpoints stop returning tenant-service 503.",
+      "services": [
+        {
+          "serviceName": "material",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "MATERIAL",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "wms",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "WMS",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "warehouse",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "Warehouse",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "inventory",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "Inventory",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        }
+      ],
+      "endpoints": [
+        {
+          "name": "checkProdResult",
+          "method": "POST",
+          "path": "/msService/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/material/foreign/foreign/checkProdResult\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/material/foreign/foreign/checkProdResult] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:24.083+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "generateProduceOutSing",
+          "method": "POST",
+          "path": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:24.605+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        }
+      ],
+      "database": {
+        "materialLikeTableCount": 36,
+        "materialLikeTables": [
+          "baseset_material_attributes",
+          "baseset_material_attributes_di",
+          "baseset_material_classes",
+          "baseset_material_classes_di",
+          "baseset_material_classes_sv",
+          "baseset_material_contras",
+          "baseset_material_externs",
+          "baseset_material_rechecks",
+          "baseset_material_stocks",
+          "baseset_material_stocks_di",
+          "baseset_material_ware_lists",
+          "baseset_material_ware_sets",
+          "baseset_materials",
+          "baseset_materials_di",
+          "baseset_materials_mc",
+          "baseset_materials_sv",
+          "baseset_warehouse_classes",
+          "baseset_warehouse_classes_di",
+          "baseset_warehouses",
+          "baseset_warehouses_di",
+          "baseset_warehouses_mc",
+          "baseset_warehouses_sv",
+          "hm_material_menage",
+          "hm_material_saves",
+          "hm_stock_menage",
+          "hm_stock_menage_di",
+          "wom_output_materials",
+          "wom_output_materials_sv",
+          "wom_put_in_materials",
+          "wom_put_in_materials_sv",
+          "wom_reject_materials",
+          "wom_reject_materials_di",
+          "wom_reject_materials_sv",
+          "wom_remain_materials",
+          "wom_remain_materials_sv",
+          "wom_task_materials"
+        ]
+      },
+      "issues": [
+        "No healthy Nacos service instance was found for the expected dependency aliases.",
+        "Authenticated endpoint probe still returns tenant-service 503."
+      ],
+      "nextAction": "Deploy/register the warehouse/material service package, map target stock-in tables, then rerun marker inventory acceptance."
+    },
+    {
+      "id": "process-analysis",
+      "title": "ProcessAnalysis traceability service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-020",
+        "WOM production process traceability"
+      ],
+      "readyWhen": "ProcessAnalysis has healthy service registration, runtime/menu metadata, PostgreSQL target tables, and authenticated endpoints no longer return tenant-service 503.",
+      "services": [
+        {
+          "serviceName": "ProcessAnalysis",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "processanalysis",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "PROCESSANALYSIS",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "Traceability",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        },
+        {
+          "serviceName": "traceability",
+          "fetched": true,
+          "hostCount": 0,
+          "healthyHostCount": 0,
+          "ports": [],
+          "instanceIds": []
+        }
+      ],
+      "endpoints": [
+        {
+          "name": "isProdprocessView",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_DEPENDENCY_SMOKE_BATCH",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:25.027+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "processBatchViewOut",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_DEPENDENCY_SMOKE_BATCH&productNo=ADP_DEPENDENCY_SMOKE_MAT",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:26.330+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "analysisiTask",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:27.364+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "manualStatActive",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=1",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:28.336+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        },
+        {
+          "name": "manualStatProcess",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=1",
+          "status": 503,
+          "error": null,
+          "timeout": false,
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:29.003+0000\",\"status\":503}",
+          "tenantServiceMissing": true
+        }
+      ],
+      "database": {
+        "processAnalysisTableCount": 0,
+        "processAnalysisTables": [],
+        "processAnalysisRuntimeViewCount": 0,
+        "processAnalysisMenuCount": 0
+      },
+      "issues": [
+        "No healthy Nacos service instance was found for the expected dependency aliases.",
+        "Authenticated endpoint probe still returns tenant-service 503.",
+        "No ProcessAnalysis runtime_view metadata was found."
+      ],
+      "nextAction": "Deploy/recover the ProcessAnalysis package and schema, then rerun traceability browser/API/DB marker acceptance from the WOM button."
+    }
+  ],
+  "evidence": {
+    "method": "Read-only Nacos service instance lookup, read-only PostgreSQL metadata scan, and authenticated bounded-time HTTP dependency probes.",
+    "secretHandling": "Login token and credentials are not written to this report."
+  }
+}

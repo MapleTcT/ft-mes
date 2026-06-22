@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-20T04:53:01+08:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "environment": {
+    "sshHost": "100.99.133.43",
+    "hostname": "v6-2288H-V6",
+    "frontendBaseUrl": "http://100.99.133.43:18080",
+    "nacosUrl": "http://127.0.0.1:8848/nacos inside adp-mes-newbase-nacos-1",
+    "nacosGroup": "prod"
+  },
+  "status": "BLOCKED_MISSING_PROCESSANALYSIS_SERVICE",
+  "sourceDependencies": [
+    {
+      "caller": "WOM prodprocessView on makeTaskList",
+      "serviceName": "ProcessAnalysis",
+      "endpoint": "/analysisParam/analysisParam/isProdprocessView"
+    },
+    {
+      "caller": "WOM prodprocessView on makeTaskList and makeTaskGraphList",
+      "serviceName": "ProcessAnalysis",
+      "endpoint": "/processAnalysis/exelogSecond/processBatchViewOut"
+    },
+    {
+      "caller": "WOM process execution log manual statistics",
+      "serviceName": "ProcessAnalysis",
+      "endpoint": "/paramStatRec/paramStatRec/manualStatProcess"
+    },
+    {
+      "caller": "WOM activity execution log manual statistics",
+      "serviceName": "ProcessAnalysis",
+      "endpoint": "/paramStatRec/paramStatRec/manualStatActive"
+    },
+    {
+      "caller": "WOM task execution parameter analysis",
+      "serviceName": "ProcessAnalysis",
+      "endpoint": "/paramDetail/paramDetail/analysisiTask"
+    }
+  ],
+  "runtimeEvidence": {
+    "containersFound": [
+      "adp-mes-newbase-WOMMs-1",
+      "adp-mes-newbase-nacos-1"
+    ],
+    "containersMissing": [
+      "ProcessAnalysis",
+      "processanalysis",
+      "Traceability",
+      "traceability"
+    ],
+    "nacosInstances": [
+      {
+        "serviceName": "ProcessAnalysis",
+        "hosts": []
+      },
+      {
+        "serviceName": "processanalysis",
+        "hosts": []
+      },
+      {
+        "serviceName": "PROCESSANALYSIS",
+        "hosts": []
+      },
+      {
+        "serviceName": "Traceability",
+        "hosts": []
+      },
+      {
+        "serviceName": "traceability",
+        "hosts": []
+      },
+      {
+        "serviceName": "WOMMs",
+        "hostsSummary": "healthy 172.25.0.55:8080"
+      }
+    ]
+  },
+  "endpointEvidence": [
+    {
+      "method": "GET",
+      "path": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH",
+      "authenticated": true,
+      "status": 503,
+      "message": "can not find any tenant app service"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH&productNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_MAT",
+      "authenticated": true,
+      "status": 503,
+      "message": "can not find any tenant app service"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+      "authenticated": true,
+      "status": 503,
+      "message": "can not find any tenant app service"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=1",
+      "authenticated": true,
+      "status": 503,
+      "message": "can not find any tenant app service"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=1",
+      "authenticated": true,
+      "status": 503,
+      "message": "can not find any tenant app service"
+    }
+  ],
+  "databaseEvidence": {
+    "verificationSql": "select table_name from information_schema.tables where table_schema='public' and (table_name ~* '^pa_' or table_name ~* 'process.*analysis' or table_name ~* 'trace' or table_name ~* 'process_batch') order by table_name; select count(*) from public.runtime_view where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%'; select count(*) from public.rbac_menuinfo where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%';",
+    "strictProcessAnalysisTables": 0,
+    "runtimeViewRows": 0,
+    "rbacMenuRows": 0,
+    "processAnalysisTargetTablesVerified": false
+  },
+  "packageEvidence": {
+    "found": [
+      "WOM caller-side event scripts referencing ProcessAnalysis"
+    ],
+    "notFound": [
+      "ProcessAnalysis Java controller/service implementation",
+      "ProcessAnalysis runtime module package",
+      "processBatchViewOut implementation",
+      "isProdprocessView implementation",
+      "traceability module package filename"
+    ]
+  },
+  "impactedAcceptanceCases": [
+    "PROD-020"
+  ],
+  "latestReadinessSmoke": {
+    "generatedAt": "2026-06-21T13:46:42.816Z",
+    "report": "metadata/business-dependency-readiness-smoke.json",
+    "externalEvidence": "/tmp/adp-business-dependency-readiness-smoke-current.json",
+    "status": "BLOCKED",
+    "summary": "ProcessAnalysis/processanalysis/PROCESSANALYSIS/Traceability/traceability aliases all have healthyHostCount=0; five authenticated ProcessAnalysis endpoints still return tenant-service 503; PostgreSQL processAnalysisTableCount/runtimeView/menu counts remain 0."
+  },
+  "nextActions": [
+    "Deploy the package that provides serviceName=ProcessAnalysis.",
+    "Confirm Nacos prod@@ProcessAnalysis has a healthy instance.",
+    "Recover runtime_view, menu, permission, and PostgreSQL schema assets for ProcessAnalysis.",
+    "Re-run isProdprocessView and processBatchViewOut from a real WOM browser context with a marker batch.",
+    "Trace controller/service/DAO/SQL and query PostgreSQL target tables before changing PROD-020 from BLOCKED to PASS."
+  ]
+}

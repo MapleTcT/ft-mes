@@ -1,59 +1,61 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T20:48:01+08:00",
-  "repoCommit": "0fcdda693a89cd73b449c253f28596338b22f0ba",
+  "generatedAt": "2026-06-19T17:50:31.680Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
   "database": "PostgreSQL",
   "module": "production",
   "sourcePackage": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4",
-  "liveDiscoveryReport": "/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json",
+  "liveDiscoveryReport": "/tmp/adp-production-action-discovery-20260616014350/production-action-discovery.json",
   "summary": {
-    "sourceActions": 12,
+    "sourceActions": 15,
     "liveRoutesProbed": 8,
-    "liveRoutesPass": 2,
-    "liveRoutesWithErrors": 6,
-    "actionsReadyForMarkerPersistence": 0,
-    "blockedByRuntimeLayout": 10
+    "liveRoutesPass": 7,
+    "liveRoutesWithErrors": 1,
+    "actionsReadyForMarkerPersistence": 12,
+    "blockedByRuntimeLayout": 0,
+    "blockedByMissingMarkerData": 1,
+    "blockedByImplementationGap": 1
   },
   "runtimeFindings": [
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
       "status": "PASS_READ_ONLY",
-      "evidence": "Real browser navigation 200; visible buttons 查询, 仅查待办, 清空; POST /makeTaskList-pending returned 200; no safe create button."
+      "evidence": "Real browser navigation 200. SQL 078 restored list buttons: 开始, 保持, 重启, 结束, 提前放料, 请检, 生产过程追溯, 生成二维码. POST /makeTaskList-pending returned 200. List shows 共 0 项, so no marker row was available and no write request was submitted. Reports: /tmp/adp-production-action-discovery-20260615180122/production-action-discovery.json; /tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/prepareMakeTaskList",
       "status": "PASS_READ_ONLY",
-      "evidence": "Real browser navigation 200; visible buttons 查询, 清空; POST /prepareMakeTaskList-query returned 200; source generatePrepareNeed button is not exposed in current runtime view."
+      "evidence": "Real browser navigation 200. SQL 078 restored 下推备料需求 button. POST /prepareMakeTaskList-query returned 200. List shows 共 0 项, so no marker row was available and no generatePrepareNeed write request was submitted. Reports: /tmp/adp-production-action-discovery-20260615180122/production-action-discovery.json; /tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit",
-      "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200. After runtime_extra_view JSON patch, GET layoutJson for WOM_1.0.0_produceTask_makeTaskEdit returned 200 with DataGridCode and real produceTask field keys. Real browser still failed with visible error banner and React error #130; no buttons or fields rendered. Direct layoutJson verification returns pageType EDIT; real browser still fails with React #130."
+      "status": "PASS_RENDER_ONLY",
+      "evidence": "Navigation 200. layoutJson for WOM_1.0.0_produceTask_makeTaskEdit returned 200 with pageType EDIT. Real browser render completed with no console/page/network errors in the action render probe, but no marker create/save was submitted."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskSubmitView",
-      "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the page still fails in the desktop renderer with ErrorBoundary React #130 and exposes no actionable controls."
+      "status": "PASS_RENDER_ONLY",
+      "evidence": "Navigation 200. layoutJson for WOM_1.0.0_produceTask_makeTaskSubmitView returned 200 with pageType EDIT. Real browser render completed with no console/page/network errors in the action render probe, but no marker submit/write request was submitted."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskView",
-      "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch. Direct layoutJson verification returns pageType VIEW; real browser still fails with React #130 and no fields/buttons render."
+      "status": "PASS_RENDER_ONLY",
+      "evidence": "Navigation 200. layoutJson for WOM_1.0.0_produceTask_makeTaskView returned 200 with pageType VIEW. Real browser render completed with no console/page/network errors in the action render probe, but no marker process/action write request was submitted."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
-      "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the action page still renders the generic error banner and React #130, so batch process/activity UI is unavailable."
+      "status": "PASS_RENDER_ONLY",
+      "evidence": "Navigation 200. layoutJson for WOM_1.0.0_produceTask_makeTaskBatchView returned 200. Real browser render completed with no console/page/network errors in the action render probe, but no marker batch activity write request was submitted."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/easyTaskOperateView",
-      "status": "FAIL_RUNTIME_LAYOUT",
-      "evidence": "Navigation 200. layoutJson now returns 200 after runtime JSON patch, but the easy activity/report-work page still fails with React #130 before controls render."
+      "status": "PASS_RENDER_ONLY",
+      "evidence": "Navigation 200. layoutJson for WOM_1.0.0_produceTask_easyTaskOperateView returned 200. Real browser render completed with no console/page/network errors in the action render probe. SQL 102 later restored the easy report btn-report runtime button, and /tmp/adp-wom-easy-active-persistence-current.json proves a marker endEasyActive action from this page."
     },
     {
       "route": "/msService/WOM/produceTask/produceTask/makeTaskGraphList",
       "status": "FAIL_NOT_FOUND",
-      "evidence": "Real browser navigation returned 404 document response."
+      "evidence": "Real browser navigation returned 404 document response; route remains unmapped."
     }
   ],
   "actions": [
@@ -73,7 +75,7 @@
       ],
       "requiresPersistence": false,
       "acceptanceStatus": "PASS_READ_ONLY",
-      "evidence": "Captured by live browser discovery with status 200 and pageNo/pageSize payload.",
+      "evidence": "Captured by live browser discovery with status 200 and pageNo/pageSize payload. SQL 078 restored visible list action buttons, but this action is read-only and does not require marker persistence.",
       "blockers": []
     },
     {
@@ -91,7 +93,7 @@
       ],
       "requiresPersistence": false,
       "acceptanceStatus": "PASS_READ_ONLY",
-      "evidence": "Captured by live browser discovery with status 200.",
+      "evidence": "Captured by live browser discovery with status 200. SQL 078 restored 下推备料需求 visibility on prepareMakeTaskList, but this action row is the read/query entry.",
       "blockers": []
     },
     {
@@ -106,14 +108,16 @@
       "serviceEntry": "WOMProduceTaskServiceImpl.generatePrepareNeed",
       "targetTables": [
         "WOM_PRODUCE_TASKS",
-        "WOM_TASK_MATERIALS"
+        "WOM_PRE_PARE_NEEDS",
+        "WOM_PRE_PARE_NEED_REFS",
+        "WOM_PRE_PARE_NEEDS_DI",
+        "wfm_task_pending",
+        "jbpm4_execution"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source customEvent.js posts selected ids to generatePrepareNeed; live prepareMakeTaskList page exposes only 查询/清空 in current runtime.",
-      "blockers": [
-        "Action button not exposed in current runtime view; cannot run marker-based write acceptance."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser selected marker ADP_E2E_20260615220711_WOM_PREPARE_NEED_TASK_TN on /msService/WOM/produceTask/produceTask/prepareMakeTaskList and clicked 下推备料需求. POST /generatePrepareNeed payload ids=8288156123129379%2C returned HTTP 200 and data.dealSuccessFlag=true with no console/page/network/request errors. PostgreSQL verified wom_produce_tasks.is_prepared=true and pre_pare_state=WOM_prePareNeedState/waitPrePare, wom_pre_pare_needs id 755654805062912 table_no prepareMaterialNeed_20260616_002, wom_pre_pare_need_refs id 755654805140736, wom_pre_pare_needs_di count 1, plus workflow pending/JBPM compatibility. Evidence: /tmp/adp-wom-prepare-need-persistence-current.json.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-004",
@@ -127,38 +131,62 @@
       "serviceEntry": "WOMProduceTaskServiceImpl.updateTaskState",
       "targetTables": [
         "WOM_PRODUCE_TASKS",
-        "WOM_TASK_PROCESSES",
-        "WOM_TASK_ACTIVES"
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PROC_REPORTS",
+        "WOM_PRODUCE_TASK_EXELOG"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source customEvent.js uses updateTaskState for start/pause/recovery; controller and service entries exist in WOM_6.1.3.4 source.",
-      "blockers": [
-        "Current runtime makeTaskList has layoutDatagrid.buttons=[] and no visible state buttons."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Source customEvent.js uses updateTaskState for start/pause/recovery; controller and service entries exist in WOM_6.1.3.4 source. SQL 078 restored 开始/保持/重启 buttons, SQL 079 restored public.wom_wait_put_records, and SQL 080 added PostgreSQL state-sync triggers for hold/restart wait-record consistency. Real browser/runtime-event acceptance selected marker ADP_E2E_20260615195204_WOMSTART_HOLD_RESTART, captured state=start/hold/restart POST requests for taskId=8088155312477323, received HTTP 200 dealSuccessFlag=true, and PostgreSQL verified wom_produce_tasks plus wom_wait_put_records transitions runing -> iskeep -> runing. Report: /tmp/adp-wom-hold-restart-persistence-current.json.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-005",
       "name": "制造任务完工报工并结束",
       "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
-      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList",
-      "sourceEvent": "stopTaskEvent(event)",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList; WOM_1.0.0_procReport_outPutCommonTaskEdit",
+      "sourceEvent": "stopTaskEvent(event) -> outPutCommonTaskEdit -> addOutputByOutPutDetails",
       "method": "POST",
       "endpoint": "/msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
       "controllerEntry": "WOMProduceTaskController.addOutputByOutPutDetails",
-      "serviceEntry": "WOMProduceTaskServiceImpl.addOutputByOutPutDetails",
+      "serviceEntry": "WOMProduceTaskServiceImpl.addOutputByOutPutDetails -> updateTaskState(stop)",
       "targetTables": [
-        "WOM_PROC_REPORTS",
         "WOM_PRODUCE_TASKS",
-        "WOM_TASK_ACTIVES",
-        "WOM_TASK_PROCESSES"
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PROC_REPORTS",
+        "WOM_PRODUCE_TASK_EXELOG",
+        "WOM_OUTPUT_DETAILS",
+        "WOM_MAT_OUTPT_RECORDS"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source stopTaskEvent opens outPutCommonTaskEdit and posts procReportId/taskId to addOutputByOutPutDetails after save.",
-      "blockers": [
-        "Runtime makeTaskList does not expose finish/report-work button; cannot create marker proc report from UI."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Report: /tmp/adp-wom-stop-output-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskList, selected marker ADP_E2E_20260616001326_WOMSTART_STOP_OUTPUT_TASK_TN, triggered start via updateTaskState, opened the real outPutCommonTaskEdit dialog, seeded marker output detail 8900056880648505, then submitted POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails with procReportId=755685841040640&taskId=8900056880648502. Response returned HTTP 200, dealSuccessFlag=true, exeState.id=WOM_runState/finished, with no console/page/network/request errors. PostgreSQL verified wom_produce_tasks.id=8900056880648502 task_run_state=WOM_runState/finished, finish_num=5.000000, version=2; wom_wait_put_records.id=8900056880648503 exe_state=WOM_runState/finished, batch_sync_status=WOM_BatchSyncStatus/done, proc_report_id=755685841040640; wom_proc_reports.id=755685841040640 valid=true; wom_produce_task_exelog.id=755685841319168 task_run_state=WOM_runState/finished, finish_num=5.000000; wom_output_details.id=8900056880648505 output_num=5.000000, report_num=5.000000, product=8900056880648500, remain_operate=WOM_remainOperate/noOperate; wom_mat_outpt_records count for out_mat_detail_id=8900056880648505 is 1. Runtime fixes: WOMMs-prod config disables MES warehouse integration for test, wom-config-default.jar defaults null WOM config values, and SQL 101 syncs task finish_num from output details in PostgreSQL. Evidence: /tmp/adp-wom-stop-output-persistence-current.json.",
+      "blockers": []
+    },
+    {
+      "id": "WOM-PROD-ACTION-014",
+      "name": "投入明细保存并结束投料活动",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskBatchView; /msService/WOM/procReport/putinDetail/remainMaterialView/save",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskBatchView; WOM_1.0.0_procReport_remainMaterialView",
+      "sourceEvent": "startActive(event) -> remainMaterialView/save -> endActiveEvent(event)",
+      "method": "GET; POST; GET",
+      "endpoint": "/msService/WOM/produceTask/produceTask/startActive; /msService/WOM/procReport/putinDetail/remainMaterialView/save; /msService/WOM/produceTask/produceTask/endActive",
+      "controllerEntry": "WOMProduceTaskController.startActive/endActive; WOMPutinDetailController.submit",
+      "serviceEntry": "WOMProduceTaskServiceImpl.startActive/endActive/toProcfeedback; WOMPutinDetailServiceImpl.submit/savePutinDetail",
+      "targetTables": [
+        "WOM_TASK_ACTIVES",
+        "WOM_PROC_REPORTS",
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PUTIN_DETAILS",
+        "WOM_TASK_PROCESSES",
+        "WOM_PRODUCE_TASKS",
+        "WOM_PROCESS_EXELOGS",
+        "WOM_MAT_CONSUM_RECODS"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "evidence": "Report: /tmp/adp-wom-putin-active-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskBatchView?id=8388157617258686, selected marker process/activity rows, triggered startActive, then submitted POST /msService/WOM/procReport/putinDetail/remainMaterialView/save in the same authenticated frontend context with marker materialBatchNum ADP_E2E_20260616021612_WOM_ACTIVE_BATCH and useNum/putinNum=2, then triggered endActive. startActive and endActive both returned HTTP 200 with data.success=true; putin save returned HTTP 200, code=200, data.dealSuccessFlag=true, id=755716019803392; failedResponses/requestFailures/consoleErrors/pageErrors were all empty. PostgreSQL verified wom_task_actives id 8388157617258688 run_state=WOM_runState/finished/is_finish=true/version=2, wom_proc_reports id 755716010800384 valid=true, wom_wait_put_records id 8388157617258689 exe_state=WOM_runState/finished with actual_start_time/actual_end_time/proc_report_id, and wom_putin_details id 755716019803392 head_id=755716010800384 material_batch_num=ADP_E2E_20260616021612_WOM_ACTIVE_BATCH material_id=8388157617258684 putin_num=2 use_num=2 remain_operate=WOM_remainOperate/noOperate valid=true. Separate source and remote SQL analysis verified activeExelogCount=0 and matConsumCount=0 because the current RM_activeType/putin path does not auto-create WOMActiExelog/material consumption records; this is not a PostgreSQL migration gap.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-006",
@@ -168,17 +196,15 @@
       "sourceEvent": "earlyPutInFunc(event)",
       "method": "GET",
       "endpoint": "/msService/WOM/produceTask/produceTask/setAdvanceTrue/{orderId}",
-      "controllerEntry": "WOMProduceTaskController.setAdvanceTrue",
-      "serviceEntry": "WOMProduceTaskServiceImpl.setAdvanceTrue or equivalent service path",
+      "controllerEntry": "WOMProduceTaskController.setAdvanceFlag",
+      "serviceEntry": "WOMProduceTaskServiceImpl.setAdvaceTrue",
       "targetTables": [
         "WOM_PRODUCE_TASKS"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source customEvent.js calls setAdvanceTrue after taskRunState/runing and advanceCharge checks.",
-      "blockers": [
-        "Runtime makeTaskList does not expose early put-in action button."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser selected marker ADP_E2E_20260615232454_WOMADVANCE_RELEASE_TASK_TN on /msService/WOM/produceTask/produceTask/makeTaskList and triggered 提前放料 via runtime button btn-earlyPutIn. GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/8088156589437949 returned HTTP 200, code=200, data.success=true, with no console/page/network/request errors. PostgreSQL verified wom_produce_tasks.id=8088156589437949, task_run_state=WOM_runState/runing, advance_charge=true, is_advanced=true, feed_condition='ADP_E2E_20260615232454_WOMADVANCE_RELEASE feed condition', version=1. Evidence: /tmp/adp-wom-advance-release-persistence-current.json.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-007",
@@ -192,34 +218,45 @@
       "serviceEntry": "WOMProduceTaskServiceImpl.createManuInspect",
       "targetTables": [
         "WOM_PRODUCE_TASKS",
-        "QCS inspection tables"
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PRODUCE_TASK_EXELOG",
+        "BASESET_BATCH_INFOS",
+        "QCS_INSPECTS",
+        "QCS_INSPECT_STDS",
+        "RM_FORMULA_QUALITIES",
+        "LIMSBA_QUALITY_STDS",
+        "LIMSBA_STD_VERSIONS",
+        "LIMSBA_ANALY_PROD_STDS",
+        "WF_CUSTOM_CONFIG",
+        "WF_DEPLOYMENT"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source customEvent.js checks findCheckMsgByBatch then posts taskId to createManuInspect.",
-      "blockers": [
-        "Runtime makeTaskList does not expose inspection action; QCS target tables still need table-level trace."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Source customEvent.js checks findCheckMsgByBatch and posts taskId to createManuInspect. SQL 078 restored 请检 on makeTaskList. Real frontend acceptance /tmp/adp-wom-manu-inspect-persistence-acceptance-rerun.json selected marker task ADP_E2E_20260616050127_WOM_MANU_INSPECT_TASK_TN, posted taskId=8990058608766755 to /msService/WOM/produceTask/produceTask/createManuInspect, received HTTP 200/data.success=true, opened QCS manuInspectList, and confirmed marker batch visibility. PostgreSQL verified WOM task/wait/exelog check_state=待检 and check_times=1, qcs_inspects id=755756625425664 table_no=manuInspect_20260616_005 status=88, and qcs_inspect_stds count=1. Fixes applied before PASS include SQL 112-116 plus simulated-login fallback for LIMS internal auth.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-008",
       "name": "工序开始/结束",
-      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskView",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskBatchView",
       "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskView",
       "sourceEvent": "startProcessEvent / endProcessEvent",
       "method": "POST",
       "endpoint": "/msService/WOM/produceTask/taskProcess/start/{id}; /msService/WOM/produceTask/taskProcess/end/{id}",
-      "controllerEntry": "WOM taskProcess controller",
-      "serviceEntry": "WOM taskProcess service",
+      "controllerEntry": "WOMTaskProcessController.startProcess/endProcess",
+      "serviceEntry": "WOMTaskProcessServiceImpl.startProcess/endProcess -> WOMProduceTaskServiceImpl.insertActiveWaitPut/insertProcessWaitPut",
       "targetTables": [
-        "WOM_TASK_PROCESSES"
+        "WOM_TASK_PROCESSES",
+        "WOM_PROC_REPORTS",
+        "WOM_PROCESS_EXELOGS",
+        "WOM_WAIT_PUT_RECORDS",
+        "HM_FACTORY_MODELS",
+        "RM_PROCESS_ACTIVES"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source makeTaskView and makeTaskBatchView customEvent.js call taskProcess start/end endpoints.",
-      "blockers": [
-        "Live makeTaskView action pages render React #130 after layoutJson 200, so the action UI cannot render."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser acceptance /tmp/adp-wom-process-end-persistence-current.json covers makeTaskBatchView process start/end. Marker ADP_E2E_20260616015500_WOM_ACTIVE selected process 8388157490066681, captured POST /msService/WOM/produceTask/taskProcess/start/8388157490066681, GET /isUnFinishActives/8388157490066681, and POST /msService/WOM/produceTask/taskProcess/end/8388157490066681 returning HTTP 200 with no console/page/network/request errors. PostgreSQL verified wom_task_processes finished with act_start_time/act_end_time, wom_proc_reports taskProcess row finished, wom_process_exelogs finished, wom_wait_put_records process row finished with actual_start_time/actual_end_time/proc_report_id, and work-order wait evidence was written. SQL 104 restored rm_process_actives, SQL 105 covers convert(proc_sort,int), and SQL 106 syncs process wait actual_end_time in PostgreSQL.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-009",
@@ -227,19 +264,19 @@
       "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskView",
       "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskView",
       "sourceEvent": "setUnitEvent(event)",
-      "method": "FORM_SAVE",
-      "endpoint": "/msService/WOM/produceTask/taskProcess/processUnitEdit?id={processId}",
-      "controllerEntry": "runtime edit form save",
-      "serviceEntry": "runtime edit form save",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/taskProcess/processUnitEdit/submit?id={processId}",
+      "controllerEntry": "WOMTaskProcessController.submit",
+      "serviceEntry": "WOMTaskProcessServiceImpl.afterSaveTaskProcess -> WOMProduceTaskServiceImpl.modifyTaskWorkUnitByProcess",
       "targetTables": [
-        "WOM_TASK_PROCESSES"
+        "WOM_TASK_PROCESSES",
+        "WOM_WAIT_PUT_RECORDS",
+        "HM_FACTORY_MODELS"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source customEvent.js opens processUnitEdit dialog and calls submitFormData('save').",
-      "blockers": [
-        "Live makeTaskView/makeTaskBatchView action pages render React #130 after layoutJson 200."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "2026-06-20 remote/browser proof: SQL 159 restored WOM_1.0.0_produceTask_processUnitEdit runtime_extra_view.view_json and runtime_view.extra_view/ec_env linkage, then baseService was restarted to clear layout cache. Real browser used http://222.88.185.146:18080, logged in as admin, opened /msService/WOM/produceTask/taskProcess/processUnitEdit?id=8388189129735082; layoutJson/editStates/upload-list all returned 200 with no console/page/request failures. POST /msService/WOM/produceTask/taskProcess/processUnitEdit/submit?id=8388189129735082 returned HTTP 200/code=200/dealSuccessFlag=true. PostgreSQL on 100.99.133.43 verified marker ADP_E2E_20260619174817_WOM_ACTIVE_WU saved to wom_task_processes.equipment_id and synchronized wom_wait_put_records process/workOrder rows euq_id/equ_code/equ_name. Evidence: /tmp/adp-wom-process-unit-persistence-current.json.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-010",
@@ -254,14 +291,16 @@
       "targetTables": [
         "WOM_TASK_ACTIVES",
         "WOM_TASK_PROCESSES",
-        "WOM_PRODUCE_TASKS"
+        "WOM_PRODUCE_TASKS",
+        "WOM_PROC_REPORTS",
+        "WOM_ACTI_EXELOGS",
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PROCESS_EXELOGS"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source makeTaskBatchView customEvent.js calls startActive/endActive and refreshes taskActive/queryByProcess.",
-      "blockers": [
-        "Live makeTaskBatchView action pages render React #130 after layoutJson 200."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser acceptance now covers both startActive and endActive. startActive evidence: /tmp/adp-wom-active-persistence-current.json with marker ADP_E2E_20260615225342_WOM_ACTIVE. endActive evidence: /tmp/adp-wom-active-end-persistence-current.json with marker ADP_E2E_20260615230854_WOM_ACTIVE. The end run opened makeTaskBatchView, selected marker process/activity rows, triggered startActive then endActive from runtime buttons, and PostgreSQL verified wom_task_actives.run_state=WOM_runState/finished/is_finish=true, wom_acti_exelogs.run_state=WOM_runState/finished, and wom_wait_put_records.exe_state=WOM_runState/finished with actual_end_time/proc_report_id/acti_exelog.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-011",
@@ -275,14 +314,18 @@
       "serviceEntry": "WOMProduceTaskServiceImpl.endEasyActive",
       "targetTables": [
         "WOM_TASK_ACTIVES",
-        "WOM_PROC_REPORTS"
+        "WOM_PROC_REPORTS",
+        "WOM_ACTI_EXELOGS",
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_OUTPUT_DETAILS",
+        "WOM_MAT_OUTPT_RECORDS",
+        "WOM_TASK_PROCESSES",
+        "WOM_PRODUCE_TASKS"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "evidence": "Source easyTaskOperateView customEvent.js posts selected active id to endEasyActive.",
-      "blockers": [
-        "Live easyTaskOperateView action pages render React #130 after layoutJson 200."
-      ]
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser acceptance /tmp/adp-wom-easy-active-persistence-current.json covers easyTaskOperateView reportEvent/endEasyActive. Marker ADP_E2E_20260616004615_WOM_ACTIVE opened easyTaskOperateView?id=8388157077549687, selected active 8388157077549689, invoked restored btn-report / 结束报工, and captured POST /msService/WOM/produceTask/produceTask/endEasyActive/8388157077549689 returning HTTP 200, dealSuccessFlag=true, exeState.id=WOM_runState/finished. PostgreSQL verified wom_task_actives.is_finish=true with act_end_time, wom_proc_reports.is_finish=true, wom_acti_exelogs.run_state=WOM_runState/finished, wom_wait_put_records.exe_state=WOM_runState/finished with actual_end_time/proc_report_id/acti_exelog, wom_output_details output_num/report_num=3, and wom_mat_outpt_records count=1. SQL 102 restored the missing runtime button and live baseService was restarted to clear layout cache.",
+      "blockers": []
     },
     {
       "id": "WOM-PROD-ACTION-012",
@@ -296,14 +339,64 @@
       "serviceEntry": "WOM/QCS checkout generation service",
       "targetTables": [
         "WOM_TASK_ACTIVES",
-        "QCS checkout tables"
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PROC_REPORTS",
+        "WOM_ACTI_EXELOGS",
+        "QCS_INSPECTS",
+        "QCS_INSPECT_STDS",
+        "QCS_INSPECT_COMS",
+        "BASESET_BATCH_INFOS"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "evidence": "Real browser page-context acceptance /tmp/adp-wom-checkoutbill-persistence-20260618200829/wom-checkoutbill-persistence-results.json covers checkoutBill/generate. Marker ADP_E2E_20260618200829_WOM_CHECKOUTBILL opened makeTaskBatchView, selected the seeded quality process/activity, called GET /msService/WOM/produceTask/produceTask/checkoutBill/generate/8991071330917347, and captured HTTP 200/code=200 with zero console/page/request failures. PostgreSQL on 100.99.133.43 verified wom_task_actives.check_state=待检/check_times=1/inpect_deal_id=756687356716288/is_finish=true, wom_wait_put_records finished with proc_report_id=756687354574080, wom_proc_reports and wom_acti_exelogs persisted, qcs_inspects manuInspect_20260619_002/status=88, one qcs_inspect_stds row, one qcs_inspect_coms row, and baseset_batch_infos check_state=BaseSet_checkState/waitForCheck.",
+      "blockers": []
+    },
+    {
+      "id": "WOM-PROD-ACTION-013",
+      "name": "制造任务结束最小路径（无产出明细）",
+      "frontendRoute": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "sourceViewCode": "WOM_1.0.0_produceTask_makeTaskList; WOM_1.0.0_procReport_outPutCommonTaskEdit",
+      "sourceEvent": "stopTaskEvent(event) -> outPutCommonTaskEdit -> addOutputByOutPutDetails",
+      "method": "POST",
+      "endpoint": "/msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
+      "controllerEntry": "WOMProduceTaskController.addOutputByOutPutDetails",
+      "serviceEntry": "WOMProduceTaskServiceImpl.addOutputByOutPutDetails -> updateTaskState(stop)",
+      "targetTables": [
+        "WOM_PRODUCE_TASKS",
+        "WOM_WAIT_PUT_RECORDS",
+        "WOM_PROC_REPORTS",
+        "WOM_PRODUCE_TASK_EXELOG",
+        "WOM_OUTPUT_DETAILS",
+        "WOM_TASK_ACT_ITEMSS"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "evidence": "Report: /tmp/adp-wom-stop-persistence-current.json; real browser opened /msService/WOM/produceTask/produceTask/makeTaskList, selected marker ADP_E2E_20260615203324_WOMSTART_STOP, clicked 开始 and confirmed the modal, then invoked the runtime stop button event to open the real outPutCommonTaskEdit dialog. After layoutJson for WOM_1.0.0_procReport_outPutCommonTaskEdit returned 200 with no console/page/network/request errors, the browser page context submitted POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails with procReportId=755631765824768&taskId=8088155560435840. Response was HTTP 200, dealSuccessFlag=true, exeState.id=WOM_runState/finished. PostgreSQL verified wom_produce_tasks id 8088155560435840 task_run_state=WOM_runState/finished, act_end_time=2026-06-16 04:33:34.851, version=2; wom_wait_put_records id 8088155560435841 exe_state=WOM_runState/finished, actual_end_time=2026-06-16 04:33:34.86, proc_report_id=755631765824768; wom_proc_reports id 755631765824768 valid=true; wom_produce_task_exelog id 755631766148352 task_run_state=WOM_runState/finished. outputDetailCount=0 and taskActItemsCount=0, so this proves the minimal no-output finish path, not full output/input detail report-work. Screenshots: /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-before.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-start-confirm.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-stop-dialog.png, /tmp/adp-wom-start-stop-persistence-20260615203324/wom-start-stop-after.png. Runtime metadata fix: deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql and 085-wom-output-common-task-edit-view-linkage.sql; live env needed baseService restart because the failed view was cached before the patch. Report: /tmp/adp-wom-stop-persistence-current.json. SQL 084/085 restored outPutCommonTaskEdit layoutJson and runtime_view linkage.",
+      "blockers": []
+    },
+    {
+      "id": "WOM-PROD-ACTION-015",
+      "name": "public 日计划生成制造指令单接口",
+      "frontendRoute": "/msService/public/WOM/produceTask/produceTask/produceTaskCreated",
+      "sourceViewCode": "external-public-api",
+      "sourceEvent": "external daily-plan create callback",
+      "method": "POST",
+      "endpoint": "/msService/public/WOM/produceTask/produceTask/produceTaskCreated",
+      "controllerEntry": "WOMProduceTaskController.produceTaskCreated",
+      "serviceEntry": "WOMProduceTaskServiceImpl.creatProTask",
+      "targetTables": [
+        "WOM_PRODUCE_TASKS"
       ],
       "requiresPersistence": true,
       "acceptanceStatus": "BLOCKED",
-      "evidence": "Source easyTaskOperateView customEvent.js calls checkoutBill/generate and refreshes activity grids.",
+      "evidence": "Safe marker probe ADP_E2E_20260620025202_PUBLIC_PRODUCE_NOOP returned HTTP 200 and message 处理成功, but PostgreSQL marker count in wom_produce_tasks remained 0. Source review of WOM_6.1.3.4 shows WOMProduceTaskController.produceTaskCreated delegates to WOMProduceTaskServiceImpl.creatProTask, whose intended creation body is commented out before returning Result.success(\"处理成功\"). Detailed report: docs/backend-table-audit/wom-public-produce-task-created-analysis.md; machine record: metadata/wom-public-produce-task-created-analysis.json; probe evidence: /tmp/adp-public-produceTaskCreated-noop-current.json.",
       "blockers": [
-        "Live easyTaskOperateView action pages render React #130 after layoutJson 200; QCS checkout target tables still need table-level trace."
+        "Legacy public endpoint returns false success without persistence.",
+        "This is an implementation/product-contract gap, not a PostgreSQL compatibility SQL gap.",
+        "Use produceTaskCreated2 as the accepted daily-plan generation baseline until the public endpoint is restored or explicitly disabled."
       ]
     }
-  ]
+  ],
+  "evidence": {}
 }

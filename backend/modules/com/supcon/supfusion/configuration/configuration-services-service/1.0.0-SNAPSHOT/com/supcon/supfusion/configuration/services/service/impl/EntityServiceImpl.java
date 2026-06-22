@@ -234,14 +234,14 @@ public class EntityServiceImpl extends BaseServiceImpl<Entity> implements Entity
 //		}
 		//fix me:菜单有自己的缓存，这里先不处理
 		menuInfoService.deleteMenuOperateByEntity(entity.getCode());
-		String specialPermissionSql="from SpecialPermission s  where  s.entityCode= ?";
+		String specialPermissionSql="from SpecialPermission s  where  s.entityCode= ?0";
 		List<SpecialPermission> specialPermissionList = entityDao.findByHql(specialPermissionSql, entity.getCode());
 		if(specialPermissionList != null && !specialPermissionList.isEmpty()) {
 			for(SpecialPermission s:specialPermissionList)  {
 					specialPermissionDao.delete(s);
 			}
 		}
-		String viewSql = "from  View as v where v.entity.code= ?";
+		String viewSql = "from  View as v where v.entity.code= ?0";
 		List<View> viewList = entityDao.findByHql(viewSql, entity.getCode());
 		if(viewList != null && !viewList.isEmpty()) {
 			for(View v : viewList) {
@@ -250,14 +250,20 @@ public class EntityServiceImpl extends BaseServiceImpl<Entity> implements Entity
 				viewService.deleteView(v);
 			}
 		}
-		String emSql = "from  Model as m where m.entity.code= ?";
+		String emSql = "from  Model as m where m.entity.code= ?0";
 		List<Model> emList = entityDao.findByHql(emSql, entity.getCode());
 		if(emList != null && !emList.isEmpty()) {
 			for(Model m : emList) {
 				modelService.deleteModel(m);
 			}
 		}
-		entityDao.delete(entity.getCode(), entity.getVersion());
+		Entity persistedEntity = entityDao.get(entity.getCode());
+		if (persistedEntity == null || !Objects.equals(persistedEntity.getVersion(), entity.getVersion())) {
+			throw new StaleObjectStateException(Entity.class.getName(), entity.getCode());
+		}
+		persistedEntity.setValid(false);
+		persistedEntity.setDeleteTime(new Date());
+		entityDao.update(persistedEntity);
 		//开始保存模块信息数据的最后修改时间
 //		ModuleGenerateInfo generateInfo = moduleGenerateInfoService.getModuleGenerateInfoByModuleCode(entity.getModule().getCode());
 //		if(generateInfo!=null){

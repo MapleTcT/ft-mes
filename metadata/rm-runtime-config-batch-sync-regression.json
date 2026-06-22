@@ -1,0 +1,150 @@
+{
+  "generatedAt": "2026-06-21T07:34:13.941Z",
+  "baseUrl": "http://100.99.133.43:18080",
+  "route": "/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+  "marker": "ADP_E2E_20260621073500_RM_CFG_REG",
+  "origin": "formulaEnableFlw",
+  "batchFormulaId": "1782027300000",
+  "productCode": "ADP_E2E_20260615191905_WOMSTART_MAT",
+  "console": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/greenDill/static/RM/formula/formula/batchFormulaList/i18n-value.js?0.18462447954540973",
+      "postData": null
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--批控配方-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/RM/formula/formula/batchFormulaList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"RM_1.0.0_formula_batchFormulaList\", //  视图编码\n\t\t\t\"entityCode\":\"RM_1.0.0_formula\",// 实体编码\n\t\t\t\"menuCode\": \"RM_1.0.0_formula_batchFormulaList\",\n\t\t\t\"viewName\": \"批控配方\",// 视图名称\n\t\t\t\"viewType\": \"LIST\",// 视图类型\n\t\t\t\"modelCode\": \"RM_1.0.0_formula_Formula\",// 模型编码\n\t\t\t\"moduleCode\": \"RM_1.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"formula\",// 模型别名\n\t\t\t\"workflowEnabled\": false,// 启用工作流\n\t\t\t\"listButtons\":{\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/RM/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/RM/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/RM/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/RM/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/RM/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/RM/formula/formula/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/RM/formula/formula/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"mneClientSpe\":\"/msService/RM/formula/formula/mneClient\",//  助记码\n\t\t\t\t\"mainView\": \"/msService/RM/formula/formula/batchFormulaView\", //  主查看视图\n\t\t\t\t\"downloadXls\": \"/msService/RM/formula/formula/downloadXls\", //  下载导入模板\n\t\t\t\t\"importMainXls\": \"/msService/RM/formula/formula/importMainXls\", //  导入Excel\n\t\t\t\t\"deleteData\": \"/msService/RM/formula/formula/delete\",// 删除数据\n\t\t\t\t\"sourceData\": \"/msService/RM/formula/formula/batchFormulaList-\", //  列表数据\n\t\t\t\t\"echartsData\": \"/msService/RM/formula/formula/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1642645999954\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1642645999954\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=16426459999"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/greenDill/static/RM/formula/formula/batchFormulaList/i18n-value.js?0.18462447954540973",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\n"
+    }
+  ],
+  "screenshots": {
+    "batchFormulaList": "/tmp/adp-rm-batch-sync-persistence-20260621073413/rm-batch-formula-list.png",
+    "batchFormulaListError": "page.screenshot: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n",
+    "afterActions": "/tmp/adp-rm-batch-sync-persistence-20260621073413/rm-batch-formula-after-actions.png",
+    "afterActionsError": "page.screenshot: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n"
+  },
+  "sync": {
+    "request": {
+      "method": "POST",
+      "api": "/msService/RM/formula/formula/batch/sync",
+      "payload": {
+        "origin": "formulaEnableFlw",
+        "mqValue": "{\"ID\":\"1782027300000\",\"Name\":\"ADP_E2E_20260621073500_RM_CFG_REG_FORMULA\",\"Version\":\"1\",\"Status\":\"0\",\"Product\":\"ADP_E2E_20260615191905_WOMSTART_MAT\",\"ProductID\":\"-1\",\"OrgID\":\"-1\",\"Norsize\":\"100\",\"Remark\":\"ADP_E2E_20260621073500_RM_CFG_REG\",\"Units\":[],\"Cells\":[]}"
+      }
+    },
+    "response": {
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"success\":true},\"message\":\"操作成功\"}"
+    },
+    "verificationRaw": "757563696166144|1782027300000|0|ADP_E2E_20260621073500_RM_CFG_REG_FORMULA|1|6579588704999001|1781551145996252|t|88|202260\n0",
+    "verificationRows": [
+      [
+        "757563696166144",
+        "1782027300000",
+        "0",
+        "ADP_E2E_20260621073500_RM_CFG_REG_FORMULA",
+        "1",
+        "6579588704999001",
+        "1781551145996252",
+        "t",
+        "88",
+        "202260"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "persistence": {
+      "formulaRows": [
+        [
+          "757563696166144",
+          "1782027300000",
+          "0",
+          "ADP_E2E_20260621073500_RM_CFG_REG_FORMULA",
+          "1",
+          "6579588704999001",
+          "1781551145996252",
+          "t",
+          "88",
+          "202260"
+        ]
+      ],
+      "status": "PASS"
+    }
+  },
+  "delete": {
+    "request": {
+      "method": "POST",
+      "api": "/msService/RM/formula/formula/batch/delete?batchFormulaId=1782027300000"
+    },
+    "response": {
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"errorMessage\":\"\"},\"message\":\"操作成功\"}"
+    },
+    "verificationRaw": "757563696166144|1782027300000|f|0|202261\n0",
+    "verificationRows": [
+      [
+        "757563696166144",
+        "1782027300000",
+        "f",
+        "0",
+        "202261"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "persistence": {
+      "formulaRows": [
+        [
+          "757563696166144",
+          "1782027300000",
+          "f",
+          "0",
+          "202261"
+        ]
+      ],
+      "status": "PASS"
+    }
+  },
+  "precheck": {
+    "sql": "SELECT 'product', id, code, valid, coalesce(status::text, '') FROM public.baseset_materials WHERE code = 'ADP_E2E_20260615191905_WOMSTART_MAT';\nSELECT 'other_system', id, code, valid, coalesce(status::text, ''), coalesce(system_type::text, '') FROM public.baseset_other_systems WHERE code = 'formulaEnableFlw';\nSELECT 'deployment', id, process_key, is_current_version FROM public.wf_deployment WHERE process_key = 'formulaEnableFlw' ORDER BY id DESC LIMIT 5;\nSELECT 'table', table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('rm_formulas', 'rm_process_actives', 'rm_formula_processes') ORDER BY table_name;",
+    "result": "product|1781551145996252|ADP_E2E_20260615191905_WOMSTART_MAT|t|\nother_system|6579588704999001|formulaEnableFlw|t|99|\ndeployment|6579588704043008|formulaEnableFlw|1\ntable|rm_formula_processes\ntable|rm_formulas\ntable|rm_process_actives"
+  },
+  "login": {
+    "status": 200,
+    "ticket": true
+  },
+  "navigation": {
+    "route": "/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+    "status": 200
+  },
+  "summary": {
+    "sync": "PASS",
+    "delete": "PASS",
+    "frontendConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "status": "PASS"
+  }
+}

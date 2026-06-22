@@ -1,0 +1,1718 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T18:50:41.287Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "基础配置-低代码自定义字段配置",
+  "route": "/supplant/#/customFieldModelManage",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "marker": "ADP_E2E_20260621184706_CUSTOM_PROPERTY",
+  "target": {
+    "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+    "propertyCode": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+    "pagePath": "/supplant/#/customFieldModelManage"
+  },
+  "operations": {
+    "listBefore": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+      "method": "GET",
+      "requestPayload": null,
+      "text": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4\",\"displayNameInternational\":\"自定义字段IPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparamb\",\"name\":\"bigintparamb\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50\",\"displayNameInternational\":\"自定义字段CPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparama\",\"name\":\"charparama\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34\",\"displayNameInternational\":\"自定义字段CPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparamb\",\"name\":\"charparamb\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b\",\"displayNameInternational\":\"自定义字段DPA\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparama\",\"name\":\"dateparama\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c\",\"displayNameInternational\":\"自定义字段DPB\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparamb\",\"name\":\"dateparamb\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a\",\"displayNameInternational\":\"自定义字段FPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparama\",\"name\":\"numberparama\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19\",\"displayNameInternational\":\"自定义字段FPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparamb\",\"name\":\"numberparamb\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10\",\"displayNameInternational\":\"自定义字段OPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparama\",\"name\":\"objparama\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e\",\"displayNameInternational\":\"自定义字段OPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparamb\",\"name\":\"objparamb\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538\",\"displayNameInternational\":\"自定义字段SCPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparama\",\"name\":\"scparama\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760\",\"displayNameInternational\":\"自定义字段SCPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparamb\",\"name\":\"scparamb\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}}]}",
+      "bodySnippet": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4\",\"displayNameInternational\":\"自定义字段IPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"",
+      "json": {
+        "list": [
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+            "displayNameInternational": "自定义字段IPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+              "name": "bigintparama",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53",
+            "displayNameInternational": "自定义字段IPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparamb",
+              "name": "bigintparamb",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50",
+            "displayNameInternational": "自定义字段CPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparama",
+              "name": "charparama",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34",
+            "displayNameInternational": "自定义字段CPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparamb",
+              "name": "charparamb",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b",
+            "displayNameInternational": "自定义字段DPA",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparama",
+              "name": "dateparama",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c",
+            "displayNameInternational": "自定义字段DPB",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparamb",
+              "name": "dateparamb",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a",
+            "displayNameInternational": "自定义字段FPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparama",
+              "name": "numberparama",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19",
+            "displayNameInternational": "自定义字段FPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparamb",
+              "name": "numberparamb",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10",
+            "displayNameInternational": "自定义字段OPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparama",
+              "name": "objparama",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e",
+            "displayNameInternational": "自定义字段OPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparamb",
+              "name": "objparamb",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538",
+            "displayNameInternational": "自定义字段SCPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparama",
+              "name": "scparama",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760",
+            "displayNameInternational": "自定义字段SCPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparamb",
+              "name": "scparamb",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          }
+        ]
+      }
+    },
+    "enable": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+      "method": "POST",
+      "requestPayload": {
+        "codes": [
+          "TeamInfo_1.0.0_schedual_Schedule_bigintparama"
+        ],
+        "ids": [],
+        "enabled": true
+      },
+      "text": "{\"code\":200,\"message\":\"succeed\"}",
+      "bodySnippet": "{\"code\":200,\"message\":\"succeed\"}",
+      "json": {
+        "code": 200,
+        "message": "succeed"
+      }
+    },
+    "listAfterEnable": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+      "method": "GET",
+      "requestPayload": null,
+      "text": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4\",\"displayNameInternational\":\"自定义字段IPA\",\"enableCustom\":true,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":6605417268593040,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparamb\",\"name\":\"bigintparamb\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50\",\"displayNameInternational\":\"自定义字段CPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparama\",\"name\":\"charparama\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34\",\"displayNameInternational\":\"自定义字段CPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparamb\",\"name\":\"charparamb\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b\",\"displayNameInternational\":\"自定义字段DPA\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparama\",\"name\":\"dateparama\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c\",\"displayNameInternational\":\"自定义字段DPB\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparamb\",\"name\":\"dateparamb\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a\",\"displayNameInternational\":\"自定义字段FPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparama\",\"name\":\"numberparama\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19\",\"displayNameInternational\":\"自定义字段FPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparamb\",\"name\":\"numberparamb\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10\",\"displayNameInternational\":\"自定义字段OPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparama\",\"name\":\"objparama\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e\",\"displayNameInternational\":\"自定义字段OPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparamb\",\"name\":\"objparamb\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538\",\"displayNameInternational\":\"自定义字段SCPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparama\",\"name\":\"scparama\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760\",\"displayNameInternational\":\"自定义字段SCPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparamb\",\"name\":\"scparamb\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}}]}",
+      "bodySnippet": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4\",\"displayNameInternational\":\"自定义字段IPA\",\"enableCustom\":true,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":6605417268593040,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"mo",
+      "json": {
+        "list": [
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+            "displayNameInternational": "自定义字段IPA",
+            "enableCustom": true,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": 6605417268593040,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+              "name": "bigintparama",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53",
+            "displayNameInternational": "自定义字段IPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparamb",
+              "name": "bigintparamb",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50",
+            "displayNameInternational": "自定义字段CPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparama",
+              "name": "charparama",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34",
+            "displayNameInternational": "自定义字段CPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparamb",
+              "name": "charparamb",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b",
+            "displayNameInternational": "自定义字段DPA",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparama",
+              "name": "dateparama",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c",
+            "displayNameInternational": "自定义字段DPB",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparamb",
+              "name": "dateparamb",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a",
+            "displayNameInternational": "自定义字段FPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparama",
+              "name": "numberparama",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19",
+            "displayNameInternational": "自定义字段FPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparamb",
+              "name": "numberparamb",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10",
+            "displayNameInternational": "自定义字段OPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparama",
+              "name": "objparama",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e",
+            "displayNameInternational": "自定义字段OPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparamb",
+              "name": "objparamb",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538",
+            "displayNameInternational": "自定义字段SCPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparama",
+              "name": "scparama",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760",
+            "displayNameInternational": "自定义字段SCPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparamb",
+              "name": "scparamb",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          }
+        ]
+      }
+    },
+    "edit": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/save",
+      "method": "POST",
+      "requestPayload": {
+        "associatedPropertyCode": null,
+        "associatedType": null,
+        "relatedKey": null,
+        "precision": null,
+        "multable": false,
+        "sort": null,
+        "description": "ADP_E2E_20260621184706_CUSTOM_PROPERTY description",
+        "displayName": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+        "enableCustom": true,
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "fillContent": null,
+        "nullable": true,
+        "refViewCode": null,
+        "property": {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "name": "bigintparama",
+          "type": "INTEGER",
+          "fillcontent": null
+        },
+        "displayNameInternational": "ADP_E2E_20260621184706_CUSTOM_PROPERTY display name"
+      },
+      "text": "{\"code\":200,\"message\":\"succeed\"}",
+      "bodySnippet": "{\"code\":200,\"message\":\"succeed\"}",
+      "json": {
+        "code": 200,
+        "message": "succeed"
+      }
+    },
+    "listAfterEdit": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+      "method": "GET",
+      "requestPayload": null,
+      "text": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY description\",\"displayName\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName\",\"displayNameInternational\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName\",\"enableCustom\":true,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":6605417268593040,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparamb\",\"name\":\"bigintparamb\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50\",\"displayNameInternational\":\"自定义字段CPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparama\",\"name\":\"charparama\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34\",\"displayNameInternational\":\"自定义字段CPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_charparamb\",\"name\":\"charparamb\",\"type\":\"TEXT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b\",\"displayNameInternational\":\"自定义字段DPA\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparama\",\"name\":\"dateparama\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c\",\"displayNameInternational\":\"自定义字段DPB\",\"enableCustom\":false,\"fieldType\":\"DATETIME\",\"format\":\"YMD_HMS\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_dateparamb\",\"name\":\"dateparamb\",\"type\":\"DATETIME\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a\",\"displayNameInternational\":\"自定义字段FPA\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparama\",\"name\":\"numberparama\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19\",\"displayNameInternational\":\"自定义字段FPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_numberparamb\",\"name\":\"numberparamb\",\"type\":\"DECIMAL\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10\",\"displayNameInternational\":\"自定义字段OPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparama\",\"name\":\"objparama\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e\",\"displayNameInternational\":\"自定义字段OPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_objparamb\",\"name\":\"objparamb\",\"type\":\"OBJECT\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538\",\"displayNameInternational\":\"自定义字段SCPA\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparama\",\"name\":\"scparama\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760\",\"displayNameInternational\":\"自定义字段SCPB\",\"enableCustom\":false,\"fieldType\":\"SELECTCOMP\",\"format\":\"SELECTCOMP\",\"fillContent\":null,\"id\":null,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_scparamb\",\"name\":\"scparamb\",\"type\":\"SYSTEMCODE\",\"fillcontent\":null}}]}",
+      "bodySnippet": "{\"list\":[{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY description\",\"displayName\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName\",\"displayNameInternational\":\"ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName\",\"enableCustom\":true,\"fieldType\":\"TEXTFIELD\",\"format\":\"TEXT\",\"fillContent\":null,\"id\":6605417268593040,\"nullable\":true,\"refViewCode\":null,\"moduleCode\":\"TeamInfo_1.0.0\",\"property\":{\"code\":\"TeamInfo_1.0.0_schedual_Schedule_bigintparama\",\"name\":\"bigintparama\",\"type\":\"INTEGER\",\"fillcontent\":null}},{\"associatedPropertyCode\":null,\"associatedProperty\":null,\"associatedType\":null,\"relatedKey\":null,\"precision1\":null,\"multable\":false,\"sort\":null,\"description\":null,\"displayName\":\"TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53\",\"displayNameInternational\":\"自定义字段IPB\",\"enableCustom\":false,\"fieldType\":\"TEXTFIELD\",\"format\":\"",
+      "json": {
+        "list": [
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": "ADP_E2E_20260621184706_CUSTOM_PROPERTY description",
+            "displayName": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+            "displayNameInternational": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+            "enableCustom": true,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": 6605417268593040,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+              "name": "bigintparama",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionf5254f5f1e724bb9a13d79d94fd2ba53",
+            "displayNameInternational": "自定义字段IPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparamb",
+              "name": "bigintparamb",
+              "type": "INTEGER",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radiondaa7624087d845f5842829b281514b50",
+            "displayNameInternational": "自定义字段CPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparama",
+              "name": "charparama",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radione359b066389d4b45b92d3d059ebfed34",
+            "displayNameInternational": "自定义字段CPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_charparamb",
+              "name": "charparamb",
+              "type": "TEXT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion1bef5e0b8d44422a9c760584d3296a2b",
+            "displayNameInternational": "自定义字段DPA",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparama",
+              "name": "dateparama",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion4194727a2c514704bd1f9c0b9b42e79c",
+            "displayNameInternational": "自定义字段DPB",
+            "enableCustom": false,
+            "fieldType": "DATETIME",
+            "format": "YMD_HMS",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_dateparamb",
+              "name": "dateparamb",
+              "type": "DATETIME",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionaf578e94405a4f33a0be62a1c02f5f4a",
+            "displayNameInternational": "自定义字段FPA",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparama",
+              "name": "numberparama",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion3a373062c5544bdf8af6315416b4ab19",
+            "displayNameInternational": "自定义字段FPB",
+            "enableCustom": false,
+            "fieldType": "TEXTFIELD",
+            "format": "TEXT",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_numberparamb",
+              "name": "numberparamb",
+              "type": "DECIMAL",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion739356ae583249f5a6de4cb10149da10",
+            "displayNameInternational": "自定义字段OPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparama",
+              "name": "objparama",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion11ce55b05eb64a888bd2fd15f6230a0e",
+            "displayNameInternational": "自定义字段OPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_objparamb",
+              "name": "objparamb",
+              "type": "OBJECT",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radionc9c6e36dc020417bae0d54cd2ddfe538",
+            "displayNameInternational": "自定义字段SCPA",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparama",
+              "name": "scparama",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          },
+          {
+            "associatedPropertyCode": null,
+            "associatedProperty": null,
+            "associatedType": null,
+            "relatedKey": null,
+            "precision1": null,
+            "multable": false,
+            "sort": null,
+            "description": null,
+            "displayName": "TeamInfo.propertydisplayName.radion8d3efa062bf94ce8b5d6f3fe18303760",
+            "displayNameInternational": "自定义字段SCPB",
+            "enableCustom": false,
+            "fieldType": "SELECTCOMP",
+            "format": "SELECTCOMP",
+            "fillContent": null,
+            "id": null,
+            "nullable": true,
+            "refViewCode": null,
+            "moduleCode": "TeamInfo_1.0.0",
+            "property": {
+              "code": "TeamInfo_1.0.0_schedual_Schedule_scparamb",
+              "name": "scparamb",
+              "type": "SYSTEMCODE",
+              "fillcontent": null
+            }
+          }
+        ]
+      }
+    },
+    "restoreOriginalDisplay": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/save",
+      "method": "POST",
+      "requestPayload": {
+        "associatedPropertyCode": null,
+        "associatedType": null,
+        "relatedKey": null,
+        "precision": null,
+        "multable": false,
+        "sort": null,
+        "description": "",
+        "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+        "enableCustom": true,
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "fillContent": null,
+        "nullable": true,
+        "refViewCode": null,
+        "property": {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "name": "bigintparama",
+          "type": "INTEGER",
+          "fillcontent": null
+        },
+        "displayNameInternational": "自定义字段IPA"
+      },
+      "text": "{\"code\":200,\"message\":\"succeed\"}",
+      "bodySnippet": "{\"code\":200,\"message\":\"succeed\"}",
+      "json": {
+        "code": 200,
+        "message": "succeed"
+      }
+    },
+    "disable": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+      "method": "POST",
+      "requestPayload": {
+        "codes": [],
+        "ids": [
+          6605417268593040
+        ],
+        "enabled": false
+      },
+      "text": "{\"code\":200,\"message\":\"succeed\"}",
+      "bodySnippet": "{\"code\":200,\"message\":\"succeed\"}",
+      "json": {
+        "code": 200,
+        "message": "succeed"
+      }
+    },
+    "finalReadiness": {
+      "ok": true,
+      "status": 200,
+      "url": "http://100.99.133.43:18080/inter-api/customProperty/tree?type=module",
+      "method": "GET",
+      "requestPayload": null,
+      "text": "{\"list\":[{\"code\":\"DataSet_1.0.0\",\"isParent\":true,\"name\":\"统一数据源\"},{\"code\":\"TagManagement_1.0.0\",\"isParent\":true,\"name\":\"测点管理\"},{\"code\":\"TeamInfo_1.0.0\",\"isParent\":true,\"name\":\"排班管理\"},{\"code\":\"EAM_1.0.0\",\"isParent\":true,\"name\":\"设备档案管理\"},{\"code\":\"Qualify_1.0.0\",\"isParent\":true,\"name\":\"资质管理\"},{\"code\":\"RM_1.0.0\",\"isParent\":true,\"name\":\"配方管理\"},{\"code\":\"WOM_1.0.0\",\"isParent\":true,\"name\":\"生产管理\"},{\"code\":\"WTS_1.0.0\",\"isParent\":true,\"name\":\"作业管理\"},{\"code\":\"craftGraph_1.0\",\"isParent\":true,\"name\":\"SOP组态工具\"},{\"code\":\"BaseSet_1.0.0\",\"isParent\":true,\"name\":\"基础模型\"},{\"code\":\"DocManage_1.0.0\",\"isParent\":true,\"name\":\"文档管理\"},{\"code\":\"HierarchicalMod_1.0.0\",\"isParent\":true,\"name\":\"层次模型\"},{\"code\":\"OverEquipEffect_6.1.6.1\",\"isParent\":true,\"name\":\"设备综合效率管理\"},{\"code\":\"TOOL_6.0.0.0\",\"isParent\":true,\"name\":\"工具档案管理\"},{\"code\":\"Special_0.0.1\",\"isParent\":true,\"name\":\"特种设备管理\"},{\"code\":\"workAppointment_6.1.6.1\",\"isParent\":true,\"name\":\"作业预约\"},{\"code\":\"LIMSBasic_1.0.0\",\"isParent\":true,\"name\":\"检验基础\"},{\"code\":\"EQPTOperation_5.0.0.0\",\"isParent\":true,\"name\":\"运行管理\"},{\"code\":\"LIMSInterface_6.0.0.0\",\"isParent\":true,\"name\":\"实验室接口交互\"},{\"code\":\"LIMSDC_5.1.0.1\",\"isParent\":true,\"name\":\"数据采集\"},{\"code\":\"LIMSSTDS_5.1.0.1\",\"isParent\":true,\"name\":\"标准溶液管理\"},{\"code\":\"LIMSMaterial_5.1.0.1\",\"isParent\":true,\"name\":\"材料试剂管理\"},{\"code\":\"LIMSRetain_5.0.4.1\",\"isParent\":true,\"name\":\"留样管理\"},{\"code\":\"ChartReportMap_1.0.0\",\"isParent\":true,\"name\":\"图表映射\"},{\"code\":\"Measure_0.0.1\",\"isParent\":true,\"name\":\"测量设备管理\"},{\"code\":\"OverhaulTicket_6.0.3.2\",\"isParent\":true,\"name\":\"检修作业票管理\"},{\"code\":\"PartiManage_6.0.4.1\",\"isParent\":true,\"name\":\"专项管理\"},{\"code\":\"SpareManage_1.0.0\",\"isParent\":true,\"name\":\"备件管理\"},{\"code\":\"maintenance_1.0.0\",\"isParent\":true,\"name\":\"检维修管理\"},{\"code\":\"outagManage_5.0.0.1\",\"isParent\":true,\"name\":\"电气设备管理\"},{\"code\":\"LIMSSample_5.0.0.0\",\"isParent\":true,\"name\":\"样品管理\"},{\"code\":\"LIMSSteady_6.0.4.1\",\"isParent\":true,\"name\":\"稳定性试验\"},{\"code\":\"QCS_5.0.0.0\",\"isParent\":true,\"name\":\"质量检验\"}]}",
+      "bodySnippet": "{\"list\":[{\"code\":\"DataSet_1.0.0\",\"isParent\":true,\"name\":\"统一数据源\"},{\"code\":\"TagManagement_1.0.0\",\"isParent\":true,\"name\":\"测点管理\"},{\"code\":\"TeamInfo_1.0.0\",\"isParent\":true,\"name\":\"排班管理\"},{\"code\":\"EAM_1.0.0\",\"isParent\":true,\"name\":\"设备档案管理\"},{\"code\":\"Qualify_1.0.0\",\"isParent\":true,\"name\":\"资质管理\"},{\"code\":\"RM_1.0.0\",\"isParent\":true,\"name\":\"配方管理\"},{\"code\":\"WOM_1.0.0\",\"isParent\":true,\"name\":\"生产管理\"},{\"code\":\"WTS_1.0.0\",\"isParent\":true,\"name\":\"作业管理\"},{\"code\":\"craftGraph_1.0\",\"isParent\":true,\"name\":\"SOP组态工具\"},{\"code\":\"BaseSet_1.0.0\",\"isParent\":true,\"name\":\"基础模型\"},{\"code\":\"DocManage_1.0.0\",\"isParent\":true,\"name\":\"文档管理\"},{\"code\":\"HierarchicalMod_1.0.0\",\"isParent\":true,\"name\":\"层次模型\"},{\"code\":\"OverEquipEffect_6.1.6.1\",\"isParent\":true,\"name\":\"设备综合效率管理\"},{\"code\":\"TOOL_6.0.0.0\",\"isParent\":true,\"name\":\"工具档案管理\"},{\"code\":\"Special_0.0.1\",\"isParent\":true,\"name\":\"特种设备管理\"},{\"code\":\"workAppointment_6.1.6.1\",\"isParent\":true,\"name\":\"作业预约\"},{\"code\":\"LIMSBasic_1.0.0\",\"isParent\":true,\"name\":\"检验基础\"},{\"code\":\"EQPTOperati",
+      "json": {
+        "list": [
+          {
+            "code": "DataSet_1.0.0",
+            "isParent": true,
+            "name": "统一数据源"
+          },
+          {
+            "code": "TagManagement_1.0.0",
+            "isParent": true,
+            "name": "测点管理"
+          },
+          {
+            "code": "TeamInfo_1.0.0",
+            "isParent": true,
+            "name": "排班管理"
+          },
+          {
+            "code": "EAM_1.0.0",
+            "isParent": true,
+            "name": "设备档案管理"
+          },
+          {
+            "code": "Qualify_1.0.0",
+            "isParent": true,
+            "name": "资质管理"
+          },
+          {
+            "code": "RM_1.0.0",
+            "isParent": true,
+            "name": "配方管理"
+          },
+          {
+            "code": "WOM_1.0.0",
+            "isParent": true,
+            "name": "生产管理"
+          },
+          {
+            "code": "WTS_1.0.0",
+            "isParent": true,
+            "name": "作业管理"
+          },
+          {
+            "code": "craftGraph_1.0",
+            "isParent": true,
+            "name": "SOP组态工具"
+          },
+          {
+            "code": "BaseSet_1.0.0",
+            "isParent": true,
+            "name": "基础模型"
+          },
+          {
+            "code": "DocManage_1.0.0",
+            "isParent": true,
+            "name": "文档管理"
+          },
+          {
+            "code": "HierarchicalMod_1.0.0",
+            "isParent": true,
+            "name": "层次模型"
+          },
+          {
+            "code": "OverEquipEffect_6.1.6.1",
+            "isParent": true,
+            "name": "设备综合效率管理"
+          },
+          {
+            "code": "TOOL_6.0.0.0",
+            "isParent": true,
+            "name": "工具档案管理"
+          },
+          {
+            "code": "Special_0.0.1",
+            "isParent": true,
+            "name": "特种设备管理"
+          },
+          {
+            "code": "workAppointment_6.1.6.1",
+            "isParent": true,
+            "name": "作业预约"
+          },
+          {
+            "code": "LIMSBasic_1.0.0",
+            "isParent": true,
+            "name": "检验基础"
+          },
+          {
+            "code": "EQPTOperation_5.0.0.0",
+            "isParent": true,
+            "name": "运行管理"
+          },
+          {
+            "code": "LIMSInterface_6.0.0.0",
+            "isParent": true,
+            "name": "实验室接口交互"
+          },
+          {
+            "code": "LIMSDC_5.1.0.1",
+            "isParent": true,
+            "name": "数据采集"
+          },
+          {
+            "code": "LIMSSTDS_5.1.0.1",
+            "isParent": true,
+            "name": "标准溶液管理"
+          },
+          {
+            "code": "LIMSMaterial_5.1.0.1",
+            "isParent": true,
+            "name": "材料试剂管理"
+          },
+          {
+            "code": "LIMSRetain_5.0.4.1",
+            "isParent": true,
+            "name": "留样管理"
+          },
+          {
+            "code": "ChartReportMap_1.0.0",
+            "isParent": true,
+            "name": "图表映射"
+          },
+          {
+            "code": "Measure_0.0.1",
+            "isParent": true,
+            "name": "测量设备管理"
+          },
+          {
+            "code": "OverhaulTicket_6.0.3.2",
+            "isParent": true,
+            "name": "检修作业票管理"
+          },
+          {
+            "code": "PartiManage_6.0.4.1",
+            "isParent": true,
+            "name": "专项管理"
+          },
+          {
+            "code": "SpareManage_1.0.0",
+            "isParent": true,
+            "name": "备件管理"
+          },
+          {
+            "code": "maintenance_1.0.0",
+            "isParent": true,
+            "name": "检维修管理"
+          },
+          {
+            "code": "outagManage_5.0.0.1",
+            "isParent": true,
+            "name": "电气设备管理"
+          },
+          {
+            "code": "LIMSSample_5.0.0.0",
+            "isParent": true,
+            "name": "样品管理"
+          },
+          {
+            "code": "LIMSSteady_6.0.4.1",
+            "isParent": true,
+            "name": "稳定性试验"
+          },
+          {
+            "code": "QCS_5.0.0.0",
+            "isParent": true,
+            "name": "质量检验"
+          }
+        ]
+      }
+    }
+  },
+  "backendTrace": {
+    "modelList": {
+      "controller": "custom-property-webapi ModelManageController.modelManageList GET /inter-api/customProperty/modelManage/list",
+      "service": "custom-property-service ModelServiceFoundationImpl.findCustomPropertyModelMappings",
+      "mapper": "PropertyMapper + CustomPropertyModelMappingMapper",
+      "sqlOrOrm": "MyBatis-Plus selectList on runtime_property and base_cp_model_mapping"
+    },
+    "enableDisable": {
+      "controller": "custom-property-webapi ModelManageController.batcheUpdateEnabledStatus POST /inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+      "service": "custom-property-service ModelServiceFoundationImpl.enableProperty",
+      "mapper": "CustomPropertyModelMappingMapper + PropertyMapper + PropertyProjectMapper + CustomPropertyViewMappingMapper",
+      "sqlOrOrm": "MyBatis-Plus saveOrUpdate on base_cp_model_mapping, runtime_property and project_property; optional base_cp_view_mapping sync for non-nullable/sysbase fields"
+    },
+    "edit": {
+      "controller": "custom-property-webapi ModelManageController.modelManageSave POST /inter-api/customProperty/modelManage/save",
+      "service": "custom-property-service ModelServiceFoundationImpl.saveCustomPropertyModelMapping",
+      "mapper": "CustomPropertyModelMappingMapper + PropertyMapper + PropertyProjectMapper + CustomPropertyViewMappingMapper",
+      "sqlOrOrm": "MyBatis-Plus saveOrUpdate on base_cp_model_mapping, runtime_property and project_property; updateViewData for dependent view mapping"
+    }
+  },
+  "databaseEvidence": {
+    "before": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "viewMapping": []
+    },
+    "afterEnable": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [
+        {
+          "id": "6605417268593040",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "propertyCode": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "enableCustom": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": "",
+          "sort": ""
+        }
+      ],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "viewMapping": []
+    },
+    "afterEdit": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [
+        {
+          "id": "6605417268593040",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "propertyCode": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "enableCustom": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+          "description": "ADP_E2E_20260621184706_CUSTOM_PROPERTY description",
+          "sort": ""
+        }
+      ],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+          "description": "ADP_E2E_20260621184706_CUSTOM_PROPERTY description"
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "ADP_E2E_20260621184706_CUSTOM_PROPERTY.displayName",
+          "description": "ADP_E2E_20260621184706_CUSTOM_PROPERTY description"
+        }
+      ],
+      "viewMapping": []
+    },
+    "afterRestore": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [
+        {
+          "id": "6605417268593040",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "propertyCode": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "enableCustom": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": "",
+          "sort": ""
+        }
+      ],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "true",
+          "isUsedForList": "true",
+          "isUsedForSearch": "true",
+          "projFlag": "true",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "viewMapping": []
+    },
+    "afterDisable": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [
+        {
+          "id": "6605417268593040",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "propertyCode": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "enableCustom": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": "",
+          "sort": ""
+        }
+      ],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "viewMapping": []
+    },
+    "afterCleanup": {
+      "sql": {
+        "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+        "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+        "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;"
+      },
+      "modelMapping": [],
+      "runtimeProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "projectProperty": [
+        {
+          "code": "TeamInfo_1.0.0_schedual_Schedule_bigintparama",
+          "modelCode": "TeamInfo_1.0.0_schedual_Schedule",
+          "projCustomInUse": "false",
+          "isUsedForList": "false",
+          "isUsedForSearch": "false",
+          "projFlag": "false",
+          "nullable": "true",
+          "fieldType": "TEXTFIELD",
+          "format": "TEXT",
+          "displayName": "TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4",
+          "description": ""
+        }
+      ],
+      "viewMapping": []
+    },
+    "verificationSql": {
+      "modelMapping": "select coalesce(id::text,''), coalesce(model_code,''), coalesce(property_code,''), coalesce(enable_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,''), coalesce(sort::text,'') from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule' order by id desc;",
+      "runtimeProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.runtime_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+      "projectProperty": "select coalesce(code,''), coalesce(model_code,''), coalesce(proj_custom_in_use::text,''), coalesce(is_used_for_list::text,''), coalesce(is_used_for_search::text,''), coalesce(proj_flag::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(description,'') from public.project_property where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama';",
+      "viewMapping": "select coalesce(id::text,''), coalesce(property_code,''), coalesce(associated_code,''), coalesce(property_layrec,''), coalesce(show_custom::text,''), coalesce(nullable::text,''), coalesce(field_type,''), coalesce(format,''), coalesce(display_name,''), coalesce(sort::text,'') from public.base_cp_view_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' order by id desc;",
+      "cleanup": "begin; delete from public.base_cp_model_mapping where property_code='TeamInfo_1.0.0_schedual_Schedule_bigintparama' and model_code='TeamInfo_1.0.0_schedual_Schedule'; update public.runtime_property set proj_custom_in_use=false, proj_flag=false, is_used_for_list=false, is_used_for_search=false, sort=null, display_name='TeamInfo.propertydisplayName.radionb184b145ac3640c5af2f80b50f4af7d4', description=null, modify_time=current_timestamp where code='TeamInfo_1.0.0_schedual_Schedule_bigintparama'; commit;"
+    }
+  },
+  "checks": [
+    {
+      "name": "browser-page-open",
+      "status": "PASS"
+    },
+    {
+      "name": "model-mapping-created",
+      "status": "PASS"
+    },
+    {
+      "name": "model-mapping-edited",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime-property-synced",
+      "status": "PASS"
+    },
+    {
+      "name": "project-property-synced",
+      "status": "PASS"
+    },
+    {
+      "name": "model-mapping-display-restored",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime-property-display-restored",
+      "status": "PASS"
+    },
+    {
+      "name": "project-property-display-restored",
+      "status": "PASS"
+    },
+    {
+      "name": "model-mapping-disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "runtime-property-disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "project-property-disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "controlled-cleanup",
+      "status": "PASS"
+    },
+    {
+      "name": "final-readiness",
+      "status": "PASS"
+    }
+  ],
+  "browser": {
+    "url": "http://100.99.133.43:18080/supplant/#/customFieldModelManage",
+    "navigationStatus": 200,
+    "visibleError": null,
+    "networkErrors": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "apiCalls": [
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/tree?type=module",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/save",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/list?modelCode=TeamInfo_1.0.0_schedual_Schedule",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/save",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/inter-api/customProperty/tree?type=module",
+        "status": 200
+      }
+    ]
+  },
+  "issues": [],
+  "evidence": "Browser-context marker acceptance for low-code custom property mapping. It creates/enables one existing custom field mapping, edits display metadata with an ADP_E2E marker, verifies PostgreSQL before/after rows, restores the original display metadata, then disables the marker mapping again.",
+  "limitations": [
+    "This validates custom-property model mapping and runtime_property/project_property synchronization, not full ec_entity/ec_model creation.",
+    "A controlled SQL cleanup removes the test-created mapping when the pre-test state had no base_cp_model_mapping row; the business persistence evidence remains in afterEnable/afterEdit/afterDisable.",
+    "Entity/model create/edit/delete actions remain PLANNED until real configuration pages create or remove dedicated ADP_E2E entity/model metadata."
+  ]
+}

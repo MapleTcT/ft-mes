@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
@@ -19,6 +20,7 @@ SKIP_PREFIXES = (
     ".git/",
     "metadata/",
     "docs/oracle-migration-backlog.md",
+    "docs/oracle-replacement-status.md",
 )
 
 TEXT_SUFFIXES = {
@@ -60,6 +62,21 @@ def git_files() -> list[str]:
     return [line for line in result.stdout.splitlines() if line]
 
 
+def git_head() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+    return result.stdout.strip()
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
 def iter_text_files() -> Iterable[Path]:
     for relative in git_files():
         if relative.startswith(SKIP_PREFIXES):
@@ -96,6 +113,10 @@ def classify(relative: str, pattern: str, line: str) -> tuple[str, str]:
         return "allowed-legacy-contract", "Oracle is explicit legacy compatibility, not the default runtime path."
     if relative == "Makefile":
         return "tooling-or-audit-code", "Tooling may mention Oracle to generate or check migration audit outputs."
+    if lower.startswith("deploy/business-smoke/production-migration/"):
+        return "documentation-or-workflow", "Production signoff template reference; keep wording aligned with PostgreSQL-first policy."
+    if lower.startswith("deploy/nacos/production-migration/"):
+        return "documentation-or-workflow", "Nacos/runtime patch evidence may require Oracle-default drift checks while keeping PostgreSQL as the runtime target."
     if lower in {"agents.md", "readme.md"} or lower.startswith((".github/", "docs/")) or lower.endswith("/readme.md"):
         return "documentation-or-workflow", "Documentation/template reference; keep wording aligned with PostgreSQL-first policy."
     if lower.startswith("frontend/") and pattern == "rownum":
@@ -152,6 +173,8 @@ def scan() -> dict[str, object]:
     file_counts = Counter(str(item["file"]) for item in findings)
     return {
         "schemaVersion": 1,
+        "generatedAt": now_iso(),
+        "repoCommit": git_head(),
         "findingCount": len(findings),
         "categoryCounts": dict(sorted(category_counts.items())),
         "patternCounts": dict(sorted(pattern_counts.items())),
@@ -211,6 +234,9 @@ def render_markdown(report: dict[str, object]) -> str:
         if len(backlog_rows) >= 81:
             break
 
+    category_counts = report["categoryCounts"]  # type: ignore[index]
+    unclassified = int(category_counts.get("unclassified-oracle-reference") or 0)  # type: ignore[union-attr]
+
     return "\n".join(
         [
             "# Oracle 迁移 Backlog",
@@ -221,7 +247,10 @@ def render_markdown(report: dict[str, object]) -> str:
             "",
             "## 摘要",
             "",
+            f"- Generated At：`{report.get('generatedAt')}`。",
+            f"- Repo Commit：`{report.get('repoCommit')}`。",
             f"- 总引用数：`{report['findingCount']}`。",
+            f"- 未分类引用数：`{unclassified}`；新增未分类 Oracle 引用会让生成器失败。",
             "- 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。",
             "- 机器可读报告：`metadata/oracle-migration-audit.json`。",
             "",
@@ -254,9 +283,38 @@ def write_outputs(report: dict[str, object]) -> None:
     OUTPUT_MD.write_text(render_markdown(report), encoding="utf-8")
 
 
+def validate_report(report: dict[str, object]) -> int:
+    category_counts = report.get("categoryCounts")
+    if not isinstance(category_counts, dict):
+        print("Oracle migration audit report missing categoryCounts.", file=sys.stderr)
+        return 1
+    unclassified = int(category_counts.get("unclassified-oracle-reference") or 0)
+    if unclassified:
+        print(
+            "Oracle migration audit has unclassified references: "
+            f"{unclassified}. Update scripts/generate-oracle-migration-audit.py classification rules.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
 def check_outputs(report: dict[str, object]) -> int:
-    expected_json = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
-    expected_md = render_markdown(report)
+    validation_status = validate_report(report)
+    if validation_status != 0:
+        return validation_status
+    existing_json: dict[str, object] = {}
+    if OUTPUT_JSON.exists():
+        try:
+            loaded = json.loads(OUTPUT_JSON.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                existing_json = loaded
+        except json.JSONDecodeError:
+            pass
+    stable_report = json.loads(json.dumps(report))
+    stable_report["generatedAt"] = existing_json.get("generatedAt")
+    expected_json = json.dumps(stable_report, ensure_ascii=False, indent=2) + "\n"
+    expected_md = render_markdown(stable_report)
     stale = []
     if not OUTPUT_JSON.exists() or OUTPUT_JSON.read_text(encoding="utf-8") != expected_json:
         stale.append(str(OUTPUT_JSON.relative_to(ROOT)))
@@ -276,6 +334,9 @@ def main() -> int:
     args = parser.parse_args()
 
     report = scan()
+    validation_status = validate_report(report)
+    if validation_status != 0:
+        return validation_status
     if args.check:
         return check_outputs(report)
     write_outputs(report)

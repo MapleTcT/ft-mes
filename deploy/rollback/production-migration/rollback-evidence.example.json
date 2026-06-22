@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "TBD",
+  "cutoverWindow": "TBD",
+  "rollbackDecisionOwner": "TBD",
+  "status": "PLANNED",
+  "components": [
+    {
+      "id": "postgresql-target-database",
+      "title": "PostgreSQL target database",
+      "status": "PLANNED",
+      "owner": "DBA",
+      "backupEvidence": "TBD",
+      "restoreProcedure": "pg_restore --clean --if-exists --dbname \"$PGDATABASE\" \"$BACKUP_FILE\"",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "Production-style backup and restore rehearsal output is not attached."
+      ],
+      "nextActions": [
+        "Capture a signed pg_dump/pg_restore rehearsal report and checksum."
+      ]
+    },
+    {
+      "id": "minio-objects",
+      "title": "MinIO objects",
+      "status": "PLANNED",
+      "owner": "Storage owner",
+      "backupEvidence": "TBD",
+      "restoreProcedure": "Restore from preserved source bucket, versioned target bucket, or signed object backup set.",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "Object rollback or source-read fallback has not been rehearsed."
+      ],
+      "nextActions": [
+        "Run MinIO inventory/compare, rehearse restore, and attach sampled download evidence."
+      ]
+    },
+    {
+      "id": "keycloak-realm-users",
+      "title": "Keycloak realm and users",
+      "status": "PLANNED",
+      "owner": "Identity owner",
+      "backupEvidence": "TBD",
+      "restoreProcedure": "Import signed realm export and restore the Keycloak database snapshot.",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "Realm import and Keycloak database restore have not been rehearsed."
+      ],
+      "nextActions": [
+        "Run Keycloak source/target inventory, restore rehearsal, JWT sync, and login smoke."
+      ]
+    },
+    {
+      "id": "nacos-configuration",
+      "title": "Nacos configuration",
+      "status": "PLANNED",
+      "owner": "Runtime owner",
+      "backupEvidence": "TBD",
+      "restoreProcedure": "Reapply exported Nacos config set and restart affected services.",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "Nacos export/import rollback has not been rehearsed."
+      ],
+      "nextActions": [
+        "Attach signed Nacos export, diff, import command, and service health proof."
+      ]
+    },
+    {
+      "id": "runtime-patch-set",
+      "title": "Runtime patch set",
+      "status": "PLANNED",
+      "owner": "Runtime owner",
+      "backupEvidence": "metadata/runtime-patch-manifest.json",
+      "restoreProcedure": "Redeploy previous runtime patch bundle and restart affected services.",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "Previous signed patch bundle and restore rehearsal are not attached."
+      ],
+      "nextActions": [
+        "Attach previous/next patch manifest comparison and rollback smoke output."
+      ]
+    },
+    {
+      "id": "domain-port-tls-entry",
+      "title": "Domain, port and TLS entry",
+      "status": "PLANNED",
+      "owner": "Infrastructure owner",
+      "backupEvidence": "TBD",
+      "restoreProcedure": "Repoint reverse proxy or DNS to the previous stack and restore previous certificate config.",
+      "rehearsalEvidence": "TBD",
+      "blockingIssues": [
+        "DNS/reverse-proxy rollback window and TLS restoration proof are not attached."
+      ],
+      "nextActions": [
+        "Attach production-like DNS/proxy rollback rehearsal and TLS validation output."
+      ]
+    }
+  ]
+}

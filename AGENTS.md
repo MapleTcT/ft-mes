@@ -4,6 +4,8 @@
 
 本项目当前阶段以功能验收优先，不以治理文档、静态扫描或代码推断作为完成标准。
 
+2026-06-16 起，本项目执行任何测试、修复、模块接入或交付验收时，都必须把“真实前端功能测试 + 后端业务动作 PostgreSQL 落库证明”作为最高优先级。治理文档、静态检查、接口 200、Mapper 推断和页面能打开都只是辅助证据，不能替代真实页面操作和数据库查询。
+
 当前任务口径：
 
 - 不是继续补治理层。
@@ -19,9 +21,12 @@
 3. 形成可交接、可复验、可继续推进的测试与落库验收报告。
 4. 必要时修复阻断问题，但不能跳过验证、不能只凭代码推断。
 
+如果前端无法启动、后端无法启动、数据库无法连接、页面空白、权限不足、接口 500 或 SQL 异常，不能跳到写文档结束；这些问题本身就是最高优先级阻断项，必须先修复或按 `BLOCKED` 写入验收资产。
+
 ## 固定仓库上下文
 
 - 仓库路径：`/Users/zhangchu/Documents/ADP/adp-source-repo`
+- 本轮任务声明的 `main` 同步基线：`b6b5ecd5cd0dbb5c425a4e79fee110b9158ce854`
 - 默认数据库：PostgreSQL。
 - Oracle 只允许作为 `legacy-template-only` 或显式 `oracle-legacy` 路径存在，不允许重新变成默认运行路径。
 - 功能验收规则入口：`docs/functional-persistence-acceptance.md`
@@ -51,7 +56,7 @@
 - 当前有哪些前端页面、菜单、路由和主要业务操作。
 - 哪些操作理论上应该触发后端接口。
 - 哪些接口理论上应该写入或更新数据库。
-- 实际仓库 HEAD；如果任务声明的同步 commit 和本地 HEAD 不一致，先记录差异，不直接覆盖或回滚用户改动。
+- 实际仓库 HEAD；如果任务声明的 `main` 同步基线和本地 HEAD 不一致，先记录差异，不直接覆盖或回滚用户改动。
 
 ## 真实前端测试要求
 
@@ -120,6 +125,8 @@
 - `docs/frontend-functional-test-report.md`
 - `docs/backend-table-audit/persistence-acceptance.md`
 - `metadata/persistence-acceptance.json`
+
+这些资产必须可交接、可复验、可继续推进。每条记录都要能回答页面/路由、操作步骤、预期结果、实际结果、console error、network error、API endpoint、是否需要落库、后端入口、目标表、验收 SQL 和最终状态。
 
 并至少运行：
 

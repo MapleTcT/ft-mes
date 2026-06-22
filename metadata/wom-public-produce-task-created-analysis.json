@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-06-22T07:53:28.346Z",
+  "database": "PostgreSQL",
+  "module": "production-WOM",
+  "sourcePackage": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4",
+  "endpoint": "POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated",
+  "acceptedReplacementEndpoint": "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2",
+  "status": "BLOCKED_EXPLICIT_DISABLED",
+  "classification": "explicit-disabled-pending-product-decision",
+  "isPostgresCompatibilityGap": false,
+  "marker": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP",
+  "evidence": {
+    "apiProbe": "metadata/wom-public-produce-task-created-noop-probe.json",
+    "httpStatus": 200,
+    "responseSummary": "{\"code\":400,\"data\":null,\"message\":\"public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。\"}",
+    "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%';",
+    "databaseResult": "marker count remained 0 before and 0 after; endpoint returned explicit disabled response code=400",
+    "latestProbeStatus": "EXPLICIT_REJECTION_NO_PERSISTENCE",
+    "latestProbeConclusion": "Endpoint no longer returns false success; HTTP 200, code=400, message=public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。. Update backlog classification after product review.",
+    "latestProbeGeneratedAt": "2026-06-22T07:53:28.346Z",
+    "runtimePatch": "deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh",
+    "remoteRuntimeBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar.bak-public-disabled-20260622152535"
+  },
+  "sourceTrace": {
+    "controller": "WOMProduceTaskController.produceTaskCreated",
+    "service": "WOMProduceTaskServiceImpl.creatProTask",
+    "sourceLines": [
+      "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/controllers/WOMProduceTaskController.java:2848",
+      "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMProduceTaskServiceImpl.java:13174",
+      "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMProduceTaskServiceImpl.java:13531"
+    ],
+    "finding": "The recovered source has the intended creation body commented out and would return success without persistence; the test runtime now patches the public endpoint to return an explicit disabled response pending product decision."
+  },
+  "acceptedPath": {
+    "endpoint": "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2",
+    "marker": "ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6",
+    "evidence": [
+      "/tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json",
+      "/tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json",
+      "/tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json"
+    ],
+    "tables": [
+      "wom_produce_tasks",
+      "wom_produce_tasks_di",
+      "wom_task_actives",
+      "wom_task_qualities",
+      "baseset_batch_infos",
+      "baseset_batch_deals",
+      "wfm_task_pending",
+      "rbac_flow_permission",
+      "jbpm4_execution"
+    ]
+  },
+  "backlog": [
+    {
+      "id": "PROD-ACTION-007",
+      "issue": "public produceTaskCreated is explicitly disabled in the test runtime because the recovered implementation would otherwise return success without inserting or updating wom_produce_tasks",
+      "nextAction": "Confirm whether the public endpoint is still a product contract. If yes, restore or replace creatProTask and rerun marker API/browser/PostgreSQL acceptance. If no, keep/document the disabled response and remove it from supported create API docs.",
+      "latestProbe": {
+        "generatedAt": "2026-06-22T07:53:28.346Z",
+        "marker": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP",
+        "status": "EXPLICIT_REJECTION_NO_PERSISTENCE",
+        "httpStatus": 200,
+        "responseCode": 400,
+        "beforeCount": 0,
+        "afterCount": 0,
+        "evidence": "metadata/wom-public-produce-task-created-noop-probe.json"
+      }
+    }
+  ]
+}

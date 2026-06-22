@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "reportKind": "wom-public-produce-task-created-noop-probe",
+  "generatedAt": "2026-06-22T07:53:28.346Z",
+  "database": "PostgreSQL",
+  "baseUrl": "http://222.88.185.146:18080",
+  "endpoint": "http://222.88.185.146:18080/msService/public/WOM/produceTask/produceTask/produceTaskCreated",
+  "marker": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP",
+  "method": "POST",
+  "requestShape": "minimal daily-plan-like marker payload; not product-accepted",
+  "payload": [
+    {
+      "userName": "admin",
+      "companyCode": "default",
+      "orderInfos": {
+        "sourceIds": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP_SOURCE",
+        "sourceRatio": "1",
+        "sourceType": "1",
+        "creatStaffCode": "admin",
+        "prodCode": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP_PRODUCT",
+        "planNum": "1",
+        "batchcode": "ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP_BATCH",
+        "packageInfos": []
+      }
+    }
+  ],
+  "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622075328_PUBLIC_PRODUCE_NOOP%';",
+  "beforeCount": 0,
+  "httpStatus": 200,
+  "responseText": "{\"code\":400,\"data\":null,\"message\":\"public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。\"}",
+  "responseJson": {
+    "code": 400,
+    "data": null,
+    "message": "public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。"
+  },
+  "afterCount": 0,
+  "status": "EXPLICIT_REJECTION_NO_PERSISTENCE",
+  "conclusion": "Endpoint no longer returns false success; HTTP 200, code=400, message=public produceTaskCreated 已禁用：当前恢复版本不会创建制造指令单，请使用 /msService/WOM/produceTask/produceTask/produceTaskCreated2 或恢复经产品确认的落库实现。. Update backlog classification after product review."
+}

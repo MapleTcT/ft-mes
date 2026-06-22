@@ -5,7 +5,8 @@ const fs = require("fs");
 const path = require("path");
 const { chromium, request } = require("playwright");
 
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
+const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const departmentCode = process.env.ADP_ORG_DEPARTMENT_CODE || "0102";
@@ -13,6 +14,10 @@ const departmentName = process.env.ADP_ORG_DEPARTMENT_NAME || "办公室";
 const departmentId = process.env.ADP_ORG_DEPARTMENT_ID || "";
 const headless = process.env.ADP_HEADLESS !== "false";
 const screenshotMode = process.env.ADP_SCREENSHOTS || "failures";
+const apiTimeoutMs = Number(process.env.ADP_API_TIMEOUT_MS || 90000);
+const apiRetries = Number(process.env.ADP_API_RETRIES || 3);
+const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 90000);
+const departmentVisibleTimeoutMs = Number(process.env.ADP_ORG_VISIBLE_TIMEOUT_MS || 120000);
 const outputDir =
   process.env.ADP_OUTPUT_DIR ||
   path.join("/tmp", `adp-organization-smoke-${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`);
@@ -50,6 +55,32 @@ async function readJsonSafe(response) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientApiError(error) {
+  return /Timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|socket hang up|network/i.test(
+    error && error.message ? error.message : String(error)
+  );
+}
+
+async function withApiRetries(label, operation) {
+  const errors = [];
+  for (let attempt = 1; attempt <= apiRetries; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      errors.push(error && error.message ? error.message : String(error));
+      if (attempt >= apiRetries || !isTransientApiError(error)) {
+        throw error;
+      }
+      await sleep(Math.min(1000 * attempt, 5000));
+    }
+  }
+  throw new Error(`${label} failed after ${apiRetries} attempts: ${errors.join(" | ")}`);
+}
+
 async function login(api) {
   const attempts = [
     { userName: username, password, clientId: "pc_dt" },
@@ -58,17 +89,19 @@ async function login(api) {
 
   const errors = [];
   for (const body of attempts) {
-    const response = await api.post(`${baseUrl}/inter-api/auth/login`, {
-      data: body,
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=UTF-8",
-      },
-    });
+    const response = await withApiRetries("auth login", () =>
+      api.post(`${baseUrl}/inter-api/auth/login`, {
+        data: body,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+      })
+    );
     const parsed = await readJsonSafe(response);
     const ticket = response.ok() ? findTicket(parsed.json) : null;
     if (ticket) {
-      return ticket;
+      return { ticket, loginPayload: parsed.json };
     }
     errors.push({ status: response.status(), body: parsed.text.slice(0, 500) });
   }
@@ -141,9 +174,11 @@ function flattenMenus(payload) {
 }
 
 async function fetchOrganizationManageUrl(api, ticket) {
-  const response = await api.get(`${baseUrl}/inter-api/rbac/v1/menus/currentUser`, {
-    headers: authHeaders(ticket),
-  });
+  const response = await withApiRetries("menus currentUser", () =>
+    api.get(`${baseUrl}/inter-api/rbac/v1/menus/currentUser`, {
+      headers: authHeaders(ticket),
+    })
+  );
   const parsed = await readJsonSafe(response);
   if (!response.ok()) {
     throw new Error(`Menu API failed with ${response.status()}: ${parsed.text.slice(0, 500)}`);
@@ -186,7 +221,9 @@ function collectDepartments(payload) {
 }
 
 async function runApiCheck(api, ticket, name, urlPath) {
-  const response = await api.get(`${baseUrl}${urlPath}`, { headers: authHeaders(ticket) });
+  const response = await withApiRetries(name, () =>
+    api.get(`${baseUrl}${urlPath}`, { headers: authHeaders(ticket) })
+  );
   const parsed = await readJsonSafe(response);
   const ok = response.status() < 400 && !visibleErrorPattern.test(parsed.text || "");
   return {
@@ -204,7 +241,9 @@ async function selectDepartment(api, ticket) {
   if (!tree.ok) {
     throw new Error(`Department tree API failed: ${tree.bodySnippet || tree.status}`);
   }
-  const response = await api.get(`${baseUrl}${treePath}`, { headers: authHeaders(ticket) });
+  const response = await withApiRetries("department-tree-select", () =>
+    api.get(`${baseUrl}${treePath}`, { headers: authHeaders(ticket) })
+  );
   const parsed = await readJsonSafe(response);
   const departments = collectDepartments(parsed.json).filter((item) => item.companyId);
   const selected =
@@ -225,10 +264,17 @@ function findVisibleError(bodyText) {
     .find((line) => line && visibleErrorPattern.test(line));
 }
 
-async function runBrowserClick(ticket, organizationUrl, department) {
+function withTimeout(promise, timeoutMs, fallback) {
+  return Promise.race([
+    promise.catch(() => fallback),
+    new Promise((resolve) => setTimeout(() => resolve(fallback), timeoutMs)),
+  ]);
+}
+
+async function runBrowserClick(ticket, loginPayload, organizationUrl, department) {
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
-    baseURL: baseUrl,
+    baseURL: browserBaseUrl,
     ignoreHTTPSErrors: true,
     viewport: { width: 1440, height: 960 },
     extraHTTPHeaders: {
@@ -236,26 +282,43 @@ async function runBrowserClick(ticket, organizationUrl, department) {
     },
   });
   await context.addCookies([
-    { name: "suposTicket", value: ticket, url: baseUrl },
-    { name: "SUPOS_TICKET", value: ticket, url: baseUrl },
+    { name: "suposTicket", value: ticket, url: browserBaseUrl },
+    { name: "SUPOS_TICKET", value: ticket, url: browserBaseUrl },
   ]);
-  await context.addInitScript((token) => {
+  await context.addInitScript(({ token, loginPayload: loginPayloadValue }) => {
     window.localStorage.setItem("suposTicket", token);
     window.localStorage.setItem("SUPOS_TICKET", token);
     window.localStorage.setItem("token", token);
+    window.localStorage.setItem("ticket", token);
     window.sessionStorage.setItem("suposTicket", token);
     window.sessionStorage.setItem("SUPOS_TICKET", token);
     window.sessionStorage.setItem("token", token);
-  }, ticket);
+    window.sessionStorage.setItem("ticket", token);
+    if (loginPayloadValue) {
+      window.localStorage.setItem("loginMsg", JSON.stringify(loginPayloadValue));
+      window.sessionStorage.setItem("loginMsg", JSON.stringify(loginPayloadValue));
+    }
+    window.localStorage.setItem("language", "zh_CN");
+    window.localStorage.setItem("langu_code", "zh_CN");
+    window.localStorage.setItem("locale", "zh-cn");
+    window.sessionStorage.setItem("language", "zh_CN");
+    window.sessionStorage.setItem("langu_code", "zh_CN");
+    window.sessionStorage.setItem("locale", "zh-cn");
+  }, { token: ticket, loginPayload });
 
   const page = await context.newPage();
+  page.setDefaultTimeout(pageTimeoutMs);
+  page.setDefaultNavigationTimeout(pageTimeoutMs);
   const networkErrors = [];
   const pageErrors = [];
   const requestFailures = [];
-  const resolvedUrl = new URL(organizationUrl, `${baseUrl}/`).toString();
+  const resolvedUrl = new URL(organizationUrl, `${browserBaseUrl}/`).toString();
   let navigationStatus = null;
   let navigationError = null;
   let visibleError = null;
+  let finalUrl = null;
+  let pageTitle = null;
+  let bodyTextSnippet = null;
   let screenshot = null;
 
   page.on("response", async (response) => {
@@ -295,10 +358,14 @@ async function runBrowserClick(ticket, organizationUrl, department) {
   });
 
   try {
-    const navigation = await page.goto(resolvedUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+    const navigation = await page.goto(resolvedUrl, { waitUntil: "commit", timeout: pageTimeoutMs });
     navigationStatus = navigation ? navigation.status() : null;
+    await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {});
     await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
-    await page.getByText(department.name, { exact: true }).first().waitFor({ state: "visible", timeout: 30000 });
+    await page
+      .getByText(department.name, { exact: true })
+      .first()
+      .waitFor({ state: "visible", timeout: departmentVisibleTimeoutMs });
     await page.getByText(department.name, { exact: true }).first().click({ timeout: 10000 });
     await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1200);
@@ -308,6 +375,13 @@ async function runBrowserClick(ticket, organizationUrl, department) {
     navigationError = error.message;
   }
 
+  finalUrl = page.url();
+  pageTitle = await withTimeout(page.title(), 2000, null);
+  bodyTextSnippet = await withTimeout(page.locator("body").innerText({ timeout: 2000 }), 2500, "");
+  if (bodyTextSnippet) {
+    bodyTextSnippet = bodyTextSnippet.replace(/\s+/g, " ").trim().slice(0, 1000);
+  }
+
   const failed =
     Boolean(navigationError) ||
     (navigationStatus !== null && navigationStatus >= 400) ||
@@ -315,10 +389,13 @@ async function runBrowserClick(ticket, organizationUrl, department) {
     pageErrors.length > 0 ||
     requestFailures.length > 0 ||
     Boolean(visibleError);
+  const capturedNetworkErrors = networkErrors.slice();
+  const capturedPageErrors = pageErrors.slice();
+  const capturedRequestFailures = requestFailures.slice();
 
   if (screenshotMode === "all" || (screenshotMode === "failures" && failed)) {
     screenshot = path.join(outputDir, failed ? "organization-failure.png" : "organization.png");
-    await page.screenshot({ path: screenshot, fullPage: true }).catch(() => {
+    await page.screenshot({ path: screenshot, fullPage: true, timeout: 10000 }).catch(() => {
       screenshot = null;
     });
   }
@@ -329,12 +406,15 @@ async function runBrowserClick(ticket, organizationUrl, department) {
     ok: !failed,
     url: organizationUrl,
     resolvedUrl,
+    finalUrl,
+    pageTitle,
+    bodyTextSnippet,
     navigationStatus,
     navigationError,
     visibleError,
-    networkErrors,
-    pageErrors,
-    requestFailures,
+    networkErrors: capturedNetworkErrors,
+    pageErrors: capturedPageErrors,
+    requestFailures: capturedRequestFailures,
     screenshot,
   };
 }
@@ -343,8 +423,8 @@ async function main() {
   ensureDir(path.dirname(outputPath));
   ensureDir(outputDir);
 
-  const api = await request.newContext({ ignoreHTTPSErrors: true });
-  const ticket = await login(api);
+  const api = await request.newContext({ ignoreHTTPSErrors: true, timeout: apiTimeoutMs });
+  const { ticket, loginPayload } = await login(api);
   const organizationUrl = await fetchOrganizationManageUrl(api, ticket);
   const { selected, tree } = await selectDepartment(api, ticket);
   const detail = await runApiCheck(
@@ -363,13 +443,14 @@ async function main() {
   );
   await api.dispose();
 
-  const browser = await runBrowserClick(ticket, organizationUrl, selected);
+  const browser = await runBrowserClick(ticket, loginPayload, organizationUrl, selected);
   const apiResults = [tree, detail, relatedPersons];
   const failedApi = apiResults.filter((result) => !result.ok);
   const ok = failedApi.length === 0 && browser.ok;
   const report = {
     generatedAt: new Date().toISOString(),
     baseUrl,
+    browserBaseUrl,
     username,
     ok,
     selectedDepartment: {

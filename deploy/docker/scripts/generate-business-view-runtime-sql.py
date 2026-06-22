@@ -17,7 +17,7 @@ import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
 TARGET_VIEW_CODES: Sequence[str] = (
@@ -30,6 +30,12 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "TagManagement_1.0.0_tagInfo_tagList",
     "TagManagement_1.0.0_dataConvert_dataConvertList",
     "TeamInfo_1.0.0_team_teamList",
+    "TeamInfo_1.0.0_team_teamLayout",
+    "TeamInfo_1.0.0_team_teamEdit",
+    "TeamInfo_1.0.0_team_teamView",
+    "TeamInfo_1.0.0_schedulePlan_schedulePlanList",
+    "TeamInfo_1.0.0_schedulePlan_schedulePlanEdit",
+    "TeamInfo_1.0.0_schedulePlan_schedulePlanView",
     "TeamInfo_1.0.0_schedual_schedualDeptLayout",
     "Qualify_1.0.0_certificate_certifcateLayOut",
     "DocManage_1.0.0_document_documentList",
@@ -44,6 +50,7 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "LIMSSTDS_5.1.0.1_aqPrepRecord_aqPrepRecordList",
     "LIMSSteady_6.0.4.1_envCondition_envConditionList",
     "QCS_5.0.0.0_inspect_manuInspectList",
+    "QCS_5.0.0.0_inspectReport_manuInspReportEdit",
     "WOM_1.0.0_produceTask_makeTaskList",
     "WOM_1.0.0_produceTask_prepareMakeTaskList",
     "WOM_1.0.0_produceTask_makeTaskEdit",
@@ -51,7 +58,12 @@ TARGET_VIEW_CODES: Sequence[str] = (
     "WOM_1.0.0_produceTask_makeTaskView",
     "WOM_1.0.0_produceTask_makeTaskBatchView",
     "WOM_1.0.0_produceTask_easyTaskOperateView",
+    "WOM_1.0.0_procReport_outPutCommonTaskEdit",
     "WOM_1.0.0_batchMaterial_baRetireMentPDAList",
+    "WOM_1.0.0_rejectMaterilal_batchRejectEdit",
+    "WOM_1.0.0_rejectMaterilal_materiaRejectEdit",
+    "WOM_1.0.0_rejectMaterilal_materiaEditableEdit",
+    "WOM_1.0.0_rejectMaterilal_prePareRejectEdit",
     "RM_1.0.0_formula_batchFormulaList",
     "craftGraph_1.0_basicInfo_basicInfoList",
     "craftGraph_1.0_operationButton_buttonConfList",
@@ -268,6 +280,7 @@ class ViewDef:
     view_type: str
     show_type: str
     url: str
+    open_type: str
     module_code: str
     ass_model_code: str
     entity_code: str
@@ -311,6 +324,322 @@ def int_or_none(value: str) -> Optional[int]:
         return int(float(value))
     except ValueError:
         return None
+
+
+def xml_value(element: ET.Element) -> Any:
+    children = list(element)
+    if not children:
+        return (element.text or "").strip()
+    if element.tag == "list":
+        return [xml_value(child) for child in children if child.tag == "list-item"]
+
+    result: Dict[str, Any] = {}
+    for child in children:
+        value = xml_value(child)
+        if child.tag in result:
+            existing = result[child.tag]
+            if not isinstance(existing, list):
+                result[child.tag] = [existing]
+            result[child.tag].append(value)
+        else:
+            result[child.tag] = value
+    return result
+
+
+def xml_children_dict(element: Optional[ET.Element]) -> Dict[str, Any]:
+    if element is None:
+        return {}
+    value = xml_value(element)
+    return value if isinstance(value, dict) else {}
+
+
+def list_items(element: Optional[ET.Element]) -> List[ET.Element]:
+    if element is None:
+        return []
+    if element.tag == "list":
+        return [child for child in list(element) if child.tag == "list-item"]
+    child_list = element.find("list")
+    if child_list is None:
+        return []
+    return [child for child in list(child_list) if child.tag == "list-item"]
+
+
+def first_text(element: Optional[ET.Element], *tags: str, default: str = "") -> str:
+    for tag in tags:
+        value = direct_text(element, tag)
+        if value:
+            return value
+    return default
+
+
+def unwrap_xml_list(value: Any) -> Any:
+    if isinstance(value, dict) and set(value.keys()) == {"list"} and isinstance(value.get("list"), list):
+        return value["list"]
+    return value
+
+
+VIEW_REFERENCE_KEYS: Sequence[str] = (
+    "viewview",
+    "linkView",
+    "allowviewcode",
+    "referenceview",
+    "viewselect",
+    "allowmultviewselect",
+)
+
+
+BOOLEAN_XML_KEYS = {
+    "acceptrevisions",
+    "allowview",
+    "autoresize",
+    "batchoperation",
+    "casesensitive",
+    "complex",
+    "containlower",
+    "convertpdfonline",
+    "couple",
+    "crosscol",
+    "defaultvaluehaschanged",
+    "downloaddoc",
+    "getrevisions",
+    "hiderevision",
+    "iscontrol",
+    "iscreatenew",
+    "iscustom",
+    "isgroup",
+    "ishide",
+    "ishidden",
+    "islink",
+    "ismultable",
+    "isnocopy",
+    "isofficesign",
+    "isofficehandsign",
+    "ispermission",
+    "isrefselect",
+    "isreadonly",
+    "isrevision",
+    "ispublished",
+    "issignatureconfig",
+    "istitle",
+    "mnecode",
+    "mneenable",
+    "multable",
+    "multallowview",
+    "nullable",
+    "officeprint",
+    "officenotnull",
+    "openemptydoc",
+    "openpending",
+    "precisionhaschanged",
+    "readonly",
+    "savetemplate",
+    "showformathaschanged",
+    "showrevision",
+    "showtypehaschanged",
+}
+
+
+BUTTON_COPY_KEYS: Sequence[str] = (
+    "id",
+    "showname",
+    "name",
+    "namekey",
+    "buttonstyle",
+    "operatetype",
+    "operateType",
+    "isHide",
+    "ispermission",
+    "isPublished",
+    "buttonoperationcode",
+    "funcname",
+    "funcbody",
+    "funcbody_es5",
+    "callbackbody",
+    "callbackbody_es5",
+    "callbackname",
+    "viewselect",
+    "iscallback",
+    "iscustomfunc",
+    "useInMore",
+    "isconfirm",
+    "isSignatureConfig",
+    "batchOperation",
+    "buttonAlign",
+    "cellCode",
+    "ecEnv",
+    "regionType",
+)
+
+
+BUTTON_MEANINGFUL_KEYS: Sequence[str] = (
+    "id",
+    "showname",
+    "namekey",
+    "buttonoperationcode",
+    "funcbody",
+    "funcname",
+    "viewselect",
+)
+
+
+def normalize_xml_scalar_types(value: Any, key: str = "") -> Any:
+    if isinstance(value, dict):
+        for child_key, child_value in list(value.items()):
+            value[child_key] = normalize_xml_scalar_types(child_value, child_key)
+        return value
+    if isinstance(value, list):
+        return [normalize_xml_scalar_types(item, key) for item in value]
+    if isinstance(value, str) and key.lower() in BOOLEAN_XML_KEYS:
+        lowered = value.strip().lower()
+        if lowered in {"true", "false"}:
+            return lowered == "true"
+    return value
+
+
+def sanitize_runtime_strings(value: Any) -> Any:
+    if isinstance(value, dict):
+        for child_key, child_value in list(value.items()):
+            value[child_key] = sanitize_runtime_strings(child_value)
+        return value
+    if isinstance(value, list):
+        return [sanitize_runtime_strings(item) for item in value]
+    if isinstance(value, str):
+        return value.replace("`", "'")
+    return value
+
+
+def reference_mne_type(url: str) -> str:
+    if url.startswith("/organization/#/reference?type="):
+        return url.rsplit("=", 1)[-1][:1].upper() + url.rsplit("=", 1)[-1][1:]
+    return "other"
+
+
+def view_reference_payload(ref_code: str, views: Dict[str, "ViewDef"], element: Dict[str, Any]) -> Any:
+    ref_view = views.get(ref_code)
+    if ref_view is None:
+        return ref_code
+    cross_company = element.get("iscrosscompany")
+    if cross_company in (None, ""):
+        cross_company = element.get("isgroup")
+    if cross_company in (None, ""):
+        cross_company = "false"
+    return {
+        "title": ref_view.title,
+        "code": ref_view.code,
+        "name": ref_view.name,
+        "openType": ref_view.open_type,
+        "url": ref_view.url,
+        "iscrosscompany": str(cross_company).lower(),
+        "mneType": reference_mne_type(ref_view.url),
+    }
+
+
+def expand_element_view_references(element: Dict[str, Any], views: Dict[str, "ViewDef"]) -> None:
+    for key in VIEW_REFERENCE_KEYS:
+        ref_value = element.get(key)
+        if isinstance(ref_value, str) and ref_value:
+            element[key] = view_reference_payload(ref_value, views, element)
+            if key == "referenceview" and not element.get("mainDisplayName"):
+                field_key = str(element.get("key") or element.get("name") or "")
+                if "." in field_key:
+                    element["mainDisplayName"] = field_key.rsplit(".", 1)[-1]
+
+
+def canonical_button_onclick(funcname: str) -> str:
+    value = (funcname or "").strip()
+    if not value:
+        return ""
+    match = re.search(r"onclick\s*=\s*['\"]([^'\"]+)['\"]", value)
+    if match:
+        return match.group(1).strip()
+    if value.startswith("onclick="):
+        return value.split("=", 1)[-1].strip().strip("'\"")
+    return value
+
+
+def default_button_style(button: Dict[str, Any]) -> str:
+    style = str(button.get("buttonstyle") or "").strip()
+    if style:
+        return style
+    operate_type = str(button.get("operatetype") or button.get("operateType") or "").upper()
+    return {
+        "ADD": "add",
+        "MODIFY": "modify",
+        "UPDATE": "modify",
+        "DELETE": "del",
+        "DEL": "del",
+        "VIEW": "view",
+    }.get(operate_type, "add")
+
+
+def button_payload(button_item: ET.Element, views: Optional[Dict[str, "ViewDef"]] = None) -> Optional[Dict[str, Any]]:
+    raw = {key: direct_text(button_item, key) for key in BUTTON_COPY_KEYS}
+    if not any(raw.get(key) for key in BUTTON_MEANINGFUL_KEYS):
+        return None
+    if bool_text(raw.get("isHide", "")):
+        return None
+
+    result: Dict[str, Any] = {}
+    for key, value in raw.items():
+        if value != "":
+            result[key] = value
+
+    show_name = str(result.get("showname") or result.get("name") or result.get("namekey") or "").strip()
+    original_namekey = str(result.get("namekey") or "").strip()
+    if original_namekey and show_name and original_namekey != show_name:
+        result["i18nKey"] = original_namekey
+    if show_name:
+        result["name"] = show_name
+        result["showname"] = show_name
+        result["namekey"] = show_name
+
+    if "operateType" in result and "operatetype" not in result:
+        result["operatetype"] = result["operateType"]
+    if "operatetype" in result:
+        result["operatetype"] = str(result["operatetype"]).upper()
+        result["operateType"] = result["operatetype"]
+
+    button_style = default_button_style(result)
+    result["buttonstyle"] = button_style
+    operation_code = str(result.get("buttonoperationcode") or result.get("id") or "").strip()
+    onclick = canonical_button_onclick(str(result.get("funcname") or ""))
+    if onclick:
+        result["onclick"] = onclick
+        result["ONCLICK"] = onclick
+    if operation_code:
+        result["CODE"] = operation_code
+    if show_name:
+        result["NAME"] = show_name
+    result["ICONCLS"] = "cui-btn-" + button_style
+    result["USEINMORE"] = str(result.get("useInMore", "false")).lower()
+    result["SEPARATENUM"] = "0"
+
+    normalize_xml_scalar_types(result)
+    viewselect = result.get("viewselect")
+    if isinstance(viewselect, str) and viewselect:
+        result["viewselect"] = view_reference_payload(viewselect, views or {}, result)
+    return result
+
+
+def extract_buttons(view: "ViewDef", views: Optional[Dict[str, "ViewDef"]] = None) -> List[Dict[str, Any]]:
+    buttons: List[Dict[str, Any]] = []
+    seen = set()
+    for item in iter_region_items(view, "BUTTON"):
+        payload = button_payload(item, views)
+        if payload is None:
+            continue
+        key = (
+            payload.get("buttonoperationcode")
+            or payload.get("id")
+            or payload.get("funcname")
+            or payload.get("showname")
+            or json.dumps(payload, sort_keys=True, ensure_ascii=False)
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        buttons.append(payload)
+    return buttons
 
 
 def null_if_blank(value: str) -> Optional[str]:
@@ -407,6 +736,7 @@ def parse_view(source: Path, view_element: ET.Element) -> Optional[ViewDef]:
         view_type=view_type,
         show_type=direct_text(view_element, "showType", "SINGLE") or "SINGLE",
         url=url,
+        open_type=direct_text(view_element, "openType"),
         module_code=module_code,
         ass_model_code=ass_model_code,
         entity_code=entity_code,
@@ -930,7 +1260,9 @@ def field_json(field: FieldDef) -> Dict[str, object]:
     return result
 
 
-def data_grid_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str, object]:
+def data_grid_json(
+    view: ViewDef, parent_code: Optional[str] = None, views: Optional[Dict[str, ViewDef]] = None
+) -> Dict[str, object]:
     fields = extract_fields(view)
     visible_fields = [field for field in fields if not field.hidden]
     main_display = "name"
@@ -947,7 +1279,7 @@ def data_grid_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str
         "mainDisplayName": main_display,
         "idPrefix": "compat_" + (parent_code or view.code),
         "listPT": False,
-        "buttons": [],
+        "buttons": extract_buttons(view, views),
         "fields": [field_json(field) for field in fields],
     }
     if view.url:
@@ -971,7 +1303,282 @@ def runtime_page_type(view: ViewDef) -> str:
     return "LIST"
 
 
-def list_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str, object]:
+def section_cells(section: ET.Element) -> List[ET.Element]:
+    return list_items(section.find("cells"))
+
+
+def section_region_type(section: ET.Element) -> str:
+    return direct_text(section, "regionType").upper()
+
+
+def action_cell_json(cell: ET.Element, views: Optional[Dict[str, ViewDef]] = None) -> Dict[str, Any]:
+    result: Dict[str, Any] = {}
+    for child in list(cell):
+        if child.tag == "element":
+            result["element"] = xml_children_dict(child)
+        elif child.tag == "cells":
+            continue
+        else:
+            result[child.tag] = xml_value(child)
+
+    if "element" not in result:
+        result["element"] = xml_children_dict(cell)
+    for list_key in ("validate",):
+        if list_key in result:
+            result[list_key] = unwrap_xml_list(result[list_key])
+    result["colspan"] = int_text(str(result.get("colspan") or "1"), 1)
+    result["rowspan"] = int_text(str(result.get("rowspan") or "1"), 1)
+    result["firstTd"] = int_text(str(result.get("firstTd") or "0"), 0)
+
+    element = result.get("element")
+    if not isinstance(element, dict):
+        element = {}
+        result["element"] = element
+    if not element.get("key"):
+        cell_code = str(result.get("cellCode") or "blank").replace(".", "_")
+        element.update(
+            {
+                "key": f"compat.blank.{cell_code}",
+                "namekey": "",
+                "name": "",
+                "showType": "LABEL",
+                "showFormat": "TEXT",
+                "columnType": "TEXT",
+                "nullable": "true",
+            }
+        )
+        result.setdefault("name", "")
+    normalize_xml_scalar_types(result)
+    element = result.get("element") if isinstance(result.get("element"), dict) else {}
+    if str(element.get("columnType", "")).upper() == "SYSTEMCODE" and not isinstance(element.get("fill"), dict):
+        element["fill"] = {}
+    expand_element_view_references(element, views or {})
+    return result
+
+
+def action_sections(container: ET.Element) -> List[ET.Element]:
+    sections: List[ET.Element] = []
+    for item in container.iter("list-item"):
+        region_type = section_region_type(item)
+        if region_type in {"EDIT", "DATAGRID"} and item.find("cells") is not None:
+            sections.append(item)
+    return sections
+
+
+def action_tab_sources(layout: ET.Element) -> List[ET.Element]:
+    tab_items = list_items(layout.find("tabs"))
+    return tab_items or [layout]
+
+
+def data_grid_name(view: ViewDef, datagrid_code: str) -> str:
+    if datagrid_code.startswith(view.code):
+        suffix = datagrid_code[len(view.code) :]
+        if suffix:
+            return suffix
+    return datagrid_code
+
+
+def action_data_grid_json(
+    view: ViewDef, section: ET.Element, marker: Dict[str, Any], views: Optional[Dict[str, ViewDef]] = None
+) -> Dict[str, Any]:
+    element = marker.get("element") if isinstance(marker.get("element"), dict) else {}
+    marker_code = str(element.get("code") or direct_text(section, "datagridCode") or direct_text(section, "dataGridCode"))
+    datagrid_code = direct_text(section, "datagridCode") or direct_text(section, "dataGridCode") or marker_code
+    section_config = xml_children_dict(section.find("pageConfig"))
+    is_readonly = direct_text(section, "isreadonly") or direct_text(section, "isreadonlyBak")
+    return {
+        "DataGridCode": datagrid_code,
+        "code": datagrid_code,
+        "name": data_grid_name(view, datagrid_code),
+        "datagridName": direct_text(section, "datagridName") or datagrid_code,
+        "isEditable": view.view_type != "VIEW" and not bool_text(is_readonly),
+        "ptRealTimeLoad": bool_text(direct_text(section, "ptRealTimeLoad")),
+        "ptPageInit": section_config.get("ptPageInit", ""),
+        "renderOver": section_config.get("renderOver", ""),
+        "config": {
+            "code": marker_code,
+            "DataGridCode": datagrid_code,
+        },
+        "buttons": extract_buttons(view, views),
+        "elements": [],
+    }
+
+
+def action_section_colwidth(section: ET.Element) -> str:
+    colwidth = first_text(section, "colwidth", "colWidth", "columnWidth", "columnwidth")
+    if colwidth:
+        return colwidth
+    col_num = int_text(first_text(section, "colNum", "columnNum"), 6)
+    col_num = max(1, min(col_num, 12))
+    each = round(100 / col_num, 4)
+    return ",".join(str(each).rstrip("0").rstrip(".") for _ in range(col_num))
+
+
+def action_section_json(section: ET.Element, cells: List[Dict[str, Any]], index: int) -> Dict[str, Any]:
+    section_code = first_text(section, "sectionCode", "layoutCode", "code", default=f"compat_section_{index + 1}")
+    section_name = first_text(section, "sectionName", "namekey", "name", default=section_code)
+    return {
+        "type": "layoutSection",
+        "layoutmethod": "container",
+        "layoutContent": "section",
+        "sectionCode": section_code,
+        "namekey": section_name,
+        "cssstyle": direct_text(section, "cssstyle"),
+        "colwidth": action_section_colwidth(section),
+        "cells": cells,
+    }
+
+
+def action_datagrid_cell_json(
+    view: ViewDef, section: ET.Element, marker: Dict[str, Any], views: Optional[Dict[str, ViewDef]] = None
+) -> Dict[str, Any]:
+    grid = action_data_grid_json(view, section, marker, views)
+    data_grid_code = (
+        grid.get("DataGridCode")
+        or grid.get("config", {}).get("DataGridCode")
+        or grid.get("datagridName")
+        or grid.get("name")
+    )
+    grid.update(
+        {
+            "type": "layoutDatagrid",
+            "layoutmethod": "container",
+            "dataGridName": grid.get("datagridName") or data_grid_code,
+            "DataGridCode": data_grid_code,
+            "code": data_grid_code,
+            "fields": grid.get("elements", []),
+            "modelCode": model_code_for(view, extract_fields(view)),
+            "idPrefix": "compat_" + view.code,
+            "listPT": False,
+            "isCheckBox": False,
+            "isFirstLoad": True,
+        }
+    )
+    return {
+        "type": "layout",
+        "layoutmethod": "container",
+        "colspan": 1,
+        "rowspan": 1,
+        "firstTd": 1,
+        "components": [grid],
+    }
+
+
+def action_tab_layout_json(
+    view: ViewDef, tab_source: ET.Element, index: int, views: Optional[Dict[str, ViewDef]] = None
+) -> Optional[Dict[str, Any]]:
+    components: List[Dict[str, Any]] = []
+
+    for section_index, section in enumerate(action_sections(tab_source)):
+        region_type = section_region_type(section)
+        cells = section_cells(section)
+        if region_type == "EDIT":
+            field_cells = [action_cell_json(cell, views) for cell in cells]
+            if field_cells:
+                components.append(action_section_json(section, field_cells, section_index))
+            continue
+
+        if region_type == "DATAGRID" and cells:
+            marker = action_cell_json(cells[0], views)
+            components.append(
+                action_section_json(
+                    section,
+                    [action_datagrid_cell_json(view, section, marker, views)],
+                    section_index,
+                )
+            )
+
+    if not components:
+        return None
+
+    tab_code = first_text(tab_source, "tabCode", default=f"compat_{view.code}_tab_{index + 1}")
+    tab_name = first_text(tab_source, "tabName", "name", "namekey", default=view.display_name or view.title or tab_code)
+    return {
+        "type": "layout",
+        "layoutmethod": "column",
+        "tabCode": tab_code,
+        "namekey": tab_name,
+        "components": [
+            {
+                "type": "layout",
+                "layoutmethod": "container",
+                "layoutContent": "section",
+                "components": components,
+            }
+        ],
+    }
+
+
+def action_view_json(view: ViewDef, views: Optional[Dict[str, ViewDef]] = None) -> Dict[str, Any]:
+    layout = layout_element(view)
+    tab_layouts: List[Dict[str, Any]] = []
+    if layout is not None:
+        for index, tab_source in enumerate(action_tab_sources(layout)):
+            tab_layout = action_tab_layout_json(view, tab_source, index, views)
+            if tab_layout:
+                tab_layouts.append(tab_layout)
+
+    if not tab_layouts:
+        tab_layouts = [
+            {
+                "type": "layout",
+                "layoutmethod": "column",
+                "tabCode": f"compat_{view.code}_tab_1",
+                "namekey": view.display_name or view.title or view.code,
+                "components": [
+                    {
+                        "type": "layout",
+                        "layoutmethod": "container",
+                        "layoutContent": "section",
+                        "components": [
+                            {
+                                "type": "layoutSection",
+                                "layoutmethod": "container",
+                                "layoutContent": "section",
+                                "sectionCode": "compat_empty_section",
+                                "namekey": "",
+                                "colwidth": "16.6667,16.6667,16.6667,16.6667,16.6667,16.6667",
+                                "cells": [],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ]
+
+    body_layout: Dict[str, Any]
+    if len(tab_layouts) > 1:
+        body_layout = {
+            "type": "layout",
+            "layoutmethod": "tab",
+            "components": tab_layouts,
+        }
+    else:
+        body_layout = tab_layouts[0]
+
+    return {
+        "pageType": runtime_page_type(view),
+        "title": view.title,
+        "url": view.url,
+        "isMain": True,
+        "hasAttachment": view.has_attachment,
+        "onlyForQuery": view.only_for_query,
+        "components": [
+            {
+                "type": "layout",
+                "layoutmethod": "column",
+                "events": [],
+                "components": [body_layout],
+            }
+        ],
+        "isFileView": True,
+        "moveFlag": view.move_flag,
+    }
+
+
+def list_json(
+    view: ViewDef, parent_code: Optional[str] = None, views: Optional[Dict[str, ViewDef]] = None
+) -> Dict[str, object]:
     return {
         "pageType": runtime_page_type(view),
         "title": view.title,
@@ -993,7 +1600,7 @@ def list_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str, obj
                         "fastProperty": [],
                         "advProperty": [],
                     },
-                    data_grid_json(view, parent_code),
+                    data_grid_json(view, parent_code, views),
                 ],
             }
         ],
@@ -1002,7 +1609,12 @@ def list_json(view: ViewDef, parent_code: Optional[str] = None) -> Dict[str, obj
     }
 
 
-def tree_json(view: ViewDef, parent_code: Optional[str] = None, width: Optional[int] = None) -> Dict[str, object]:
+def tree_json(
+    view: ViewDef,
+    parent_code: Optional[str] = None,
+    width: Optional[int] = None,
+    views: Optional[Dict[str, ViewDef]] = None,
+) -> Dict[str, object]:
     layout = layout_element(view)
     layout_code = direct_text(layout, "layoutCode") or "compat_" + view.code
     result: Dict[str, object] = {
@@ -1013,7 +1625,7 @@ def tree_json(view: ViewDef, parent_code: Optional[str] = None, width: Optional[
         "url": view.url,
         "treeViewCode": view.code,
         "hasAttachment": view.has_attachment,
-        "buttons": [],
+        "buttons": extract_buttons(view, views),
     }
     if width:
         result["fix_w"] = width
@@ -1033,9 +1645,9 @@ def layout2_json(view: ViewDef, views: Dict[str, ViewDef]) -> Dict[str, object]:
     components: List[Dict[str, object]] = []
     tree_view = views.get(tree_code)
     if tree_view is not None:
-        components.append(tree_json(tree_view, view.code, width))
+        components.append(tree_json(tree_view, view.code, width, views))
     list_view = views.get(list_code)
-    components.append(list_json(list_view or view, view.code))
+    components.append(list_json(list_view or view, view.code, views))
 
     return {
         "title": view.title,
@@ -1063,10 +1675,13 @@ def view_json(view: ViewDef, views: Dict[str, ViewDef]) -> str:
             "type": "layout",
             "layoutmethod": "column",
             "title": view.title,
-            "components": [tree_json(view)],
+            "components": [tree_json(view, views=views)],
         }
+    elif runtime_page_type(view) in {"EDIT", "VIEW"}:
+        payload = action_view_json(view, views)
     else:
-        payload = list_json(view)
+        payload = list_json(view, views=views)
+    sanitize_runtime_strings(payload)
     return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -1434,26 +2049,26 @@ def emit_preamble() -> List[str]:
         "    rbac_menuoperate.create_time,",
         "    rbac_menuoperate.modify_time,",
         "    rbac_menuoperate.delete_time,",
-        "    CASE WHEN lower(rbac_menuoperate.valid::text) IN ('1', 't', 'true') THEN 1 ELSE 0 END::smallint AS valid,",
+        "    CASE WHEN rbac_menuoperate.valid IS NULL THEN NULL WHEN lower(rbac_menuoperate.valid::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS valid,",
         "    rbac_menuoperate.cid,",
-        "    rbac_menuoperate.is_allow_proxy,",
-        "    rbac_menuoperate.is_hidden,",
-        "    rbac_menuoperate.three_role,",
+        "    CASE WHEN rbac_menuoperate.is_allow_proxy IS NULL THEN NULL WHEN lower(rbac_menuoperate.is_allow_proxy::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS is_allow_proxy,",
+        "    CASE WHEN rbac_menuoperate.is_hidden IS NULL THEN NULL WHEN lower(rbac_menuoperate.is_hidden::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS is_hidden,",
+        "    CASE WHEN rbac_menuoperate.three_role IS NULL THEN NULL WHEN lower(rbac_menuoperate.three_role::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS three_role,",
         "    rbac_menuoperate.view_code,",
-        "    rbac_menuoperate.is_query,",
-        "    rbac_menuoperate.is_orrelation,",
-        "    rbac_menuoperate.for_flow_permission AS for_data_permission,",
-        "    rbac_menuoperate.enable_norestrict,",
-        "    rbac_menuoperate.enable_custompermission AS enable_otherrestrict,",
-        "    rbac_menuoperate.enable_datapermission AS enable_specialpermission,",
-        "    rbac_menuoperate.enable_dealerpermission,",
-        "    rbac_menuoperate.enable_assignstaff,",
-        "    rbac_menuoperate.enable_assignpos,",
-        "    rbac_menuoperate.enable_posrestrict,",
-        "    rbac_menuoperate.enable_grouprestrict,",
+        "    CASE WHEN rbac_menuoperate.is_query IS NULL THEN NULL WHEN lower(rbac_menuoperate.is_query::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS is_query,",
+        "    CASE WHEN rbac_menuoperate.is_orrelation IS NULL THEN NULL WHEN lower(rbac_menuoperate.is_orrelation::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS is_orrelation,",
+        "    CASE WHEN rbac_menuoperate.for_flow_permission IS NULL THEN NULL WHEN lower(rbac_menuoperate.for_flow_permission::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS for_data_permission,",
+        "    CASE WHEN rbac_menuoperate.enable_norestrict IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_norestrict::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_norestrict,",
+        "    CASE WHEN rbac_menuoperate.enable_custompermission IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_custompermission::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_otherrestrict,",
+        "    CASE WHEN rbac_menuoperate.enable_datapermission IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_datapermission::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_specialpermission,",
+        "    CASE WHEN rbac_menuoperate.enable_dealerpermission IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_dealerpermission::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_dealerpermission,",
+        "    CASE WHEN rbac_menuoperate.enable_assignstaff IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_assignstaff::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_assignstaff,",
+        "    CASE WHEN rbac_menuoperate.enable_assignpos IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_assignpos::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_assignpos,",
+        "    CASE WHEN rbac_menuoperate.enable_posrestrict IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_posrestrict::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_posrestrict,",
+        "    CASE WHEN rbac_menuoperate.enable_grouprestrict IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_grouprestrict::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_grouprestrict,",
         "    rbac_menuoperate.entity_code,",
-        "    rbac_menuoperate.ignore_permission,",
-        "    rbac_menuoperate.power_flag,",
+        "    CASE WHEN rbac_menuoperate.ignore_permission IS NULL THEN NULL WHEN lower(rbac_menuoperate.ignore_permission::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS ignore_permission,",
+        "    CASE WHEN rbac_menuoperate.power_flag IS NULL THEN NULL WHEN lower(rbac_menuoperate.power_flag::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS power_flag,",
         "    NULLIF(rbac_menuoperate.flow_version::text, '')::integer AS flow_version,",
         "    rbac_menuoperate.flow_key,",
         "    rbac_menuoperate.msg_assembled,",
@@ -1490,8 +2105,8 @@ def emit_preamble() -> List[str]:
         "    rbac_menuoperate.menuoperatetype,",
         "    rbac_menuoperate.flow_name,",
         "    rbac_menuoperate.flow_name_display,",
-        "    rbac_menuoperate.enable_assigndept,",
-        "    rbac_menuoperate.enable_deptrict",
+        "    CASE WHEN rbac_menuoperate.enable_assigndept IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_assigndept::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_assigndept,",
+        "    CASE WHEN rbac_menuoperate.enable_deptrict IS NULL THEN NULL WHEN lower(rbac_menuoperate.enable_deptrict::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS enable_deptrict",
         "FROM public.rbac_menuoperate",
         "$view$;",
         "  END IF;",
@@ -1518,9 +2133,14 @@ def emit_preamble() -> List[str]:
         "CREATE OR REPLACE VIEW public.base_datapermission AS",
         "SELECT",
         "    id, version, create_staff_id, modify_staff_id, NULL::bigint AS delete_staff_id,",
-        "    create_time, modify_time, delete_time, true AS valid, entity_code, purview_distribution,",
-        "    purview_state, memo, unlimited_power, group_power_flag, assign_staff_flag, assign_pos_flag,",
-        "    position_power_flag, flow_permission_type AS data_permission_type, type_id, activity_code,",
+        "    create_time, modify_time, delete_time, 1::smallint AS valid, entity_code, purview_distribution,",
+        "    purview_state, memo,",
+        "    CASE WHEN unlimited_power IS NULL THEN NULL WHEN lower(unlimited_power::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS unlimited_power,",
+        "    CASE WHEN group_power_flag IS NULL THEN NULL WHEN lower(group_power_flag::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS group_power_flag,",
+        "    CASE WHEN assign_staff_flag IS NULL THEN NULL WHEN lower(assign_staff_flag::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS assign_staff_flag,",
+        "    CASE WHEN assign_pos_flag IS NULL THEN NULL WHEN lower(assign_pos_flag::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS assign_pos_flag,",
+        "    CASE WHEN position_power_flag IS NULL THEN NULL WHEN lower(position_power_flag::text) IN ('1', 't', 'true', 'y', 'yes') THEN 1 ELSE 0 END::smallint AS position_power_flag,",
+        "    flow_permission_type AS data_permission_type, type_id, activity_code,",
         "    NULLIF(flow_version::text, '')::integer AS flow_version, flow_key, cid",
         "FROM public.rbac_flow_permission",
         "$view$;",
@@ -2463,6 +3083,24 @@ def generate_sql(modules_root: Path, targets: Sequence[str]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def generate_runtime_extra_view_sql(modules_root: Path, targets: Sequence[str]) -> str:
+    views = load_views(modules_root)
+    required = resolve_required_views(views, targets)
+    lines = [
+        "-- Generated by deploy/docker/scripts/generate-business-view-runtime-sql.py --runtime-extra-view-only",
+        "-- Restores runtime_extra_view.view_json for recovered action views without touching business data.",
+        f"-- modules_root: {modules_root}",
+        f"-- target_view_count: {len(targets)}",
+        f"-- emitted_view_count: {len(required)}",
+        "",
+    ]
+    for view in required:
+        lines.append(f"-- {view.code} from {view.source}")
+        lines.append(runtime_extra_view_sql(view, views))
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -2477,6 +3115,11 @@ def parse_args() -> argparse.Namespace:
         dest="targets",
         help="Restrict generation to a target view code. Can be repeated.",
     )
+    parser.add_argument(
+        "--runtime-extra-view-only",
+        action="store_true",
+        help="Emit only runtime_extra_view.view_json upserts for the selected target view codes.",
+    )
     return parser.parse_args()
 
 
@@ -2487,7 +3130,10 @@ def main() -> int:
         print(f"Modules root does not exist: {modules_root}", file=sys.stderr)
         return 2
     targets = tuple(args.targets or TARGET_VIEW_CODES)
-    sys.stdout.write(generate_sql(modules_root, targets))
+    if args.runtime_extra_view_only:
+        sys.stdout.write(generate_runtime_extra_view_sql(modules_root, targets))
+    else:
+        sys.stdout.write(generate_sql(modules_root, targets))
     return 0
 
 

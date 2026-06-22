@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T07:27:52.164Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "areaId": "systemconfig-controlled-runtime-config",
+  "targetMode": "rm",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "route": "/systemconfig/#/sysconfig",
+  "username": "admin",
+  "summary": {
+    "status": "PASS",
+    "targetCount": 1,
+    "pass": 1,
+    "fail": 0,
+    "browserErrors": 0,
+    "rollbackVerified": true
+  },
+  "targets": [
+    {
+      "actionId": "builtin-rm-runtime-config",
+      "catalogName": "RM.ocd.MQ",
+      "catalogId": "129020",
+      "configId": "129003",
+      "configCode": "brokerUrl",
+      "marker": "ADP_E2E_20260621072600_SCFG_RM_RUNTIME",
+      "status": "PASS",
+      "regressionStatus": "ROLLBACK_ONLY; RM formula sync/delete regression is required before this action can become PASS.",
+      "issues": [],
+      "before": {
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129003';",
+        "rows": [
+          {
+            "id": "129003",
+            "catalogId": "129020",
+            "catalogCode": "RM.MQ",
+            "catalogName": "RM.ocd.MQ",
+            "configCode": "brokerUrl",
+            "configName": "RM.ocd.MQ.brokerUrl",
+            "widgetType": "1",
+            "widgetValue": "localhost",
+            "tidModuleKey": "dt/RM/RM.MQ",
+            "configVersion": "dt/RM/RM.MQ/postgres-init-129",
+            "modifyTime": ""
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "brokerUrl",
+                  "name": "RM.ocd.MQ.brokerUrl",
+                  "typeConfig": {
+                    "tip": "Test-env RM batch MQ broker host; no external batch-control broker is required for DB persistence acceptance"
+                  },
+                  "type": 1,
+                  "value": [
+                    "localhost"
+                  ],
+                  "configId": "129003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "localhost"
+      },
+      "markerUpdate": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 129020,
+          "config": [
+            {
+              "configId": 129003,
+              "value": [
+                "ADP_E2E_20260621072600_SCFG_RM_RUNTIME"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129003';",
+        "rows": [
+          {
+            "id": "129003",
+            "catalogId": "129020",
+            "catalogCode": "RM.MQ",
+            "catalogName": "RM.ocd.MQ",
+            "configCode": "brokerUrl",
+            "configName": "RM.ocd.MQ.brokerUrl",
+            "widgetType": "1",
+            "widgetValue": "ADP_E2E_20260621072600_SCFG_RM_RUNTIME",
+            "tidModuleKey": "dt/RM/RM.MQ",
+            "configVersion": "dt/RM/RM.MQ/20260621-152729",
+            "modifyTime": "2026-06-21 07:27:29.39"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "brokerUrl",
+                  "name": "RM.ocd.MQ.brokerUrl",
+                  "typeConfig": {
+                    "tip": "Test-env RM batch MQ broker host; no external batch-control broker is required for DB persistence acceptance"
+                  },
+                  "type": 1,
+                  "value": [
+                    "ADP_E2E_20260621072600_SCFG_RM_RUNTIME"
+                  ],
+                  "configId": "129003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "ADP_E2E_20260621072600_SCFG_RM_RUNTIME",
+        "moduleRead": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "code": 100000000,
+            "message": "操作成功",
+            "data": {
+              "brokerUrl": "ADP_E2E_20260621072600_SCFG_RM_RUNTIME"
+            }
+          }
+        },
+        "moduleReadValue": "ADP_E2E_20260621072600_SCFG_RM_RUNTIME"
+      },
+      "rollback": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 129020,
+          "config": [
+            {
+              "configId": 129003,
+              "value": [
+                "localhost"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129003';",
+        "rows": [
+          {
+            "id": "129003",
+            "catalogId": "129020",
+            "catalogCode": "RM.MQ",
+            "catalogName": "RM.ocd.MQ",
+            "configCode": "brokerUrl",
+            "configName": "RM.ocd.MQ.brokerUrl",
+            "widgetType": "1",
+            "widgetValue": "localhost",
+            "tidModuleKey": "dt/RM/RM.MQ",
+            "configVersion": "dt/RM/RM.MQ/20260621-152740",
+            "modifyTime": "2026-06-21 07:27:40.481"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "brokerUrl",
+                  "name": "RM.ocd.MQ.brokerUrl",
+                  "typeConfig": {
+                    "tip": "Test-env RM batch MQ broker host; no external batch-control broker is required for DB persistence acceptance"
+                  },
+                  "type": 1,
+                  "value": [
+                    "localhost"
+                  ],
+                  "configId": "129003"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "localhost"
+      }
+    }
+  ],
+  "browser": {
+    "navigationStatus": 200,
+    "navigationError": null,
+    "visibleError": null,
+    "consoleMessages": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "evidence": {
+    "method": "Authenticated real browser route plus in-browser systemconfig PUT/GET calls, direct PostgreSQL before/after verification, and immediate rollback.",
+    "boundary": "This report proves controlled save/read/rollback for the listed runtime config only. It does not promote the whole built-in runtime config action to PASS without production-chain regression evidence.",
+    "secretHandling": "Login token and password are used only in memory and are not written to this report."
+  }
+}

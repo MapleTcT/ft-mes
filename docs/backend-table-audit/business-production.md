@@ -2,18 +2,41 @@
 
 ## 结论
 
-当前生产模块已经有真实浏览器页面 smoke 证据，但还没有完成动作级落库验收。后续专门线程应以 [生产模块功能测试用例矩阵](../production-module-functional-test-cases.md) 为入口，逐条补页面/API/Controller/Service/Mapper/表/字段链路。
+当前生产模块已经有真实浏览器页面 smoke 证据，并已完成 WOM 制造任务 `start/hold/restart`、无产出明细 `stop` 最小路径、完工报工产出明细、投入明细报工、提前放料确认、下推备料需求、工序开始/结束、活动开始/结束、简易活动报工、WOM 制造请检生成 QCS 请检单、WOM 质量活动生成检验单、QCS 请检单审核生效后生成检验报告、QCS 报告编辑页渲染、报告结果保存、合格报告生效回写 WOM、不合格报告生效回写 WOM、不合格报告自动生成不合格处理单、不合格处理单审核生效回写 WOM 处理单号，以及不合格处理单让步放行/拒收方式生效回写 WOM 的真实前端触发和 PostgreSQL 落库验收。QCS 产品紧急放行 edit/view 页 `layoutJson` 缺失已用 `124-qcs-inspect-release-runtime-json.sql` 修复并通过公网真实浏览器渲染复验，保存草稿和提交审核也已完成真实前端/API/PostgreSQL 验收。QCS 请检链路所需的检验明细/处理明细表缺口已用 `107-qcs-inspect-detail-tables.sql` 补齐并在测试机建表验证，`createManuInspect`、`checkoutBill/generate`、`bulkSubmit -> qcs_inspect_reports/qcs_report_coms`、`batchDealReports -> WOM syncInspectReport`、`manuUnQlfDealView/submit -> WOM syncRejectReport`、`inspectRelease save/submit` 已经 PASS；当前阻断收窄为不良数登记、完工入库/库存回写等剩余链路。让步放行 `degradedRelease` 和拒收 `return` 均已 PASS。后续专门线程应以 [生产模块功能测试用例矩阵](../production-module-functional-test-cases.md) 为入口，继续逐条补这些页面/API/Controller/Service/Mapper/表/字段链路。
 
 ## 已验证
 
 | 能力 | 证据 | 状态 |
 | --- | --- | --- |
 | WOM 制造任务列表打开 | `/msService/WOM/produceTask/produceTask/makeTaskList` 浏览器 smoke | PASS |
+| WOM 制造任务开始/保持/重启落库 | `updateTaskState(start/hold/restart)` 真实前端触发，PostgreSQL 回查 `wom_produce_tasks`、`wom_wait_put_records`、`wom_proc_reports`、`wom_produce_task_exelog` | PASS |
+| WOM 制造任务结束最小路径落库 | `findProcReportIdByTaskId`、`outPutCommonTaskEdit`、`addOutputByOutPutDetails` 真实前端路径触发，PostgreSQL 回查任务/待办完成；`outputDetailCount=0` | PASS |
+| WOM 完工报工产出明细落库 | `outPutCommonTaskEdit` 真实前端弹窗提交产出明细，PostgreSQL 回查任务/待办/执行日志完成、`wom_output_details.output_num=5`，并生成 `wom_mat_outpt_records` | PASS |
+| WOM 投入明细报工落库 | `makeTaskBatchView` 真实前端上下文执行 `startActive -> remainMaterialView/save -> endActive`，PostgreSQL 回查 `wom_putin_details` 写入 marker 批次和投入/消耗数量，活动和待投记录完成；`wom_mat_consum_recods=0` 已由 [WOM 投入明细与消耗记录专项分析](wom-consumption-record-analysis.md) 解释为当前源码路径不自动生成活动执行记录/消耗记录，不作为 PostgreSQL 迁移缺口 | PASS |
+| WOM 提前放料确认落库 | `setAdvanceTrue` 真实前端触发，PostgreSQL 回查 `wom_produce_tasks.advance_charge=true`、`is_advanced=true`、`feed_condition` marker 保留 | PASS |
+| WOM 下推备料需求落库 | `generatePrepareNeed` 真实前端触发，PostgreSQL 回查任务备料状态、备料需求单、引用行和明细计数 | PASS |
+| WOM 工序开始/结束落库 | `startProcess/endProcess` 真实前端触发，PostgreSQL 回查 `wom_task_processes`、`wom_proc_reports`、`wom_process_exelogs`、`wom_wait_put_records` 状态变化；process wait 行 `actual_end_time` 已由 SQL 106 同步并复验 | PASS |
+| WOM 活动开始/结束落库 | `startActive/endActive` 真实前端触发，PostgreSQL 回查活动、过程报工、活动执行日志和待投记录状态 | PASS |
+| WOM 简易活动报工落库 | `endEasyActive` 真实前端触发，PostgreSQL 回查活动完成、过程报工完成、待投记录完成、产出明细和物料产出记录 | PASS |
+| WOM 生产请检生成 QCS 请检单 | `createManuInspect` 真实前端触发，PostgreSQL 回查 WOM 任务/待投/执行日志进入待检，`qcs_inspects` 与 `qcs_inspect_stds` 落库 | PASS |
+| WOM 质量活动生成检验单 | `checkoutBill/generate/{activeId}` 真实页面上下文触发，PostgreSQL 回查活动进入待检、待投记录完成、过程报工和活动执行日志落库，`qcs_inspects/qcs_inspect_stds/qcs_inspect_coms` 写入，批次进入待检 | PASS |
+| QCS 请检单提交到生效并生成报告 | marker `ADP_E2E_20260616084434_WOM_MANU_INSPECT`；`bulkSubmit` 两步均返回 `200`，`qcs_inspects.status=99/refable=true/check_state=QCS_checkState/reporting`，`qcs_inspect_reports.id=755811962860800`、`qcs_report_coms` 1 条、报告编辑待办 `755811963663616` 均已查库确认 | PASS |
+| QCS 检验报告编辑页打开 | `layoutJson/editStates/data` 均返回 `200/操作成功`；公网入口 `222.88.185.146:18080` 真实浏览器渲染 PASS，12 个输入控件和“保存”按钮可见 | PASS |
+| QCS 检验报告结果保存 | 真实页面运行时执行报告保存/提交，PostgreSQL 回查 `qcs_inspect_reports.check_result/memo_field/version` 更新 | PASS |
+| QCS 检验报告生效并回写 WOM 合格状态 | `batchDealReports` 提交报告待办到生效，PostgreSQL 回查 WOM 任务和批次回写为已检/合格、`active_batch_state_id=11000` | PASS |
+| QCS 检验报告生效并回写 WOM 不合格状态 | marker `ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2`；报告生效后 PostgreSQL 回查 WOM 任务/待入库/执行日志为已检/不合格，批次 `active_batch_state_id=11003` 且 `is_available=false` | PASS |
+| QCS 不合格处理单自动生成 | marker `ADP_E2E_20260618_UNQLF_AUTO_DEAL_3`；LIMS 日志确认 `judgeResultUnqualified:true`、`autoUnQlfDeal:manu`、`创建不合格品处理单`；PostgreSQL 回查 `qcs_un_qlf_deals.id=756484120581376/status=88/table_no=manuUnQlfDeal_20260618_001/report_id=756483934967040` 和待办 `756484121699584/TaskEvent_18cp6xa` | PASS |
+| QCS 不合格处理单审核生效 | marker `ADP_E2E_20260618_UNQLF_DEAL_EFFECT`；真实页面 `manuUnQlfDealView` 带 `workFlowVar.outcome=SequenceFlow_1rfxf3h` 提交生效；PostgreSQL 回查 `qcs_un_qlf_deals.status=99`、待办清零、DI 写入 `生效`，WOM 任务/执行日志/批次均回填 `rejects_deal_id=756484120581376` | PASS |
+| QCS 不合格处理单让步放行处理方式生效 | marker `ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE`；`139-baseset-qcs-deal-way-state-seed.sql` 补齐 `degradedRelease(11010)` 和 `return(11011)`；真实页面上下文创建处理单、提交审核、提交生效，PostgreSQL 回查 `qcs_un_qlf_deals.status=99/act_bat_state_id=11010`，WOM 任务/执行日志/批次均回填 `rejects_deal_id=756700072772864`，批次 `deal_type=BaseSet_dealType/degradedRelease` | PASS |
+| QCS 不合格处理单拒收 return 处理方式生效 | marker `ADP_E2E_20260619_QCS_RETURN_1`；真实浏览器生成 WOM 请检、QCS 不合格报告和自动处理单，编辑页选择 `actBatStateId=11011/return` 后审核、生效均 HTTP 200；PostgreSQL 回查 `qcs_un_qlf_deals.status=99/act_bat_state_id=11011`，WOM 任务/执行日志/批次均回填 `rejects_deal_id=756714615715072`，批次 `deal_type=BaseSet_dealType/return` | PASS |
+| QCS 产品紧急放行编辑/查看页打开 | `124-qcs-inspect-release-runtime-json.sql` 恢复 `QCS_5.0.0.0_inspectRelease_manuInspReleaseEdit/View` 的 `runtime_extra_view.view_json`；重启 `baseService` 后公网真实浏览器 edit/view 渲染 PASS，`layoutJson/editStates/data` 200 | PASS |
+| QCS 产品紧急放行保存草稿并提交审核 | marker `ADP_E2E_20260618_INSP_RELEASE_SAVE_797449` 保存草稿写入 `qcs_inspect_releases/ec_table_info/wfm_task_pending`；marker `ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449` 提交审核生成审核待办和 `wf_deal_info.outcome_des=审核` | PASS |
 | WOM 退料 PDA 列表打开 | `/msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` 浏览器 smoke | PASS |
 | RM 批量配方列表打开 | `/msService/RM/formula/formula/batchFormulaList` 浏览器 smoke | PASS |
+| RM 批控配方同步新增和删除清理 | marker `ADP_E2E_20260619063244_RMBATCH_RECHECK`；真实浏览器上下文打开 `batchFormulaList?system=formulaEnableFlw`，`batch/sync` 返回 `200/success=true` 并写入 `rm_formulas/rm_formulas_di`，`batch/delete` 返回 `200/dealSuccessFlag=true` 后同一配方 `valid=false/status=0` | PASS |
 | craftGraph 工艺基础信息打开 | `/msService/craftGraph/basicInfo/basicInfo/basicInfoList` 浏览器 smoke | PASS |
 | craftGraph 按钮配置打开 | `/msService/craftGraph/operationButton/buttonConfig/buttonConfList` 浏览器 smoke | PASS |
-| WTS 作业许可列表打开 | `/msService/WTS/workPermit/workPermit/workPermitList` 浏览器 smoke | PASS |
+| WTS 作业许可列表打开 | `/msService/WTS/workPermit/workPermit/workPermitList` 浏览器 smoke；`POST /msService/WTS/workPermit/workPermit/workPermitList-query` | PASS；`165-wts-workpermit-list-runtime-compat.sql` 补齐 `runtime_extra_view.config/full_config`，并把历史数字串 `wts_work_permits.payload` 修正为 `workTickets` JSON 后，认证查询返回 `HTTP 200/code=200/message=操作成功/total=8` |
 | workAppointment 作业计划列表打开 | `/msService/workAppointment/workPlan/workTicketPlan/workPlanList` 浏览器 smoke | PASS |
 | QCS 制造检验列表打开 | `/msService/QCS/inspect/inspect/manuInspectList` 浏览器 smoke | PASS |
 
@@ -21,45 +44,73 @@
 
 - API/layout smoke：`/tmp/adp-business-module-smoke-20260615184508.json`
 - 页面 smoke：`/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json`
-- WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
+- WOM 制造任务动作发现：`/tmp/adp-production-action-discovery-20260615180122/production-action-discovery.json`
 - WOM 生产动作候选页探测：`/tmp/adp-production-action-discovery-candidates-20260615193213/production-action-discovery.json`
-- WOM runtime JSON 修复后复验：`/tmp/adp-production-action-discovery-final8-20260615204438/production-action-discovery.json`
+- WOM runtime JSON 修复后复验：`/tmp/adp-production-action-discovery-20260616014350/production-action-discovery.json`
+- WOM 列表动作按钮可见性复验：`/tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json`
 - WOM layoutJson 直连复验：5 个动作 viewCode 均 `200`，pageType 为 `EDIT/VIEW`
 - WOM 生产动作源地图：[`business-production-action-map.md`](business-production-action-map.md)
 - WOM 生产动作机器记录：`metadata/production-module-source-action-map.json`
-- 运行时视图来源：`deploy/docker/postgres/init/065-business-view-runtime-json.sql` 中 `WOM_1.0.0_produceTask_makeTaskList` 的 `layoutDatagrid.buttons` 为 `[]`
+- 运行时视图来源：`deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql` 已把 `WOM_1.0.0_produceTask_makeTaskList` 的 `layoutDatagrid.buttons` 恢复为 8 个，把 `prepareMakeTaskList` 恢复为 1 个。
+- PostgreSQL 兼容表来源：`deploy/docker/postgres/init/079-wom-wait-put-records-table.sql` 已补 `WOM_WAIT_PUT_RECORDS` 对应的 `public.wom_wait_put_records`；测试机回读存在、112 列、主键和 5 个索引存在。
+- PostgreSQL 待办状态同步来源：`deploy/docker/postgres/init/080-wom-wait-record-state-sync-trigger.sql` 已修复 hold/restart 返回 200 后 `wom_wait_put_records.exe_state` 未同步的问题。
+- WOM 开始执行落库报告：`/tmp/adp-wom-start-persistence-script-current.json`
+- WOM 保持/重启落库报告：`/tmp/adp-wom-hold-restart-persistence-current.json`
+- WOM 结束最小路径落库报告：`/tmp/adp-wom-stop-persistence-current.json`
+- WOM 完工报工产出明细落库报告：`/tmp/adp-wom-stop-output-persistence-current.json`
+- WOM 投入明细报工落库报告：`/tmp/adp-wom-putin-active-persistence-current.json`
+- WOM 投入明细与消耗记录专项分析：[`wom-consumption-record-analysis.md`](wom-consumption-record-analysis.md)；机器记录：`metadata/wom-consumption-record-analysis.json`；远端 SQL 回读 `activeExelogCount=0`、`matConsumCount=0`，结论是不按 PostgreSQL 缺表/缺列/方言缺口处理。
+- WOM 提前放料确认落库报告：`/tmp/adp-wom-advance-release-persistence-current.json`
+- WOM 下推备料需求落库报告：`/tmp/adp-wom-prepare-need-persistence-current.json`
+- WOM 工序开始/结束落库报告：`/tmp/adp-wom-process-end-persistence-current.json`
+- WOM 活动开始/结束落库报告：`/tmp/adp-wom-active-persistence-current.json`、`/tmp/adp-wom-active-end-persistence-current.json`
+- WOM 简易活动报工落库报告：`/tmp/adp-wom-easy-active-persistence-current.json`
+- WOM 生产请检生成 QCS 请检单落库报告：`/tmp/adp-wom-manu-inspect-persistence-acceptance-rerun.json`；早期通过报告：`/tmp/adp-wom-manu-inspect-persistence-acceptance.json`
+- WOM 质量活动生成检验单落库报告：`/tmp/adp-wom-checkoutbill-persistence-20260618200829/wom-checkoutbill-persistence-results.json`；marker `ADP_E2E_20260618200829_WOM_CHECKOUTBILL`；`GET /msService/WOM/produceTask/produceTask/checkoutBill/generate/8991071330917347` 返回 `200/code=200`，PostgreSQL 确认 `wom_task_actives`、`wom_wait_put_records`、`wom_proc_reports`、`wom_acti_exelogs`、`qcs_inspects`、`qcs_inspect_stds`、`qcs_inspect_coms`、`baseset_batch_infos` 均写入或更新。
+- QCS 请检单提交到生效并生成报告证据：marker `ADP_E2E_20260616084434_WOM_MANU_INSPECT`；第一次 `POST /msService/QCS/inspect/inspect/bulkSubmit` 生成审核待办 `755811812603136`，第二次返回 `200` 后 `qcs_inspects.id=755811472454912` 变为 `status=99`、`refable=true`、`check_state=QCS_checkState/reporting`，`qcs_inspects_di` 写入保存/审核/生效，`qcs_inspect_reports.id=755811962860800`、`qcs_report_coms.id=755811964515584` 和报告编辑待办 `755811963663616` 均已落库。证据文件：`/tmp/adp-wom-manu-inspect-persistence-acceptance-after-qcs-report-fix.json`。
+- QCS 报告编辑页和结果保存证据：`/tmp/adp-qcs-report-edit-render-public-20260618031023/qcs-report-edit-render.json`；`/tmp/adp-qcs-result-save-ADP_E2E_20260618033224_QCS_RESULT_SAVE.json`。`layoutJson/editStates/data` 已返回 200，真实浏览器渲染 PASS，结果保存已写入 `qcs_inspect_reports`。
+- QCS 报告生效/WOM 合格回写证据：`/tmp/adp-qcs-report-effective-submit-ADP_E2E_20260618044947_QCS_REPORT_EFFECTIVE_RETRY6.json`，PostgreSQL 回查 WOM 任务/批次为合格。
+- QCS 不合格处理单自动生成证据：marker `ADP_E2E_20260618_UNQLF_AUTO_DEAL_3`；四个业务请求证据 `/tmp/adp-qcs-unqlf-auto-deal-workflow-ADP_E2E_20260618_UNQLF_AUTO_DEAL_3.json`，最终 SQL 证据 `/tmp/adp-qcs-unqlf-auto-deal-final-sql-ADP_E2E_20260618_UNQLF_AUTO_DEAL_3.txt`。PostgreSQL 确认报告 `756483934967040` `status=99/check_result=不合格/un_qlf_deal_flag=true`，`qcs_un_qlf_deals.id=756484120581376` 初始 `status=88/table_no=manuUnQlfDeal_20260618_001/report_id=756483934967040`，处理单待办 `756484121699584/TaskEvent_18cp6xa`，WOM 任务 `8990076354371584`、待入库、执行日志和批次均为不合格。
+- QCS 不合格处理单审核生效证据：marker `ADP_E2E_20260618_UNQLF_DEAL_EFFECT`；真实页面证据 `/tmp/adp-qcs-unqlf-deal-submit-20260618/submit-effective-response-workflowvar-public.json`，截图 `view-before-effective-submit-workflowvar-public.png`、`view-after-effective-submit-workflowvar-public.png`。PostgreSQL 确认 `qcs_un_qlf_deals.id=756484120581376 status=99`，`wfm_task_pending` 对 `table_info_id=756484120614144` 清零，`qcs_un_qlf_deals_di` 写入 `SequenceFlow_1rfxf3h/生效`，`wom_produce_tasks`、`wom_produce_task_exelog`、`baseset_batch_infos` 均回填 `rejects_deal_id=756484120581376`。
+- QCS 产品紧急放行编辑/查看页与保存/提交证据：`deploy/docker/postgres/init/124-qcs-inspect-release-runtime-json.sql`、`125-qcs-inspect-release-action-compat.sql`；真实浏览器证据 `/tmp/adp-qcs-inspect-release-edit-after-fix-20260618.json`、`/tmp/adp-qcs-inspect-release-view-after-sv-fix-20260618/evidence.json`、`/tmp/adp-qcs-inspect-release-list-actions-20260618.json`。保存草稿 marker `ADP_E2E_20260618_INSP_RELEASE_SAVE_797449` 证据 `/tmp/adp-qcs-insp-release-save-ADP_E2E_20260618_INSP_RELEASE_SAVE_797449/evidence.json`，提交审核 marker `ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449` 证据 `/tmp/adp-qcs-insp-release-submit-ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449/submit-evidence.json`；PostgreSQL 回查 `qcs_inspect_releases.id=756521397810432/version=3`、审核待办和 `wf_deal_info` 均存在。
+- QCS 报告生效/WOM 不合格回写证据：`/tmp/adp-qcs-unqualified-wom-backfill-20260618-public-2/wom-manu-inspect-persistence-results.json`、`/tmp/adp-qcs-unqualified-report-effective-submit-2-ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2.json`、`/tmp/adp-qcs-unqualified-wom-backfill-final-sql-ADP_E2E_20260618_UNQUAL_WOM_BACKFILL_2.txt`，PostgreSQL 回查 WOM 任务/待入库/执行日志均为不合格，批次 `active_batch_state_id=11003`。
+- WOM 完工报工弹窗 runtime 修复：`deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql`、`deploy/docker/postgres/init/085-wom-output-common-task-edit-view-linkage.sql`
+- WOM 简易活动报工 runtime 修复：`deploy/docker/postgres/init/102-wom-easy-active-runtime-report-button.sql`
+- WOM 工序开始/结束 PostgreSQL 兼容修复：`deploy/docker/postgres/init/104-rm-process-actives-table.sql`、`deploy/docker/postgres/init/105-wom-process-procsort-convert-compat.sql`、`deploy/docker/postgres/init/106-wom-process-wait-end-time-sync.sql`
+- QCS 请检/报告/处理单 PostgreSQL 兼容修复：`deploy/docker/postgres/init/107-qcs-inspect-detail-tables.sql`、`113-qcs-manu-inspect-jbpm-definition.sql`、`117-qcs-report-generation-support.sql`、`118-postgres-legacy-text-bytea-operator.sql`、`119-qcs-inspect-report-edit-runtime-json.sql`、`120-baseset-act-bat-state-seed.sql`、`121-qcs-unqualified-deal-workflow-config.sql`、`122-qcs-unqualified-deal-runtime-compat.sql`、`123-wom-qcs-null-boolean-compat.sql`、`139-baseset-qcs-deal-way-state-seed.sql`；测试机 `100.99.133.43` 回读确认 QCS 明细/DI 表存在，报告工作流、报告编辑页、自动报告前置和批次状态种子已应用，`createManuInspect`、报告生成、报告结果保存、合格/不合格报告生效回写、处理单自动生成、处理单生效和让步放行处理方式均已通过真实前端/API 和 PostgreSQL 验收。
+- public `produceTaskCreated` no-op 专项：[`wom-public-produce-task-created-analysis.md`](wom-public-produce-task-created-analysis.md)。该接口返回 `200/处理成功` 但不落库，源码 `creatProTask` 主体被注释；这不是 PostgreSQL 兼容 SQL 缺口，必须按模块实现/产品接口 backlog 处理。
 
 ## 未验证
 
 | 业务动作 | 当前状态 | 后续验收要求 |
 | --- | --- | --- |
-| 新建生产工单或制造任务 | BLOCKED | 当前 WOM 制造任务列表只发现“查询 / 仅查待办 / 清空”，未发现新增入口；需定位真正创建页面或按钮权限来源 |
-| 工单下发、暂停、恢复、关闭 | BLOCKED | 源事件和 `updateTaskState` 后端入口已定位，但当前列表按钮未暴露；恢复按钮后查询 `WOM_PRODUCE_TASKS`、`WOM_TASK_PROCESSES`、`WOM_TASK_ACTIVES` 字段变化 |
-| 制造指令单生成或维护 | NOT_RUN | 先定位准确页面和目标表 |
-| 工序、人员、班组派工 | NOT_RUN | 准备人员/班组数据，确认派工表 |
-| 退料申请提交、审核或回写库存 | NOT_RUN | 查询退料单据、库存和状态字段 |
-| 批量配方导入、编辑、删除 | NOT_RUN | 使用真实模板和 marker 行查库 |
-| 工艺路线新增、编辑、删除 | NOT_RUN | 查询工艺主表和明细表 |
-| 作业许可新建、提交、审批、关闭 | NOT_RUN | 查询许可表、流程表和待办状态 |
-| 作业计划新建、调整、取消 | NOT_RUN | 查询计划表和状态字段 |
-| 制造检验结果录入和生产状态回写 | NOT_RUN | 查询 QCS 表和生产状态字段 |
-| 批次/物料/工单追溯 | BLOCKED | 当前未定位完整追溯页面和表链路 |
-| 工序报工 | BLOCKED | 源事件已定位 `addOutputByOutPutDetails`、`endEasyActive` 和 `WOM_PROC_REPORTS`；`makeTaskView/makeTaskBatchView/easyTaskOperateView` 的 `layoutJson` 已修复为 200，但真实浏览器仍 React #130，未渲染出动作表单或按钮 |
+| 新建生产工单或制造任务 | PASS | 候选日计划生成路径已通过：`161`、`162`、`163`、`164` 补齐 `manufacture/makeTaskFlow` 工作流、JBPM、权限、物料/质量和 DI 表后，marker `ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6` 调用 `POST /msService/WOM/produceTask/produceTask/produceTaskCreated2` 返回 `生成指令单成功`，PostgreSQL 确认 `wom_produce_tasks`、DI、活动、质量、批次、批次处理记录、待办、权限和 JBPM execution 均写入；公网真实浏览器打开生成的 `makeTaskEdit` 待办页并读到生产批号 marker。残留：WOM 制造任务列表仍没有用户可见“新增/创建”按钮，public `produceTaskCreated` 仍为 no-op |
+| 制造指令单生成或维护 | PASS | `makeTaskEdit` 视图可渲染，`produceTaskCreated2` 已能从 daily-plan payload 生成制造指令单并进入 `makeTaskFlow` 编辑待办。最终数据：`wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true`，待办 `757036687533312` 打开 URL 指向 `makeTaskEdit`。当前仍需后续恢复用户可见保存/导入入口；`/msService/public/.../produceTaskCreated` 探针返回 `200/处理成功` 但 marker 查库为 0，源码 `creatProTask` 仍是 no-op，不能作为创建通道 |
+| 工序、人员、班组派工 | PASS | `159-wom-process-unit-edit-runtime-json.sql` 恢复 `processUnitEdit` 运行时 JSON 和 `runtime_view.extra_view/ec_env` 链接；公网真实浏览器提交 marker `ADP_E2E_20260619174817_WOM_ACTIVE_WU`，PostgreSQL 确认 `WOM_TASK_PROCESSES.equipment_id` 以及 `WOM_WAIT_PUT_RECORDS` process/workOrder 行 `euq_id/equ_code/equ_name` 均同步。TeamInfo 排班计划主表新增已由 `ADP_E2E_20260619030900_TEAMINFO_SCHEDULE_PLAN` 单独 PASS；若后续业务包提供独立 WOM 人员/班组派工单，需要新增专项用例 |
+| 退料申请提交、审核或回写库存 | PASS | 退料/拒收相关列表已真实浏览器打开且查询无错；`prePareReject` 保存/删除/提交生效、`materiaReject` 发起/接收/生效并扣减 `hm_factory_materias.availi_quantity`、`batchReject` 保存/生效并回写 `wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts.return_num` 均已通过真实前端/API 和 PostgreSQL 验收。最终仓储/库存服务总账仍归 `PROD-022` material 服务缺失跟踪 |
+| 批量配方导入和可见显式编辑入口 | BLOCKED | Excel 模板导入、`batch/sync` 同步新增和 `batch/delete` 删除清理已通过真实前端上下文和 PostgreSQL 验收；`160-rm-batch-formula-edit-view-runtime-json.sql` 已恢复 `batchFormulaEdit/View` 页面并通过真实浏览器渲染复验；2026-06-20 在 `100.99.133.43` 复核 `runtime_button=0`、菜单操作仅 query、`batchFormulaList` 运行时按钮仅“下载模板/导入Excel”，源码和产品手册显示手工编辑依赖外部 Batch 客户端 ActiveX/WebSocket 推送，当前测试环境缺外部 Batch 客户端联调 |
+| 工艺路线新增、编辑、删除 | PASS | craftGraph 基础信息已通过可见新增、修改、删除；marker `ADP_E2E_20260619071722_CRAFTGRAPH` 查库确认 `craft_basic_infos` 与 `craft_tree_structures` 写入、更新和删除清理 |
+| WTS 作业许可 `WTS_processing/stop` 终止分支 | PASS | marker `ADP_E2E_20260619144549_WTS_FIREWORK_STOP` 已通过公网真实浏览器 E2E 和 `100.99.133.43` PostgreSQL 验收：最终 `status=99/job_status=WTS_jobStatus/errorClose/process_method=WTS_processing/stop/pending=0`；若产品另有独立作废/cancel/delete 入口仍需确认后单独验收 |
+| 作业计划新建、调整、作废、审批生效 | PASS | marker `ADP_E2E_20260619161920_WAPS_WORKPLAN` 完成新建、调整、作废；marker `ADP_E2E_20260619162733_WAPS_WORKPLAN_APPROVE` 完成四段审批到生效；PostgreSQL 回查 `workplan` 主表、待办和 `wf_deal_info` 均符合预期 |
+| 不良数和库存/入库回写 | BLOCKED | WOM `createManuInspect`、QCS 报告生成、报告编辑页、结果保存、合格/不合格报告生效回写、自动不合格处理单创建、处理单审核生效、让步放行/拒收处理方式生效回写 WOM，以及紧急放行 edit/view/保存/提交已通过真实前端/API 与 PostgreSQL 验收；当前 blocker 是不良数和库存相关动作尚未完成真实前端落库验收 |
+| 批次/物料/工单追溯 | BLOCKED | WOM 追溯按钮和调用链已定位，但目标 `ProcessAnalysis` 服务缺失：`100.99.133.43` 认证调用 5 个入口均为 `503 can not find any tenant app service`，Nacos 无实例，PostgreSQL 无 `runtime_view/rbac_menuinfo` 或严格命名业务表。详见 `processanalysis-dependency-analysis.md` |
+| 工序报工 | BLOCKED | 源事件已定位 `startProcess/endProcess`、`addOutputByOutPutDetails`、`remainMaterialView/save`、`endEasyActive` 和 `WOM_PROC_REPORTS/WOM_PUTIN_DETAILS`；`makeTaskView/makeTaskBatchView/easyTaskOperateView` 已真实浏览器渲染成功，工序 `startProcess/endProcess`、活动 `startActive/endActive`、产出明细报工、投入明细报工和简易活动报工已专项 PASS；`wom_mat_consum_recods=0` 已解释为当前 `RM_activeType/putin` 路径不生成 `WOMActiExelog`，不良数/质量登记仍缺 marker 前置数据 |
 | 完工入库或库存回写 | BLOCKED | 需要仓储/库存模块包和表结构 |
 
 ## 初始页面/API 入口
 
 | 领域 | 页面 | 已知入口 | 备注 |
 | --- | --- | --- | --- |
-| 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList`；`POST /msService/WOM/produceTask/produceTask/makeTaskList-pending` | 已捕获列表查询；运行时视图按钮为空；读模型识别到 `WOM_PRODUCE_TASKS`，待办筛选关联 `wfm_task_pending`；当前页面未发现创建入口 |
-| 工单/任务 | 备料列表 | `GET /msService/WOM/produceTask/produceTask/prepareMakeTaskList`；`POST /msService/WOM/produceTask/produceTask/prepareMakeTaskList-query` | 已捕获列表查询；源码存在 `generatePrepareNeed` 写动作，但当前页面只暴露查询/清空 |
-| 工单/任务 | 状态流转/报工动作视图 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` | `layoutJson` 已返回 200，并带 `DataGridCode` 与真实 `produceTask` 字段键；真实浏览器仍 React #130，当前不能做 marker 落库 |
-| 退料 | 退料 PDA | `GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList` | 需要确认提交/审核接口 |
-| 配方 | 批量配方 | `GET /msService/RM/formula/formula/batchFormulaList` | 静态 patch 暴露 `downloadXls`、`importMainXls`、`delete` |
-| 工艺 | 基础信息 | `GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList` | 需要确认主表/明细表 |
-| 作业许可 | 作业许可 | `GET /msService/WTS/workPermit/workPermit/workPermitList` | 需要确认流程表/待办表 |
-| 作业计划 | 作业计划 | `GET /msService/workAppointment/workPlan/workTicketPlan/workPlanList` | 需要确认计划表和状态字段 |
-| 质量联动 | 制造检验 | `GET /msService/QCS/inspect/inspect/manuInspectList` | 需要确认 QCS 与生产状态联动 |
+| 工单/任务 | 制造任务列表 | `GET /msService/WOM/produceTask/produceTask/makeTaskList`；`POST /msService/WOM/produceTask/produceTask/makeTaskList-pending`；`POST /msService/WOM/produceTask/produceTask/updateTaskState`；`GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/{orderId}`；`POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails`；`POST /msService/WOM/produceTask/produceTask/createManuInspect`；`GET /msService/WOM/produceTask/produceTask/checkoutBill/generate/{activeId}` | 已捕获列表查询；开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码按钮已可见；读模型识别到 `WOM_PRODUCE_TASKS`，待办筛选关联 `wfm_task_pending`；start/hold/restart/无明细 stop、产出明细报工、投入明细报工、提前放料确认、生产请检和质量活动生成检验单已用 marker 任务真实前端触发并查库通过；当前页面仍未发现创建入口 |
+| 工单/任务 | 备料列表 | `GET /msService/WOM/produceTask/produceTask/prepareMakeTaskList`；`POST /msService/WOM/produceTask/produceTask/prepareMakeTaskList-query` | 已捕获列表查询；`下推备料需求` 按钮已可见；`generatePrepareNeed` 已用 marker 任务真实前端触发并查库通过 |
+| 工单/任务 | 状态流转/报工动作视图 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView`、`outPutCommonTaskEdit`、`remainMaterialView` | `layoutJson` 已返回 200，并带 `DataGridCode` 与真实字段键；真实浏览器已渲染成功；2026-06-20 `makeTaskEdit` 复验可渲染 17 个表单控件但无可见保存/提交按钮。无明细 stop、产出明细报工、投入明细报工、工序 `startProcess/endProcess`、活动 `startActive/endActive`、简易活动报工、生产请检和质量活动生成检验单已验收；不良数/质量判定仍缺可用报告/结果前置数据 |
+| 退料 | 退料 PDA / 退料主流程 | `GET /msService/WOM/batchMaterial/batMaterilPart/baRetireMentPDAList`；`prePareRejectEdit/save/submit`；`materiaRejectEdit/save/submit`；`materiaEditableEdit/submit`；`batchRejectEdit/save/submit` | PDA/list 查询 PASS；备料退料、车间物料退料、批次退料主写链路均已 PASS，最终仓储/库存服务总账另见 `PROD-022` |
+| 配方 | 批量配方 | `GET /msService/RM/formula/formula/batchFormulaList`；`GET /msService/RM/formula/formula/batchFormulaEdit/View`；`POST /msService/RM/formula/formula/batch/sync`；`POST /msService/RM/formula/formula/batch/delete` | Excel 导入、`batch/sync` 同步新增和 `batch/delete` 删除清理已 PASS；`batchFormulaEdit/View` 页面 runtime 已恢复并可真实浏览器打开；静态 patch 暴露的 `downloadXls` 经源码注释和直接探测确认是“下载导入模板”，`importMainXls` 为导入；可见手工编辑入口经源码/运行时/真实浏览器确认为外部 Batch 客户端推送形态，需外部 Batch 联调后复验 |
+| 导出 | 生产相关列表导出 | `GET /msService/WOM/produceTask/produceTask/downloadXls`；`GET /msService/RM/formula/formula/downloadXls`；`POST /msService/WTS/workPermit/workPermit/workPermitList-query?exportFlag=true`；`GET /msService/QCS/inspectReport/inspectReport/downloadXls`；`GET /msService/QCS/unQlfDeal/unQlfDeal/downloadXls`；`GET /msService/QCS/inspectRelease/inspectRelease/downloadXls` | 仓库内 smoke `metadata/production-export-readiness-smoke.json` 对 6 个生产列表执行真实浏览器页面、`layoutJson`、`downloadXls`、query-export、sourceAudit 和逐目标 `acceptanceContract` 复验，API base 为 `http://100.99.133.43:18080`，浏览器入口为同环境公网地址 `http://222.88.185.146:18080`，`2026-06-22T01:50:35.404Z` 复跑结果为 `pagePass=6`、`visibleExportActions=0`、`runtimeExportActions=0`、`nonEmptyDownloads=1`、`backendQueryExportWorkbooks=1`、`backendQueryExportErrors=4`、`verifiedDataExports=0`、`ready=0`、`actionRequired=1`、`blocked=5`，仍为 BLOCKED。WTS `workPermitList-query?exportFlag=true` 已返回 `200/OLE_XLS/8704`，但真实页面没有可见导出动作、layoutJson 没有 runtime 导出动作、sourceAudit 仍找不到目标导出 hook，因此只能记为 `ACTION_REQUIRED`，不能按真实列表导出 PASS；WOM 与 3 个 QCS query-export 仍为 500/JSON，RM query-export 为 200/JSON。sourceAudit 记录平台通用 `exportExcel` 模板存在，但 6 个目标生产页 `targetExportMatches=0`；当前刷新证据：`metadata/production-export-readiness-smoke.json`、`metadata/production-export-gap-breakdown.json` |
+| 工艺 | 基础信息 | `GET /msService/craftGraph/basicInfo/basicInfo/basicInfoList` | craftGraph 可见新增、修改、删除已 PASS；主表 `craft_basic_infos` 和树结构 `craft_tree_structures` 已查库确认 |
+| 作业许可 | 作业许可 | `GET /msService/WTS/workPermit/workPermit/workPermitList`；`POST /msService/WTS/workPermit/workPermit/permitUltraSubmit`；`POST /msService/WTS/workTicket/workTicket/fireworkDeal/submit?id=6599181782336064`；`POST /msService/WTS/workTicket/workTicket/fireworkClose/submit?id=6599181782336064` | `wts_work_permits`、`wts_work_tickets`、`wfm_task_pending`、`wf_deal_info`、`jbpm4_hist_actinst` 已有落库证据；正常关闭 marker `ADP_E2E_20260619142344_WTS_FIREWORK` PASS，最终 `status=99/job_status=WTS_jobStatus/normalClose/pending=0`；终止 marker `ADP_E2E_20260619144549_WTS_FIREWORK_STOP` PASS，最终 `status=99/job_status=WTS_jobStatus/errorClose/process_method=WTS_processing/stop/pending=0` |
+| 作业计划 | 作业计划 | `GET /msService/workAppointment/workPlan/workTicketPlan/workPlanList` | 可见新增、保存、删除清理、新建后调整并作废、四段审批到生效均已 PASS；`upload-list` runtime 兼容已修复并纳入 PostgreSQL/runtime patch |
+| 质量联动 | 制造检验/不合格处理/紧急放行 | `GET /msService/QCS/inspect/inspect/manuInspectList`；`POST /msService/WOM/produceTask/produceTask/createManuInspect`；`GET /msService/WOM/produceTask/produceTask/checkoutBill/generate/{activeId}`；`POST /msService/QCS/inspect/inspect/bulkSubmit`；`GET /msService/QCS/inspectReport/inspectReport/data/{id}`；`GET /msService/baseService/view/layoutJson?...manuInspReportEdit...`；`POST /msService/QCS/inspectReport/inspectReport/batchDealReports`；`POST /msService/public/QCS/unQlfDeal/unQlfDeal/createUnQlfDeal`；`POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealEdit/submit`；`POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealView/submit`；`GET /msService/baseService/view/layoutJson?...manuInspReleaseEdit/View...`；`POST /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit/save`；`POST /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseEdit/submit`；`POST /public/QCS/inspect/inspect/createInspect` | QCS 制造检验入口页面 smoke 已 PASS；`createManuInspect -> QCS createInspect` 与 `checkoutBill/generate -> QCS createInspect` 已用 marker 真实前端验收并查库 PASS；`bulkSubmit` 到生效后报告生成已 PASS；报告编辑页 API/render、结果保存、合格/不合格报告生效回写、自动处理单生成、处理单生效、让步放行处理方式生效、拒收 `return` 处理方式生效、产品紧急放行 edit/view/保存/提交均 PASS；不良数和库存/入库仍待专项验收 |
 
 ## PostgreSQL backlog 规则
 
@@ -75,9 +126,13 @@
 
 | ID | 类型 | 问题 | 当前处理 |
 | --- | --- | --- | --- |
-| PROD-DB-001 | 缺入口 | WOM 制造任务当前列表页未发现新增入口；运行时视图 `buttons` 为空 | 读模型已定位 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending`；继续排查菜单、按钮权限、原始创建视图或真实创建页面 |
-| PROD-DB-002 | runtime render 阻断 | `makeTaskEdit`、`makeTaskSubmitView`、`makeTaskView`、`makeTaskBatchView`、`easyTaskOperateView` 的 `layoutJson` 已返回 200，但生成组件树仍触发 React #130 | 从原始 runtime/static/template 中恢复真实 edit/view component metadata，避免继续用 list-style datagrid JSON 冒充动作表单 |
-| PROD-DB-005 | 缺按钮/权限 | WOM 源码存在 `updateTaskState`、`addOutputByOutPutDetails`、`generatePrepareNeed`、`createManuInspect` 等动作，但当前页面按钮未暴露 | 对齐旧 BAP 按钮元数据、RBAC 按钮权限和 runtime view 生成逻辑 |
-| PROD-DB-006 | 缺映射 | QCS 检验单目标表未追到底 | 从 `createManuInspect`、`checkoutBill/generate` 继续追 QCS 源包和 PostgreSQL 元数据 |
+| PROD-DB-012 | 已处理 / WTS 正常关闭 | WTS `fireworkClose` 曾先暴露 `text ~~ bigint`，后暴露父许可 payload/空值保护和 PLS 事件推送污染事务问题；本轮已通过 `155-postgres-legacy-text-bigint-like-operator.sql`、`WorkTicket2PermitService` fallback、`WorkTicketEvent` 空值保护/结束置状态、`AutoNodeEvent` 空值/PLS 事件隔离修复 | 正常关闭与未选处理方式业务校验 marker `ADP_E2E_20260619142344_WTS_FIREWORK` 已 PASS：未选处理方式返回 HTTP 200/data.code=400/message=请选择作业票处理方式且未脏推进；随后正常关闭最终 `status=99/job_status=WTS_jobStatus/normalClose/pending=0`。`WTS_processing/stop` 终止分支专项验收已由 marker `ADP_E2E_20260619144549_WTS_FIREWORK_STOP` PASS；若产品另有独立作废/cancel/delete 入口仍需确认 |
+| PROD-DB-001 | 缺入口 | WOM 制造任务列表未发现新增入口；当前恢复的是状态/备料/请检/追溯类动作按钮，不是创建按钮 | 读模型已定位 `WOM_PRODUCE_TASKS` 和 `wfm_task_pending`；继续排查原始创建视图或准备 marker 任务种子 |
+| PROD-DB-002 | 缺测试数据 | `makeTaskList` / `prepareMakeTaskList` 的 start/hold/restart/无明细 stop、产出明细报工、投入明细报工、提前放料确认、下推备料需求、工序开始/结束、活动开始/结束、简易活动报工、生产请检、质量活动生成检验单、QCS 报告生成、报告结果保存、合格/不合格报告生效回写、不合格处理单生效、让步放行处理方式生效和紧急放行 edit/view/保存/提交已通过脚本准备 marker 任务验收；投入明细不自动生成消耗记录已按源码设计解释；不良数和完工入库仍缺可用检验/质量/库存前置数据 | QCS 明细表结构缺口已由 `107` 处理；`createManuInspect`、`checkoutBill/generate`、报告生成、报告编辑页、报告保存、合格/不合格回写、自动处理单生成、处理单生效、让步放行、拒收 return 和紧急放行保存/提交已 PASS。下一步准备库存/质量前置数据复跑真实前端落库验收 |
+| PROD-DB-005 | 部分按钮已落库验收 | WOM 源码存在 `updateTaskState`、`setAdvanceTrue`、`startProcess/endProcess`、`addOutputByOutPutDetails`、`remainMaterialView/save`、`generatePrepareNeed`、`endEasyActive`、`createManuInspect`、`generateCheckoutBill` 等动作，当前列表按钮已暴露；`updateTaskState(start/hold/restart)`、提前放料确认、工序开始/结束、无明细 `addOutputByOutPutDetails` stop、产出明细报工、投入明细报工、`endEasyActive` 简易活动报工、生产请检、检验单生成、QCS 报告生成、合格/不合格报告回写、自动处理单创建、处理单生效、让步放行、拒收 return 和紧急放行保存/提交已通过 | 下一步不是再补状态按钮、提前放料、工序、产出/投入明细、简易报工、请检、检验单生成、报告回写、自动处理单创建、处理单生效、让步放行或紧急放行页面空白，而是继续从真实前端验证不良数和库存/入库相关表变化 |
+| PROD-DB-006 | 请检、检验单生成、报告生成、报告编辑和回写已验收 | QCS 请检链路源码已追到 `WOMProduceTaskController.createManuInspect -> WOMProduceTaskServiceImpl.createManuInspect/changeTaskStateAndInitiateCheck -> WOMQCSServiceImpl.createInspect -> QCSInspectController.createInspect -> QCSInspectServiceImpl.createInspect`；质量活动检验单链路已追到 `WOMProduceTaskController.generateCheckoutBill -> WOMProduceTaskServiceImpl.generateCheckoutBill -> WOMQCSServiceImpl.createInspect`；报告生成链路已追到 `QCSInspectReportServiceImpl.createQcsReportByInspet`；报告生效回写链路已追到 `QCSInspectReportServiceImpl.afterSubmit -> sendReportResultToWOM -> WOMQCSServiceImpl.checkReportBackfillWom`；不合格处理单链路已验收 `createUnQlfDeal -> manuUnQlfDealEdit/submit -> manuUnQlfDealView/submit`；紧急放行页面和保存/提交链路已验收 `inspectRelease save/submit` | 已新增并应用 `107`、`113`、`117`、`118`、`119`、`120`、`124`、`125`、`139`；真实 `createManuInspect` 和 `checkoutBill/generate` marker 已 PASS，QCS `bulkSubmit` 生成报告、报告编辑页、结果保存、合格/不合格回写、让步放行、拒收 return 和紧急放行保存/提交均 PASS。剩余为坏品/库存专项 |
+| PROD-DB-011 | 已处理 QCS PostgreSQL 缺表、报告生成前置、报告编辑页和紧急放行页 | 远端 PostgreSQL 原只有 QCS 主表和 `_sv` 视图，缺少 `init.xml` 声明的请检明细、报告明细和 DI 表，且缺报告生成前置、数据接口兼容、报告编辑页运行时 JSON 和紧急放行 edit/view 运行时 JSON | `107-qcs-inspect-detail-tables.sql` 已补明细/DI 表和 `qcs_inspect_reports_sv` 兼容视图；`113`/`117` 已补工作流与自动报告前置；`118` 修复 `varchar/text = bytea` legacy 比较；`119` 恢复报告编辑页 runtime JSON；`120` 补合格/不合格批次状态种子；`124` 恢复紧急放行 edit/view runtime JSON。`createManuInspect`、报告生成、报告编辑页、报告保存、合格/不合格回写和紧急放行页面渲染均 PASS |
+| PROD-DB-007 | 已处理缺表/状态同步 | `updateTaskState` 依赖 `WOM_WAIT_PUT_RECORDS`，测试机原先缺少对应 PostgreSQL 表；hold/restart 曾出现任务状态和待办状态不同步 | 已用 `079-wom-wait-put-records-table.sql` 建立 `public.wom_wait_put_records`，并用 `080-wom-wait-record-state-sync-trigger.sql` 同步 workOrder 待办状态；start/hold/restart 已复验 PASS |
+| PROD-DB-008 | 已处理完工报工弹窗 layoutJson | `outPutCommonTaskEdit` 曾在 baseService 缓存缺失 `extraView` 后抛 `NullPointerException` | 已用 `084-wom-output-common-task-edit-runtime-json.sql` 恢复 `runtime_extra_view.view_json`，并用 `085-wom-output-common-task-edit-view-linkage.sql` 补齐 `runtime_view.extra_view/ec_env` 链路；在线环境应用后需重启 `baseService` 或清 layout cache |
 | PROD-DB-003 | 缺映射 | 完工入库或库存回写链路未定位 | 等待仓储/库存模块包 |
-| PROD-DB-004 | 缺映射 | 追溯页面和目标表未定位 | 等待菜单和运行包排查 |
+| PROD-DB-004 | 缺服务/缺映射 | 追溯入口已定位到 `ProcessAnalysis`，但当前包缺被调服务、运行时视图/菜单和目标表 | 等待 `ProcessAnalysis` 业务模块包；补齐后按 `processanalysis-dependency-analysis.md` 复验 |

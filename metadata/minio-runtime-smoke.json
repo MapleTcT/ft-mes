@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T00:09:14.970Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "environment": {
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "minioContainer": "adp-mes-newbase-minio-1",
+    "minioEndpoint": "http://127.0.0.1:30200"
+  },
+  "summary": {
+    "status": "PASS",
+    "totalChecks": 8,
+    "pass": 8,
+    "fail": 0,
+    "bucketCount": 2,
+    "inspectedBucketCount": 2,
+    "bucketsWithObjects": 2,
+    "totalObjects": 31,
+    "totalSizeBytes": 104285
+  },
+  "checks": [
+    {
+      "name": "ssh-target-reachable",
+      "status": "PASS",
+      "evidence": "sshTarget=v6@100.99.133.43"
+    },
+    {
+      "name": "minio-container-reachable",
+      "status": "PASS",
+      "evidence": "container=adp-mes-newbase-minio-1"
+    },
+    {
+      "name": "minio-alias-auth",
+      "status": "PASS",
+      "evidence": "endpoint=http://127.0.0.1:30200; aliasStatus=OK"
+    },
+    {
+      "name": "bucket-discovery",
+      "status": "PASS",
+      "evidence": "bucketCount=2"
+    },
+    {
+      "name": "expected-bucket-dtbucket",
+      "status": "PASS",
+      "evidence": "expected=dtbucket"
+    },
+    {
+      "name": "expected-bucket-system001bucket",
+      "status": "PASS",
+      "evidence": "expected=system001bucket"
+    },
+    {
+      "name": "bucket-inventory-dtbucket",
+      "status": "PASS",
+      "evidence": "objects=6; totalSizeBytes=54784; parseErrors=0"
+    },
+    {
+      "name": "bucket-inventory-system001bucket",
+      "status": "PASS",
+      "evidence": "objects=25; totalSizeBytes=49501; parseErrors=0"
+    }
+  ],
+  "buckets": [
+    {
+      "name": "dtbucket",
+      "inventoryStatus": "PASS",
+      "commandExitCode": 0,
+      "objectCount": 6,
+      "totalSizeBytes": 54784,
+      "maxObjectSizeBytes": 9216,
+      "earliestLastModified": "2026-06-18T23:42:16.499Z",
+      "latestLastModified": "2026-06-19T01:58:49.46Z",
+      "sampleObjectKeySha256Prefixes": [
+        "05d20acfc1ad9721",
+        "a6d45f1b94f31187",
+        "7a9e0d730fe60b19",
+        "6c9ce7ef28877aa4",
+        "30d0b8596d64c88a"
+      ],
+      "parseErrorCount": 0,
+      "discoveredAtTopLevel": true
+    },
+    {
+      "name": "system001bucket",
+      "inventoryStatus": "PASS",
+      "commandExitCode": 0,
+      "objectCount": 25,
+      "totalSizeBytes": 49501,
+      "maxObjectSizeBytes": 2553,
+      "earliestLastModified": "2026-06-11T15:53:24.119Z",
+      "latestLastModified": "2026-06-11T15:53:24.707Z",
+      "sampleObjectKeySha256Prefixes": [
+        "a640b7170dc69b88",
+        "68763db991a9d180",
+        "c85ba6b5daf270c8",
+        "85ab19ffd5136fb7",
+        "7738bb2599138de7"
+      ],
+      "parseErrorCount": 0,
+      "discoveredAtTopLevel": true
+    }
+  ],
+  "evidence": {
+    "method": "ssh docker exec minio mc ls --json and mc ls --recursive --json",
+    "secretHandling": "MinIO credentials were read from container environment only and are not written to this report.",
+    "mcVersion": "mc version RELEASE.2025-08-13T08-35-41Z (commit-id=7394ce0dd2a80935aded936b09fa12cbb3cb8096)",
+    "minioVersion": "minio version RELEASE.2025-09-07T16-13-09Z (commit-id=07c3a429bfed433e49018cb0f78a52145d4bedeb)"
+  }
+}

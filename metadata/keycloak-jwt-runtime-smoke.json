@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0",
+  "generatedAt": "2026-06-21T00:09:24.536Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "target": {
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "keycloakContainer": "adp-mes-newbase-keycloak-1",
+    "nacosContainer": "adp-mes-newbase-nacos-1",
+    "realm": "dt",
+    "nacosGroup": "prod",
+    "baseUrl": "http://100.99.133.43:18080"
+  },
+  "summary": {
+    "checks": 19,
+    "pass": 19,
+    "fail": 0,
+    "expectedClients": 2,
+    "clientScopes": 10,
+    "suposMappers": 17,
+    "keycloakPublicKeySha256Prefix": "9e9cea84527f841b",
+    "nacosJwtSha256Prefix": "9e9cea84527f841b",
+    "nacosHealthyKeycloakHosts": 2,
+    "gatewayMenuTargets": 374,
+    "status": "PASS"
+  },
+  "checks": [
+    {
+      "name": "realm-public-key-present",
+      "status": "PASS",
+      "evidence": "publicKeySha256Prefix=9e9cea84527f841b"
+    },
+    {
+      "name": "realm-enabled",
+      "status": "PASS",
+      "evidence": "enabled=true"
+    },
+    {
+      "name": "realm-direct-grant-flow",
+      "status": "PASS",
+      "evidence": "directGrantFlow=lfy grant"
+    },
+    {
+      "name": "nacos-jwt-public-key-synced",
+      "status": "PASS",
+      "evidence": "keycloakSha256Prefix=9e9cea84527f841b; nacosSha256Prefix=9e9cea84527f841b"
+    },
+    {
+      "name": "nacos-keycloak-healthy-instance",
+      "status": "PASS",
+      "evidence": "healthyHosts=2"
+    },
+    {
+      "name": "client-scope-supos-present",
+      "status": "PASS",
+      "evidence": "clientScopes=10"
+    },
+    {
+      "name": "readonly-property-file-component-present",
+      "status": "PASS",
+      "evidence": "components=12"
+    },
+    {
+      "name": "lfy-grant-flow-present",
+      "status": "PASS",
+      "evidence": "flows=9"
+    },
+    {
+      "name": "client-pc_dt-enabled",
+      "status": "PASS",
+      "evidence": "client is enabled"
+    },
+    {
+      "name": "client-pc_dt-direct-grant",
+      "status": "PASS",
+      "evidence": "publicClient=true; directAccessGrantsEnabled=true"
+    },
+    {
+      "name": "client-mobile_dt-enabled",
+      "status": "PASS",
+      "evidence": "client is enabled"
+    },
+    {
+      "name": "client-mobile_dt-direct-grant",
+      "status": "PASS",
+      "evidence": "publicClient=true; directAccessGrantsEnabled=true"
+    },
+    {
+      "name": "supos-mapper-userName",
+      "status": "PASS",
+      "evidence": "mappers=17"
+    },
+    {
+      "name": "supos-mapper-userId",
+      "status": "PASS",
+      "evidence": "mappers=17"
+    },
+    {
+      "name": "supos-mapper-departmentCode",
+      "status": "PASS",
+      "evidence": "mappers=17"
+    },
+    {
+      "name": "supos-mapper-companyId",
+      "status": "PASS",
+      "evidence": "mappers=17"
+    },
+    {
+      "name": "supos-mapper-staffName",
+      "status": "PASS",
+      "evidence": "mappers=17"
+    },
+    {
+      "name": "gateway-login-admin",
+      "status": "PASS",
+      "evidence": "status=200; ticketSha256Prefix=491e58a62fe9d748"
+    },
+    {
+      "name": "gateway-menu-current-user",
+      "status": "PASS",
+      "evidence": "status=200; menuTargets=374"
+    }
+  ],
+  "evidence": {
+    "clients": [
+      {
+        "clientId": "pc_dt",
+        "enabled": true,
+        "publicClient": true,
+        "directAccessGrantsEnabled": true,
+        "serviceAccountsEnabled": true,
+        "standardFlowEnabled": false,
+        "implicitFlowEnabled": false
+      },
+      {
+        "clientId": "mobile_dt",
+        "enabled": true,
+        "publicClient": true,
+        "directAccessGrantsEnabled": true,
+        "serviceAccountsEnabled": true,
+        "standardFlowEnabled": false,
+        "implicitFlowEnabled": true
+      }
+    ],
+    "requiredMappers": [
+      "userName",
+      "userId",
+      "departmentCode",
+      "companyId",
+      "staffName"
+    ],
+    "presentRequiredMappers": [
+      "userName",
+      "userId",
+      "departmentCode",
+      "companyId",
+      "staffName"
+    ],
+    "nacosKeycloakHosts": [
+      {
+        "ip": "172.25.0.7",
+        "port": 8080,
+        "healthy": true,
+        "enabled": true,
+        "ephemeral": false
+      },
+      {
+        "ip": "172.25.0.7",
+        "port": 8080,
+        "healthy": true,
+        "enabled": true,
+        "ephemeral": true
+      }
+    ],
+    "gateway": {
+      "loginStatus": 200,
+      "loginOk": true,
+      "ticketFingerprint": "491e58a62fe9d748",
+      "menuStatus": 200,
+      "menuTargetCount": 374
+    }
+  }
+}

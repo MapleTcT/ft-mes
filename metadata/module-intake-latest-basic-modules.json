@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T02:06:35+00:00",
+  "reportKind": "module-intake-candidate",
+  "source": {
+    "id": "latest-basic-modules",
+    "label": "MES包/最新基础模块",
+    "pathAtScan": "/Users/zhangchu/Documents/MES包/最新基础模块",
+    "inputKind": "directory",
+    "scanMode": "report-only",
+    "rawReport": "/tmp/adp-intake-latest-basic-modules.json",
+    "command": "python3 scripts/precheck-module-intake.py \"/Users/zhangchu/Documents/MES包/最新基础模块\" --report /tmp/adp-intake-latest-basic-modules.json --report-only"
+  },
+  "status": "BLOCKED_FOR_SOURCE_PROMOTION",
+  "summary": {
+    "fileCount": 13996,
+    "byteCount": 766357690,
+    "pomCount": 68,
+    "javaFileCount": 5084,
+    "sqlFileCount": 49,
+    "mapperOrSqlFileCount": 250,
+    "binaryCount": 27,
+    "zipArchiveCount": 26,
+    "unsupportedArchiveCount": 1,
+    "nestedFileCount": 13990,
+    "maxArchiveDepthSeen": 2,
+    "textCandidateCount": 9806,
+    "textScannedCount": 9784,
+    "textSkippedLargeCount": 22,
+    "textSkippedUnavailableCount": 0,
+    "textScannedBytes": 152593531,
+    "findingCount": 306,
+    "errorCount": 3,
+    "warningCount": 303
+  },
+  "categoryCounts": {
+    "binary-artifact": 27,
+    "oracle-default-path": 2,
+    "sql-dialect": 276,
+    "unsupported-archive": 1
+  },
+  "patternCounts": {
+    "7z": 2,
+    "decode": 6,
+    "from-dual": 146,
+    "mysql-only": 13,
+    "oracle-jdbc-url": 2,
+    "rownum": 20,
+    "sysdate": 91,
+    "zip": 26
+  },
+  "blockingFindings": [
+    {
+      "file": "XTYsupPlant-WOM V6.1.3.4-220722-C(α版).7z",
+      "line": null,
+      "severity": "error",
+      "category": "unsupported-archive",
+      "pattern": "7z",
+      "excerpt": "Archive type cannot be inspected by module intake precheck; repackage as zip/jar/war/ear or scan separately before promotion."
+    },
+    {
+      "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/DataSet_6.1.2.2.zip!service/src/main/custom/com/supcon/orchid/DataSet/util/DbUtils.java",
+      "line": 27,
+      "severity": "error",
+      "category": "oracle-default-path",
+      "pattern": "oracle-jdbc-url",
+      "excerpt": "url = \"jdbc:oracle:thin:@\" + databaseAddr + \":\" + databasePort + \":\" + databaseName;"
+    },
+    {
+      "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/DataSet_6.1.2.2.zip!service/src/main/custom/com/supcon/orchid/DataSet/util/DbUtils.java",
+      "line": 30,
+      "severity": "error",
+      "category": "oracle-default-path",
+      "pattern": "oracle-jdbc-url",
+      "excerpt": "url = \"jdbc:oracle:thin:@\" + databaseAddr + \":\" + databasePort + \"/\" + databaseName;"
+    }
+  ],
+  "warningExamples": [
+    {
+      "pattern": "from-dual",
+      "count": 146,
+      "examples": [
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSRetain_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/mysql/init.sql",
+          "line": 6,
+          "category": "sql-dialect",
+          "excerpt": "INSERT INTO BASE_APP_BUSINFO(ID, VERSION, DELETE_TIME, MODIFY_TIME, CREATE_TIME, DELETE_STAFF_ID, MODIFY_STAFF_ID, CREATE_STAFF_ID, VALID, MENU_CODE, SORT, POWER_FLAG, IS_HIDDEN, URL, SCREEN_TYPE, APP_ICON, APP_TYPE, NAM"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSRetain_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/oracle/init.sql",
+          "line": 6,
+          "category": "sql-dialect",
+          "excerpt": "INSERT INTO BASE_APP_BUSINFO(ID, VERSION, DELETE_TIME, MODIFY_TIME, CREATE_TIME, DELETE_STAFF_ID, MODIFY_STAFF_ID, CREATE_STAFF_ID, VALID, MENU_CODE, SORT, POWER_FLAG, IS_HIDDEN, URL, SCREEN_TYPE, APP_ICON, APP_TYPE, NAM"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSSample_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/mysql/init.sql",
+          "line": 9,
+          "category": "sql-dialect",
+          "excerpt": "INSERT INTO BASE_APP_BUSINFO(ID, VERSION, DELETE_TIME, MODIFY_TIME, CREATE_TIME, DELETE_STAFF_ID, MODIFY_STAFF_ID, CREATE_STAFF_ID, VALID, MENU_CODE, SORT, POWER_FLAG, IS_HIDDEN, URL, SCREEN_TYPE, APP_ICON, APP_TYPE, NAM"
+        }
+      ]
+    },
+    {
+      "pattern": "sysdate",
+      "count": 91,
+      "examples": [
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/mysql/init.sql",
+          "line": 397,
+          "category": "sql-dialect",
+          "excerpt": "(1, 1, sysdate(), ${ADMIN_STAFF_ID}, 1, ${ADMIN_COMPANY_ID},"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/mysql/init.sql",
+          "line": 404,
+          "category": "sql-dialect",
+          "excerpt": "(2, 1, sysdate(), ${ADMIN_STAFF_ID}, 1, ${ADMIN_COMPANY_ID},"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/resources/META-INF/init/custom/mysql/init.sql",
+          "line": 411,
+          "category": "sql-dialect",
+          "excerpt": "(3, 1, sysdate(), ${ADMIN_STAFF_ID}, 1, ${ADMIN_COMPANY_ID},"
+        }
+      ]
+    },
+    {
+      "pattern": "zip",
+      "count": 26,
+      "examples": [
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip",
+          "line": null,
+          "category": "binary-artifact",
+          "excerpt": "Runtime/package binary should not be copied into source modules."
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip",
+          "line": null,
+          "category": "binary-artifact",
+          "excerpt": "Runtime/package binary should not be copied into source modules."
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/resources/custom/LIMSBasic/_static_backup/_static.zip",
+          "line": null,
+          "category": "binary-artifact",
+          "excerpt": "Runtime/package binary should not be copied into source modules."
+        }
+      ]
+    },
+    {
+      "pattern": "rownum",
+      "count": 20,
+      "examples": [
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/custom/com/supcon/orchid/LIMSBasic/services/impl/LIMSBasicDataPermissionServiceImpl.java",
+          "line": 113,
+          "category": "sql-dialect",
+          "excerpt": ".append(\"(SELECT ID,CODE,NAME,ROWNUM AS rowno FROM BASESET_MATERIALS WHERE VALID = 1\");"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/custom/com/supcon/orchid/LIMSBasic/services/impl/LIMSBasicDataPermissionServiceImpl.java",
+          "line": 122,
+          "category": "sql-dialect",
+          "excerpt": "sql.append(\" AND ROWNUM <= ?) temp WHERE temp.rowno > ?\");"
+        },
+        {
+          "file": "supLIMS V6.1.3.5-220328-C.zip!supLIMS V6.1.3.5-220328-C/LIMSBasic_6.1.3.5.zip!service/src/main/custom/com/supcon/orchid/LIMSBasic/services/impl/LIMSBasicDataPermissionServiceImpl.java",
+          "line": 130,
+          "category": "sql-dialect",
+          "excerpt": "sql.append(\"SELECT temp.LAY_REC FROM (SELECT ROWNUM AS rowno,LAY_REC FROM LIMSBA_PICKSITE WHERE VALID = 1 AND LAY_NO = 1 AND ROWNUM <= \")"
+        }
+      ]
+    },
+    {
+      "pattern": "mysql-only",
+      "count": 13,
+      "examples": [
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/HierarchicalMod_6.1.2.5.zip!service/src/main/custom/com/supcon/orchid/HierarchicalMod/extend/dao/TechCardDaoImplSqlWrapper.java",
+          "line": 159,
+          "category": "sql-dialect",
+          "excerpt": "\" , '\\\"cardName\\\":\\\"' , ifnull ( CAST(main.NAME as char) , CAST('' as varchar) ) \\n\" +"
+        },
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/HierarchicalMod_6.1.2.5.zip!service/src/main/custom/com/supcon/orchid/HierarchicalMod/extend/dao/TechCardDaoImplSqlWrapper.java",
+          "line": 160,
+          "category": "sql-dialect",
+          "excerpt": "\" , '\\\",\\\"coefficient\\\":\\\"' , ifnull ( CAST(htcs.COEFFICIENT as char) , CAST('' as varchar) ) \\n\" +"
+        },
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/HierarchicalMod_6.1.2.5.zip!service/src/main/custom/com/supcon/orchid/HierarchicalMod/extend/dao/TechCardDaoImplSqlWrapper.java",
+          "line": 161,
+          "category": "sql-dialect",
+          "excerpt": "\" , '\\\",\\\"judgmentRule\\\":\\\"' , ifnull ( CAST(htcs.JUDGMENT_RULE as char) , CAST('' as varchar) ) \\n\" +"
+        }
+      ]
+    },
+    {
+      "pattern": "decode",
+      "count": 6,
+      "examples": [
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/ChartReportMap_6.1.2.3.zip!service/src/main/custom/com/supcon/orchid/ChartReportMap/util/ConvertUtil.java",
+          "line": 742,
+          "category": "sql-dialect",
+          "excerpt": "return charset.decode(data).toString();"
+        },
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/DataSet_6.1.2.2.zip!service/src/main/custom/com/supcon/orchid/DataSet/controllers/DataSetDefinitionController.java",
+          "line": 36,
+          "category": "sql-dialect",
+          "excerpt": "String sql = java.net.URLDecoder.decode(sqlStr.get(\"sqlStr\"), \"UTF-8\");"
+        },
+        {
+          "file": "supPlant-Base V6.1.2.5-220222-C.zip!supPlant-Base V6.1.2.5-220222-C/DataSet_6.1.2.2.zip!service/src/main/custom/com/supcon/orchid/DataSet/controllers/DataSetDefinitionController.java",
+          "line": 50,
+          "category": "sql-dialect",
+          "excerpt": "String sqlStr = java.net.URLDecoder.decode(sqlVo.getSqlStr(), \"UTF-8\");"
+        }
+      ]
+    },
+    {
+      "pattern": "7z",
+      "count": 1,
+      "examples": [
+        {
+          "file": "XTYsupPlant-WOM V6.1.3.4-220722-C(α版).7z",
+          "line": null,
+          "category": "binary-artifact",
+          "excerpt": "Runtime/package binary should not be copied into source modules."
+        }
+      ]
+    }
+  ],
+  "requiredActions": [
+    "Repackage XTYsupPlant-WOM V6.1.3.4-220722-C(α版).7z as an inspectable zip/jar/war/ear or produce a separate signed intake report before promotion.",
+    "Before promoting DataSet_6.1.2.2 into backend/source-modules, replace the hard-coded jdbc:oracle:thin URL construction in DbUtils.java with PostgreSQL-first datasource handling or isolate it in an explicit legacy migration path.",
+    "Review SQL dialect warnings before source promotion: rownum/from dual/sysdate/nvl/decode/mysql-only expressions must become PostgreSQL-compatible SQL, documented legacy templates, or module backlog items.",
+    "Do not copy runtime/package binaries from this package into backend/source-modules; keep them as external package evidence or unpack only vetted source/resources."
+  ],
+  "evidence": {
+    "precheckScript": "scripts/precheck-module-intake.py",
+    "verificationScript": "scripts/verify-module-intake-candidate-report.py",
+    "document": "docs/module-intake-latest-basic-modules.md",
+    "databaseDefault": "PostgreSQL",
+    "oraclePolicy": "Oracle may remain only as legacy-template-only or backlog evidence, not as default source-module runtime configuration.",
+    "rawReportRegeneratedAt": "2026-06-22T02:06:35+00:00",
+    "scanCoverageSummary": "textScanned=9784/9806, textSkippedLarge=22, nestedFileCount=13990, maxArchiveDepthSeen=2, unsupportedArchiveCount=1"
+  },
+  "scanPolicy": {
+    "maxTextBytes": 2097152,
+    "maxNestedArchiveBytes": 67108864,
+    "maxArchiveDepth": 2,
+    "textSuffixes": [
+      "",
+      ".conf",
+      ".ftl",
+      ".java",
+      ".json",
+      ".properties",
+      ".sql",
+      ".txt",
+      ".xml",
+      ".yaml",
+      ".yml"
+    ],
+    "zipArchiveSuffixes": [
+      ".ear",
+      ".jar",
+      ".war",
+      ".zip"
+    ],
+    "unsupportedArchiveSuffixes": [
+      ".7z",
+      ".bz2",
+      ".gz",
+      ".rar",
+      ".tar",
+      ".tgz",
+      ".xz"
+    ]
+  },
+  "scanCoverage": {
+    "textCoverageComplete": false,
+    "hasUnsupportedArchives": true,
+    "hasOversizedNestedArchives": false,
+    "zipArchiveOverNestedLimitCount": 0,
+    "nestedArchivePathsPreserved": true
+  }
+}

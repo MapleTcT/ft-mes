@@ -60,7 +60,7 @@ REPLACEMENTS = {
     "http://127.0.0.1:30130": f"http://{env('I18N_HOST', 'i18n')}:{env('I18N_PORT', '8080')}",
     "${I18N_HOST:127.0.0.1}": "${I18N_HOST:i18n}",
     "${I18N_PORT:30130}": "${I18N_PORT:8080}",
-    "${SUPOS_ADDRESS:http://127.0.0.1:${server.port}}": "${SUPOS_ADDRESS:http://10.11.100.17:18080}",
+    "${SUPOS_ADDRESS:http://127.0.0.1:${server.port}}": "${SUPOS_ADDRESS:http://100.99.133.43:18080}",
     "forceChange:": "",
 }
 
@@ -96,11 +96,14 @@ TARGETED_OVERRIDES = {
         "spring.data.mongodb.authentication-database": env("MONGO_AUTH_DBNAME", "admin"),
     },
     "supfusion-baseApplications.properties": {
-        "WebSocketUrl": f"{env('ADP_PUBLIC_HOST', '10.11.100.17')}:{env('ADP_HTTP_PORT', '18080')}",
+        "WebSocketUrl": f"{env('ADP_PUBLIC_HOST', '100.99.133.43')}:{env('ADP_HTTP_PORT', '18080')}",
         "bap.allow.empty.password": "false",
         "LIMSBasic/LIMSBasic.dataPermission": "false",
         "LIMSSample/LIMSSample.dataPermission": "false",
         "QCS/QCS.dataPermission": "false",
+        "QCS/QCS.reportShowIndexRange": "qualityStd",
+        "QCS/QCS.autoReportStaff": "currentUser",
+        "QCS/QCS.autoReport": "manuCheck",
         "spring.datasource.type": "com.supcon.supfusion.framework.scaffold.dbp.MultiTenantDatasource",
         "mybatis-plus.mapper-locations[0]": "classpath*:com/supcon/supfusion/i18n/dao/mapper/${supfusion.cloud.datasource.connect.system.db-type}/*.xml",
         "mybatis-plus.mapper-locations[1]": "classpath*:mappers/*.xml",
@@ -113,7 +116,7 @@ TARGETED_OVERRIDES = {
     },
     "supfusion-adp-lite.properties": {
         "supfusion.cloud.i18n.host": f"http://{env('I18N_HOST', 'i18n')}:{env('I18N_PORT', '8080')}",
-        "supfusion.supos.supos-host": env("SUPOS_ADDRESS", "http://10.11.100.17:18080"),
+        "supfusion.supos.supos-host": env("SUPOS_ADDRESS", "http://100.99.133.43:18080"),
         "supfusion.supos.ak": "adp-test-ak",
         "supfusion.supos.sk": "adp-test-sk",
     },

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "PLANNED",
+  "owner": "security-owner",
+  "productionSecretManager": "TBD",
+  "breakGlassOwner": "TBD",
+  "reviewDate": "TBD",
+  "controls": [
+    {
+      "id": "default-admin-password-rotation",
+      "title": "Default admin passwords rotated",
+      "category": "account",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "risk": "Default or test passwords allow unauthorized production access.",
+      "currentState": "Test profile uses known local credentials for smoke validation.",
+      "requiredEvidence": "Production password rotation record and post-rotation login smoke.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production admin password rotation record is missing."
+      ],
+      "nextActions": [
+        "Rotate all default admin and service-console passwords, then attach smoke evidence without recording secret values."
+      ]
+    },
+    {
+      "id": "test-account-cleanup",
+      "title": "Test accounts removed or tightly scoped",
+      "category": "account",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "risk": "Test users or broad smoke accounts can survive production cutover.",
+      "currentState": "Test environment keeps smoke accounts for automated validation.",
+      "requiredEvidence": "Production account inventory, disabled test accounts and approved break-glass account list.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production account inventory and test-account cleanup evidence are missing."
+      ],
+      "nextActions": [
+        "Export auth/user inventory, disable or scope test accounts, and attach approved break-glass ownership."
+      ]
+    },
+    {
+      "id": "test-runtime-bypass-disabled",
+      "title": "Test runtime bypasses disabled",
+      "category": "runtime",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "risk": "Test-only license or simulated-login bypasses can be promoted into production.",
+      "currentState": "Test deployment can seed license state and carries runtime patches for compatibility.",
+      "requiredEvidence": "Production config review proving test license seed, simulated login and debug bypasses are disabled or formally approved.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production runtime-bypass cleanup or approval evidence is missing."
+      ],
+      "nextActions": [
+        "Review Nacos, Compose and runtime patch settings; attach signed evidence that test bypasses are disabled or approved through license decision."
+      ]
+    },
+    {
+      "id": "service-account-least-privilege",
+      "title": "Service accounts use least privilege",
+      "category": "account",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "risk": "Over-privileged service users can modify unrelated services or data.",
+      "currentState": "Production service-account privilege matrix is not attached.",
+      "requiredEvidence": "Service account inventory and privilege matrix reviewed by owner.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Least-privilege matrix is missing."
+      ],
+      "nextActions": [
+        "Create service-account inventory for application, Keycloak, MinIO, Nacos and database users."
+      ]
+    },
+    {
+      "id": "database-user-privilege-split",
+      "title": "Database users split by service and privilege",
+      "category": "database",
+      "status": "PLANNED",
+      "owner": "database-owner",
+      "risk": "One shared database superuser hides write ownership and expands blast radius.",
+      "currentState": "Test Compose uses one PostgreSQL application user for repeatable smoke.",
+      "requiredEvidence": "Production PostgreSQL role/grant review and migration/runtime user split.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production PostgreSQL role/grant review is missing."
+      ],
+      "nextActions": [
+        "Define migration user, runtime user and read-only audit user; attach grant review."
+      ]
+    },
+    {
+      "id": "secret-management",
+      "title": "Secrets stored outside git",
+      "category": "secret",
+      "status": "PLANNED",
+      "owner": "security-owner",
+      "risk": "Production credentials, private keys or license material can leak through repository artifacts.",
+      "currentState": "Repository templates use placeholders; production secret manager is not recorded.",
+      "requiredEvidence": "Secret inventory without values, approved secret-manager path and repository secret scan output.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production secret-manager path and secret inventory are missing."
+      ],
+      "nextActions": [
+        "Record secret owners and approved storage locations without secret values; run repository secret scan."
+      ]
+    },
+    {
+      "id": "client-secret-rotation",
+      "title": "Client secrets and tokens rotated",
+      "category": "identity",
+      "status": "PLANNED",
+      "owner": "identity-platform-owner",
+      "risk": "Recovered or test Keycloak client secrets can remain valid in production.",
+      "currentState": "Keycloak production realm migration evidence has not attached client-secret rotation.",
+      "requiredEvidence": "Keycloak client-secret rotation record and post-rotation login/API smoke.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Client-secret rotation evidence is missing."
+      ],
+      "nextActions": [
+        "Rotate production Keycloak clients and attach smoke evidence without recording secret values."
+      ]
+    },
+    {
+      "id": "container-image-scan",
+      "title": "Container images scanned",
+      "category": "container",
+      "status": "PLANNED",
+      "owner": "security-owner",
+      "risk": "Base images and runtime layers can carry known vulnerabilities into production.",
+      "currentState": "Docker Compose image scan report is not attached.",
+      "requiredEvidence": "Image scan report, exception list and remediation owner for ADP Java, PostgreSQL, Redis, Mongo, MinIO and Nginx images.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Container image scan report is missing."
+      ],
+      "nextActions": [
+        "Run approved image scanner and attach report or accepted risk exceptions."
+      ]
+    },
+    {
+      "id": "container-runtime-user",
+      "title": "Containers run as non-root where possible",
+      "category": "container",
+      "status": "PLANNED",
+      "owner": "runtime-platform-owner",
+      "risk": "Root containers increase host escape and filesystem damage blast radius.",
+      "currentState": "Production runtime user policy is not attached.",
+      "requiredEvidence": "Compose/Kubernetes runtime-user review and exception list for services that require root.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Runtime user review and exceptions are missing."
+      ],
+      "nextActions": [
+        "Review every production container user, add non-root policy where possible, and document exceptions."
+      ]
+    },
+    {
+      "id": "host-firewall-review",
+      "title": "Host firewall and network boundary reviewed",
+      "category": "network",
+      "status": "PLANNED",
+      "owner": "infrastructure-owner",
+      "risk": "Internal services can become internet-facing through host firewall or security-group drift.",
+      "currentState": "Network/TLS plan exists separately but security hardening needs firewall review signoff.",
+      "requiredEvidence": "Firewall or security-group export reviewed by infrastructure and security owners.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Firewall/security-group review evidence is missing."
+      ],
+      "nextActions": [
+        "Attach reviewed firewall/security-group export and cross-link the network/TLS READY evidence."
+      ]
+    },
+    {
+      "id": "audit-log-retention",
+      "title": "Audit logs retained",
+      "category": "audit",
+      "status": "PLANNED",
+      "owner": "operations-owner",
+      "risk": "Security and business actions cannot be investigated after production incidents.",
+      "currentState": "Production audit log retention config is not attached.",
+      "requiredEvidence": "Application, gateway, Keycloak, database and host log-retention configuration.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Audit log retention evidence is missing."
+      ],
+      "nextActions": [
+        "Define log retention period, storage location, query owner and privacy handling."
+      ]
+    },
+    {
+      "id": "alerting-monitoring",
+      "title": "Security alerting configured",
+      "category": "monitoring",
+      "status": "PLANNED",
+      "owner": "operations-owner",
+      "risk": "Authentication failures, license failures, DB errors and suspicious access can go unnoticed.",
+      "currentState": "Production alert rules are not attached.",
+      "requiredEvidence": "Alert rules for authentication failures, service health, database errors, license state, certificate expiry and storage errors.",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Security alert rules are missing."
+      ],
+      "nextActions": [
+        "Create alert rules and attach test firing or dashboard evidence."
+      ]
+    }
+  ]
+}

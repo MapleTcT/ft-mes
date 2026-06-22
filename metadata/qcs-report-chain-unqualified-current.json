@@ -1,0 +1,859 @@
+{
+  "generatedAt": "2026-06-21T07:04:26.337Z",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "navigationWaitUntil": "commit",
+  "mode": "unqualified",
+  "marker": "ADP_E2E_20260621070426_QCS_UNQLF",
+  "operation": "QCS manufacturing report save and unqualified effective persistence",
+  "api": "/msService/QCS/inspect/inspect/bulkSubmit; /msService/QCS/inspectReport/inspectReport/batchDealReports",
+  "backendEntry": "QCSInspectController.bulkSubmit -> QCSInspectServiceImpl.bulkSubmit -> QCSInspectReportServiceImpl.batchDealReports -> QCSInspectReportServiceImpl.bulkSubmit -> sendReportResultToWOM -> WOMQCSServiceImpl.checkReportBackfillWom",
+  "targetTables": [
+    "qcs_inspects",
+    "qcs_inspects_di",
+    "qcs_inspect_reports",
+    "qcs_report_coms",
+    "wfm_task_pending",
+    "wf_deal_info",
+    "wom_produce_tasks",
+    "wom_wait_put_records",
+    "wom_produce_task_exelog",
+    "baseset_batch_infos",
+    "qcs_un_qlf_deals"
+  ],
+  "console": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList?ADP_E2E=ADP_E2E_20260621070426_QCS_UNQLF",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?0.24437630017681244",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_manuInspectList&menuCode=QCS_5.0.0.0_inspect_manuInspectList&entityCode=QCS_5.0.0.0_inspect&isEs5=true",
+      "postData": null
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"QCS_5.0.0.0_inspect_manuInspectList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/bulkSubmit",
+      "postData": "ids=757556430894336&deploymentId=6579656982888448&pendingIds=757556431529216&activityName=TaskEvent_1b1kzjf"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/bulkSubmit",
+      "postData": "ids=757556430894336&deploymentId=6579656982888448&pendingIds=757556563141888&activityName=TaskEvent_1lwqfuu"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?id=757556653315328&pendingId=757556653651200",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/i18n-value.js?0.9207660245450106",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js?v=0.5928500411610659",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/editStates?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportEdit&id=757556653315328",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportEdit&isEs5=true",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/data/757556653315328?pendingId=757556653651200",
+      "postData": null
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "postData": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556653651200%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_0u4czzq%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A0%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=save"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "postData": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A3%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556653651200%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_0u4czzq%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=submit"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "postData": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A3%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556835611904%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_10f9q36%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=submit"
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList?ADP_E2E=ADP_E2E_20260621070426_QCS_UNQLF",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--产品检验申请单列表-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\r\n<script src = \"/greenDill/static/QCS/static/inspect/js/commonList.js\"></script>\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"QCS_5.0.0.0_inspect_manuInspectList\", //  视图编码\n\t\t\t\"entityCode\":\"QCS_5.0.0.0_inspect\",// 实体编码\n\t\t\t\"menuCode\": \"QCS_5.0.0.0_inspect_manuInspectList\",\n\t\t\t\"viewName\": \"产品检验申请单列表\",// 视图名称\n\t\t\t\"viewType\": \"LIST\",// 视图类型\n\t\t\t\"modelCode\": \"QCS_5.0.0.0_inspect_Inspect\",// 模型编码\n\t\t\t\"moduleCode\": \"QCS_5.0.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"inspect\",// 模型别名\n\t\t\t\"workflowEnabled\": true,// 启用工作流\n\t\t\t\"listButtons\":{\n                    \"DELETE\":\"manuInspectList_delete_del_QCS_5.0.0.0_inspect_manuInspectList\",\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/QCS/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/QCS/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/QCS/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/QCS/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/QCS/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/QCS/inspect/inspect/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/QCS/inspect/inspect/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"mainView\": \"/msService/QCS/inspect/inspect/purchInspectView\", //  主查看视图\n\t\t\t\t\"downloadXls\": \"/msService/QCS/inspect/inspect/downloadXls\", //  下载导入模板\n\t\t\t\t\"importMainXls\": \"/msService/QCS/inspect/inspect/importMainXls\", //  导入Excel\n\t\t\t\t\"deleteData\": \"/msService/QCS/inspect/inspect/delete\",// 删除数据\n\t\t\t\t\"sourceData\": \"/msService/QCS/inspect/inspect/manuInspectList-\", //  列表数据\n\n\t\t\t\t\"echartsData\": \"/msService/QCS/inspect/inspect/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antd.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/i18n.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.commons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.echarts.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.sesgis.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/list.js?v=1648782232082\"></script>\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- body.html--start -->\n\t\n\t<!-- body.html--end -->\n\t<script>\n\t\t\n\t</script>\n</body>\n</html>\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?0.24437630017681244",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_manuInspectList&menuCode=QCS_5.0.0.0_inspect_manuInspectList&entityCode=QCS_5.0.0.0_inspect&isEs5=true",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"pageType\":\"LIST\",\"title\":\"产品检验申请单列表\",\"url\":\"/msService/QCS/inspect/inspect/manuInspectList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"query\",\"layoutName\":\"layoutSearchWidget\",\"layoutmethod\":\"container\",\"fix_h\":150,\"fastProperty\":[],\"advProperty\":[]},{\"type\":\"layoutDatagrid\",\"layoutmethod\":\"container\",\"ratio_h\":100,\"modelCode\":\"QCS_5.0.0.0_inspect_Inspect\",\"hasFastQuery\":true,\"mainDisplayName\":\"tableNo\",\"idPrefix\":\"compat_QCS_5.0.0.0_inspect_manuInspectList\",\"buttons\":[],\"fields\":[{\"key\":\"tableNo\",\"namekey\":\"ec.common.tableNo\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":180,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"busiTypeId.name\",\"namekey\":\"业务类型\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"prodId.code\",\"namekey\":\"物料编码\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"prodId.name\",\"namekey\":\"物料名称\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"psId.name\",\"namekey\":\"采样点\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"batchCode\",\"namekey\":\"批号\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":150,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"skipType\",\"namekey\":\"跳检\",\"showType\":\"SELECTCOMP\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"SYSTEMCODE\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"QCS_skipType\"}},{\"key\":\"checkState\",\"namekey\":\"状态\",\"showType\":\"SELECTCOMP\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"SYSTEMCODE\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"QCS_checkState\"}},{\"key\":\"applyStaffId.name\",\"namekey\":\"请检人\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"applyDeptId.name\",\"namekey\":\"请检部门\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":100,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"applyTime\",\"namekey\":\"请检时间\",\"showType\":\"DATETIME\",\"showFormat\":\"YMD_HMS\",\"width\":150,\"isHidden\":false,\"columnType\":\"DATETIME\"},{\"key\":\"needLab\",\"namekey\":\"需实验室检验\",\"showType\":\"SELECT\",\"showFormat\":\"SELECT\",\"width\":100,\"isHidden\":false,\"columnType\":\"BOOLEAN\"},{\"key\":\"closed\",\"namekey\":\"关闭\",\"showType\":\"SELECT\",\"showFormat\":\"SELECT\",\"width\":100,\"isHidden\":false,\"columnType\":\"BOOLEAN\"},{\"key\":\"QCS_5_0_0_0_inspect_manuInspectList_LISTPT_CUSTOM_3aaefcb6_6d96_4d9d_b2c6_bde20b55ed9d\",\"namekey\":\"QCS_5_0_0_0_inspect_manuInspectList_LISTPT_CUSTOM_3aaefcb6_6d96_4d9d_b2c6_bde20b55ed9d\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":162,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"memoField\",\"namekey\":\"备注\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":200,\"isHidden\":false,\"columnType\":\"TEXT\"},{\"key\":\"busiTypeId.id\",\"namekey\":\"busiTypeId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"},{\"key\":\"prodId.id\",\"namekey\":\"prodId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"},{\"key\":\"psId.id\",\"namekey\":\"psId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"},{\"key\":\"applyStaffId.id\",\"namekey\":\"applyStaffId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"},{\"key\":\"applyDeptId.id\",\"namekey\":\"applyDeptId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"}],\"downloadXls\":\"/msService/QCS/inspect/inspect/downloadXls\",\"importMainXls\":\"/msService/QCS/inspect/inspect/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false},\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1782025500311,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260621070426_QCS_UNQLF_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":757556430894336,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":757556431529216,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=757556431529216\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=757556430935296\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=757556430894336\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621070426_QCS_UNQLF_MAT\",\"id\":8990002546652350,\"name\":\"ADP_E2E_20260621070426_QCS_UNQLF material\"},\"psId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"skipType\":{\"id\":\"QCS_skipType/notSkip\",\"value\":\"否\"},\"status\":88,\"tableInfoId\":757556430935296,\"tableNo\":\"manuInspect_20260621_008\",\"valid\":true,\"version\":2},{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1782024462674,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260621064708_QCS_REPORT_QUAL_WOM_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":757552180782336,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":757552181409024,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=757552181409024\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=757552180819200\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=757552180782336\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621064708_QCS_REPORT_QUAL_WOM_MAT\",\"id\":8990002442870818,\"name\":\"ADP_E2E_20260621064708_QCS_REPORT_QUAL_WOM material\"},\"psId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"skipType\":{\"id\":\"QCS_skipType/notSkip\",\"value\":\"否\"},\"status\":88,\"tableInfoId\":757552180819200,\"tableNo\":\"manuInspect_20260621_003\",\"valid\":true,\"version\":2},{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1782022642787,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":757544726402304,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":757544726885632,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=757544726885632\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=757544726430976\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=757544726402304\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621061644_WOM_MANU_INSPECT_MAT\",\"id\":8990002260490695,\"name\":\"ADP_E2E_20260621061644_WOM_MANU_INSPECT material\"},\"psId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"skipType\":{\"id\":\"QCS_skipType/notSkip\",\"value\":\"否\"},\"status\":88,\"tableInfoId\":757544726430976,\"tableNo\":\"manuInspect_20260621_002\",\"valid\":true,\"version\":2},{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1782021229589,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260621055313_WOM_CHECKOUTBILL_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":757538938336512,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":757538938975488,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=757538938975488\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=757538938377472\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=757538938336512\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621055313_WOM_CHECKOUTBILL_MAT\",\"id\":8991002119314357,\"name\":\"ADP_E2E_20260621055313_WOM_CHECKOUTBILL material\"},\"psId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"skipType\":{\"id\":\"QCS_skipType/notSkip\",\"value\":\"否\"},\"status\":88,\"tableInfoId\":757538938377472,\"tableNo\":\"manuInspect_20260621_001\",\"valid\":true,\"version\":2},{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1781841930393,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260619_QCSBAD_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":756804528497920,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":756804529177856,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=756804529177856\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=756804528534784\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=756804528497920\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSBAD_MAT\",\"id\":8990084191051160,\"name\":\"ADP_E2E_20260619_QCSBAD material\"},\"psId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"skipType\":{\"id\":\"QCS_skipType/notSkip\",\"value\":\"否\"},\"status\":88,\"tableInfoId\":756804528534784,\"tableNo\":\"manuInspect_20260619_005\",\"valid\":true,\"version\":2},{\"applyDeptId\":{\"attrMap\":null,\"id\":1,\"name\":\"虚拟部门\"},\"applyStaffId\":{\"id\":1,\"name\":\"虚拟人员\"},\"applyTime\":1781841773362,\"attrMap\":null,\"batchCode\":\"ADP_E2E_20260619_QCSM2_BATCH\",\"busiTypeId\":{\"attrMap\":null,\"id\":1,\"name\":\"成品检验\"},\"checkState\":{\"id\":\"QCS_checkState/untested\",\"value\":\"待检验\"},\"cid\":1000,\"closed\":false,\"createStaff\":null,\"createTime\":null,\"id\":756803885679872,\"memoField\":null,\"needLab\":false,\"pending\":{\"activityName\":\"TaskEvent_1b1kzjf\",\"activityType\":\"task\",\"bulkDealFlag\":null,\"deploymentId\":6579656982888448,\"id\":756803886445824,\"openUrl\":\"/msService/QCS/inspect/inspect/manuInspectEdit?pendingId=756803886445824\\u0026__pc__=VGFza0V2ZW50XzFiMWt6amZ8bWFudUluc3BlY3RXb3JrRmxvdw__\\u0026tableInfoId=756803885716736\\u0026entityCode=QCS_5.0.0.0_inspect\\u0026id=756803885679872\\u0026deploymentId=6579656982888448\",\"processDescription\":\"产品检验申请单工作流\",\"processId\":\"manuInspectWorkFlow-1\",\"processKey\":\"manuInspectWorkFlow\",\"processVersion\":1,\"taskDescription\":\"编辑\",\"userId\":1},\"prodId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSM2_MAT\",\"id\":8990084171374037,\"name\":\"ADP_E2E_20260619_QCSM2 material\"},\"psId\":{\"attrMap\":null,\"id\":"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/bulkSubmit",
+      "status": 200,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/bulkSubmit",
+      "status": 200,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?id=757556653315328&pendingId=757556653651200",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--产品检验报告-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\r\n<script src = \"/msService/LIMSBasic/static/calculate/js/jstat.min.js\"></script>\r\n<script src = \"/msService/LIMSBasic/static/calculate/js/formula.js\"></script>\r\n<script src = \"/msService/LIMSBasic/static/calculate/js/generalCal.js\"></script>\r\n<script src = \"/msService/LIMSBasic/static/calculate/js/numeric.js\"></script>\r\n<script src = \"/msService/LIMSBasic/static/calculate/js/numeral.min.js\"></script>\r\n<script src = \"/msService/QCS/static/inspectReport/js/commonEdit.js\"></script>\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"QCS_5.0.0.0_inspectReport_manuInspReportEdit\", //  视图编码\n\t\t\t\"entityCode\":\"QCS_5.0.0.0_inspectReport\",// 实体编码\n\t\t\t\"menuCode\": \"QCS_5.0.0.0_inspectReport_manuInspReportEdit\",\n\t\t\t\"viewName\": \"产品检验报告\",// 视图名称\n\t\t\t\"viewType\": \"EDIT\",// 视图类型\n\t\t\t\"modelCode\": \"QCS_5.0.0.0_inspectReport_InspectReport\",// 模型编码\n\t\t\t\"moduleCode\": \"QCS_5.0.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"inspectReport\",// 模型别名\n\t\t\t\"workflowEnabled\": true,// 启用工作流\n\t\t\t\"listButtons\":{\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/QCS/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/QCS/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/QCS/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/QCS/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/QCS/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/QCS/inspectReport/inspectReport/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/QCS/inspectReport/inspectReport/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"sourceData\": \"/msService/QCS/inspectReport/inspectReport/data\", //  表单数据\n\t\t\t\t\"datagridData\": \"/msService/QCS/inspectReport/inspectReport/data-\", //  表格数据源\n\t\t\t\t\"submit\": \"/msService/QCS/inspectReport/inspectReport/manuInspReportEdit/submit\", //  表单提交\n\t\t\t\t\"save\": \"/msService/QCS/inspectReport/inspectReport/manuInspReportEdit/save\", //  表单保存\n\t\t\t\t\"dealInfoList\": \"/msService/QCS/inspectReport/inspectReport/dealInfo-list\", //  意见处理\n\t\t\t\t\"editStates\": \"/msService/QCS/inspectReport/inspectReport/editStates\", //  配置信息\n\t\t\t\t\"echartsData\": \"/msService/QCS/inspectReport/inspectReport/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antd.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/i18n.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.commons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.echarts.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.sesgis.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/edit.js?v=1648782232082\"></script>\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- body.html--start -->\n\t\n\t<!-- body.html--end -->\n\t<script>\n\t\tloadScript('/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/body');\n\t</script>\n</body>\n</html>\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/i18n-value.js?0.9207660245450106",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js?v=0.5928500411610659",
+      "status": 200,
+      "body": "void 0;\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/editStates?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportEdit&id=757556653315328",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"hasSupervision\":false,\"creatorInfo\":{\"mainPosition\":null,\"position\":{\"cid\":1000,\"id\":1,\"name\":\"虚拟岗位\"},\"positions\":null,\"staff\":{\"id\":1,\"name\":\"虚拟人员\"}},\"hasPayCloseAttention\":false},\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportEdit&isEs5=true",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"pageType\":\"EDIT\",\"title\":\"产品检验报告\",\"url\":\"/msService/QCS/inspectReport/inspectReport/manuInspReportEdit\",\"isMain\":true,\"hasAttachment\":true,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"events\":[],\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"tabCode\":\"tab_0\",\"namekey\":\"常规信息\",\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"container\",\"layoutContent\":\"section\",\"components\":[{\"type\":\"layoutSection\",\"layoutmethod\":\"container\",\"layoutContent\":\"section\",\"sectionCode\":\"section_1591094787269_6705\",\"namekey\":\"section_1591094787269_6705\",\"cssstyle\":\"\",\"colwidth\":\"16.6667,16.6667,16.6667,16.6667,16.6667,16.6667\",\"cells\":[{\"colspan\":1,\"firstTd\":1,\"regionType\":\"EDIT\",\"rowspan\":1,\"cellCode\":\"cell_1591094797717_4478\",\"name\":\"检验申请单号\",\"element\":{\"showTypeHasChanged\":false,\"couple\":true,\"acceptRevisions\":false,\"code\":\"QCS_5.0.0.0_inspectReport_manuInspReportEdit_EDIT_LABEL_QCS_5.0.0.0_inspectReport_InspectReport_inspectId_QCS_5.0.0.0_inspect_Inspect_tableNo\",\"iscontrol\":false,\"nullable\":false,\"displayName\":\"QCS.inspectReport.inspectReport.inspectTableNo\",\"isOfficeHandSign\":false,\"multallowview\":false,\"isRevision\":false,\"showFormatHasChanged\":false,\"hideRevision\":false,\"getRevisions\":false,\"allowview\":false,\"propertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_inspectId||QCS_5.0.0.0_inspect_Inspect_tableNo\",\"elalign\":\"right\",\"readonly\":false,\"showRevision\":false,\"convertPdfOnLine\":true,\"complex\":false,\"namekey\":\"检验申请单号\",\"isreadonly\":false,\"isgroup\":false,\"showType\":\"LABEL\",\"officePrint\":false,\"isCreateNew\":false,\"key\":\"inspectReport.inspectId.tableNo\",\"downloadDoc\":true,\"entityCode\":\"QCS_5.0.0.0_inspectReport\",\"moduleCode\":\"QCS_5.0.0.0\",\"showFormat\":\"TEXT\",\"officeNotNull\":false,\"autoresize\":false,\"mneenable\":false,\"fullPropertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_inspectId||QCS_5.0.0.0_inspect_Inspect_tableNo\",\"isOfficeSign\":false,\"columnType\":\"TEXT\",\"isTitle\":true,\"isrefselect\":false,\"saveTemplate\":false,\"isCustom\":false,\"name\":\"单据编号\",\"openEmptyDoc\":true,\"isNoCopy\":false,\"multable\":false,\"columnName\":\"TABLE_NO\"}},{\"callbackbody\":\"function onInspectCallBack(inspectObj) {\\n\\n\\t//检验报告PT\\n\\tvar reportComDg = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"QCS_5.0.0.0_inspectReport_manuInspReportEditdg1591145511105\\\");\\n\\tvar dgKeyName = \\\"QCS_5.0.0.0_inspectReport_manuInspReportEditdg1591145511105\\\";\\n\\t//检验申请回调函数，调用公用方法\\n\\tconsole.log(inspectObj[0]);\\n\\tinspectCallBack(reportComDg, inspectObj, dgKeyName);\\n\\t//显示报告PT参照、删行、上移、下移\\n\\tsetDgBtnDisplay(reportComDg);\\n\\n\\tisPaper = false;\\n\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setValue({});\\n\\tReactAPI.getComponentAPI(\\\"Label\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").hide();\\n\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").hide();\\n\\tvar sourceType = null;\\n\\tif (inspectObj[0].sourceType != null) {\\n\\t\\tsourceType = inspectObj[0].sourceType.id;\\n\\t}\\n\\n\\t//判断是否上载的工单模块是造纸行业和上游单据时生产下推\\n\\tisPaper = judgeIsPaper(sourceType);\\n\\tif (isPaper) {\\n\\t\\tReactAPI.getComponentAPI(\\\"Label\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").show();\\n\\t\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").show();\\n\\t\\tReactAPI.getComponentAPI(\\\"Label\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setNullableStyle(false);\\n\\t\\t//清空\\n\\t\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setValue({});\\n\\t\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setReadonly(true);\\n\\t\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setRequired(false);\\n\\t}\\n}\",\"funcbody\":\"function onInspectTableNoClear() {\\n\\t//报告单PT\\n\\tvar reportComDg = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"QCS_5.0.0.0_inspectReport_manuInspReportEditdg1591145511105\\\");\\n\\t//清空检验申请单号事件（清除检验申请单号关联的表头信息，以及删除pt合格范围列和pt数据）\\n\\tinspectTableNoClear(reportComDg);\\n\\t//清空单据编号时，隐藏PT按钮\\n\\treportComDg.setBtnHidden([\\\"ref\\\", \\\"delete\\\", \\\"moveUp\\\", \\\"moveDown\\\", \\\"refSampleCom\\\"]);\\n\\n\\tisPaper = false;\\n\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").setValue({});\\n\\tReactAPI.getComponentAPI(\\\"Label\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").hide();\\n\\tReactAPI.getComponentAPI(\\\"Reference\\\").APIs(\\\"inspectReport.actBatStateId.name\\\").hide();\\n}\",\"funcname\":\"onAfterClear='onInspectTableNoClear()'\",\"cellCode\":\"cell_1591094797717_3160\",\"colspan\":1,\"sourcepropertyname\":\"inspectReport.inspectId\",\"regionType\":\"EDIT\",\"topAssName\":\"id\",\"rowspan\":1,\"callbackname\":\"onInspectCallBack(inspectObj)\",\"element\":{\"showTypeHasChanged\":true,\"couple\":true,\"iscontrol\":false,\"nullable\":false,\"isOfficeHandSign\":false,\"isRevision\":false,\"showFormatHasChanged\":true,\"defaultValueHasChanged\":false,\"referenceview\":{\"title\":\"产品检验申请参照\",\"code\":\"QCS_5.0.0.0_inspect_manuInspectRef\",\"name\":\"manuInspectRef\",\"openType\":\"frame\",\"url\":\"/msService/QCS/inspect/inspect/manuInspectRef\",\"iscrosscompany\":\"false\",\"mneType\":\"other\"},\"propertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_inspectId||QCS_5.0.0.0_inspect_Inspect_tableNo\",\"elalign\":\"left\",\"readonly\":false,\"convertPdfOnLine\":true,\"complex\":false,\"isgroup\":false,\"showType\":\"SELECTCOMP\",\"isCreateNew\":false,\"officeNotNull\":false,\"mneenable\":false,\"isOfficeSign\":false,\"columnType\":\"TEXT\",\"isTitle\":true,\"isrefselect\":false,\"modelcode\":\"QCS_5.0.0.0_inspect_Inspect\",\"name\":\"inspectReport.inspectId.tableNo\",\"isNoCopy\":false,\"precisionHasChanged\":true,\"acceptRevisions\":false,\"code\":\"QCS_5.0.0.0_inspectReport_manuInspReportEdit_EDIT_OTHER_QCS_5.0.0.0_inspectReport_InspectReport_inspectId_QCS_5.0.0.0_inspect_Inspect_tableNo\",\"displayName\":\"QCS.inspectReport.inspectReport.inspectTableNo\",\"multallowview\":false,\"hideRevision\":false,\"getRevisions\":false,\"allowview\":false,\"showRevision\":false,\"namekey\":\"检验申请单号\",\"isreadonly\":false,\"officePrint\":false,\"key\":\"inspectReport.inspectId.tableNo\",\"downloadDoc\":true,\"entityCode\":\"QCS_5.0.0.0_inspectReport\",\"moduleCode\":\"QCS_5.0.0.0\",\"showFormat\":\"SELECTCOMP\",\"autoresize\":false,\"fullPropertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_inspectId||QCS_5.0.0.0_inspect_Inspect_tableNo\",\"saveTemplate\":false,\"isCustom\":false,\"refCondition\":\"if(processKey == 'batchReportWorkFlow') {\\n\\treturn 'isBatch=true&source=inspectReport';\\n}\\nreturn \\\"source=inspectReport\\\";\",\"openEmptyDoc\":true,\"multable\":false,\"columnName\":\"TABLE_NO\",\"mainDisplayName\":\"tableNo\"},\"firstTd\":0},{\"colspan\":1,\"regionType\":\"EDIT\",\"rowspan\":1,\"cellCode\":\"cell_1591241396351_3680\",\"name\":\"业务类型\",\"element\":{\"showTypeHasChanged\":false,\"couple\":true,\"acceptRevisions\":false,\"code\":\"QCS_5.0.0.0_inspectReport_manuInspReportEdit_EDIT_LABEL_QCS_5.0.0.0_inspectReport_InspectReport_busiTypeId_QCS_5.0.0.0_tableType_BusiType_name\",\"iscontrol\":false,\"nullable\":true,\"displayName\":\"QCS.tableType.BusiType.name\",\"isOfficeHandSign\":false,\"multallowview\":false,\"isRevision\":false,\"showFormatHasChanged\":false,\"hideRevision\":false,\"getRevisions\":false,\"allowview\":false,\"propertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_busiTypeId||QCS_5.0.0.0_tableType_BusiType_name\",\"elalign\":\"right\",\"readonly\":false,\"showRevision\":false,\"convertPdfOnLine\":true,\"complex\":false,\"namekey\":\"业务类型\",\"isreadonly\":false,\"isgroup\":false,\"showType\":\"LABEL\",\"officePrint\":false,\"isCreateNew\":false,\"key\":\"inspectReport.busiTypeId.name\",\"downloadDoc\":true,\"entityCode\":\"QCS_5.0.0.0_inspectReport\",\"moduleCode\":\"QCS_5.0.0.0\",\"showFormat\":\"TEXT\",\"officeNotNull\":false,\"autoresize\":false,\"mneenable\":false,\"fullPropertyCode\":\"QCS_5.0.0.0_inspectReport_InspectReport_busiTypeId||QCS_5.0.0.0_tableType_BusiType_name\",\"isOfficeSign\":false,\"columnType\":\"TEXT\",\"isTitle\":true,\"isrefselect\":false,\"saveTemplate\":false,\"isCustom\":false,\"name\":\"业务类型\",\"openEmptyDoc\":true,\"isNoCopy\":false,\"multable\":false,\"columnName\":\"NAME\"},\"firstTd\":0},{\"colspan\":1,\"sourcepropertyname\":\"inspectReport.busiTypeId\",\"regionType\":\"EDIT\",\"topAssN"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/data/757556653315328?pendingId=757556653651200",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"id\":757556653315328,\"version\":2,\"bapSearchId\":\"com.supcon.orchid.QCS.entities.QCSInspectReport@757556653315328\",\"bapSearchType\":\"com.supcon.orchid.QCS.entities.QCSInspectReport\",\"createStaffId\":1,\"modifyStaffId\":1,\"createStaff\":{\"id\":1,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Staff@1\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Staff\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createTime\":1781177374007,\"modifyTime\":1781177374007,\"deleteTime\":null,\"valid\":true,\"code\":\"default_person\",\"name\":\"虚拟人员\",\"mobile\":null,\"email\":null,\"birthday\":null,\"nativePlace\":null,\"idCard\":null,\"imagePath\":null,\"marriage\":null,\"nation\":null,\"securityClass\":null,\"memo\":\"虚拟人员\",\"politicsInfo\":null,\"jabber\":null,\"virtualMobile\":null,\"height\":null,\"computeLevel\":null,\"foreignLanguage\":null,\"school\":null,\"biyeTime\":null,\"profession\":null,\"educational\":null,\"degree\":null,\"dangandi\":null,\"hukoudi\":null,\"hukouxingzhi\":null,\"workStatus\":{\"id\":\"sys_person_status/onWork\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781177072739,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":null,\"layNo\":1,\"parentId\":null,\"fullPathName\":null,\"leaf\":false,\"leaf2\":false,\"type\":null,\"code\":\"onWork\",\"entityCode\":\"sys_person_status\",\"value\":\"在职\",\"attribute\":false,\"memo\":\"系统默认\",\"sort\":1,\"defaultFlag\":true,\"zhCnValue\":null,\"codeDesA\":null,\"codeDesB\":null,\"codeDesC\":null,\"seqId\":null,\"uniqueCode\":\"sys_person_status/onWork\",\"root\":true,\"children2\":[],\"isParent\":true},\"ygxs\":null,\"leaderStaffId\":null,\"higherLeaderStaffId\":null,\"leaderName\":null,\"higherLeaderName\":null,\"sysFlag\":true,\"document\":null,\"mainPositionId\":1,\"mainPosition\":{\"id\":1,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Position@1\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Position\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createTime\":1781175164786,\"modifyTime\":1781175164786,\"deleteTime\":null,\"valid\":true,\"cid\":1000,\"company\":{\"id\":1000,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Company@1000\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Company\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781175164772,\"modifyTime\":1781175164772,\"deleteTime\":null,\"valid\":true,\"type\":null,\"code\":\"default_org_company\",\"name\":\"默认公司\",\"shortName\":\"默认公司\",\"address\":null,\"postcode\":null,\"telephone\":null,\"fax\":null,\"site\":null,\"email\":null,\"sort\":0,\"scNature\":null,\"description\":null,\"uuid\":null,\"parentId\":null,\"customerField1\":null,\"customerField2\":null,\"layRec\":\"1000\",\"default\":false},\"children2\":[],\"layRec\":\"1\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"/默认公司/虚拟岗位\",\"leaf\":true,\"leaf2\":true,\"leaf3\":false,\"parentCode\":null,\"code\":\"default_position\",\"name\":\"虚拟岗位\",\"category\":null,\"description\":null,\"sort\":1000,\"roleNames\":null,\"roleIds\":null,\"roleCodes\":null,\"delRoleIds\":null,\"isVirtual\":true,\"uuid\":null,\"integerparama\":null,\"integerparamb\":null,\"integerparamc\":null,\"integerparamd\":null,\"integerparame\":null,\"dateparama\":null,\"dateparamb\":null,\"dateparamc\":null,\"dateparamd\":null,\"dateparame\":null,\"numberparama\":null,\"numberparamb\":null,\"numberparamc\":null,\"numberparamd\":null,\"numberparame\":null,\"charparama\":null,\"charparamb\":null,\"charparamc\":null,\"charparamd\":null,\"charparame\":null,\"resScparama\":null,\"resScparamb\":null,\"resScparamc\":null,\"resScparamd\":null,\"resScparame\":null,\"objparama\":null,\"objparamb\":null,\"resScparamaMainDisplay\":null,\"resScparambMainDisplay\":null,\"resScparamcMainDisplay\":null,\"resScparamdMainDisplay\":null,\"resScparameMainDisplay\":null,\"objparambMainDisplay\":null,\"objparamc\":null,\"objparamcMainDisplay\":null,\"objparamd\":null,\"objparamdMainDisplay\":null,\"objparame\":null,\"objparameMainDisplay\":null,\"objparamaMainDisplay\":null,\"attrMap\":null,\"root\":true,\"children\":[],\"isParent\":false},\"sort\":null,\"uuid\":null,\"customerField1\":null,\"customerField2\":null},\"modifyStaff\":{\"id\":1,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Staff@1\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Staff\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createTime\":1781177374007,\"modifyTime\":1781177374007,\"deleteTime\":null,\"valid\":true,\"code\":\"default_person\",\"name\":\"虚拟人员\",\"mobile\":null,\"email\":null,\"birthday\":null,\"nativePlace\":null,\"idCard\":null,\"imagePath\":null,\"marriage\":null,\"nation\":null,\"securityClass\":null,\"memo\":\"虚拟人员\",\"politicsInfo\":null,\"jabber\":null,\"virtualMobile\":null,\"height\":null,\"computeLevel\":null,\"foreignLanguage\":null,\"school\":null,\"biyeTime\":null,\"profession\":null,\"educational\":null,\"degree\":null,\"dangandi\":null,\"hukoudi\":null,\"hukouxingzhi\":null,\"workStatus\":{\"id\":\"sys_person_status/onWork\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781177072739,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":null,\"layNo\":1,\"parentId\":null,\"fullPathName\":null,\"leaf\":false,\"leaf2\":false,\"type\":null,\"code\":\"onWork\",\"entityCode\":\"sys_person_status\",\"value\":\"在职\",\"attribute\":false,\"memo\":\"系统默认\",\"sort\":1,\"defaultFlag\":true,\"zhCnValue\":null,\"codeDesA\":null,\"codeDesB\":null,\"codeDesC\":null,\"seqId\":null,\"uniqueCode\":\"sys_person_status/onWork\",\"root\":true,\"children2\":[],\"isParent\":true},\"ygxs\":null,\"leaderStaffId\":null,\"higherLeaderStaffId\":null,\"leaderName\":null,\"higherLeaderName\":null,\"sysFlag\":true,\"document\":null,\"mainPositionId\":1,\"mainPosition\":{\"id\":1,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Position@1\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Position\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createTime\":1781175164786,\"modifyTime\":1781175164786,\"deleteTime\":null,\"valid\":true,\"cid\":1000,\"company\":{\"id\":1000,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Company@1000\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Company\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781175164772,\"modifyTime\":1781175164772,\"deleteTime\":null,\"valid\":true,\"type\":null,\"code\":\"default_org_company\",\"name\":\"默认公司\",\"shortName\":\"默认公司\",\"address\":null,\"postcode\":null,\"telephone\":null,\"fax\":null,\"site\":null,\"email\":null,\"sort\":0,\"scNature\":null,\"description\":null,\"uuid\":null,\"parentId\":null,\"customerField1\":null,\"customerField2\":null,\"layRec\":\"1000\",\"default\":false},\"children2\":[],\"layRec\":\"1\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"/默认公司/虚拟岗位\",\"leaf\":true,\"leaf2\":true,\"leaf3\":false,\"parentCode\":null,\"code\":\"default_position\",\"name\":\"虚拟岗位\",\"category\":null,\"description\":null,\"sort\":1000,\"roleNames\":null,\"roleIds\":null,\"roleCodes\":null,\"delRoleIds\":null,\"isVirtual\":true,\"uuid\":null,\"integerparama\":null,\"integerparamb\":null,\"integerparamc\":null,\"intege"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "status": 200,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "status": 200,
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "status": 200,
+      "body": ""
+    }
+  ],
+  "screenshots": {
+    "inspectList": "/tmp/adp-qcs-report-chain-unqualified-20260621070426/qcs-inspect-list-before-submit.png",
+    "reportEdit": "/tmp/adp-qcs-report-chain-unqualified-20260621070426/qcs-report-edit-before-save.png",
+    "reportAfterSubmit": "/tmp/adp-qcs-report-chain-unqualified-20260621070426/qcs-report-edit-after-submit.png"
+  },
+  "screenshotErrors": [],
+  "inspectBulkSubmitAttempts": [
+    {
+      "attempt": 1,
+      "before": {
+        "id": "757556430894336",
+        "version": "2",
+        "status": "88",
+        "tableNo": "manuInspect_20260621_008",
+        "tableInfoId": "757556430935296",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkState": "QCS_checkState/untested",
+        "refable": "false",
+        "valid": "true",
+        "pendingId": "757556431529216",
+        "pendingDeploymentId": "6579656982888448",
+        "pendingActivityName": "TaskEvent_1b1kzjf",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+        "pendingProcessKey": "manuInspectWorkFlow"
+      },
+      "existingReport": null,
+      "response": {
+        "method": "POST",
+        "url": "/msService/QCS/inspect/inspect/bulkSubmit",
+        "requestPayload": "ids=757556430894336&deploymentId=6579656982888448&pendingIds=757556431529216&activityName=TaskEvent_1b1kzjf",
+        "status": 200,
+        "body": "",
+        "json": null
+      },
+      "afterReport": null
+    },
+    {
+      "attempt": 2,
+      "before": {
+        "id": "757556430894336",
+        "version": "2",
+        "status": "88",
+        "tableNo": "manuInspect_20260621_008",
+        "tableInfoId": "757556430935296",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkState": "QCS_checkState/untested",
+        "refable": "false",
+        "valid": "true",
+        "pendingId": "757556563141888",
+        "pendingDeploymentId": "6579656982888448",
+        "pendingActivityName": "TaskEvent_1lwqfuu",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1588122044745.flag",
+        "pendingProcessKey": "manuInspectWorkFlow"
+      },
+      "existingReport": null,
+      "response": {
+        "method": "POST",
+        "url": "/msService/QCS/inspect/inspect/bulkSubmit",
+        "requestPayload": "ids=757556430894336&deploymentId=6579656982888448&pendingIds=757556563141888&activityName=TaskEvent_1lwqfuu",
+        "status": 200,
+        "body": "",
+        "json": null
+      },
+      "afterReport": {
+        "id": "757556653315328",
+        "version": "2",
+        "status": "88",
+        "tableNo": "manuReport_20260621_005",
+        "tableInfoId": "757556653315329",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkResult": "",
+        "checkResCode": "",
+        "memoField": "",
+        "unQlfDealFlag": "",
+        "actBatStateId": "",
+        "valid": "true",
+        "pendingId": "757556653651200",
+        "pendingDeploymentId": "6579656984166400",
+        "pendingActivityName": "TaskEvent_0u4czzq",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+        "pendingProcessKey": "manuInspectReportWorkFlow",
+        "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?pendingId=757556653651200&__pc__=VGFza0V2ZW50XzB1NGN6enF8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+      }
+    }
+  ],
+  "reportSubmitAttempts": [
+    {
+      "attempt": 1,
+      "before": {
+        "id": "757556653315328",
+        "version": "3",
+        "status": "88",
+        "tableNo": "manuReport_20260621_005",
+        "tableInfoId": "757556653315329",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkResult": "不合格",
+        "checkResCode": "",
+        "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "unQlfDealFlag": "",
+        "actBatStateId": "",
+        "valid": "true",
+        "pendingId": "757556653651200",
+        "pendingDeploymentId": "6579656984166400",
+        "pendingActivityName": "TaskEvent_0u4czzq",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+        "pendingProcessKey": "manuInspectReportWorkFlow",
+        "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?pendingId=757556653651200&__pc__=VGFza0V2ZW50XzB1NGN6enF8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+      },
+      "reportComs": [
+        {
+          "id": "757556654060800",
+          "version": "2",
+          "reportId": "757556653315328",
+          "reportName": "ADP_E2E_20260621070426_QCS_UNQLF QCS report item",
+          "dispValue": "不合格",
+          "checkResult": "不合格",
+          "valid": "true"
+        }
+      ],
+      "requestReportJson": "[{\"reportId\":\"{\\\"id\\\":\\\"757556653315328\\\",\\\"version\\\":3,\\\"checkResult\\\":\\\"不合格\\\",\\\"memoField\\\":\\\"ADP_E2E_20260621070426_QCS_UNQLF unqualified memo\\\",\\\"pending\\\":{\\\"id\\\":\\\"757556653651200\\\",\\\"deploymentId\\\":\\\"6579656984166400\\\",\\\"activityName\\\":\\\"TaskEvent_0u4czzq\\\"}}\",\"reportComs\":\"[{\\\"id\\\":\\\"757556654060800\\\",\\\"version\\\":2,\\\"checkResult\\\":\\\"不合格\\\",\\\"dispValue\\\":\\\"不合格\\\"}]\"}]",
+      "response": {
+        "method": "POST",
+        "url": "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "requestPayload": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A3%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556653651200%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_0u4czzq%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=submit",
+        "status": 200,
+        "body": "",
+        "json": null
+      },
+      "after": {
+        "id": "757556653315328",
+        "version": "3",
+        "status": "88",
+        "tableNo": "manuReport_20260621_005",
+        "tableInfoId": "757556653315329",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkResult": "不合格",
+        "checkResCode": "",
+        "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "unQlfDealFlag": "",
+        "actBatStateId": "",
+        "valid": "true",
+        "pendingId": "757556835611904",
+        "pendingDeploymentId": "6579656984166400",
+        "pendingActivityName": "TaskEvent_10f9q36",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221629652.flag",
+        "pendingProcessKey": "manuInspectReportWorkFlow",
+        "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportView?pendingId=757556835611904&__pc__=VGFza0V2ZW50XzEwZjlxMzZ8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+      }
+    },
+    {
+      "attempt": 2,
+      "before": {
+        "id": "757556653315328",
+        "version": "3",
+        "status": "88",
+        "tableNo": "manuReport_20260621_005",
+        "tableInfoId": "757556653315329",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkResult": "不合格",
+        "checkResCode": "",
+        "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "unQlfDealFlag": "",
+        "actBatStateId": "",
+        "valid": "true",
+        "pendingId": "757556835611904",
+        "pendingDeploymentId": "6579656984166400",
+        "pendingActivityName": "TaskEvent_10f9q36",
+        "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221629652.flag",
+        "pendingProcessKey": "manuInspectReportWorkFlow",
+        "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportView?pendingId=757556835611904&__pc__=VGFza0V2ZW50XzEwZjlxMzZ8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+      },
+      "reportComs": [
+        {
+          "id": "757556654060800",
+          "version": "2",
+          "reportId": "757556653315328",
+          "reportName": "ADP_E2E_20260621070426_QCS_UNQLF QCS report item",
+          "dispValue": "不合格",
+          "checkResult": "不合格",
+          "valid": "true"
+        }
+      ],
+      "requestReportJson": "[{\"reportId\":\"{\\\"id\\\":\\\"757556653315328\\\",\\\"version\\\":3,\\\"checkResult\\\":\\\"不合格\\\",\\\"memoField\\\":\\\"ADP_E2E_20260621070426_QCS_UNQLF unqualified memo\\\",\\\"pending\\\":{\\\"id\\\":\\\"757556835611904\\\",\\\"deploymentId\\\":\\\"6579656984166400\\\",\\\"activityName\\\":\\\"TaskEvent_10f9q36\\\"}}\",\"reportComs\":\"[{\\\"id\\\":\\\"757556654060800\\\",\\\"version\\\":2,\\\"checkResult\\\":\\\"不合格\\\",\\\"dispValue\\\":\\\"不合格\\\"}]\"}]",
+      "response": {
+        "method": "POST",
+        "url": "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+        "requestPayload": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A3%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556835611904%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_10f9q36%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=submit",
+        "status": 200,
+        "body": "",
+        "json": null
+      },
+      "after": {
+        "id": "757556653315328",
+        "version": "6",
+        "status": "99",
+        "tableNo": "manuReport_20260621_005",
+        "tableInfoId": "757556653315329",
+        "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "checkResult": "不合格",
+        "checkResCode": "",
+        "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "unQlfDealFlag": "true",
+        "actBatStateId": "",
+        "valid": "true",
+        "pendingId": "",
+        "pendingDeploymentId": "",
+        "pendingActivityName": "",
+        "pendingTaskDescription": "",
+        "pendingProcessKey": "",
+        "pendingOpenUrl": ""
+      }
+    }
+  ],
+  "womScript": {
+    "script": "/Users/zhangchu/Documents/ADP/adp-source-repo/deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js",
+    "exitCode": 0,
+    "stdout": "{\n  \"status\": \"PASS\",\n  \"marker\": \"ADP_E2E_20260621070426_QCS_UNQLF\",\n  \"outputPath\": \"/tmp/adp-qcs-report-chain-unqualified-20260621070426/wom-manu-inspect-persistence-results.json\",\n  \"api\": {\n    \"method\": \"POST\",\n    \"url\": \"/msService/WOM/produceTask/produceTask/createManuInspect\",\n    \"requestPayload\": \"taskId=8990002546652357\",\n    \"status\": 200,\n    \"body\": \"{\\\"code\\\":200,\\\"data\\\":{\\\"success\\\":true},\\\"message\\\":\\\"操作成功\\\"}\",\n    \"json\": {\n      \"code\": 200,\n      \"data\": {\n        \"success\": true\n      },\n      \"message\": \"操作成功\"\n    }\n  },\n  \"persistence\": {\n    \"task\": [\n      \"task\",\n      \"8990002546652357\",\n      \"ADP_E2E_20260621070426_QCS_UNQLF_TASK_TN\",\n      \"8990002546652352\",\n      \"待检\",\n      \"1\",\n      \"757556430894336\",\n      \"\"\n    ],\n    \"wait\": [\n      \"wait\",\n      \"8990002546652358\",\n      \"8990002546652357\",\n      \"8990002546652352\",\n      \"待检\",\n      \"1\",\n      \"\"\n    ],\n    \"exelog\": [\n      \"exelog\",\n      \"8990002546652359\",\n      \"8990002546652357\",\n      \"8990002546652352\",\n      \"待检\",\n      \"1\",\n      \"757556430894336\",\n      \"\"\n    ],\n    \"batch\": [\n      \"batch\",\n      \"8990002546652356\",\n      \"ADP_E2E_20260621070426_QCS_UNQLF_BATCH\",\n      \"8990002546652350\",\n      \"BaseSet_checkState/waitForCheck\",\n      \"\",\n      \"0\"\n    ],\n    \"inspect\": [\n      \"inspect\",\n      \"757556430894336\",\n      \"8990002546652357\",\n      \"8990002546652357\",\n      \"QCS_sourceType/womComplete\",\n      \"8990002546652350\",\n      \"ADP_E2E_20260621070426_QCS_UNQLF_BATCH\",\n      \"1\",\n      \"1\",\n      \"1\",\n      \"1\",\n      \"false\",\n      \"manuInspect_20260621_008\",\n      \"88\"\n    ],\n    \"inspectStdCount\": [\n      \"inspectStdCount\",\n      \"757556430894336\",\n      \"1\"\n    ],\n    \"inspectComCount\": [\n      \"inspectComCount\",\n      \"757556430894336\",\n      \"1\"\n    ]\n  }\n}\n",
+    "stderr": "",
+    "outputPath": "/tmp/adp-qcs-report-chain-unqualified-20260621070426/wom-manu-inspect-persistence-results.json"
+  },
+  "womManuInspect": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260621070426_QCS_UNQLF",
+    "taskId": "8990002546652357",
+    "batchNo": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+    "inspectId": "757556430894336",
+    "createManuInspect": {
+      "method": "POST",
+      "url": "/msService/WOM/produceTask/produceTask/createManuInspect",
+      "requestPayload": "taskId=8990002546652357",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"success\":true},\"message\":\"操作成功\"}",
+      "json": {
+        "code": 200,
+        "data": {
+          "success": true
+        },
+        "message": "操作成功"
+      }
+    },
+    "frontendClean": {
+      "failedResponses": [],
+      "requestFailures": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "status": "PASS"
+    }
+  },
+  "login": {
+    "status": 200,
+    "ticket": true
+  },
+  "inspectListNavigation": {
+    "route": "/msService/QCS/inspect/inspect/manuInspectList",
+    "status": 200
+  },
+  "generatedReport": {
+    "id": "757556653315328",
+    "version": "2",
+    "status": "88",
+    "tableNo": "manuReport_20260621_005",
+    "tableInfoId": "757556653315329",
+    "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+    "checkResult": "",
+    "checkResCode": "",
+    "memoField": "",
+    "unQlfDealFlag": "",
+    "actBatStateId": "",
+    "valid": "true",
+    "pendingId": "757556653651200",
+    "pendingDeploymentId": "6579656984166400",
+    "pendingActivityName": "TaskEvent_0u4czzq",
+    "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+    "pendingProcessKey": "manuInspectReportWorkFlow",
+    "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?pendingId=757556653651200&__pc__=VGFza0V2ZW50XzB1NGN6enF8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+  },
+  "reportEditNavigation": {
+    "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+    "status": 200,
+    "reportId": "757556653315328",
+    "pendingId": "757556653651200"
+  },
+  "reportEditBodyHasMarker": true,
+  "reportSave": {
+    "before": {
+      "id": "757556653315328",
+      "version": "2",
+      "status": "88",
+      "tableNo": "manuReport_20260621_005",
+      "tableInfoId": "757556653315329",
+      "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+      "checkResult": "",
+      "checkResCode": "",
+      "memoField": "",
+      "unQlfDealFlag": "",
+      "actBatStateId": "",
+      "valid": "true",
+      "pendingId": "757556653651200",
+      "pendingDeploymentId": "6579656984166400",
+      "pendingActivityName": "TaskEvent_0u4czzq",
+      "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+      "pendingProcessKey": "manuInspectReportWorkFlow",
+      "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?pendingId=757556653651200&__pc__=VGFza0V2ZW50XzB1NGN6enF8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+    },
+    "reportComsBefore": [
+      {
+        "id": "757556654060800",
+        "version": "0",
+        "reportId": "757556653315328",
+        "reportName": "ADP_E2E_20260621070426_QCS_UNQLF QCS report item",
+        "dispValue": "",
+        "checkResult": "",
+        "valid": "true"
+      }
+    ],
+    "requestReportJson": "[{\"reportId\":\"{\\\"id\\\":\\\"757556653315328\\\",\\\"version\\\":2,\\\"checkResult\\\":\\\"不合格\\\",\\\"memoField\\\":\\\"ADP_E2E_20260621070426_QCS_UNQLF unqualified memo\\\",\\\"pending\\\":{\\\"id\\\":\\\"757556653651200\\\",\\\"deploymentId\\\":\\\"6579656984166400\\\",\\\"activityName\\\":\\\"TaskEvent_0u4czzq\\\"}}\",\"reportComs\":\"[{\\\"id\\\":\\\"757556654060800\\\",\\\"version\\\":0,\\\"checkResult\\\":\\\"不合格\\\",\\\"dispValue\\\":\\\"不合格\\\"}]\"}]",
+    "response": {
+      "method": "POST",
+      "url": "/msService/QCS/inspectReport/inspectReport/batchDealReports",
+      "requestPayload": "reportJSon=%5B%7B%22reportId%22%3A%22%7B%5C%22id%5C%22%3A%5C%22757556653315328%5C%22%2C%5C%22version%5C%22%3A2%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22memoField%5C%22%3A%5C%22ADP_E2E_20260621070426_QCS_UNQLF+unqualified+memo%5C%22%2C%5C%22pending%5C%22%3A%7B%5C%22id%5C%22%3A%5C%22757556653651200%5C%22%2C%5C%22deploymentId%5C%22%3A%5C%226579656984166400%5C%22%2C%5C%22activityName%5C%22%3A%5C%22TaskEvent_0u4czzq%5C%22%7D%7D%22%2C%22reportComs%22%3A%22%5B%7B%5C%22id%5C%22%3A%5C%22757556654060800%5C%22%2C%5C%22version%5C%22%3A0%2C%5C%22checkResult%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%2C%5C%22dispValue%5C%22%3A%5C%22%E4%B8%8D%E5%90%88%E6%A0%BC%5C%22%7D%5D%22%7D%5D&dealType=save",
+      "status": 200,
+      "body": "",
+      "json": null
+    },
+    "after": {
+      "id": "757556653315328",
+      "version": "3",
+      "status": "88",
+      "tableNo": "manuReport_20260621_005",
+      "tableInfoId": "757556653315329",
+      "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+      "checkResult": "不合格",
+      "checkResCode": "",
+      "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+      "unQlfDealFlag": "",
+      "actBatStateId": "",
+      "valid": "true",
+      "pendingId": "757556653651200",
+      "pendingDeploymentId": "6579656984166400",
+      "pendingActivityName": "TaskEvent_0u4czzq",
+      "pendingTaskDescription": "QCS_5.0.0.0.workflow.randon1592221382676.flag",
+      "pendingProcessKey": "manuInspectReportWorkFlow",
+      "pendingOpenUrl": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit?pendingId=757556653651200&__pc__=VGFza0V2ZW50XzB1NGN6enF8bWFudUluc3BlY3RSZXBvcnRXb3JrRmxvdw__&tableInfoId=757556653315329&entityCode=QCS_5.0.0.0_inspectReport&id=757556653315328&deploymentId=6579656984166400"
+    }
+  },
+  "frontendClean": {
+    "failedResponses": [],
+    "requestFailures": [],
+    "ignoredRequestFailures": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "status": "PASS"
+  },
+  "finalVerificationSql": "report|757556653315328|99|6|不合格||ADP_E2E_20260621070426_QCS_UNQLF unqualified memo|true|\nreportComCount|1|不合格:不合格\nreportPendingCount|0\ninspect|757556430894336|99|QCS_checkState/reported|true\ntask|8990002546652357|Checked|Unqualified|757556653315328|757556430894336|\nwait|8990002546652358|Checked|Unqualified\nexelog|8990002546652359|Checked|Unqualified|757556430894336|\nbatch|8990002546652356|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|BaseSet_checkState/haveChecked|BaseSet_checkResult/unqualified|11003|false|\ndeal|757556916282624|88|manuUnQlfDeal_20260621_002|757556653315328|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|",
+  "finalState": {
+    "raw": "report|757556653315328|99|6|不合格||ADP_E2E_20260621070426_QCS_UNQLF unqualified memo|true|\nreportComCount|1|不合格:不合格\nreportPendingCount|0\ninspect|757556430894336|99|QCS_checkState/reported|true\ntask|8990002546652357|Checked|Unqualified|757556653315328|757556430894336|\nwait|8990002546652358|Checked|Unqualified\nexelog|8990002546652359|Checked|Unqualified|757556430894336|\nbatch|8990002546652356|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|BaseSet_checkState/haveChecked|BaseSet_checkResult/unqualified|11003|false|\ndeal|757556916282624|88|manuUnQlfDeal_20260621_002|757556653315328|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|",
+    "rows": [
+      [
+        "report",
+        "757556653315328",
+        "99",
+        "6",
+        "不合格",
+        "",
+        "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "true",
+        ""
+      ],
+      [
+        "reportComCount",
+        "1",
+        "不合格:不合格"
+      ],
+      [
+        "reportPendingCount",
+        "0"
+      ],
+      [
+        "inspect",
+        "757556430894336",
+        "99",
+        "QCS_checkState/reported",
+        "true"
+      ],
+      [
+        "task",
+        "8990002546652357",
+        "Checked",
+        "Unqualified",
+        "757556653315328",
+        "757556430894336",
+        ""
+      ],
+      [
+        "wait",
+        "8990002546652358",
+        "Checked",
+        "Unqualified"
+      ],
+      [
+        "exelog",
+        "8990002546652359",
+        "Checked",
+        "Unqualified",
+        "757556430894336",
+        ""
+      ],
+      [
+        "batch",
+        "8990002546652356",
+        "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "BaseSet_checkState/haveChecked",
+        "BaseSet_checkResult/unqualified",
+        "11003",
+        "false",
+        ""
+      ],
+      [
+        "deal",
+        "757556916282624",
+        "88",
+        "manuUnQlfDeal_20260621_002",
+        "757556653315328",
+        "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        ""
+      ]
+    ],
+    "report": [
+      "report",
+      "757556653315328",
+      "99",
+      "6",
+      "不合格",
+      "",
+      "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+      "true",
+      ""
+    ],
+    "reportComCount": [
+      "reportComCount",
+      "1",
+      "不合格:不合格"
+    ],
+    "reportPendingCount": [
+      "reportPendingCount",
+      "0"
+    ],
+    "inspect": [
+      "inspect",
+      "757556430894336",
+      "99",
+      "QCS_checkState/reported",
+      "true"
+    ],
+    "task": [
+      "task",
+      "8990002546652357",
+      "Checked",
+      "Unqualified",
+      "757556653315328",
+      "757556430894336",
+      ""
+    ],
+    "wait": [
+      "wait",
+      "8990002546652358",
+      "Checked",
+      "Unqualified"
+    ],
+    "exelog": [
+      "exelog",
+      "8990002546652359",
+      "Checked",
+      "Unqualified",
+      "757556430894336",
+      ""
+    ],
+    "batch": [
+      "batch",
+      "8990002546652356",
+      "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+      "BaseSet_checkState/haveChecked",
+      "BaseSet_checkResult/unqualified",
+      "11003",
+      "false",
+      ""
+    ],
+    "deal": [
+      "deal",
+      "757556916282624",
+      "88",
+      "manuUnQlfDeal_20260621_002",
+      "757556653315328",
+      "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+      ""
+    ]
+  },
+  "persistence": {
+    "report": {
+      "id": "757556653315328",
+      "version": "6",
+      "status": "99",
+      "tableNo": "manuReport_20260621_005",
+      "tableInfoId": "757556653315329",
+      "batchCode": "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+      "checkResult": "不合格",
+      "checkResCode": "",
+      "memoField": "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+      "unQlfDealFlag": "true",
+      "actBatStateId": "",
+      "valid": "true",
+      "pendingId": "",
+      "pendingDeploymentId": "",
+      "pendingActivityName": "",
+      "pendingTaskDescription": "",
+      "pendingProcessKey": "",
+      "pendingOpenUrl": ""
+    },
+    "finalState": {
+      "raw": "report|757556653315328|99|6|不合格||ADP_E2E_20260621070426_QCS_UNQLF unqualified memo|true|\nreportComCount|1|不合格:不合格\nreportPendingCount|0\ninspect|757556430894336|99|QCS_checkState/reported|true\ntask|8990002546652357|Checked|Unqualified|757556653315328|757556430894336|\nwait|8990002546652358|Checked|Unqualified\nexelog|8990002546652359|Checked|Unqualified|757556430894336|\nbatch|8990002546652356|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|BaseSet_checkState/haveChecked|BaseSet_checkResult/unqualified|11003|false|\ndeal|757556916282624|88|manuUnQlfDeal_20260621_002|757556653315328|ADP_E2E_20260621070426_QCS_UNQLF_BATCH|",
+      "rows": [
+        [
+          "report",
+          "757556653315328",
+          "99",
+          "6",
+          "不合格",
+          "",
+          "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+          "true",
+          ""
+        ],
+        [
+          "reportComCount",
+          "1",
+          "不合格:不合格"
+        ],
+        [
+          "reportPendingCount",
+          "0"
+        ],
+        [
+          "inspect",
+          "757556430894336",
+          "99",
+          "QCS_checkState/reported",
+          "true"
+        ],
+        [
+          "task",
+          "8990002546652357",
+          "Checked",
+          "Unqualified",
+          "757556653315328",
+          "757556430894336",
+          ""
+        ],
+        [
+          "wait",
+          "8990002546652358",
+          "Checked",
+          "Unqualified"
+        ],
+        [
+          "exelog",
+          "8990002546652359",
+          "Checked",
+          "Unqualified",
+          "757556430894336",
+          ""
+        ],
+        [
+          "batch",
+          "8990002546652356",
+          "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+          "BaseSet_checkState/haveChecked",
+          "BaseSet_checkResult/unqualified",
+          "11003",
+          "false",
+          ""
+        ],
+        [
+          "deal",
+          "757556916282624",
+          "88",
+          "manuUnQlfDeal_20260621_002",
+          "757556653315328",
+          "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+          ""
+        ]
+      ],
+      "report": [
+        "report",
+        "757556653315328",
+        "99",
+        "6",
+        "不合格",
+        "",
+        "ADP_E2E_20260621070426_QCS_UNQLF unqualified memo",
+        "true",
+        ""
+      ],
+      "reportComCount": [
+        "reportComCount",
+        "1",
+        "不合格:不合格"
+      ],
+      "reportPendingCount": [
+        "reportPendingCount",
+        "0"
+      ],
+      "inspect": [
+        "inspect",
+        "757556430894336",
+        "99",
+        "QCS_checkState/reported",
+        "true"
+      ],
+      "task": [
+        "task",
+        "8990002546652357",
+        "Checked",
+        "Unqualified",
+        "757556653315328",
+        "757556430894336",
+        ""
+      ],
+      "wait": [
+        "wait",
+        "8990002546652358",
+        "Checked",
+        "Unqualified"
+      ],
+      "exelog": [
+        "exelog",
+        "8990002546652359",
+        "Checked",
+        "Unqualified",
+        "757556430894336",
+        ""
+      ],
+      "batch": [
+        "batch",
+        "8990002546652356",
+        "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        "BaseSet_checkState/haveChecked",
+        "BaseSet_checkResult/unqualified",
+        "11003",
+        "false",
+        ""
+      ],
+      "deal": [
+        "deal",
+        "757556916282624",
+        "88",
+        "manuUnQlfDeal_20260621_002",
+        "757556653315328",
+        "ADP_E2E_20260621070426_QCS_UNQLF_BATCH",
+        ""
+      ]
+    }
+  },
+  "status": "PASS"
+}

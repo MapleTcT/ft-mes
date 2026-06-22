@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { request } = require("playwright");
 
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const roleCode = process.env.ADP_RBAC_AUTHORITY_ROLE_CODE || "systemRole";
@@ -14,6 +14,8 @@ const menuCodes = (process.env.ADP_RBAC_AUTHORITY_MENU_CODES || "organizationman
   .split(",")
   .map((item) => item.trim())
   .filter(Boolean);
+const apiTimeoutMs = Number(process.env.ADP_API_TIMEOUT_MS || 90000);
+const apiRetries = Number(process.env.ADP_API_RETRIES || 3);
 const outputPath =
   process.env.ADP_RBAC_AUTHORITY_SMOKE_OUTPUT ||
   path.join("/tmp", `adp-rbac-authority-smoke-${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}.json`);
@@ -49,6 +51,32 @@ async function readJsonSafe(response) {
   }
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientApiError(error) {
+  return /Timeout|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|socket hang up|network/i.test(
+    error && error.message ? error.message : String(error)
+  );
+}
+
+async function withApiRetries(label, operation) {
+  const errors = [];
+  for (let attempt = 1; attempt <= apiRetries; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      errors.push(error && error.message ? error.message : String(error));
+      if (attempt >= apiRetries || !isTransientApiError(error)) {
+        throw error;
+      }
+      await sleep(Math.min(1000 * attempt, 5000));
+    }
+  }
+  throw new Error(`${label} failed after ${apiRetries} attempts: ${errors.join(" | ")}`);
+}
+
 async function login(api) {
   const attempts = [
     { userName: username, password, clientId: "pc_dt" },
@@ -56,13 +84,15 @@ async function login(api) {
   ];
   const errors = [];
   for (const body of attempts) {
-    const response = await api.post(`${baseUrl}/inter-api/auth/login`, {
-      data: body,
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=UTF-8",
-      },
-    });
+    const response = await withApiRetries("auth login", () =>
+      api.post(`${baseUrl}/inter-api/auth/login`, {
+        data: body,
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=UTF-8",
+        },
+      })
+    );
     const parsed = await readJsonSafe(response);
     const ticket = response.ok() ? findTicket(parsed.json) : null;
     if (ticket) {
@@ -145,7 +175,9 @@ function countPermissionGroups(payload) {
 }
 
 async function getJson(api, ticket, pathName) {
-  const response = await api.get(`${baseUrl}${pathName}`, { headers: authHeaders(ticket) });
+  const response = await withApiRetries(pathName, () =>
+    api.get(`${baseUrl}${pathName}`, { headers: authHeaders(ticket) })
+  );
   const parsed = await readJsonSafe(response);
   return {
     path: pathName,
@@ -171,7 +203,7 @@ async function findRole(api, ticket) {
 
 async function run() {
   ensureDir(outputPath);
-  const api = await request.newContext({ ignoreHTTPSErrors: true });
+  const api = await request.newContext({ ignoreHTTPSErrors: true, timeout: apiTimeoutMs });
   const startedAt = new Date().toISOString();
   const results = [];
   const report = { baseUrl, username, roleCode, userId, menuCodes, startedAt, results };

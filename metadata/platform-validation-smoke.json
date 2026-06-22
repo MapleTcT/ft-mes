@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T12:13:01.954Z",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "username": "admin",
+  "outputDir": "/tmp/adp-platform-validation-20260621120351",
+  "ok": true,
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "scope": {
+    "platform": [
+      "login",
+      "current-user",
+      "users-organizations-permissions",
+      "menus",
+      "todo",
+      "organization-department-click",
+      "basic-configuration",
+      "nacos-keycloak-postgresql-runtime-patch-through-smoke"
+    ],
+    "businessModules": "startup-menu-api-table-initial-check-only"
+  },
+  "prerequisites": [
+    {
+      "id": "playwright",
+      "title": "Playwright dependency",
+      "status": "passed",
+      "ok": true,
+      "resolvedPath": "/Users/zhangchu/Documents/ADP/adp-source-repo/node_modules/playwright/index.js"
+    }
+  ],
+  "results": [
+    {
+      "id": "platform-api",
+      "title": "Platform API smoke",
+      "requiredFor": [
+        "login",
+        "current-user",
+        "permissions",
+        "menus",
+        "todo-api",
+        "basic-config",
+        "entity-config"
+      ],
+      "status": "passed",
+      "ok": true,
+      "command": "node deploy/docker/scripts/adp-platform-api-smoke.js",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "timeoutMs": 360000,
+      "error": null,
+      "reportPath": "/tmp/adp-platform-validation-20260621120351/platform-api-smoke.json",
+      "summary": {
+        "total": 16,
+        "passed": 16,
+        "failed": 0
+      },
+      "stdoutTail": "OK menus-currentUser status=200 targets=374\nOK rbac-flow-permissions status=200 total=20\nOK signatureLog-empty status=200\nOK signatureLog-like-array status=200\nOK i18n-allkeyvalues-default-lang status=200\nOK i18n-forFront-default-lang status=200\nOK ip-black-white status=200\nOK identityCenterConfig status=200\nOK pending-listByGroup status=200\nOK printer-apps status=200\nOK customPropertyTree status=200\nOK serviceManagerApps status=200\nOK findMyProcesses status=200\nOK ec-engine-msManage status=200\nOK ec-module-msManage status=200\nOK ec-engine-datalist status=200\nSUMMARY total=16 passed=16 failed=0\nREPORT /tmp/adp-platform-validation-20260621120351/platform-api-smoke.json\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "home-todo",
+      "title": "Home todo page smoke",
+      "requiredFor": [
+        "login-page",
+        "home-shell",
+        "todo-page",
+        "runtime-schema-errors"
+      ],
+      "status": "passed",
+      "ok": true,
+      "command": "node deploy/docker/scripts/adp-home-todo-smoke.js",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "timeoutMs": 360000,
+      "error": null,
+      "reportPath": "/tmp/adp-platform-validation-20260621120351/home-todo/home-todo-smoke-results.json",
+      "summary": {
+        "ok": true,
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "networkErrorCount": 0,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0
+      },
+      "stdoutTail": "OK home-todo\nREPORT /tmp/adp-platform-validation-20260621120351/home-todo/home-todo-smoke-results.json\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "organization",
+      "title": "Organization department smoke",
+      "requiredFor": [
+        "organization-menu",
+        "department-tree",
+        "department-detail",
+        "department-related-persons"
+      ],
+      "status": "passed",
+      "ok": true,
+      "command": "node deploy/docker/scripts/adp-organization-smoke.js",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "timeoutMs": 360000,
+      "error": null,
+      "reportPath": "/tmp/adp-platform-validation-20260621120351/organization/organization-smoke-results.json",
+      "summary": {
+        "ok": true,
+        "selectedDepartment": {
+          "id": 6586438770704912,
+          "code": "0102",
+          "name": "办公室",
+          "companyId": 1000
+        },
+        "failedApis": [],
+        "browserOk": true,
+        "browserNavigationError": null,
+        "browserFinalUrl": "http://100.99.133.43:18080/organization/#/organizationmanage",
+        "browserTitle": "管理系统",
+        "browserBodyTextSnippet": "组织管理 部门 岗位 默认公司 数智部 办公室 财务部 导入下载模板 办公室 1. 基本信息 部门名称： 办公室 类型： 普通部门 描述： 编码： 0102 负责人： 组织路径： 默认公司/办公室 2. 关联信息 关联岗位 暂无数据 关联人员 暂无数据",
+        "browserNetworkErrorCount": 0,
+        "browserVisibleError": null
+      },
+      "stdoutTail": "OK organization-department selected=0102\nREPORT /tmp/adp-platform-validation-20260621120351/organization/organization-smoke-results.json\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "rbac-authority",
+      "title": "RBAC authority editor smoke",
+      "requiredFor": [
+        "role-permission-page",
+        "user-permission-page",
+        "menu-permission-tree"
+      ],
+      "status": "passed",
+      "ok": true,
+      "command": "node deploy/docker/scripts/adp-rbac-authority-smoke.js",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "timeoutMs": 360000,
+      "error": null,
+      "reportPath": "/tmp/adp-platform-validation-20260621120351/rbac-authority-smoke.json",
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "roleId": 1,
+        "menuCount": 628,
+        "selectedMenus": [
+          {
+            "code": "organizationmanage",
+            "id": 6576396571755009
+          },
+          {
+            "code": "personmanage",
+            "id": 6576396571755008
+          },
+          {
+            "code": "role",
+            "id": 6576396571722253
+          }
+        ]
+      },
+      "stdoutTail": "RBAC authority smoke passed: 9/9. Report: /tmp/adp-platform-validation-20260621120351/rbac-authority-smoke.json\n",
+      "stderrTail": ""
+    },
+    {
+      "id": "menu-pages",
+      "title": "Menu page smoke",
+      "requiredFor": [
+        "menus",
+        "front-routes",
+        "page-network-errors",
+        "visible-runtime-errors"
+      ],
+      "status": "passed",
+      "ok": true,
+      "command": "node deploy/docker/scripts/adp-menu-smoke.js",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "timeoutMs": 360000,
+      "error": null,
+      "reportPath": "/tmp/adp-platform-validation-20260621120351/menu/menu-smoke-results.json",
+      "summary": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "stdoutTail": "OK 1/5 EAM.menuInfoname.radion1571809852671 > EAM_1.0.0.menuInfoname.randon1571809955135 > EAM.menuName.randon1571830562913 /msService/EAM/eamType/eamType/typeLayout\nOK 2/5 EAM.menuInfoname.radion1571809852671 > EAM_1.0.0.menuInfoname.randon1571809955135 > EAM.menuName.randon1572243664439 /msService/EAM/eamPower/powerHead/powerList\nOK 3/5 EAM.menuInfoname.radion1571809852671 > EAM_1.0.0.menuInfoname.randon1571809955135 > EAM.menuName.randon1571810040740 /msService/EAM/lubricatePart/lubricatePart/lubricatePartList\nOK 4/5 EAM.menuInfoname.radion1571809852671 > EAM_1.0.0.menuInfoname.randon1571809955135 > EAM.menuName.randon1651146856153 /msService/EAM/taskList/taskList/taskList\nOK 5/5 EAM.menuInfoname.radion1571809852671 > EAM_1.0.0.menuInfoname.randon1571809955135 > EAM.menuName.randon1663661147498 /msService/EAM/typeOfWork/typeOfWork/typeOfWorkList\nSUMMARY total=5 passed=5 failed=0\nREPORT /tmp/adp-platform-validation-20260621120351/menu/menu-smoke-results.json\n",
+      "stderrTail": ""
+    }
+  ]
+}

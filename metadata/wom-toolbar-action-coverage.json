@@ -1,0 +1,1073 @@
+{
+  "schemaVersion": 1,
+  "reportKind": "wom-toolbar-action-coverage",
+  "generatedAt": "2026-06-22T10:09:22.203Z",
+  "database": "PostgreSQL",
+  "module": "WOM",
+  "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+  "sourceReports": [
+    "metadata/production-module-test-cases.json",
+    "metadata/persistence-acceptance.json",
+    "metadata/business-dependency-readiness-smoke.json",
+    "metadata/test-environment-static-bundle-link-smoke.json",
+    "metadata/wom-toolbar-row-smoke.json"
+  ],
+  "runtimeButtonEvidence": {
+    "runtimeSql": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+    "toolbarInteractionCompatSql": "deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql",
+    "i18nStaticOverlay": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+    "latestDirectClickEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestScreenshot": "metadata/wom-toolbar-row-smoke.png",
+    "latestToolbarRowClickEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestToolbarRowClickScreenshot": "metadata/wom-toolbar-row-smoke.png",
+    "latestToolbarFocusedProbeEvidence": "/tmp/adp-wom-toolbar-focused-probe.json",
+    "latestToolbarFocusedProbeScreenshot": "/tmp/adp-wom-toolbar-focused-probe.png",
+    "latestToolbarFocusedProbeStatus": "PASS",
+    "latestToolbarFocusedProbeGeneratedAt": "2026-06-21T19:20:26.336Z",
+    "latestToolbarGuardEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestToolbarGuardScreenshot": "metadata/wom-toolbar-row-smoke.png",
+    "latestToolbarBodyFallbackEvidence": "/tmp/adp-wom-toolbar-row-smoke-after-body-fallback.json",
+    "latestToolbarBodyFallbackScreenshot": "/tmp/adp-wom-toolbar-row-smoke-after-body-fallback.png",
+    "latestPersistenceEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "messageFallbackPatch": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+    "bodyMessageFallbackPatch": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+    "bodyMessageFallbackPatchEs5": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+    "toolbarDependencyGuard": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+    "toolbarDependencyGuardEs5": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+    "toolbarStateSyncPatch": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+    "toolbarStateSyncPatchEs5": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+    "toolbarDependencyGuardNginx": "deploy/docker/nginx/adp.conf",
+    "latestToolbarSeedEvidence": "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+    "latestToolbarRowSmokeStatus": "PASS_WITH_KNOWN_BLOCKERS",
+    "latestToolbarRowSmokeCommand": "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_USERNAME=admin ADP_PASSWORD=123456 WOM_TOOLBAR_PAGE_TIMEOUT_MS=240000 make smoke-wom-toolbar-row",
+    "latestToolbarSelectionRestoreEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestToolbarSelectionRestoreScreenshot": "metadata/wom-toolbar-row-smoke.png",
+    "latestStaticBundleLinkEvidence": "metadata/test-environment-static-bundle-link-smoke.json",
+    "latestToolbarRowSmokeGeneratedAt": "2026-06-22T10:09:22.203Z",
+    "latestToolbarRowSmokeMarker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+    "latestToolbarRowSmokeTaskId": "9000006229150923",
+    "latestToolbarRowSmokeFilterDropdown": {
+      "clicked": true,
+      "dropdownVisible": false,
+      "hasOptions": false,
+      "emptySelectFallbackApplied": true,
+      "displayText": "全部",
+      "candidate": {
+        "tag": "DIV",
+        "id": "",
+        "className": "ant-select-selection\n            ant-select-selection--single",
+        "text": "",
+        "displayText": "",
+        "emptySelectFallbackApplied": false,
+        "rect": {
+          "x": 10,
+          "y": 14,
+          "width": 172,
+          "height": 32,
+          "centerX": 96,
+          "centerY": 30
+        }
+      },
+      "selectStateAfterClick": {
+        "displayText": "全部",
+        "emptySelectFallbackApplied": true
+      },
+      "dropdowns": []
+    },
+    "latestToolbarRowSmokeProcessAnalysisStatus": "GUARDED_WITHOUT_REQUEST",
+    "latestToolbarRowSmokeQrStatus": "GUARDED_WITHOUT_REQUEST",
+    "latestToolbarGuardGeneratedAt": "2026-06-22T10:09:22.203Z",
+    "latestToolbarGuardMarker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+    "latestToolbarGuardTaskId": "9000006229150923",
+    "latestToolbarReportWorkRenderEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestToolbarReportWorkRenderScreenshot": "metadata/adp-wom-toolbar-report-work-render.png",
+    "latestToolbarReportWorkRenderStatus": "PASS",
+    "latestToolbarReportWorkRenderUrl": "http://222.88.185.146:18080/msService/WOM/procReport/procReport/outPutCommonTaskEdit?taskId.id=9000006229150923&id=757955491001600&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=outPutCommonDialog&isDailogAPI=true",
+    "latestToolbarReportWorkRenderGeneratedAt": "2026-06-22T10:09:22.203Z",
+    "latestToolbarRowSmokePrecondition": {
+      "beforeHoldRunning": {
+        "checked": true,
+        "expectedState": "WOM_runState/runing",
+        "before": {
+          "refreshResponse": {
+            "status": 200,
+            "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+            "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+          },
+          "ok": true,
+          "rowIndex": 0,
+          "selectedCount": 1,
+          "selectedId": "9000006229150923",
+          "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "taskRunState": "WOM_runState/runing",
+          "status": 99,
+          "batchContral": false,
+          "advanceCharge": false,
+          "isAdvanced": false,
+          "feedCondition": null,
+          "apiSelection": {
+            "ok": true,
+            "rowIndex": 0,
+            "selectedCount": 1,
+            "selectedId": "9000006229150923",
+            "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+            "taskRunState": "WOM_runState/runing",
+            "status": 99,
+            "batchContral": false,
+            "advanceCharge": false,
+            "isAdvanced": false,
+            "feedCondition": null
+          },
+          "domSelection": {
+            "attempted": true,
+            "ok": true,
+            "error": ""
+          },
+          "restoredSelection": null
+        },
+        "needed": false,
+        "operation": null,
+        "after": {
+          "refreshResponse": {
+            "status": 200,
+            "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+            "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+          },
+          "ok": true,
+          "rowIndex": 0,
+          "selectedCount": 1,
+          "selectedId": "9000006229150923",
+          "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "taskRunState": "WOM_runState/runing",
+          "status": 99,
+          "batchContral": false,
+          "advanceCharge": false,
+          "isAdvanced": false,
+          "feedCondition": null,
+          "apiSelection": {
+            "ok": true,
+            "rowIndex": 0,
+            "selectedCount": 1,
+            "selectedId": "9000006229150923",
+            "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+            "taskRunState": "WOM_runState/runing",
+            "status": 99,
+            "batchContral": false,
+            "advanceCharge": false,
+            "isAdvanced": false,
+            "feedCondition": null
+          },
+          "domSelection": {
+            "attempted": true,
+            "ok": true,
+            "error": ""
+          },
+          "restoredSelection": null
+        },
+        "messages": []
+      }
+    },
+    "visibleTextFallbackPatch": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+    "bodyVisibleTextFallbackPatch": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+    "bodyVisibleTextFallbackPatchEs5": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+    "latestToolbarRawKeyStatus": "PASS",
+    "latestToolbarRawKeyEvidence": {
+      "rawStart": "WOM.custom.randon1575958246066",
+      "rawTableNo": "ec.common.tableNo",
+      "getTextStart": "只有【待执行】的指令单可以开始！",
+      "getTextTableNo": "单据编号",
+      "guardInstalled": true,
+      "stateSyncPatched": true,
+      "translateInstalled": true,
+      "bodyTranslateInstalled": true,
+      "hasRawWomCustom": false,
+      "hasTableNoKey": false
+    },
+    "latestQrRouteProbeEvidence": "metadata/wom-qrcode-route-probe.json",
+    "latestQrRouteProbeGeneratedAt": "2026-06-22T01:27:49.172Z",
+    "latestQrRouteProbeStatus": "BLOCKED",
+    "latestToolbarRowSmokePersistence": {
+      "raw": "task|9000006229150923|ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN|WOM_runState/runing|99|5|2026-06-22 18:08:47.253|2026-06-22 18:10:09.518\nwait|9000006229150924|9000006229150923|WOM_runState/runing|757955491001600|WOM_BatchSyncStatus/done|2026-06-22 18:08:47.298",
+      "rows": [
+        [
+          "task",
+          "9000006229150923",
+          "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "WOM_runState/runing",
+          "99",
+          "5",
+          "2026-06-22 18:08:47.253",
+          "2026-06-22 18:10:09.518"
+        ],
+        [
+          "wait",
+          "9000006229150924",
+          "9000006229150923",
+          "WOM_runState/runing",
+          "757955491001600",
+          "WOM_BatchSyncStatus/done",
+          "2026-06-22 18:08:47.298"
+        ]
+      ],
+      "task": [
+        "task",
+        "9000006229150923",
+        "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+        "WOM_runState/runing",
+        "99",
+        "5",
+        "2026-06-22 18:08:47.253",
+        "2026-06-22 18:10:09.518"
+      ],
+      "wait": [
+        "wait",
+        "9000006229150924",
+        "9000006229150923",
+        "WOM_runState/runing",
+        "757955491001600",
+        "WOM_BatchSyncStatus/done",
+        "2026-06-22 18:08:47.298"
+      ]
+    },
+    "latestToolbarRowSmokePreconditions": {
+      "beforeHoldRunning": {
+        "checked": true,
+        "expectedState": "WOM_runState/runing",
+        "before": {
+          "refreshResponse": {
+            "status": 200,
+            "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+            "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+          },
+          "ok": true,
+          "rowIndex": 0,
+          "selectedCount": 1,
+          "selectedId": "9000006229150923",
+          "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "taskRunState": "WOM_runState/runing",
+          "status": 99,
+          "batchContral": false,
+          "advanceCharge": false,
+          "isAdvanced": false,
+          "feedCondition": null,
+          "apiSelection": {
+            "ok": true,
+            "rowIndex": 0,
+            "selectedCount": 1,
+            "selectedId": "9000006229150923",
+            "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+            "taskRunState": "WOM_runState/runing",
+            "status": 99,
+            "batchContral": false,
+            "advanceCharge": false,
+            "isAdvanced": false,
+            "feedCondition": null
+          },
+          "domSelection": {
+            "attempted": true,
+            "ok": true,
+            "error": ""
+          },
+          "restoredSelection": null
+        },
+        "needed": false,
+        "operation": null,
+        "after": {
+          "refreshResponse": {
+            "status": 200,
+            "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+            "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+          },
+          "ok": true,
+          "rowIndex": 0,
+          "selectedCount": 1,
+          "selectedId": "9000006229150923",
+          "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+          "taskRunState": "WOM_runState/runing",
+          "status": 99,
+          "batchContral": false,
+          "advanceCharge": false,
+          "isAdvanced": false,
+          "feedCondition": null,
+          "apiSelection": {
+            "ok": true,
+            "rowIndex": 0,
+            "selectedCount": 1,
+            "selectedId": "9000006229150923",
+            "tableNo": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART_TASK_TN",
+            "taskRunState": "WOM_runState/runing",
+            "status": 99,
+            "batchContral": false,
+            "advanceCharge": false,
+            "isAdvanced": false,
+            "feedCondition": null
+          },
+          "domSelection": {
+            "attempted": true,
+            "ok": true,
+            "error": ""
+          },
+          "restoredSelection": null
+        },
+        "messages": []
+      }
+    },
+    "latestToolbarGuardStatus": "PASS_WITH_KNOWN_BLOCKERS",
+    "latestToolbarKnownBlockers": {
+      "processAnalysis": {
+        "expectedGuard": "front-end dependency guard before missing ProcessAnalysis request",
+        "observed": true,
+        "guardedWithoutRequest": true,
+        "response": null,
+        "messageObserved": true,
+        "message": "生产过程追溯服务未部署或暂不可用！",
+        "dependencyStatus": "BLOCKED",
+        "businessBlocker": "ProcessAnalysis service/runtime metadata/menu/schema is still missing; the toolbar guard only prevents a broken click path."
+      },
+      "qrcode": {
+        "expectedGuard": "front-end dependency guard before missing WOM printManage QR request",
+        "observed": true,
+        "guardedWithoutRequest": true,
+        "response": null,
+        "messageObserved": true,
+        "message": "二维码生成页面未部署或暂不可用！",
+        "dependencyStatus": "BLOCKED",
+        "businessBlocker": "WOM printManage QR endpoint/package is still missing; route probe remains the backend blocker evidence."
+      }
+    },
+    "latestToolbarNoSelectionGuardEvidence": "metadata/wom-toolbar-row-smoke.json",
+    "latestToolbarNoSelectionGuardStatus": "PASS",
+    "latestToolbarNoSelectionGuard": [
+      {
+        "buttonId": "btn-startTask",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-pauseTask",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-recoveryTask",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-stopTask",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-earlyPutIn",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-manuInspect",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-prodprocessView",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      },
+      {
+        "buttonId": "btn-generateCode",
+        "clicked": true,
+        "selectedCount": 0,
+        "messages": [
+          "请先选择一条指令单！"
+        ],
+        "rawI18n": false
+      }
+    ]
+  },
+  "summary": {
+    "totalActions": 8,
+    "pass": 6,
+    "blocked": 2,
+    "notVerified": 0,
+    "notApplicable": 0,
+    "requiresPersistence": 7,
+    "persistencePass": 6,
+    "directNormalClickPass": 3,
+    "pageContextRuntimeEventPass": 3
+  },
+  "actions": [
+    {
+      "id": "start",
+      "label": "开始",
+      "buttonCode": "makeTaskList_startTask_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "NORMAL_MOUSE_CLICK",
+      "productionCaseIds": [
+        "PROD-003"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000006229150923;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, ''), coalesce(actual_start_time::text, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000006229150923;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-start-persistence-script-current.json",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-hold-restart-make-target-browser-base.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "/tmp/adp-wom-hold-restart-after-state-sync.json",
+        "/tmp/adp-wom-toolbar-row-after-state-sync.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-start-persistence",
+        "make smoke-wom-toolbar-row"
+      ],
+      "issues": [
+        "2026-06-21 20:31 direct normal-click persistence smoke selected marker 9000005450549258 and clicked 开始; updateTaskState returned HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/runing and PostgreSQL inserted proc/exelog rows.",
+        "2026-06-21 20:34 full toolbar row-click smoke clicked 开始 again on the now-running marker; the expected negative business warning was translated to 只有【待执行】的指令单可以开始！ and no raw WOM.custom key was visible.",
+        "2026-06-21 20:56 sustainable Make target make smoke-wom-toolbar-row seeded marker ADP_E2E_20260621125514_WOMSTART_HOLD_RESTART, opened makeTaskList in a real browser, verified translated start warning on the running row, and found no raw WOM.custom/ec.common.tableNo keys.",
+        "2026-06-21 21:36 selection-restore regression smoke clicked 开始 on running marker 9000005475286863; page showed translated warning 只有【待执行】的指令单可以开始！ with no raw WOM.custom key.",
+        "2026-06-21 23:54 strengthened make smoke-wom-toolbar-row used marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART, taskId=9000005571592916; the top filter dropdown opened and returned 暂无数据, query/pending-only returned HTTP 200, clear clicked, start/advance-release/manufacturing-inspection showed translated Chinese business prompts with no raw i18n keys, hold/restart returned HTTP 200, stop opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5, proc_report_id=757686174524672. ProcessAnalysis stayed HTTP 503 and printManage generateCode stayed HTTP 404.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 03:20 focused browser probe reproduced the slow-load i18n race and verified the persistent fallback fix: ReactAPI.international.getText('WOM.custom.randon1575958246066') returned 只有【待执行】的指令单可以开始！, getText('ec.common.tableNo') returned 单据编号, body text had no raw WOM.custom/ec.common key, and a real click on 开始 showed 指令单已开始！ with no raw key. PostgreSQL readback for taskId=9000005688468704 showed wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757737548141824.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 开始 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "hold",
+      "label": "保持",
+      "buttonCode": "makeTaskList_pauseTask_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "NORMAL_MOUSE_CLICK",
+      "productionCaseIds": [
+        "PROD-024"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000006229150923;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, ''), coalesce(actual_start_time::text, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000006229150923;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-toolbar-direct-final-20260621084458/evidence.json",
+        "/tmp/adp-wom-start-i18n-proof.png",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-hold-restart-make-target-browser-base.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "/tmp/adp-wom-hold-restart-after-state-sync.json",
+        "/tmp/adp-wom-toolbar-row-after-state-sync.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-hold-restart-persistence",
+        "make smoke-wom-toolbar-row"
+      ],
+      "issues": [
+        "2026-06-21 20:31 direct normal-click smoke exposed and fixed the stale selected-row state after 开始. The body.js/body-es5.js state-sync patch remembers updateTaskState exeState before the next toolbar click, so 保持 no longer sees the old waitForRun row.",
+        "2026-06-21 20:34 full toolbar row-click smoke clicked 保持 on marker 9000005450549258; updateTaskState returned HTTP 200, page showed 指令单已保持！, and follow-up SQL after restart read task_run_state=WOM_runState/runing/version=5.",
+        "2026-06-21 20:56 sustainable Make target make smoke-wom-toolbar-row clicked 保持 on marker 9000005465147155; updateTaskState returned HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/iskeep.",
+        "2026-06-21 21:36 selection-restore regression smoke clicked 保持 after grid refresh; updateTaskState returned HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/iskeep.",
+        "2026-06-21 23:54 strengthened make smoke-wom-toolbar-row used marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART, taskId=9000005571592916; the top filter dropdown opened and returned 暂无数据, query/pending-only returned HTTP 200, clear clicked, start/advance-release/manufacturing-inspection showed translated Chinese business prompts with no raw i18n keys, hold/restart returned HTTP 200, stop opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5, proc_report_id=757686174524672. ProcessAnalysis stayed HTTP 503 and printManage generateCode stayed HTTP 404.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 保持 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "restart",
+      "label": "重启",
+      "buttonCode": "makeTaskList_recoveryTask_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "NORMAL_MOUSE_CLICK",
+      "productionCaseIds": [
+        "PROD-024"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000006229150923;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, ''), coalesce(actual_start_time::text, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000006229150923;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-toolbar-direct-final-20260621084458/evidence.json",
+        "/tmp/adp-wom-start-i18n-proof.png",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-hold-restart-make-target-browser-base.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "/tmp/adp-wom-hold-restart-after-state-sync.json",
+        "/tmp/adp-wom-toolbar-row-after-state-sync.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-hold-restart-persistence",
+        "make smoke-wom-toolbar-row"
+      ],
+      "issues": [
+        "2026-06-21 20:31 direct normal-click smoke verified the state-sync patch across 开始 -> 保持 -> 重启. 重启 returned HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/runing.",
+        "2026-06-21 20:34 full toolbar row-click smoke clicked 重启 on marker 9000005450549258; updateTaskState returned HTTP 200, page showed 指令单已重启！, and follow-up SQL read wait record exe_state=WOM_runState/runing/proc_report_id=757636591805696.",
+        "2026-06-21 20:56 sustainable Make target make smoke-wom-toolbar-row clicked 重启 on marker 9000005465147155; updateTaskState returned HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/runing and PostgreSQL read ADP_E2E_20260621125514_WOMSTART_HOLD_RESTART_TASK_TN as WOM_runState/runing/version=5.",
+        "2026-06-21 21:36 selection-restore regression smoke clicked 重启 after grid refresh; updateTaskState returned HTTP 200/dealSuccessFlag=true and PostgreSQL read task_run_state=WOM_runState/runing/version=5.",
+        "2026-06-21 23:54 strengthened make smoke-wom-toolbar-row used marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART, taskId=9000005571592916; the top filter dropdown opened and returned 暂无数据, query/pending-only returned HTTP 200, clear clicked, start/advance-release/manufacturing-inspection showed translated Chinese business prompts with no raw i18n keys, hold/restart returned HTTP 200, stop opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5, proc_report_id=757686174524672. ProcessAnalysis stayed HTTP 503 and printManage generateCode stayed HTTP 404.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 重启 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "stop",
+      "label": "结束",
+      "buttonCode": "makeTaskList_stopTask_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+        "GET /msService/WOM/produceTask/produceTask/findProcReportIdByTaskId",
+        "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "PAGE_CONTEXT_RUNTIME_EVENT",
+      "productionCaseIds": [
+        "PROD-025",
+        "PROD-026"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog",
+        "wom_output_details",
+        "wom_mat_outpt_records"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "select id, table_no, task_run_state, act_end_time, finish_num, version from public.wom_produce_tasks where id=8088155560435840;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-stop-persistence-current.json",
+        "/tmp/adp-wom-stop-output-persistence-current.json",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "metadata/wom-toolbar-row-smoke.png",
+        "metadata/adp-wom-toolbar-report-work-render.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-stop-persistence",
+        "make acceptance-wom-stop-output-persistence"
+      ],
+      "issues": [
+        "Current evidence proves the frontend page context and PostgreSQL write path. 2026-06-21 direct mouse click also opened the real 指令单完工报工 dialog and loaded findProcReportIdByTaskId/outPutCommonTaskEdit/layoutJson with HTTP 200; final submit/persistence remains covered by the marker acceptance reports. 2026-06-21 18:46 direct row-click smoke clicked 结束 and opened the real 指令单完工报工 dialog; findProcReportIdByTaskId, outPutCommonTaskEdit, editStates, layoutJson and upload-list all returned HTTP 200. Final submit remains covered by dedicated stop persistence evidence.",
+        "2026-06-21 23:54 strengthened row smoke used ordinary mouse click on 结束 after selecting marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART; findProcReportIdByTaskId returned HTTP 200/result=757686174524672, outPutCommonTaskEdit returned HTTP 200, and no page/request failure remained. Final save persistence is still covered by the dedicated stop acceptance reports.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 结束 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "advance-release",
+      "label": "提前放料",
+      "buttonCode": "makeTaskList_earlyPutIn_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/{taskId}"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "PAGE_CONTEXT_RUNTIME_EVENT",
+      "productionCaseIds": [
+        "PROD-027"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "SELECT id, table_no, task_run_state, advance_charge, is_advanced, feed_condition, version FROM public.wom_produce_tasks WHERE id = 8088156589437949;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-advance-release-persistence-current.json",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-advance-release-persistence"
+      ],
+      "issues": [
+        "Current evidence proves the frontend page context and PostgreSQL write path. 2026-06-21 direct mouse click on a running task without advanceCharge produced the expected Chinese business warning 该批次不能提前放料！ without submitting a write request. 2026-06-21 18:46 direct row-click smoke clicked 提前放料 on a running task without advanceCharge; page showed translated warning 该批次不能提前放料！ and did not submit a write request.",
+        "2026-06-21 23:54 strengthened row smoke used ordinary mouse click on 提前放料 for marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART; page showed translated prompt 该批次不能提前放料！ and did not expose a raw WOM.custom key. Valid advance-release persistence remains covered by the dedicated marker report.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 提前放料 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "manufacturing-inspection",
+      "label": "请检",
+      "buttonCode": "makeTaskList_createManuInspect_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/createManuInspect"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "PAGE_CONTEXT_RUNTIME_EVENT",
+      "productionCaseIds": [
+        "PROD-031",
+        "PROD-032",
+        "PROD-035",
+        "PROD-036"
+      ],
+      "targetTables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos",
+        "qcs_inspects",
+        "qcs_inspect_stds",
+        "qcs_inspect_coms",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals"
+      ],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "select 'task', id, table_no, quality_std_id, check_state, check_times, inpect_deal_id, check_result from public.wom_produce_tasks where id=8990002260490702; select 'inspect', id, source_table_id, source_type, prod_id, batch_code, table_no, status from public.qcs_inspects where id=757544726402304;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/persistence-acceptance.json",
+        "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+        "metadata/qcs-report-chain-qualified-current.json",
+        "metadata/qcs-report-chain-unqualified-current.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-manu-inspect-persistence-acceptance-rerun.json",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make acceptance-wom-manu-inspect-persistence",
+        "make acceptance-qcs-report-chain-persistence"
+      ],
+      "issues": [
+        "Current evidence proves the frontend page context and PostgreSQL write path. 2026-06-21 direct mouse click on a product with no inspection requirement produced the expected Chinese warning 该指令单产品无需质检！; marker inspection creation remains covered by the dedicated WOM/QCS acceptance reports. 2026-06-21 18:46 direct row-click smoke clicked 请检 on a no-inspection product; page showed translated warning 该指令单产品无需质检！. Valid inspection creation remains covered by WOM/QCS marker evidence.",
+        "2026-06-21 23:54 strengthened row smoke used ordinary mouse click on 请检 for marker ADP_E2E_20260621155239_WOMSTART_HOLD_RESTART; page showed translated prompt 该指令单产品无需质检！ and did not expose a raw WOM.custom key. Valid WOM/QCS createManuInspect persistence remains covered by dedicated marker reports.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 04:32 latest sustainable row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 请检 from the real makeTaskList toolbar; query and pending filters returned HTTP 200, clear was clickable, i18n raw keys were absent, hold/restart persistence ended at WOM_runState/runing/version=5, and known dependency buttons were guarded without issuing missing service requests.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "process-traceability",
+      "label": "生产过程追溯",
+      "buttonCode": "makeTaskList_prodprocessView_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "GET /msService/ProcessAnalysis/traceability/traceability/isProdprocessView",
+        "GET /msService/ProcessAnalysis/traceability/traceability/processBatchViewOut"
+      ],
+      "requiresPersistence": false,
+      "acceptanceStatus": "BLOCKED",
+      "clickEvidence": "DEPENDENCY_BLOCKED",
+      "productionCaseIds": [
+        "PROD-020"
+      ],
+      "targetTables": [],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "select table_name from information_schema.tables where table_schema='public' and (table_name ~* '^pa_' or table_name ~* 'process.*analysis' or table_name ~* 'trace' or table_name ~* 'process_batch') order by table_name;",
+      "sourceEvidenceRefs": [
+        "metadata/production-module-test-cases.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+        "deploy/docker/nginx/adp.conf",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-trace-processanalysis-20260618094108/processanalysis-trace-report.json",
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "/tmp/adp-wom-toolbar-guard-current.png",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
+        "metadata/test-environment-static-bundle-link-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke-public-fresh.png",
+        "/tmp/adp-wom-toolbar-guard-final2.json",
+        "/tmp/adp-wom-toolbar-guard-final2.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make smoke-business-dependencies",
+        "manual: after ProcessAnalysis deployment, click the WOM trace button with a marker batch and verify traceability runtime/menu/schema",
+        "make smoke-wom-toolbar-row"
+      ],
+      "issues": [
+        "ProcessAnalysis has no healthy Nacos prod instance in the current test environment.",
+        "The current recovered package has WOM caller-side scripts only; ProcessAnalysis runtime metadata, menu entries, PostgreSQL schema, and service implementation are missing. 2026-06-21 18:46 direct row-click smoke clicked 生产过程追溯; GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView returned HTTP 503.",
+        "2026-06-21 19:50 applied WOM makeTaskList body.js/body-es5.js and nginx aliases on the test server; the toolbar now guards the missing ProcessAnalysis dependency with a Chinese prompt instead of opening a blank/no-feedback interaction. This is a frontend guard only and does not close PROD-020.",
+        "2026-06-21 20:56 make smoke-wom-toolbar-row clicked 生产过程追溯 on marker 9000005465147155; the page showed the Chinese guard message and captured ProcessAnalysis isProdprocessView HTTP 503, so the action remains BLOCKED by the missing ProcessAnalysis service.",
+        "2026-06-21 21:36 selection-restore regression smoke kept the marker row selected across refresh, clicked 生产过程追溯, captured ProcessAnalysis isProdprocessView HTTP 503, and showed the Chinese dependency guard message.",
+        "2026-06-21 22:50 public-ingress make smoke-wom-toolbar-row used marker ADP_E2E_20260621144811_WOMSTART_HOLD_RESTART, kept the marker row selected, captured ProcessAnalysis isProdprocessView HTTP 503, and showed the Chinese dependency guard. 100.99 direct browser entry failed earlier because core static bundles hit ERR_CONTENT_LENGTH_MISMATCH over Tailscale DERP, so that direct-entry failure is tracked separately in metadata/test-environment-static-bundle-link-smoke.json.",
+        "2026-06-21 23:20 public-ingress make smoke-wom-toolbar-row kept marker 9000005551587839 selected, clicked 生产过程追溯, captured ProcessAnalysis isProdprocessView HTTP 503, and kept the action BLOCKED by the missing ProcessAnalysis service/package.",
+        "2026-06-21 23:54 strengthened row smoke kept marker 9000005571592916 selected, clicked 生产过程追溯, captured ProcessAnalysis isProdprocessView HTTP 503, and showed the Chinese dependency guard; action remains BLOCKED by the missing ProcessAnalysis service/package.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 01:51 after disabling stale gzip_static for makeTaskList body.js/body-es5.js, the real toolbar click is guarded before the missing ProcessAnalysis request: no ProcessAnalysis request is emitted, the page shows 生产过程追溯服务未部署或暂不可用！, and the action remains BLOCKED only because the ProcessAnalysis service/runtime/schema package is absent.",
+        "2026-06-22 03:20 focused browser probe confirmed the guard still works after the i18n race fix: clicking 生产过程追溯 shows 生产过程追溯服务未部署或暂不可用！ and emits no ProcessAnalysis request.",
+        "2026-06-22 04:32 latest row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 生产过程追溯 and observed the front-end guard message 生产过程追溯服务未部署或暂不可用！; guardedWithoutRequest=true, dependencyStatus=BLOCKED, and the remaining blocker is missing ProcessAnalysis service/runtime/menu/schema rather than a new PostgreSQL SQL gap.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 row smoke kept 生产过程追溯 guarded without emitting a ProcessAnalysis request; the remaining blocker is still missing ProcessAnalysis service/runtime/menu/schema, not the toolbar interaction.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    },
+    {
+      "id": "generate-qrcode",
+      "label": "生成二维码",
+      "buttonCode": "makeTaskList_generateCode_add_WOM_1.0.0_produceTask_makeTaskList",
+      "apiEndpoints": [
+        "POST /msService/WOM/printManage/generateQrCode",
+        "POST /msService/packConfigManag/packMessage/printLog/startPrint",
+        "POST /msService/WOM/printManage/backfill-printInfo"
+      ],
+      "requiresPersistence": true,
+      "acceptanceStatus": "BLOCKED",
+      "clickEvidence": "DEPENDENCY_BLOCKED",
+      "productionCaseIds": [],
+      "targetTables": [],
+      "marker": "ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART",
+      "verificationSql": "select 'baseset_printers', count(*) from public.baseset_printers; select 'baseset_qr_code_types', count(*) from public.baseset_qr_code_types; select 'baseset_qr_detail_infos', count(*) from public.baseset_qr_detail_infos; select 'printer_register', count(*) from public.printer_register;",
+      "sourceEvidenceRefs": [
+        "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
+        "deploy/docker/nginx/adp.conf",
+        "deploy/docker/scripts/adp-wom-qrcode-route-probe.js",
+        "metadata/wom-qrcode-route-probe.json"
+      ],
+      "externalEvidenceRefs": [
+        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
+        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
+        "/tmp/adp-wom-toolbar-guard-current.png",
+        "metadata/wom-toolbar-row-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke.png",
+        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
+        "metadata/test-environment-static-bundle-link-smoke.json",
+        "/tmp/adp-wom-toolbar-row-smoke-public-fresh.png",
+        "/tmp/adp-wom-toolbar-guard-final2.json",
+        "/tmp/adp-wom-toolbar-guard-final2.png",
+        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
+        "metadata/wom-toolbar-row-smoke.png"
+      ],
+      "recheckCommands": [
+        "make probe-wom-qrcode-route",
+        "manual: after the WOM printManage QR implementation/package is restored, seed or select a marker WOM task, printer config, production date, expiry date and print count; click 生成二维码; capture /WOM/printManage/generateQrCode request and query the package QR code tables",
+        "manual: if print is required, also capture /packConfigManag/packMessage/printLog/startPrint and /WOM/printManage/backfill-printInfo",
+        "make smoke-wom-toolbar-row"
+      ],
+      "issues": [
+        "2026-06-21 route probe on http://100.99.133.43:18080 returned HTTP 404 for GET /msService/WOM/printManage/printDate/generateCode, POST /msService/WOM/printManage/generateQrCode and POST /msService/WOM/printManage/backfill-printInfo.",
+        "Runtime WOM service jar scan found 0 class matches and 0 string matches for printManage/generateQrCode/backfill-printInfo/QrCode, so the current WOMMs package does not expose the button target implementation.",
+        "PostgreSQL currently has 0 rows in baseset_printers, baseset_qr_code_types and baseset_qr_detail_infos, while printer_register has 8 platform registrations; printer seed data alone cannot close the missing endpoint blocker.",
+        "The flow still depends on printer/package configuration and optional print backfill after the missing WOM endpoint implementation is restored, so it must not be counted as a PASS from list-button visibility alone.",
+        "2026-06-21 direct mouse click opened the 二维码生成 dialog shell, but the target GET /msService/WOM/printManage/printDate/generateCode still returned HTTP 404, so the actual generate/print/backfill business chain remains blocked. 2026-06-21 18:46 direct row-click smoke clicked 生成二维码; GET /msService/WOM/printManage/printDate/generateCode returned HTTP 404.",
+        "2026-06-21 19:50 applied WOM makeTaskList body.js/body-es5.js and nginx aliases on the test server; the toolbar now guards the missing printManage generateCode page with a Chinese prompt instead of opening the empty QR dialog. The real QR generation/backfill chain remains BLOCKED until the WOM printManage implementation/package exists.",
+        "2026-06-21 20:56 make smoke-wom-toolbar-row clicked 生成二维码 on marker 9000005465147155; the page showed the Chinese guard message and captured WOM printManage generateCode HTTP 404, so the QR chain remains BLOCKED by the missing printManage implementation.",
+        "2026-06-21 21:36 selection-restore regression smoke kept the marker row selected across refresh, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard message.",
+        "2026-06-21 22:50 public-ingress make smoke-wom-toolbar-row used marker ADP_E2E_20260621144811_WOMSTART_HOLD_RESTART, kept the marker row selected, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard. 100.99 direct browser entry failed earlier because core static bundles hit ERR_CONTENT_LENGTH_MISMATCH over Tailscale DERP, so that direct-entry failure is tracked separately in metadata/test-environment-static-bundle-link-smoke.json.",
+        "2026-06-21 23:20 public-ingress make smoke-wom-toolbar-row kept marker 9000005551587839 selected, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and kept the action BLOCKED by the missing printManage implementation.",
+        "2026-06-21 23:54 strengthened row smoke kept marker 9000005571592916 selected, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard; action remains BLOCKED by the missing printManage implementation.",
+        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
+        "2026-06-22 01:51 after disabling stale gzip_static for makeTaskList body.js/body-es5.js, the real toolbar click is guarded before the missing printManage page request: no /WOM/printManage request is emitted, the page shows 二维码生成页面未部署或暂不可用！, and the QR chain remains BLOCKED by the missing WOM printManage implementation proven by metadata/wom-qrcode-route-probe.json.",
+        "2026-06-22 03:20 focused browser probe confirmed the guard still works after the i18n race fix: clicking 生成二维码 shows 二维码生成页面未部署或暂不可用！ and emits no /WOM/printManage request.",
+        "2026-06-22 04:32 latest row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 生成二维码 and observed the front-end guard message 二维码生成页面未部署或暂不可用！; guardedWithoutRequest=true, dependencyStatus=BLOCKED, and the remaining blocker is missing WOM printManage QR endpoint/package rather than a new PostgreSQL SQL gap.",
+        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 07:17 row smoke kept 生成二维码 guarded without emitting a WOM printManage request; the remaining blocker is still missing WOM printManage QR endpoint/package and print/backfill chain.",
+        "2026-06-22 09:27 make probe-wom-qrcode-route reran against http://100.99.133.43:18080: GET /msService/WOM/printManage/printDate/generateCode, POST /msService/WOM/printManage/generateQrCode and POST /msService/WOM/printManage/backfill-printInfo all returned HTTP 404/code 404; WOM service jar scan still found 0 class matches and 0 string matches for printManage/generateQrCode/backfill-printInfo/QrCode.",
+        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 18:09 latest real-browser row smoke marker ADP_E2E_20260622100835_WOMSTART_HOLD_RESTART/taskId=9000006229150923 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006229150923 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:10:09.518 and wom_wait_put_records.id=9000006229150924 proc_report_id=757955491001600/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ],
+      "latestRouteProbe": {
+        "generatedAt": "2026-06-22T01:27:49.172Z",
+        "baseUrl": "http://100.99.133.43:18080",
+        "status": "BLOCKED",
+        "allEndpoints404": true,
+        "noServiceJarMatches": true,
+        "missingPrinterConfig": true,
+        "selectedTask": {
+          "id": "9000005838388864",
+          "tableNo": "ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_TASK_TN",
+          "taskRunState": "WOM_runState/runing",
+          "status": "99"
+        },
+        "tableCounts": {
+          "public.baseset_printers": 0,
+          "public.baseset_qr_code_types": 0,
+          "public.baseset_qr_detail_infos": 0,
+          "public.printer_register": 8
+        },
+        "endpointProbes": [
+          {
+            "method": "GET",
+            "url": "/msService/WOM/printManage/printDate/generateCode",
+            "httpStatus": 404,
+            "responseCode": 404,
+            "responseMessage": "404 没找到请求"
+          },
+          {
+            "method": "POST",
+            "url": "/msService/WOM/printManage/generateQrCode",
+            "httpStatus": 404,
+            "responseCode": 404,
+            "responseMessage": "404 没找到请求"
+          },
+          {
+            "method": "POST",
+            "url": "/msService/WOM/printManage/backfill-printInfo",
+            "httpStatus": 404,
+            "responseCode": 404,
+            "responseMessage": "404 没找到请求"
+          }
+        ],
+        "serviceJarScan": {
+          "checked": true,
+          "outerJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
+          "classMatchCount": 0,
+          "stringMatchCount": 0
+        }
+      },
+      "evidenceNotes": [
+        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
+        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+      ]
+    }
+  ]
+}

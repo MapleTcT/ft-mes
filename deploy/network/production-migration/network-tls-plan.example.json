@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "PLANNED",
+  "owner": "infrastructure-owner",
+  "publicBaseUrl": "TBD",
+  "domains": [
+    {
+      "id": "primary-web-domain",
+      "hostname": "TBD",
+      "purpose": "Frontend and gateway public entry",
+      "exposure": "public",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production frontend/gateway domain has not been approved."
+      ],
+      "nextActions": [
+        "Confirm DNS owner, domain name and cutover TTL plan."
+      ]
+    },
+    {
+      "id": "identity-domain",
+      "hostname": "TBD",
+      "purpose": "Keycloak login endpoint if exposed separately",
+      "exposure": "public-or-private",
+      "owner": "identity-platform-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Keycloak exposure mode and hostname have not been confirmed."
+      ],
+      "nextActions": [
+        "Decide whether Keycloak is routed through the public gateway or private network."
+      ]
+    },
+    {
+      "id": "object-storage-domain",
+      "hostname": "TBD",
+      "purpose": "MinIO API/console endpoint if business download/upload requires external access",
+      "exposure": "private-preferred",
+      "owner": "storage-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "MinIO public/private exposure mode and hostname have not been confirmed."
+      ],
+      "nextActions": [
+        "Prefer private network or VPN-only access unless a signed public exposure decision exists."
+      ]
+    }
+  ],
+  "tlsCertificates": [
+    {
+      "id": "primary-public-certificate",
+      "domains": [
+        "TBD"
+      ],
+      "issuer": "TBD",
+      "storage": "TBD",
+      "renewalMethod": "TBD",
+      "expiryMonitoring": "TBD",
+      "autoRenewalEvidence": "TBD",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "Certificate issuer, deployment location and renewal evidence are missing."
+      ],
+      "nextActions": [
+        "Attach certificate inventory, renewal dry-run and expiry alert evidence."
+      ]
+    }
+  ],
+  "reverseProxies": [
+    {
+      "id": "frontend-gateway-proxy",
+      "serviceId": "frontend-gateway",
+      "listener": "TBD",
+      "upstream": "gateway:8008 and frontend nginx",
+      "tlsTermination": "TBD",
+      "headers": [
+        "Host",
+        "X-Forwarded-Proto",
+        "X-Forwarded-For",
+        "X-Real-IP"
+      ],
+      "hsts": "TBD",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production reverse-proxy listener, upstream and HSTS policy are not signed."
+      ],
+      "nextActions": [
+        "Attach proxy config review and header verification evidence."
+      ]
+    }
+  ],
+  "exposedServices": [
+    {
+      "id": "frontend-gateway",
+      "title": "Frontend and API gateway",
+      "exposure": "public",
+      "protocol": "HTTPS",
+      "externalPort": "443",
+      "internalTarget": "nginx:8080 / gateway:8008",
+      "tlsMode": "TERMINATED_AT_PROXY",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Production HTTPS entry has not been configured or verified."
+      ],
+      "nextActions": [
+        "Validate external HTTPS, forwarded headers and service health from outside the cluster."
+      ]
+    },
+    {
+      "id": "keycloak",
+      "title": "Keycloak authentication service",
+      "exposure": "gateway-or-private",
+      "protocol": "HTTPS",
+      "externalPort": "TBD",
+      "internalTarget": "keycloak:8080",
+      "tlsMode": "TBD",
+      "owner": "identity-platform-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Keycloak exposure boundary and TLS mode are not signed."
+      ],
+      "nextActions": [
+        "Confirm whether Keycloak is routed by the gateway or kept private."
+      ]
+    },
+    {
+      "id": "minio",
+      "title": "MinIO API and console",
+      "exposure": "private-preferred",
+      "protocol": "HTTPS-or-private-HTTP",
+      "externalPort": "TBD",
+      "internalTarget": "minio:30200",
+      "tlsMode": "TBD",
+      "owner": "storage-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "MinIO public/private boundary and TLS policy are not signed."
+      ],
+      "nextActions": [
+        "Attach object storage access policy and firewall evidence."
+      ]
+    },
+    {
+      "id": "nacos",
+      "title": "Nacos configuration and discovery",
+      "exposure": "private",
+      "protocol": "HTTP",
+      "externalPort": "not-exposed",
+      "internalTarget": "nacos:8848",
+      "tlsMode": "INTERNAL_ONLY",
+      "owner": "runtime-platform-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Nacos private network boundary has not been verified with firewall evidence."
+      ],
+      "nextActions": [
+        "Confirm Nacos is not publicly reachable and record internal-only access evidence."
+      ]
+    },
+    {
+      "id": "postgresql",
+      "title": "PostgreSQL database",
+      "exposure": "private",
+      "protocol": "TCP",
+      "externalPort": "not-exposed",
+      "internalTarget": "postgres:5432",
+      "tlsMode": "PRIVATE_NETWORK",
+      "owner": "database-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "PostgreSQL private network boundary and DBA access path have not been verified."
+      ],
+      "nextActions": [
+        "Attach security-group or firewall rule evidence proving PostgreSQL is private."
+      ]
+    }
+  ],
+  "firewallRules": [
+    {
+      "id": "public-https-ingress",
+      "source": "internet-or-approved-client-network",
+      "destination": "reverse-proxy",
+      "ports": [
+        "443/tcp"
+      ],
+      "action": "allow",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Public HTTPS ingress rule is not attached."
+      ],
+      "nextActions": [
+        "Attach firewall or security-group rule export."
+      ]
+    },
+    {
+      "id": "admin-private-services",
+      "source": "vpn-or-admin-network",
+      "destination": "nacos/minio/postgresql",
+      "ports": [
+        "8848/tcp",
+        "30200/tcp",
+        "5432/tcp"
+      ],
+      "action": "allow-private-only",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Private admin/service access rule is not attached."
+      ],
+      "nextActions": [
+        "Attach firewall export showing Nacos, MinIO admin and PostgreSQL are not internet-facing."
+      ]
+    }
+  ],
+  "validationChecks": [
+    {
+      "id": "tls-expiry-check",
+      "title": "Certificate expiry and chain validation",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "Valid chain and acceptable expiry window",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "TLS expiry/chain validation output is missing."
+      ],
+      "nextActions": [
+        "Run openssl/curl validation against the production domain."
+      ]
+    },
+    {
+      "id": "certificate-renewal-dry-run",
+      "title": "Certificate renewal dry-run",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "Renewal dry-run succeeds or managed certificate renewal evidence is attached",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "Certificate renewal dry-run evidence is missing."
+      ],
+      "nextActions": [
+        "Attach ACME or managed certificate renewal evidence."
+      ]
+    },
+    {
+      "id": "firewall-boundary-check",
+      "title": "Firewall and security-group boundary validation",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "Only approved public ports are reachable externally",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "External and private reachability evidence is missing."
+      ],
+      "nextActions": [
+        "Run external reachability checks and attach security-group export."
+      ]
+    },
+    {
+      "id": "proxy-header-check",
+      "title": "Reverse proxy forwarded header validation",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "Host, X-Forwarded-Proto, X-Forwarded-For and X-Real-IP reach gateway correctly",
+      "owner": "infrastructure-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "Proxy header validation evidence is missing."
+      ],
+      "nextActions": [
+        "Validate gateway sees the correct forwarded scheme, host and client IP."
+      ]
+    },
+    {
+      "id": "hsts-decision",
+      "title": "HSTS decision",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "HSTS policy is explicitly enabled or deferred with risk acceptance",
+      "owner": "security-owner",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "HSTS decision is not signed."
+      ],
+      "nextActions": [
+        "Record HSTS max-age, includeSubDomains and preload decision."
+      ]
+    },
+    {
+      "id": "external-health-check",
+      "title": "External HTTPS health and login smoke",
+      "commandOrEvidence": "TBD",
+      "expectedResult": "Production URL loads login and platform health checks over HTTPS",
+      "owner": "release-manager",
+      "status": "PLANNED",
+      "blockingIssues": [
+        "External HTTPS health/login smoke evidence is missing."
+      ],
+      "nextActions": [
+        "Run browser/API smoke against the production domain after cutover rehearsal."
+      ]
+    }
+  ]
+}

@@ -1,32 +1,43 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 75,
+  "migrationCount": 170,
   "firstNumber": 1,
-  "lastNumber": 75,
+  "lastNumber": 170,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
-  "watchStatementCount": 45,
+  "unguardedStructuralStatementCount": 0,
+  "watchStatementCount": 60,
+  "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 9185,
-    "create-function": 39,
-    "create-index": 672,
-    "create-table": 486,
-    "create-view": 92,
-    "insert": 3663,
-    "update": 3654
+    "alter-table": 9324,
+    "create-function": 67,
+    "create-index": 840,
+    "create-table": 523,
+    "create-view": 107,
+    "insert": 3874,
+    "update": 3931
+  },
+  "idempotencySignalTotals": {
+    "create-or-replace": 171,
+    "do-block": 272,
+    "if-exists": 88,
+    "if-not-exists": 11246,
+    "on-conflict": 3838,
+    "to-regclass": 152,
+    "where-not-exists": 26
   },
   "tagTotals": {
-    "auth-rbac-org": 29,
-    "business": 9,
-    "compatibility": 42,
-    "configuration": 18,
-    "general": 3,
+    "auth-rbac-org": 36,
+    "business": 33,
+    "compatibility": 73,
+    "configuration": 41,
+    "general": 22,
     "notification": 9,
-    "platform": 21,
-    "workflow": 6
+    "platform": 48,
+    "workflow": 19
   },
   "migrations": [
     {
@@ -49,39 +60,79 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 6,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 6,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 1,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, smallint);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, smallint);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (varchar, smallint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 2,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, integer);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, integer);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (varchar, integer);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 3,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, bigint);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (varchar, bigint);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (varchar, bigint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 4,
           "pattern": "drop-function",
-          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_smallint(varchar, smallint);"
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_smallint(varchar, smallint);",
+          "statement": "DROP FUNCTION IF EXISTS public.varchar_eq_smallint(varchar, smallint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         },
         {
           "line": 5,
           "pattern": "drop-function",
-          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_integer(varchar, integer);"
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_integer(varchar, integer);",
+          "statement": "DROP FUNCTION IF EXISTS public.varchar_eq_integer(varchar, integer);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         },
         {
           "line": 6,
           "pattern": "drop-function",
-          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_bigint(varchar, bigint);"
+          "excerpt": "DROP FUNCTION IF EXISTS public.varchar_eq_bigint(varchar, bigint);",
+          "statement": "DROP FUNCTION IF EXISTS public.varchar_eq_bigint(varchar, bigint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/002-sms-jincang.sql",
@@ -103,8 +154,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/003-core-missing-tables.sql",
@@ -126,8 +187,18 @@
         "insert": 7,
         "update": 4
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 54,
+        "on-conflict": 7,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/004-auth-org-user.sql",
@@ -149,8 +220,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/005-rbac-init-version.sql",
@@ -172,8 +253,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/006-rbac-auth-fixups.sql",
@@ -196,8 +287,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 39,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/007-rbac-boolean-columns.sql",
@@ -220,24 +321,49 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 5,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS base_rolepermission;"
+          "excerpt": "DROP VIEW IF EXISTS base_rolepermission;",
+          "statement": "DROP VIEW IF EXISTS base_rolepermission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 6,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS base_menuoperate;"
+          "excerpt": "DROP VIEW IF EXISTS base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 7,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS base_menuinfo;"
+          "excerpt": "DROP VIEW IF EXISTS base_menuinfo;",
+          "statement": "DROP VIEW IF EXISTS base_menuinfo;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/008-rbac-boolean-aggregate.sql",
@@ -260,14 +386,29 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 16,
           "pattern": "drop-aggregate",
-          "excerpt": "DROP AGGREGATE IF EXISTS public.sum(boolean);"
+          "excerpt": "DROP AGGREGATE IF EXISTS public.sum(boolean);",
+          "statement": "DROP AGGREGATE IF EXISTS public.sum(boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility aggregates idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/009-rbac-boolean-integer-operators.sql",
@@ -290,29 +431,59 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 6,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 66,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, integer);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, integer);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (boolean, integer);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 67,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (integer, boolean);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (integer, boolean);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (integer, boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 68,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.<> (boolean, integer);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.<> (boolean, integer);",
+          "statement": "DROP OPERATOR IF EXISTS public.<> (boolean, integer);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 69,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.<> (integer, boolean);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.<> (integer, boolean);",
+          "statement": "DROP OPERATOR IF EXISTS public.<> (integer, boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/010-rbac-boolean-minmax-aggregates.sql",
@@ -335,19 +506,39 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 34,
           "pattern": "drop-aggregate",
-          "excerpt": "DROP AGGREGATE IF EXISTS public.max(boolean);"
+          "excerpt": "DROP AGGREGATE IF EXISTS public.max(boolean);",
+          "statement": "DROP AGGREGATE IF EXISTS public.max(boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility aggregates idempotently."
         },
         {
           "line": 35,
           "pattern": "drop-aggregate",
-          "excerpt": "DROP AGGREGATE IF EXISTS public.min(boolean);"
+          "excerpt": "DROP AGGREGATE IF EXISTS public.min(boolean);",
+          "statement": "DROP AGGREGATE IF EXISTS public.min(boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility aggregates idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/011-rbac-userpermission-boolean-fixups.sql",
@@ -370,14 +561,29 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 5,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS base_userpermission;"
+          "excerpt": "DROP VIEW IF EXISTS base_userpermission;",
+          "statement": "DROP VIEW IF EXISTS base_userpermission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/012-rbac-userpermission-menuoperate-code.sql",
@@ -400,8 +606,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 2,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/013-page-runtime-schema-fixups.sql",
@@ -424,8 +640,18 @@
         "insert": 5,
         "update": 6
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 17,
+        "on-conflict": 5,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/014-ui-smoke-runtime-fixups.sql",
@@ -437,8 +663,8 @@
         "platform",
         "compatibility"
       ],
-      "lineCount": 570,
-      "sha256": "dc3f6de2cdb32fbdac65f65f4a21851ec2efadd1dc4fae7b881a5cf11b45e59e",
+      "lineCount": 574,
+      "sha256": "3ad9ffed8ce256a08cdcc5f32a2ad1b1b9c6d787613f3851b99d8f2b7307a403",
       "statementCounts": {
         "create-table": 8,
         "create-view": 3,
@@ -448,24 +674,49 @@
         "insert": 4,
         "update": 7
       },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 20,
+        "on-conflict": 4,
+        "do-block": 8,
+        "to-regclass": 6,
+        "create-or-replace": 6,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 169,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 243,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 384,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_positionwork;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_positionwork;",
+          "statement": "DROP VIEW IF EXISTS public.base_positionwork;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/015-i18n-dingtalk-startup.sql",
@@ -488,8 +739,18 @@
         "insert": 1,
         "update": 4
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 15,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/016-notification-printer-runtime-fixups.sql",
@@ -502,8 +763,8 @@
         "notification",
         "compatibility"
       ],
-      "lineCount": 625,
-      "sha256": "9bcdb7f214118649780c148d9ee80f3480496ad85a1446801ad8dff86c33138c",
+      "lineCount": 628,
+      "sha256": "d7862341e47176b00c3a4d8278e50baace8dcf3b9ffff629bc5c6188f581df29",
       "statementCounts": {
         "create-table": 29,
         "create-view": 0,
@@ -513,8 +774,18 @@
         "insert": 7,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 47,
+        "on-conflict": 7,
+        "do-block": 2,
+        "to-regclass": 2,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/017-rbac-menuoperate-url-ref-fixups.sql",
@@ -538,24 +809,49 @@
         "insert": 8,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 27,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 8
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 195,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_datapmsposition;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapmsposition;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapmsposition;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 196,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_datapermissionstaff;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermissionstaff;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapermissionstaff;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 197,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/018-org-mnecode-fixups.sql",
@@ -579,29 +875,59 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 61,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_staff_mnecode;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_staff_mnecode;",
+          "statement": "DROP VIEW IF EXISTS public.base_staff_mnecode;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 62,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_department_mnecode;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_department_mnecode;",
+          "statement": "DROP VIEW IF EXISTS public.base_department_mnecode;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 63,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_position_mnecode;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_position_mnecode;",
+          "statement": "DROP VIEW IF EXISTS public.base_position_mnecode;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 64,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group_mnecode;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group_mnecode;",
+          "statement": "DROP VIEW IF EXISTS public.base_custom_group_mnecode;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/019-auth-online-user-fixups.sql",
@@ -624,8 +950,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 23,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/020-iam-account-fixups.sql",
@@ -647,8 +983,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 15,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/021-notification-postgres-idempotent-fixups.sql",
@@ -660,8 +1006,8 @@
         "notification",
         "compatibility"
       ],
-      "lineCount": 264,
-      "sha256": "11baee6798eef14548089c6d1a21e163deaf93e19f774861feccef7a1abd4b43",
+      "lineCount": 265,
+      "sha256": "c2733b52f53504bb27267cde316154ffd45de6de4843d65ab4c97d36a82617ca",
       "statementCounts": {
         "create-table": 3,
         "create-view": 0,
@@ -671,34 +1017,69 @@
         "insert": 0,
         "update": 6
       },
+      "idempotencySignals": {
+        "if-exists": 11,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 5,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 38,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_before_insert_idempotent ON public.notice_protocol;"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_before_insert_idempotent ON public.notice_protocol;",
+          "statement": "DROP TRIGGER IF EXISTS trg_notice_protocol_before_insert_idempotent ON public.notice_protocol;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         },
         {
           "line": 91,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_tmpl_before_insert_idempotent ON public.notice_protocol_tmpl;"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_protocol_tmpl_before_insert_idempotent ON public.notice_protocol_tmpl;",
+          "statement": "DROP TRIGGER IF EXISTS trg_notice_protocol_tmpl_before_insert_idempotent ON public.notice_protocol_tmpl;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         },
         {
           "line": 130,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_tmpl_before_insert_idempotent ON public.notice_tmpl;"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_tmpl_before_insert_idempotent ON public.notice_tmpl;",
+          "statement": "DROP TRIGGER IF EXISTS trg_notice_tmpl_before_insert_idempotent ON public.notice_tmpl;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         },
         {
           "line": 167,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_before_insert_idempotent ON public.notice_topic;"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_before_insert_idempotent ON public.notice_topic;",
+          "statement": "DROP TRIGGER IF EXISTS trg_notice_topic_before_insert_idempotent ON public.notice_topic;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         },
         {
           "line": 199,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_tmpl_rel_before_insert_idempotent ON public.notice_topic_tmpl_rel;"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_notice_topic_tmpl_rel_before_insert_idempotent ON public.notice_topic_tmpl_rel;",
+          "statement": "DROP TRIGGER IF EXISTS trg_notice_topic_tmpl_rel_before_insert_idempotent ON public.notice_topic_tmpl_rel;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/022-notification-topic-rel-type-fixups.sql",
@@ -721,8 +1102,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/023-auth-user-role-fixups.sql",
@@ -745,8 +1136,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/024-auth-login-config-fixups.sql",
@@ -769,8 +1170,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/025-notification-default-iam-account.sql",
@@ -792,8 +1203,18 @@
         "insert": 1,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/026-notification-pending-topic-bindings.sql",
@@ -816,8 +1237,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/027-login-theme-runtime-fixups.sql",
@@ -840,8 +1271,18 @@
         "insert": 2,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/028-auth-user-directory-fixups.sql",
@@ -865,8 +1306,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/029-theme-portal-loginlog-fixups.sql",
@@ -889,8 +1340,18 @@
         "insert": 1,
         "update": 3
       },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 12,
+        "on-conflict": 1,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/030-rbac-menu-validity-fixups.sql",
@@ -914,8 +1375,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/031-rbac-menu-collection-fixups.sql",
@@ -940,8 +1411,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/032-organization-base-company-views.sql",
@@ -964,8 +1445,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/033-test-admin-usability-fixups.sql",
@@ -987,8 +1478,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/034-workflow-ec-table-info-fixups.sql",
@@ -1012,8 +1513,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/035-organization-core-base-views.sql",
@@ -1036,8 +1547,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/036-notification-stationletter-config.sql",
@@ -1059,8 +1580,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/037-platform-page-smoke-fixups.sql",
@@ -1083,14 +1614,29 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 18,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 304,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/038-i18n-language-name-resource-fixups.sql",
@@ -1113,8 +1659,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/039-platform-menu-full-smoke-fixups.sql",
@@ -1137,34 +1693,69 @@
         "insert": 2,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 6,
+        "if-not-exists": 66,
+        "on-conflict": 2,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 5,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 414,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_menuinfo;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuinfo;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuinfo;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 469,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 538,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_roleuser;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_roleuser;",
+          "statement": "DROP VIEW IF EXISTS public.base_roleuser;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 551,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_group;",
+          "statement": "DROP VIEW IF EXISTS public.base_custom_group;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         },
         {
           "line": 570,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_custom_groupmember;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_custom_groupmember;",
+          "statement": "DROP VIEW IF EXISTS public.base_custom_groupmember;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/040-notification-i18n-resource-fixups.sql",
@@ -1188,8 +1779,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/041-workflow-pending-source-fixups.sql",
@@ -1212,8 +1813,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/042-configuration-module-import-fixups.sql",
@@ -1236,8 +1847,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 6,
+        "on-conflict": 1,
+        "do-block": 2,
+        "to-regclass": 2,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/043-configuration-design-tables-from-vendor.sql",
@@ -1259,8 +1880,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 123,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 1,
+        "create-or-replace": 1,
+        "where-not-exists": 1
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/044-configuration-design-flag-types.sql",
@@ -1282,8 +1913,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/045-configuration-view-mobile-version.sql",
@@ -1305,8 +1946,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/046-configuration-property-newer-fields.sql",
@@ -1328,8 +1979,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 12,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/047-configuration-sql-model-dm-sql.sql",
@@ -1351,8 +2012,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/048-rbac-menu-company-ref-compat.sql",
@@ -1376,8 +2047,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/049-rbac-menuoperate-valid-integer.sql",
@@ -1400,14 +2081,29 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 14,
           "pattern": "drop-view",
-          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;"
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/050-postgres-boolean-smallint-assignment-cast.sql",
@@ -1429,8 +2125,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/051-rbac-deployment-company-ref-ec.sql",
@@ -1453,8 +2159,18 @@
         "insert": 1,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/052-module-company-ref.sql",
@@ -1476,8 +2192,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/053-postgres-boolean-integer-assignment-cast.sql",
@@ -1499,8 +2225,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/054-scheduler-job-callback-flag.sql",
@@ -1522,8 +2258,18 @@
         "insert": 0,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/055-scheduler-quartz-runtime-compat.sql",
@@ -1547,8 +2293,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/056-runtime-metadata-from-ec-compat.sql",
@@ -1572,8 +2328,18 @@
         "insert": 1,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 1
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/057-latest-foundation-newmods-business-schema.sql",
@@ -1595,8 +2361,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1647,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/058-sysbase-core-runtime-metadata.sql",
@@ -1619,8 +2395,18 @@
         "insert": 4,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/059-configuration-script-code-compat.sql",
@@ -1643,8 +2429,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/060-sysbase-department-reference-views.sql",
@@ -1667,8 +2463,18 @@
         "insert": 4,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/061-sysbase-staff-reference-view.sql",
@@ -1691,8 +2497,18 @@
         "insert": 7,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 7,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/062-wts-business-schema-from-initxml.sql",
@@ -1714,8 +2530,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2716,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/063-disable-legacy-external-scheduler-jobs.sql",
@@ -1737,14 +2563,29 @@
         "insert": 0,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 30,
           "pattern": "delete",
-          "excerpt": "DELETE FROM public.scheduler_job_log_info"
+          "excerpt": "DELETE FROM public.scheduler_job_log_info",
+          "statement": "DELETE FROM public.scheduler_job_log_info WHERE job_status = 3 OR job_service_api LIKE 'http://192.168.90.%' OR exception_info LIKE '%192.168.90.%';",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/064-craftgraph-business-schema-from-initxml.sql",
@@ -1766,8 +2607,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1293,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
@@ -1791,29 +2642,59 @@
         "insert": 3591,
         "update": 3591
       },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 4101,
+        "on-conflict": 3591,
+        "do-block": 122,
+        "to-regclass": 121,
+        "create-or-replace": 74,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 48,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, bigint);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, bigint);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (text, bigint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 51,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (bigint, text);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (bigint, text);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (bigint, text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 54,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, text);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, text);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (boolean, text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         },
         {
           "line": 57,
           "pattern": "drop-operator",
-          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, boolean);"
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, boolean);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (text, boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/066-lims-qcs-test-config.sql",
@@ -1835,8 +2716,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/067-qcs-table-types-postgres.sql",
@@ -1858,8 +2749,18 @@
         "insert": 2,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 8,
+        "on-conflict": 1,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/068-organization-position-role-compat.sql",
@@ -1882,8 +2783,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/069-organization-manager-compat.sql",
@@ -1906,8 +2817,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/070-test-admin-default-password.sql",
@@ -1929,8 +2850,18 @@
         "insert": 1,
         "update": 1
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/071-organization-person-profile-compat.sql",
@@ -1953,8 +2884,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 10,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/072-rbac-authority-page-compat.sql",
@@ -1978,8 +2919,18 @@
         "insert": 1,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 1,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
@@ -2002,8 +2953,18 @@
         "insert": 0,
         "update": 2
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -2025,8 +2986,18 @@
         "insert": 0,
         "update": 0
       },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
-      "watchStatements": []
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     },
     {
       "file": "deploy/docker/postgres/init/075-rbac-data-resource-permission-tables.sql",
@@ -2048,14 +3019,3370 @@
         "insert": 1,
         "update": 3
       },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 10,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
       "highRiskStatements": [],
       "watchStatements": [
         {
           "line": 191,
           "pattern": "drop-trigger",
-          "excerpt": "DROP TRIGGER IF EXISTS trg_rbac_role_data_permission_sync_users"
+          "excerpt": "DROP TRIGGER IF EXISTS trg_rbac_role_data_permission_sync_users",
+          "statement": "DROP TRIGGER IF EXISTS trg_rbac_role_data_permission_sync_users ON public.rbac_role_data_permission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         }
-      ]
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/076-wom-action-view-runtime-json.sql",
+      "name": "076-wom-action-view-runtime-json.sql",
+      "number": 76,
+      "slug": "wom-action-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 160,
+      "sha256": "8428a70c61666707d34ac39d90ee0f0d4e8b33ae6adad504fec41097eace0750",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 10,
+        "update": 10
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 10,
+        "do-block": 5,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/077-wom-reference-view-runtime-json.sql",
+      "name": "077-wom-reference-view-runtime-json.sql",
+      "number": 77,
+      "slug": "wom-reference-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 222,
+      "sha256": "53e71731b0254a54ce666fa111cea884cef2a8ca91b5c41371a26fae6d0cb15a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 14,
+        "update": 14
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 14,
+        "do-block": 7,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+      "name": "078-wom-list-button-runtime-json.sql",
+      "number": 78,
+      "slug": "wom-list-button-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 67,
+      "sha256": "ea6f96a04bf2e6ff25c2835ee268123c2c51afc0f97d9a327ab245cf06f9c2c2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/079-wom-wait-put-records-table.sql",
+      "name": "079-wom-wait-put-records-table.sql",
+      "number": 79,
+      "slug": "wom-wait-put-records-table",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 167,
+      "sha256": "7aa57035d49bf67730f1905df2c9d7ff4ef5d08d8a1a438cffc23d61a8fa132c",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 5,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/080-wom-wait-record-state-sync-trigger.sql",
+      "name": "080-wom-wait-record-state-sync-trigger.sql",
+      "number": 80,
+      "slug": "wom-wait-record-state-sync-trigger",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 84,
+      "sha256": "144e2d50dc589d5cffe5178e2f0d808431fd164880867d17bb06d02890337952",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 42,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_work_order_wait_state",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_work_order_wait_state ON public.wom_wait_put_records;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 76,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_push_task_state_to_wait_records",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_push_task_state_to_wait_records ON public.wom_produce_tasks;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/081-wom-task-act-itemss-table.sql",
+      "name": "081-wom-task-act-itemss-table.sql",
+      "number": 81,
+      "slug": "wom-task-act-itemss-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 86,
+      "sha256": "7e583b9f52f4b252617f6c639339b3d97ac3f55c9da675cca2872ac83dbf11e1",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/082-wom-pro-check-details-table.sql",
+      "name": "082-wom-pro-check-details-table.sql",
+      "number": 82,
+      "slug": "wom-pro-check-details-table",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 104,
+      "sha256": "5b2b6a4d74228580ba59e0c162182d892f6dbba8bf163dd5cef690c6adb2dce0",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 6,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/083-postgres-legacy-boolean-assignment-cast.sql",
+      "name": "083-postgres-legacy-boolean-assignment-cast.sql",
+      "number": 83,
+      "slug": "postgres-legacy-boolean-assignment-cast",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 16,
+      "sha256": "3dd47aca06b87e4293e57bd276f275bf27192d760f61cc8222b76f7033c3c300",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/084-wom-output-common-task-edit-runtime-json.sql",
+      "name": "084-wom-output-common-task-edit-runtime-json.sql",
+      "number": 84,
+      "slug": "wom-output-common-task-edit-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 36,
+      "sha256": "628fc7987fa5d2c33bd1d51f41c3c2b3f1e072a1e9e93547bd8723891cc6c47e",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/085-wom-output-common-task-edit-view-linkage.sql",
+      "name": "085-wom-output-common-task-edit-view-linkage.sql",
+      "number": 85,
+      "slug": "wom-output-common-task-edit-view-linkage",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 38,
+      "sha256": "b11355111e0cd8060ee7cc7b0b7d4c5e340b7693a66c11f224531792a3563286",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/086-wom-prepare-need-ref-table.sql",
+      "name": "086-wom-prepare-need-ref-table.sql",
+      "number": 86,
+      "slug": "wom-prepare-need-ref-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 105,
+      "sha256": "6d1bd505ffba4d162d747a66ef5bf3803d18cf530770ad52460fbd54ba39f0fa",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/087-wom-prepare-need-deal-info-table.sql",
+      "name": "087-wom-prepare-need-deal-info-table.sql",
+      "number": 87,
+      "slug": "wom-prepare-need-deal-info-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 97,
+      "sha256": "119fabbae7793aa763dab5ac78b73ef455024bb8563f2db32b886d3d3fc0291c",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/088-wom-workflow-current-version.sql",
+      "name": "088-wom-workflow-current-version.sql",
+      "number": 88,
+      "slug": "wom-workflow-current-version",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 37,
+      "sha256": "1a7f3d16a72839d3239c3e9a4ecc7a8c9c5473d04e74faf0c4e8c3d304e4e55c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/089-wf-deployment-clob-oid-compat.sql",
+      "name": "089-wf-deployment-clob-oid-compat.sql",
+      "number": 89,
+      "slug": "wf-deployment-clob-oid-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 85,
+      "sha256": "dda16feb704afb6dd7b8460f30d62ecd1bc74a24dd6eb1bf8760265ba2b495df",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/090-wom-preneed-flow-task-transition.sql",
+      "name": "090-wom-preneed-flow-task-transition.sql",
+      "number": 90,
+      "slug": "wom-preneed-flow-task-transition",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 156,
+      "sha256": "b406ca98a886c44ae5e70eb5f6d55b479cb0ef96bbace3d9bb81fef3c7f99f0c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/091-jbpm4-lob-oid-compat.sql",
+      "name": "091-jbpm4-lob-oid-compat.sql",
+      "number": 91,
+      "slug": "jbpm4-lob-oid-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 29,
+      "sha256": "95bdff1bb9e03e10d98382c84e691f45a38fbaa00d0f5a465caa3b246e08e7d1",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/092-wf-task-runtime-column-compat.sql",
+      "name": "092-wf-task-runtime-column-compat.sql",
+      "number": 92,
+      "slug": "wf-task-runtime-column-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 8,
+      "sha256": "6ecfc93320df873cecb2a5458a8b3b23fbf11b43ec7cc010159ce2fcbe6a9c8c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/093-rbac-modify-permission-log-table.sql",
+      "name": "093-rbac-modify-permission-log-table.sql",
+      "number": 93,
+      "slug": "rbac-modify-permission-log-table",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 53,
+      "sha256": "20fa760754abdada87532c97f38634be271fd80421bee56ca37894c7c4704c9c",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 21,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/094-rbac-menuoperate-foundation-boolean-casts.sql",
+      "name": "094-rbac-menuoperate-foundation-boolean-casts.sql",
+      "number": 94,
+      "slug": "rbac-menuoperate-foundation-boolean-casts",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 86,
+      "sha256": "0d90e99b6f091e23f11a5e1b14ef08c3197f5101d89666b0d4a06a9c375eff85",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 12,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "statement": "DROP VIEW IF EXISTS public.base_menuoperate;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/095-rbac-flow-permission-foundation-boolean-casts.sql",
+      "name": "095-rbac-flow-permission-foundation-boolean-casts.sql",
+      "number": 95,
+      "slug": "rbac-flow-permission-foundation-boolean-casts",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "workflow",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 55,
+      "sha256": "3034c66bc2c9a9367729a4fb7bcfeda119007ee15bf0014fe12b19945098103d",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 2,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 2,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 8,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapermission;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
+        },
+        {
+          "line": 42,
+          "pattern": "drop-view",
+          "excerpt": "DROP VIEW IF EXISTS public.base_datapmsposition;",
+          "statement": "DROP VIEW IF EXISTS public.base_datapmsposition;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when recreating compatibility views idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/096-workflow-task-pending-memo-column.sql",
+      "name": "096-workflow-task-pending-memo-column.sql",
+      "number": 96,
+      "slug": "workflow-task-pending-memo-column",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 6,
+      "sha256": "5f9f6e86e28eebd8d9020260467eca5892d723a6576564be55dacbdd820a1d70",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/097-jbpm-hasvars-boolean-compat.sql",
+      "name": "097-jbpm-hasvars-boolean-compat.sql",
+      "number": 97,
+      "slug": "jbpm-hasvars-boolean-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 47,
+      "sha256": "80cae7b791542991f257f2e5bd153d75b4d05c2ce32f6b48d5ea500ef40a959f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/098-wom-active-execsort-convert-compat.sql",
+      "name": "098-wom-active-execsort-convert-compat.sql",
+      "number": 98,
+      "slug": "wom-active-execsort-convert-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 19,
+      "sha256": "9b4daaac2e1d966ecea6600548e308ae89efd6bd1c7df13b3059bfa6a7394453",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/099-wom-producetask-supervision-view-compat.sql",
+      "name": "099-wom-producetask-supervision-view-compat.sql",
+      "number": 99,
+      "slug": "wom-producetask-supervision-view-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 40,
+      "sha256": "65ec5ead21c8ec499114850c73e5787a3a8a16ca93a768b545e350d4fcb4aad4",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 2,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/100-wom-batch-active-runtime-buttons.sql",
+      "name": "100-wom-batch-active-runtime-buttons.sql",
+      "number": 100,
+      "slug": "wom-batch-active-runtime-buttons",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 261,
+      "sha256": "235af019acc114ade19257e006c00cbef2cfb4dfa0c4cff99baff70a87760894",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/101-wom-output-finish-num-sync.sql",
+      "name": "101-wom-output-finish-num-sync.sql",
+      "number": 101,
+      "slug": "wom-output-finish-num-sync",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 76,
+      "sha256": "0f6760768db70ed296c94c8decadb053f23d0786858118eff4516c667db31abf",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 3,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 3,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 31,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_before_task_finish_num ON public.wom_produce_tasks;",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_before_task_finish_num ON public.wom_produce_tasks;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 72,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_task_finish_num_from_output ON public.wom_output_details;",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_task_finish_num_from_output ON public.wom_output_details;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/102-wom-easy-active-runtime-report-button.sql",
+      "name": "102-wom-easy-active-runtime-report-button.sql",
+      "number": 102,
+      "slug": "wom-easy-active-runtime-report-button",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 187,
+      "sha256": "0a5b75e7d13006292ec1bc007a17b8fd46010550921cd9b716e4f99e3b8f582a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/103-wom-batch-process-runtime-buttons.sql",
+      "name": "103-wom-batch-process-runtime-buttons.sql",
+      "number": 103,
+      "slug": "wom-batch-process-runtime-buttons",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 318,
+      "sha256": "ba0b321898cf83cb0078ceead34d2aa16d9074c795dcbe2f52088b61c46945ce",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/104-rm-process-actives-table.sql",
+      "name": "104-rm-process-actives-table.sql",
+      "number": 104,
+      "slug": "rm-process-actives-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 180,
+      "sha256": "bd695b4ab97d7b5d52aff4ce70ca8a8a2687671d087765cedcc84838e62630db",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 5,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/105-wom-process-procsort-convert-compat.sql",
+      "name": "105-wom-process-procsort-convert-compat.sql",
+      "number": 105,
+      "slug": "wom-process-procsort-convert-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 20,
+      "sha256": "4088fd4cd31dc230d0b93c01213e9ea60b1a492bd2110004454a75d79b92d2a5",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/106-wom-process-wait-end-time-sync.sql",
+      "name": "106-wom-process-wait-end-time-sync.sql",
+      "number": 106,
+      "slug": "wom-process-wait-end-time-sync",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 61,
+      "sha256": "c45a2c18f6ea923a4ca324f9ea521ff5bdb3787fa1883801e119ccb02bacde86",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 45,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_process_wait_end_time_from_process",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_process_wait_end_time_from_process ON public.wom_task_processes;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 54,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_process_wait_end_time_from_exelog",
+          "statement": "DROP TRIGGER IF EXISTS trg_adp_wom_sync_process_wait_end_time_from_exelog ON public.wom_process_exelogs;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/107-qcs-inspect-detail-tables.sql",
+      "name": "107-qcs-inspect-detail-tables.sql",
+      "number": 107,
+      "slug": "qcs-inspect-detail-tables",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 280,
+      "sha256": "42918655bf7eb3dcc5b83e30c76ecca23210844a827872dcd3b5bfbe4b1d9285",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 21,
+        "alter-table": 18,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 227,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/108-rm-formula-qualities-table.sql",
+      "name": "108-rm-formula-qualities-table.sql",
+      "number": 108,
+      "slug": "rm-formula-qualities-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 110,
+      "sha256": "37e0e805aefac2c2d2e9f7d6c745596a643b98b2af4f136673ea9efebdf71657",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 5,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/109-limsbasic-qcs-inspection-support-tables.sql",
+      "name": "109-limsbasic-qcs-inspection-support-tables.sql",
+      "number": 109,
+      "slug": "limsbasic-qcs-inspection-support-tables",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 179,
+      "sha256": "6414581483e7177663bdc9dbe01df9912930bfad15c4feaed7187c1c99878739",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 16,
+        "alter-table": 6,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 96,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/110-qcs-manu-inspect-workflow-config.sql",
+      "name": "110-qcs-manu-inspect-workflow-config.sql",
+      "number": 110,
+      "slug": "qcs-manu-inspect-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 105,
+      "sha256": "16440ab3e8d45f4bb3db1b90ce52a90d89bafdcf90b81eb5ec427108551f4060",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/111-limsbasic-quality-std-custom-columns.sql",
+      "name": "111-limsbasic-quality-std-custom-columns.sql",
+      "number": 111,
+      "slug": "limsbasic-quality-std-custom-columns",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 19,
+      "sha256": "9be94e219c11983ecffee72d29d4428b2d955687c473111e63612ceeb7ffb332",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 9,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/112-qcs-table-types-lob-oid-compat.sql",
+      "name": "112-qcs-table-types-lob-oid-compat.sql",
+      "number": 112,
+      "slug": "qcs-table-types-lob-oid-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 51,
+      "sha256": "262f53b82a1c9edee0d50f713c17663adb224f2cc344e2e7f56ff6ea4f3cb671",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/113-qcs-manu-inspect-jbpm-definition.sql",
+      "name": "113-qcs-manu-inspect-jbpm-definition.sql",
+      "number": 113,
+      "slug": "qcs-manu-inspect-jbpm-definition",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business"
+      ],
+      "lineCount": 668,
+      "sha256": "be503bee279ae479bea1c447fe25d57e0ab3a90f2ade736c4e0e2995f6dc0f9d",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 9,
+        "update": 10
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 9,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/114-qcs-deal-info-column-compat.sql",
+      "name": "114-qcs-deal-info-column-compat.sql",
+      "number": 114,
+      "slug": "qcs-deal-info-column-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 45,
+      "sha256": "77f43cd0e3e5578d46f2a9d51bdf9464e5937a549ef010f0b49673b92ac41333",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 19,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 22,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/115-wom-wait-put-records-lob-oid-compat.sql",
+      "name": "115-wom-wait-put-records-lob-oid-compat.sql",
+      "number": 115,
+      "slug": "wom-wait-put-records-lob-oid-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 38,
+      "sha256": "b6c5c9dce13d904c8ae3c4864d1f7ff595591b1626fdb899910ca63f975c5d5f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/116-wom-produce-task-lob-oid-compat.sql",
+      "name": "116-wom-produce-task-lob-oid-compat.sql",
+      "number": 116,
+      "slug": "wom-produce-task-lob-oid-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 51,
+      "sha256": "39f21c355b50b6a387e873acb57792910fc031d69c15694d310e973e23b83bbf",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/117-qcs-report-generation-support.sql",
+      "name": "117-qcs-report-generation-support.sql",
+      "number": 117,
+      "slug": "qcs-report-generation-support",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 374,
+      "sha256": "150ed1c679d55160aa318d7abdc662cd2f6d3b06aa262edf7b0f1de7b808746d",
+      "statementCounts": {
+        "create-table": 3,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 15,
+        "alter-table": 4,
+        "insert": 4,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 169,
+        "on-conflict": 3,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/118-postgres-legacy-text-bytea-operator.sql",
+      "name": "118-postgres-legacy-text-bytea-operator.sql",
+      "number": 118,
+      "slug": "postgres-legacy-text-bytea-operator",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 85,
+      "sha256": "181e2d9480c3c3ba2565bf9af8f7b05300f32994ccf200a950d8e1b2a8a80d4c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/119-qcs-inspect-report-edit-runtime-json.sql",
+      "name": "119-qcs-inspect-report-edit-runtime-json.sql",
+      "number": 119,
+      "slug": "qcs-inspect-report-edit-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 36,
+      "sha256": "fe40d1c9fd155e256f32a0027b2b684147e5f1c7cb6fb1618f82587d1cf56061",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/120-baseset-act-bat-state-seed.sql",
+      "name": "120-baseset-act-bat-state-seed.sql",
+      "number": 120,
+      "slug": "baseset-act-bat-state-seed",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 116,
+      "sha256": "2b3a534c221fd08ba4bcb8615753cf45cc853783271f32d28e9c0316bce49f52",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/121-qcs-unqualified-deal-workflow-config.sql",
+      "name": "121-qcs-unqualified-deal-workflow-config.sql",
+      "number": 121,
+      "slug": "qcs-unqualified-deal-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "business"
+      ],
+      "lineCount": 337,
+      "sha256": "184f56d5613f755f9e3fd085512d21dedb203b095a13b5cc7a612c1f1fcba141",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 3,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/122-qcs-unqualified-deal-runtime-compat.sql",
+      "name": "122-qcs-unqualified-deal-runtime-compat.sql",
+      "number": 122,
+      "slug": "qcs-unqualified-deal-runtime-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 108,
+      "sha256": "8ba329e12a5fd2ca5842ec14e1753862543f9d605c757f18b1c3a91b8b78f531",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 3,
+        "to-regclass": 2,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/123-wom-qcs-null-boolean-compat.sql",
+      "name": "123-wom-qcs-null-boolean-compat.sql",
+      "number": 123,
+      "slug": "wom-qcs-null-boolean-compat",
+      "validName": true,
+      "tags": [
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 10,
+      "sha256": "8dfa3e135c3c70c7452fca6397d6b5ab7b52a894eb4843544e1a9424a0faab4f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/124-qcs-inspect-release-runtime-json.sql",
+      "name": "124-qcs-inspect-release-runtime-json.sql",
+      "number": 124,
+      "slug": "qcs-inspect-release-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 67,
+      "sha256": "749a8ee0f01cf0b0d36375e040e89a1cbc67f7b43f13b31574de1c1af6859599",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/125-qcs-inspect-release-action-compat.sql",
+      "name": "125-qcs-inspect-release-action-compat.sql",
+      "number": 125,
+      "slug": "qcs-inspect-release-action-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 455,
+      "sha256": "6d780f6084ffaf89509b54d7e23d3bc2f83c0354e0dc96c6876e6f1a2fc7acbc",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 10,
+        "alter-table": 1,
+        "insert": 4,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 77,
+        "on-conflict": 3,
+        "do-block": 1,
+        "to-regclass": 2,
+        "create-or-replace": 1,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/126-business-edit-view-runtime-json.sql",
+      "name": "126-business-edit-view-runtime-json.sql",
+      "number": 126,
+      "slug": "business-edit-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "business"
+      ],
+      "lineCount": 129,
+      "sha256": "a98a966f56e2f2408a579ad70fa864c71a38926da209e070041455ff426d7898",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 8,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 8,
+        "do-block": 4,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/127-workappointment-action-edit-runtime-json.sql",
+      "name": "127-workappointment-action-edit-runtime-json.sql",
+      "number": 127,
+      "slug": "workappointment-action-edit-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 36,
+      "sha256": "4ffbeb18936b6ba1e4f19d8dc56b565e236a4f78d5785db8351c263c25e7d672",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/128-rm-batch-sync-test-system.sql",
+      "name": "128-rm-batch-sync-test-system.sql",
+      "number": 128,
+      "slug": "rm-batch-sync-test-system",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 72,
+      "sha256": "46d699dc3e0178dd392ba126dd9ef202df9545666ca9ed7cd78cafac8132b175",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/129-rm-batch-system-config.sql",
+      "name": "129-rm-batch-system-config.sql",
+      "number": 129,
+      "slug": "rm-batch-system-config",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 133,
+      "sha256": "9ec4c0d3279cc152dad2b6f201440a1d3a47eb3031ff7d33eddeb4ef3c275e42",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 5,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/130-rm-formula-child-tables.sql",
+      "name": "130-rm-formula-child-tables.sql",
+      "number": 130,
+      "slug": "rm-formula-child-tables",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 220,
+      "sha256": "8c9935a5ca15dc0b46e50269d27187c4c0ff89dbdea6db9ed6ae5e24f98cf34e",
+      "statementCounts": {
+        "create-table": 2,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 10,
+        "on-conflict": 0,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/131-rm-formula-supervision-dealinfo-compat.sql",
+      "name": "131-rm-formula-supervision-dealinfo-compat.sql",
+      "number": 131,
+      "slug": "rm-formula-supervision-dealinfo-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 115,
+      "sha256": "19b4e5c1c695d35f58182257caea9ef3015dfa3f41f9dc099585d99fa5347e4e",
+      "statementCounts": {
+        "create-table": 2,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 12,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 17,
+        "on-conflict": 0,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/132-rm-formula-mne-code-table.sql",
+      "name": "132-rm-formula-mne-code-table.sql",
+      "number": 132,
+      "slug": "rm-formula-mne-code-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 50,
+      "sha256": "7ea2a4d45a1a51081eb8a742bcfa719641a740751639830e5d165def98fa71d3",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 5,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/133-rm-batch-workflow-jbpm-definition.sql",
+      "name": "133-rm-batch-workflow-jbpm-definition.sql",
+      "number": 133,
+      "slug": "rm-batch-workflow-jbpm-definition",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 486,
+      "sha256": "c9c2c797cd1f3cbe0a166bb41835be6568a7d7523a977b03d141c7e28e0c55b1",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 7,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 7,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/134-rm-batch-workflow-permission.sql",
+      "name": "134-rm-batch-workflow-permission.sql",
+      "number": 134,
+      "slug": "rm-batch-workflow-permission",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "workflow"
+      ],
+      "lineCount": 96,
+      "sha256": "d51039b9c78c9f3efe16a9c85facd90e7d7fe54fb24eb5114f27addcaf79c179",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/135-rm-formula-dealinfo-column-compat.sql",
+      "name": "135-rm-formula-dealinfo-column-compat.sql",
+      "number": 135,
+      "slug": "rm-formula-dealinfo-column-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 59,
+      "sha256": "dd3a54d9589719bab6d5709e82dd4ae717cbddcfe105da85460853fcced447bb",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/136-workappointment-workplan-workflow-config.sql",
+      "name": "136-workappointment-workplan-workflow-config.sql",
+      "number": 136,
+      "slug": "workappointment-workplan-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 597,
+      "sha256": "84e05c796a84901f7f4ecd1c9b97a1c8172c4280cf46d0b6478d783d383e43cf",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 1,
+        "create-index": 10,
+        "alter-table": 12,
+        "insert": 6,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 22,
+        "on-conflict": 6,
+        "do-block": 2,
+        "to-regclass": 1,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 185,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wfm_task_pending pending",
+          "statement": "DELETE FROM public.wfm_task_pending pending WHERE pending.process_key = 'ticketPlan' AND ( pending.model_id = NEW.id OR pending.table_info_id = NEW.table_info_id OR pending.table_no = NEW.table_no );",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        },
+        {
+          "line": 196,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_waps_work_ticket_plan_pending_cleanup",
+          "statement": "DROP TRIGGER IF EXISTS trg_waps_work_ticket_plan_pending_cleanup ON public.waps_work_ticket_plans;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 204,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wfm_task_pending pending",
+          "statement": "DELETE FROM public.wfm_task_pending pending USING public.waps_work_ticket_plans plan WHERE pending.process_key = 'ticketPlan' AND coalesce(plan.valid, false) = false AND ( pending.model_id = plan.id OR pending.table_info",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/137-wom-reject-material-workflow-config.sql",
+      "name": "137-wom-reject-material-workflow-config.sql",
+      "number": 137,
+      "slug": "wom-reject-material-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "configuration"
+      ],
+      "lineCount": 656,
+      "sha256": "164953a726e61c153acd6e991f7ce259474a0036af7038c18e9359685d8b8a8d",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 1,
+        "create-function": 1,
+        "create-index": 11,
+        "alter-table": 12,
+        "insert": 6,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 23,
+        "on-conflict": 6,
+        "do-block": 2,
+        "to-regclass": 1,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 133,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wfm_task_pending pending",
+          "statement": "DELETE FROM public.wfm_task_pending pending WHERE pending.process_key IN ('batchRejectFlow', 'materiaReject', 'prePareRejectFlow') AND ( pending.model_id = NEW.id OR pending.table_info_id = NEW.table_info_id OR pending.t",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        },
+        {
+          "line": 144,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_wom_reject_material_pending_cleanup",
+          "statement": "DROP TRIGGER IF EXISTS trg_wom_reject_material_pending_cleanup ON public.wom_reject_materials;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 152,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wfm_task_pending pending",
+          "statement": "DELETE FROM public.wfm_task_pending pending USING public.wom_reject_materials reject_material WHERE pending.process_key IN ('batchRejectFlow', 'materiaReject', 'prePareRejectFlow') AND coalesce(reject_material.valid, fal",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/138-wom-reject-material-edit-runtime-json.sql",
+      "name": "138-wom-reject-material-edit-runtime-json.sql",
+      "number": 138,
+      "slug": "wom-reject-material-edit-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 129,
+      "sha256": "d94a8332c50fe9537b38c4d0f4b040de7f3972dc4d50632d6c88efba162b01ee",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 8,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 8,
+        "do-block": 4,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/139-baseset-qcs-deal-way-state-seed.sql",
+      "name": "139-baseset-qcs-deal-way-state-seed.sql",
+      "number": 139,
+      "slug": "baseset-qcs-deal-way-state-seed",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 117,
+      "sha256": "b6dee856e9f42db88cfd7c384da98343f15e9b3254f07434f0a6bea19fe0f3c5",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/140-qcs-unqlf-deal-flag-default.sql",
+      "name": "140-qcs-unqlf-deal-flag-default.sql",
+      "number": 140,
+      "slug": "qcs-unqlf-deal-flag-default",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 26,
+      "sha256": "89cdceb8f75da21875d97d2081bd4ede7695fc7119cd077dad81b68c871be781",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 1,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/141-rm-formula-import-template.sql",
+      "name": "141-rm-formula-import-template.sql",
+      "number": 141,
+      "slug": "rm-formula-import-template",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 218,
+      "sha256": "e7b8fede558d6e0617db6201bb2b08d75fc8cb571c49dafe02f8225fa8f28562",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 10,
+        "update": 12
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 10,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/142-postgres-legacy-text-boolean-assignment-cast.sql",
+      "name": "142-postgres-legacy-text-boolean-assignment-cast.sql",
+      "number": 142,
+      "slug": "postgres-legacy-text-boolean-assignment-cast",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 39,
+      "sha256": "0c889cc41e743bf9ccdc36f6aba0e856773f1b2e03e9de29ea6b8e9f01ade038",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/143-teaminfo-runtime-json.sql",
+      "name": "143-teaminfo-runtime-json.sql",
+      "number": 143,
+      "slug": "teaminfo-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 253,
+      "sha256": "f4a2db42d62b81aac84f4d5da22c81103f2537c7415700a57a4e69967d7245e8",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 16,
+        "update": 16
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 16,
+        "do-block": 8,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/144-teaminfo-admin-role-permissions.sql",
+      "name": "144-teaminfo-admin-role-permissions.sql",
+      "number": 144,
+      "slug": "teaminfo-admin-role-permissions",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org"
+      ],
+      "lineCount": 83,
+      "sha256": "15fd323e16effc5bf42c50be2b925358807fb4c6e1e146b4b3ff6e60e8ced16e",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/145-teaminfo-runtime-button-permission-compat.sql",
+      "name": "145-teaminfo-runtime-button-permission-compat.sql",
+      "number": 145,
+      "slug": "teaminfo-runtime-button-permission-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 57,
+      "sha256": "bf58890369fbb031bc9e3239122b3c955a04bcdebae6bd91f89a14539732e643",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/146-teaminfo-smoke-prerequisites.sql",
+      "name": "146-teaminfo-smoke-prerequisites.sql",
+      "number": 146,
+      "slug": "teaminfo-smoke-prerequisites",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 149,
+      "sha256": "f49eb1714a983743cf515942d912c2388c64d7e251ad1d9c48c5a52d251a270f",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 5,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/147-wom-pro-check-details-lob-oid-compat.sql",
+      "name": "147-wom-pro-check-details-lob-oid-compat.sql",
+      "number": 147,
+      "slug": "wom-pro-check-details-lob-oid-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 37,
+      "sha256": "698fbef5b4cb99459f58aa904b7014a4572313009a1beb32eecbfad7a08bc693",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/148-runtime-visible-business-buttons.sql",
+      "name": "148-runtime-visible-business-buttons.sql",
+      "number": 148,
+      "slug": "runtime-visible-business-buttons",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 298,
+      "sha256": "f73522fed35efd700cd1e3ac59469c77f031f9145e73dc4be0aeb48f41d650a0",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/149-workappointment-i18n-resource-fixups.sql",
+      "name": "149-workappointment-i18n-resource-fixups.sql",
+      "number": 149,
+      "slug": "workappointment-i18n-resource-fixups",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 28,
+      "sha256": "833abe3190bf3e42f3aa37c4d6dd149dd95473f55af2423ab489219b0984a742",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/150-craftgraph-visible-modify-button.sql",
+      "name": "150-craftgraph-visible-modify-button.sql",
+      "number": 150,
+      "slug": "craftgraph-visible-modify-button",
+      "validName": true,
+      "tags": [
+        "business"
+      ],
+      "lineCount": 198,
+      "sha256": "6823c5edfdadfdd7832e67c9e495dabd579b684dcc7674ff3d064683b50d6287",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/151-workappointment-workplan-list-runtime-compat.sql",
+      "name": "151-workappointment-workplan-list-runtime-compat.sql",
+      "number": 151,
+      "slug": "workappointment-workplan-list-runtime-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 339,
+      "sha256": "ec1fec0240160b86ade30a32ee38bfae8e5ec2b2fe72bbe494bcc6c8248cc1b6",
+      "statementCounts": {
+        "create-table": 5,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 10,
+        "update": 9
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 5,
+        "on-conflict": 5,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/152-wts-firework-workflow-config.sql",
+      "name": "152-wts-firework-workflow-config.sql",
+      "number": 152,
+      "slug": "wts-firework-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow",
+        "business"
+      ],
+      "lineCount": 472,
+      "sha256": "114aa2ab87dfdd26cd32971746d1821dfa7108591d7b1bacbd7ba86d11f1f78e",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 6,
+        "update": 7
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 6,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/153-wts-firework-runtime-json.sql",
+      "name": "153-wts-firework-runtime-json.sql",
+      "number": 153,
+      "slug": "wts-firework-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business"
+      ],
+      "lineCount": 439,
+      "sha256": "6bdec0d6a59a79f7d31c2a10131485d39bddfe394ca697c1ee6ac6d593823201",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 28,
+        "update": 28
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 28,
+        "do-block": 14,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/154-runtime-view-is-shadow-integer-compat.sql",
+      "name": "154-runtime-view-is-shadow-integer-compat.sql",
+      "number": 154,
+      "slug": "runtime-view-is-shadow-integer-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 30,
+      "sha256": "ffbf11f6060a7e875255f933fe1c32c6c8b942b5441a221c0e6c0c4a3a7031d9",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/155-postgres-legacy-text-bigint-like-operator.sql",
+      "name": "155-postgres-legacy-text-bigint-like-operator.sql",
+      "number": 155,
+      "slug": "postgres-legacy-text-bigint-like-operator",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 71,
+      "sha256": "ac5805e11c4754f3d23c533193e99611f8b8a0a77e9c23960f4e1764d3dcfe9a",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/156-workappointment-work-actions-compat.sql",
+      "name": "156-workappointment-work-actions-compat.sql",
+      "number": 156,
+      "slug": "workappointment-work-actions-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 111,
+      "sha256": "404ab07abdf841505dce8b3fe74992175321f1381b75c4f991e42d456c670f38",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 49,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/157-workappointment-workplan-approve-runtime-json.sql",
+      "name": "157-workappointment-workplan-approve-runtime-json.sql",
+      "number": 157,
+      "slug": "workappointment-workplan-approve-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 87,
+      "sha256": "b95119416935f79a51bfcdfc0dc117ea94c77db3c60f38561348380b512cde15",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 5,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 5,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/158-workappointment-workplan-picture-upload-compat.sql",
+      "name": "158-workappointment-workplan-picture-upload-compat.sql",
+      "number": 158,
+      "slug": "workappointment-workplan-picture-upload-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 99,
+      "sha256": "a36ef21016768dcb537fc5c512bdd15b5a84f327d2c457c0c2ca03b527418b42",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 3
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/159-wom-process-unit-edit-runtime-json.sql",
+      "name": "159-wom-process-unit-edit-runtime-json.sql",
+      "number": 159,
+      "slug": "wom-process-unit-edit-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 64,
+      "sha256": "1a412e622905cd68a6bec336e58b99f83235e426e453c4e16537d12c10806b78",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/160-rm-batch-formula-edit-view-runtime-json.sql",
+      "name": "160-rm-batch-formula-edit-view-runtime-json.sql",
+      "number": 160,
+      "slug": "rm-batch-formula-edit-view-runtime-json",
+      "validName": true,
+      "tags": [
+        "platform",
+        "configuration"
+      ],
+      "lineCount": 67,
+      "sha256": "8c8aec9dde150d76000ba58b867a36af0db5ed9d713b55b16b4e63ec327a7237",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql",
+      "name": "161-wom-make-task-flow-workflow-config.sql",
+      "number": 161,
+      "slug": "wom-make-task-flow-workflow-config",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 258,
+      "sha256": "82ec75ec7a9336fcee8c4f828794892d4d78e608c9968849f77a51eb4e9f34b4",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 3,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 3,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/162-wom-task-material-quality-tables.sql",
+      "name": "162-wom-task-material-quality-tables.sql",
+      "number": 162,
+      "slug": "wom-task-material-quality-tables",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 229,
+      "sha256": "78fb0ae08052356c73040becb6cb1436c9a157b107a64020687b8b09d47bef05",
+      "statementCounts": {
+        "create-table": 2,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 6,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 12,
+        "on-conflict": 0,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/163-wom-make-task-flow-jbpm-definition.sql",
+      "name": "163-wom-make-task-flow-jbpm-definition.sql",
+      "number": 163,
+      "slug": "wom-make-task-flow-jbpm-definition",
+      "validName": true,
+      "tags": [
+        "workflow"
+      ],
+      "lineCount": 296,
+      "sha256": "14e46757bc8ab2c14c4af14d5cb2940a498e793fd252ce4f3c59cbb7e3550d4c",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 1,
+        "alter-table": 0,
+        "insert": 4,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 1,
+        "on-conflict": 4,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/164-wom-produce-task-deal-info-table.sql",
+      "name": "164-wom-produce-task-deal-info-table.sql",
+      "number": 164,
+      "slug": "wom-produce-task-deal-info-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 129,
+      "sha256": "07c86fa757e199493d2203a4eddbd5e734b2795cc1532f0efa83fbad6cfa9998",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 3,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql",
+      "name": "165-wts-workpermit-list-runtime-compat.sql",
+      "number": 165,
+      "slug": "wts-workpermit-list-runtime-compat",
+      "validName": true,
+      "tags": [
+        "platform",
+        "business",
+        "compatibility"
+      ],
+      "lineCount": 294,
+      "sha256": "2e0b9c0b9c2ba9924ec65c51511c746d6ef1c495addbba9703c1fd3109dfc129",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 5,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 5,
+        "do-block": 3,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/166-postgres-legacy-bigint-text-like-operator.sql",
+      "name": "166-postgres-legacy-bigint-text-like-operator.sql",
+      "number": 166,
+      "slug": "postgres-legacy-bigint-text-like-operator",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 116,
+      "sha256": "2f24949c40bbf5185539a2b90f81efd373132b484ec9f044ca7ddd441d548300",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 4,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 4,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/167-postgres-legacy-varchar-text-like-operator.sql",
+      "name": "167-postgres-legacy-varchar-text-like-operator.sql",
+      "number": 167,
+      "slug": "postgres-legacy-varchar-text-like-operator",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 65,
+      "sha256": "5ec9a2a8da9e4edcc38fa8170963e0e89cf2778e6eb92d0f24f0601d25800024",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 2,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 2,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql",
+      "name": "168-wom-maketasklist-toolbar-interaction-compat.sql",
+      "number": 168,
+      "slug": "wom-maketasklist-toolbar-interaction-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 252,
+      "sha256": "b5f24e29f94e00741856f5c750bab339f7ba30f6ce9f0a5926cbe969189e7e1b",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/169-custom-property-project-property-compat.sql",
+      "name": "169-custom-property-project-property-compat.sql",
+      "number": 169,
+      "slug": "custom-property-project-property-compat",
+      "validName": true,
+      "tags": [
+        "configuration",
+        "compatibility"
+      ],
+      "lineCount": 10,
+      "sha256": "ac93668e0bf2915972b09d14ba25a3d6bf710444a3364617529c38c44e7596fa",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 1,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/170-rbac-pstaff-pposition-compat.sql",
+      "name": "170-rbac-pstaff-pposition-compat.sql",
+      "number": 170,
+      "slug": "rbac-pstaff-pposition-compat",
+      "validName": true,
+      "tags": [
+        "auth-rbac-org",
+        "compatibility"
+      ],
+      "lineCount": 104,
+      "sha256": "2aecd5ef4201d076073adde88d6decad5d506adce748a85e373a6bc665d8a914",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 4,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 4,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
     }
   ]
 }

@@ -6,13 +6,16 @@
 -- select
 --   'public.org_department' as table_name,
 --   count(*) as row_count,
---   md5(string_agg(
+--   md5(coalesce(string_agg(
 --     concat_ws('|', id, code, name, valid),
 --     E'\n' order by id
---   )) as checksum
+--   ), '')) as checksum,
+--   'OK' as status
 -- from public.org_department;
 --
 -- Rules:
 -- - Order by a stable primary key or deterministic business key.
 -- - Exclude volatile audit columns unless they are part of the acceptance.
--- - Compare source and target outputs in the rehearsal report.
+-- - Output table_name, row_count, checksum and status as tab-separated columns.
+-- - Compare source and target outputs with scripts/compare-checksums.py in the
+--   rehearsal report.

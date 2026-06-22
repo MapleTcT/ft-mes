@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "PLANNED",
+  "productionMode": "NOT_DECIDED",
+  "decisionOwner": "platform-owner",
+  "testBypassPromotedToProduction": false,
+  "decisions": [
+    {
+      "id": "formal-license",
+      "title": "Formal license procurement or supported integration",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "decision": "TBD",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Formal production license or supported license-service integration has not been confirmed."
+      ],
+      "nextActions": [
+        "Attach vendor confirmation, contract reference, or supported integration design."
+      ]
+    },
+    {
+      "id": "expiry-behavior",
+      "title": "License expiry behavior",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "decision": "TBD",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "License expiry behavior has not been rehearsed in a non-production environment."
+      ],
+      "nextActions": [
+        "Run expiry/failure-mode rehearsal and record user-visible behavior."
+      ]
+    },
+    {
+      "id": "emergency-bypass",
+      "title": "Emergency bypass approval and audit",
+      "status": "PLANNED",
+      "owner": "security-owner",
+      "decision": "TBD",
+      "allowed": false,
+      "approver": "TBD",
+      "maxDuration": "TBD",
+      "auditEvidence": "TBD",
+      "blockingIssues": [
+        "Emergency bypass approval path and audit rule are not signed."
+      ],
+      "nextActions": [
+        "Define approver, max duration, audit log location, and rollback-to-license procedure."
+      ]
+    },
+    {
+      "id": "config-backup-restore",
+      "title": "Redis, Nacos and gateway license config backup/restore",
+      "status": "PLANNED",
+      "owner": "runtime-owner",
+      "decision": "TBD",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "License-related Redis/Nacos/gateway config backup and restore proof is missing."
+      ],
+      "nextActions": [
+        "Attach backup/restore commands and rollback rehearsal evidence."
+      ]
+    },
+    {
+      "id": "monitoring-audit",
+      "title": "License monitoring and audit",
+      "status": "PLANNED",
+      "owner": "operations-owner",
+      "decision": "TBD",
+      "evidence": "TBD",
+      "blockingIssues": [
+        "Monitoring, alerting and audit evidence are not attached."
+      ],
+      "nextActions": [
+        "Define alert rule, dashboard, log query and incident runbook."
+      ]
+    }
+  ]
+}

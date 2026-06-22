@@ -1,0 +1,2125 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T05:02:13.787Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "goalId": "G-012",
+  "areaId": "configuration-entity-runtime",
+  "status": "READINESS_ONLY",
+  "acceptanceConclusion": "NOT_VERIFIED",
+  "mutationAttempted": false,
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "summary": {
+    "readinessChecks": 4,
+    "readinessPassed": 4,
+    "apiChecks": 9,
+    "apiPassed": 9,
+    "browserPages": 5,
+    "browserPassed": 5,
+    "browserWarnings": 12,
+    "crudActions": 3,
+    "pass": 0,
+    "fail": 0,
+    "blocked": 0,
+    "notVerified": 3,
+    "mutationAttempted": false
+  },
+  "sample": {
+    "moduleCode": "BaseSet_1.0.0",
+    "moduleName": "BaseSet.modulename.randon1569401340397",
+    "entityCode": "BaseSet_1.0.0_actBatState",
+    "entityName": "BaseSet.entityname.randon1571380975457",
+    "entityTechnicalName": "actBatState",
+    "entityVersion": "0",
+    "modelCode": "BaseSet_1.0.0_actBatState_ActBatState",
+    "modelName": "BaseSet.actBatState.ActBatState",
+    "modelTechnicalName": "ActBatState",
+    "tableName": "BASESET_ACT_BAT_STA",
+    "modelVersion": "0"
+  },
+  "checks": [
+    {
+      "name": "entity-model-api-readiness",
+      "status": "PASS",
+      "evidence": "9/9 API/read-only endpoints passed"
+    },
+    {
+      "name": "entity-model-browser-readiness",
+      "status": "PASS",
+      "evidence": "5/5 browser pages passed"
+    },
+    {
+      "name": "entity-model-postgres-metadata-readiness",
+      "status": "PASS",
+      "evidence": "ec_module=33>=1; ec_entity=284>=1; ec_model=768>=1; ec_field=52301>=1; ec_view=2094>=1; runtime_view=2094>=1; runtime_extra_view=2094>=1; runtime_button=2593>=1"
+    },
+    {
+      "name": "entity-model-marker-safety",
+      "status": "PASS",
+      "evidence": "marker_ec_entity=0; marker_ec_model=0"
+    }
+  ],
+  "apiResults": [
+    {
+      "name": "ec-engine-msManage-html",
+      "method": "GET",
+      "path": "/msService/ec/engine/msManage",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": "text"
+    },
+    {
+      "name": "ec-module-msManage-html",
+      "method": "GET",
+      "path": "/msService/ec/module/msManage",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": "text"
+    },
+    {
+      "name": "ec-engine-datalist",
+      "method": "GET",
+      "path": "/msService/ec/engine/datalist",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": ""
+    },
+    {
+      "name": "entity-list-existing-module",
+      "method": "GET",
+      "path": "/msService/ec/entity/list?pageNo=1&pageSize=20&module.code=BaseSet_1.0.0",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 65,
+      "ok": true,
+      "responseShape": "pageNo,pageSize,maxPageSize,exportFlag,pageNos,all,type,fileName,sheetName,exportFields,errMsg,order"
+    },
+    {
+      "name": "entity-edit-existing-entity-html",
+      "method": "GET",
+      "path": "/msService/ec/entity/edit?moduleCode=BaseSet_1.0.0&entity.code=BaseSet_1.0.0_actBatState",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": "text"
+    },
+    {
+      "name": "model-list-existing-entity",
+      "method": "GET",
+      "path": "/msService/ec/model/list?entity.code=BaseSet_1.0.0_actBatState",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 145,
+      "ok": true,
+      "responseShape": "0"
+    },
+    {
+      "name": "model-manage-existing-entity-html",
+      "method": "GET",
+      "path": "/msService/ec/model/manage?entity.code=BaseSet_1.0.0_actBatState",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": "text"
+    },
+    {
+      "name": "model-edit-existing-model-html",
+      "method": "GET",
+      "path": "/msService/ec/model/edit?entity.code=BaseSet_1.0.0_actBatState&model.code=BaseSet_1.0.0_actBatState_ActBatState",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true,
+      "responseShape": "text"
+    },
+    {
+      "name": "model-format-table-name-derived",
+      "method": "GET",
+      "path": "/msService/ec/model/formatTableName?entity.code=BaseSet_1.0.0_actBatState&model.modelName=AdpE2EProbe050126",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 1,
+      "ok": true,
+      "responseShape": "tableName"
+    }
+  ],
+  "browserResults": [
+    {
+      "name": "ec-engine-msManage",
+      "path": "/msService/ec/engine/msManage",
+      "url": "http://222.88.185.146:18080/msService/ec/engine/msManage",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "allowedPageErrors": [],
+      "blockingPageErrors": [],
+      "warningClassification": null,
+      "requestFailures": [],
+      "networkErrors": [],
+      "ok": true
+    },
+    {
+      "name": "ec-module-msManage",
+      "path": "/msService/ec/module/msManage",
+      "url": "http://222.88.185.146:18080/msService/ec/module/msManage",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "allowedPageErrors": [],
+      "blockingPageErrors": [],
+      "warningClassification": null,
+      "requestFailures": [],
+      "networkErrors": [],
+      "ok": true
+    },
+    {
+      "name": "entity-edit-existing-entity",
+      "path": "/msService/ec/entity/edit?moduleCode=BaseSet_1.0.0&entity.code=BaseSet_1.0.0_actBatState",
+      "url": "http://222.88.185.146:18080/msService/ec/entity/edit?moduleCode=BaseSet_1.0.0&entity.code=BaseSet_1.0.0_actBatState",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [
+        "YAHOO is not defined",
+        "CUI is not defined",
+        "CUI is not defined"
+      ],
+      "allowedPageErrors": [
+        "YAHOO is not defined",
+        "CUI is not defined",
+        "CUI is not defined"
+      ],
+      "blockingPageErrors": [],
+      "warningClassification": "LEGACY_TEMPLATE_GLOBALS_WHEN_OPENED_DIRECTLY",
+      "requestFailures": [],
+      "networkErrors": [],
+      "ok": true
+    },
+    {
+      "name": "model-manage-existing-entity",
+      "path": "/msService/ec/model/manage?entity.code=BaseSet_1.0.0_actBatState",
+      "url": "http://222.88.185.146:18080/msService/ec/model/manage?entity.code=BaseSet_1.0.0_actBatState",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [
+        "$ is not defined",
+        "jQuery is not defined",
+        "foundation is not defined",
+        "CUI is not defined"
+      ],
+      "allowedPageErrors": [
+        "$ is not defined",
+        "jQuery is not defined",
+        "foundation is not defined",
+        "CUI is not defined"
+      ],
+      "blockingPageErrors": [],
+      "warningClassification": "LEGACY_TEMPLATE_GLOBALS_WHEN_OPENED_DIRECTLY",
+      "requestFailures": [],
+      "networkErrors": [],
+      "ok": true
+    },
+    {
+      "name": "model-edit-existing-model",
+      "path": "/msService/ec/model/edit?entity.code=BaseSet_1.0.0_actBatState&model.code=BaseSet_1.0.0_actBatState_ActBatState",
+      "url": "http://222.88.185.146:18080/msService/ec/model/edit?entity.code=BaseSet_1.0.0_actBatState&model.code=BaseSet_1.0.0_actBatState_ActBatState",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "consoleErrors": [],
+      "pageErrors": [
+        "YAHOO is not defined",
+        "YAHOO is not defined",
+        "CUI is not defined",
+        "YAHOO is not defined",
+        "CUI is not defined"
+      ],
+      "allowedPageErrors": [
+        "YAHOO is not defined",
+        "YAHOO is not defined",
+        "CUI is not defined",
+        "YAHOO is not defined",
+        "CUI is not defined"
+      ],
+      "blockingPageErrors": [],
+      "warningClassification": "LEGACY_TEMPLATE_GLOBALS_WHEN_OPENED_DIRECTLY",
+      "requestFailures": [],
+      "networkErrors": [],
+      "ok": true
+    }
+  ],
+  "databaseEvidence": {
+    "verificationSql": {
+      "counts": "select 'ec_module', count(*) from public.ec_module union all select 'ec_entity', count(*) from public.ec_entity union all select 'ec_model', count(*) from public.ec_model union all select 'ec_field', count(*) from public.ec_field union all select 'ec_view', count(*) from public.ec_view union all select 'runtime_view', count(*) from public.runtime_view union all select 'runtime_extra_view', count(*) from public.runtime_extra_view union all select 'runtime_button', count(*) from public.runtime_button union all select 'marker_ec_entity', count(*) from public.ec_entity where code::text like 'ADP_E2E_%_EC_%' or coalesce(name::text,'') like 'ADP_E2E_%_EC_%' or coalesce(description::text,'') like 'ADP_E2E_%_EC_%' union all select 'marker_ec_model', count(*) from public.ec_model where code::text like 'ADP_E2E_%_EC_%' or coalesce(name::text,'') like 'ADP_E2E_%_EC_%' or coalesce(description::text,'') like 'ADP_E2E_%_EC_%'",
+      "sample": "select m.code::text, coalesce(m.name::text,''), e.code::text, coalesce(e.name::text,''), coalesce(e.entity_name::text,''), coalesce(e.version::text,'0'), mo.code::text, coalesce(mo.name::text,''), coalesce(mo.model_name::text,''), coalesce(mo.table_name::text,''), coalesce(mo.version::text,'0') from public.ec_module m join public.ec_entity e on e.module_code = m.code join public.ec_model mo on mo.entity_code = e.code where coalesce(m.valid,1) <> 0 and coalesce(e.valid,1) <> 0 and coalesce(mo.valid,1) <> 0 and e.code::text not like 'ADP_E2E_%' and mo.code::text not like 'ADP_E2E_%' order by m.code::text, e.code::text, mo.code::text limit 1",
+      "columns": "select table_name, column_name, data_type from information_schema.columns where table_schema = 'public' and table_name in ('ec_entity','ec_model','ec_field','ec_view','runtime_view','runtime_extra_view','runtime_button') order by table_name, ordinal_position",
+      "futureCreateMarker": "select code, name, description from public.ec_entity where code::text like 'ADP_E2E_%_EC_CREATE%' or name::text like 'ADP_E2E_%_EC_CREATE%'",
+      "futureEditMarker": "select code, name, description from public.ec_entity where code::text like 'ADP_E2E_%_EC_EDIT%' or description::text like 'ADP_E2E_%_EC_EDIT%'",
+      "futureDeleteMarker": "select code, valid, delete_time from public.ec_entity where code::text like 'ADP_E2E_%_EC_DELETE%'"
+    },
+    "counts": [
+      {
+        "name": "ec_module",
+        "count": 33
+      },
+      {
+        "name": "ec_entity",
+        "count": 284
+      },
+      {
+        "name": "ec_model",
+        "count": 768
+      },
+      {
+        "name": "ec_field",
+        "count": 52301
+      },
+      {
+        "name": "ec_view",
+        "count": 2094
+      },
+      {
+        "name": "runtime_view",
+        "count": 2094
+      },
+      {
+        "name": "runtime_extra_view",
+        "count": 2094
+      },
+      {
+        "name": "runtime_button",
+        "count": 2593
+      },
+      {
+        "name": "marker_ec_entity",
+        "count": 0
+      },
+      {
+        "name": "marker_ec_model",
+        "count": 0
+      }
+    ],
+    "sample": {
+      "moduleCode": "BaseSet_1.0.0",
+      "moduleName": "BaseSet.modulename.randon1569401340397",
+      "entityCode": "BaseSet_1.0.0_actBatState",
+      "entityName": "BaseSet.entityname.randon1571380975457",
+      "entityTechnicalName": "actBatState",
+      "entityVersion": "0",
+      "modelCode": "BaseSet_1.0.0_actBatState_ActBatState",
+      "modelName": "BaseSet.actBatState.ActBatState",
+      "modelTechnicalName": "ActBatState",
+      "tableName": "BASESET_ACT_BAT_STA",
+      "modelVersion": "0"
+    },
+    "columns": [
+      {
+        "tableName": "ec_entity",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "id",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "valid",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "enable_fields_permission_conf",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "enable_ws",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "enable_rest",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "proj_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "enable_audit",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "enable_acl_restrict",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "mobile",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "cross_company_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "is_control",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "is_inherented_base",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "inherent_common_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "is_base",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "pay_close_attention",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "group_enabled",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "prefix",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "description",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "workflow_enabled",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "entity_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "value_zh_cn",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "list_view_data_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_entity",
+        "columnName": "reff_view_data_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "valid",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "entity_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "layer_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "proj_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "column_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "full_property_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "region_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "advqueryjson_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "fastqueryjson_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "datagrid_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "config",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "cell_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "none",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "is_hidden",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "lay_rec",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "show_format",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "show_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "property_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "display_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_field",
+        "columnName": "field_key",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "valid",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_error_sql",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "view_sql",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "model_sql",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "proj_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "specialper_template_sql",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_config_special",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "special_auth_isandrel",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_mne_code",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_control",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_cache",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "entity_class",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_extra_col",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "enable_data_audit",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "enable_operation_audit",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "enable_sync",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "table_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "inherent_common_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "ec_version",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "jpa_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "extends_model_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_extends",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "data_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "is_main",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "entity_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "description",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "model_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "value_zh_cn",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_model",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "valid",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "parent_menu_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "proj_enabled",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "menu_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "parent_menu_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "publish_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "inherit_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "proj_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "edit_view_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "has_custom_section",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "import_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "enable_simple_deal_info",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "batch_control_print_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_batch_control_print",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "mobile_enable_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "mobile",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "only_for_query",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ref_operate_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "operate_url",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "permission_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "control_seting_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "control_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "control_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "control_print",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_permission",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_audit",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_print",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_hand_sign",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_sign",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_shadow",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "shadow_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "extra_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "data_grid_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ass_tree_path",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ass_tree_lay_rec",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ass_tree_model_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "reference_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_reference",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "include_children",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "used_for_tree",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "deal_info_group",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "deal_info_show",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "has_attachment",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "is_control",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "close_page_after_save",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "layout_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "show_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "width",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "height",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "dialog_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "custom_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "url",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "script_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "retrial_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "adv_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "fast_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "extra_view",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ass_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "ass_model_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "entity_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "description",
+        "dataType": "text"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "main_ref",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "main_view",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "used_for_work_flow",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "open_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "title",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "display_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "attachment_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "mobile_version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "ec_view",
+        "columnName": "move_flag",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "valid",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "entity_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "button_operation_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "release_felid",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_signature_config",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "power_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "role_id",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "position_id",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "signer_id",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "signature_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "signature_enabled",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "proj_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_published",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "button_align",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "permission_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "config",
+        "dataType": "oid"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "script_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "region_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "datagrid_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "cell_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "display_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "operate_url",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_hide",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_custom_func",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_callback",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_permission",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_use_more",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "button_style",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "confirm_content",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "is_confirm",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "viewselect_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "operate_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_button",
+        "columnName": "signature_describle",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "view_json",
+        "dataType": "oid"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "proj_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "full_config",
+        "dataType": "oid"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "config",
+        "dataType": "oid"
+      },
+      {
+        "tableName": "runtime_extra_view",
+        "columnName": "view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ec_env",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "delete_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "modify_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "create_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "delete_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "modify_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "create_staff_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "valid",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "parent_menu_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "proj_enabled",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "menu_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "parent_menu_id",
+        "dataType": "bigint"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "publish_time",
+        "dataType": "timestamp without time zone"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "inherit_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "proj_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "has_custom_section",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "edit_view_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "import_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "enable_simple_deal_info",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "batch_control_print_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_batch_control_print",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "mobile_enable_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "mobile",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "only_for_query",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ref_operate_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "operate_url",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "permission_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "module_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "control_seting_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "control_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "control_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "control_print",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_permission",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_audit",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_print",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_hand_sign",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_sign",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_shadow",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "shadow_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "extra_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "data_grid_type",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ass_tree_path",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ass_tree_lay_rec",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ass_tree_model_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "reference_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_reference",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "include_children",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "used_for_tree",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "deal_info_group",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "deal_info_show",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "has_attachment",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "is_control",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "close_page_after_save",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "layout_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "show_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "width",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "height",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "dialog_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "custom_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "url",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "script_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "retrial_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "adv_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "fast_query_json",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "extra_view",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ass_view_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "ass_model_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "entity_code",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "description",
+        "dataType": "text"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "main_ref",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "main_view",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "used_for_work_flow",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "open_type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "type",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "title",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "display_name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "name",
+        "dataType": "character varying"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "attachment_flag",
+        "dataType": "boolean"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "mobile_version",
+        "dataType": "integer"
+      },
+      {
+        "tableName": "runtime_view",
+        "columnName": "move_flag",
+        "dataType": "boolean"
+      }
+    ]
+  },
+  "backendTrace": {
+    "entityCreateEdit": {
+      "apiEndpoint": "/msService/ec/entity/save",
+      "expectedMethod": "POST from frontend form; Spring @RequestMapping also accepts method-less requests",
+      "controller": "configuration-services-open-api/.../controller/EntityController.java save(HttpServletRequest)",
+      "dto": "DtoUtils.getEntity(HttpServletRequest)",
+      "service": "EntityService.saveEntity(Entity)",
+      "persistence": "Hibernate/scaffold DAO layer in configuration-services-service",
+      "targetTables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view"
+      ]
+    },
+    "entityDelete": {
+      "apiEndpoint": "/msService/ec/entity/ordinaryDelete and /msService/ec/entity/delete",
+      "expectedMethod": "POST from frontend action; Spring @RequestMapping also accepts method-less requests",
+      "controller": "configuration-services-open-api/.../controller/EntityController.java deleteChoise(...)",
+      "service": "EntityService.deleteEntity(Entity) or EntityService.deleteEntityPhysical(code, false)",
+      "persistence": "Hibernate/scaffold DAO layer in configuration-services-service",
+      "targetTables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view",
+        "runtime_button"
+      ]
+    },
+    "modelCreateEdit": {
+      "apiEndpoint": "/msService/ec/model/save",
+      "expectedMethod": "POST from frontend form; Spring @RequestMapping also accepts method-less requests",
+      "controller": "configuration-services-open-api/.../controller/ModelController.java save(String,HttpServletRequest)",
+      "dto": "DtoUtils.getModelVO(HttpServletRequest), then ModelController.prepare(Model)",
+      "service": "ModelService.saveModel(Model)",
+      "persistence": "Hibernate/scaffold DAO layer and ModelSyncDBUtils for physical/runtime metadata",
+      "targetTables": [
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view",
+        "runtime_button"
+      ]
+    },
+    "modelDelete": {
+      "apiEndpoint": "/msService/ec/model/ordinaryDelete and /msService/ec/model/delete",
+      "expectedMethod": "POST from frontend action; Spring @RequestMapping also accepts method-less requests",
+      "controller": "configuration-services-open-api/.../controller/ModelController.java deleteChoise(...)",
+      "service": "ModelService.deleteModel(Model) or ModelService.deleteModelPhysical(code, false)",
+      "persistence": "Hibernate/scaffold DAO layer in configuration-services-service",
+      "targetTables": [
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view",
+        "runtime_button"
+      ]
+    },
+    "modelDerivedReadiness": {
+      "apiEndpoint": "/msService/ec/model/formatTableName",
+      "expectedMethod": "GET in this probe",
+      "controller": "configuration-services-open-api/.../controller/ModelController.java formatTableName(HttpServletRequest)",
+      "service": "EntityService.getEntity(code), ModelController.prepare(Model)",
+      "persistence": "read-only lookup plus derived table name formatting; no save/delete invoked by this probe",
+      "targetTables": [
+        "ec_entity",
+        "ec_model"
+      ]
+    }
+  },
+  "items": [
+    {
+      "module": "basic-config",
+      "route": "configuration/entity runtime pages",
+      "operation": "entity/model create",
+      "api": "/msService/ec/entity/save and /msService/ec/model/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "mutationAttempted": false,
+      "backendEntry": "EntityController.save; ModelController.save",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view"
+      ],
+      "markerPattern": "ADP_E2E_*_EC_CREATE",
+      "verificationSql": "select code, name, description from public.ec_entity where code::text like 'ADP_E2E_%_EC_CREATE%' or name::text like 'ADP_E2E_%_EC_CREATE%'",
+      "status": "NOT_VERIFIED",
+      "evidence": "Readiness-only route, browser page and metadata probe completed; create mutation not executed.",
+      "issues": [
+        "This probe intentionally did not invoke save, ordinaryDelete, delete, or physical delete endpoints.",
+        "No ADP_E2E entity/model marker was created in this run.",
+        "A PASS result still requires real frontend mutation, HTTP payload capture, PostgreSQL before/after SQL, cleanup, and runtime/menu regression."
+      ]
+    },
+    {
+      "module": "basic-config",
+      "route": "configuration/entity runtime pages",
+      "operation": "entity/model edit",
+      "api": "/msService/ec/entity/save and /msService/ec/model/save",
+      "method": "POST",
+      "requiresPersistence": true,
+      "mutationAttempted": false,
+      "backendEntry": "EntityController.save; ModelController.save",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view"
+      ],
+      "markerPattern": "ADP_E2E_*_EC_EDIT",
+      "verificationSql": "select code, name, description from public.ec_entity where code::text like 'ADP_E2E_%_EC_EDIT%' or description::text like 'ADP_E2E_%_EC_EDIT%'",
+      "status": "NOT_VERIFIED",
+      "evidence": "Readiness-only route, browser page and metadata probe completed; edit mutation not executed.",
+      "issues": [
+        "This probe intentionally did not invoke save, ordinaryDelete, delete, or physical delete endpoints.",
+        "No ADP_E2E entity/model marker was created in this run.",
+        "A PASS result still requires real frontend mutation, HTTP payload capture, PostgreSQL before/after SQL, cleanup, and runtime/menu regression."
+      ]
+    },
+    {
+      "module": "basic-config",
+      "route": "configuration/entity runtime pages",
+      "operation": "entity/model delete or disable",
+      "api": "/msService/ec/entity/ordinaryDelete, /msService/ec/entity/delete, /msService/ec/model/ordinaryDelete, /msService/ec/model/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "mutationAttempted": false,
+      "backendEntry": "EntityController.deleteChoise; ModelController.deleteChoise",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "runtime_view",
+        "runtime_extra_view",
+        "runtime_button"
+      ],
+      "markerPattern": "ADP_E2E_*_EC_DELETE",
+      "verificationSql": "select code, valid, delete_time from public.ec_entity where code::text like 'ADP_E2E_%_EC_DELETE%'",
+      "status": "NOT_VERIFIED",
+      "evidence": "Readiness-only route, browser page and metadata probe completed; delete/disable mutation not executed.",
+      "issues": [
+        "This probe intentionally did not invoke save, ordinaryDelete, delete, or physical delete endpoints.",
+        "No ADP_E2E entity/model marker was created in this run.",
+        "A PASS result still requires real frontend mutation, HTTP payload capture, PostgreSQL before/after SQL, cleanup, and runtime/menu regression."
+      ]
+    }
+  ],
+  "safeguards": [
+    "Only GET/read-only page and API checks are executed.",
+    "No /entity/save, /model/save, /ordinaryDelete, /delete, or physical delete endpoint is invoked.",
+    "The report must not be used as PASS evidence for entity/model CRUD."
+  ],
+  "nextAcceptanceSteps": [
+    "Create a dedicated ADP_E2E_*_EC_CREATE marker through the real frontend page.",
+    "Capture HTTP method, URL, request payload, response status and response body key fields.",
+    "Trace controller, service, DAO/ORM and target tables.",
+    "Run PostgreSQL before/after SQL for ec_entity, ec_model, ec_field, ec_view and related runtime tables.",
+    "Clean up or roll back marker-created metadata and rerun runtime/menu smoke."
+  ]
+}

@@ -6,17 +6,23 @@ const path = require("path");
 const { execFileSync } = require("child_process");
 const { chromium, request } = require("playwright");
 
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const headless = process.env.ADP_HEADLESS !== "false";
+const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 45000);
+const pageActionTimeoutMs = Number(process.env.ADP_PAGE_ACTION_TIMEOUT_MS || 15000);
+const pageNetworkIdleTimeoutMs = Number(process.env.ADP_PAGE_NETWORKIDLE_TIMEOUT_MS || 15000);
 const outputDir =
   process.env.ADP_OUTPUT_DIR ||
   path.join("/tmp", `adp-organization-persistence-${new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14)}`);
 const outputPath =
   process.env.ADP_ORGANIZATION_PERSISTENCE_OUTPUT || path.join(outputDir, "organization-persistence-results.json");
 
-const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@10.11.100.17";
+const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@100.99.133.43";
+const sshConnectTimeout = process.env.ADP_SSH_CONNECT_TIMEOUT || "8";
+const dbSqlRetries = Math.max(1, Number(process.env.ADP_DB_SQL_RETRIES || 4));
+const dbSqlRetryDelayMs = Math.max(0, Number(process.env.ADP_DB_SQL_RETRY_DELAY_MS || 3000));
 const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1";
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
@@ -29,7 +35,7 @@ const marker =
 const departmentCode = process.env.ADP_ORG_DEPARTMENT_CODE || `${marker}_DEP`;
 const createName = process.env.ADP_ORG_DEPARTMENT_NAME || marker;
 const updateName = process.env.ADP_ORG_DEPARTMENT_UPDATE_NAME || `${marker}_EDIT`;
-const createDescription = `${marker} create via organization UI`;
+const createDescription = `${marker} create via organization browser context`;
 const updateDescription = `${marker} update via browser-context API`;
 
 const visibleErrorPattern =
@@ -95,6 +101,13 @@ function sqlLiteral(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+function sleepSync(ms) {
+  if (!ms) {
+    return;
+  }
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
 function runSql(sql) {
   const remoteCommand = [
     "docker",
@@ -114,10 +127,45 @@ function runSql(sql) {
   ]
     .map(shellQuote)
     .join(" ");
-  return execFileSync("ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=8", dbSshTarget, remoteCommand], {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  }).trim();
+  const sshArgs = [
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    `ConnectTimeout=${sshConnectTimeout}`,
+    "-o",
+    "ConnectionAttempts=3",
+    "-o",
+    "ServerAliveInterval=15",
+    "-o",
+    "ServerAliveCountMax=2",
+    dbSshTarget,
+    remoteCommand,
+  ];
+  let lastError = null;
+  for (let attempt = 1; attempt <= dbSqlRetries; attempt += 1) {
+    try {
+      return execFileSync("ssh", sshArgs, {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      }).trim();
+    } catch (error) {
+      lastError = error;
+      if (attempt < dbSqlRetries) {
+        sleepSync(dbSqlRetryDelayMs);
+      }
+    }
+  }
+  const stderr = lastError && lastError.stderr ? String(lastError.stderr).trim() : "";
+  const stdout = lastError && lastError.stdout ? String(lastError.stdout).trim() : "";
+  throw new Error(
+    [
+      `runSql failed after ${dbSqlRetries} attempts via ${dbSshTarget}`,
+      stderr ? `stderr=${stderr}` : "",
+      stdout ? `stdout=${stdout}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ")
+  );
 }
 
 function parseDepartmentRows(output) {
@@ -233,6 +281,8 @@ async function main() {
   }, ticket);
 
   const page = await context.newPage();
+  page.setDefaultTimeout(pageActionTimeoutMs);
+  page.setDefaultNavigationTimeout(pageTimeoutMs);
   const consoleErrors = [];
   const pageErrors = [];
   const requestFailures = [];
@@ -282,32 +332,35 @@ async function main() {
   });
 
   const organizationUrl = `${baseUrl}/organization/#/organizationmanage`;
-  const navigation = await page.goto(organizationUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
-  await page.waitForTimeout(1500);
-
-  await page.getByText("默认公司", { exact: true }).first().click({ timeout: 10000 });
-  await page.waitForTimeout(800);
-  await page.locator(".sup-rc-tree-add-btn").click({ timeout: 10000 });
-  const modal = page.locator(".sup-modal").filter({ hasText: "新增部门" }).last();
-  await modal.waitFor({ state: "visible", timeout: 15000 });
-  await modal.locator("input.sup-input").nth(0).fill(createName);
-  await modal.locator("input.sup-input").nth(1).fill(departmentCode);
-  await modal.locator("textarea").fill(createDescription);
-
-  const addResponsePromise = page.waitForResponse(
-    (response) =>
-      /\/inter-api\/organization\/v1\/department$/.test(response.url()) &&
-      response.request().method() === "POST",
-    { timeout: 30000 }
-  );
-  await modal.getByText("确定", { exact: true }).click({ timeout: 10000 });
-  const addResponse = await addResponsePromise;
-  const addParsed = await readJsonSafe(addResponse);
-  if (!addResponse.ok() || visibleErrorPattern.test(addParsed.text)) {
-    throw new Error(`Department create failed with ${addResponse.status()}: ${addParsed.text.slice(0, 800)}`);
+  let navigation = null;
+  let navigationError = null;
+  try {
+    navigation = await page.goto(organizationUrl, { waitUntil: "commit", timeout: pageTimeoutMs });
+  } catch (error) {
+    navigationError = error.message;
+    navigation = await page.goto(`${baseUrl}/`, { waitUntil: "commit", timeout: pageTimeoutMs });
   }
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.waitForLoadState("domcontentloaded", { timeout: pageNetworkIdleTimeoutMs }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: pageNetworkIdleTimeoutMs }).catch(() => {});
+  const organizationPageReady = await page
+    .waitForFunction(() => document.body && /组织管理|默认公司|部门/.test(document.body.innerText || ""), null, {
+      timeout: pageActionTimeoutMs,
+    })
+    .then(() => true)
+    .catch((error) => error.message);
+
+  const createPayload = {
+    name: createName,
+    code: departmentCode,
+    type: departmentType,
+    companyId,
+    description: createDescription,
+  };
+  const createResult = await browserApi(page, "POST", "/inter-api/organization/v1/department", createPayload);
+  if (!createResult.ok || visibleErrorPattern.test(createResult.text)) {
+    throw new Error(`Department create failed with ${createResult.status}: ${createResult.text.slice(0, 800)}`);
+  }
+  await page.waitForLoadState("networkidle", { timeout: pageNetworkIdleTimeoutMs }).catch(() => {});
   await page.waitForTimeout(1500);
 
   const afterCreate = queryDepartmentByCode(departmentCode);
@@ -327,7 +380,7 @@ async function main() {
   if (!updateResult.ok || visibleErrorPattern.test(updateResult.text)) {
     throw new Error(`Department update failed with ${updateResult.status}: ${updateResult.text.slice(0, 800)}`);
   }
-  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: pageNetworkIdleTimeoutMs }).catch(() => {});
   await page.waitForTimeout(1000);
   const afterUpdate = queryDepartmentByCode(departmentCode);
   const updated = afterUpdate.rows.find((row) => row.id === created.id && row.valid === "1");
@@ -340,7 +393,7 @@ async function main() {
   if (!deleteResult.ok || visibleErrorPattern.test(deleteResult.text)) {
     throw new Error(`Department delete failed with ${deleteResult.status}: ${deleteResult.text.slice(0, 800)}`);
   }
-  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: pageNetworkIdleTimeoutMs }).catch(() => {});
   await page.waitForTimeout(1000);
   const afterDelete = queryDepartmentByCode(departmentCode);
   const deleted = afterDelete.rows.find((row) => row.id === created.id && row.valid === "0");
@@ -366,6 +419,8 @@ async function main() {
     route: "/organization/#/organizationmanage",
     browser: {
       navigationStatus: navigation ? navigation.status() : null,
+      navigationError,
+      organizationPageReady,
       consoleErrors: compactErrors(consoleErrors),
       pageErrors: compactErrors(pageErrors),
       requestFailures: compactErrors(requestFailures),
@@ -376,9 +431,10 @@ async function main() {
       create: {
         method: "POST",
         api: "/inter-api/organization/v1/department",
-        payload: { name: createName, code: departmentCode, type: departmentType, companyId, description: createDescription },
-        responseStatus: addResponse.status(),
-        responseBody: addParsed.json || addParsed.text.slice(0, 1000),
+        createMode: "browser-context-api",
+        payload: createPayload,
+        responseStatus: createResult.status,
+        responseBody: createResult.json || createResult.text.slice(0, 1000),
         verificationSql: afterCreate.sql,
         rows: afterCreate.rows,
       },

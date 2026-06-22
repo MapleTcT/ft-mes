@@ -7,7 +7,8 @@ const { execFileSync } = require("child_process");
 const { chromium, request } = require("playwright");
 
 const stamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
+const browserBaseUrl = (process.env.ADP_BROWSER_BASE_URL || baseUrl).replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const headless = process.env.ADP_HEADLESS !== "false";
@@ -17,7 +18,7 @@ const outputPath =
   process.env.ADP_RBAC_PERMISSION_PERSISTENCE_OUTPUT ||
   path.join(outputDir, "rbac-permission-persistence-results.json");
 
-const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@10.11.100.17";
+const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@100.99.133.43";
 const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1";
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
@@ -604,14 +605,14 @@ async function main() {
 
   const browser = await chromium.launch({ headless });
   const context = await browser.newContext({
-    baseURL: baseUrl,
+    baseURL: browserBaseUrl,
     ignoreHTTPSErrors: true,
     viewport: { width: 1600, height: 1000 },
     extraHTTPHeaders: { Authorization: `Bearer ${ticket}` },
   });
   await context.addCookies([
-    { name: "suposTicket", value: ticket, url: baseUrl },
-    { name: "SUPOS_TICKET", value: ticket, url: baseUrl },
+    { name: "suposTicket", value: ticket, url: browserBaseUrl },
+    { name: "SUPOS_TICKET", value: ticket, url: browserBaseUrl },
   ]);
   await context.addInitScript((token) => {
     window.localStorage.clear();
@@ -728,7 +729,7 @@ async function main() {
   let personAfterCleanup;
 
   try {
-    const rolePage = `${baseUrl}/auth/#/role`;
+    const rolePage = `${browserBaseUrl}/auth/#/role`;
     navigations.push({ route: "/auth/#/role", status: (await openAndSettle(page, rolePage))?.status() || null });
 
     const roleCreatePayload = {
@@ -1040,7 +1041,7 @@ async function main() {
       rows: roleUserAfterDelete.rows,
     };
 
-    const authorityRolePage = `${baseUrl}/auth/#/authority?status=role&id=${cleanup.roleId}&name=${encodeURIComponent(updatedRoleName)}`;
+    const authorityRolePage = `${browserBaseUrl}/auth/#/authority?status=role&id=${cleanup.roleId}&name=${encodeURIComponent(updatedRoleName)}`;
     navigations.push({
       route: `/auth/#/authority?status=role&id=${cleanup.roleId}&name=${updatedRoleName}`,
       status: (await openAndSettle(page, authorityRolePage))?.status() || null,
@@ -1139,7 +1140,7 @@ async function main() {
       rows: rolePermissionAfterDelete.rows,
     };
 
-    const authorityUserPage = `${baseUrl}/auth/#/authority?status=user&id=${cleanup.userId}&name=${encodeURIComponent(userName)}`;
+    const authorityUserPage = `${browserBaseUrl}/auth/#/authority?status=user&id=${cleanup.userId}&name=${encodeURIComponent(userName)}`;
     navigations.push({
       route: `/auth/#/authority?status=user&id=${cleanup.userId}&name=${userName}`,
       status: (await openAndSettle(page, authorityUserPage))?.status() || null,
@@ -1509,6 +1510,7 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     baseUrl,
+    browserBaseUrl,
     username,
     marker,
     routes: ["/auth/#/role", "/auth/#/authority?status=role", "/auth/#/authority?status=user"],
@@ -1610,6 +1612,7 @@ main().catch((error) => {
       {
         generatedAt: new Date().toISOString(),
         baseUrl,
+        browserBaseUrl,
         username,
         marker,
         ok: false,

@@ -368,7 +368,7 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			return JsonUtils.setToJson(descSet);
 			//throw new BAPException(BAPException.Code.REFERENCE_VIEW);
 		}
-		String hql = " from Property as p where p.model.code != ? and p.associatedProperty.model.code = ?";
+		String hql = " from Property as p where p.model.code != ?0 and p.associatedProperty.model.code = ?1";
 		List<Property> properties = modelDao.findByHql(hql, new Object[] { model.getCode(), model.getCode() });
 		if (null != properties && !properties.isEmpty()) {
 			for (Property property : properties) {
@@ -377,7 +377,7 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			return JsonUtils.setToJson(descSet);
 			//throw new BAPException(BAPException.Code.ASS_BY_MODEL);
 		}
-		List<Property> list = propertyDao.findByHql("from Property as p where p.model.code = ?", model.getCode());
+		List<Property> list = propertyDao.findByHql("from Property as p where p.model.code = ?0", model.getCode());
 		if (null != list && !list.isEmpty()) {
 			for (Property p : list) {
 				List<DataGrid> dataGrids = dataGridService.findDataGridsByProperty(p);
@@ -393,7 +393,13 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			sqlModelService.deleteSqlModel(model.getCode());
 			sqlModelService.deleteDBView(model.getTableName());
 		}
-		modelDao.delete(model.getCode(), model.getVersion());
+		Model persistedModel = modelDao.get(model.getCode());
+		if (persistedModel == null || !Objects.equals(persistedModel.getVersion(), model.getVersion())) {
+			throw new StaleObjectStateException(Model.class.getName(), model.getCode());
+		}
+		persistedModel.setValid(false);
+		persistedModel.setDeleteTime(new Date());
+		modelDao.update(persistedModel);
 
 		//开始保存模块信息数据的最后修改时间
 //		ModuleGenerateInfo generateInfo = moduleGenerateInfoService.getModuleGenerateInfoByModuleCode(model.getModuleCode());
@@ -1229,7 +1235,9 @@ public class ModelServiceImpl extends BaseServiceImpl<Model> implements ModelSer
 			}
 			//throw new BAPException(BAPException.Code.USED_BY_VIEW);
 		}
-		propertyDao.delete(property.getCode(), property.getVersion());
+		property.setValid(false);
+		property.setDeleteTime(new Date());
+		propertyDao.update(property);
 		if (DbColumnType.BAPCODE == property.getType()) {
 			propertyService.deleteCounter(property);
 		}

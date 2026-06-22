@@ -1,0 +1,3 @@
+# This legacy external QCS patch is excluded from the default runtime patch set.
+build/
+*.jar

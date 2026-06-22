@@ -1,0 +1,708 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T01:28:43.256Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "environment": {
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "baseUrl": "http://100.99.133.43:18080",
+    "secondaryBaseUrl": "http://100.99.133.43:18070"
+  },
+  "summary": {
+    "status": "PASS",
+    "totalChecks": 9,
+    "pass": 9,
+    "fail": 0,
+    "expectedContainerCount": 6,
+    "runningExpectedContainers": 6
+  },
+  "checks": [
+    {
+      "name": "http-frontend-18080",
+      "status": "PASS",
+      "evidence": "method=HEAD; status=200; bytes=0; elapsedMs=2162"
+    },
+    {
+      "name": "http-secondary-18070",
+      "status": "PASS",
+      "evidence": "method=HEAD; status=200; bytes=0; elapsedMs=763"
+    },
+    {
+      "name": "ssh-reachable",
+      "status": "PASS",
+      "evidence": "sshTarget=v6@100.99.133.43; hostname=v6-2288H-V6; user=v6"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-nginx-1",
+      "status": "PASS",
+      "evidence": "Up 31 hours"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-gateway-1",
+      "status": "PASS",
+      "evidence": "Up 2 days"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-postgres-1",
+      "status": "PASS",
+      "evidence": "Up 9 days (healthy)"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-nacos-1",
+      "status": "PASS",
+      "evidence": "Up 9 days"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-keycloak-1",
+      "status": "PASS",
+      "evidence": "Up 9 days"
+    },
+    {
+      "name": "container-up-adp-mes-newbase-minio-1",
+      "status": "PASS",
+      "evidence": "Up 9 days"
+    }
+  ],
+  "http": [
+    {
+      "label": "frontend-18080",
+      "url": "http://100.99.133.43:18080",
+      "method": "HEAD",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 2162,
+      "contentType": "text/html",
+      "contentLengthHeader": "",
+      "cacheControl": "private, no-store, no-cache, must-revalidate, proxy-revalidate",
+      "server": "nginx/1.24.0",
+      "bodyBytes": 0
+    },
+    {
+      "label": "secondary-18070",
+      "url": "http://100.99.133.43:18070",
+      "method": "HEAD",
+      "status": 200,
+      "ok": true,
+      "elapsedMs": 763,
+      "contentType": "text/html",
+      "contentLengthHeader": "2353",
+      "cacheControl": "",
+      "server": "nginx/1.24.0",
+      "bodyBytes": 0
+    }
+  ],
+  "ssh": {
+    "hostname": "v6-2288H-V6",
+    "whoami": "v6",
+    "containers": [
+      {
+        "name": "ndh-hdfs-datanode",
+        "image": "docker.1ms.run/bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8",
+        "status": "Up 20 hours (healthy)",
+        "up": true
+      },
+      {
+        "name": "ndh-hdfs-namenode",
+        "image": "docker.1ms.run/bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8",
+        "status": "Up 21 hours (healthy)",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-nginx-1",
+        "image": "m.daocloud.io/docker.io/library/nginx:1.24.0",
+        "status": "Up 31 hours",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-RMMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 2 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-gateway-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 2 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-LIMS-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 2 days",
+        "up": true
+      },
+      {
+        "name": "ndh-dolphinscheduler",
+        "image": "m.daocloud.io/docker.io/apache/dolphinscheduler-standalone-server:3.2.1",
+        "status": "Up 4 days",
+        "up": true
+      },
+      {
+        "name": "ndh-om-mysql",
+        "image": "m.daocloud.io/docker.io/library/mysql:8.0",
+        "status": "Up 4 days",
+        "up": true
+      },
+      {
+        "name": "ndh-web",
+        "image": "m.daocloud.io/docker.io/library/nginx:1.24.0",
+        "status": "Up 4 days",
+        "up": true
+      },
+      {
+        "name": "ndh-apisix",
+        "image": "m.daocloud.io/docker.io/apache/apisix:3.13.0-debian",
+        "status": "Up 5 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-WOMMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 2 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-WTSs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 28 hours",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-craftGraphMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-EamMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 7 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-FoundationMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-ToolMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-WAPS-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 33 hours",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-SpecialMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-OEEMs-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-LIMSDCMan-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-LIMSMatStds-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-LIMSINT-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 7 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-docms-pgfix3-20260612231511",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-basemntms-dataset-poc-20260612225307",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-reportchart-poc-20260612225307",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-ds-poc-20260612204633",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-tagmanage-poc-20260612204632",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-ms-basicms-poc-20260612203040",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-orgmanagement-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 5 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-admin-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-license-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-operatetools-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-keycloak-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-flow-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-wechat-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-dingtalk-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-mobile-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-sms-jincang-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-apiserver-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-engine-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-notification-app-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-msgmanagement-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-iam-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-i18n-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-fileServer-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-task-scheduler-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-basicmanagement-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-auditlog-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-sysmanagement-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-customProperty-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-printer-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-baseService-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 31 hours",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-excel-server-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-configuration-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 8 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-adp-admin-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-websocket-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-postgres-1",
+        "image": "m.daocloud.io/docker.io/library/postgres:15-alpine",
+        "status": "Up 9 days (healthy)",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-kafka-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-zookeeper-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-redis-1",
+        "image": "m.daocloud.io/docker.io/library/redis:6-alpine",
+        "status": "Up 9 days (healthy)",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-mongo-1",
+        "image": "m.daocloud.io/docker.io/library/mongo:4.4",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-nacos-1",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "adp-mes-newbase-minio-1",
+        "image": "m.daocloud.io/docker.io/minio/minio:latest",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "ndh-doris",
+        "image": "apache/doris:doris-all-in-one-2.1.0",
+        "status": "Up 9 days (healthy)",
+        "up": true
+      },
+      {
+        "name": "ndh-clickhouse",
+        "image": "m.daocloud.io/docker.io/clickhouse/clickhouse-server:25.5",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "ndh-trino",
+        "image": "m.daocloud.io/docker.io/trinodb/trino:481",
+        "status": "Up 9 days (healthy)",
+        "up": true
+      },
+      {
+        "name": "ndh-keycloak",
+        "image": "quay.io/keycloak/keycloak:26.6.1",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "ndh-flowable",
+        "image": "swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/flowable/flowable-rest:latest",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "ndh-apisix-etcd",
+        "image": "quay.io/coreos/etcd:v3.5.21",
+        "status": "Up 9 days",
+        "up": true
+      },
+      {
+        "name": "ndh-redis",
+        "image": "m.daocloud.io/docker.io/library/redis:6-alpine",
+        "status": "Up 10 days (healthy)",
+        "up": true
+      },
+      {
+        "name": "ndh-minio",
+        "image": "m.daocloud.io/docker.io/minio/minio:latest",
+        "status": "Up 10 days",
+        "up": true
+      },
+      {
+        "name": "ndh-postgres",
+        "image": "m.daocloud.io/docker.io/library/postgres:16-alpine",
+        "status": "Up 11 days",
+        "up": true
+      },
+      {
+        "name": "data-platform-frontend-3100-proxy",
+        "image": "m.daocloud.io/docker.io/library/node:22-alpine",
+        "status": "Up 12 days",
+        "up": true
+      },
+      {
+        "name": "dify-test-nginx-1",
+        "image": "m.daocloud.io/docker.io/library/nginx:latest",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-api_websocket-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-api:1.14.2",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-api-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-api:1.14.2",
+        "status": "Up 2 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "dify-test-worker-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-api:1.14.2",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-worker_beat-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-api:1.14.2",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-plugin_daemon-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-plugin-daemon:0.6.1-local",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-db_postgres-1",
+        "image": "m.daocloud.io/docker.io/library/postgres:15-alpine",
+        "status": "Up 2 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "dify-test-redis-1",
+        "image": "m.daocloud.io/docker.io/library/redis:6-alpine",
+        "status": "Up 2 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "dify-test-web-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-web:1.14.2",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-sandbox-1",
+        "image": "m.daocloud.io/docker.io/langgenius/dify-sandbox:0.2.15",
+        "status": "Up 2 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "dify-test-weaviate-1",
+        "image": "m.daocloud.io/docker.io/semitechnologies/weaviate:1.27.0",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "dify-test-ssrf_proxy-1",
+        "image": "m.daocloud.io/docker.io/ubuntu/squid:latest",
+        "status": "Up 2 weeks",
+        "up": true
+      },
+      {
+        "name": "feitian-ods-lake-pg",
+        "image": "m.daocloud.io/docker.io/library/postgres:16-alpine",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "feitian-ingestion-test-pg",
+        "image": "m.daocloud.io/docker.io/library/postgres:16-alpine",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "larkmidtable-test-app",
+        "image": "m.daocloud.io/docker.io/eclipse-temurin:8-jre",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "larkmidtable-test-mysql",
+        "image": "m.daocloud.io/docker.io/library/mysql:8.0",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "qdata-test-nginx",
+        "image": "m.daocloud.io/docker.io/library/nginx:1.24.0",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "qdata-test-ai",
+        "image": "crpi-kf13onfj0v8f6jax.cn-shanghai.personal.cr.aliyuncs.com/qiantongkeji/qdata-ai-ce:1.5.2",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "qdata-test-quality",
+        "image": "crpi-kf13onfj0v8f6jax.cn-shanghai.personal.cr.aliyuncs.com/qiantongkeji/qdata-quality-ce:1.5.2",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "qdata-test-api",
+        "image": "crpi-kf13onfj0v8f6jax.cn-shanghai.personal.cr.aliyuncs.com/qiantongkeji/qdata-server-ce:1.5.2",
+        "status": "Up 3 weeks",
+        "up": true
+      },
+      {
+        "name": "qdata-test-neo4j",
+        "image": "m.daocloud.io/docker.io/library/neo4j:4.4.40",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "qdata-test-mongodb",
+        "image": "m.daocloud.io/docker.io/library/mongo:4.4",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "qdata-test-rabbitmq",
+        "image": "m.daocloud.io/docker.io/library/rabbitmq:3.12-management",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "qdata-test-redis",
+        "image": "m.daocloud.io/docker.io/library/redis:6-alpine",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "qdata-test-mysql",
+        "image": "m.daocloud.io/docker.io/library/mysql:8.0",
+        "status": "Up 3 weeks (healthy)",
+        "up": true
+      },
+      {
+        "name": "feitian-data-platform-private-test-control-plane",
+        "image": "m.daocloud.io/docker.io/kindest/node:v1.35.0",
+        "status": "Up 4 weeks",
+        "up": true
+      }
+    ]
+  },
+  "expectedContainers": [
+    "adp-mes-newbase-nginx-1",
+    "adp-mes-newbase-gateway-1",
+    "adp-mes-newbase-postgres-1",
+    "adp-mes-newbase-nacos-1",
+    "adp-mes-newbase-keycloak-1",
+    "adp-mes-newbase-minio-1"
+  ],
+  "evidence": {
+    "method": "HTTP HEAD probes, small ranged GET fallback, plus SSH docker ps over the current test host.",
+    "secretHandling": "No application credentials, database passwords, SSH keys, or MinIO secrets are read or written by this smoke.",
+    "error": ""
+  }
+}

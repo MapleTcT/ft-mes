@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title></title>
+	<!--作业活动参照-->
+	<script>
+		var loadScript = function(url, placeBody) {
+			function loadUrlContent(url, successCallback, errorCallback) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, false);
+				if ("overrideMimeType" in xhr) {
+					xhr.overrideMimeType("text/plain");
+				}
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState === 4) {
+					if (xhr.status === 0 || xhr.status === 200) {
+						successCallback(xhr.responseText);
+					} else {
+						errorCallback && errorCallback();
+						throw new Error("Could not load " + url);
+					}
+					}
+				};
+				return xhr.send(null);
+			}
+			var isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+			if (!isChrome) {
+				url += '-es5';
+			}
+			url += '.js?v=' + Math.random();
+
+			loadUrlContent(url, function(content){
+				var parentEl = document.getElementsByTagName('head')[0];
+				var s = document.createElement('script');
+				s.text = content;
+				parentEl.appendChild(s);
+			});
+		};
+	</script>
+
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- head.html--start -->
+
+	<!-- head.html--end -->
+	<script>
+
+
+
+	</script>
+	<script type="text/javascript">
+		var pageConfig = {
+			"prefix": "/msService",// url前缀
+			"viewCode": "workAppointment_6.1.6.1_workAction_workActionRef", //  视图编码
+			"entityCode":"workAppointment_6.1.6.1_workAction",// 实体编码
+			"menuCode": "workAppointment_6.1.6.1_workAction_workActionRef",
+			"viewName": "作业活动参照",// 视图名称
+			"viewType": "REFERENCE",// 视图类型
+			"modelCode": "workAppointment_6.1.6.1_workAction_WorkAction",// 模型编码
+			"moduleCode": "workAppointment_6.1.6.1",// 模块编码
+			"isMain":true,// 主模型
+			"permissionCode":null, // 视图权限操作码（主要参照视图使用）
+
+
+			"showType": "SINGLE",// 视图展示类型
+			"modelAlias": "workAction",// 模型别名
+			"workflowEnabled": false,// 启用工作流
+			"listButtons":{
+                    "ADD":"workActionRef_addAction_add_workAppointment_6.1.6.1_workAction_workActionRef",
+			},
+			"interfaceApi": {
+				"downloadFile":"/workAppointment/baseService/workbench/download",//  下载附件接口
+				"uploadList": "/workAppointment/baseService/workbench/upload-list", //  附件列表
+				"PreviewAttachments":"/workAppointment/baseService/workbench/preview",//附件预览
+                "PreviewPicture":"/workAppointment/baseService/workbench/preview/picture",//图片预览
+                "authenticationMessage":"/msService/workAppointment/baseService/workbench/download/getAuthenticationMessage",//附件下载预览鉴权信息
+				"recall":"/msService/workAppointment/workAction/workAction/recall",//  流程单据撤回（基础单据无效）
+				"retrial":"/msService/workAppointment/workAction/workAction/retrial",//  流程单据弃审（基础单据无效）
+				"approvalInfo":"/msService/workAppointment/workAction/workAction/approval",// 流程批量处理弹出框
+                "approvalSubmit":"/msService/workAppointment/workAction/workAction/batchSubmit", //流程单据批量处理
+				"mainView": "/msService/workAppointment/workAction/workAction/workActionView", //  主查看视图
+				"downloadXls": "/msService/workAppointment/workAction/workAction/downloadXls", //  下载导入模板
+				"importMainXls": "/msService/workAppointment/workAction/workAction/importMainXls", //  导入Excel
+				"deleteData": "/msService/workAppointment/workAction/workAction/delete",// 删除数据
+				"sourceData": "/msService/workAppointment/workAction/workAction/workActionRef-", //  列表数据
+
+				"echartsData": "/msService/workAppointment/workAction/workAction/echartsData", //  图表数据源
+			},
+			"baseServiceApi": {
+				"flowRoot": "/msService/baseService/workflow/flowRoot", //  路由数据
+				"layoutJson": "/msService/baseService/view/layoutJson", //  布局数据
+				"systemCodeJson": "/inter-api/systemcode/v1/systemCodeJson", //  系统编码
+				"uploadFile": "/inter-api/file-server/v1/file/upload/file", //  附件上传
+				"deleteFile": "/inter-api/file-server/v1/file/delete", //  附件删除
+				"mneClient": "/msService/baseService/workbench/common/mneClient", //  助记码
+			},
+		}
+	</script>
+</head>
+
+<body class="supos-container">
+	<div id="app"></div>
+	<script src="/greenDill/static/scripts/styles.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.core.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.antdicons.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.antd.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/i18n.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.commons.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/vendors.echarts.js?v=1656662491113"></script>
+	<script type="text/javascript" src="/greenDill/static/scripts/list.js?v=1656662491113"></script>
+	<!-- 自定义代码，在custom对应目录下 -->
+	<!-- body.html--start -->
+
+	<!-- body.html--end -->
+	<script>
+
+	</script>
+</body>
+</html>

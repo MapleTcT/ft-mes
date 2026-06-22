@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -20,10 +22,33 @@ INPUTS = {
     "oracleMigrationAudit": ROOT / "metadata/oracle-migration-audit.json",
     "postgresMigrationInventory": ROOT / "metadata/postgres-migration-inventory.json",
     "sourceModulePom": ROOT / "backend/source-modules/pom.xml",
+    "sourceModuleVerifier": ROOT / "scripts/verify-source-modules.py",
     "composeFile": ROOT / "deploy/docker/docker-compose.yml",
     "envExample": ROOT / "deploy/docker/.env.example",
     "oracleLegacyEnvExample": ROOT / "deploy/docker/.env.oracle-legacy.example",
+    "nacosConfigDir": ROOT / "deploy/nacos-config",
+    "nacosRenderedDir": ROOT / "deploy/docker/nacos-rendered",
 }
+
+RUNTIME_ORACLE_PATTERN = re.compile(
+    r"\b(?:oracle|ojdbc|jdbc:oracle|orcl)\b|SUPOS_SYSTEM_DB_PORT:1521|[:=]1521\b",
+    re.IGNORECASE,
+)
+
+
+def git_head() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+    return result.stdout.strip()
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -127,6 +152,25 @@ def run_postgres_mapping_audit() -> tuple[dict[str, Any], int]:
     return summary, result.returncode
 
 
+def compact_command_output(stdout: str, stderr: str) -> str:
+    text = " ".join((stdout + "\n" + stderr).split())
+    return text[:300] if text else "no output"
+
+
+def run_source_module_oracle_policy() -> tuple[dict[str, Any], int]:
+    result = subprocess.run(
+        [sys.executable, "scripts/verify-source-modules.py"],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return {
+        "returnCode": result.returncode,
+        "output": compact_command_output(result.stdout, result.stderr),
+    }, result.returncode
+
+
 def compose_defaults(content: dict[str, Any]) -> dict[str, Any]:
     compose = INPUTS["composeFile"].read_text(encoding="utf-8")
     env_example = INPUTS["envExample"].read_text(encoding="utf-8")
@@ -138,6 +182,50 @@ def compose_defaults(content: dict[str, Any]) -> dict[str, Any]:
         "envExamplePostgres": "SUPOS_SYSTEM_DB_TYPE=postgresql" in env_example,
         "envExamplePostgresHost": "SUPOS_SYSTEM_DB_HOST=postgres" in env_example,
         "oracleLegacyTemplatePresent": "SUPOS_SYSTEM_DB_TYPE=oracle" in legacy_env,
+    }
+
+
+def active_config_line(raw_line: str) -> str:
+    line = raw_line.strip()
+    if not line or line.startswith("#") or line.startswith("!"):
+        return ""
+    return line
+
+
+def runtime_oracle_defaults() -> dict[str, Any]:
+    roots = [INPUTS["nacosConfigDir"], INPUTS["nacosRenderedDir"]]
+    findings: list[dict[str, Any]] = []
+    scanned_files = 0
+    scanned_lines = 0
+    for root in roots:
+        if not root.exists():
+            continue
+        for path in sorted(root.glob("*.properties")):
+            scanned_files += 1
+            area = "rendered" if "nacos-rendered" in path.parts else "source-template"
+            for line_number, raw_line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+                line = active_config_line(raw_line)
+                if not line:
+                    continue
+                scanned_lines += 1
+                if RUNTIME_ORACLE_PATTERN.search(line):
+                    findings.append(
+                        {
+                            "area": area,
+                            "path": str(path.relative_to(ROOT)),
+                            "line": line_number,
+                            "text": line[:300],
+                        }
+                    )
+    source_findings = [item for item in findings if item["area"] == "source-template"]
+    rendered_findings = [item for item in findings if item["area"] == "rendered"]
+    return {
+        "scannedFiles": scanned_files,
+        "scannedActiveLines": scanned_lines,
+        "activeOracleLineCount": len(findings),
+        "sourceTemplateActiveOracleLineCount": len(source_findings),
+        "renderedActiveOracleLineCount": len(rendered_findings),
+        "findings": findings,
     }
 
 
@@ -165,9 +253,24 @@ def build_status() -> dict[str, Any]:
     oracle_audit = load_json(INPUTS["oracleMigrationAudit"])
     postgres_migrations = load_json(INPUTS["postgresMigrationInventory"])
     mapping_audit, mapping_returncode = run_postgres_mapping_audit()
+    source_module_policy, source_module_policy_returncode = run_source_module_oracle_policy()
     defaults = compose_defaults(content)
+    runtime_oracle_scan = runtime_oracle_defaults()
     promoted_source_modules = source_module_count()
     parent_oracle_policy = parent_pom_oracle_policy()
+    current_head = git_head()
+    oracle_audit_category_counts = oracle_audit.get("categoryCounts", {})
+    oracle_audit_finding_count = int(oracle_audit.get("findingCount") or 0)
+    oracle_audit_unclassified_count = int(
+        oracle_audit_category_counts.get("unclassified-oracle-reference") or 0
+    )
+    oracle_audit_category_total = sum(int(value) for value in oracle_audit_category_counts.values())
+    oracle_audit_current_and_classified = (
+        bool(oracle_audit.get("generatedAt"))
+        and oracle_audit.get("repoCommit") == current_head
+        and oracle_audit_unclassified_count == 0
+        and oracle_audit_category_total == oracle_audit_finding_count
+    )
 
     source_counts = {
         "backendSourceJars": content["backend"]["sourceJarCount"],
@@ -195,12 +298,14 @@ def build_status() -> dict[str, Any]:
     )
     mapping_errors = mapping_audit.get("errorCount")
     mapper_audit_ok = mapping_returncode == 0 and mapping_errors == 0
+    source_module_oracle_policy_ok = source_module_policy_returncode == 0
     dependency_parse_ok = backend_deps["parseErrorCount"] == 0
     parent_pom_oracle_policy_ok = (
         parent_oracle_policy["defaultOracleDependencyManagementCount"] == 0
         and parent_oracle_policy["oracleLegacyProfilePresent"]
         and parent_oracle_policy["oracleLegacyDependencyManagementCount"] > 0
     )
+    runtime_config_defaults_ok = runtime_oracle_scan["activeOracleLineCount"] == 0
 
     checks = [
         status_item(
@@ -228,11 +333,38 @@ def build_status() -> dict[str, Any]:
             blocking=not parent_pom_oracle_policy_ok,
         ),
         status_item(
+            "runtime-config-no-oracle-defaults",
+            "Nacos 默认运行配置不含 active Oracle-like fallback",
+            "pass" if runtime_config_defaults_ok else "fail",
+            (
+                f"activeOracle={runtime_oracle_scan['activeOracleLineCount']}, "
+                f"source={runtime_oracle_scan['sourceTemplateActiveOracleLineCount']}, "
+                f"rendered={runtime_oracle_scan['renderedActiveOracleLineCount']}, "
+                f"files={runtime_oracle_scan['scannedFiles']}"
+            ),
+            "Nacos source templates and rendered configs must default to PostgreSQL; Oracle-like defaults can only remain in comments, backlog, or explicit legacy templates.",
+            blocking=not runtime_config_defaults_ok,
+        ),
+        status_item(
             "oracle-legacy-only",
             "Oracle 只作为 legacy 路径保留",
             "watch" if oracle_audit["findingCount"] else "pass",
             f"Oracle migration backlog has {oracle_audit['findingCount']} tracked references.",
             "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
+        ),
+        status_item(
+            "oracle-audit-current-and-classified",
+            "Oracle migration audit 可追溯且无未分类引用",
+            "pass" if oracle_audit_current_and_classified else "fail",
+            (
+                f"generatedAt={oracle_audit.get('generatedAt')}, "
+                f"repoCommit={oracle_audit.get('repoCommit')}, "
+                f"unclassified={oracle_audit_unclassified_count}, "
+                f"findingCount={oracle_audit_finding_count}, "
+                f"categoryTotal={oracle_audit_category_total}"
+            ),
+            "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
+            blocking=not oracle_audit_current_and_classified,
         ),
         status_item(
             "backend-direct-oracle-deps",
@@ -289,6 +421,14 @@ def build_status() -> dict[str, Any]:
             "按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。",
         ),
         status_item(
+            "source-module-oracle-policy",
+            "已提升源码模块不含 Oracle 默认依赖",
+            "pass" if source_module_oracle_policy_ok else "fail",
+            source_module_policy["output"],
+            "修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。",
+            blocking=not source_module_oracle_policy_ok,
+        ),
+        status_item(
             "backend-table-audit",
             "后端落表业务排查已拆为专门工作流",
             "planned",
@@ -303,6 +443,8 @@ def build_status() -> dict[str, Any]:
     planned_count = sum(1 for item in checks if item["status"] == "planned")
     return {
         "schemaVersion": 1,
+        "generatedAt": now_iso(),
+        "repoCommit": current_head,
         "generatedFrom": [str(path.relative_to(ROOT)) for path in INPUTS.values()],
         "summary": {
             "blockingIssueCount": blocking_issue_count,
@@ -310,17 +452,30 @@ def build_status() -> dict[str, Any]:
             "watchCount": watch_count,
             "plannedCount": planned_count,
             "sourceModuleCount": promoted_source_modules,
+            "sourceModuleOraclePolicyPass": source_module_oracle_policy_ok,
             "oracleBacklogReferenceCount": oracle_audit["findingCount"],
             "directOracleDependencyCount": backend_deps["oracleDependencyCount"],
             "postgresMigrationCount": postgres_migrations["migrationCount"],
             "postgresMigrationHighRiskCount": postgres_migrations["highRiskStatementCount"],
             "postgresMapperAuditErrorCount": mapping_audit.get("errorCount"),
             "postgresMapperAuditWarningCount": mapping_audit.get("warningCount"),
+            "runtimeConfigActiveOracleLineCount": runtime_oracle_scan["activeOracleLineCount"],
+            "oracleAuditUnclassifiedCount": oracle_audit_unclassified_count,
+            "oracleAuditRepoCommitMatchesHead": oracle_audit.get("repoCommit") == current_head,
         },
         "sourceCounts": source_counts,
         "composeDefaults": defaults,
+        "runtimeConfigOracleScan": runtime_oracle_scan,
         "parentPomOraclePolicy": parent_oracle_policy,
+        "sourceModuleOraclePolicy": source_module_policy,
         "postgresMapperAudit": mapping_audit,
+        "oracleMigrationAudit": {
+            "generatedAt": oracle_audit.get("generatedAt"),
+            "repoCommit": oracle_audit.get("repoCommit"),
+            "findingCount": oracle_audit_finding_count,
+            "categoryTotal": oracle_audit_category_total,
+            "unclassifiedReferenceCount": oracle_audit_unclassified_count,
+        },
         "oracleBacklogCategoryCounts": oracle_audit["categoryCounts"],
         "backendDirectOracleModules": backend_deps["oracleModules"],
         "backendDirectOracleDependencies": backend_deps.get("oracleDependencies", []),
@@ -382,6 +537,18 @@ def render_markdown(status: dict[str, Any]) -> str:
     for item in mapper.get("topFiles", [])[:10]:
         mapper_top_rows.append([item["file"], str(item["findingCount"])])
 
+    runtime_oracle_scan = status["runtimeConfigOracleScan"]
+    runtime_oracle_rows = [["Area", "Path", "Line", "Text"]]
+    for item in runtime_oracle_scan.get("findings", [])[:20]:
+        runtime_oracle_rows.append(
+            [
+                item["area"],
+                item["path"],
+                str(item["line"]),
+                item["text"].replace("|", "\\|"),
+            ]
+        )
+
     return "\n".join(
         [
             "# Oracle 替换状态总账",
@@ -390,15 +557,21 @@ def render_markdown(status: dict[str, Any]) -> str:
             "",
             "## 摘要",
             "",
+            f"- Generated At：`{status.get('generatedAt')}`。",
+            f"- Repo Commit：`{status.get('repoCommit')}`。",
             f"- CI 阻断问题：`{summary['blockingIssueCount']}`。",
             f"- 迁移缺口：`{summary['gapCount']}`。",
             f"- 关注项：`{summary['watchCount']}`。",
             f"- 计划项：`{summary['plannedCount']}`。",
             f"- 已提升源码模块：`{summary['sourceModuleCount']}`。",
+            f"- 源码模块 Oracle 禁入：`{'pass' if summary['sourceModuleOraclePolicyPass'] else 'fail'}`。",
             f"- Oracle backlog 引用：`{summary['oracleBacklogReferenceCount']}`。",
             f"- 直接 Oracle 依赖：`{summary['directOracleDependencyCount']}`。",
             f"- PostgreSQL migration 脚本：`{summary['postgresMigrationCount']}`。",
             f"- PostgreSQL mapper audit：`{summary['postgresMapperAuditErrorCount']}` error / `{summary['postgresMapperAuditWarningCount']}` warning。",
+            f"- 运行配置 active Oracle-like 默认行：`{summary['runtimeConfigActiveOracleLineCount']}`。",
+            f"- Oracle audit 未分类引用：`{summary['oracleAuditUnclassifiedCount']}`。",
+            f"- Oracle audit commit matches HEAD：`{summary['oracleAuditRepoCommitMatchesHead']}`。",
             "- 机器可读清单：`metadata/oracle-replacement-status.json`。",
             "",
             "## 状态矩阵",
@@ -425,6 +598,14 @@ def render_markdown(status: dict[str, Any]) -> str:
             "",
             table(mapper_top_rows) if len(mapper_top_rows) > 1 else "当前没有 mapper/sql 方言发现。",
             "",
+            "## 运行配置 Oracle 默认扫描",
+            "",
+            (
+                table(runtime_oracle_rows)
+                if len(runtime_oracle_rows) > 1
+                else f"当前 Nacos source/rendered 配置 active 行没有 Oracle-like fallback；扫描 `{runtime_oracle_scan['scannedFiles']}` 个文件、`{runtime_oracle_scan['scannedActiveLines']}` 行 active 配置。"
+            ),
+            "",
             "## 使用规则",
             "",
             "- 这个总账不是替代各专项报告，而是把专项报告的当前结论串起来。",
@@ -443,8 +624,18 @@ def write_outputs(status: dict[str, Any]) -> None:
 
 def check_outputs(status: dict[str, Any]) -> int:
     failures: list[str] = []
-    expected_json = json.dumps(status, ensure_ascii=False, indent=2) + "\n"
-    expected_md = render_markdown(status)
+    existing_json: dict[str, Any] = {}
+    if OUTPUT_JSON.exists():
+        try:
+            loaded = json.loads(OUTPUT_JSON.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                existing_json = loaded
+        except json.JSONDecodeError as error:
+            failures.append(f"{OUTPUT_JSON.relative_to(ROOT)} is invalid JSON: {error}")
+    stable_status = json.loads(json.dumps(status))
+    stable_status["generatedAt"] = existing_json.get("generatedAt")
+    expected_json = json.dumps(stable_status, ensure_ascii=False, indent=2) + "\n"
+    expected_md = render_markdown(stable_status)
     if status["summary"]["blockingIssueCount"]:
         failures.append(f"blocking Oracle replacement issues: {status['summary']['blockingIssueCount']}")
     if not OUTPUT_JSON.exists() or OUTPUT_JSON.read_text(encoding="utf-8") != expected_json:

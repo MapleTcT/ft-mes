@@ -16,10 +16,11 @@ The current script inventory is generated into:
 
 ```text
 docs/postgres-migration-index.md
+docs/postgres-migration-watch-rationale.md
 metadata/postgres-migration-inventory.json
 ```
 
-Run `make postgres-migration-index` after adding or changing scripts, and `make postgres-migration-check` before committing. Script names must stay in the `NNN-lowercase-slug.sql` form, numbers must be continuous and unique, and destructive table/schema/database reset statements are blocked by the check.
+Run `make postgres-migration-index` after adding or changing scripts, and `make postgres-migration-check` before committing. Script names must stay in the `NNN-lowercase-slug.sql` form, numbers must be continuous and unique, destructive table/schema/database reset statements are blocked by the check, and watch statements must either be guarded `DROP ... IF EXISTS` compatibility rebuilds or scoped `DELETE ... WHERE` cleanup statements.
 
 ## Legacy Oracle
 
@@ -50,9 +51,10 @@ Production migration preparation lives under:
 deploy/database/production-migration/
 ```
 
-That directory contains target PostgreSQL preflight templates and a safe
-schema/row-count inventory runner. It is not a production cutover script and it
-does not make the migration track `READY`; readiness remains controlled by:
+That directory contains source row-count inventory, target PostgreSQL preflight
+templates, source/target row-count comparison, and safe read-only runners. It is
+not a production cutover script and it does not make the migration track
+`READY`; readiness remains controlled by:
 
 ```text
 docs/production-migration-readiness.md

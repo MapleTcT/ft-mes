@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import re
 import sys
@@ -15,6 +16,8 @@ from typing import Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_TEXT_BYTES = 2 * 1024 * 1024
+MAX_NESTED_ARCHIVE_BYTES = 64 * 1024 * 1024
+MAX_ARCHIVE_DEPTH = 2
 
 TEXT_SUFFIXES = {
     "",
@@ -41,6 +44,17 @@ BINARY_SUFFIXES = {
     ".zip",
     ".7z",
     ".rar",
+}
+
+ZIP_ARCHIVE_SUFFIXES = {".zip", ".jar", ".war", ".ear"}
+UNSUPPORTED_ARCHIVE_SUFFIXES = {
+    ".7z",
+    ".rar",
+    ".tar",
+    ".tgz",
+    ".gz",
+    ".bz2",
+    ".xz",
 }
 
 ERROR_PATTERNS = {
@@ -90,28 +104,68 @@ def relative_display(path: Path) -> str:
         return str(path)
 
 
+def normalized_name(name: str) -> str:
+    return name.lower().replace("\\", "/").replace("!", "/")
+
+
+def archive_member_name(prefix: str, name: str) -> str:
+    return f"{prefix}!{name}" if prefix else name
+
+
+def archive_suffix(name: str) -> str:
+    lowered = name.lower()
+    for suffix in (".tar.gz", ".tar.bz2", ".tar.xz"):
+        if lowered.endswith(suffix):
+            return suffix
+    return Path(lowered).suffix
+
+
+def iter_zip_archive(archive: zipfile.ZipFile, prefix: str = "", depth: int = 0) -> Iterable[CandidateFile]:
+    for info in sorted(archive.infolist(), key=lambda value: value.filename):
+        if info.is_dir():
+            continue
+        name = archive_member_name(prefix, info.filename)
+        suffix = Path(info.filename).suffix.lower()
+        data = None
+        if info.file_size <= MAX_TEXT_BYTES and suffix in TEXT_SUFFIXES:
+            data = archive.read(info)
+        yield CandidateFile(name, info.file_size, data)
+
+        if suffix not in ZIP_ARCHIVE_SUFFIXES or depth >= MAX_ARCHIVE_DEPTH:
+            continue
+        if info.file_size > MAX_NESTED_ARCHIVE_BYTES:
+            continue
+        try:
+            nested_bytes = archive.read(info)
+            with zipfile.ZipFile(io.BytesIO(nested_bytes)) as nested_archive:
+                yield from iter_zip_archive(nested_archive, name, depth + 1)
+        except zipfile.BadZipFile:
+            continue
+
+
 def iter_directory(path: Path) -> Iterable[CandidateFile]:
     for item in sorted(path.rglob("*")):
         if not item.is_file():
             continue
         rel = str(item.relative_to(path))
         size = item.stat().st_size
+        suffix = item.suffix.lower()
         data = None
-        if size <= MAX_TEXT_BYTES and item.suffix.lower() in TEXT_SUFFIXES:
+        if size <= MAX_TEXT_BYTES and suffix in TEXT_SUFFIXES:
             data = item.read_bytes()
         yield CandidateFile(rel, size, data)
+        if suffix not in ZIP_ARCHIVE_SUFFIXES or size > MAX_NESTED_ARCHIVE_BYTES:
+            continue
+        try:
+            with zipfile.ZipFile(item) as archive:
+                yield from iter_zip_archive(archive, rel, 1)
+        except zipfile.BadZipFile:
+            continue
 
 
 def iter_zip(path: Path) -> Iterable[CandidateFile]:
     with zipfile.ZipFile(path) as archive:
-        for info in sorted(archive.infolist(), key=lambda value: value.filename):
-            if info.is_dir():
-                continue
-            suffix = Path(info.filename).suffix.lower()
-            data = None
-            if info.file_size <= MAX_TEXT_BYTES and suffix in TEXT_SUFFIXES:
-                data = archive.read(info)
-            yield CandidateFile(info.filename, info.file_size, data)
+        yield from iter_zip_archive(archive)
 
 
 def iter_candidate_files(path: Path) -> tuple[str, Iterable[CandidateFile]]:
@@ -192,7 +246,8 @@ def pom_dependency_findings(candidate: CandidateFile, text_value: str) -> list[d
 
 def scan_text(candidate: CandidateFile, text_value: str) -> list[dict[str, object]]:
     findings: list[dict[str, object]] = []
-    is_pom = candidate.name.lower().endswith("/pom.xml") or candidate.name.lower() == "pom.xml"
+    normalized = normalized_name(candidate.name)
+    is_pom = normalized.endswith("/pom.xml") or normalized == "pom.xml"
     if is_pom:
         findings.extend(pom_dependency_findings(candidate, text_value))
 
@@ -237,12 +292,33 @@ def scan(path: Path) -> dict[str, object]:
     input_kind, candidates = iter_candidate_files(path)
     findings: list[dict[str, object]] = []
     stats = Counter()
+    max_archive_depth_seen = 0
 
     for candidate in candidates:
-        suffix = Path(candidate.name).suffix.lower()
-        normalized = "/" + candidate.name.lower().replace("\\", "/")
+        suffix = archive_suffix(candidate.name)
+        normalized = "/" + normalized_name(candidate.name)
+        archive_depth = candidate.name.count("!")
+        max_archive_depth_seen = max(max_archive_depth_seen, archive_depth)
         stats["fileCount"] += 1
         stats["byteCount"] += candidate.size
+        if archive_depth:
+            stats["nestedFileCount"] += 1
+        if suffix in ZIP_ARCHIVE_SUFFIXES:
+            stats["zipArchiveCount"] += 1
+            if candidate.size > MAX_NESTED_ARCHIVE_BYTES:
+                stats["zipArchiveOverNestedLimitCount"] += 1
+        if suffix in UNSUPPORTED_ARCHIVE_SUFFIXES:
+            stats["unsupportedArchiveCount"] += 1
+        if suffix in TEXT_SUFFIXES:
+            stats["textCandidateCount"] += 1
+            if candidate.data is None:
+                if candidate.size > MAX_TEXT_BYTES:
+                    stats["textSkippedLargeCount"] += 1
+                else:
+                    stats["textSkippedUnavailableCount"] += 1
+            else:
+                stats["textScannedCount"] += 1
+                stats["textScannedBytes"] += len(candidate.data)
         if suffix in BINARY_SUFFIXES:
             stats["binaryCount"] += 1
             findings.append(
@@ -253,6 +329,17 @@ def scan(path: Path) -> dict[str, object]:
                     "category": "binary-artifact",
                     "pattern": suffix.lstrip(".") or "binary",
                     "excerpt": "Runtime/package binary should not be copied into source modules.",
+                }
+            )
+        if suffix in UNSUPPORTED_ARCHIVE_SUFFIXES:
+            findings.append(
+                {
+                    "file": candidate.name,
+                    "line": None,
+                    "severity": "error",
+                    "category": "unsupported-archive",
+                    "pattern": suffix.lstrip("."),
+                    "excerpt": "Archive type cannot be inspected by module intake precheck; repackage as zip/jar/war/ear or scan separately before promotion.",
                 }
             )
         if candidate.name.lower().endswith("pom.xml"):
@@ -301,9 +388,34 @@ def scan(path: Path) -> dict[str, object]:
             "sqlFileCount": stats["sqlFileCount"],
             "mapperOrSqlFileCount": stats["mapperOrSqlFileCount"],
             "binaryCount": stats["binaryCount"],
+            "zipArchiveCount": stats["zipArchiveCount"],
+            "unsupportedArchiveCount": stats["unsupportedArchiveCount"],
+            "nestedFileCount": stats["nestedFileCount"],
+            "maxArchiveDepthSeen": max_archive_depth_seen,
+            "textCandidateCount": stats["textCandidateCount"],
+            "textScannedCount": stats["textScannedCount"],
+            "textSkippedLargeCount": stats["textSkippedLargeCount"],
+            "textSkippedUnavailableCount": stats["textSkippedUnavailableCount"],
+            "textScannedBytes": stats["textScannedBytes"],
             "findingCount": len(findings),
             "errorCount": severity_counts["error"],
             "warningCount": severity_counts["warning"],
+        },
+        "scanPolicy": {
+            "maxTextBytes": MAX_TEXT_BYTES,
+            "maxNestedArchiveBytes": MAX_NESTED_ARCHIVE_BYTES,
+            "maxArchiveDepth": MAX_ARCHIVE_DEPTH,
+            "textSuffixes": sorted(TEXT_SUFFIXES),
+            "zipArchiveSuffixes": sorted(ZIP_ARCHIVE_SUFFIXES),
+            "unsupportedArchiveSuffixes": sorted(UNSUPPORTED_ARCHIVE_SUFFIXES),
+        },
+        "scanCoverage": {
+            "textCoverageComplete": stats["textSkippedLargeCount"] == 0
+            and stats["textSkippedUnavailableCount"] == 0,
+            "hasUnsupportedArchives": stats["unsupportedArchiveCount"] > 0,
+            "hasOversizedNestedArchives": stats["zipArchiveOverNestedLimitCount"] > 0,
+            "zipArchiveOverNestedLimitCount": stats["zipArchiveOverNestedLimitCount"],
+            "nestedArchivePathsPreserved": stats["nestedFileCount"] > 0,
         },
         "categoryCounts": dict(sorted(category_counts.items())),
         "patternCounts": dict(sorted(pattern_counts.items())),

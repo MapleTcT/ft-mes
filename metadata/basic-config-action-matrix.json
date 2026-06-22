@@ -1,0 +1,809 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T09:08:53.723Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "goalId": "G-012",
+  "overallStatus": "PARTIAL",
+  "summary": {
+    "totalActions": 16,
+    "pass": 6,
+    "readOnlyGuarded": 4,
+    "controlledMarkerRequired": 3,
+    "planned": 3,
+    "blocked": 0
+  },
+  "actions": [
+    {
+      "id": "systemcode-dictionary-crud",
+      "areaId": "systemcode-dictionary",
+      "title": "系统编码字典项/字典值 CRUD",
+      "status": "PASS",
+      "mutationPolicy": "marker-allowed",
+      "riskLevel": "medium",
+      "route": "/systemcode/#/",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_SYSCODE",
+      "tables": [
+        "sys_entity",
+        "sys_code"
+      ],
+      "acceptedOperations": [
+        "entity create",
+        "entity update",
+        "value create",
+        "value update",
+        "value delete",
+        "entity delete with child cleanup"
+      ],
+      "evidenceRefs": [
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "deploy/docker/scripts/adp-systemcode-persistence-acceptance.js"
+      ],
+      "recheckCommands": [
+        "make acceptance-systemcode-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCODE_PERSISTENCE_OUTPUT=/tmp/adp-systemcode-persistence-1009913343-current.json"
+      ],
+      "remainingGaps": []
+    },
+    {
+      "id": "systemconfig-app-catalog-crud",
+      "areaId": "systemconfig-app-catalog-value",
+      "title": "系统配置 app 目录/配置项/配置值 CRUD",
+      "status": "PASS",
+      "mutationPolicy": "marker-allowed",
+      "riskLevel": "medium",
+      "route": "/systemconfig/#/sysconfig",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_SCFG",
+      "tables": [
+        "systemconfig_config_catalog",
+        "systemconfig_config_info",
+        "systemconfig_config_option",
+        "systemconfig_config_version"
+      ],
+      "acceptedOperations": [
+        "catalog and config create",
+        "catalog detail read",
+        "config value update",
+        "module/key read",
+        "catalog/config/version delete cleanup"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-persistence-acceptance.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js"
+      ],
+      "recheckCommands": [
+        "make acceptance-systemconfig-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_PERSISTENCE_OUTPUT=metadata/systemconfig-persistence-acceptance.json"
+      ],
+      "remainingGaps": []
+    },
+    {
+      "id": "builtin-identity-directory",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "用户目录",
+      "status": "READ_ONLY_GUARDED",
+      "mutationPolicy": "forbidden-in-generic-smoke",
+      "riskLevel": "critical",
+      "catalogName": "用户目录",
+      "classification": "identity-directory",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "security-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "post-login-smoke"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json"
+      ],
+      "remainingGaps": [
+        "只读 smoke 已覆盖目录/详情/表元数据；写操作会影响登录和用户同步，必须单独设计安全验收。"
+      ]
+    },
+    {
+      "id": "builtin-print-auth",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "打印服务授权",
+      "status": "READ_ONLY_GUARDED",
+      "mutationPolicy": "forbidden-in-generic-smoke",
+      "riskLevel": "critical",
+      "catalogName": "打印服务授权",
+      "classification": "license-or-entitlement",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "license-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "post-print-service-smoke"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json"
+      ],
+      "remainingGaps": [
+        "只读 smoke 已覆盖目录/详情/表元数据；写操作会影响报表/打印授权，必须纳入 license 策略。"
+      ]
+    },
+    {
+      "id": "builtin-ak-sk",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "AK/SK 凭证管理",
+      "status": "READ_ONLY_GUARDED",
+      "mutationPolicy": "forbidden-in-generic-smoke",
+      "riskLevel": "critical",
+      "catalogName": "AK/SK凭证管理",
+      "classification": "secret",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "security-owner-approval",
+        "secret-rotation-plan",
+        "dedicated-marker",
+        "rollback-plan"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json"
+      ],
+      "remainingGaps": [
+        "只读 smoke 已覆盖目录/详情/表元数据；提交证据只能保存数量/hash，不允许保存明文凭证。"
+      ]
+    },
+    {
+      "id": "builtin-password-policy",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "密码配置",
+      "status": "READ_ONLY_GUARDED",
+      "mutationPolicy": "forbidden-in-generic-smoke",
+      "riskLevel": "critical",
+      "catalogName": "密码配置",
+      "classification": "security-policy",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "security-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "admin-login-smoke"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json"
+      ],
+      "remainingGaps": [
+        "只读 smoke 已覆盖目录/详情/表元数据；写操作可能锁定测试/生产账号，不能用通用 smoke 改值。"
+      ]
+    },
+    {
+      "id": "builtin-qcs-runtime-config",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "质量检验配置",
+      "status": "CONTROLLED_MARKER_REQUIRED",
+      "mutationPolicy": "dedicated-business-marker-only",
+      "riskLevel": "high",
+      "catalogName": "质量检验配置",
+      "classification": "business-runtime-config",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "business-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "qcs-report-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json",
+        "metadata/systemconfig-controlled-runtime-config-acceptance.json",
+        "metadata/qcs-runtime-config-wom-checkoutbill-regression.json",
+        "metadata/production-module-test-cases.json",
+        "deploy/docker/scripts/adp-systemconfig-controlled-runtime-config-acceptance.js",
+        "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+        "metadata/qcs-report-chain-qualified-current.json",
+        "metadata/qcs-report-chain-unqualified-current.json",
+        "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js"
+      ],
+      "remainingGaps": [
+        "QCS reportShowIndexRange 已完成专用 marker 保存、详情/按模块回读、PostgreSQL before/after 和立即回滚验收；配置回滚后 WOM checkoutBill 质量活动、WOM 制造请检、QCS 报告保存/合格生效回写、不合格生效回写并自动生成不合格处理单均已用当前地址复跑 PASS。该配置仍属于高风险运行配置，后续任何写操作仍必须专用 marker、回滚和业务回归。"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "builtin-qcs-runtime-config",
+        "scope": "change QCS runtime configuration through the real systemconfig page with a dedicated marker, then re-run the accepted QCS production chain.",
+        "requiredProductionCaseIds": [
+          "PROD-018",
+          "PROD-031",
+          "PROD-032",
+          "PROD-033",
+          "PROD-034",
+          "PROD-035",
+          "PROD-036",
+          "PROD-037",
+          "PROD-038",
+          "PROD-039",
+          "PROD-040",
+          "PROD-041",
+          "PROD-042"
+        ],
+        "blockedImpactCaseIds": [
+          "PROD-019"
+        ],
+        "requiredTables": [
+          "systemconfig_config_info",
+          "systemconfig_config_version"
+        ],
+        "frontendRequirement": "Browser operation on /systemconfig/#/sysconfig; generic smoke mutation is not acceptable for QCS runtime configuration.",
+        "apiEvidenceRequired": [
+          "HTTP method",
+          "URL",
+          "request payload",
+          "response status",
+          "response body key fields"
+        ],
+        "persistenceRequirement": "Use an ADP_E2E marker and PostgreSQL before/after SQL to verify systemconfig_config_info and systemconfig_config_version changes.",
+        "minimumPassConditions": [
+          "ADP_E2E marker is visible in the frontend request and PostgreSQL rows",
+          "QCS production cases in requiredProductionCaseIds stay PASS after the marker change",
+          "PostgreSQL before/after SQL proves only the intended QCS config value changed",
+          "rollback restores the original config value and QCS smoke remains stable"
+        ],
+        "rollbackPlan": [
+          "Restore the captured before value for the marker-touched config",
+          "Verify PostgreSQL config rows and QCS browser/API regression after rollback"
+        ],
+        "recheckCommands": [
+          "make acceptance-systemconfig-controlled-runtime-config",
+          "make acceptance-wom-checkoutbill-persistence",
+          "make acceptance-systemconfig-persistence",
+          "make production-testcase-check",
+          "make basic-config-action-matrix-check",
+          "make acceptance-wom-manu-inspect-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 WOM_MANU_INSPECT_PERSISTENCE_OUTPUT=metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+          "make acceptance-qcs-report-chain-persistence QCS_REPORT_CHAIN_MODE=qualified ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-qualified-current.json",
+          "make acceptance-qcs-report-chain-persistence QCS_REPORT_CHAIN_MODE=unqualified ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-unqualified-current.json"
+        ],
+        "currentGaps": [
+          "Dedicated QCS runtime config marker evidence exists for reportShowIndexRange save/read/rollback.",
+          "WOM checkoutBill quality-active inspection generation was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621055313_WOM_CHECKOUTBILL.",
+          "WOM createManuInspect manufacturing-inspection creation was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621061644_WOM_MANU_INSPECT.",
+          "QCS report save/effective qualified chain was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621065620_QCS_REPORT_QUAL.",
+          "QCS report save/effective unqualified chain was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621070426_QCS_UNQLF; qcs_un_qlf_deals auto treatment row 757556916282624 was generated."
+        ]
+      }
+    },
+    {
+      "id": "builtin-rm-runtime-config",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "RM.ocd.RM",
+      "status": "CONTROLLED_MARKER_REQUIRED",
+      "mutationPolicy": "dedicated-business-marker-only",
+      "riskLevel": "high",
+      "catalogName": "RM.ocd.RM",
+      "classification": "business-runtime-config",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "business-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "rm-formula-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json",
+        "metadata/systemconfig-controlled-runtime-config-rm-current.json",
+        "metadata/rm-runtime-config-batch-sync-regression.json",
+        "metadata/production-module-test-cases.json",
+        "deploy/docker/scripts/adp-systemconfig-controlled-runtime-config-acceptance.js",
+        "deploy/docker/scripts/adp-rm-batch-sync-persistence-acceptance.js"
+      ],
+      "remainingGaps": [
+        "RM.MQ brokerUrl 已完成单项 marker 保存、详情回读、按模块回读、PostgreSQL 验证和立即回滚；回滚后 RM 批控配方同步新增和删除清理已复跑 PASS。",
+        "RM 配方导入保持既有 PASS 证据；后续若修改 username/password 等敏感配置，仍必须另走安全审批、脱敏证据和回滚方案。",
+        "PROD-010 外部 Batch 客户端显式编辑入口仍单独 BLOCKED，不能由 RM.MQ brokerUrl 配置回归替代。"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "builtin-rm-runtime-config",
+        "scope": "change RM runtime configuration through the real systemconfig page with a dedicated marker, then re-run the accepted RM formula flows.",
+        "requiredProductionCaseIds": [
+          "PROD-008",
+          "PROD-009",
+          "PROD-043"
+        ],
+        "blockedImpactCaseIds": [
+          "PROD-010"
+        ],
+        "requiredTables": [
+          "systemconfig_config_info",
+          "systemconfig_config_version"
+        ],
+        "frontendRequirement": "Browser operation on /systemconfig/#/sysconfig; generic smoke mutation is not acceptable for RM runtime configuration.",
+        "apiEvidenceRequired": [
+          "HTTP method",
+          "URL",
+          "request payload",
+          "response status",
+          "response body key fields"
+        ],
+        "persistenceRequirement": "Use an ADP_E2E marker and PostgreSQL before/after SQL to verify systemconfig_config_info and systemconfig_config_version changes.",
+        "minimumPassConditions": [
+          "ADP_E2E marker is visible in the frontend request and PostgreSQL rows",
+          "RM production cases in requiredProductionCaseIds stay PASS after the marker change",
+          "PostgreSQL before/after SQL proves only the intended RM config value changed",
+          "rollback restores the original config value and RM formula smoke remains stable"
+        ],
+        "rollbackPlan": [
+          "Restore the captured before value for the marker-touched config",
+          "Verify PostgreSQL config rows and RM formula regression after rollback"
+        ],
+        "recheckCommands": [
+          "make acceptance-systemconfig-controlled-runtime-config SYSTEMCONFIG_CONTROLLED_TARGET_MODE=rm SYSTEMCONFIG_CONTROLLED_OUTPUT=metadata/systemconfig-controlled-runtime-config-rm-current.json",
+          "ADP_BASE_URL=http://100.99.133.43:18080 ADP_E2E_MARKER=ADP_E2E_YYYYMMDD_HHMMSS_RM_CFG_REG ADP_RM_BATCH_FORMULA_ID=<unique-id> ADP_RM_BATCH_SYNC_PERSISTENCE_OUTPUT=metadata/rm-runtime-config-batch-sync-regression.json node deploy/docker/scripts/adp-rm-batch-sync-persistence-acceptance.js",
+          "make production-testcase-check",
+          "make basic-config-action-matrix-check"
+        ],
+        "currentGaps": [
+          "Dedicated RM.MQ brokerUrl runtime config marker evidence exists for save/read/rollback.",
+          "RM batch sync/delete regression was rerun after rollback and passed with marker ADP_E2E_20260621073500_RM_CFG_REG.",
+          "Sensitive RM username/password config values were not modified and must remain out of generic smoke evidence.",
+          "External Batch client edit entry remains blocked as PROD-010."
+        ]
+      }
+    },
+    {
+      "id": "builtin-baseset-runtime-config",
+      "areaId": "systemconfig-built-in-catalogs",
+      "title": "BaseSet.ocd.BaseSet",
+      "status": "CONTROLLED_MARKER_REQUIRED",
+      "mutationPolicy": "dedicated-business-marker-only",
+      "riskLevel": "high",
+      "catalogName": "BaseSet.ocd.BaseSet",
+      "classification": "business-runtime-config",
+      "requiresPersistence": true,
+      "mutationAllowedInGenericSmoke": false,
+      "requiredBeforeMutation": [
+        "business-owner-approval",
+        "dedicated-marker",
+        "rollback-plan",
+        "wom-qcs-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-builtins-readiness-smoke.json",
+        "metadata/production-module-test-cases.json",
+        "metadata/systemconfig-controlled-runtime-config-baseset-current.json",
+        "metadata/baseset-runtime-config-wom-start-regression.json",
+        "metadata/baseset-runtime-config-wom-manu-inspect-regression.json",
+        "deploy/docker/scripts/adp-systemconfig-controlled-runtime-config-acceptance.js",
+        "deploy/docker/scripts/adp-wom-start-persistence-acceptance.js",
+        "deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js"
+      ],
+      "remainingGaps": [
+        "BaseSet.isEnable 已完成专用受控变更证据：真实 /systemconfig/#/sysconfig 页面上下文把值从 true 临时切到 false，通过详情 API、按模块读取 API 和 PostgreSQL before/after 查到 false，然后立即回滚为 true 并再次查库确认。",
+        "回滚后 WOM 制造指令单开始已复跑 PASS，marker ADP_E2E_20260621180558_WOMSTART 写入 wom_produce_tasks、wom_wait_put_records、wom_proc_reports 和 wom_produce_task_exelog。",
+        "回滚后 WOM 制造请检/QCS 请检单生成已复跑 PASS，marker ADP_E2E_20260621180914_WOM_MANU_INSPECT 写入 WOM 任务/待办/执行日志、BaseSet 批次待检状态和 qcs_inspects/qcs_inspect_stds/qcs_inspect_coms。",
+        "BaseSet 仍属于高风险运行配置；后续任何新配置项、物料/批次/库存边界或 PROD-022 material 入库链路仍必须专用 marker、回滚和业务回归。"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "builtin-baseset-runtime-config",
+        "scope": "change BaseSet runtime configuration through the real systemconfig page with a dedicated marker, then re-run representative WOM and QCS flows.",
+        "requiredProductionCaseIds": [
+          "PROD-001",
+          "PROD-002",
+          "PROD-003",
+          "PROD-004",
+          "PROD-031",
+          "PROD-035",
+          "PROD-036"
+        ],
+        "blockedImpactCaseIds": [
+          "PROD-022"
+        ],
+        "requiredTables": [
+          "systemconfig_config_info",
+          "systemconfig_config_version"
+        ],
+        "frontendRequirement": "Browser operation on /systemconfig/#/sysconfig; generic smoke mutation is not acceptable for BaseSet runtime configuration.",
+        "apiEvidenceRequired": [
+          "HTTP method",
+          "URL",
+          "request payload",
+          "response status",
+          "response body key fields"
+        ],
+        "persistenceRequirement": "Use an ADP_E2E marker and PostgreSQL before/after SQL to verify systemconfig_config_info and systemconfig_config_version changes.",
+        "minimumPassConditions": [
+          "ADP_E2E marker is visible in the frontend request and PostgreSQL rows",
+          "BaseSet, WOM and QCS production cases in requiredProductionCaseIds stay PASS after the marker change",
+          "PostgreSQL before/after SQL proves only the intended BaseSet config value changed",
+          "rollback restores the original config value and WOM/QCS regression remains stable"
+        ],
+        "rollbackPlan": [
+          "Restore the captured before value for the marker-touched config",
+          "Verify PostgreSQL config rows and WOM/QCS regression after rollback"
+        ],
+        "recheckCommands": [
+          "make acceptance-systemconfig-controlled-runtime-config SYSTEMCONFIG_CONTROLLED_TARGET_MODE=baseset SYSTEMCONFIG_CONTROLLED_OUTPUT=metadata/systemconfig-controlled-runtime-config-baseset-current.json",
+          "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_WOM_START_PERSISTENCE_OUTPUT=metadata/baseset-runtime-config-wom-start-regression.json node deploy/docker/scripts/adp-wom-start-persistence-acceptance.js",
+          "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_PAGE_TIMEOUT_MS=240000 ADP_NAV_WAIT_UNTIL=domcontentloaded ADP_WOM_MANU_INSPECT_PERSISTENCE_OUTPUT=metadata/baseset-runtime-config-wom-manu-inspect-regression.json node deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js",
+          "make production-testcase-check",
+          "make basic-config-action-matrix-check"
+        ],
+        "currentGaps": [
+          "Dedicated BaseSet.isEnable controlled config evidence exists for save/read/rollback with marker ADP_E2E_20260621180355_SCFG_BASESET_RUNTIME; the persisted typed value was false and rollback restored true.",
+          "WOM start regression was rerun after rollback and passed with marker ADP_E2E_20260621180558_WOMSTART.",
+          "WOM createManuInspect/QCS inspection generation regression was rerun after rollback and passed with marker ADP_E2E_20260621180914_WOM_MANU_INSPECT.",
+          "Material warehouse/inventory stock-in remains blocked as PROD-022 and is not closed by BaseSet.isEnable regression."
+        ]
+      }
+    },
+    {
+      "id": "custom-property-model-mapping-toggle",
+      "areaId": "configuration-entity-runtime",
+      "title": "低代码自定义字段模型映射启用/编辑/禁用",
+      "status": "PASS",
+      "mutationPolicy": "marker-allowed",
+      "riskLevel": "medium",
+      "route": "/supplant/#/customFieldModelManage",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_CUSTOM_PROPERTY",
+      "tables": [
+        "base_cp_model_mapping",
+        "runtime_property",
+        "project_property",
+        "base_cp_view_mapping"
+      ],
+      "acceptedOperations": [
+        "browser page opened",
+        "model custom property mapping enabled/created",
+        "display metadata edited with marker",
+        "runtime_property/project_property synchronized",
+        "original display metadata restored",
+        "mapping disabled and controlled cleanup verified",
+        "customProperty tree readiness checked"
+      ],
+      "evidenceRefs": [
+        "metadata/custom-property-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-custom-property-persistence-acceptance.js",
+        "deploy/docker/postgres/init/169-custom-property-project-property-compat.sql",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "recheckCommands": [
+        "make acceptance-custom-property-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 CUSTOM_PROPERTY_ACCEPTANCE_OUTPUT=metadata/custom-property-persistence-acceptance.json ADP_API_TIMEOUT_MS=90000"
+      ],
+      "remainingGaps": []
+    },
+    {
+      "id": "entity-model-create",
+      "areaId": "configuration-entity-runtime",
+      "title": "实体/模型配置新增",
+      "status": "PASS",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "high",
+      "route": "configuration/entity runtime pages",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_ENTITY_MODEL",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_property",
+        "information_schema.tables"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "rollback-plan",
+        "runtime-page-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "metadata/entity-model-config-crud-readiness-probe.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js",
+        "scripts/verify-entity-model-config-crud-readiness.py",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "remainingGaps": [],
+      "acceptanceEvidence": {
+        "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+        "report": "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "route": "/msService/ec/engine/msManage",
+        "requests": [
+          "POST /msService/ec/entity/save entityCreate HTTP 200/success=true",
+          "POST /msService/ec/model/save modelCreate HTTP 200/success=true",
+          "POST /msService/ec/entity/save entityEdit HTTP 200/success=true",
+          "POST /msService/ec/model/save modelEdit HTTP 200/success=true",
+          "POST /msService/ec/model/ordinaryDelete HTTP 200/success=true",
+          "POST /msService/ec/entity/ordinaryDelete HTTP 200/success=true"
+        ],
+        "backendTrace": [
+          "EntityController.save/ordinaryDelete -> EntityServiceImpl -> entityDao",
+          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> modelDao/propertyDao",
+          "DtoUtils.getEntity/getModelVO request DTO parsing"
+        ],
+        "postgreSqlEvidence": [
+          "after create ec_entity=1",
+          "after create ec_model=1",
+          "after create inherent ec_property=3",
+          "edit marker persisted to entity/model descriptions",
+          "ordinaryDelete soft-deleted entity/model/property rows",
+          "controlled cleanup left entity/model/property/physical table counts at 0"
+        ],
+        "postgresNote": "The PostgreSQL branch currently records entity/model/property metadata; ModelSyncDBUtils does not auto-create the physical DS_E2E_063301 table for PostgreSQL in this report."
+      },
+      "acceptedOperations": [
+        "browser page context opened /msService/ec/engine/msManage",
+        "entity create request returned HTTP 200/success=true",
+        "model create request returned HTTP 200/success=true",
+        "PostgreSQL verified ec_entity=1 and ec_model=1 after create",
+        "PostgreSQL verified inherent ec_property rows were created"
+      ]
+    },
+    {
+      "id": "entity-model-edit",
+      "areaId": "configuration-entity-runtime",
+      "title": "实体/模型配置编辑",
+      "status": "PASS",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "high",
+      "route": "configuration/entity runtime pages",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_ENTITY_MODEL",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_property",
+        "information_schema.tables"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "before-after-sql",
+        "rollback-plan",
+        "runtime-page-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "metadata/entity-model-config-crud-readiness-probe.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js",
+        "scripts/verify-entity-model-config-crud-readiness.py",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "remainingGaps": [],
+      "acceptanceEvidence": {
+        "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+        "report": "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "route": "/msService/ec/engine/msManage",
+        "requests": [
+          "POST /msService/ec/entity/save entityCreate HTTP 200/success=true",
+          "POST /msService/ec/model/save modelCreate HTTP 200/success=true",
+          "POST /msService/ec/entity/save entityEdit HTTP 200/success=true",
+          "POST /msService/ec/model/save modelEdit HTTP 200/success=true",
+          "POST /msService/ec/model/ordinaryDelete HTTP 200/success=true",
+          "POST /msService/ec/entity/ordinaryDelete HTTP 200/success=true"
+        ],
+        "backendTrace": [
+          "EntityController.save/ordinaryDelete -> EntityServiceImpl -> entityDao",
+          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> modelDao/propertyDao",
+          "DtoUtils.getEntity/getModelVO request DTO parsing"
+        ],
+        "postgreSqlEvidence": [
+          "after create ec_entity=1",
+          "after create ec_model=1",
+          "after create inherent ec_property=3",
+          "edit marker persisted to entity/model descriptions",
+          "ordinaryDelete soft-deleted entity/model/property rows",
+          "controlled cleanup left entity/model/property/physical table counts at 0"
+        ],
+        "postgresNote": "The PostgreSQL branch currently records entity/model/property metadata; ModelSyncDBUtils does not auto-create the physical DS_E2E_063301 table for PostgreSQL in this report."
+      },
+      "acceptedOperations": [
+        "entity edit request returned HTTP 200/success=true",
+        "model edit request returned HTTP 200/success=true",
+        "PostgreSQL verified marker updates in entity/model descriptions",
+        "browser context had no visible/console/page/request failure"
+      ]
+    },
+    {
+      "id": "entity-model-delete",
+      "areaId": "configuration-entity-runtime",
+      "title": "实体/模型配置删除/禁用",
+      "status": "PASS",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "high",
+      "route": "configuration/entity runtime pages",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_ENTITY_MODEL",
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_property",
+        "information_schema.tables"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "before-after-sql",
+        "rollback-plan",
+        "menu-runtime-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "metadata/entity-model-config-crud-readiness-probe.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js",
+        "scripts/verify-entity-model-config-crud-readiness.py",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "remainingGaps": [],
+      "acceptanceEvidence": {
+        "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+        "report": "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "route": "/msService/ec/engine/msManage",
+        "requests": [
+          "POST /msService/ec/entity/save entityCreate HTTP 200/success=true",
+          "POST /msService/ec/model/save modelCreate HTTP 200/success=true",
+          "POST /msService/ec/entity/save entityEdit HTTP 200/success=true",
+          "POST /msService/ec/model/save modelEdit HTTP 200/success=true",
+          "POST /msService/ec/model/ordinaryDelete HTTP 200/success=true",
+          "POST /msService/ec/entity/ordinaryDelete HTTP 200/success=true"
+        ],
+        "backendTrace": [
+          "EntityController.save/ordinaryDelete -> EntityServiceImpl -> entityDao",
+          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> modelDao/propertyDao",
+          "DtoUtils.getEntity/getModelVO request DTO parsing"
+        ],
+        "postgreSqlEvidence": [
+          "after create ec_entity=1",
+          "after create ec_model=1",
+          "after create inherent ec_property=3",
+          "edit marker persisted to entity/model descriptions",
+          "ordinaryDelete soft-deleted entity/model/property rows",
+          "controlled cleanup left entity/model/property/physical table counts at 0"
+        ],
+        "postgresNote": "The PostgreSQL branch currently records entity/model/property metadata; ModelSyncDBUtils does not auto-create the physical DS_E2E_063301 table for PostgreSQL in this report."
+      },
+      "acceptedOperations": [
+        "model ordinaryDelete returned HTTP 200/success=true",
+        "entity ordinaryDelete returned HTTP 200/success=true",
+        "PostgreSQL verified entity/model/property soft-delete state",
+        "controlled cleanup removed marker rows and verified zero leftover metadata rows"
+      ]
+    },
+    {
+      "id": "entity-model-postgres-physical-table-autocreate",
+      "areaId": "configuration-physical-model-table",
+      "title": "实体/模型配置 PostgreSQL 物理表自动创建",
+      "status": "PLANNED",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "high",
+      "route": "/msService/ec/engine/msManage",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_ENTITY_MODEL_PHYSICAL_TABLE",
+      "tables": [
+        "ec_model",
+        "ec_property",
+        "information_schema.tables",
+        "generated_model_physical_table"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "before-after-sql",
+        "rollback-plan",
+        "model-sync-postgresql-branch",
+        "runtime-page-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/basic-config-coverage.json",
+        "docs/basic-config-coverage.md",
+        "docs/basic-config-action-matrix.md"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "entity-model-postgres-physical-table-autocreate",
+        "scope": "create a dedicated ADP_E2E entity/model and verify the PostgreSQL physical model table is created or intentionally risk-accepted",
+        "requiredTables": [
+          "ec_model",
+          "ec_property",
+          "information_schema.tables",
+          "generated_model_physical_table"
+        ],
+        "frontendRequirement": "Browser operation on /msService/ec/engine/msManage is required; metadata-only success is not enough for this action.",
+        "apiEvidenceRequired": [
+          "HTTP method",
+          "URL",
+          "request payload",
+          "response status",
+          "response body key fields"
+        ],
+        "backendTraceRequired": [
+          "ModelController.save",
+          "ModelServiceImpl.saveModel",
+          "ModelSyncDBUtils PostgreSQL branch or replacement path",
+          "SQL DDL or migration mapping"
+        ],
+        "persistenceRequirement": "Use ADP_E2E_*_ENTITY_MODEL_PHYSICAL_TABLE marker and verify information_schema.tables contains the generated table before cleanup.",
+        "minimumPassConditions": [
+          "ADP_E2E marker is visible in frontend/API evidence",
+          "PostgreSQL information_schema.tables returns the generated physical model table",
+          "cleanup drops or removes only the marker-created physical table and metadata rows",
+          "runtime configuration pages reload without console or network errors after create and cleanup"
+        ],
+        "rollbackPlan": [
+          "Drop only the marker-created generated physical table",
+          "Delete or disable only marker-created ec_entity/ec_model/ec_property rows",
+          "Verify information_schema.tables and metadata rows are clean after rollback"
+        ],
+        "recheckCommands": [
+          "make basic-config-action-matrix-check",
+          "make basic-config-coverage-check",
+          "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_ENTITY_MODEL_TABLE_NAME=<marker-table> ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
+        ],
+        "currentGaps": [
+          "Existing entity/model CRUD acceptance proves ec_entity/ec_model/ec_property metadata only.",
+          "metadata/entity-model-config-crud-persistence-acceptance.json records that the PostgreSQL path did not create DS_E2E_063301.",
+          "No ModelSyncDBUtils PostgreSQL physical-table acceptance evidence exists yet."
+        ]
+      },
+      "remainingGaps": [
+        "当前实体/模型 CRUD 验收只证明元数据链路；还需要补 PostgreSQL 物理模型表自动创建或正式风险接受证据。"
+      ]
+    },
+    {
+      "id": "nacos-production-export-diff",
+      "areaId": "nacos-keycloak-production-config",
+      "title": "Nacos 生产配置 export/diff",
+      "status": "PLANNED",
+      "mutationPolicy": "production-evidence-required",
+      "riskLevel": "high",
+      "route": "production configuration runbooks",
+      "requiresPersistence": false,
+      "requiredBeforeMutation": [
+        "production-nacos-export",
+        "drift-review",
+        "signed-runtime-patch",
+        "rollback-plan"
+      ],
+      "evidenceRefs": [
+        "metadata/nacos-config-drift-smoke.json",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json"
+      ],
+      "remainingGaps": [
+        "测试环境 runtime smoke 已通过；生产 export/diff、漂移审阅、签名 patch 和回退演练未执行。"
+      ]
+    },
+    {
+      "id": "keycloak-production-realm-migration",
+      "areaId": "nacos-keycloak-production-config",
+      "title": "Keycloak 生产 realm 迁移",
+      "status": "PLANNED",
+      "mutationPolicy": "production-evidence-required",
+      "riskLevel": "critical",
+      "route": "production configuration runbooks",
+      "requiresPersistence": false,
+      "requiredBeforeMutation": [
+        "source-target-realm-inventory",
+        "database-restore-rehearsal",
+        "secret-rotation",
+        "jwt-nacos-sync",
+        "post-migration-auth-smoke",
+        "rollback-plan"
+      ],
+      "evidenceRefs": [
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py"
+      ],
+      "remainingGaps": [
+        "测试环境 JWT smoke 已通过；生产 realm export/import、数据库恢复演练、secret 轮换和生产登录 smoke 未执行。"
+      ]
+    }
+  ]
+}

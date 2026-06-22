@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T00:00:00+08:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "production",
+  "overallStatus": "BLOCKED",
+  "summary": {
+    "dependencies": 2,
+    "ready": 0,
+    "blocked": 2,
+    "productionBlockedCases": 4,
+    "requiredEndpointProbes": 7,
+    "requiredContractStages": 22,
+    "requiredStartupEvidenceContracts": 2,
+    "requiredStartupSmokeCommands": 8
+  },
+  "sourceReports": [
+    "metadata/business-dependency-readiness-smoke.json",
+    "metadata/business-dependency-package-scan.json",
+    "metadata/production-module-blockers.json",
+    "metadata/production-module-backlog.json"
+  ],
+  "dependencies": [
+    {
+      "id": "material-service",
+      "title": "Material warehouse/inventory service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-019",
+        "PROD-021",
+        "PROD-022",
+        "WOM/QCS inventory and stock-in write-back"
+      ],
+      "serviceAliases": [
+        "material",
+        "MATERIAL",
+        "wms",
+        "WMS",
+        "warehouse",
+        "Warehouse",
+        "inventory",
+        "Inventory"
+      ],
+      "requiredPackageEvidence": {
+        "statusBeforePackage": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+        "candidateStatusAfterPackage": "CANDIDATE_FOUND",
+        "requiredTerms": [
+          "checkProdResult",
+          "generateProduceOutSing",
+          "produceOutSingle",
+          "material/foreign/foreign"
+        ],
+        "notEnoughEvidence": [
+          "LIMSMaterial master-data package only",
+          "BaseSet material master data only",
+          "WOM internal material document DTO/interface only"
+        ]
+      },
+    "requiredRuntimeEvidence": {
+      "nacosGroup": "prod",
+      "minimumHealthyInstances": 1,
+      "endpointHttpStatusMustBe2xx": true,
+      "endpointTenantServiceMissingMustBeFalse": true,
+      "mustTraceBackendPath": true,
+      "mustMapTargetTables": true
+    },
+    "requiredStartupEvidence": {
+      "moduleIntakePrecheck": true,
+      "postgresDefaultRuntime": true,
+      "oracleLegacyOnly": true,
+      "nacosConfigRendered": true,
+      "dockerComposeRegistration": true,
+      "runtimePatchManifestUpdated": true,
+      "rollbackOrDisablePlan": true,
+      "startupSmokeCommands": [
+        "make module-intake-check INTAKE=/path/to/material-package",
+        "make render-config",
+        "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
+        "make audit-postgres-mappings"
+      ],
+      "notEnoughEvidence": [
+        "Dropping a jar into the runtime without source/intake scan.",
+        "A Nacos service registration that still points at Oracle/default legacy datasource.",
+        "A Compose service that starts but has no rollback/disable plan."
+      ]
+    },
+    "requiredEndpoints": [
+        {
+          "name": "checkProdResult",
+          "method": "POST",
+          "path": "/msService/material/foreign/foreign/checkProdResult?srcId=<marker-src-id>&checkResult=<marker-result>"
+        },
+        {
+          "name": "generateProduceOutSing",
+          "method": "POST",
+          "path": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+        }
+      ],
+      "requiredDatabaseEvidence": [
+        "PostgreSQL target stock-in or inventory tables are identified and are not only BaseSet/WOM master-data tables.",
+        "A unique ADP_E2E marker writes to the confirmed stock-in or inventory target table.",
+        "Before/after SQL and query result summaries are added to persistence acceptance assets."
+      ],
+      "acceptanceStages": [
+        "package-candidate-scan",
+        "module-intake-precheck",
+        "docker-compose-registration",
+        "nacos-healthy-service",
+        "authenticated-endpoint-probes",
+        "controller-service-dao-sql-trace",
+        "target-table-map",
+        "real-browser-marker-flow",
+        "postgresql-before-after-query",
+        "production-blocker-update",
+        "persistence-acceptance-update"
+      ],
+      "evidenceRefs": [
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md",
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-backlog.json"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after package deployment, run checkProdResult/generateProduceOutSing with ADP_E2E marker data and query target stock-in/inventory tables"
+      ],
+      "nonSolutions": [
+        "Do not mark inventory write-back PASS from QCS/WOM state backfill alone.",
+        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
+        "Do not mark PASS from HTTP 200 without PostgreSQL marker writes."
+      ]
+    },
+    {
+      "id": "process-analysis",
+      "title": "ProcessAnalysis traceability service",
+      "status": "BLOCKED",
+      "requiredFor": [
+        "PROD-020",
+        "WOM production process traceability"
+      ],
+      "serviceAliases": [
+        "ProcessAnalysis",
+        "processanalysis",
+        "PROCESSANALYSIS",
+        "Traceability",
+        "traceability"
+      ],
+      "requiredPackageEvidence": {
+        "statusBeforePackage": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+        "candidateStatusAfterPackage": "CANDIDATE_FOUND",
+        "requiredTerms": [
+          "ProcessAnalysis",
+          "isProdprocessView",
+          "processBatchViewOut",
+          "analysisiTask",
+          "manualStatActive",
+          "manualStatProcess"
+        ],
+        "notEnoughEvidence": [
+          "WOM caller-side JavaScript only",
+          "Direct URL route reachability without service registration",
+          "Runtime menu row without target service and tables"
+        ]
+      },
+    "requiredRuntimeEvidence": {
+      "nacosGroup": "prod",
+      "minimumHealthyInstances": 1,
+      "endpointHttpStatusMustBe2xx": true,
+      "endpointTenantServiceMissingMustBeFalse": true,
+      "runtimeViewCountMustBePositive": true,
+        "menuCountMustBePositive": true,
+      "tableCountMustBePositive": true,
+      "mustTraceBackendPath": true
+    },
+    "requiredStartupEvidence": {
+      "moduleIntakePrecheck": true,
+      "postgresDefaultRuntime": true,
+      "oracleLegacyOnly": true,
+      "nacosConfigRendered": true,
+      "dockerComposeRegistration": true,
+      "runtimePatchManifestUpdated": true,
+      "rollbackOrDisablePlan": true,
+      "startupSmokeCommands": [
+        "make module-intake-check INTAKE=/path/to/process-analysis-package",
+        "make render-config",
+        "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
+        "make audit-postgres-mappings"
+      ],
+      "notEnoughEvidence": [
+        "Only importing runtime menu rows without a healthy ProcessAnalysis service.",
+        "A traceability route that opens while backend endpoints still return tenant-service 503.",
+        "A service package that starts only with Oracle/default legacy datasource settings."
+      ]
+    },
+    "requiredEndpoints": [
+        {
+          "name": "isProdprocessView",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=<ADP_E2E_marker_batch>"
+        },
+        {
+          "name": "processBatchViewOut",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?batchNo=<ADP_E2E_marker_batch>&productNo=<ADP_E2E_marker_material>"
+        },
+        {
+          "name": "analysisiTask",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask"
+        },
+        {
+          "name": "manualStatActive",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=<marker-active-id>"
+        },
+        {
+          "name": "manualStatProcess",
+          "method": "GET",
+          "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=<marker-process-id>"
+        }
+      ],
+      "requiredDatabaseEvidence": [
+        "ProcessAnalysis PostgreSQL tables are identified and table count is greater than 0.",
+        "runtime_view and rbac_menuinfo rows for ProcessAnalysis/traceability are greater than 0.",
+        "A real WOM traceability button or equivalent authenticated browser context opens the target page with marker batch data."
+      ],
+      "acceptanceStages": [
+        "package-candidate-scan",
+        "module-intake-precheck",
+        "docker-compose-registration",
+        "nacos-healthy-service",
+        "runtime-menu-permission-import",
+        "authenticated-endpoint-probes",
+        "real-wom-trace-button-browser-flow",
+        "controller-service-dao-sql-trace",
+        "postgresql-runtime-and-target-table-query",
+        "production-blocker-update",
+        "persistence-acceptance-update"
+      ],
+      "evidenceRefs": [
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md",
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-backlog.json"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: after ProcessAnalysis deployment, open processBatchViewOut from the real WOM trace button with an ADP_E2E marker batch"
+      ],
+      "nonSolutions": [
+        "Do not patch WOM alone and call traceability complete.",
+        "Do not mark PASS from direct URL reachability without Nacos, runtime, menu and table evidence.",
+        "Do not use HTTP 200 alone without target module and PostgreSQL/runtime evidence."
+      ]
+    }
+  ]
+}

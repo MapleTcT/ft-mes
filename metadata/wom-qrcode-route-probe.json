@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "reportKind": "wom-qrcode-route-probe",
+  "generatedAt": "2026-06-22T07:41:18.625Z",
+  "database": "PostgreSQL",
+  "baseUrl": "http://222.88.185.146:18080",
+  "dbSshTarget": "v6@100.99.133.43",
+  "login": {
+    "username": "admin",
+    "status": 200,
+    "tokenCaptured": true
+  },
+  "databaseEvidence": {
+    "sql": [
+      "SELECT count(*) FROM public.baseset_printers;",
+      "SELECT count(*) FROM public.baseset_qr_code_types;",
+      "SELECT count(*) FROM public.baseset_qr_detail_infos;",
+      "SELECT count(*) FROM public.printer_register;",
+      "SELECT id, table_no, task_run_state, status FROM public.wom_produce_tasks ORDER BY create_time DESC NULLS LAST, id DESC LIMIT 1;"
+    ],
+    "tableCounts": {
+      "public.baseset_printers": 0,
+      "public.baseset_qr_code_types": 0,
+      "public.baseset_qr_detail_infos": 0,
+      "public.printer_register": 8
+    },
+    "selectedTask": {
+      "id": "9000006140596437",
+      "tableNo": "ADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_TASK_TN",
+      "taskRunState": "WOM_runState/waitForRun",
+      "status": "99"
+    },
+    "rawRows": [
+      [
+        "tableCount",
+        "public.baseset_printers",
+        "0"
+      ],
+      [
+        "tableCount",
+        "public.baseset_qr_code_types",
+        "0"
+      ],
+      [
+        "tableCount",
+        "public.baseset_qr_detail_infos",
+        "0"
+      ],
+      [
+        "tableCount",
+        "public.printer_register",
+        "8"
+      ],
+      [
+        "task",
+        "9000006140596437",
+        "ADP_E2E_20260622074059_WOMSTART_HOLD_RESTART_TASK_TN",
+        "WOM_runState/waitForRun",
+        "99"
+      ]
+    ]
+  },
+  "endpointProbes": [
+    {
+      "method": "GET",
+      "url": "/msService/WOM/printManage/printDate/generateCode",
+      "requestPayload": null,
+      "httpStatus": 404,
+      "responseCode": 404,
+      "responseMessage": "404 没找到请求",
+      "responseBodyExcerpt": "{\"code\":404,\"data\":{\"timestamp\":1782114072234,\"status\":404,\"error\":\"Not Found\",\"message\":\"No message available\",\"path\":\"/WOM/printManage/printDate/generateCode\",\"error_message\":null},\"message\":\"404 没找到请求\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/generateQrCode",
+      "requestPayload": {
+        "taskId": 9000006140596437,
+        "manuDate": "2026-06-21",
+        "approveDate": "2027-06-21",
+        "printId": 1,
+        "printCount": 1
+      },
+      "httpStatus": 404,
+      "responseCode": 404,
+      "responseMessage": "404 没找到请求",
+      "responseBodyExcerpt": "{\"code\":404,\"data\":{\"timestamp\":1782114072378,\"status\":404,\"error\":\"Not Found\",\"message\":\"No message available\",\"path\":\"/WOM/printManage/generateQrCode\",\"error_message\":null},\"message\":\"404 没找到请求\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/backfill-printInfo",
+      "requestPayload": [
+        {
+          "isPrint": 1,
+          "detail": "ADP_E2E_QRCODE_ROUTE_PROBE"
+        }
+      ],
+      "httpStatus": 404,
+      "responseCode": 404,
+      "responseMessage": "404 没找到请求",
+      "responseBodyExcerpt": "{\"code\":404,\"data\":{\"timestamp\":1782114072487,\"status\":404,\"error\":\"Not Found\",\"message\":\"No message available\",\"path\":\"/WOM/printManage/backfill-printInfo\",\"error_message\":null},\"message\":\"404 没找到请求\"}"
+    }
+  ],
+  "serviceJarScan": {
+    "checked": true,
+    "outerJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
+    "classMatchCount": 0,
+    "stringMatchCount": 0,
+    "classMatches": [],
+    "stringMatches": []
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "allEndpoints404": true,
+    "noServiceJarMatches": true,
+    "missingPrinterConfig": true,
+    "qrRowsBeforeProbe": 0
+  },
+  "conclusion": "The WOM toolbar button references printManage QR endpoints, but the current runtime returns 404 and the WOM service jar contains no matching controller/string evidence. This is a missing runtime implementation/package gap, not a proven PostgreSQL persistence path."
+}

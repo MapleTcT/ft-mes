@@ -1,14 +1,19 @@
 {
   "schemaVersion": 1,
+  "generatedAt": "2026-06-22T10:19:55+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
     "metadata/oracle-migration-audit.json",
     "metadata/postgres-migration-inventory.json",
     "backend/source-modules/pom.xml",
+    "scripts/verify-source-modules.py",
     "deploy/docker/docker-compose.yml",
     "deploy/docker/.env.example",
-    "deploy/docker/.env.oracle-legacy.example"
+    "deploy/docker/.env.oracle-legacy.example",
+    "deploy/nacos-config",
+    "deploy/docker/nacos-rendered"
   ],
   "summary": {
     "blockingIssueCount": 0,
@@ -16,12 +21,16 @@
     "watchCount": 2,
     "plannedCount": 1,
     "sourceModuleCount": 1,
-    "oracleBacklogReferenceCount": 827,
+    "sourceModuleOraclePolicyPass": true,
+    "oracleBacklogReferenceCount": 958,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 75,
+    "postgresMigrationCount": 170,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
-    "postgresMapperAuditWarningCount": 3
+    "postgresMapperAuditWarningCount": 0,
+    "runtimeConfigActiveOracleLineCount": 0,
+    "oracleAuditUnclassifiedCount": 0,
+    "oracleAuditRepoCommitMatchesHead": true
   },
   "sourceCounts": {
     "backendSourceJars": 250,
@@ -41,6 +50,14 @@
     "envExamplePostgresHost": true,
     "oracleLegacyTemplatePresent": true
   },
+  "runtimeConfigOracleScan": {
+    "scannedFiles": 88,
+    "scannedActiveLines": 1620,
+    "activeOracleLineCount": 0,
+    "sourceTemplateActiveOracleLineCount": 0,
+    "renderedActiveOracleLineCount": 0,
+    "findings": []
+  },
   "parentPomOraclePolicy": {
     "defaultOracleDependencyManagementCount": 0,
     "defaultOracleDependencies": [],
@@ -50,48 +67,39 @@
       "com.oracle.database.jdbc:ojdbc8"
     ]
   },
+  "sourceModuleOraclePolicy": {
+    "returnCode": 0,
+    "output": "Source module verification passed. Modules: 1."
+  },
   "postgresMapperAudit": {
-    "findingCount": 3,
+    "findingCount": 0,
     "errorCount": 0,
-    "warningCount": 3,
+    "warningCount": 0,
     "undecodableCount": 0,
-    "byPattern": {
-      "oracle-to-char": 3
-    },
-    "bySeverity": {
-      "warning": 3
-    },
-    "byScope": {
-      "postgresql": 3
-    },
-    "topFiles": [
-      {
-        "file": "014-ui-smoke-runtime-fixups.sql",
-        "findingCount": 1
-      },
-      {
-        "file": "016-notification-printer-runtime-fixups.sql",
-        "findingCount": 1
-      },
-      {
-        "file": "021-notification-postgres-idempotent-fixups.sql",
-        "findingCount": 1
-      }
-    ]
+    "byPattern": {},
+    "bySeverity": {},
+    "byScope": {},
+    "topFiles": []
+  },
+  "oracleMigrationAudit": {
+    "generatedAt": "2026-06-22T10:18:45+00:00",
+    "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+    "findingCount": 958,
+    "categoryTotal": 958,
+    "unclassifiedReferenceCount": 0
   },
   "oracleBacklogCategoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 165,
+    "documentation-or-workflow": 186,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
-    "postgres-compat-reference": 1,
-    "postgres-conversion-tooling": 26,
+    "postgres-compat-reference": 6,
+    "postgres-conversion-tooling": 35,
     "recovered-source-backlog": 266,
-    "runtime-config-backlog": 2,
     "runtime-patch-backlog": 9,
-    "tooling-or-audit-code": 166
+    "tooling-or-audit-code": 264
   },
   "backendDirectOracleModules": [
     {
@@ -131,7 +139,7 @@
       "verification": "提升模块后运行 `make source-module-check`、`make source-module-test`，并用登录/currentuser 或升级任务 dry-run 验证。"
     }
   ],
-  "postgresMigrationWatchCount": 45,
+  "postgresMigrationWatchCount": 60,
   "checks": [
     {
       "id": "runtime-default-postgresql",
@@ -150,11 +158,27 @@
       "blocking": false
     },
     {
+      "id": "runtime-config-no-oracle-defaults",
+      "title": "Nacos 默认运行配置不含 active Oracle-like fallback",
+      "status": "pass",
+      "evidence": "activeOracle=0, source=0, rendered=0, files=88",
+      "nextAction": "Nacos source templates and rendered configs must default to PostgreSQL; Oracle-like defaults can only remain in comments, backlog, or explicit legacy templates.",
+      "blocking": false
+    },
+    {
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 827 tracked references.",
+      "evidence": "Oracle migration backlog has 958 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
+      "blocking": false
+    },
+    {
+      "id": "oracle-audit-current-and-classified",
+      "title": "Oracle migration audit 可追溯且无未分类引用",
+      "status": "pass",
+      "evidence": "generatedAt=2026-06-22T10:18:45+00:00, repoCommit=1c06d331de47644110a73be7f439fbf3ecfa3461, unclassified=0, findingCount=958, categoryTotal=958",
+      "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
     {
@@ -169,7 +193,7 @@
       "id": "mapper-postgres-audit",
       "title": "默认路径 Mapper/SQL 无阻断方言",
       "status": "pass",
-      "evidence": "errors=0, warnings=3, findings=3",
+      "evidence": "errors=0, warnings=0, findings=0",
       "nextAction": "任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。",
       "blocking": false
     },
@@ -177,7 +201,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "75 scripts, range=001-075, highRisk=0, watch=45",
+      "evidence": "170 scripts, range=001-170, highRisk=0, watch=60",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },
@@ -195,6 +219,14 @@
       "status": "watch",
       "evidence": "`backend/source-modules` currently declares 1 buildable modules.",
       "nextAction": "按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。",
+      "blocking": false
+    },
+    {
+      "id": "source-module-oracle-policy",
+      "title": "已提升源码模块不含 Oracle 默认依赖",
+      "status": "pass",
+      "evidence": "Source module verification passed. Modules: 1.",
+      "nextAction": "修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。",
       "blocking": false
     },
     {

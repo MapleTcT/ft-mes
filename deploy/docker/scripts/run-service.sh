@@ -62,6 +62,14 @@ case "$service_dir" in
     service_extra_args="${service_extra_args} -Dintegration.supos.enabled=${INTEGRATION_SUPOS_ENABLED:-false} -Dentitlement.server=${SUPOS_ENTITLEMENT_SERVER:-license:8010} -Dentitlement.libc.type=${SUPOS_ENTITLEMENT_LIBC_TYPE:-glibc}"
     ;;
 esac
+case "$jar_path" in
+  */module-Server/WOMMs/*)
+    service_extra_args="${service_extra_args} -DWOM/WOM.mesProBatch=${WOM_MES_PRO_BATCH:-false}"
+    ;;
+  */module-Server/LIMS/*)
+    service_extra_args="${service_extra_args} -DQCS/QCS.reportShowIndexRange=${QCS_REPORT_SHOW_INDEX_RANGE:-qualityStd} -DQCS/QCS.autoReportStaff=${QCS_AUTO_REPORT_STAFF:-currentUser} -DQCS/QCS.autoReport=${QCS_AUTO_REPORT:-manuCheck} -DQCS/QCS.autoUnQlfDeal=${QCS_AUTO_UNQLF_DEAL:-manu}"
+    ;;
+esac
 case "$service_dir" in
   notification-dingtalk|notification-mobile|notification-sms-jincang|notification-wechat)
     service_extra_args="${service_extra_args} -Dsystemconfig.ribbon.NIWSServerListClassName=com.netflix.loadbalancer.ConfigurationBasedServerList -Dsystemconfig.ribbon.listOfServers=sysmanagement:30220 -Dnotification-admin.ribbon.NIWSServerListClassName=com.netflix.loadbalancer.ConfigurationBasedServerList -Dnotification-admin.ribbon.listOfServers=notification-admin:30102 -Di18n.ribbon.NIWSServerListClassName=com.netflix.loadbalancer.ConfigurationBasedServerList -Di18n.ribbon.listOfServers=i18n:8080 -Dsupfusion.cloud.i18n.host=http://i18n:8080"

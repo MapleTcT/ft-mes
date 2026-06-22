@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-15T21:12:00+08:00",
-  "repoCommit": "55b9f9091dc9d036deb711bbd2e1faa6e726ce77",
+  "generatedAt": "2026-06-22T07:40:40+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
   "database": "PostgreSQL",
   "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
   "summary": {
@@ -23,22 +23,38 @@
         "metadata/postgres-migration-inventory.json",
         "docs/oracle-migration-backlog.md",
         "deploy/database/production-migration/README.md",
-        "deploy/database/production-migration/scripts/run-target-preflight.sh"
+        "deploy/database/production-migration/scripts/run-target-preflight.sh",
+        "deploy/database/production-migration/scripts/run-source-inventory.sh",
+        "deploy/database/production-migration/scripts/compare-row-counts.py",
+        "deploy/database/production-migration/scripts/compare-checksums.py",
+        "deploy/database/production-migration/migration-evidence.example.json",
+        "deploy/database/production-migration/scripts/validate-migration-evidence.py",
+        "deploy/database/production-migration/source-checksums.example.tsv",
+        "deploy/database/production-migration/target-checksums.example.tsv",
+        "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+        "metadata/postgres-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
       ],
       "requiredEvidence": [
         "生产源库 inventory",
         "全量迁移脚本",
         "增量或冻结窗口方案",
-        "行数和 checksum 校验 SQL",
+        "行数和 checksum 校验 SQL/对账报告",
+        "数据库迁移演练 evidence manifest strict-ready 校验通过",
         "至少一次 rehearsal 报告"
       ],
       "blockingIssues": [
-        "当前新增的是目标 PostgreSQL 预检和校验模板，不是完整生产源库抽取脚本。",
-        "仍缺生产源库抽取、增量同步、数据量评估和 rehearsal 结果。"
+        "当前新增的是源库 row-count inventory、目标 PostgreSQL 预检、行数/checksum 对比入口和测试环境 PostgreSQL runtime smoke，不是完整生产数据搬迁执行脚本。",
+        "deploy/database/production-migration/migration-evidence.example.json 只是 PLANNED 结构模板；make production-db-migration-ready-check 必须使用真实演练 evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 PostgreSQL smoke 报告结构和 PASS 状态，不替代生产数据迁移 rehearsal。",
+        "仍缺增量同步或冻结窗口设计、表级迁移顺序、生产 checksum 实填、数据量评估和 rehearsal 结果。"
       ],
       "nextActions": [
-        "用 deploy/database/production-migration/ 建立生产源库 inventory 和目标库预检报告。",
-        "按模块输出表级迁移顺序和 checksum SQL。",
+        "用 deploy/database/production-migration/scripts/run-source-inventory.sh 建立生产源库 row-count inventory。",
+        "用 deploy/database/production-migration/scripts/run-target-preflight.sh 建立目标库预检报告，再用 compare-row-counts.py 输出 source/target 行数对比。",
+        "按模块输出表级迁移顺序和 checksum SQL，再用 compare-checksums.py 输出 source/target checksum 对比。",
+        "把 source inventory、target preflight、row-count/checksum 对账、target PostgreSQL runtime smoke 和 rollback 证据写入数据库迁移 evidence manifest，并用 production-db-migration-ready-check 做 strict-ready 校验。",
+        "生产发布前复跑 make smoke-postgres-runtime 指向目标/生产副本环境，并保存 runtime smoke 结果。",
         "在测试副本执行 rehearsal 并记录报告。"
       ],
       "artifacts": [
@@ -46,9 +62,26 @@
         "deploy/database/production-migration/.env.example",
         "deploy/database/production-migration/table-list.example.txt",
         "deploy/database/production-migration/scripts/run-target-preflight.sh",
+        "deploy/database/production-migration/scripts/run-source-inventory.sh",
+        "deploy/database/production-migration/scripts/compare-row-counts.py",
+        "deploy/database/production-migration/scripts/compare-checksums.py",
+        "deploy/database/production-migration/migration-evidence.example.json",
+        "deploy/database/production-migration/scripts/validate-migration-evidence.py",
+        "deploy/database/production-migration/source-checksums.example.tsv",
+        "deploy/database/production-migration/target-checksums.example.tsv",
         "deploy/database/production-migration/sql/target-schema-inventory.sql",
         "deploy/database/production-migration/sql/target-row-counts-template.sql",
-        "deploy/database/production-migration/sql/target-checksum-template.sql"
+        "deploy/database/production-migration/sql/target-checksum-template.sql",
+        "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+        "metadata/postgres-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-source-inventory",
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-target-preflight",
+        "make production-rowcount-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-checksum-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-db-migration-ready-check DB_MIGRATION_EVIDENCE=/secure/path/adp-db-migration-evidence.json"
       ]
     },
     {
@@ -60,7 +93,10 @@
       "currentEvidence": [
         "deploy/docker/docker-compose.yml",
         "docs/runtime-validation-scope.md",
-        "docs/production-migration/rollback-runbook.md"
+        "docs/production-migration/rollback-runbook.md",
+        "deploy/rollback/production-migration/README.md",
+        "deploy/rollback/production-migration/rollback-evidence.example.json",
+        "deploy/rollback/production-migration/scripts/validate-rollback-evidence.py"
       ],
       "requiredEvidence": [
         "备份命令",
@@ -70,14 +106,22 @@
         "负责人和时间窗"
       ],
       "blockingIssues": [
-        "已有回滚 runbook 模板，但缺生产级备份、恢复、回切、DNS/端口回滚和演练时间窗证据。"
+        "当前新增的是回滚证据 manifest 模板和 READY 校验器，不是生产回滚演练结果。",
+        "仍缺生产级备份、恢复、回切、DNS/端口回滚和演练时间窗的真实证据文件。"
       ],
       "nextActions": [
-        "在测试环境演练 PostgreSQL restore、MinIO 对象回滚、Keycloak realm 回滚和 Nacos 配置回滚。",
-        "把演练输出写入 docs/production-migration/rollback-runbook.md。"
+        "按 deploy/rollback/production-migration/rollback-evidence.example.json 填写真实回滚证据文件。",
+        "在测试环境演练 PostgreSQL restore、MinIO 对象回滚、Keycloak realm 回滚、Nacos 配置回滚、runtime patch 回滚和域名/TLS 回退。",
+        "用 make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json 校验演练证据。"
       ],
       "artifacts": [
-        "docs/production-migration/rollback-runbook.md"
+        "docs/production-migration/rollback-runbook.md",
+        "deploy/rollback/production-migration/README.md",
+        "deploy/rollback/production-migration/rollback-evidence.example.json",
+        "deploy/rollback/production-migration/scripts/validate-rollback-evidence.py"
+      ],
+      "readyEvidenceCommands": [
+        "make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json"
       ]
     },
     {
@@ -90,7 +134,10 @@
         "deploy/nacos-config/supfusion-license.properties",
         "deploy/docker/scripts/seed-test-license.sh",
         "docs/runtime-validation-scope.md",
-        "docs/production-migration/license-strategy.md"
+        "docs/production-migration/license-strategy.md",
+        "deploy/license/production-migration/README.md",
+        "deploy/license/production-migration/license-decision.example.json",
+        "deploy/license/production-migration/scripts/validate-license-decision.py"
       ],
       "requiredEvidence": [
         "正式授权方案",
@@ -99,14 +146,22 @@
         "license 配置备份恢复方法"
       ],
       "blockingIssues": [
-        "测试环境可以 bypass，但生产是否允许、如何审计尚未确认。"
+        "当前新增的是 license decision 模板和 READY 校验器，不是生产授权或应急审批证据。",
+        "测试环境可以 bypass，但生产正式授权、失效行为、应急 bypass 审批、审计规则和合法性确认尚未形成真实 evidence。"
       ],
       "nextActions": [
-        "确认是否采购或接入正式 license。",
-        "补生产 license 决策记录和应急审批记录。"
+        "按 deploy/license/production-migration/license-decision.example.json 填写真实生产 license 决策 evidence。",
+        "确认是否采购正式 license、接入受支持 license 服务，或使用受审批的限时应急 bypass。",
+        "用 make production-license-ready-check LICENSE_DECISION=/secure/path/adp-license-decision.json 校验真实生产决策。"
       ],
       "artifacts": [
-        "docs/production-migration/license-strategy.md"
+        "docs/production-migration/license-strategy.md",
+        "deploy/license/production-migration/README.md",
+        "deploy/license/production-migration/license-decision.example.json",
+        "deploy/license/production-migration/scripts/validate-license-decision.py"
+      ],
+      "readyEvidenceCommands": [
+        "make production-license-ready-check LICENSE_DECISION=/secure/path/adp-license-decision.json"
       ]
     },
     {
@@ -118,7 +173,15 @@
       "currentEvidence": [
         "deploy/docker/docker-compose.yml",
         "历史包线索：MinIO mes / transfer bucket",
-        "docs/production-migration/minio-migration-runbook.md"
+        "docs/production-migration/minio-migration-runbook.md",
+        "deploy/minio/production-migration/README.md",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json",
+        "deploy/minio/production-migration/scripts/validate-minio-migration-evidence.py",
+        "deploy/minio/production-migration/scripts/run-bucket-inventory.sh",
+        "deploy/minio/production-migration/scripts/compare-bucket-inventory.py",
+        "deploy/docker/scripts/adp-minio-runtime-smoke.js",
+        "metadata/minio-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
       ],
       "requiredEvidence": [
         "bucket inventory",
@@ -126,18 +189,41 @@
         "对象迁移脚本",
         "hash 或 etag 校验结果",
         "抽样下载验证",
+        "MinIO migration evidence manifest strict-ready 校验通过",
         "回滚或双写策略"
       ],
       "blockingIssues": [
-        "已有 MinIO 迁移 runbook 模板，但缺生产 bucket inventory 和对象迁移 dry-run。",
-        "缺断点续传和回滚策略的演练证据。"
+        "当前新增的是 MinIO 源/目标 bucket inventory、对象清单对账工具和测试环境 runtime smoke，不是生产对象迁移执行证据。",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json 只是 PLANNED 结构模板；make production-minio-migration-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 MinIO smoke 报告结构、bucket 摘要和 secret hygiene，不替代生产对象迁移 dry-run。",
+        "仍缺生产 endpoint 的 bucket inventory、对象迁移 dry-run、断点续传、抽样下载和回滚策略演练证据。"
       ],
       "nextActions": [
-        "导出生产 bucket/object 清单。",
-        "编写 dry-run 迁移脚本并记录 hash/etag 校验。"
+        "用 deploy/minio/production-migration/scripts/run-bucket-inventory.sh 导出生产源/目标 bucket object 清单。",
+        "用 deploy/minio/production-migration/scripts/compare-bucket-inventory.py 输出对象数量、大小和 etag 对账结果。",
+        "生产发布前复跑 make smoke-minio-runtime 指向目标环境，并保存 runtime smoke 结果。",
+        "把 source inventory、target inventory、object comparison、dry-run、sample download、runtime smoke 和 rollback evidence 写入 MinIO migration evidence manifest，并用 production-minio-migration-ready-check 做 strict-ready 校验。",
+        "在非生产目标执行迁移 dry-run、抽样下载验证和回滚演练。"
       ],
       "artifacts": [
-        "docs/production-migration/minio-migration-runbook.md"
+        "docs/production-migration/minio-migration-runbook.md",
+        "deploy/minio/production-migration/README.md",
+        "deploy/minio/production-migration/.env.example",
+        "deploy/minio/production-migration/bucket-list.example.txt",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json",
+        "deploy/minio/production-migration/scripts/run-bucket-inventory.sh",
+        "deploy/minio/production-migration/scripts/normalize-mc-ls-json.py",
+        "deploy/minio/production-migration/scripts/compare-bucket-inventory.py",
+        "deploy/minio/production-migration/scripts/validate-minio-migration-evidence.py",
+        "deploy/docker/scripts/adp-minio-runtime-smoke.js",
+        "metadata/minio-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-source-inventory",
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-target-inventory",
+        "make production-minio-compare MINIO_MIGRATION_REPORT_DIR=/secure/path/adp-minio-migration-preflight",
+        "make production-minio-migration-ready-check MINIO_MIGRATION_EVIDENCE=/secure/path/adp-minio-migration-evidence.json"
       ]
     },
     {
@@ -150,24 +236,57 @@
         "deploy/docker/scripts/init-keycloak-realm.sh",
         "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
         "deploy/docker/scripts/register-keycloak-nacos.sh",
-        "docs/production-migration/keycloak-production-runbook.md"
+        "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "make smoke-keycloak-jwt",
+        "docs/production-migration/keycloak-production-runbook.md",
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+        "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py"
       ],
       "requiredEvidence": [
         "realm export/import",
         "生产库备份恢复",
         "admin 和 client secret 轮换",
         "JWT public key 同步验证",
-        "用户/角色/组织映射策略"
+        "用户/角色/组织映射策略",
+        "Keycloak migration evidence manifest strict-ready 校验通过"
       ],
       "blockingIssues": [
-        "当前只有测试环境 realm 初始化和 JWT 同步脚本，缺生产库策略和演练证据。"
+        "当前新增的是 Keycloak source/target realm inventory 和对账工具，不是生产 realm 导入或数据库恢复演练证据。",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json 只是 PLANNED 结构模板；make production-keycloak-migration-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 Keycloak/JWT smoke 报告结构和 PASS 状态，不替代生产 realm export/import 或 secret 轮换演练。",
+        "测试环境 Keycloak/JWT runtime smoke 已经证明 100.99.133.43 的 realm、client、mapper、Nacos JWT 同步和网关登录/菜单链路通过，但仍缺生产或生产副本的 export/import、Keycloak 数据库备份恢复、admin/client secret 轮换和生产 JWT 同步后的登录 smoke 证据。"
       ],
       "nextActions": [
-        "在测试副本执行 realm export/import 和 JWT 同步验证。",
-        "把生产用户、角色、组织映射关系补入 runbook。"
+        "用 deploy/keycloak/production-migration/scripts/export-realm-inventory.sh 导出 source/target realm inventory。",
+        "用 deploy/keycloak/production-migration/scripts/compare-realm-inventory.py 对账 clients、roles、client scopes、components 和 JWT key fingerprint。",
+        "在测试副本执行 realm export/import、Keycloak 数据库备份恢复和 JWT 同步验证。",
+        "生产发布前复跑 make smoke-keycloak-jwt 指向目标环境，并保存 runtime smoke 结果。",
+        "把 source inventory、target inventory、realm comparison、database backup/restore、secret rotation、JWT/Nacos sync、auth smoke 和 rollback evidence 写入 Keycloak migration evidence manifest，并用 production-keycloak-migration-ready-check 做 strict-ready 校验。",
+        "把生产用户、角色、组织映射关系和 secret 轮换结果补入 runbook。"
       ],
       "artifacts": [
-        "docs/production-migration/keycloak-production-runbook.md"
+        "docs/production-migration/keycloak-production-runbook.md",
+        "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/.env.example",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+        "deploy/keycloak/production-migration/scripts/normalize-realm-inventory.py",
+        "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-source-export",
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-target-export",
+        "make production-keycloak-compare KEYCLOAK_MIGRATION_REPORT_DIR=/secure/path/adp-keycloak-migration-preflight",
+        "make production-keycloak-migration-ready-check KEYCLOAK_MIGRATION_EVIDENCE=/secure/path/adp-keycloak-migration-evidence.json"
       ]
     },
     {
@@ -180,24 +299,57 @@
         "deploy/docker/scripts/render-nacos-configs.py",
         "deploy/docker/scripts/prepare-runtime-patches.sh",
         "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
-        "docs/production-migration/nacos-runtime-patch-runbook.md"
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "deploy/nacos/production-migration/README.md",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py",
+        "metadata/runtime-patch-manifest.json",
+        "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
+        "metadata/nacos-config-drift-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "metadata/nacos-config-drift-smoke.json shows 44/44 fetched dataIds, 20/20 critical config checks PASS, zero non-comment Oracle residue, 91 group prod registered services, and 18/18 expected platform/business services healthy",
+        "make smoke-nacos-config",
+        "make runtime-patch-manifest-check"
       ],
       "requiredEvidence": [
         "生产 Nacos 配置差异清单",
         "runtime patch 版本和影响清单",
+        "签名生产 patch 包 manifest",
+        "Nacos/runtime patch evidence manifest strict-ready 校验通过",
         "回退脚本",
         "重启顺序",
         "健康检查结果"
       ],
       "blockingIssues": [
-        "测试环境 runtime patch 仍是运行包兼容层，生产升级策略和回退演练证据未形成。"
+        "当前仓库已有 runtime patch checksum manifest，但测试环境 runtime patch 仍是运行包兼容层。",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json 只是 PLANNED 结构模板；make production-nacos-runtime-patch-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境 Nacos drift smoke 报告结构、group prod/service 健康和 secret hygiene，不替代生产 Nacos export/diff、签名 patch 包或回退演练。",
+        "测试环境 Nacos drift smoke 已经证明 100.99.133.43 运行态 group prod 可取、关键 PostgreSQL/JWT/Nacos 配置通过且关键服务健康注册通过，但生产 Nacos export/diff、签名 patch 包、升级策略和回退演练证据未形成。"
       ],
       "nextActions": [
-        "输出 Nacos/rendered 配置 diff。",
-        "为每个 runtime patch 记录业务影响、版本号、checksum 和回退方式。"
+        "输出生产 Nacos/rendered 配置 diff。",
+        "用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。",
+        "为每个 runtime patch 记录业务影响、版本号、checksum 和回退方式。",
+        "生产发布前复跑 make smoke-nacos-config 指向目标环境，并人工审阅 metadata/nacos-config-drift-smoke.json 中的 hash drift。",
+        "把 rendered config baseline、target Nacos export、diff review、signed patch package、post-publish smoke 和 rollback evidence 写入 Nacos/runtime patch evidence manifest，并用 production-nacos-runtime-patch-ready-check 做 strict-ready 校验。",
+        "演练 Nacos 配置和 runtime patch 回退。"
       ],
       "artifacts": [
-        "docs/production-migration/nacos-runtime-patch-runbook.md"
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "deploy/nacos/production-migration/README.md",
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py",
+        "deploy/docker/scripts/adp-nacos-config-drift-smoke.js",
+        "metadata/nacos-config-drift-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py",
+        "metadata/runtime-patch-manifest.json",
+        "docs/production-migration/runtime-patch-manifest.md"
+      ],
+      "readyEvidenceCommands": [
+        "make runtime-patch-manifest-check",
+        "make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host",
+        "make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json"
       ]
     },
     {
@@ -209,7 +361,13 @@
       "currentEvidence": [
         "deploy/docker/docker-compose.yml",
         "deploy/docker/.env.example",
-        "docs/production-migration/network-tls-checklist.md"
+        "docs/production-migration/network-tls-checklist.md",
+        "deploy/network/production-migration/README.md",
+        "deploy/network/production-migration/network-tls-plan.example.json",
+        "deploy/network/production-migration/scripts/validate-network-tls-plan.py",
+        "deploy/docker/scripts/adp-test-environment-smoke.js",
+        "metadata/test-environment-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
       ],
       "requiredEvidence": [
         "生产域名清单",
@@ -219,14 +377,26 @@
         "防火墙或安全组规则"
       ],
       "blockingIssues": [
-        "已有网络/TLS checklist，但缺生产域名、证书、反向代理和网络边界的实际配置证据。"
+        "已有 network/TLS evidence 模板、strict READY 校验器和 100.99.133.43 测试环境 HTTP/SSH/Docker smoke，但缺真实生产域名、证书、反向代理、防火墙/安全组、HSTS、证书续期和外部 HTTPS smoke 证据。",
+        "make runtime-smoke-reports-check 只能校验已提交的测试环境入口 smoke 报告结构、HTTP/SSH/Docker PASS 状态和 secret hygiene，不替代生产域名/TLS 证据。"
       ],
       "nextActions": [
-        "确认生产域名和证书来源。",
-        "补 nginx / gateway / Keycloak / MinIO / Nacos / PostgreSQL 暴露边界。"
+        "生产发布前复跑 make smoke-test-environment 指向目标环境，确认测试/目标入口可达性。",
+        "按 deploy/network/production-migration/network-tls-plan.example.json 填写真实生产 network/TLS evidence。",
+        "补 nginx / gateway / Keycloak / MinIO / Nacos / PostgreSQL 暴露边界。",
+        "用 make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json 校验真实生产域名/TLS evidence。"
       ],
       "artifacts": [
-        "docs/production-migration/network-tls-checklist.md"
+        "docs/production-migration/network-tls-checklist.md",
+        "deploy/network/production-migration/README.md",
+        "deploy/network/production-migration/network-tls-plan.example.json",
+        "deploy/network/production-migration/scripts/validate-network-tls-plan.py",
+        "deploy/docker/scripts/adp-test-environment-smoke.js",
+        "metadata/test-environment-smoke.json",
+        "scripts/verify-runtime-smoke-reports.py"
+      ],
+      "readyEvidenceCommands": [
+        "make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json"
       ]
     },
     {
@@ -238,7 +408,10 @@
       "currentEvidence": [
         "docs/oracle-replacement-status.md",
         "metadata/oracle-replacement-status.json",
-        "docs/production-migration/security-hardening-checklist.md"
+        "docs/production-migration/security-hardening-checklist.md",
+        "deploy/security/production-migration/README.md",
+        "deploy/security/production-migration/security-hardening-plan.example.json",
+        "deploy/security/production-migration/scripts/validate-security-hardening-plan.py"
       ],
       "requiredEvidence": [
         "默认账号处理记录",
@@ -249,14 +422,21 @@
       ],
       "blockingIssues": [
         "测试账号和测试配置不能直接进入生产。",
-        "缺生产密钥管理、数据库账号拆分和镜像扫描证据。"
+        "缺生产账号轮换、测试账号清理、密钥管理、数据库账号拆分、镜像扫描、容器运行用户、审计日志和告警证据。"
       ],
       "nextActions": [
-        "建立生产 secret inventory 模板。",
-        "补最小权限和默认账号清理 checklist 的实际执行证据。"
+        "按 deploy/security/production-migration/security-hardening-plan.example.json 填写真实生产安全加固 evidence。",
+        "补最小权限和默认账号清理 checklist 的实际执行证据。",
+        "用 make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json 校验真实生产安全加固 evidence。"
       ],
       "artifacts": [
-        "docs/production-migration/security-hardening-checklist.md"
+        "docs/production-migration/security-hardening-checklist.md",
+        "deploy/security/production-migration/README.md",
+        "deploy/security/production-migration/security-hardening-plan.example.json",
+        "deploy/security/production-migration/scripts/validate-security-hardening-plan.py"
+      ],
+      "readyEvidenceCommands": [
+        "make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json"
       ]
     },
     {
@@ -266,11 +446,16 @@
       "owner": "business-owner",
       "scope": "平台、基础配置、生产主流程和所有写业务数据动作的真实前端 smoke 与 PostgreSQL 落库签字。",
       "currentEvidence": [
-        "docs/frontend-functional-test-report.md",
-        "docs/backend-table-audit/persistence-acceptance.md",
-        "metadata/persistence-acceptance.json",
-        "metadata/production-module-test-cases.json",
-        "docs/production-migration/business-smoke-signoff-template.md"
+        "平台和 53 个业务页面 smoke 有证据。",
+        "生产模块测试矩阵当前 43 条，37 PASS / 6 BLOCKED / 0 NOT_RUN，其中 41 条 route smoke PASS。",
+        "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
+        "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis remain BLOCKED on 100.99.133.43: no healthy Nacos dependency instances, authenticated dependency endpoints return 503, and ProcessAnalysis PostgreSQL/runtime/menu metadata is absent.",
+        "metadata/production-module-blockers.json records the 6 unresolved production blocker cases and is now a required business smoke signoff gate.",
+        "metadata/production-module-backlog.json records 9 unresolved production backlog items, including public produceTaskCreated explicit-disabled product decision blocker, visible WOM manual-create/import scope, and WOM makeTaskList QR runtime endpoint 404, and is now a required business smoke signoff gate.",
+        "docs/production-migration/business-smoke-signoff-template.md 已建立。",
+        "deploy/business-smoke/production-migration/README.md",
+        "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+        "deploy/business-smoke/production-migration/scripts/validate-business-smoke-signoff.py"
       ],
       "requiredEvidence": [
         "平台 smoke PASS",
@@ -280,17 +465,202 @@
         "业务负责人签字"
       ],
       "blockingIssues": [
-        "WOM 生产动作页仍 React #130，生产状态流转/报工没有 marker 落库证据。",
-        "生产模块完整主流程不能签字。"
+        "剩余 6 条生产用例仍 BLOCKED：RM 批量配方显式编辑入口、物料服务/库存入库、ProcessAnalysis 追溯、完整报工中的独立不良数/库存边界、生产相关导出入口，以及可见手工创建入口仍缺真实 marker 或业务包证据。",
+        "business smoke signoff READY 校验必须覆盖 metadata/production-module-blockers.json 的每个 PROD-* 阻断 case；未解决 case 需要逐项签署结构化风险接受，riskAcceptance 必须包含 decision=ACCEPTED、acceptedBy、signedAt 和真实 evidence。",
+        "business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。",
+        "business smoke signoff is blocked by production action persistence gaps and missing material/ProcessAnalysis external dependencies.",
+        "业务负责人尚未基于真实主流程签字。"
       ],
       "nextActions": [
-        "恢复 WOM 真实 edit/view component metadata。",
-        "补生产主流程 marker 落库验收。",
-        "形成业务 smoke 签字单。"
+        "补齐外部 Batch 客户端、物料/库存、ProcessAnalysis 等业务包和入口。",
+        "After deploying material/ProcessAnalysis packages, rerun make smoke-business-dependencies before marker acceptance/signoff.",
+        "从真实前端执行剩余 6 条 BLOCKED 用例并查 PostgreSQL。",
+        "把结果填入业务 smoke 签字模板。",
+        "用 make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json 校验真实生产业务签字 evidence。"
       ],
       "artifacts": [
-        "docs/production-migration/business-smoke-signoff-template.md"
+        "docs/production-migration/business-smoke-signoff-template.md",
+        "deploy/business-smoke/production-migration/README.md",
+        "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+        "deploy/business-smoke/production-migration/scripts/validate-business-smoke-signoff.py",
+        "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
+        "metadata/business-dependency-readiness-smoke.json",
+        "docs/production-module-blockers.md",
+        "metadata/production-module-blockers.json",
+        "docs/production-module-backlog.md",
+        "metadata/production-module-backlog.json"
+      ],
+      "readyEvidenceCommands": [
+        "make business-package-scan",
+        "make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url",
+        "make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url",
+        "make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json"
       ]
     }
-  ]
+  ],
+  "sourceEvidence": {
+    "testEnvironmentSmoke": {
+      "path": "metadata/test-environment-smoke.json",
+      "generatedAt": "2026-06-21T01:28:43.256Z",
+      "status": "PASS",
+      "metrics": {
+        "totalChecks": 9,
+        "pass": 9,
+        "fail": 0,
+        "expectedContainerCount": 6,
+        "runningExpectedContainers": 6,
+        "sshHost": "100.99.133.43",
+        "baseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "platformValidationSmoke": {
+      "path": "metadata/platform-validation-smoke.json",
+      "generatedAt": "2026-06-21T12:13:01.954Z",
+      "status": "PASS",
+      "metrics": {
+        "ok": true,
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "baseUrl": "http://100.99.133.43:18080",
+        "browserBaseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "postgresRuntimeSmoke": {
+      "path": "metadata/postgres-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:10.911Z",
+      "status": "PASS",
+      "metrics": {
+        "status": "PASS",
+        "totalChecks": 8,
+        "pass": 8,
+        "fail": 0,
+        "publicTableCount": 1474,
+        "publicViewCount": 150,
+        "databaseSizeBytes": 590593383,
+        "expectedTables": 32,
+        "presentExpectedTables": 32,
+        "missingExpectedTables": 0,
+        "expectedColumns": 15,
+        "presentExpectedColumns": 15,
+        "expectedIndexes": 8,
+        "presentExpectedIndexes": 8
+      }
+    },
+    "nacosConfigSmoke": {
+      "path": "metadata/nacos-config-drift-smoke.json",
+      "generatedAt": "2026-06-21T00:09:15.729Z",
+      "status": "PASS",
+      "metrics": {
+        "dataIds": 44,
+        "remoteFetched": 44,
+        "missingRemote": 0,
+        "missingLocal": 0,
+        "exactMatches": 17,
+        "drifted": 27,
+        "oracleResidueFiles": 0,
+        "criticalChecks": 20,
+        "criticalPass": 20,
+        "criticalFail": 0,
+        "expectedServices": 18,
+        "healthyServices": 18,
+        "failedServices": 0,
+        "nacosServiceCount": 91,
+        "status": "PASS"
+      }
+    },
+    "keycloakJwtSmoke": {
+      "path": "metadata/keycloak-jwt-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:24.536Z",
+      "status": "PASS",
+      "metrics": {
+        "checks": 19,
+        "pass": 19,
+        "fail": 0,
+        "expectedClients": 2,
+        "clientScopes": 10,
+        "suposMappers": 17,
+        "keycloakPublicKeySha256Prefix": "9e9cea84527f841b",
+        "nacosJwtSha256Prefix": "9e9cea84527f841b",
+        "nacosHealthyKeycloakHosts": 2,
+        "gatewayMenuTargets": 374,
+        "status": "PASS"
+      }
+    },
+    "minioRuntimeSmoke": {
+      "path": "metadata/minio-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:14.970Z",
+      "status": "PASS",
+      "metrics": {
+        "status": "PASS",
+        "totalChecks": 8,
+        "pass": 8,
+        "fail": 0,
+        "bucketCount": 2,
+        "inspectedBucketCount": 2,
+        "bucketsWithObjects": 2,
+        "totalObjects": 31,
+        "totalSizeBytes": 104285
+      }
+    },
+    "productionBlockers": {
+      "path": "metadata/production-module-blockers.json",
+      "generatedAt": "2026-06-21T15:13:16+00:00",
+      "status": "BLOCKED",
+      "metrics": {
+        "blockers": 6,
+        "blockedCases": 6
+      }
+    },
+    "productionBacklog": {
+      "path": "metadata/production-module-backlog.json",
+      "generatedAt": "2026-06-22T01:27:49.172Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "totalItems": 9,
+        "blocked": 9,
+        "failBacklog": 0
+      }
+    },
+    "businessDependencyReadiness": {
+      "path": "metadata/business-dependency-readiness-smoke.json",
+      "generatedAt": "2026-06-22T01:36:29.672Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "dependencies": 2,
+        "ready": 0,
+        "blocked": 2,
+        "sshHost": "100.99.133.43",
+        "baseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "businessPackageScan": {
+      "path": "metadata/business-dependency-package-scan.json",
+      "generatedAt": "2026-06-20T16:05:25Z",
+      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "metrics": {
+        "filesVisited": 58889,
+        "archivesScanned": 1142,
+        "nestedArchivesScanned": 2139,
+        "archiveEntriesScanned": 429984,
+        "blockedDependencies": 2,
+        "candidateDependencies": 0
+      }
+    },
+    "productionExportReadiness": {
+      "path": "metadata/production-export-readiness-smoke.json",
+      "generatedAt": "2026-06-22T01:50:35.404Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "targets": 6,
+        "pagePass": 6,
+        "visibleExportActions": 0,
+        "runtimeExportActions": 0,
+        "verifiedDataExports": 0,
+        "ready": 0,
+        "actionRequired": 1,
+        "blocked": 5
+      }
+    }
+  }
 }

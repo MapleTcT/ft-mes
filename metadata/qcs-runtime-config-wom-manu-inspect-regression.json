@@ -1,0 +1,630 @@
+{
+  "generatedAt": "2026-06-21T06:16:44.907Z",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "navigationWaitUntil": "commit",
+  "marker": "ADP_E2E_20260621061644_WOM_MANU_INSPECT",
+  "ids": {
+    "material": "8990002260490695",
+    "formula": "8990002260490696",
+    "qualityStd": "8990002260490697",
+    "stdVersion": "8990002260490698",
+    "analyProdStd": "8990002260490699",
+    "formulaQuality": "8990002260490700",
+    "batchInfo": "8990002260490701",
+    "task": "8990002260490702",
+    "wait": "8990002260490703",
+    "taskExelog": "8990002260490704",
+    "pending": "8990002260490705",
+    "workUnit": "8990002260490706",
+    "testComponent": "8990002260490707",
+    "stdVerCom": "8990002260490708",
+    "stdVerGradeUnqualified": "8990002260490709",
+    "stdVerGradeQualified": "8990002260490710",
+    "specLimit": "8990002260490711"
+  },
+  "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+  "qcsRoute": "/msService/QCS/inspect/inspect/manuInspectList",
+  "tableNo": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_TASK_TN",
+  "materialCode": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_MAT",
+  "formulaCode": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_FORM",
+  "qualityStdCode": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_STD",
+  "batchNo": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+  "operation": "WOM makeTaskList manufacturing inspection creation",
+  "api": "/msService/WOM/produceTask/produceTask/createManuInspect",
+  "backendEntry": "WOMProduceTaskController.createManuInspect -> WOMProduceTaskServiceImpl.changeTaskStateAndInitiateCheck -> WOMQCSServiceImpl.createInspect -> QCSInspectServiceImpl.createInspect",
+  "targetTables": [
+    "wom_produce_tasks",
+    "wom_wait_put_records",
+    "wom_produce_task_exelog",
+    "baseset_batch_infos",
+    "qcs_inspects",
+    "qcs_inspect_stds",
+    "qcs_inspect_coms",
+    "rm_formula_qualities",
+    "limsba_quality_stds",
+    "limsba_std_versions",
+    "limsba_test_components",
+    "limsba_std_ver_coms",
+    "limsba_std_ver_grades",
+    "limsba_spec_limits",
+    "limsba_analy_prod_stds",
+    "baseset_wf_custom_configs"
+  ],
+  "console": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.28106287879943126",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.599448203594756",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&menuCode=WOM_1.0.0_produceTask_makeTaskList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_formulaType",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=WOM_runState",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_reportType",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_inspectTimer",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_compat_WOM_1.0.0_produceTask_makeTaskList_query",
+      "postData": null
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/createManuInspect",
+      "postData": "taskId=8990002260490702"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList?ADP_E2E=ADP_E2E_20260621061644_WOM_MANU_INSPECT",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?0.980876184479017",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspect_manuInspectList&menuCode=QCS_5.0.0.0_inspect_manuInspectList&entityCode=QCS_5.0.0.0_inspect&isEs5=true",
+      "postData": null
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--制造指令单-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"WOM_1.0.0_produceTask_makeTaskList\", //  视图编码\n\t\t\t\"entityCode\":\"WOM_1.0.0_produceTask\",// 实体编码\n\t\t\t\"menuCode\": \"WOM_1.0.0_produceTask_makeTaskList\",\n\t\t\t\"viewName\": \"制造指令单\",// 视图名称\n\t\t\t\"viewType\": \"LIST\",// 视图类型\n\t\t\t\"modelCode\": \"WOM_1.0.0_produceTask_ProduceTask\",// 模型编码\n\t\t\t\"moduleCode\": \"WOM_1.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"produceTask\",// 模型别名\n\t\t\t\"workflowEnabled\": true,// 启用工作流\n\t\t\t\"listButtons\":{\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/WOM/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/WOM/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/WOM/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/WOM/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/WOM/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/WOM/produceTask/produceTask/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/WOM/produceTask/produceTask/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"mainView\": \"/msService/WOM/produceTask/produceTask/makeTaskBatchView\", //  主查看视图\n\t\t\t\t\"downloadXls\": \"/msService/WOM/produceTask/produceTask/downloadXls\", //  下载导入模板\n\t\t\t\t\"importMainXls\": \"/msService/WOM/produceTask/produceTask/importMainXls\", //  导入Excel\n\t\t\t\t\"deleteData\": \"/msService/WOM/produceTask/produceTask/delete\",// 删除数据\n\t\t\t\t\"sourceData\": \"/msService/WOM/produceTask/produceTask/makeTaskList-\", //  列表数据\n\n\t\t\t\t\"echartsData\": \"/msService/WOM/produceTask/produceTask/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antd.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/i18n.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.commons.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.echarts.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.sesgis.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/list.js?v=1663120692297\"></script>\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- body.html--start -->\n\t\n\t<!-- body.html--end -->\n\t<script>\n\t\tloadScript('/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body');\n\t</script>\n</body>\n</html>\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.28106287879943126",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.599448203594756",
+      "status": 200,
+      "body": "/**\n * 设置按钮状态\n * @param {text} button 按钮id\n * @param {boolean} state 状态\n */\n/*function setBtnStyle(button, state) {\n    if (state) {\n        $(\"#\" + button).css({'pointer-events': 'auto' });\n        $(\"#\" + button + \" span\").css({ 'color': '#000' });\n    } else {\n        $(\"#\" + button).css({ 'pointer-events': 'none' });\n        $(\"#\" + button + \" span\").css({ 'color': 'grey' });\n    }\n}*/\n\nvar makeTaskBatchView;"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&menuCode=WOM_1.0.0_produceTask_makeTaskList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"pageType\":\"LIST\",\"title\":\"制造指令单\",\"url\":\"/msService/WOM/produceTask/produceTask/makeTaskList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"query\",\"layoutName\":\"layoutSearchWidget\",\"layoutmethod\":\"container\",\"fix_h\":150,\"fastProperty\":[],\"advProperty\":[]},{\"type\":\"layoutDatagrid\",\"layoutmethod\":\"container\",\"ratio_h\":100,\"DataGridCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"modelCode\":\"WOM_1.0.0_produceTask_ProduceTask\",\"hasFastQuery\":true,\"mainDisplayName\":\"tableNo\",\"idPrefix\":\"compat_WOM_1.0.0_produceTask_makeTaskList\",\"listPT\":false,\"buttons\":[{\"id\":\"startTask\",\"showname\":\"开始\",\"namekey\":\"开始\",\"buttonstyle\":\"add\",\"operatetype\":\"CUSTOM\",\"isHide\":false,\"ispermission\":false,\"isPublished\":false,\"buttonoperationcode\":\"makeTaskList_startTask_add_WOM_1.0.0_produceTask_makeTaskList\",\"funcname\":\"onclick='startTaskEvent(event)'\",\"funcbody\":\"function startTaskEvent(event) {\\n    var selecteds = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getSelecteds();\\n    if (selecteds.length == 0) {\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('SupDatagrid.button.error'));\\n        return false;\\n    }\\n    var data = selecteds[0];\\n    if (data.batchContral) {\\n        //只有非批控的工单才可以操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958091725'));\\n        return false;\\n    }\\n    if (data.status != 99) {\\n        //请先将指令单生效再进行操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958171058'));\\n        return false;\\n    }\\n    var taskRunState = data.taskRunState.id;\\n    if (taskRunState != 'WOM_runState/waitForRun') {\\n        //只能开始执行状态为待执行的指令单\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958246066'));\\n        return false;\\n    }\\n    var taskId = data.id;\\n    if (data.nodeId && data.nodeId !== \\\"\\\") {\\n        var data1 = {\\n            rootId: data.nodeId,\\n            operate: \\\"start\\\",\\n            nodeId: data.nodeId,\\n            level: \\\"0\\\",\\n            operateType: \\\"manual\\\"\\n        };\\n        $.ajax({\\n            url: \\\"/msService/WOM/craftToMes/craftToMes/dealDataFromCraft\\\",\\n            type: 'post',\\n            async: false,\\n            contentType: \\\"application/json\\\",\\n            data: JSON.stringify(data1),\\n            success: function success(res) {\\n                if (res.code = 200) {\\n                    // 指令单已开始！\\n                    ReactAPI.showMessage(\\\"s\\\", ReactAPI.international.getText('WOM.custom.randon1602655303748'));\\n                    var currentPage = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().currentPage;\\n                    var pageSize = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().pageSize;\\n                    var url = \\\"/msService/WOM/produceTask/produceTask/makeTaskList-query\\\";\\n                    ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").refreshDataByRequst({\\n                        type: \\\"POST\\\",\\n                        url: url,\\n                        param: {\\n                            classifyCodes: \\\",\\\",\\n                            customCondition: {},\\n                            pageNo: currentPage,\\n                            paging: true,\\n                            pageSize: pageSize\\n                        }\\n                    });\\n                } else {\\n                    ReactAPI.showMessage(\\\"f\\\", res.msg);\\n                }\\n            }\\n        });\\n    } else {\\n        $.ajax({\\n            url: \\\"/msService/WOM/produceTask/produceTask/updateTaskState\\\",\\n            type: 'post',\\n            async: false,\\n            data: { state: \\\"start\\\", taskId: taskId },\\n            success: function success(res) {\\n                if (res.code = 200) {\\n                    var _data = res.data;\\n                    if (_data.dealSuccessFlag) {\\n                        // 指令单已开始！\\n                        ReactAPI.showMessage(\\\"s\\\", ReactAPI.international.getText('WOM.custom.randon1602655303748'));\\n                        var currentPage = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().currentPage;\\n                        var pageSize = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().pageSize;\\n                        var url = \\\"/msService/WOM/produceTask/produceTask/makeTaskList-query\\\";\\n                        ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").refreshDataByRequst({\\n                            type: \\\"POST\\\",\\n                            url: url,\\n                            param: {\\n                                classifyCodes: \\\",\\\",\\n                                customCondition: {},\\n                                pageNo: currentPage,\\n                                paging: true,\\n                                pageSize: pageSize\\n                            }\\n                        }); //查询刷新PT；\\n                    } else {\\n                        ReactAPI.showMessage(\\\"f\\\", _data.errorMessage);\\n                    }\\n                } else {\\n                    ReactAPI.showMessage(\\\"f\\\", res.msg);\\n                }\\n            }\\n        });\\n    }\\n}\",\"iscallback\":\"false\",\"iscustomfunc\":\"false\",\"useInMore\":\"false\",\"isconfirm\":\"false\",\"isSignatureConfig\":true,\"cellCode\":\"cell_1575439162732_788\",\"ecEnv\":\"product\",\"regionType\":\"BUTTON\",\"i18nKey\":\"WOM.buttonPropertyshowName.randon1575439168443.flag\",\"name\":\"开始\",\"operateType\":\"CUSTOM\",\"onclick\":\"startTaskEvent(event)\",\"ONCLICK\":\"startTaskEvent(event)\",\"CODE\":\"makeTaskList_startTask_add_WOM_1.0.0_produceTask_makeTaskList\",\"NAME\":\"开始\",\"ICONCLS\":\"cui-btn-add\",\"USEINMORE\":\"false\",\"SEPARATENUM\":\"0\",\"buttonCode\":\"WOM_1.0.0_produceTask_makeTaskList_BUTTON_startTask\"},{\"id\":\"pauseTask\",\"showname\":\"保持\",\"namekey\":\"保持\",\"buttonstyle\":\"add\",\"operatetype\":\"CUSTOM\",\"isHide\":false,\"ispermission\":false,\"isPublished\":false,\"buttonoperationcode\":\"makeTaskList_pauseTask_add_WOM_1.0.0_produceTask_makeTaskList\",\"funcname\":\"onclick='pauseTaskEvent(event)'\",\"funcbody\":\"function pauseTaskEvent(event) {\\n    console.log('pause');\\n    var selecteds = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getSelecteds();\\n    if (selecteds.length == 0) {\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('SupDatagrid.button.error'));\\n        return false;\\n    }\\n    var data = selecteds[0];\\n    if (data.batchContral) {\\n        //只有非批控的工单才可以操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958091725'));\\n        return false;\\n    }\\n    if (data.status != 99) {\\n        //请先将指令单生效再进行操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958171058'));\\n        return false;\\n    }\\n    var taskRunState = data.taskRunState.id;\\n    if (taskRunState != 'WOM_runState/runing') {\\n        //只有执行中的指令单可以暂停\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575959595767'));\\n        return false;\\n    }\\n    var taskId = data.id;\\n    $.ajax({\\n        url: \\\"/msService/WOM/produceTask/produceTask/updateTaskState\\\",\\n        type: 'post',\\n        async: false,\\n        data: { state: \\\"hold\\\", taskId: taskId },\\n        success: function success(res) {\\n            debugger;\\n            if (res.code == 200) {\\n                var _data = res.data;\\n                if (_data.deal"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_formulaType",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_formulaType/commonFormula\":\"标准配方\",\"RM_formulaType/simpleFormula\":\"普通配方\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=WOM_runState",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"WOM_runState/iskeep\":\"已保持\",\"WOM_runState/starting\":\"开始中\",\"WOM_runState/waitForRun\":\"待执行\",\"WOM_runState/runing\":\"执行中\",\"WOM_runState/finished\":\"已完成\",\"WOM_runState/pausing\":\"暂停中\",\"WOM_runState/paused\":\"已暂停\",\"WOM_runState/stoping\":\"停止中\",\"WOM_runState/stoped\":\"已停止\",\"WOM_runState/resuming\":\"恢复中\",\"WOM_runState/abandoning\":\"放弃中\",\"WOM_runState/abandoned\":\"已放弃\",\"WOM_runState/waitToBeChecked\":\"待检\",\"WOM_runState/cancel\":\"已取消\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_reportType",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_reportType/noReport\":\"不报工\",\"RM_reportType/editReport\":\"报工可编辑\",\"RM_reportType/effectReport\":\"报工并生效\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_inspectTimer",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_inspectTimer/submit\":\"工单生效\",\"RM_inspectTimer/finish\":\"完工后检验\",\"RM_inspectTimer/active\":\"活动发起\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_compat_WOM_1.0.0_produceTask_makeTaskList_query",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":\"\",\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1781978515270,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260620180136_WOMSTART_FORM\",\"id\":9000004784966216,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000004784966217,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000004784966219,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260620180136_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781895706275,\"planNum\":1.000000,\"planStartTime\":1781892106275,\"produceBatchNum\":\"ADP_E2E_20260620180136_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260620180136_WOMSTART_MAT\",\"id\":9000004784966215,\"name\":\"ADP_E2E_20260620180136_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000004784966217,\"tableNo\":\"ADP_E2E_20260620180136_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1781841919532,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"不合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSBAD_FORM\",\"id\":8990084191051161,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084191051167,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084191051170,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSBAD\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928319532,\"planNum\":1.000000,\"planStartTime\":1781755519532,\"produceBatchNum\":\"ADP_E2E_20260619_QCSBAD_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSBAD_MAT\",\"id\":8990084191051160,\"name\":\"ADP_E2E_20260619_QCSBAD material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084191051167,\"tableNo\":\"ADP_E2E_20260619_QCSBAD_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841762865,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSM2_FORM\",\"id\":8990084171374038,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084171374044,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084171374047,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSM2\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928162865,\"planNum\":1.000000,\"planStartTime\":1781755362865,\"produceBatchNum\":\"ADP_E2E_20260619_QCSM2_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSM2_MAT\",\"id\":8990084171374037,\"name\":\"ADP_E2E_20260619_QCSM2 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084171374044,\"tableNo\":\"ADP_E2E_20260619_QCSM2_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841655410,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":0,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSMI_FORM\",\"id\":8990084164227896,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084164227902,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084164227905,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSMI\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928055410,\"planNum\":1.000000,\"planStartTime\":1781755255410,\"produceBatchNum\":\"ADP_E2E_20260619_QCSMI_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSMI_MAT\",\"id\":8990084164227895,\"name\":\"ADP_E2E_20260619_QCSMI material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084164227902,\"tableNo\":\"ADP_E2E_20260619_QCSMI_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1781819657505,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCS_RETURN_1_FORM\",\"id\":8990081965308913,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990081965308919,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990081965308922,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCS_RETURN_1\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781906057505,\"planNum\":1.000000,\"planStartTime\":1781733257505,\"produceBatchNum\":\"ADP_E2E_20260619_QCS_RETURN_1_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCS_RETURN_1_MAT\",\"id\":8990081965308912,\"name\":\"ADP_E2E_20260619_QCS_RETURN_1 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990081965308919,\"tableNo\":\"ADP_E2E_20260619_QCS_RETURN_1_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":4},{\"actEndTime\":null,\"actStartTime\":1781763551970,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_FORM\",\"id\":8990076354371578,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990076354371584,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1781978515270,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260620180136_WOMSTART_FORM\",\"id\":9000004784966216,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000004784966217,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000004784966219,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260620180136_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781895706275,\"planNum\":1.000000,\"planStartTime\":1781892106275,\"produceBatchNum\":\"ADP_E2E_20260620180136_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260620180136_WOMSTART_MAT\",\"id\":9000004784966215,\"name\":\"ADP_E2E_20260620180136_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000004784966217,\"tableNo\":\"ADP_E2E_20260620180136_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1781841919532,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"不合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSBAD_FORM\",\"id\":8990084191051161,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084191051167,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084191051170,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSBAD\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928319532,\"planNum\":1.000000,\"planStartTime\":1781755519532,\"produceBatchNum\":\"ADP_E2E_20260619_QCSBAD_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSBAD_MAT\",\"id\":8990084191051160,\"name\":\"ADP_E2E_20260619_QCSBAD material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084191051167,\"tableNo\":\"ADP_E2E_20260619_QCSBAD_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841762865,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSM2_FORM\",\"id\":8990084171374038,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084171374044,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084171374047,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSM2\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928162865,\"planNum\":1.000000,\"planStartTime\":1781755362865,\"produceBatchNum\":\"ADP_E2E_20260619_QCSM2_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSM2_MAT\",\"id\":8990084171374037,\"name\":\"ADP_E2E_20260619_QCSM2 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084171374044,\"tableNo\":\"ADP_E2E_20260619_QCSM2_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841655410,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":0,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSMI_FORM\",\"id\":8990084164227896,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084164227902,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084164227905,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSMI\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928055410,\"planNum\":1.000000,\"planStartTime\":1781755255410,\"produceBatchNum\":\"ADP_E2E_20260619_QCSMI_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSMI_MAT\",\"id\":8990084164227895,\"name\":\"ADP_E2E_20260619_QCSMI material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084164227902,\"tableNo\":\"ADP_E2E_20260619_QCSMI_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1781819657505,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCS_RETURN_1_FORM\",\"id\":8990081965308913,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990081965308919,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990081965308922,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCS_RETURN_1\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781906057505,\"planNum\":1.000000,\"planStartTime\":1781733257505,\"produceBatchNum\":\"ADP_E2E_20260619_QCS_RETURN_1_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCS_RETURN_1_MAT\",\"id\":8990081965308912,\"name\":\"ADP_E2E_20260619_QCS_RETURN_1 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990081965308919,\"tableNo\":\"ADP_E2E_20260619_QCS_RETURN_1_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":4},{\"actEndTime\":null,\"actStartTime\":1781763551970,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_FORM\",\"id\":8990076354371578,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990076354371584,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuIns"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1781978515270,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260620180136_WOMSTART_FORM\",\"id\":9000004784966216,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000004784966217,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000004784966219,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260620180136_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781895706275,\"planNum\":1.000000,\"planStartTime\":1781892106275,\"produceBatchNum\":\"ADP_E2E_20260620180136_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260620180136_WOMSTART_MAT\",\"id\":9000004784966215,\"name\":\"ADP_E2E_20260620180136_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000004784966217,\"tableNo\":\"ADP_E2E_20260620180136_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1781841919532,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"不合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSBAD_FORM\",\"id\":8990084191051161,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084191051167,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084191051170,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSBAD\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928319532,\"planNum\":1.000000,\"planStartTime\":1781755519532,\"produceBatchNum\":\"ADP_E2E_20260619_QCSBAD_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSBAD_MAT\",\"id\":8990084191051160,\"name\":\"ADP_E2E_20260619_QCSBAD material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084191051167,\"tableNo\":\"ADP_E2E_20260619_QCSBAD_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841762865,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"合格\",\"checkState\":\"已检\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSM2_FORM\",\"id\":8990084171374038,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084171374044,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084171374047,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSM2\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928162865,\"planNum\":1.000000,\"planStartTime\":1781755362865,\"produceBatchNum\":\"ADP_E2E_20260619_QCSM2_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSM2_MAT\",\"id\":8990084171374037,\"name\":\"ADP_E2E_20260619_QCSM2 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084171374044,\"tableNo\":\"ADP_E2E_20260619_QCSM2_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1781841655410,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":0,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCSMI_FORM\",\"id\":8990084164227896,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990084164227902,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990084164227905,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCSMI\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781928055410,\"planNum\":1.000000,\"planStartTime\":1781755255410,\"produceBatchNum\":\"ADP_E2E_20260619_QCSMI_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCSMI_MAT\",\"id\":8990084164227895,\"name\":\"ADP_E2E_20260619_QCSMI material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990084164227902,\"tableNo\":\"ADP_E2E_20260619_QCSMI_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1781819657505,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260619_QCS_RETURN_1_FORM\",\"id\":8990081965308913,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990081965308919,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuInspect\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":8990081965308922,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"生产请检验收\",\"processId\":\"ADP_E2E_MANU_INSPECT_ADP_E2E_20260619_QCS_RETURN_1\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"生产请检验收(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781906057505,\"planNum\":1.000000,\"planStartTime\":1781733257505,\"produceBatchNum\":\"ADP_E2E_20260619_QCS_RETURN_1_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260619_QCS_RETURN_1_MAT\",\"id\":8990081965308912,\"name\":\"ADP_E2E_20260619_QCS_RETURN_1 material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":8990081965308919,\"tableNo\":\"ADP_E2E_20260619_QCS_RETURN_1_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":4},{\"actEndTime\":null,\"actStartTime\":1781763551970,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":\"Unqualified\",\"checkState\":\"Checked\",\"checkTimes\":1,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_FORM\",\"id\":8990076354371578,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":8990076354371584,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":null,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_manuIns"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/createManuInspect",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"success\":true},\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/QCS/inspect/inspect/manuInspectList?ADP_E2E=ADP_E2E_20260621061644_WOM_MANU_INSPECT",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--产品检验申请单列表-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\r\n<script src = \"/greenDill/static/QCS/static/inspect/js/commonList.js\"></script>\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"QCS_5.0.0.0_inspect_manuInspectList\", //  视图编码\n\t\t\t\"entityCode\":\"QCS_5.0.0.0_inspect\",// 实体编码\n\t\t\t\"menuCode\": \"QCS_5.0.0.0_inspect_manuInspectList\",\n\t\t\t\"viewName\": \"产品检验申请单列表\",// 视图名称\n\t\t\t\"viewType\": \"LIST\",// 视图类型\n\t\t\t\"modelCode\": \"QCS_5.0.0.0_inspect_Inspect\",// 模型编码\n\t\t\t\"moduleCode\": \"QCS_5.0.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"inspect\",// 模型别名\n\t\t\t\"workflowEnabled\": true,// 启用工作流\n\t\t\t\"listButtons\":{\n                    \"DELETE\":\"manuInspectList_delete_del_QCS_5.0.0.0_inspect_manuInspectList\",\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/QCS/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/QCS/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/QCS/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/QCS/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/QCS/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/QCS/inspect/inspect/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/QCS/inspect/inspect/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"mainView\": \"/msService/QCS/inspect/inspect/purchInspectView\", //  主查看视图\n\t\t\t\t\"downloadXls\": \"/msService/QCS/inspect/inspect/downloadXls\", //  下载导入模板\n\t\t\t\t\"importMainXls\": \"/msService/QCS/inspect/inspect/importMainXls\", //  导入Excel\n\t\t\t\t\"deleteData\": \"/msService/QCS/inspect/inspect/delete\",// 删除数据\n\t\t\t\t\"sourceData\": \"/msService/QCS/inspect/inspect/manuInspectList-\", //  列表数据\n\n\t\t\t\t\"echartsData\": \"/msService/QCS/inspect/inspect/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antd.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/i18n.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.commons.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.echarts.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.sesgis.js?v=1648782232082\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/list.js?v=1648782232082\"></script>\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- body.html--start -->\n\t\n\t<!-- body.html--end -->\n\t<script>\n\t\t\n\t</script>\n</body>\n</html>\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/QCS/inspect/inspect/manuInspectList/i18n-value.js?0.980876184479017",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\n"
+    }
+  ],
+  "screenshots": {
+    "before": "/tmp/adp-wom-manu-inspect-persistence-20260621061644/wom-manu-inspect-before.png",
+    "afterCreate": "/tmp/adp-wom-manu-inspect-persistence-20260621061644/wom-manu-inspect-after-create.png",
+    "qcsList": "/tmp/adp-wom-manu-inspect-persistence-20260621061644/qcs-manu-inspect-list-after-create.png"
+  },
+  "screenshotErrors": [],
+  "seed": {
+    "sqlResult": "BEGIN\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 2\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nCOMMIT\nseed|ADP_E2E_20260621061644_WOM_MANU_INSPECT|8990002260490702|8990002260490697|8990002260490698|8990002260490700|8990002260490701"
+  },
+  "login": {
+    "status": 200,
+    "ticket": true
+  },
+  "navigation": {
+    "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+    "status": 200
+  },
+  "beforeBodyHasMarker": false,
+  "markerGridRefresh": {
+    "status": 200,
+    "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending"
+  },
+  "markerGridVisibleTimeout": "page.waitForFunction: Timeout 15000ms exceeded.",
+  "selection": {
+    "ok": true,
+    "fallback": "makeTaskList-pending",
+    "status": 200,
+    "rowCount": 86,
+    "selectedId": 8990002260490702,
+    "tableNo": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_TASK_TN",
+    "produceBatchNum": "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+    "taskRunState": "WOM_runState/runing",
+    "statusValue": 99,
+    "checkState": null,
+    "checkTimes": 0,
+    "pending": {
+      "id": 8990002260490705,
+      "activityName": "start_manuInspect",
+      "taskDescription": "生产请检验收(ec.flowActive.dai)"
+    }
+  },
+  "findCheckMsgByBatch": {
+    "method": "GET",
+    "url": "/msService/WOM/produceTask/produceTask/findCheckMsgByBatch?taskId=8990002260490702",
+    "status": 200,
+    "body": "{\"code\":200,\"data\":{\"success\":true,\"checkResult\":null},\"message\":\"操作成功\"}",
+    "json": {
+      "code": 200,
+      "data": {
+        "success": true,
+        "checkResult": null
+      },
+      "message": "操作成功"
+    }
+  },
+  "createManuInspect": {
+    "method": "POST",
+    "url": "/msService/WOM/produceTask/produceTask/createManuInspect",
+    "requestPayload": "taskId=8990002260490702",
+    "status": 200,
+    "body": "{\"code\":200,\"data\":{\"success\":true},\"message\":\"操作成功\"}",
+    "json": {
+      "code": 200,
+      "data": {
+        "success": true
+      },
+      "message": "操作成功"
+    }
+  },
+  "qcsNavigation": {
+    "route": "/msService/QCS/inspect/inspect/manuInspectList",
+    "status": 200
+  },
+  "qcsBodyHasMarker": false,
+  "frontendClean": {
+    "failedResponses": [],
+    "requestFailures": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "status": "PASS"
+  },
+  "verificationSql": "SELECT 'task', id, table_no, coalesce(quality_std_id::text, ''), coalesce(check_state, ''), coalesce(check_times::text, ''), coalesce(inpect_deal_id::text, ''), coalesce(check_result, '')\nFROM public.wom_produce_tasks\nWHERE id = 8990002260490702;\n\nSELECT 'wait', id, task_id, coalesce(quality_std_id::text, ''), coalesce(check_state, ''), coalesce(check_times::text, ''), coalesce(check_result, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 8990002260490702\nORDER BY id;\n\nSELECT 'exelog', id, task_id, coalesce(quality_std_id::text, ''), coalesce(check_state, ''), coalesce(check_times::text, ''), coalesce(inpect_deal_id::text, ''), coalesce(check_result, '')\nFROM public.wom_produce_task_exelog\nWHERE task_id = 8990002260490702\nORDER BY id;\n\nSELECT 'batch', id, batch_num, coalesce(material_id::text, ''), coalesce(check_state, ''), coalesce(check_result, ''), coalesce(check_times::text, '')\nFROM public.baseset_batch_infos\nWHERE batch_num = 'ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH'\nORDER BY id;\n\nSELECT 'inspect', id, coalesce(source_id::text, ''), coalesce(source_table_id::text, ''), coalesce(source_type, ''),\n       coalesce(prod_id::text, ''), coalesce(batch_code, ''), coalesce(table_type_id::text, ''),\n       coalesce(busi_type_id::text, ''), coalesce(apply_staff_id::text, ''),\n       coalesce(apply_dept_id::text, ''), coalesce(need_lab::text, ''), coalesce(table_no, ''),\n       coalesce(status::text, '')\nFROM public.qcs_inspects\nWHERE source_table_id = 8990002260490702\n   OR batch_code = 'ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH'\nORDER BY id;\n\nSELECT 'inspectStdCount', coalesce(inspect_id::text, ''), count(*)::text\nFROM public.qcs_inspect_stds\nWHERE inspect_id IN (\n  SELECT id FROM public.qcs_inspects WHERE source_table_id = 8990002260490702 OR batch_code = 'ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH'\n)\nGROUP BY inspect_id\nORDER BY inspect_id;\n\nSELECT 'inspectComCount', coalesce(inspect_id::text, ''), count(*)::text\nFROM public.qcs_inspect_coms\nWHERE inspect_id IN (\n  SELECT id FROM public.qcs_inspects WHERE source_table_id = 8990002260490702 OR batch_code = 'ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH'\n)\nGROUP BY inspect_id\nORDER BY inspect_id;\n\nSELECT 'formulaQuality', id, coalesce(formula_id::text, ''), coalesce(unit_id::text, ''), coalesce(apply_check_staff_id::text, ''), coalesce(apply_check_dep_id::text, ''), coalesce(quality_std_id::text, '')\nFROM public.rm_formula_qualities\nWHERE id = 8990002260490700;\n\nSELECT 'stdVersion', id, coalesce(std_id::text, ''), coalesce(active::text, ''), coalesce(valid::text, '')\nFROM public.limsba_std_versions\nWHERE id = 8990002260490698;\n\nSELECT 'testComponent', id, code, coalesce(name, ''), coalesce(report_name, ''), coalesce(is_report::text, ''), coalesce(valid::text, '')\nFROM public.limsba_test_components\nWHERE id = 8990002260490707;\n\nSELECT 'stdVerCom', id, coalesce(std_id::text, ''), coalesce(std_ver_id::text, ''), coalesce(com_id::text, ''), coalesce(is_report::text, ''), coalesce(report_name, ''), coalesce(valid::text, '')\nFROM public.limsba_std_ver_coms\nWHERE id = 8990002260490708;\n\nSELECT 'stdVerReportCount', coalesce(std_ver_id::text, ''), count(*)::text\nFROM public.limsba_std_ver_coms\nWHERE std_ver_id = 8990002260490698\n  AND valid = true\n  AND is_report = true\nGROUP BY std_ver_id;\n\nSELECT 'stdVerGradeCount', coalesce(std_ver_id::text, ''), count(*)::text,\n       coalesce(string_agg(coalesce(std_grade, '') || ':' || coalesce(name, ''), ',' ORDER BY sort DESC, id), '')\nFROM public.limsba_std_ver_grades\nWHERE std_ver_id = 8990002260490698\n  AND valid = true\nGROUP BY std_ver_id;\n\nSELECT 'specLimit', id, coalesce(std_ver_com_id::text, ''), coalesce(standard_grade, ''), coalesce(disp_value, ''), coalesce(valid::text, '')\nFROM public.limsba_spec_limits\nWHERE id = 8990002260490711;\n\nSELECT 'analyProdStd', id, coalesce(product_id::text, ''), coalesce(std_id::text, ''), coalesce(available_std::text, ''), coalesce(valid::text, '')\nFROM public.limsba_analy_prod_stds\nWHERE id = 8990002260490699;\n\nSELECT 'wfCustom', id, code, coalesce(deployment_key, ''), coalesce(flow_config_type, ''), coalesce(valid::text, '')\nFROM public.baseset_wf_custom_configs\nWHERE code = 'manuInspect';\n\nSELECT 'wfCustomReport', id, code, coalesce(deployment_key, ''), coalesce(flow_config_type, ''), coalesce(valid::text, '')\nFROM public.baseset_wf_custom_configs\nWHERE code = 'manuReport';\n\nSELECT 'wfDeployment', id, process_key, coalesce(is_current_version::text, ''), coalesce(valid::text, '')\nFROM public.wf_deployment\nWHERE process_key = 'manuInspectWorkFlow'\nORDER BY id;\n\nSELECT 'wfDeploymentReport', id, process_key, coalesce(is_current_version::text, ''), coalesce(valid::text, '')\nFROM public.wf_deployment\nWHERE process_key = 'manuInspectReportWorkFlow'\nORDER BY id;",
+  "persistence": {
+    "rows": [
+      [
+        "task",
+        "8990002260490702",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT_TASK_TN",
+        "8990002260490697",
+        "待检",
+        "1",
+        "757544726402304",
+        ""
+      ],
+      [
+        "wait",
+        "8990002260490703",
+        "8990002260490702",
+        "8990002260490697",
+        "待检",
+        "1",
+        ""
+      ],
+      [
+        "exelog",
+        "8990002260490704",
+        "8990002260490702",
+        "8990002260490697",
+        "待检",
+        "1",
+        "757544726402304",
+        ""
+      ],
+      [
+        "batch",
+        "8990002260490701",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+        "8990002260490695",
+        "BaseSet_checkState/waitForCheck",
+        "",
+        "0"
+      ],
+      [
+        "inspect",
+        "757544726402304",
+        "8990002260490702",
+        "8990002260490702",
+        "QCS_sourceType/womComplete",
+        "8990002260490695",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+        "1",
+        "1",
+        "1",
+        "1",
+        "false",
+        "manuInspect_20260621_002",
+        "88"
+      ],
+      [
+        "inspectStdCount",
+        "757544726402304",
+        "1"
+      ],
+      [
+        "inspectComCount",
+        "757544726402304",
+        "1"
+      ],
+      [
+        "formulaQuality",
+        "8990002260490700",
+        "8990002260490696",
+        "8990002260490706",
+        "1",
+        "1",
+        "8990002260490697"
+      ],
+      [
+        "stdVersion",
+        "8990002260490698",
+        "8990002260490697",
+        "true",
+        "true"
+      ],
+      [
+        "testComponent",
+        "8990002260490707",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT_QCS_REPORT_ITEM",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+        "true",
+        "true"
+      ],
+      [
+        "stdVerCom",
+        "8990002260490708",
+        "8990002260490697",
+        "8990002260490698",
+        "8990002260490707",
+        "true",
+        "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+        "true"
+      ],
+      [
+        "stdVerReportCount",
+        "8990002260490698",
+        "1"
+      ],
+      [
+        "stdVerGradeCount",
+        "8990002260490698",
+        "2",
+        "LIMSBasic_standardGrade/Unqualified:不合格,LIMSBasic_standardGrade/Qualified:合格"
+      ],
+      [
+        "specLimit",
+        "8990002260490711",
+        "8990002260490708",
+        "LIMSBasic_standardGrade/Qualified",
+        "合格",
+        "true"
+      ],
+      [
+        "analyProdStd",
+        "8990002260490699",
+        "8990002260490695",
+        "8990002260490697",
+        "true",
+        "true"
+      ],
+      [
+        "wfCustom",
+        "1100000000000001",
+        "manuInspect",
+        "manuInspectWorkFlow",
+        "BaseSet_flowConfigType/save",
+        "true"
+      ],
+      [
+        "wfCustomReport",
+        "1170000000000001",
+        "manuReport",
+        "manuInspectReportWorkFlow",
+        "BaseSet_flowConfigType/save",
+        "true"
+      ],
+      [
+        "wfDeployment",
+        "6579656982888448",
+        "manuInspectWorkFlow",
+        "1",
+        "1"
+      ],
+      [
+        "wfDeploymentReport",
+        "6579656984166400",
+        "manuInspectReportWorkFlow",
+        "1",
+        "1"
+      ]
+    ],
+    "task": [
+      "task",
+      "8990002260490702",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT_TASK_TN",
+      "8990002260490697",
+      "待检",
+      "1",
+      "757544726402304",
+      ""
+    ],
+    "wait": [
+      "wait",
+      "8990002260490703",
+      "8990002260490702",
+      "8990002260490697",
+      "待检",
+      "1",
+      ""
+    ],
+    "exelog": [
+      "exelog",
+      "8990002260490704",
+      "8990002260490702",
+      "8990002260490697",
+      "待检",
+      "1",
+      "757544726402304",
+      ""
+    ],
+    "batch": [
+      "batch",
+      "8990002260490701",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+      "8990002260490695",
+      "BaseSet_checkState/waitForCheck",
+      "",
+      "0"
+    ],
+    "inspect": [
+      "inspect",
+      "757544726402304",
+      "8990002260490702",
+      "8990002260490702",
+      "QCS_sourceType/womComplete",
+      "8990002260490695",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT_BATCH",
+      "1",
+      "1",
+      "1",
+      "1",
+      "false",
+      "manuInspect_20260621_002",
+      "88"
+    ],
+    "inspectStdCount": [
+      "inspectStdCount",
+      "757544726402304",
+      "1"
+    ],
+    "inspectComCount": [
+      "inspectComCount",
+      "757544726402304",
+      "1"
+    ],
+    "formulaQuality": [
+      "formulaQuality",
+      "8990002260490700",
+      "8990002260490696",
+      "8990002260490706",
+      "1",
+      "1",
+      "8990002260490697"
+    ],
+    "stdVersion": [
+      "stdVersion",
+      "8990002260490698",
+      "8990002260490697",
+      "true",
+      "true"
+    ],
+    "testComponent": [
+      "testComponent",
+      "8990002260490707",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT_QCS_REPORT_ITEM",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+      "true",
+      "true"
+    ],
+    "stdVerCom": [
+      "stdVerCom",
+      "8990002260490708",
+      "8990002260490697",
+      "8990002260490698",
+      "8990002260490707",
+      "true",
+      "ADP_E2E_20260621061644_WOM_MANU_INSPECT QCS report item",
+      "true"
+    ],
+    "stdVerReportCount": [
+      "stdVerReportCount",
+      "8990002260490698",
+      "1"
+    ],
+    "stdVerGradeCount": [
+      "stdVerGradeCount",
+      "8990002260490698",
+      "2",
+      "LIMSBasic_standardGrade/Unqualified:不合格,LIMSBasic_standardGrade/Qualified:合格"
+    ],
+    "specLimit": [
+      "specLimit",
+      "8990002260490711",
+      "8990002260490708",
+      "LIMSBasic_standardGrade/Qualified",
+      "合格",
+      "true"
+    ],
+    "analyProdStd": [
+      "analyProdStd",
+      "8990002260490699",
+      "8990002260490695",
+      "8990002260490697",
+      "true",
+      "true"
+    ],
+    "wfCustom": [
+      "wfCustom",
+      "1100000000000001",
+      "manuInspect",
+      "manuInspectWorkFlow",
+      "BaseSet_flowConfigType/save",
+      "true"
+    ],
+    "wfCustomReport": [
+      "wfCustomReport",
+      "1170000000000001",
+      "manuReport",
+      "manuInspectReportWorkFlow",
+      "BaseSet_flowConfigType/save",
+      "true"
+    ],
+    "wfDeployment": [
+      "wfDeployment",
+      "6579656982888448",
+      "manuInspectWorkFlow",
+      "1",
+      "1"
+    ],
+    "wfDeploymentReport": [
+      "wfDeploymentReport",
+      "6579656984166400",
+      "manuInspectReportWorkFlow",
+      "1",
+      "1"
+    ]
+  },
+  "status": "PASS"
+}

@@ -1,0 +1,479 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T00:09:10.911Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "environment": {
+    "sshHost": "100.99.133.43",
+    "sshUser": "v6",
+    "postgresContainer": "adp-mes-newbase-postgres-1"
+  },
+  "summary": {
+    "status": "PASS",
+    "totalChecks": 8,
+    "pass": 8,
+    "fail": 0,
+    "publicTableCount": 1474,
+    "publicViewCount": 150,
+    "databaseSizeBytes": 590593383,
+    "expectedTables": 32,
+    "presentExpectedTables": 32,
+    "missingExpectedTables": 0,
+    "expectedColumns": 15,
+    "presentExpectedColumns": 15,
+    "expectedIndexes": 8,
+    "presentExpectedIndexes": 8
+  },
+  "checks": [
+    {
+      "name": "ssh-target-reachable",
+      "status": "PASS",
+      "evidence": "sshTarget=v6@100.99.133.43"
+    },
+    {
+      "name": "postgres-container-reachable",
+      "status": "PASS",
+      "evidence": "container=adp-mes-newbase-postgres-1"
+    },
+    {
+      "name": "postgres-version-detected",
+      "status": "PASS",
+      "evidence": "serverVersion=PostgreSQL 15.18 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit"
+    },
+    {
+      "name": "postgres-public-table-volume",
+      "status": "PASS",
+      "evidence": "publicTableCount=1474"
+    },
+    {
+      "name": "expected-tables-present",
+      "status": "PASS",
+      "evidence": "present=32/32; missing=0; errors=0"
+    },
+    {
+      "name": "compatibility-columns-present",
+      "status": "PASS",
+      "evidence": "present=15/15"
+    },
+    {
+      "name": "compatibility-indexes-present",
+      "status": "PASS",
+      "evidence": "present=8/8"
+    },
+    {
+      "name": "postgres-extension-baseline",
+      "status": "PASS",
+      "evidence": "extensions=plpgsql"
+    }
+  ],
+  "overview": {
+    "database": "adp",
+    "user": "adp",
+    "serverVersion": "PostgreSQL 15.18 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+    "serverVersionNum": "150018",
+    "publicTableCount": 1474,
+    "publicViewCount": 150,
+    "databaseSizeBytes": 590593383,
+    "schemaCount": 12
+  },
+  "tableCounts": [
+    {
+      "table": "auth_user",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "23",
+      "status": "OK"
+    },
+    {
+      "table": "org_person",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "27",
+      "status": "OK"
+    },
+    {
+      "table": "org_department",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "18",
+      "status": "OK"
+    },
+    {
+      "table": "rbac_role",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "23",
+      "status": "OK"
+    },
+    {
+      "table": "rbac_roleuser",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "2",
+      "status": "OK"
+    },
+    {
+      "table": "rbac_rolepermission",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "1404",
+      "status": "OK"
+    },
+    {
+      "table": "rbac_userpermission",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "1087",
+      "status": "OK"
+    },
+    {
+      "table": "rbac_menuinfo",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "630",
+      "status": "OK"
+    },
+    {
+      "table": "wfm_task_pending",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "105",
+      "status": "OK"
+    },
+    {
+      "table": "sys_entity",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "444",
+      "status": "OK"
+    },
+    {
+      "table": "sys_code",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "1740",
+      "status": "OK"
+    },
+    {
+      "table": "ec_module",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "33",
+      "status": "OK"
+    },
+    {
+      "table": "ec_entity",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "284",
+      "status": "OK"
+    },
+    {
+      "table": "ec_model",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "768",
+      "status": "OK"
+    },
+    {
+      "table": "ec_field",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "52301",
+      "status": "OK"
+    },
+    {
+      "table": "ec_view",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "2094",
+      "status": "OK"
+    },
+    {
+      "table": "runtime_view",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "2094",
+      "status": "OK"
+    },
+    {
+      "table": "runtime_extra_view",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "2094",
+      "status": "OK"
+    },
+    {
+      "table": "wom_produce_tasks",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "129",
+      "status": "OK"
+    },
+    {
+      "table": "wom_wait_put_records",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "130",
+      "status": "OK"
+    },
+    {
+      "table": "wom_produce_task_exelog",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "98",
+      "status": "OK"
+    },
+    {
+      "table": "wom_proc_reports",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "40",
+      "status": "OK"
+    },
+    {
+      "table": "rm_formulas",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "134",
+      "status": "OK"
+    },
+    {
+      "table": "rm_process_actives",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "0",
+      "status": "OK"
+    },
+    {
+      "table": "qcs_inspects",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "20",
+      "status": "OK"
+    },
+    {
+      "table": "qcs_inspect_reports",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "6",
+      "status": "OK"
+    },
+    {
+      "table": "qcs_inspect_reports_sv",
+      "exists": "true",
+      "relkind": "v",
+      "rowCount": "6",
+      "status": "OK"
+    },
+    {
+      "table": "qcs_un_qlf_deals",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "3",
+      "status": "OK"
+    },
+    {
+      "table": "wts_work_permits",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "9",
+      "status": "OK"
+    },
+    {
+      "table": "wts_work_tickets",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "8",
+      "status": "OK"
+    },
+    {
+      "table": "waps_work_ticket_plans",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "20",
+      "status": "OK"
+    },
+    {
+      "table": "baseset_batch_infos",
+      "exists": "true",
+      "relkind": "r",
+      "rowCount": "44",
+      "status": "OK"
+    }
+  ],
+  "columns": [
+    {
+      "table": "auth_user",
+      "column": "error_count",
+      "exists": "true",
+      "dataType": "integer",
+      "udtName": "int4",
+      "isNullable": "YES"
+    },
+    {
+      "table": "auth_user",
+      "column": "lock_time",
+      "exists": "true",
+      "dataType": "timestamp without time zone",
+      "udtName": "timestamp",
+      "isNullable": "YES"
+    },
+    {
+      "table": "qcs_inspect_coms",
+      "column": "inspect_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "qcs_inspect_reports_sv",
+      "column": "main_obj",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "qcs_inspect_stds",
+      "column": "inspect_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "qcs_un_qlf_deals_di",
+      "column": "main_obj",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "rbac_roleuser",
+      "column": "valid",
+      "exists": "true",
+      "dataType": "boolean",
+      "udtName": "bool",
+      "isNullable": "YES"
+    },
+    {
+      "table": "rm_process_actives",
+      "column": "formula_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "rm_process_actives",
+      "column": "process_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "rm_process_actives",
+      "column": "table_info_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "wfm_task_pending",
+      "column": "pending_source",
+      "exists": "true",
+      "dataType": "character varying",
+      "udtName": "varchar",
+      "isNullable": "YES"
+    },
+    {
+      "table": "wom_wait_put_records",
+      "column": "actual_end_time",
+      "exists": "true",
+      "dataType": "timestamp without time zone",
+      "udtName": "timestamp",
+      "isNullable": "YES"
+    },
+    {
+      "table": "wom_wait_put_records",
+      "column": "task_active_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "wom_wait_put_records",
+      "column": "task_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    },
+    {
+      "table": "wom_wait_put_records",
+      "column": "task_process_id",
+      "exists": "true",
+      "dataType": "bigint",
+      "udtName": "int8",
+      "isNullable": "YES"
+    }
+  ],
+  "indexes": [
+    {
+      "index": "idx_qcs_inspect_coms_inspect_id",
+      "exists": "true",
+      "table": "qcs_inspect_coms"
+    },
+    {
+      "index": "idx_qcs_inspect_stds_inspect_id",
+      "exists": "true",
+      "table": "qcs_inspect_stds"
+    },
+    {
+      "index": "idx_rm_process_actives_process",
+      "exists": "true",
+      "table": "rm_process_actives"
+    },
+    {
+      "index": "idx_rm_process_actives_table_info",
+      "exists": "true",
+      "table": "rm_process_actives"
+    },
+    {
+      "index": "idx_wfm_task_pending_user_source",
+      "exists": "true",
+      "table": "wfm_task_pending"
+    },
+    {
+      "index": "idx_wom_wait_put_records_process",
+      "exists": "true",
+      "table": "wom_wait_put_records"
+    },
+    {
+      "index": "idx_wom_wait_put_records_task",
+      "exists": "true",
+      "table": "wom_wait_put_records"
+    },
+    {
+      "index": "idx_wom_wait_put_records_type_state",
+      "exists": "true",
+      "table": "wom_wait_put_records"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "plpgsql",
+      "version": "1.0"
+    }
+  ],
+  "evidence": {
+    "method": "SSH docker exec into PostgreSQL container and read-only psql queries against pg_catalog, information_schema and selected public tables.",
+    "secretHandling": "Database credentials are read from the running PostgreSQL container environment and are not printed or written to this report."
+  }
+}

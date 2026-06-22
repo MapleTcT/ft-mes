@@ -41,8 +41,8 @@ ACTION_KEYS = [
     "blockers",
 ]
 
-ALLOWED_ACTION_STATUSES = {"PASS_READ_ONLY", "BLOCKED"}
-ALLOWED_RUNTIME_STATUSES = {"PASS_READ_ONLY", "FAIL_RUNTIME_LAYOUT", "FAIL_NOT_FOUND"}
+ALLOWED_ACTION_STATUSES = {"PASS", "PASS_READ_ONLY", "BLOCKED"}
+ALLOWED_RUNTIME_STATUSES = {"PASS_READ_ONLY", "PASS_RENDER_ONLY", "FAIL_RUNTIME_LAYOUT", "FAIL_NOT_FOUND"}
 
 
 def fail(failures: list[str], message: str) -> None:
@@ -133,6 +133,11 @@ def check_actions(data: dict[str, Any], failures: list[str]) -> None:
             fail(failures, f"{action_id}.blockers must be a list")
         if action.get("requiresPersistence") and not as_list(action.get("targetTables")):
             fail(failures, f"{action_id} persistent action must include targetTables")
+        if status == "PASS":
+            if not str(action.get("evidence", "")).strip():
+                fail(failures, f"{action_id} PASS must include evidence")
+            if action.get("requiresPersistence") and as_list(action.get("blockers")):
+                fail(failures, f"{action_id} persisted PASS must not keep blockers")
         if status == "BLOCKED" and not as_list(action.get("blockers")):
             fail(failures, f"{action_id} BLOCKED must include blockers")
         if status == "PASS_READ_ONLY" and action.get("requiresPersistence"):
@@ -146,17 +151,31 @@ def check_summary(data: dict[str, Any], failures: list[str]) -> None:
         return
     actions = as_list(data.get("actions"))
     findings = as_list(data.get("runtimeFindings"))
+    runtime_blocked_actions = [
+        item
+        for item in actions
+        if isinstance(item, dict)
+        and item.get("acceptanceStatus") == "BLOCKED"
+        and any(
+            "react #130" in str(blocker).lower() or "runtime layout" in str(blocker).lower()
+            for blocker in as_list(item.get("blockers"))
+        )
+    ]
     expected = {
         "sourceActions": len(actions),
         "liveRoutesProbed": len(findings),
-        "liveRoutesPass": sum(1 for item in findings if isinstance(item, dict) and item.get("status") == "PASS_READ_ONLY"),
+        "liveRoutesPass": sum(
+            1
+            for item in findings
+            if isinstance(item, dict) and item.get("status") in {"PASS_READ_ONLY", "PASS_RENDER_ONLY"}
+        ),
         "liveRoutesWithErrors": sum(
             1 for item in findings if isinstance(item, dict) and item.get("status") in {"FAIL_RUNTIME_LAYOUT", "FAIL_NOT_FOUND"}
         ),
         "actionsReadyForMarkerPersistence": sum(
             1 for item in actions if isinstance(item, dict) and item.get("requiresPersistence") and item.get("acceptanceStatus") == "PASS"
         ),
-        "blockedByRuntimeLayout": sum(1 for item in actions if isinstance(item, dict) and item.get("acceptanceStatus") == "BLOCKED"),
+        "blockedByRuntimeLayout": len(runtime_blocked_actions),
     }
     for key, value in expected.items():
         if summary.get(key) != value:

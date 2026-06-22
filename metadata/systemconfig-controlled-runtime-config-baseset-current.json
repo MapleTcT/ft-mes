@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-21T18:05:40.247Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "areaId": "systemconfig-controlled-runtime-config",
+  "targetMode": "baseset",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "route": "/systemconfig/#/sysconfig",
+  "username": "admin",
+  "summary": {
+    "status": "PASS",
+    "targetCount": 1,
+    "pass": 1,
+    "fail": 0,
+    "browserErrors": 0,
+    "rollbackVerified": true
+  },
+  "targets": [
+    {
+      "actionId": "builtin-baseset-runtime-config",
+      "catalogName": "BaseSet.ocd.BaseSet",
+      "catalogId": "129030",
+      "configId": "129004",
+      "configCode": "isEnable",
+      "marker": "ADP_E2E_20260621180355_SCFG_BASESET_RUNTIME",
+      "status": "PASS",
+      "regressionStatus": "ROLLBACK_ONLY; representative BaseSet/WOM/QCS regression is required before this action can become PASS.",
+      "issues": [],
+      "mutationValue": "false",
+      "before": {
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129004';",
+        "rows": [
+          {
+            "id": "129004",
+            "catalogId": "129030",
+            "catalogCode": "BaseSet",
+            "catalogName": "BaseSet.ocd.BaseSet",
+            "configCode": "isEnable",
+            "configName": "BaseSet.ocd.isEnable",
+            "widgetType": "2",
+            "widgetValue": "true",
+            "tidModuleKey": "dt/BaseSet/BaseSet",
+            "configVersion": "dt/BaseSet/BaseSet/postgres-init-129",
+            "modifyTime": ""
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "isEnable",
+                  "name": "BaseSet.ocd.isEnable",
+                  "typeConfig": {
+                    "tip": "Enable recovered batch-control integration defaults in the PostgreSQL test runtime"
+                  },
+                  "type": 2,
+                  "value": [
+                    "true"
+                  ],
+                  "configId": "129004"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "true"
+      },
+      "markerUpdate": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 129030,
+          "config": [
+            {
+              "configId": 129004,
+              "value": [
+                "false"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129004';",
+        "rows": [
+          {
+            "id": "129004",
+            "catalogId": "129030",
+            "catalogCode": "BaseSet",
+            "catalogName": "BaseSet.ocd.BaseSet",
+            "configCode": "isEnable",
+            "configName": "BaseSet.ocd.isEnable",
+            "widgetType": "2",
+            "widgetValue": "false",
+            "tidModuleKey": "dt/BaseSet/BaseSet",
+            "configVersion": "dt/BaseSet/BaseSet/20260622-020527",
+            "modifyTime": "2026-06-21 18:05:27.488"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "isEnable",
+                  "name": "BaseSet.ocd.isEnable",
+                  "typeConfig": {
+                    "tip": "Enable recovered batch-control integration defaults in the PostgreSQL test runtime"
+                  },
+                  "type": 2,
+                  "value": [
+                    "false"
+                  ],
+                  "configId": "129004"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "false",
+        "moduleRead": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "code": 100000000,
+            "message": "操作成功",
+            "data": {
+              "isEnable": "false"
+            }
+          }
+        },
+        "moduleReadValue": "false"
+      },
+      "rollback": {
+        "method": "PUT",
+        "api": "/inter-api/systemconfig/v1/config/catalog/value",
+        "payload": {
+          "catalogId": 129030,
+          "config": [
+            {
+              "configId": 129004,
+              "value": [
+                "true"
+              ]
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "ok": true,
+          "body": ""
+        },
+        "verificationSql": "select i.id::text, i.catalog_id::text, c.code, c.name, i.code, i.name, coalesce(i.widget_type::text,''), coalesce(i.widget_value,''), coalesce(v.tid_module_key,''), coalesce(v.config_version,''), coalesce(i.modify_time::text,'') from public.systemconfig_config_info i join public.systemconfig_config_catalog c on c.id=i.catalog_id left join public.systemconfig_config_version v on v.tid_module_key like concat('dt/%/', c.code) where i.id='129004';",
+        "rows": [
+          {
+            "id": "129004",
+            "catalogId": "129030",
+            "catalogCode": "BaseSet",
+            "catalogName": "BaseSet.ocd.BaseSet",
+            "configCode": "isEnable",
+            "configName": "BaseSet.ocd.isEnable",
+            "widgetType": "2",
+            "widgetValue": "true",
+            "tidModuleKey": "dt/BaseSet/BaseSet",
+            "configVersion": "dt/BaseSet/BaseSet/20260622-020534",
+            "modifyTime": "2026-06-21 18:05:34.893"
+          }
+        ],
+        "detail": {
+          "status": 200,
+          "ok": true,
+          "body": {
+            "data": {
+              "config": [
+                {
+                  "code": "isEnable",
+                  "name": "BaseSet.ocd.isEnable",
+                  "typeConfig": {
+                    "tip": "Enable recovered batch-control integration defaults in the PostgreSQL test runtime"
+                  },
+                  "type": 2,
+                  "value": [
+                    "true"
+                  ],
+                  "configId": "129004"
+                }
+              ]
+            }
+          }
+        },
+        "detailValue": "true"
+      }
+    }
+  ],
+  "browser": {
+    "navigationStatus": 200,
+    "navigationError": null,
+    "visibleError": null,
+    "consoleMessages": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "evidence": {
+    "method": "Authenticated real browser route plus in-browser systemconfig PUT/GET calls, direct PostgreSQL before/after verification, and immediate rollback.",
+    "boundary": "This report proves controlled save/read/rollback for the listed runtime config only. It does not promote the whole built-in runtime config action to PASS without production-chain regression evidence.",
+    "secretHandling": "Login token and password are used only in memory and are not written to this report."
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "TBD",
+  "environment": "production",
+  "status": "PLANNED",
+  "owner": "storage-migration-thread",
+  "repoCommit": "TBD",
+  "migrationWindow": "TBD",
+  "sourceEndpointRef": "TBD",
+  "targetEndpointRef": "TBD",
+  "phases": [
+    {
+      "id": "source-bucket-inventory",
+      "title": "Source bucket inventory captured",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "buckets": 0,
+        "objects": 0,
+        "bytes": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Production source bucket inventory has not been captured."
+      ],
+      "nextActions": [
+        "Run production-minio-source-inventory against the source endpoint and attach sanitized inventory evidence."
+      ]
+    },
+    {
+      "id": "target-bucket-inventory",
+      "title": "Target bucket inventory captured",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "buckets": 0,
+        "objects": 0,
+        "bytes": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Production target bucket inventory has not been captured."
+      ],
+      "nextActions": [
+        "Run production-minio-target-inventory against the target endpoint and attach sanitized inventory evidence."
+      ]
+    },
+    {
+      "id": "object-inventory-comparison",
+      "title": "Source and target object inventories reconciled",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "totalObjects": 0,
+        "match": 0,
+        "missing": 0,
+        "mismatch": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Source and target object inventory comparison has not passed."
+      ],
+      "nextActions": [
+        "Run production-minio-compare and attach object-inventory-comparison JSON/TSV evidence."
+      ]
+    },
+    {
+      "id": "migration-dry-run",
+      "title": "Migration dry-run completed",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "commands": 0,
+        "failedCommands": 0,
+        "resumable": false
+      },
+      "blockingIssues": [
+        "MinIO migration dry-run evidence is missing."
+      ],
+      "nextActions": [
+        "Run a non-destructive or rehearsal migration dry-run, record commands without secrets, and prove resumability."
+      ]
+    },
+    {
+      "id": "sample-download-verification",
+      "title": "Sample downloads verified",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "samples": 0,
+        "passed": 0,
+        "failed": 0
+      },
+      "blockingIssues": [
+        "Post-migration sample download verification is missing."
+      ],
+      "nextActions": [
+        "Verify sampled files can be downloaded from target storage and compare size/hash without recording object contents."
+      ]
+    },
+    {
+      "id": "post-migration-runtime-smoke",
+      "title": "Post-migration runtime smoke passed",
+      "status": "PLANNED",
+      "owner": "storage-migration-thread",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "checks": 0,
+        "passed": 0,
+        "buckets": 0,
+        "objects": 0
+      },
+      "blockingIssues": [
+        "Post-migration MinIO runtime smoke has not passed."
+      ],
+      "nextActions": [
+        "Run smoke-minio-runtime against the target or rehearsal environment and attach sanitized report evidence."
+      ]
+    },
+    {
+      "id": "rollback-link",
+      "title": "Rollback or source-read fallback linked",
+      "status": "PLANNED",
+      "owner": "release-manager",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "rollbackEvidence": "TBD",
+        "sourceReadFallback": false
+      },
+      "blockingIssues": [
+        "MinIO rollback or source-read fallback evidence is missing."
+      ],
+      "nextActions": [
+        "Attach rollback rehearsal, source-read fallback or double-write evidence and cross-link production rollback evidence."
+      ]
+    }
+  ],
+  "openIssues": [
+    {
+      "id": "MINIO-MIGRATION-001",
+      "severity": "BLOCKER",
+      "description": "This example is only a template and cannot be used as production READY evidence.",
+      "owner": "storage-migration-thread",
+      "nextAction": "Create a real evidence file outside git and run the strict-ready validator."
+    }
+  ]
+}

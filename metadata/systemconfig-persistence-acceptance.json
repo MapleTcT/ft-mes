@@ -1,0 +1,441 @@
+{
+  "generatedAt": "2026-06-20T07:35:14.417Z",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "username": "admin",
+  "marker": "ADP_E2E_20260620073225_SCFG",
+  "route": "/systemconfig/#/sysconfig",
+  "appCode": "ADP_E2E_20260620073225_SCFG_APP",
+  "catalogCode": "ADP_E2E_20260620073225_SCFG_CAT",
+  "configCode": "ADP_E2E_20260620073225_SCFG_KEY",
+  "tenantId": "dt",
+  "tidModuleKey": "dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+  "backendTrace": {
+    "create": "SystemConfigController.create -> SystemConfigServiceImpl.batchInsertConfig -> systemconfig_config_catalog/systemconfig_config_info; setConfigInfoCache -> systemconfig_config_version",
+    "update": "WebControllerService.updateConfig -> SystemConfigServiceImpl.updateConfigInfoById -> systemconfig_config_info.widget_value; updateConfigInfo -> systemconfig_config_version",
+    "read": "WebControllerService.getConfigByModuleCodeAndKey -> SystemConfigServiceImpl.selectByCode/selectByCatalogIdAndKey -> systemconfig_config_info",
+    "delete": "SystemConfigController.deleteSystemConfig -> SystemConfigServiceImpl.deleteBatchIds(appCode, code) -> delete catalog/info/options and config_version"
+  },
+  "browser": {
+    "navigationStatus": 200,
+    "consoleMessages": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "visibleError": null,
+    "screenshot": "/tmp/adp-systemconfig-persistence-20260620073225/systemconfig-persistence.png"
+  },
+  "operations": {
+    "catalogListBefore": {
+      "method": "GET",
+      "api": "/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "responseStatus": 200,
+      "responseBody": {
+        "data": {
+          "catalogs": [
+            {
+              "catalogId": "1",
+              "name": "系统配置",
+              "catalog": [
+                {
+                  "catalogId": "3",
+                  "name": "用户目录",
+                  "moduleCode": "auth.userAD"
+                },
+                {
+                  "catalogId": "4",
+                  "name": "打印服务授权"
+                },
+                {
+                  "catalogId": "5",
+                  "name": "AK/SK凭证管理",
+                  "moduleCode": "systemConfig.certificateMgr"
+                },
+                {
+                  "catalogId": "7",
+                  "name": "密码配置",
+                  "moduleCode": "auth.passwordConfig"
+                }
+              ]
+            },
+            {
+              "catalogId": "2",
+              "name": "app配置",
+              "catalog": [
+                {
+                  "catalogId": "6576532729578952",
+                  "name": "设备综合效率管理"
+                },
+                {
+                  "catalogId": "6576272022389056",
+                  "name": "notificationWechat.app_show_name"
+                },
+                {
+                  "catalogId": "6576272073572672",
+                  "name": "notificationMobile.mobile_app_show_name"
+                },
+                {
+                  "catalogId": "6576271982608704",
+                  "name": "notificationSMS.jin_cang_app_show_name"
+                },
+                {
+                  "catalogId": "6576532729577952",
+                  "name": "notificationDingtalk.app_show_name"
+                },
+                {
+                  "catalogId": "117000",
+                  "name": "质量检验配置"
+                },
+                {
+                  "catalogId": "129000",
+                  "name": "RM.ocd.RM"
+                },
+                {
+                  "catalogId": "129030",
+                  "name": "BaseSet.ocd.BaseSet"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "create": {
+      "method": "POST",
+      "api": "/open-api/systemconfig/v1/config/catalog",
+      "payload": {
+        "type": 2,
+        "catalogs": [
+          {
+            "appCode": "ADP_E2E_20260620073225_SCFG_APP",
+            "code": "ADP_E2E_20260620073225_SCFG_CAT",
+            "name": "ADP_E2E_20260620073225_SCFG catalog",
+            "order": 9999,
+            "hide": false,
+            "config": [
+              {
+                "code": "ADP_E2E_20260620073225_SCFG_KEY",
+                "name": "ADP_E2E_20260620073225_SCFG config",
+                "order": 1,
+                "type": 0,
+                "defaultValue": [
+                  "ADP_E2E_20260620073225_SCFG_DEFAULT"
+                ],
+                "verify": [
+                  {
+                    "length": 120,
+                    "isRequire": true
+                  }
+                ],
+                "typeConfig": {
+                  "remind": "ADP_E2E_20260620073225_SCFG remind"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "responseStatus": 200,
+      "responseBody": {
+        "code": 100000000,
+        "message": "操作成功",
+        "data": true
+      },
+      "verificationSql": "select id, coalesce(parent_id::text,''), coalesce(sort::text,''), code, name, app_code, coalesce(catalog_type::text,''), coalesce(has_hide::text,''), coalesce(modify_time::text,'') from public.systemconfig_config_catalog where app_code = 'ADP_E2E_20260620073225_SCFG_APP' and code = 'ADP_E2E_20260620073225_SCFG_CAT' order by create_time desc nulls last, id desc; select id, coalesce(catalog_id::text,''), coalesce(sort::text,''), code, name, app_code, coalesce(module_code,''), coalesce(widget_type::text,''), coalesce(default_value,''), coalesce(widget_value,''), coalesce(max_value::text,''), coalesce(min_value::text,''), coalesce(reg_format,''), coalesce(reg_message,''), coalesce(has_require::text,''), coalesce(custom,''), coalesce(description,''), coalesce(modify_time::text,'') from public.systemconfig_config_info where app_code = 'ADP_E2E_20260620073225_SCFG_APP' and code = 'ADP_E2E_20260620073225_SCFG_KEY' order by create_time desc nulls last, id desc; select id, tid_module_key, config_version, coalesce(modify_time::text,'') from public.systemconfig_config_version where tid_module_key = 'dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT' order by create_time desc nulls last, id desc; select count(*)::text from public.systemconfig_config_option opt join public.systemconfig_config_info info on info.id = opt.config_id where info.app_code = 'ADP_E2E_20260620073225_SCFG_APP' and info.code = 'ADP_E2E_20260620073225_SCFG_KEY';",
+      "rows": {
+        "catalog": [
+          {
+            "id": "6601256823996880",
+            "parentId": "2",
+            "sort": "9999",
+            "code": "ADP_E2E_20260620073225_SCFG_CAT",
+            "name": "ADP_E2E_20260620073225_SCFG catalog",
+            "appCode": "ADP_E2E_20260620073225_SCFG_APP",
+            "catalogType": "2",
+            "hasHide": "false",
+            "modifyTime": "2026-06-20 07:32:50.871"
+          }
+        ],
+        "config": [
+          {
+            "id": "6601256824193488",
+            "catalogId": "6601256823996880",
+            "sort": "1.000000",
+            "code": "ADP_E2E_20260620073225_SCFG_KEY",
+            "name": "ADP_E2E_20260620073225_SCFG config",
+            "appCode": "ADP_E2E_20260620073225_SCFG_APP",
+            "moduleCode": "ADP_E2E_20260620073225_SCFG_CAT",
+            "widgetType": "0",
+            "defaultValue": "ADP_E2E_20260620073225_SCFG_DEFAULT",
+            "widgetValue": "",
+            "maxValue": "120",
+            "minValue": "",
+            "regFormat": "",
+            "regMessage": "",
+            "hasRequire": "true",
+            "custom": "",
+            "description": "ADP_E2E_20260620073225_SCFG remind",
+            "modifyTime": "2026-06-20 07:32:50.874"
+          }
+        ],
+        "version": [
+          {
+            "id": "6601256818459088",
+            "tidModuleKey": "dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+            "configVersion": "dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT/20260620-153250",
+            "modifyTime": "2026-06-20 07:32:50.878"
+          }
+        ],
+        "optionCount": [
+          {
+            "count": "0"
+          }
+        ]
+      }
+    },
+    "searchAfterCreate": {
+      "method": "GET",
+      "api": "/inter-api/systemconfig/v1/config/catalog?keyword=ADP_E2E_20260620073225_SCFG&type=2",
+      "responseStatus": 200,
+      "responseBody": {
+        "data": {
+          "catalogs": [
+            {
+              "catalogId": "1",
+              "name": "系统配置"
+            },
+            {
+              "catalogId": "2",
+              "name": "app配置",
+              "catalog": [
+                {
+                  "catalogId": "6601256823996880",
+                  "name": "ADP_E2E_20260620073225_SCFG catalog"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "detailAfterCreate": {
+      "method": "GET",
+      "api": "/inter-api/systemconfig/v1/config/catalog/6601256823996880",
+      "responseStatus": 200,
+      "responseBody": {
+        "data": {
+          "config": [
+            {
+              "code": "ADP_E2E_20260620073225_SCFG_KEY",
+              "name": "ADP_E2E_20260620073225_SCFG config",
+              "typeConfig": {
+                "tip": "ADP_E2E_20260620073225_SCFG remind"
+              },
+              "verify": [
+                {
+                  "max": 120,
+                  "msg": "超过最大长度"
+                },
+                {
+                  "isRequire": true,
+                  "msg": "必填"
+                }
+              ],
+              "type": 0,
+              "value": [
+                "ADP_E2E_20260620073225_SCFG_DEFAULT"
+              ],
+              "configId": "6601256824193488"
+            }
+          ]
+        }
+      }
+    },
+    "update": {
+      "method": "PUT",
+      "api": "/inter-api/systemconfig/v1/config/catalog/value",
+      "payload": {
+        "catalogId": 6601256823996880,
+        "config": [
+          {
+            "configId": 6601256824193488,
+            "value": [
+              "ADP_E2E_20260620073225_SCFG_UPDATED"
+            ]
+          }
+        ]
+      },
+      "responseStatus": 200,
+      "responseBody": "",
+      "verificationSql": "select id, coalesce(catalog_id::text,''), coalesce(sort::text,''), code, name, app_code, coalesce(module_code,''), coalesce(widget_type::text,''), coalesce(default_value,''), coalesce(widget_value,''), coalesce(max_value::text,''), coalesce(min_value::text,''), coalesce(reg_format,''), coalesce(reg_message,''), coalesce(has_require::text,''), coalesce(custom,''), coalesce(description,''), coalesce(modify_time::text,'') from public.systemconfig_config_info where app_code = 'ADP_E2E_20260620073225_SCFG_APP' and code = 'ADP_E2E_20260620073225_SCFG_KEY' order by create_time desc nulls last, id desc; select id, tid_module_key, config_version, coalesce(modify_time::text,'') from public.systemconfig_config_version where tid_module_key = 'dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT' order by create_time desc nulls last, id desc;",
+      "rows": {
+        "config": [
+          {
+            "id": "6601256824193488",
+            "catalogId": "6601256823996880",
+            "sort": "1.000000",
+            "code": "ADP_E2E_20260620073225_SCFG_KEY",
+            "name": "ADP_E2E_20260620073225_SCFG config",
+            "appCode": "ADP_E2E_20260620073225_SCFG_APP",
+            "moduleCode": "ADP_E2E_20260620073225_SCFG_CAT",
+            "widgetType": "0",
+            "defaultValue": "ADP_E2E_20260620073225_SCFG_DEFAULT",
+            "widgetValue": "ADP_E2E_20260620073225_SCFG_UPDATED",
+            "maxValue": "120",
+            "minValue": "",
+            "regFormat": "",
+            "regMessage": "",
+            "hasRequire": "true",
+            "custom": "",
+            "description": "ADP_E2E_20260620073225_SCFG remind",
+            "modifyTime": "2026-06-20 07:33:39.66"
+          }
+        ],
+        "version": [
+          {
+            "id": "6601256818459088",
+            "tidModuleKey": "dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+            "configVersion": "dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT/20260620-153339",
+            "modifyTime": "2026-06-20 07:33:39.667"
+          }
+        ]
+      }
+    },
+    "readByModule": {
+      "method": "GET",
+      "api": "/inter-api/systemconfig/v1/config/catalog/by/module?moduleCode=ADP_E2E_20260620073225_SCFG_CAT&key=ADP_E2E_20260620073225_SCFG_KEY",
+      "responseStatus": 200,
+      "responseBody": {
+        "code": 100000000,
+        "message": "操作成功",
+        "data": {
+          "ADP_E2E_20260620073225_SCFG_KEY": "ADP_E2E_20260620073225_SCFG_UPDATED"
+        }
+      }
+    },
+    "delete": {
+      "method": "DELETE",
+      "api": "/open-api/systemconfig/v1/config/catalog/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+      "responseStatus": 200,
+      "responseBody": {
+        "code": 100000000,
+        "message": "操作成功",
+        "data": true
+      },
+      "verificationSql": "select id, coalesce(parent_id::text,''), coalesce(sort::text,''), code, name, app_code, coalesce(catalog_type::text,''), coalesce(has_hide::text,''), coalesce(modify_time::text,'') from public.systemconfig_config_catalog where app_code = 'ADP_E2E_20260620073225_SCFG_APP' and code = 'ADP_E2E_20260620073225_SCFG_CAT' order by create_time desc nulls last, id desc; select id, coalesce(catalog_id::text,''), coalesce(sort::text,''), code, name, app_code, coalesce(module_code,''), coalesce(widget_type::text,''), coalesce(default_value,''), coalesce(widget_value,''), coalesce(max_value::text,''), coalesce(min_value::text,''), coalesce(reg_format,''), coalesce(reg_message,''), coalesce(has_require::text,''), coalesce(custom,''), coalesce(description,''), coalesce(modify_time::text,'') from public.systemconfig_config_info where app_code = 'ADP_E2E_20260620073225_SCFG_APP' and code = 'ADP_E2E_20260620073225_SCFG_KEY' order by create_time desc nulls last, id desc; select id, tid_module_key, config_version, coalesce(modify_time::text,'') from public.systemconfig_config_version where tid_module_key = 'dt/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT' order by create_time desc nulls last, id desc; select count(*)::text from public.systemconfig_config_option opt join public.systemconfig_config_info info on info.id = opt.config_id where info.app_code = 'ADP_E2E_20260620073225_SCFG_APP' and info.code = 'ADP_E2E_20260620073225_SCFG_KEY';",
+      "rows": {
+        "catalog": [],
+        "config": [],
+        "version": [],
+        "optionCount": [
+          {
+            "count": "0"
+          }
+        ]
+      }
+    }
+  },
+  "capturedRequests": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/rbac/v1/userPermission/findUserOperate?menuInfoCode=systemconfig",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "postData": null
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/open-api/systemconfig/v1/config/catalog",
+      "postData": "{\"type\":2,\"catalogs\":[{\"appCode\":\"ADP_E2E_20260620073225_SCFG_APP\",\"code\":\"ADP_E2E_20260620073225_SCFG_CAT\",\"name\":\"ADP_E2E_20260620073225_SCFG catalog\",\"order\":9999,\"hide\":false,\"config\":[{\"code\":\"ADP_E2E_20260620073225_SCFG_KEY\",\"name\":\"ADP_E2E_20260620073225_SCFG config\",\"order\":1,\"type\":0,\"defaultValue\":[\"ADP_E2E_20260620073225_SCFG_DEFAULT\"],\"verify\":[{\"length\":120,\"isRequire\":true}],\"typeConfig\":{\"remind\":\"ADP_E2E_20260620073225_SCFG remind\"}}]}]}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=ADP_E2E_20260620073225_SCFG&type=2",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/6601256823996880",
+      "postData": null
+    },
+    {
+      "method": "PUT",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/value",
+      "postData": "{\"catalogId\":6601256823996880,\"config\":[{\"configId\":6601256824193488,\"value\":[\"ADP_E2E_20260620073225_SCFG_UPDATED\"]}]}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/by/module?moduleCode=ADP_E2E_20260620073225_SCFG_CAT&key=ADP_E2E_20260620073225_SCFG_KEY",
+      "postData": null
+    },
+    {
+      "method": "DELETE",
+      "url": "http://222.88.185.146:18080/open-api/systemconfig/v1/config/catalog/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+      "postData": null
+    }
+  ],
+  "capturedResponses": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/rbac/v1/userPermission/findUserOperate?menuInfoCode=systemconfig",
+      "status": 200,
+      "body": "{\"list\":[\"configCatalog\"]}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "status": 200,
+      "body": "{\"data\":{\"catalogs\":[{\"catalogId\":\"1\",\"name\":\"系统配置\",\"catalog\":[{\"catalogId\":\"3\",\"name\":\"用户目录\",\"moduleCode\":\"auth.userAD\"},{\"catalogId\":\"4\",\"name\":\"打印服务授权\"},{\"catalogId\":\"5\",\"name\":\"AK/SK凭证管理\",\"moduleCode\":\"systemConfig.certificateMgr\"},{\"catalogId\":\"7\",\"name\":\"密码配置\",\"moduleCode\":\"auth.passwordConfig\"}]},{\"catalogId\":\"2\",\"name\":\"app配置\",\"catalog\":[{\"catalogId\":\"6576532729578952\",\"name\":\"设备综合效率管理\"},{\"catalogId\":\"6576272022389056\",\"name\":\"notificationWechat.app_show_name\"},{\"catalogId\":\"6576272073572672\",\"name\":\"notificationMobile.mobile_app_show_name\"},{\"catalogId\":\"6576271982608704\",\"name\":\"notificationSMS.jin_cang_app_show_name\"},{\"catalogId\":\"6576532729577952\",\"name\":\"notificationDingtalk.app_show_name\"},{\"catalogId\":\"117000\",\"name\":\"质量检验配置\"},{\"catalogId\":\"129000\",\"name\":\"RM.ocd.RM\"},{\"catalogId\":\"129030\",\"name\":\"BaseSet.ocd.BaseSet\"}]}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "status": 200,
+      "body": "{\"data\":{\"catalogs\":[{\"catalogId\":\"1\",\"name\":\"系统配置\",\"catalog\":[{\"catalogId\":\"3\",\"name\":\"用户目录\",\"moduleCode\":\"auth.userAD\"},{\"catalogId\":\"4\",\"name\":\"打印服务授权\"},{\"catalogId\":\"5\",\"name\":\"AK/SK凭证管理\",\"moduleCode\":\"systemConfig.certificateMgr\"},{\"catalogId\":\"7\",\"name\":\"密码配置\",\"moduleCode\":\"auth.passwordConfig\"}]},{\"catalogId\":\"2\",\"name\":\"app配置\",\"catalog\":[{\"catalogId\":\"6576532729578952\",\"name\":\"设备综合效率管理\"},{\"catalogId\":\"6576272022389056\",\"name\":\"notificationWechat.app_show_name\"},{\"catalogId\":\"6576272073572672\",\"name\":\"notificationMobile.mobile_app_show_name\"},{\"catalogId\":\"6576271982608704\",\"name\":\"notificationSMS.jin_cang_app_show_name\"},{\"catalogId\":\"6576532729577952\",\"name\":\"notificationDingtalk.app_show_name\"},{\"catalogId\":\"117000\",\"name\":\"质量检验配置\"},{\"catalogId\":\"129000\",\"name\":\"RM.ocd.RM\"},{\"catalogId\":\"129030\",\"name\":\"BaseSet.ocd.BaseSet\"}]}]}}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/open-api/systemconfig/v1/config/catalog",
+      "status": 200,
+      "body": "{\"code\":100000000,\"message\":\"操作成功\",\"data\":true}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog?keyword=ADP_E2E_20260620073225_SCFG&type=2",
+      "status": 200,
+      "body": "{\"data\":{\"catalogs\":[{\"catalogId\":\"1\",\"name\":\"系统配置\"},{\"catalogId\":\"2\",\"name\":\"app配置\",\"catalog\":[{\"catalogId\":\"6601256823996880\",\"name\":\"ADP_E2E_20260620073225_SCFG catalog\"}]}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/6601256823996880",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[{\"code\":\"ADP_E2E_20260620073225_SCFG_KEY\",\"name\":\"ADP_E2E_20260620073225_SCFG config\",\"typeConfig\":{\"tip\":\"ADP_E2E_20260620073225_SCFG remind\"},\"verify\":[{\"max\":120,\"msg\":\"超过最大长度\"},{\"isRequire\":true,\"msg\":\"必填\"}],\"type\":0,\"value\":[\"ADP_E2E_20260620073225_SCFG_DEFAULT\"],\"configId\":\"6601256824193488\"}]}}"
+    },
+    {
+      "method": "PUT",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/value",
+      "status": 200,
+      "body": ""
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemconfig/v1/config/catalog/by/module?moduleCode=ADP_E2E_20260620073225_SCFG_CAT&key=ADP_E2E_20260620073225_SCFG_KEY",
+      "status": 200,
+      "body": "{\"code\":100000000,\"message\":\"操作成功\",\"data\":{\"ADP_E2E_20260620073225_SCFG_KEY\":\"ADP_E2E_20260620073225_SCFG_UPDATED\"}}"
+    },
+    {
+      "method": "DELETE",
+      "url": "http://222.88.185.146:18080/open-api/systemconfig/v1/config/catalog/ADP_E2E_20260620073225_SCFG_APP/ADP_E2E_20260620073225_SCFG_CAT",
+      "status": 200,
+      "body": "{\"code\":100000000,\"message\":\"操作成功\",\"data\":true}"
+    }
+  ]
+}

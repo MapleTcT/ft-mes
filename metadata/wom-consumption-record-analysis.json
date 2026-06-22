@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-16T10:58:00+08:00",
+  "module": "WOM",
+  "database": "PostgreSQL",
+  "analysis": "putin-detail-to-mat-consumption-record",
+  "marker": "ADP_E2E_20260616021612_WOM_ACTIVE",
+  "status": "NOT_APPLICABLE_FOR_CURRENT_PUTIN_PATH",
+  "conclusion": "The verified putin-detail path persists wom_putin_details, but the current WOM source deliberately skips WOMActiExelog creation for RM_activeType/putin. Automatic wom_mat_consum_recods generation is driven by WOMActiExelogServiceImpl.generateInOutRecordByAvtiveRecord, so there is no input record for this path. This is not classified as a PostgreSQL missing table, missing column, type compatibility, or Oracle dialect issue.",
+  "sourceEvidence": [
+    {
+      "path": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMProduceTaskServiceImpl.java",
+      "lines": "10039-10048",
+      "summary": "RM_activeType/putin is included in noCreateActiExe, so startActive does not create WOMActiExelog for manual putin."
+    },
+    {
+      "path": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMProduceTaskServiceImpl.java",
+      "lines": "10361-10392",
+      "summary": "endActive only calls generateInOutRecordByAvtiveRecord while iterating existing actiExelogs."
+    },
+    {
+      "path": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMProduceTaskServiceImpl.java",
+      "lines": "10447-10516",
+      "summary": "toProcfeedback validates WOMPutinDetail rows and handles remain material; the put-in material bill generation block is commented out."
+    },
+    {
+      "path": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMActiExelogServiceImpl.java",
+      "lines": "6363-6425",
+      "summary": "generateInOutRecordByAvtiveRecord creates WOMMatConsumRecod for putin activities from WOMActiExelog fields."
+    },
+    {
+      "path": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMPutinDetailServiceImpl.java",
+      "lines": "6001-6003",
+      "summary": "The delete hook that would link WOMPutinDetail to WOMMatConsumRecod is commented out."
+    }
+  ],
+  "remoteVerification": {
+    "host": "10.11.100.17",
+    "container": "adp-mes-newbase-postgres-1",
+    "sql": "SELECT 'activeExelogCount', count(*) FROM public.wom_acti_exelogs WHERE task_active_id = 8388157617258688 UNION ALL SELECT 'matConsumCount', count(*) FROM public.wom_mat_consum_recods WHERE put_mat_detail_id = 755716019803392 OR putin_material_detail_id = 755716019803392;",
+    "result": [
+      {
+        "metric": "activeExelogCount",
+        "count": 0
+      },
+      {
+        "metric": "matConsumCount",
+        "count": 0
+      }
+    ]
+  },
+  "acceptanceImpact": {
+    "womPutinDetails": "PASS",
+    "womMatConsumRecods": "NOT_APPLICABLE_FOR_CURRENT_PUTIN_PATH",
+    "remainingProductionAcceptancePriority": [
+      "inspection",
+      "qualityJudgement",
+      "badQuantity",
+      "finishedGoodsInventory"
+    ]
+  }
+}

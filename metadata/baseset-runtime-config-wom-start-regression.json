@@ -1,0 +1,636 @@
+{
+  "generatedAt": "2026-06-21T18:05:58.443Z",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "marker": "ADP_E2E_20260621180558_WOMSTART",
+  "transitions": [
+    "start"
+  ],
+  "ids": {
+    "material": "9000005651584428",
+    "formula": "9000005651584429",
+    "task": "9000005651584430",
+    "wait": "9000005651584431",
+    "pending": "9000005651584432",
+    "outputDetail": "9000005651584433"
+  },
+  "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+  "tableNo": "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+  "materialCode": "ADP_E2E_20260621180558_WOMSTART_MAT",
+  "formulaCode": "ADP_E2E_20260621180558_WOMSTART_FORM",
+  "console": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.5102312313615378",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.4172690534003699",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&menuCode=WOM_1.0.0_produceTask_makeTaskList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_formulaType",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=WOM_runState",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_reportType",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_inspectTimer",
+      "postData": null
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_compat_WOM_1.0.0_produceTask_makeTaskList_query",
+      "postData": null
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
+      "postData": "state=start&taskId=9000005651584430"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-query",
+      "postData": "{\"classifyCodes\":\",\",\"customCondition\":{},\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"WOM_1.0.0_produceTask_makeTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "status": 200,
+      "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--制造指令单-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\tdocument.write(\"<script src='/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"WOM_1.0.0_produceTask_makeTaskList\", //  视图编码\n\t\t\t\"entityCode\":\"WOM_1.0.0_produceTask\",// 实体编码\n\t\t\t\"menuCode\": \"WOM_1.0.0_produceTask_makeTaskList\",\n\t\t\t\"viewName\": \"制造指令单\",// 视图名称\n\t\t\t\"viewType\": \"LIST\",// 视图类型\n\t\t\t\"modelCode\": \"WOM_1.0.0_produceTask_ProduceTask\",// 模型编码\n\t\t\t\"moduleCode\": \"WOM_1.0.0\",// 模块编码\n\t\t\t\"isMain\":true,// 主模型\n\t\t\t\"permissionCode\":null, // 视图权限操作码（主要参照视图使用）\n\n\n\t\t\t\"showType\": \"SINGLE\",// 视图展示类型\n\t\t\t\"modelAlias\": \"produceTask\",// 模型别名\n\t\t\t\"workflowEnabled\": true,// 启用工作流\n\t\t\t\"listButtons\":{\n\t\t\t},\n\t\t\t\"interfaceApi\": {\n\t\t\t\t\"downloadFile\":\"/WOM/baseService/workbench/download\",//  下载附件接口\n\t\t\t\t\"uploadList\": \"/WOM/baseService/workbench/upload-list\", //  附件列表\n\t\t\t\t\"PreviewAttachments\":\"/WOM/baseService/workbench/preview\",//附件预览\n                \"PreviewPicture\":\"/WOM/baseService/workbench/preview/picture\",//图片预览\n                \"authenticationMessage\":\"/msService/WOM/baseService/workbench/download/getAuthenticationMessage\",//附件下载预览鉴权信息\n\t\t\t\t\"recall\":\"/msService/WOM/produceTask/produceTask/recall\",//  流程单据撤回（基础单据无效）\n\t\t\t\t\"retrial\":\"/msService/WOM/produceTask/produceTask/retrial\",//  流程单据弃审（基础单据无效）\n\t\t\t\t\"mainView\": \"/msService/WOM/produceTask/produceTask/makeTaskBatchView\", //  主查看视图\n\t\t\t\t\"downloadXls\": \"/msService/WOM/produceTask/produceTask/downloadXls\", //  下载导入模板\n\t\t\t\t\"importMainXls\": \"/msService/WOM/produceTask/produceTask/importMainXls\", //  导入Excel\n\t\t\t\t\"deleteData\": \"/msService/WOM/produceTask/produceTask/delete\",// 删除数据\n\t\t\t\t\"sourceData\": \"/msService/WOM/produceTask/produceTask/makeTaskList-\", //  列表数据\n\n\t\t\t\t\"echartsData\": \"/msService/WOM/produceTask/produceTask/echartsData\", //  图表数据源\n\t\t\t},\n\t\t\t\"baseServiceApi\": {\n\t\t\t\t\"flowRoot\": \"/msService/baseService/workflow/flowRoot\", //  路由数据\n\t\t\t\t\"layoutJson\": \"/msService/baseService/view/layoutJson\", //  布局数据\n\t\t\t\t\"systemCodeJson\": \"/inter-api/systemcode/v1/systemCodeJson\", //  系统编码\n\t\t\t\t\"uploadFile\": \"/inter-api/file-server/v1/file/upload/file\", //  附件上传\n\t\t\t\t\"deleteFile\": \"/inter-api/file-server/v1/file/delete\", //  附件删除\n\t\t\t\t\"mneClient\": \"/msService/baseService/workbench/common/mneClient\", //  助记码\n\t\t\t},\n\t\t}\n\t</script>\n</head>\n\n<body class=\"supos-container\">\n\t<div id=\"app\"></div>\n\t<script src=\"/greenDill/static/scripts/styles.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.core.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antdicons.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.antd.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/i18n.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.commons.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.echarts.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/vendors.sesgis.js?v=1663120692297\"></script>\n\t<script type=\"text/javascript\" src=\"/greenDill/static/scripts/list.js?v=1663120692297\"></script>\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- body.html--start -->\n\t\n\t<!-- body.html--end -->\n\t<script>\n\t\tloadScript('/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body');\n\t</script>\n</body>\n</html>\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.5102312313615378",
+      "status": 200,
+      "body": "window.InternationalResource = window.InternationalResource || {};\nwindow.InternationalResource[\"Button.text.close\"] = \"关闭\";\nwindow.InternationalResource[\"Button.text.save\"] = \"保存\";\nwindow.InternationalResource[\"HierarchicalMod.viewtitle.randon1584949160900\"] = \"工厂架构参照\";\nwindow.InternationalResource[\"SupDatagrid.button.error\"] = \"请选择一条记录进行操作！\";\nwindow.InternationalResource[\"SupDatagrid.button.tit\"] = \"提示\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1575439168443.flag\"] = \"开始\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1575439221644.flag\"] = \"保持\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1575439276981.flag\"] = \"重启\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1575439301821.flag\"] = \"结束\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1585560121170.flag\"] = \"完成\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1591581142666.flag\"] = \"提前放料\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1597201819098.flag\"] = \"请检\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1628658336505.flag\"] = \"生产过程查看\";\nwindow.InternationalResource[\"WOM.buttonPropertyshowName.randon1647831278745.flag\"] = \"生成二维码\";\nwindow.InternationalResource[\"WOM.custom.random1613701402613\"] = \"“尾料量”必须小于“产出量”\";\nwindow.InternationalResource[\"WOM.custom.random1623129307428\"] = \"指令单已保持！\";\nwindow.InternationalResource[\"WOM.custom.random1623129401596\"] = \"指令单已重启！\";\nwindow.InternationalResource[\"WOM.custom.random1633930723936\"] = \"配方未配置检验部门和检验人！\";\nwindow.InternationalResource[\"WOM.custom.randon1575958091725\"] = \"只有非批控的工单才可以操作！\";\nwindow.InternationalResource[\"WOM.custom.randon1575958171058\"] = \"请先将指令单生效再进行操作！\";\nwindow.InternationalResource[\"WOM.custom.randon1575958246066\"] = \"只有【待执行】的指令单可以开始！\";\nwindow.InternationalResource[\"WOM.custom.randon1575958861853\"] = \"只有【执行中】或者【已暂停】的指令单可以结束！\";\nwindow.InternationalResource[\"WOM.custom.randon1575959595767\"] = \"只有【执行中】的指令单可以保持！\";\nwindow.InternationalResource[\"WOM.custom.randon1575968753369\"] = \"只有【已保持】的指令单可以重启！\";\nwindow.InternationalResource[\"WOM.custom.randon1591583966456\"] = \"该批次不能提前放料！\";\nwindow.InternationalResource[\"WOM.custom.randon1591599292328\"] = \"提前投料失败!\";\nwindow.InternationalResource[\"WOM.custom.randon1591755924139\"] = \"操作成功！\";\nwindow.InternationalResource[\"WOM.custom.randon1592209666643\"] = \"【{0}】，是否继续放料？\";\nwindow.InternationalResource[\"WOM.custom.randon1596434273127\"] = \"是\";\nwindow.InternationalResource[\"WOM.custom.randon1596434330969\"] = \"否\";\nwindow.InternationalResource[\"WOM.custom.randon1597044938864\"] = \"只有【执行中】的指令单允许提前放料！\";\nwindow.InternationalResource[\"WOM.custom.randon1597055078126\"] = \"是否提前放料？\";\nwindow.InternationalResource[\"WOM.custom.randon1597211462498\"] = \"所选指令单未生效！\";\nwindow.InternationalResource[\"WOM.custom.randon1597226087560\"] = \"该指令单检验状态为【{0}】\";\nwindow.InternationalResource[\"WOM.custom.randon1597227115284\"] = \",检验结论为【{}】\";\nwindow.InternationalResource[\"WOM.custom.randon1597231220469\"] = \"处理成功！\";\nwindow.InternationalResource[\"WOM.custom.randon1597309436125\"] = \"是否发起检验申请？\";\nwindow.InternationalResource[\"WOM.custom.randon1597996619261\"] = \"只有【执行中】的指令单允许请检！\";\nwindow.InternationalResource[\"WOM.custom.randon1598424040495\"] = \"指令单已生成产品检验申请单，检验状态【待检】，是否发起检验申请？\";\nwindow.InternationalResource[\"WOM.custom.randon1598676953828\"] = \"该指令单产品无需质检！\";\nwindow.InternationalResource[\"WOM.custom.randon1602465957459\"] = \"当前指令单不允许该操作！\";\nwindow.InternationalResource[\"WOM.custom.randon1602655303748\"] = \"指令单已开始！\";\nwindow.InternationalResource[\"WOM.viewtitle.randon1575977285430\"] = \"指令单完工报工\";\nwindow.InternationalResource[\"ec.common.tableNo\"] = \"单据编号\";\nwindow.InternationalResource[\"ec.engine.view.dealsuccess\"] = \"操作成功\";\nwindow.InternationalResource[\"ec.select.no\"] = \"否\";\nwindow.InternationalResource[\"ec.select.yes\"] = \"是\";\nwindow.InternationalResource[\"formulaId.id\"] = \"配方ID\";\nwindow.InternationalResource[\"foundation.common.selectNullData\"] = \"请至少选中一行数据！\";\nwindow.InternationalResource[\"lineId.id\"] = \"生产线ID\";\nwindow.InternationalResource[\"productId.id\"] = \"产品ID\";\nwindow.InternationalResource[\"产品名称\"] = \"产品名称\";\nwindow.InternationalResource[\"产品编码\"] = \"产品编码\";\nwindow.InternationalResource[\"保持\"] = \"保持\";\nwindow.InternationalResource[\"允许提前放料\"] = \"允许提前放料\";\nwindow.InternationalResource[\"制造指令单\"] = \"制造指令单\";\nwindow.InternationalResource[\"图形化节点ID\"] = \"图形化节点ID\";\nwindow.InternationalResource[\"备注\"] = \"备注\";\nwindow.InternationalResource[\"完成数量\"] = \"完成数量\";\nwindow.InternationalResource[\"实际开始\"] = \"实际开始\";\nwindow.InternationalResource[\"实际结束\"] = \"实际结束\";\nwindow.InternationalResource[\"开始\"] = \"开始\";\nwindow.InternationalResource[\"异常完成\"] = \"异常完成\";\nwindow.InternationalResource[\"执行状态\"] = \"执行状态\";\nwindow.InternationalResource[\"批控\"] = \"批控\";\nwindow.InternationalResource[\"报工模式\"] = \"报工模式\";\nwindow.InternationalResource[\"提前放料\"] = \"提前放料\";\nwindow.InternationalResource[\"放料条件\"] = \"放料条件\";\nwindow.InternationalResource[\"是否提前放料\"] = \"是否提前放料\";\nwindow.InternationalResource[\"检验时机\"] = \"检验时机\";\nwindow.InternationalResource[\"检验次数\"] = \"检验次数\";\nwindow.InternationalResource[\"检验状态\"] = \"检验状态\";\nwindow.InternationalResource[\"检验结论\"] = \"检验结论\";\nwindow.InternationalResource[\"生产批号\"] = \"生产批号\";\nwindow.InternationalResource[\"生产线名称\"] = \"生产线名称\";\nwindow.InternationalResource[\"生产过程追溯\"] = \"生产过程追溯\";\nwindow.InternationalResource[\"生成二维码\"] = \"生成二维码\";\nwindow.InternationalResource[\"结束\"] = \"结束\";\nwindow.InternationalResource[\"统计标识\"] = \"统计标识\";\nwindow.InternationalResource[\"计划开始\"] = \"计划开始\";\nwindow.InternationalResource[\"计划数量\"] = \"计划数量\";\nwindow.InternationalResource[\"计划结束\"] = \"计划结束\";\nwindow.InternationalResource[\"请检\"] = \"请检\";\nwindow.InternationalResource[\"配方属性\"] = \"配方属性\";\nwindow.InternationalResource[\"配方编码\"] = \"配方编码\";\nwindow.InternationalResource[\"重启\"] = \"重启\";\nwindow.InternationalResource[\"需要包装\"] = \"需要包装\";\n\n(function installWomMakeTaskListI18nFallback() {\n  var resources = window.InternationalResource || {};\n  var attempts = 0;\n\n  function translate(value) {\n    if (typeof value === \"string\" && resources[value]) {\n      return resources[value];\n    }\n    return value;\n  }\n\n  function translateOptions(options) {\n    if (!options || typeof options !== \"object\") {\n      return options;\n    }\n    var patched = {};\n    for (var key in options) {\n      if (Object.prototype.hasOwnProperty.call(options, key)) {\n        patched[key] = /^(content|message|title|okText|cancelText)$/i.test(key)\n          ? translate(options[key])\n          : options[key];\n      }\n    }\n    return patched;\n  }\n\n  function patchReactApiMessages(reactApi) {\n    if (!reactApi || reactApi.__adpWomMakeTaskListMessagePatched) {\n      return;\n    }\n\n    if (typeof reactApi.showMessage === \"function\") {\n      var originalShowMessage = reactApi.showMessage.bind(reactApi);\n      reactApi.showMessage = function showMessageWithWomFallback(type, message) {\n        var args = Array.prototype.slice.call(arguments);\n        if (args.length > 1) {\n          args[1] = translate(args[1]);\n        } else if (args.length === 1) {\n          args[0] = translate(args[0]);\n        }\n        return originalShowMessage.apply(null, args);\n      };\n    }\n\n    [\"openConfirm\", \"confirm\", \"showConfirm\"].forEach(function patchConfirm(methodName) {\n      if (typeof reactApi[methodName] !== \"function\") {\n        return;\n      }\n      var original = reactApi[methodName].bind(reactApi);\n      reactApi[methodName] = function confirmWithWomFallback(options) {\n        var args = Array.prototype.slice.call(arguments);\n        args[0] = translateOptions(args[0]);\n        return original.apply(null, args);\n      };\n    });\n\n    reactApi.__adpWomMakeTaskListMessagePatched = true;\n  }\n\n  function install() {\n    attempts += 1;\n    var international = window.ReactAPI && window.ReactAPI.international;\n    if (!international || typeof international.getText !== \"function\") {\n      if (attempts < 200) {\n        window.setTimeout(install, 100);\n      }\n      return;\n    }\n\n    if (international.__adpWomMakeTaskListI18nPatched) {\n      return;\n    }\n\n    var originalGetText = international.ge"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.4172690534003699",
+      "status": 200,
+      "body": "(function installWomMakeTaskListToolbarGuards() {\n  if (window.__adpWomMakeTaskListToolbarGuards) {\n    return;\n  }\n  window.__adpWomMakeTaskListToolbarGuards = true;\n\n  var gridId = \"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\";\n  var messages = {\n    noSelection: \"请先选择一条指令单！\",\n    multiSelection: \"只可以进行单批次查看！\",\n    waitForRun: \"未执行的指令单，请重新选择！\",\n    processUnavailable: \"生产过程追溯服务未部署或暂不可用！\",\n    qrcodeUnavailable: \"二维码生成页面未部署或暂不可用！\"\n  };\n\n  var dependencyStatus = window.ADP_WOM_MAKETASKLIST_DEPENDENCIES || {};\n\n  function showWarning(message) {\n    if (window.ReactAPI && typeof window.ReactAPI.showMessage === \"function\") {\n      window.ReactAPI.showMessage(\"w\", message);\n      return;\n    }\n    window.alert(message);\n  }\n\n  function systemCodeId(value) {\n    if (!value) {\n      return \"\";\n    }\n    if (typeof value === \"string\") {\n      return value;\n    }\n    return value.id || value.value || \"\";\n  }\n\n  function syncGet(url, data) {\n    var result = { ok: false, status: 0, body: null };\n    var ajaxHost = window.jQuery || window.$;\n    if (!ajaxHost || !ajaxHost.ajax) {\n      result.error = \"jQuery.ajax unavailable\";\n      return result;\n    }\n    ajaxHost.ajax({\n      type: \"GET\",\n      url: url,\n      data: data || {},\n      traditional: true,\n      async: false,\n      timeout: 5000,\n      success: function onSuccess(body, _textStatus, xhr) {\n        result.ok = true;\n        result.status = xhr && xhr.status;\n        result.body = body;\n      },\n      error: function onError(xhr) {\n        result.ok = false;\n        result.status = xhr && xhr.status;\n        result.body = xhr && xhr.responseText;\n      }\n    });\n    return result;\n  }\n\n  function dependencyEnabled(name) {\n    return dependencyStatus[name] === true || dependencyStatus[name] === \"true\";\n  }\n\n  var taskStateById = {};\n  var lastSelectedTaskId = \"\";\n  var restoreSelectionUntil = 0;\n\n  function getGrid() {\n    var reactApi = window.ReactAPI;\n    var factory =\n      reactApi &&\n      reactApi.getComponentAPI &&\n      reactApi.getComponentAPI(\"SupDataGrid\");\n    return factory && factory.APIs && factory.APIs(gridId);\n  }\n\n  function asId(value) {\n    return value == null ? \"\" : String(value);\n  }\n\n  function extractTaskId(data) {\n    if (!data) {\n      return \"\";\n    }\n    if (typeof data === \"string\") {\n      var match = data.match(/(?:^|&)taskId=([^&]+)/);\n      return match ? decodeURIComponent(match[1].replace(/\\+/g, \" \")) : \"\";\n    }\n    if (typeof FormData !== \"undefined\" && data instanceof FormData) {\n      return asId(data.get(\"taskId\"));\n    }\n    return asId(data.taskId);\n  }\n\n  function copyOptions(source) {\n    var target = {};\n    source = source || {};\n    Object.keys(source).forEach(function copyKey(key) {\n      target[key] = source[key];\n    });\n    return target;\n  }\n\n  function applyTaskState(row, exeState) {\n    if (!row || !exeState || !exeState.id) {\n      return;\n    }\n    row.taskRunState = exeState;\n    row.taskRunStateId = exeState.id;\n    row.taskRunStateName = exeState.value || exeState.name || exeState.fullPathName || exeState.id;\n  }\n\n  function gridRows(grid) {\n    return (\n      (grid && grid.getRows && grid.getRows()) ||\n      (grid && grid.getDatagridData && grid.getDatagridData()) ||\n      []\n    );\n  }\n\n  function rememberSelectedRow(row) {\n    if (!row || row.id == null) {\n      return;\n    }\n    lastSelectedTaskId = asId(row.id);\n  }\n\n  function restoreLastSelection(grid) {\n    if (!grid || !lastSelectedTaskId || Date.now() > restoreSelectionUntil) {\n      return false;\n    }\n    var rows = gridRows(grid);\n    for (var index = 0; index < rows.length; index += 1) {\n      if (asId(rows[index] && rows[index].id) === lastSelectedTaskId) {\n        if (typeof grid.setSelecteds === \"function\") {\n          grid.setSelecteds(String(index));\n        }\n        applyTaskState(rows[index], taskStateById[lastSelectedTaskId]);\n        return true;\n      }\n    }\n    return false;\n  }\n\n  function patchRememberedRows() {\n    var grid = getGrid();\n    if (!grid) {\n      return;\n    }\n    var selecteds = (grid.getSelecteds && grid.getSelecteds()) || [];\n    var rows = gridRows(grid);\n    if (selecteds.length) {\n      rememberSelectedRow(selecteds[0]);\n    }\n    selecteds.concat(rows).forEach(function patchRow(row) {\n      var remembered = row && taskStateById[asId(row.id)];\n      if (remembered) {\n        applyTaskState(row, remembered);\n      }\n    });\n    restoreLastSelection(grid);\n  }\n\n  function restoreSelectionLater() {\n    [80, 300, 900].forEach(function queueRestore(delay) {\n      window.setTimeout(function restoreSelection() {\n        patchRememberedRows();\n      }, delay);\n    });\n  }\n\n  function selectedRows() {\n    patchRememberedRows();\n    var grid = getGrid();\n    var rows = (grid && grid.getSelecteds && grid.getSelecteds()) || [];\n    if (!rows.length && restoreLastSelection(grid)) {\n      rows = (grid && grid.getSelecteds && grid.getSelecteds()) || [];\n    }\n    if (rows.length) {\n      rememberSelectedRow(rows[0]);\n    }\n    return rows;\n  }\n\n  function selectedOne() {\n    var rows = selectedRows();\n    if (!rows.length) {\n      showWarning(messages.noSelection);\n      return null;\n    }\n    if (rows.length > 1) {\n      showWarning(messages.multiSelection);\n      return null;\n    }\n    return rows[0];\n  }\n\n  function refreshGridLater() {\n    var delays = [300, 1200, 2500];\n    delays.forEach(function queueRefresh(delay) {\n      window.setTimeout(function refreshGrid() {\n        patchRememberedRows();\n        var grid = getGrid();\n        if (!grid || typeof grid.refreshDataByRequst !== \"function\") {\n          return;\n        }\n        var pagination = (grid.getTablePagination && grid.getTablePagination()) || {};\n        grid.refreshDataByRequst({\n          type: \"POST\",\n          url: \"/msService/WOM/produceTask/produceTask/makeTaskList-pending\",\n          param: {\n            classifyCodes: \"\",\n            customCondition: {},\n            permissionCode: \"WOM_1.0.0_produceTask_makeTaskList\",\n            pageNo: pagination.currentPage || 1,\n            paging: true,\n            pageSize: pagination.pageSize || 20,\n            crossCompanyFlag: \"true\"\n          }\n        });\n        restoreSelectionLater();\n      }, delay);\n    });\n  }\n\n  function rememberUpdateTaskState(requestData, response) {\n    var payload = response && response.data;\n    if (!payload || payload.dealSuccessFlag !== true || !payload.exeState) {\n      return;\n    }\n    var taskId = extractTaskId(requestData);\n    if (!taskId) {\n      return;\n    }\n    lastSelectedTaskId = taskId;\n    restoreSelectionUntil = Date.now() + 15000;\n    taskStateById[taskId] = payload.exeState;\n    patchRememberedRows();\n    refreshGridLater();\n  }\n\n  function installUpdateTaskStateSync() {\n    var ajaxHost = window.jQuery || window.$;\n    if (!ajaxHost || !ajaxHost.ajax) {\n      window.setTimeout(installUpdateTaskStateSync, 100);\n      return;\n    }\n    if (ajaxHost.ajax.__adpWomMakeTaskStateSyncPatched) {\n      return;\n    }\n\n    var originalAjax = ajaxHost.ajax;\n    var patchedAjax = function updateTaskStateSyncAjax(urlOrOptions, maybeOptions) {\n      var options = typeof urlOrOptions === \"string\" ? copyOptions(maybeOptions) : copyOptions(urlOrOptions);\n      if (typeof urlOrOptions === \"string\") {\n        options.url = urlOrOptions;\n      }\n      if (String(options.url || \"\").indexOf(\"/WOM/produceTask/produceTask/updateTaskState\") === -1) {\n        return originalAjax.apply(this, arguments);\n      }\n\n      var originalSuccess = options.success;\n      options.success = function updateTaskStateSuccess(response) {\n        var returnValue;\n        if (typeof originalSuccess === \"function\") {\n          returnValue = originalSuccess.apply(this, arguments);\n        }\n        rememberUpdateTaskState(options.data, response);\n        return returnValue;\n      };\n      return originalAjax.call(this, options);\n    };\n    patchedAjax.__adpWomMakeTaskStateSyncPatched = true;\n    ajaxHost.ajax = patchedAjax;\n"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&menuCode=WOM_1.0.0_produceTask_makeTaskList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"url\":\"/msService/WOM/produceTask/produceTask/makeTaskList\",\"title\":\"制造指令单\",\"isMain\":true,\"moveFlag\":false,\"pageType\":\"LIST\",\"components\":[{\"type\":\"layout\",\"components\":[{\"code\":\"query\",\"type\":\"layoutSearchWidget\",\"fix_h\":150,\"layoutName\":\"layoutSearchWidget\",\"advProperty\":[],\"fastProperty\":[],\"layoutmethod\":\"container\"},{\"type\":\"layoutDatagrid\",\"fields\":[{\"key\":\"tableNo\",\"width\":160,\"namekey\":\"单据编号\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"productId.code\",\"width\":100,\"namekey\":\"产品编码\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"productId.name\",\"width\":100,\"namekey\":\"产品名称\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"produceBatchNum\",\"width\":100,\"namekey\":\"生产批号\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"BAPCODE\",\"showFormat\":\"TEXT\"},{\"key\":\"formulaId.formualCode\",\"width\":100,\"namekey\":\"配方编码\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"BAPCODE\",\"showFormat\":\"TEXT\"},{\"key\":\"formulaId.setProcess\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"RM_formulaType\"},\"width\":100,\"namekey\":\"配方属性\",\"isHidden\":false,\"showType\":\"SELECTCOMP\",\"columnType\":\"SYSTEMCODE\",\"showFormat\":\"SELECTCOMP\"},{\"key\":\"lineId.name\",\"width\":100,\"namekey\":\"生产线名称\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"taskRunState\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"WOM_runState\"},\"width\":100,\"namekey\":\"执行状态\",\"isHidden\":false,\"showType\":\"SELECTCOMP\",\"columnType\":\"SYSTEMCODE\",\"showFormat\":\"TEXT\"},{\"key\":\"checkState\",\"width\":100,\"namekey\":\"检验状态\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"checkResult\",\"width\":100,\"namekey\":\"检验结论\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"checkTimes\",\"width\":100,\"namekey\":\"检验次数\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"INTEGER\",\"showFormat\":\"TEXT\"},{\"key\":\"planNum\",\"width\":100,\"namekey\":\"计划数量\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"DECIMAL\",\"showFormat\":\"TEXT\"},{\"key\":\"finishNum\",\"width\":100,\"namekey\":\"完成数量\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"DECIMAL\",\"showFormat\":\"TEXT\"},{\"key\":\"batchContral\",\"width\":100,\"namekey\":\"批控\",\"isHidden\":false,\"showType\":\"CHECKBOX\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"CHECKBOX\"},{\"key\":\"advanceCharge\",\"width\":100,\"namekey\":\"允许提前放料\",\"isHidden\":false,\"showType\":\"CHECKBOX\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"CHECKBOX\"},{\"key\":\"isAdvanced\",\"width\":100,\"namekey\":\"是否提前放料\",\"isHidden\":false,\"showType\":\"SELECT\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"CHECKBOX\"},{\"key\":\"isAnaly\",\"width\":100,\"namekey\":\"统计标识\",\"isHidden\":true,\"showType\":\"CHECKBOX\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"CHECKBOX\"},{\"key\":\"needPack\",\"width\":100,\"namekey\":\"需要包装\",\"isHidden\":true,\"showType\":\"SELECT\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"CHECKBOX\"},{\"key\":\"reportType\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"RM_reportType\"},\"width\":100,\"namekey\":\"报工模式\",\"isHidden\":false,\"showType\":\"SELECTCOMP\",\"columnType\":\"SYSTEMCODE\",\"showFormat\":\"SELECTCOMP\"},{\"key\":\"planStartTime\",\"width\":150,\"namekey\":\"计划开始\",\"isHidden\":false,\"showType\":\"DATETIME\",\"columnType\":\"DATETIME\",\"showFormat\":\"YMD_HMS\"},{\"key\":\"planEndTime\",\"width\":150,\"namekey\":\"计划结束\",\"isHidden\":false,\"showType\":\"DATETIME\",\"columnType\":\"DATETIME\",\"showFormat\":\"YMD_HMS\"},{\"key\":\"actStartTime\",\"width\":150,\"namekey\":\"实际开始\",\"isHidden\":false,\"showType\":\"DATETIME\",\"columnType\":\"DATETIME\",\"showFormat\":\"YMD_HMS\"},{\"key\":\"actEndTime\",\"width\":150,\"namekey\":\"实际结束\",\"isHidden\":false,\"showType\":\"DATETIME\",\"columnType\":\"DATETIME\",\"showFormat\":\"YMD_HMS\"},{\"key\":\"remark\",\"width\":100,\"namekey\":\"备注\",\"isHidden\":false,\"showType\":\"TEXTFIELD\",\"columnType\":\"LONGTEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"isAbnormal\",\"width\":100,\"namekey\":\"异常完成\",\"isHidden\":true,\"showType\":\"SELECT\",\"columnType\":\"BOOLEAN\",\"showFormat\":\"SELECT\"},{\"key\":\"feedCondition\",\"width\":100,\"namekey\":\"放料条件\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"inspectTimer\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"RM_inspectTimer\"},\"width\":100,\"namekey\":\"检验时机\",\"isHidden\":true,\"showType\":\"SELECTCOMP\",\"columnType\":\"SYSTEMCODE\",\"showFormat\":\"TEXT\"},{\"key\":\"nodeId\",\"width\":100,\"namekey\":\"图形化节点ID\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"productId.id\",\"width\":120,\"namekey\":\"productId.id\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"formulaId.id\",\"width\":120,\"namekey\":\"formulaId.id\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"},{\"key\":\"lineId.id\",\"width\":120,\"namekey\":\"lineId.id\",\"isHidden\":true,\"showType\":\"TEXTFIELD\",\"columnType\":\"TEXT\",\"showFormat\":\"TEXT\"}],\"listPT\":false,\"buttons\":[{\"id\":\"startTask\",\"CODE\":\"makeTaskList_startTask_add_WOM_1.0.0_produceTask_makeTaskList\",\"NAME\":\"开始\",\"name\":\"开始\",\"ecEnv\":\"product\",\"isHide\":false,\"ICONCLS\":\"cui-btn-add\",\"ONCLICK\":\"startTaskEvent(event)\",\"i18nKey\":\"WOM.buttonPropertyshowName.randon1575439168443.flag\",\"namekey\":\"开始\",\"onclick\":\"startTaskEvent(event)\",\"cellCode\":\"cell_1575439162732_788\",\"funcbody\":\"function startTaskEvent(event) {\\n    var selecteds = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getSelecteds();\\n    if (selecteds.length == 0) {\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('SupDatagrid.button.error'));\\n        return false;\\n    }\\n    var data = selecteds[0];\\n    if (data.batchContral) {\\n        //只有非批控的工单才可以操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958091725'));\\n        return false;\\n    }\\n    if (data.status != 99) {\\n        //请先将指令单生效再进行操作\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958171058'));\\n        return false;\\n    }\\n    var taskRunState = data.taskRunState.id;\\n    if (taskRunState != 'WOM_runState/waitForRun') {\\n        //只能开始执行状态为待执行的指令单\\n        ReactAPI.showMessage(\\\"w\\\", ReactAPI.international.getText('WOM.custom.randon1575958246066'));\\n        return false;\\n    }\\n    var taskId = data.id;\\n    if (data.nodeId && data.nodeId !== \\\"\\\") {\\n        var data1 = {\\n            rootId: data.nodeId,\\n            operate: \\\"start\\\",\\n            nodeId: data.nodeId,\\n            level: \\\"0\\\",\\n            operateType: \\\"manual\\\"\\n        };\\n        $.ajax({\\n            url: \\\"/msService/WOM/craftToMes/craftToMes/dealDataFromCraft\\\",\\n            type: 'post',\\n            async: false,\\n            contentType: \\\"application/json\\\",\\n            data: JSON.stringify(data1),\\n            success: function success(res) {\\n                if (res.code = 200) {\\n                    // 指令单已开始！\\n                    ReactAPI.showMessage(\\\"s\\\", ReactAPI.international.getText('WOM.custom.randon1602655303748'));\\n                    var currentPage = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().currentPage;\\n                    var pageSize = ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").getTablePagination().pageSize;\\n                    var url = \\\"/msService/WOM/produceTask/produceTask/makeTaskList-query\\\";\\n                    ReactAPI.getComponentAPI(\\\"SupDataGrid\\\").APIs(\\\"WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg\\\").refreshDataByRequst({\\n                        type: \\\"POST\\\",\\n                        url: url,\\n                        param: {\\n                            classifyCodes: \\\",\\\",\\n                            customCondition: {},\\n                            pageNo: currentPage,\\n                            paging: true,\\n                            pageSize: pageSize\\n                        }\\n                    });\\n   "
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_inspectTimer",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_inspectTimer/submit\":\"工单生效\",\"RM_inspectTimer/finish\":\"完工后检验\",\"RM_inspectTimer/active\":\"活动发起\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_reportType",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_reportType/noReport\":\"不报工\",\"RM_reportType/editReport\":\"报工可编辑\",\"RM_reportType/effectReport\":\"报工并生效\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=RM_formulaType",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"RM_formulaType/commonFormula\":\"标准配方\",\"RM_formulaType/simpleFormula\":\"普通配方\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/inter-api/systemcode/v1/systemCodeJson?systemEntityCode=WOM_runState",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"WOM_runState/iskeep\":\"已保持\",\"WOM_runState/starting\":\"开始中\",\"WOM_runState/waitForRun\":\"待执行\",\"WOM_runState/runing\":\"执行中\",\"WOM_runState/finished\":\"已完成\",\"WOM_runState/pausing\":\"暂停中\",\"WOM_runState/paused\":\"已暂停\",\"WOM_runState/stoping\":\"停止中\",\"WOM_runState/stoped\":\"已停止\",\"WOM_runState/resuming\":\"恢复中\",\"WOM_runState/abandoning\":\"放弃中\",\"WOM_runState/abandoned\":\"已放弃\",\"WOM_runState/waitToBeChecked\":\"待检\",\"WOM_runState/cancel\":\"已取消\"},\"success\":true,\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "GET",
+      "url": "http://222.88.185.146:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_compat_WOM_1.0.0_produceTask_makeTaskList_query",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":\"\",\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1784657165077,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":nu"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/updateTaskState",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"exeState\":{\"id\":\"WOM_runState/runing\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781280175568,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":\"6579611764769008\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"执行中\",\"leaf\":true,\"leaf2\":false,\"type\":null,\"code\":\"runing\",\"entityCode\":\"WOM_runState\",\"value\":\"执行中\",\"attribute\":false,\"memo\":\"\",\"sort\":96,\"defaultFlag\":false,\"zhCnValue\":null,\"codeDesA\":\"\",\"codeDesB\":\"\",\"codeDesC\":\"\",\"seqId\":null,\"uniqueCode\":\"WOM_runState/runing\",\"root\":true,\"children2\":[],\"isParent\":false}},\"message\":\"操作成功\"}"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1784657165077,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782065172802,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":nu"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782065172802,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":nu"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-query",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782065172802,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":false,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai),生效\",\"userId\":null},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTi"
+    },
+    {
+      "method": "POST",
+      "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"actEndTime\":null,\"actStartTime\":1782065172802,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621180558_WOMSTART_FORM\",\"id\":9000005651584429,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005651584430,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005651584432,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621180558_WOMSTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781982365077,\"planNum\":1.000000,\"planStartTime\":1781978765077,\"produceBatchNum\":\"ADP_E2E_20260621180558_WOMSTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621180558_WOMSTART_MAT\",\"id\":9000005651584428,\"name\":\"ADP_E2E_20260621180558_WOMSTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005651584430,\"tableNo\":\"ADP_E2E_20260621180558_WOMSTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":1},{\"actEndTime\":null,\"actStartTime\":1782063550012,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005635355846,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005635355847,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005635355849,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781980741580,\"planNum\":1.000000,\"planStartTime\":1781977141580,\"produceBatchNum\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005635355845,\"name\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005635355847,\"tableNo\":\"ADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1782062892482,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005619242593,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005619242594,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005619242596,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781979129851,\"planNum\":1.000000,\"planStartTime\":1781975529851,\"produceBatchNum\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005619242592,\"name\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005619242594,\"tableNo\":\"ADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":3},{\"actEndTime\":null,\"actStartTime\":1784650387834,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005583809764,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005583809765,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005583809767,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975587834,\"planNum\":1.000000,\"planStartTime\":1781971987834,\"produceBatchNum\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005583809763,\"name\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005583809765,\"tableNo\":\"ADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/waitForRun\",\"value\":\"待执行\"},\"valid\":true,\"version\":0},{\"actEndTime\":null,\"actStartTime\":1782058211381,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":null,\"checkTimes\":null,\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"feedCondition\":null,\"finishNum\":0.000000,\"formulaId\":{\"attrMap\":null,\"formualCode\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\",\"id\":9000005581932826,\"setProcess\":{\"id\":\"RM_formulaType/simpleFormula\",\"value\":\"普通配方\"}},\"id\":9000005581932827,\"inspectTimer\":null,\"isAbnormal\":false,\"isAdvanced\":false,\"isAnaly\":false,\"lineId\":{\"attrMap\":null,\"id\":null,\"name\":null},\"needPack\":false,\"nodeId\":null,\"pending\":{\"activityName\":\"start_dhbmq3g\",\"activityType\":\"1\",\"bulkDealFlag\":null,\"deploymentId\":1,\"id\":9000005581932829,\"openUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit\",\"processDescription\":\"开始活动\",\"processId\":\"ADP_E2E_PROCESS_ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART\",\"processKey\":\"makeTaskFlow\",\"processVersion\":1,\"taskDescription\":\"开始活动(ec.flowActive.dai)(ec.flowActive.dai)\",\"userId\":1},\"planEndTime\":1781975402015,\"planNum\":1.000000,\"planStartTime\":1781971802015,\"produceBatchNum\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\",\"productId\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\",\"id\":9000005581932825,\"name\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\"},\"remark\":null,\"reportType\":null,\"status\":99,\"tableInfoId\":9000005581932827,\"tableNo\":\"ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\",\"taskRunState\":{\"id\":\"WOM_runState/runing\",\"value\":\"执行中\"},\"valid\":true,\"version\":5},{\"actEndTime\":null,\"actStartTime\":1782057176157,\"advanceCharge\":false,\"attrMap\":null,\"batchContral\":false,\"checkResult\":null,\"checkState\":nu"
+    }
+  ],
+  "screenshots": {
+    "before": "/tmp/adp-wom-start-persistence-20260621180558/wom-start-before.png",
+    "startConfirm": "/tmp/adp-wom-start-persistence-20260621180558/wom-start-start-confirm.png",
+    "after": "/tmp/adp-wom-start-persistence-20260621180558/wom-start-after.png"
+  },
+  "selections": [
+    {
+      "transition": "start",
+      "selection": {
+        "ok": true,
+        "rowIndex": 0,
+        "selectedCount": 1,
+        "selectedId": 9000005651584430,
+        "tableNo": "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+        "taskRunState": "WOM_runState/waitForRun",
+        "status": 99,
+        "batchContral": false,
+        "advanceCharge": false,
+        "isAdvanced": false,
+        "feedCondition": null,
+        "apiSelection": {
+          "ok": true,
+          "rowIndex": 0,
+          "selectedCount": 1,
+          "selectedId": 9000005651584430,
+          "tableNo": "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+          "taskRunState": "WOM_runState/waitForRun",
+          "status": 99,
+          "batchContral": false,
+          "advanceCharge": false,
+          "isAdvanced": false,
+          "feedCondition": null
+        },
+        "domSelection": {
+          "attempted": true,
+          "ok": true,
+          "error": ""
+        },
+        "restoredSelection": null
+      }
+    }
+  ],
+  "buttonInvocations": [
+    {
+      "transition": "start",
+      "triggerMode": "browser-click",
+      "buttonId": "btn-startTask"
+    },
+    {
+      "transition": "start",
+      "triggerMode": "browser-click-no-confirm-dialog",
+      "buttonId": "btn-startTask",
+      "note": "No confirmation dialog was shown; waiting for the direct updateTaskState request."
+    }
+  ],
+  "confirmButtonCounts": {
+    "start": 0
+  },
+  "updateTaskStateByTransition": [
+    {
+      "transition": "start",
+      "expectedState": "WOM_runState/runing",
+      "response": {
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"exeState\":{\"id\":\"WOM_runState/runing\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781280175568,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":\"6579611764769008\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"执行中\",\"leaf\":true,\"leaf2\":false,\"type\":null,\"code\":\"runing\",\"entityCode\":\"WOM_runState\",\"value\":\"执行中\",\"attribute\":false,\"memo\":\"\",\"sort\":96,\"defaultFlag\":false,\"zhCnValue\":null,\"codeDesA\":\"\",\"codeDesB\":\"\",\"codeDesC\":\"\",\"seqId\":null,\"uniqueCode\":\"WOM_runState/runing\",\"root\":true,\"children2\":[],\"isParent\":false}},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "dealSuccessFlag": true,
+            "exeState": {
+              "id": "WOM_runState/runing",
+              "version": 0,
+              "cid": 1000,
+              "createStaffId": null,
+              "modifyStaffId": null,
+              "deleteStaffId": null,
+              "createStaff": null,
+              "deleteStaff": null,
+              "createTime": 1781280175568,
+              "modifyTime": null,
+              "deleteTime": null,
+              "valid": true,
+              "parent": null,
+              "children": [],
+              "layRec": "6579611764769008",
+              "layNo": 1,
+              "parentId": null,
+              "fullPathName": "执行中",
+              "leaf": true,
+              "leaf2": false,
+              "type": null,
+              "code": "runing",
+              "entityCode": "WOM_runState",
+              "value": "执行中",
+              "attribute": false,
+              "memo": "",
+              "sort": 96,
+              "defaultFlag": false,
+              "zhCnValue": null,
+              "codeDesA": "",
+              "codeDesB": "",
+              "codeDesC": "",
+              "seqId": null,
+              "uniqueCode": "WOM_runState/runing",
+              "root": true,
+              "children2": [],
+              "isParent": false
+            }
+          },
+          "message": "操作成功"
+        }
+      }
+    }
+  ],
+  "advanceReleaseByTransition": [],
+  "findProcReportByTransition": [],
+  "outputDetailSeedByTransition": [],
+  "addOutputByTransition": [],
+  "stopDialogRequests": [],
+  "persistenceByTransition": [
+    {
+      "transition": "start",
+      "expectedState": "WOM_runState/runing",
+      "persistence": {
+        "rows": [
+          [
+            "task",
+            "9000005651584430",
+            "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+            "WOM_runState/runing",
+            "2026-06-22 02:06:12.802",
+            "",
+            "0.000000",
+            "1",
+            "false",
+            "false",
+            ""
+          ],
+          [
+            "wait",
+            "9000005651584431",
+            "9000005651584430",
+            "WOM_runState/runing",
+            "2026-06-22 02:06:12.859",
+            "",
+            "757718928811264",
+            "WOM_BatchSyncStatus/done"
+          ],
+          [
+            "proc",
+            "757718928811264",
+            "9000005651584430",
+            "WOM_procReportType/produceTask",
+            "RM_exeSystem/mes",
+            "2026-06-22 02:06:12.854",
+            "false",
+            "true"
+          ],
+          [
+            "exelog",
+            "757718928917760",
+            "9000005651584430",
+            "WOM_runState/runing",
+            "2026-06-22 02:06:12.802",
+            "",
+            "0.000000",
+            "ADP_E2E_20260621180558_WOMSTART_BATCH",
+            "true"
+          ],
+          [
+            "outputDetailCount",
+            "0"
+          ],
+          [
+            "taskActItemsCount",
+            "0"
+          ],
+          [
+            "matOutptRecordCount",
+            "0"
+          ]
+        ],
+        "task": [
+          "task",
+          "9000005651584430",
+          "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+          "WOM_runState/runing",
+          "2026-06-22 02:06:12.802",
+          "",
+          "0.000000",
+          "1",
+          "false",
+          "false",
+          ""
+        ],
+        "wait": [
+          "wait",
+          "9000005651584431",
+          "9000005651584430",
+          "WOM_runState/runing",
+          "2026-06-22 02:06:12.859",
+          "",
+          "757718928811264",
+          "WOM_BatchSyncStatus/done"
+        ],
+        "proc": [
+          "proc",
+          "757718928811264",
+          "9000005651584430",
+          "WOM_procReportType/produceTask",
+          "RM_exeSystem/mes",
+          "2026-06-22 02:06:12.854",
+          "false",
+          "true"
+        ],
+        "exelog": [
+          "exelog",
+          "757718928917760",
+          "9000005651584430",
+          "WOM_runState/runing",
+          "2026-06-22 02:06:12.802",
+          "",
+          "0.000000",
+          "ADP_E2E_20260621180558_WOMSTART_BATCH",
+          "true"
+        ],
+        "outputDetailCount": [
+          "outputDetailCount",
+          "0"
+        ],
+        "taskActItemsCount": [
+          "taskActItemsCount",
+          "0"
+        ],
+        "matOutptRecordCount": [
+          "matOutptRecordCount",
+          "0"
+        ]
+      }
+    }
+  ],
+  "seed": {
+    "sqlResult": "BEGIN\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nINSERT 0 1\nCOMMIT\nseed|ADP_E2E_20260621180558_WOMSTART|9000005651584430|9000005651584431|9000005651584432|ADP_E2E_20260621180558_WOMSTART_TASK_TN"
+  },
+  "login": {
+    "status": 200,
+    "ticket": true
+  },
+  "navigation": {
+    "status": 200,
+    "domContentLoaded": {
+      "ok": true
+    }
+  },
+  "beforeBodyHasMarker": false,
+  "updateTaskState": {
+    "status": 200,
+    "body": "{\"code\":200,\"data\":{\"dealSuccessFlag\":true,\"exeState\":{\"id\":\"WOM_runState/runing\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781280175568,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":\"6579611764769008\",\"layNo\":1,\"parentId\":null,\"fullPathName\":\"执行中\",\"leaf\":true,\"leaf2\":false,\"type\":null,\"code\":\"runing\",\"entityCode\":\"WOM_runState\",\"value\":\"执行中\",\"attribute\":false,\"memo\":\"\",\"sort\":96,\"defaultFlag\":false,\"zhCnValue\":null,\"codeDesA\":\"\",\"codeDesB\":\"\",\"codeDesC\":\"\",\"seqId\":null,\"uniqueCode\":\"WOM_runState/runing\",\"root\":true,\"children2\":[],\"isParent\":false}},\"message\":\"操作成功\"}",
+    "json": {
+      "code": 200,
+      "data": {
+        "dealSuccessFlag": true,
+        "exeState": {
+          "id": "WOM_runState/runing",
+          "version": 0,
+          "cid": 1000,
+          "createStaffId": null,
+          "modifyStaffId": null,
+          "deleteStaffId": null,
+          "createStaff": null,
+          "deleteStaff": null,
+          "createTime": 1781280175568,
+          "modifyTime": null,
+          "deleteTime": null,
+          "valid": true,
+          "parent": null,
+          "children": [],
+          "layRec": "6579611764769008",
+          "layNo": 1,
+          "parentId": null,
+          "fullPathName": "执行中",
+          "leaf": true,
+          "leaf2": false,
+          "type": null,
+          "code": "runing",
+          "entityCode": "WOM_runState",
+          "value": "执行中",
+          "attribute": false,
+          "memo": "",
+          "sort": 96,
+          "defaultFlag": false,
+          "zhCnValue": null,
+          "codeDesA": "",
+          "codeDesB": "",
+          "codeDesC": "",
+          "seqId": null,
+          "uniqueCode": "WOM_runState/runing",
+          "root": true,
+          "children2": [],
+          "isParent": false
+        }
+      },
+      "message": "操作成功"
+    }
+  },
+  "afterBody": "查 询\n仅查待办\n清 空\n开始\n保持\n重启\n结束\n提前放料\n请检\n生产过程追溯\n生成二维码\n序号\n单据编号\n产品编码\n产品名称\n生产批号\n配方编码\n配方属性\n生产线名称\n执行状态\n检验状态\n检验结论\n计划数量\n完成数量\n批控\n允许提前放料\n是否提前放料\n报工模式\n计划开始\n计划结束\n实际开始\n实际结束\n备注\n1\nADP_E2E_20260621180558_WOMSTART_TASK_TN\nADP_E2E_20260621180558_WOMSTART_MAT\nADP_E2E_20260621180558_WOMSTART material\nADP_E2E_20260621180558_WOMSTART_BATCH\nADP_E2E_20260621180558_WOMSTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 02:06:05\n2026-06-21 03:06:05\n2026-06-22 02:06:12\n2\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621173855_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 01:39:01\n2026-06-21 02:39:01\n2026-06-22 01:39:10\n3\nADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621171204_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621171204_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 01:12:09\n2026-06-21 02:12:09\n2026-06-22 01:28:12\n4\nADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621161300_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621161300_WOMSTART_HOLD_RESTART_FORM\n普通配方\n待执行\n1\n0\n2026-06-21 00:13:07\n2026-06-21 01:13:07\n2026-07-22 00:13:07\n5\nADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621160953_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621160953_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-21 00:10:02\n2026-06-21 01:10:02\n2026-06-22 00:10:11\n6\nADP_E2E_20260621155239_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621155239_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621155239_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621155239_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621155239_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 23:52:47\n2026-06-21 00:52:47\n2026-06-21 23:52:56\n7\nADP_E2E_20260621154749_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621154749_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621154749_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621154749_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621154749_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 23:48:01\n2026-06-21 00:48:01\n2026-06-21 23:48:10\n8\nADP_E2E_20260621154013_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621154013_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621154013_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621154013_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621154013_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 23:40:22\n2026-06-21 00:40:22\n2026-06-21 23:40:31\n9\nADP_E2E_20260621151918_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621151918_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621151918_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621151918_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621151918_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 23:19:26\n2026-06-21 00:19:26\n2026-06-21 23:19:37\n10\nADP_E2E_20260621144811_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621144811_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621144811_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621144811_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621144811_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 22:48:19\n2026-06-20 23:48:19\n2026-06-21 22:48:29\n11\nADP_E2E_20260621131208_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621131208_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621131208_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621131208_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621131208_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 21:12:16\n2026-06-20 22:12:16\n2026-06-21 21:29:48\n12\nADP_E2E_20260621125514_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621125514_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621125514_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621125514_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621125514_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 20:55:21\n2026-06-20 21:55:21\n2026-06-21 20:55:31\n13\nADP_E2E_20260621125217_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621125217_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621125217_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621125217_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621125217_WOMSTART_HOLD_RESTART_FORM\n普通配方\n执行中\n1\n0\n2026-06-20 20:52:23\n2026-06-20 21:52:23\n2026-06-21 20:52:30\n14\nADP_E2E_20260621125053_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621125053_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621125053_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621125053_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621125053_WOMSTART_HOLD_RESTART_FORM\n普通配方\n已保持\n1\n0\n2026-06-20 20:51:01\n2026-06-20 21:51:01\n2026-06-21 20:51:07\n15\nADP_E2E_20260621124706_WOMSTART_HOLD_RESTART_TASK_TN\nADP_E2E_20260621124706_WOMSTART_HOLD_RESTART_MAT\nADP_E2E_20260621124706_WOMSTART_HOLD_RESTART material\nADP_E2E_20260621124706_WOMSTART_HOLD_RESTART_BATCH\nADP_E2E_20260621124706_WOMSTART_HOLD_RESTART_FO",
+  "frontendClean": {
+    "failedResponses": [],
+    "requestFailures": [],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "status": "PASS"
+  },
+  "persistence": {
+    "rows": [
+      [
+        "task",
+        "9000005651584430",
+        "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+        "WOM_runState/runing",
+        "2026-06-22 02:06:12.802",
+        "",
+        "0.000000",
+        "1",
+        "false",
+        "false",
+        ""
+      ],
+      [
+        "wait",
+        "9000005651584431",
+        "9000005651584430",
+        "WOM_runState/runing",
+        "2026-06-22 02:06:12.859",
+        "",
+        "757718928811264",
+        "WOM_BatchSyncStatus/done"
+      ],
+      [
+        "proc",
+        "757718928811264",
+        "9000005651584430",
+        "WOM_procReportType/produceTask",
+        "RM_exeSystem/mes",
+        "2026-06-22 02:06:12.854",
+        "false",
+        "true"
+      ],
+      [
+        "exelog",
+        "757718928917760",
+        "9000005651584430",
+        "WOM_runState/runing",
+        "2026-06-22 02:06:12.802",
+        "",
+        "0.000000",
+        "ADP_E2E_20260621180558_WOMSTART_BATCH",
+        "true"
+      ],
+      [
+        "outputDetailCount",
+        "0"
+      ],
+      [
+        "taskActItemsCount",
+        "0"
+      ],
+      [
+        "matOutptRecordCount",
+        "0"
+      ]
+    ],
+    "task": [
+      "task",
+      "9000005651584430",
+      "ADP_E2E_20260621180558_WOMSTART_TASK_TN",
+      "WOM_runState/runing",
+      "2026-06-22 02:06:12.802",
+      "",
+      "0.000000",
+      "1",
+      "false",
+      "false",
+      ""
+    ],
+    "wait": [
+      "wait",
+      "9000005651584431",
+      "9000005651584430",
+      "WOM_runState/runing",
+      "2026-06-22 02:06:12.859",
+      "",
+      "757718928811264",
+      "WOM_BatchSyncStatus/done"
+    ],
+    "proc": [
+      "proc",
+      "757718928811264",
+      "9000005651584430",
+      "WOM_procReportType/produceTask",
+      "RM_exeSystem/mes",
+      "2026-06-22 02:06:12.854",
+      "false",
+      "true"
+    ],
+    "exelog": [
+      "exelog",
+      "757718928917760",
+      "9000005651584430",
+      "WOM_runState/runing",
+      "2026-06-22 02:06:12.802",
+      "",
+      "0.000000",
+      "ADP_E2E_20260621180558_WOMSTART_BATCH",
+      "true"
+    ],
+    "outputDetailCount": [
+      "outputDetailCount",
+      "0"
+    ],
+    "taskActItemsCount": [
+      "taskActItemsCount",
+      "0"
+    ],
+    "matOutptRecordCount": [
+      "matOutptRecordCount",
+      "0"
+    ]
+  },
+  "expectedFinalState": "WOM_runState/runing",
+  "verificationSql": "SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, ''), coalesce(advance_charge::text, ''), coalesce(is_advanced::text, ''), coalesce(feed_condition, '')\nFROM public.wom_produce_tasks\nWHERE id = 9000005651584430;\n\nSELECT 'wait', id, task_id, exe_state, coalesce(actual_start_time::text, ''), coalesce(actual_end_time::text, ''), coalesce(proc_report_id::text, ''), coalesce(batch_sync_status, '')\nFROM public.wom_wait_put_records\nWHERE task_id = 9000005651584430;\n\nSELECT 'proc', id, task_id, coalesce(proc_report_type, ''), coalesce(exe_system, ''), coalesce(produce_time::text, ''), coalesce(is_finish::text, ''), coalesce(valid::text, '')\nFROM public.wom_proc_reports\nWHERE task_id = 9000005651584430\nORDER BY id;\n\nSELECT 'exelog', id, task_id, coalesce(task_run_state, ''), coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(produce_batch_num, ''), coalesce(valid::text, '')\nFROM public.wom_produce_task_exelog\nWHERE task_id = 9000005651584430\nORDER BY id;\n\nSELECT 'outputDetail', id, coalesce(head_id::text, ''), coalesce(material_batch_num, ''), coalesce(output_num::text, ''), coalesce(report_num::text, ''), coalesce(product::text, ''), coalesce(remain_operate, ''), coalesce(valid::text, '')\nFROM public.wom_output_details\nWHERE id = 9000005651584433;\n\nSELECT 'outputDetailCount', count(*)::text\nFROM public.wom_output_details\nWHERE head_id IN (\n  SELECT id\n  FROM public.wom_proc_reports\n  WHERE task_id = 9000005651584430\n    AND proc_report_type = 'WOM_procReportType/produceTask'\n    AND coalesce(valid, true) IS TRUE\n);\n\nSELECT 'taskActItemsCount', count(*)::text\nFROM public.wom_task_act_itemss\nWHERE produce_batch_num = 'ADP_E2E_20260621180558_WOMSTART_BATCH';\n\nSELECT 'matOutptRecordCount', count(*)::text\nFROM public.wom_mat_outpt_records\nWHERE out_mat_detail_id = 9000005651584433;",
+  "status": "PASS"
+}

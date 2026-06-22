@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-20T21:51:03.837Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "areaId": "systemconfig-built-in-catalogs",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "route": "/systemconfig/#/sysconfig",
+  "username": "admin",
+  "summary": {
+    "status": "PASS",
+    "expectedCatalogs": 7,
+    "observedCatalogs": 7,
+    "missingCatalogs": 0,
+    "detailReads": 7,
+    "detailFailures": 0,
+    "dbCatalogRows": 7,
+    "dbMissing": 0,
+    "sensitiveCatalogs": 4,
+    "mutationAllowedInSmoke": 0,
+    "configItems": 5,
+    "transientApiFailures": 0,
+    "browserErrors": 0
+  },
+  "checks": [
+    {
+      "name": "browser-route-systemconfig",
+      "status": "PASS",
+      "evidence": "navigationStatus=200"
+    },
+    {
+      "name": "catalog-list-api",
+      "status": "PASS",
+      "evidence": "status=200; attempts=200"
+    },
+    {
+      "name": "expected-built-in-catalogs-present",
+      "status": "PASS",
+      "evidence": "missing=none"
+    },
+    {
+      "name": "catalog-detail-read",
+      "status": "PASS",
+      "evidence": "failed=none"
+    },
+    {
+      "name": "catalog-postgres-rows",
+      "status": "PASS",
+      "evidence": "missing=none"
+    },
+    {
+      "name": "built-in-edit-policy-boundary",
+      "status": "PASS",
+      "evidence": "unclassified=none; mutationAllowed=none"
+    },
+    {
+      "name": "browser-error-free",
+      "status": "PASS",
+      "evidence": "visible=none; console=0; ignoredTransientConsole=0; page=0; request=0"
+    }
+  ],
+  "expectedCatalogs": [
+    {
+      "name": "用户目录",
+      "classification": "identity-directory",
+      "editPolicy": "read-only-in-smoke",
+      "risk": "Identity source changes can affect login and user synchronization.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "3",
+      "moduleCode": "auth.userAD",
+      "parentId": "1",
+      "parentName": "系统配置"
+    },
+    {
+      "name": "打印服务授权",
+      "classification": "license-or-entitlement",
+      "editPolicy": "read-only-in-smoke",
+      "risk": "License changes can invalidate client-side spreadsheet/report components.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "4",
+      "moduleCode": "",
+      "parentId": "1",
+      "parentName": "系统配置"
+    },
+    {
+      "name": "AK/SK凭证管理",
+      "classification": "secret",
+      "editPolicy": "read-only-in-smoke",
+      "risk": "Credential values must not be written to committed reports or mutated by generic smoke.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "5",
+      "moduleCode": "systemConfig.certificateMgr",
+      "parentId": "1",
+      "parentName": "系统配置"
+    },
+    {
+      "name": "密码配置",
+      "classification": "security-policy",
+      "editPolicy": "read-only-in-smoke",
+      "risk": "Password policy changes can lock out test and production users.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "7",
+      "moduleCode": "auth.passwordConfig",
+      "parentId": "1",
+      "parentName": "系统配置"
+    },
+    {
+      "name": "质量检验配置",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "risk": "QCS config changes can affect inspection/report generation behavior already covered by production markers.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "117000",
+      "moduleCode": "",
+      "parentId": "2",
+      "parentName": "app配置"
+    },
+    {
+      "name": "RM.ocd.RM",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "risk": "RM config changes can affect formula/batch integration behavior.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "129000",
+      "moduleCode": "",
+      "parentId": "2",
+      "parentName": "app配置"
+    },
+    {
+      "name": "BaseSet.ocd.BaseSet",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "risk": "BaseSet config changes can affect recovered batch/material defaults.",
+      "mutationAllowedInSmoke": false,
+      "observed": true,
+      "catalogId": "129030",
+      "moduleCode": "",
+      "parentId": "2",
+      "parentName": "app配置"
+    }
+  ],
+  "details": [
+    {
+      "catalogId": "3",
+      "name": "用户目录",
+      "classification": "identity-directory",
+      "editPolicy": "read-only-in-smoke",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 0,
+      "configSummaries": []
+    },
+    {
+      "catalogId": "4",
+      "name": "打印服务授权",
+      "classification": "license-or-entitlement",
+      "editPolicy": "read-only-in-smoke",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 1,
+      "configSummaries": [
+        {
+          "configId": "1",
+          "code": "spreadjs.licence",
+          "name": "spreadjs.licence",
+          "type": "6",
+          "required": true,
+          "valueSummary": {
+            "present": false,
+            "itemCount": 0,
+            "sha256Prefix": "4f53cda18c2b"
+          }
+        }
+      ]
+    },
+    {
+      "catalogId": "5",
+      "name": "AK/SK凭证管理",
+      "classification": "secret",
+      "editPolicy": "read-only-in-smoke",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 0,
+      "configSummaries": []
+    },
+    {
+      "catalogId": "7",
+      "name": "密码配置",
+      "classification": "security-policy",
+      "editPolicy": "read-only-in-smoke",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 0,
+      "configSummaries": []
+    },
+    {
+      "catalogId": "117000",
+      "name": "质量检验配置",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 3,
+      "configSummaries": [
+        {
+          "configId": "117001",
+          "code": "reportShowIndexRange",
+          "name": "过滤指标项目",
+          "type": "1",
+          "required": true,
+          "valueSummary": {
+            "present": true,
+            "itemCount": 1,
+            "sha256Prefix": "24223778aa81"
+          }
+        },
+        {
+          "configId": "117002",
+          "code": "autoReportStaff",
+          "name": "报告检验员获取",
+          "type": "1",
+          "required": true,
+          "valueSummary": {
+            "present": true,
+            "itemCount": 1,
+            "sha256Prefix": "45be13c2221d"
+          }
+        },
+        {
+          "configId": "117003",
+          "code": "autoReport",
+          "name": "自动生成QCS检验报告",
+          "type": "1",
+          "required": false,
+          "valueSummary": {
+            "present": true,
+            "itemCount": 1,
+            "sha256Prefix": "9499df82d91d"
+          }
+        }
+      ]
+    },
+    {
+      "catalogId": "129000",
+      "name": "RM.ocd.RM",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 0,
+      "configSummaries": []
+    },
+    {
+      "catalogId": "129030",
+      "name": "BaseSet.ocd.BaseSet",
+      "classification": "business-runtime-config",
+      "editPolicy": "controlled-marker-required",
+      "mutationAllowedInSmoke": false,
+      "status": 200,
+      "attempts": [
+        {
+          "status": 200,
+          "ok": true
+        }
+      ],
+      "ok": true,
+      "configCount": 1,
+      "configSummaries": [
+        {
+          "configId": "129004",
+          "code": "isEnable",
+          "name": "BaseSet.ocd.isEnable",
+          "type": "2",
+          "required": false,
+          "valueSummary": {
+            "present": true,
+            "itemCount": 1,
+            "sha256Prefix": "8894cdad26ef"
+          }
+        }
+      ]
+    }
+  ],
+  "databaseEvidence": {
+    "catalogSql": "select id::text, coalesce(parent_id::text,''), code, name, coalesce(app_code,''), coalesce(catalog_type::text,''), coalesce(has_hide::text,''), coalesce(modify_time::text,'') from public.systemconfig_config_catalog where id::text in ('3', '4', '5', '7', '117000', '129000', '129030') order by id::text;",
+    "configSql": "select catalog_id::text, count(*)::text from public.systemconfig_config_info where catalog_id::text in ('3', '4', '5', '7', '117000', '129000', '129030') group by catalog_id::text order by catalog_id::text;",
+    "catalogRows": [
+      {
+        "id": "117000",
+        "parentId": "2",
+        "code": "QCS",
+        "name": "QCS.ocd.QCS",
+        "appCode": "QCS",
+        "catalogType": "2",
+        "hasHide": "false",
+        "modifyTime": "2026-06-16 16:41:52.110273"
+      },
+      {
+        "id": "129000",
+        "parentId": "2",
+        "code": "RM",
+        "name": "RM.ocd.RM",
+        "appCode": "RM",
+        "catalogType": "2",
+        "hasHide": "false",
+        "modifyTime": ""
+      },
+      {
+        "id": "129030",
+        "parentId": "2",
+        "code": "BaseSet",
+        "name": "BaseSet.ocd.BaseSet",
+        "appCode": "BaseSet",
+        "catalogType": "2",
+        "hasHide": "false",
+        "modifyTime": ""
+      },
+      {
+        "id": "3",
+        "parentId": "1",
+        "code": "userAD",
+        "name": "systemConfig.userAD",
+        "appCode": "system",
+        "catalogType": "1",
+        "hasHide": "false",
+        "modifyTime": ""
+      },
+      {
+        "id": "4",
+        "parentId": "1",
+        "code": "printer",
+        "name": "systemConfig.printer",
+        "appCode": "printer",
+        "catalogType": "1",
+        "hasHide": "false",
+        "modifyTime": ""
+      },
+      {
+        "id": "5",
+        "parentId": "1",
+        "code": "AKSK",
+        "name": "systemConfig.AKSK",
+        "appCode": "AKSK",
+        "catalogType": "1",
+        "hasHide": "false",
+        "modifyTime": ""
+      },
+      {
+        "id": "7",
+        "parentId": "1",
+        "code": "passwordConfig",
+        "name": "systemConfig.passwordConfig",
+        "appCode": "passwordConfig",
+        "catalogType": "1",
+        "hasHide": "false",
+        "modifyTime": ""
+      }
+    ],
+    "configCounts": [
+      {
+        "catalogId": "117000",
+        "configCount": "3"
+      },
+      {
+        "catalogId": "129030",
+        "configCount": "1"
+      },
+      {
+        "catalogId": "4",
+        "configCount": "1"
+      }
+    ]
+  },
+  "browser": {
+    "navigationStatus": 200,
+    "navigationError": null,
+    "visibleError": null,
+    "consoleMessages": [],
+    "pageErrors": [],
+    "requestFailures": []
+  },
+  "capturedResponses": [
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "status": 200,
+      "body": "{\"data\":{\"catalogs\":[{\"catalogId\":\"1\",\"name\":\"系统配置\",\"catalog\":[{\"catalogId\":\"3\",\"name\":\"用户目录\",\"moduleCode\":\"auth.userAD\"},{\"catalogId\":\"4\",\"name\":\"打印服务授权\"},{\"catalogId\":\"5\",\"name\":\"AK/SK凭证管理\",\"moduleCode\":\"systemConfig.certificateMgr\"},{\"catalogId\":\"7\",\"name\":\"密码配置\",\"moduleCode\":\"auth.passwordConfig\"}]},{\"catalogId\":\"2\",\"name\":\"app配置\",\"catalog\":[{\"catalogId\":\"6576532729578952\",\"name\":\"设备综合效率管理\"},{\"catalogId\":\"6576272022389056\",\"name\":\"notificationWechat.app_show_name\"},{\"catalogId\":\"6576272073572672\",\"name\":\"notificationMobile.mobile_app_show_name\"},{\"catalogId\":\"6576271982608704\",\"name\":\"notificationSMS.jin_cang_app_show_name\"},{\"catalogId\":\"6576532729577952\",\"name\":\"notificationDingtalk.app_show_name\"},{\"catalogId\":\"117000\",\"name\":\"质量检验配置\"},{\"catalogId\":\"129000\",\"name\":\"RM.ocd.RM\"},{\"catalogId\":\"129030\",\"name\":\"BaseSet.ocd.BaseSet\"}]}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+      "status": 200,
+      "body": "{\"data\":{\"catalogs\":[{\"catalogId\":\"1\",\"name\":\"系统配置\",\"catalog\":[{\"catalogId\":\"3\",\"name\":\"用户目录\",\"moduleCode\":\"auth.userAD\"},{\"catalogId\":\"4\",\"name\":\"打印服务授权\"},{\"catalogId\":\"5\",\"name\":\"AK/SK凭证管理\",\"moduleCode\":\"systemConfig.certificateMgr\"},{\"catalogId\":\"7\",\"name\":\"密码配置\",\"moduleCode\":\"auth.passwordConfig\"}]},{\"catalogId\":\"2\",\"name\":\"app配置\",\"catalog\":[{\"catalogId\":\"6576532729578952\",\"name\":\"设备综合效率管理\"},{\"catalogId\":\"6576272022389056\",\"name\":\"notificationWechat.app_show_name\"},{\"catalogId\":\"6576272073572672\",\"name\":\"notificationMobile.mobile_app_show_name\"},{\"catalogId\":\"6576271982608704\",\"name\":\"notificationSMS.jin_cang_app_show_name\"},{\"catalogId\":\"6576532729577952\",\"name\":\"notificationDingtalk.app_show_name\"},{\"catalogId\":\"117000\",\"name\":\"质量检验配置\"},{\"catalogId\":\"129000\",\"name\":\"RM.ocd.RM\"},{\"catalogId\":\"129030\",\"name\":\"BaseSet.ocd.BaseSet\"}]}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/3",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/4",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[{\"configId\":\"1\",\"code\":\"spreadjs.licence\",\"name\":\"spreadjs.licence\",\"type\":\"6\",\"required\":true,\"valueSummary\":{\"present\":false,\"itemCount\":0,\"sha256Prefix\":\"4f53cda18c2b\"}}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/5",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/7",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/117000",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[{\"configId\":\"117001\",\"code\":\"reportShowIndexRange\",\"name\":\"过滤指标项目\",\"type\":\"1\",\"required\":true,\"valueSummary\":{\"present\":true,\"itemCount\":1,\"sha256Prefix\":\"24223778aa81\"}},{\"configId\":\"117002\",\"code\":\"autoReportStaff\",\"name\":\"报告检验员获取\",\"type\":\"1\",\"required\":true,\"valueSummary\":{\"present\":true,\"itemCount\":1,\"sha256Prefix\":\"45be13c2221d\"}},{\"configId\":\"117003\",\"code\":\"autoReport\",\"name\":\"自动生成QCS检验报告\",\"type\":\"1\",\"required\":false,\"valueSummary\":{\"present\":true,\"itemCount\":1,\"sha256Prefix\":\"9499df82d91d\"}}]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/129000",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[]}}"
+    },
+    {
+      "method": "GET",
+      "url": "http://100.99.133.43:18080/inter-api/systemconfig/v1/config/catalog/129030",
+      "status": 200,
+      "body": "{\"data\":{\"config\":[{\"configId\":\"129004\",\"code\":\"isEnable\",\"name\":\"BaseSet.ocd.isEnable\",\"type\":\"2\",\"required\":false,\"valueSummary\":{\"present\":true,\"itemCount\":1,\"sha256Prefix\":\"8894cdad26ef\"}}]}}"
+    }
+  ],
+  "evidence": {
+    "method": "Authenticated real browser route plus in-browser systemconfig catalog/detail API reads and read-only PostgreSQL metadata queries.",
+    "editPolicy": "This smoke classifies built-in catalog risk and intentionally performs no edit/save action. Editing requires a separate marker acceptance per catalog.",
+    "valueRedaction": "Config values in details and capturedResponses are represented by count/hash summaries only.",
+    "secretHandling": "Login token and password are used only in memory and are not written to this report."
+  }
+}

@@ -491,8 +491,7 @@ public class DtoUtils {
         //		String internationalEntitynameShowName = request.getParameter("international_entityname_showName");
         Boolean isBase = Boolean.parseBoolean(request.getParameter("entity.isBase"));
 
-        SystemCode systemCode = new SystemCode();
-        systemCode.setId(request.getParameter("entity.entityType.id"));
+        String entityTypeId = request.getParameter("entity.entityType.id");
 
         Boolean groupEnabled = Boolean.parseBoolean(request.getParameter("entity.groupEnabled"));
         Boolean workflowEnabled = Boolean.parseBoolean(request.getParameter("entity.workflowEnabled"));
@@ -517,7 +516,11 @@ public class DtoUtils {
         entity.setPrefix(prefix);
         entity.setName(name);
         entity.setIsBase(isBase);
-        entity.setEntityType(systemCode);
+        if (!StringUtils.isEmpty(entityTypeId)) {
+            SystemCode systemCode = new SystemCode();
+            systemCode.setId(entityTypeId);
+            entity.setEntityType(systemCode);
+        }
         entity.setGroupEnabled(groupEnabled);
         entity.setWorkflowEnabled(!isBase);
         entity.setDescription(description);

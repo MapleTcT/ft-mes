@@ -575,13 +575,16 @@ ON CONFLICT (id) DO NOTHING;
 DO $$
 DECLARE
   month_value text;
+  month_start date;
   protocol_value text;
   task_table text;
   msg_table text;
   task_protocol_table text;
 BEGIN
   FOR month_offset IN -1..1 LOOP
-    month_value := to_char(date_trunc('month', CURRENT_DATE) + (month_offset || ' months')::interval, 'YYYYMM');
+    month_start := (date_trunc('month', CURRENT_DATE) + (month_offset || ' months')::interval)::date;
+    month_value := EXTRACT(YEAR FROM month_start)::integer::text ||
+                   lpad(EXTRACT(MONTH FROM month_start)::integer::text, 2, '0');
     task_table := 'notice_task_' || month_value;
     task_protocol_table := 'notice_task_protocol_' || month_value;
 

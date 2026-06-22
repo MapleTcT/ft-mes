@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T07:40:40+00:00",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
+  "sourceLedgers": {
+    "migrationReadiness": "metadata/production-migration-readiness.json",
+    "productionBlockers": "metadata/production-module-blockers.json",
+    "productionBacklog": "metadata/production-module-backlog.json",
+    "businessDependencyReadiness": "metadata/business-dependency-readiness-smoke.json",
+    "businessPackageScan": "metadata/business-dependency-package-scan.json",
+    "productionExportReadiness": "metadata/production-export-readiness-smoke.json",
+    "businessSmokeSignoffTemplate": "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+    "runtimeSmokeReports": [
+      "metadata/test-environment-smoke.json",
+      "metadata/postgres-runtime-smoke.json",
+      "metadata/nacos-config-drift-smoke.json",
+      "metadata/keycloak-jwt-runtime-smoke.json",
+      "metadata/minio-runtime-smoke.json"
+    ],
+    "platformValidationSmoke": "metadata/platform-validation-smoke.json"
+  },
+  "summary": {
+    "totalGates": 9,
+    "ready": 0,
+    "planned": 8,
+    "blocked": 1,
+    "notStarted": 0,
+    "productionBlockers": 6,
+    "productionBacklogItems": 9
+  },
+  "gates": [
+    {
+      "id": "postgres-data-migration",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/database/production-migration/README.md",
+        "deploy/database/production-migration/scripts/compare-checksums.py",
+        "deploy/database/production-migration/migration-evidence.example.json",
+        "deploy/database/production-migration/scripts/validate-migration-evidence.py",
+        "metadata/postgres-runtime-smoke.json"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-source-inventory",
+        "ADP_PROD_MIGRATION_ENV=/secure/path/adp-prod-migration.env make production-target-preflight",
+        "make production-rowcount-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-checksum-compare PROD_MIGRATION_REPORT_DIR=/secure/path/adp-production-migration-preflight",
+        "make production-db-migration-ready-check DB_MIGRATION_EVIDENCE=/secure/path/adp-db-migration-evidence.json"
+      ],
+      "readyCriteria": [
+        "production source inventory is captured",
+        "target PostgreSQL preflight is captured",
+        "source and target row counts/checksums are reconciled",
+        "database migration evidence manifest passes strict-ready validation with non-template evidence",
+        "migration rehearsal evidence exists"
+      ],
+      "blockingReason": "Production source inventory, production checksum outputs, strict database migration evidence, migration rehearsal and rollback evidence are missing."
+    },
+    {
+      "id": "rollback-plan",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/rollback/production-migration/rollback-evidence.example.json"
+      ],
+      "readyEvidenceCommands": [
+        "make production-rollback-ready-check ROLLBACK_EVIDENCE=/secure/path/adp-rollback-evidence.json"
+      ],
+      "readyCriteria": [
+        "PostgreSQL, MinIO, Keycloak, Nacos, runtime patch and network rollback are rehearsed"
+      ],
+      "blockingReason": "Only the rollback evidence template exists; real restore and cutback rehearsal evidence is missing."
+    },
+    {
+      "id": "license-strategy",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/license/production-migration/license-decision.example.json"
+      ],
+      "readyEvidenceCommands": [
+        "make production-license-ready-check LICENSE_DECISION=/secure/path/adp-license-decision.json"
+      ],
+      "readyCriteria": [
+        "production license decision, expiry behavior, emergency bypass approval and audit handling are signed"
+      ],
+      "blockingReason": "Production license decision and legal/operational signoff are missing."
+    },
+    {
+      "id": "minio-file-migration",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/minio/production-migration/README.md",
+        "deploy/minio/production-migration/minio-migration-evidence.example.json",
+        "deploy/minio/production-migration/scripts/validate-minio-migration-evidence.py",
+        "metadata/minio-runtime-smoke.json"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-source-inventory",
+        "ADP_MINIO_MIGRATION_ENV=/secure/path/adp-minio-migration.env make production-minio-target-inventory",
+        "make production-minio-compare MINIO_MIGRATION_REPORT_DIR=/secure/path/adp-minio-migration-preflight",
+        "make production-minio-migration-ready-check MINIO_MIGRATION_EVIDENCE=/secure/path/adp-minio-migration-evidence.json"
+      ],
+      "readyCriteria": [
+        "source and target bucket inventories are captured",
+        "object counts, size and etag/hash comparison are reconciled",
+        "MinIO migration evidence manifest passes strict-ready validation with non-template evidence",
+        "sample download and rollback/double-write strategy are evidenced"
+      ],
+      "blockingReason": "Production bucket inventory, object compare, strict MinIO migration evidence and migration dry-run are missing."
+    },
+    {
+      "id": "keycloak-production-db",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/keycloak/production-migration/README.md",
+        "deploy/keycloak/production-migration/keycloak-migration-evidence.example.json",
+        "deploy/keycloak/production-migration/scripts/validate-keycloak-migration-evidence.py",
+        "metadata/keycloak-jwt-runtime-smoke.json"
+      ],
+      "readyEvidenceCommands": [
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-source-export",
+        "ADP_KEYCLOAK_MIGRATION_ENV=/secure/path/adp-keycloak-migration.env make production-keycloak-target-export",
+        "make production-keycloak-compare KEYCLOAK_MIGRATION_REPORT_DIR=/secure/path/adp-keycloak-migration-preflight",
+        "make production-keycloak-migration-ready-check KEYCLOAK_MIGRATION_EVIDENCE=/secure/path/adp-keycloak-migration-evidence.json"
+      ],
+      "readyCriteria": [
+        "source and target realm inventories are reconciled",
+        "Keycloak database backup/restore is rehearsed",
+        "Keycloak migration evidence manifest passes strict-ready validation with non-template evidence",
+        "client secret and JWT public key rotation are verified"
+      ],
+      "blockingReason": "Production realm export/import, database restore rehearsal, strict Keycloak migration evidence and secret rotation evidence are missing."
+    },
+    {
+      "id": "nacos-runtime-patch",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
+        "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py",
+        "metadata/nacos-config-drift-smoke.json",
+        "metadata/runtime-patch-manifest.json"
+      ],
+      "readyEvidenceCommands": [
+        "make runtime-patch-manifest-check",
+        "make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host",
+        "make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json"
+      ],
+      "readyCriteria": [
+        "production Nacos export/diff is reviewed",
+        "signed runtime patch package and rollback plan exist",
+        "Nacos/runtime patch evidence manifest passes strict-ready validation with non-template evidence",
+        "post-publish Nacos and service registry smoke passes"
+      ],
+      "blockingReason": "Production Nacos export/diff, strict Nacos/runtime patch evidence, signed patch package and rollback rehearsal are missing."
+    },
+    {
+      "id": "ports-domain-tls",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/network/production-migration/network-tls-plan.example.json",
+        "metadata/test-environment-smoke.json"
+      ],
+      "readyEvidenceCommands": [
+        "make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json"
+      ],
+      "readyCriteria": [
+        "production DNS, certificate, reverse proxy, exposed ports, firewall and renewal evidence are signed"
+      ],
+      "blockingReason": "Production domain, TLS certificate, proxy and firewall evidence are missing."
+    },
+    {
+      "id": "security-hardening",
+      "status": "PLANNED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "deploy/security/production-migration/security-hardening-plan.example.json"
+      ],
+      "readyEvidenceCommands": [
+        "make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json"
+      ],
+      "readyCriteria": [
+        "default credentials, test accounts, secrets, DB least privilege, image scan, audit and alerting controls are evidenced"
+      ],
+      "blockingReason": "Production hardening evidence is missing."
+    },
+    {
+      "id": "business-smoke-signoff",
+      "status": "BLOCKED",
+      "requiredBeforeCutover": true,
+      "currentEvidence": [
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-backlog.json",
+        "metadata/business-dependency-readiness-smoke.json",
+        "metadata/business-dependency-package-scan.json",
+        "metadata/production-export-readiness-smoke.json",
+        "deploy/business-smoke/production-migration/business-smoke-signoff.example.json"
+      ],
+      "readyEvidenceCommands": [
+        "make business-package-scan",
+        "make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url",
+        "make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url",
+        "make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json"
+      ],
+      "readyCriteria": [
+        "all production module blockers are resolved or explicitly risk accepted by signed owners",
+        "all production module backlog items are resolved or explicitly risk accepted by signed owners",
+        "platform, organization, RBAC, menu/todo, base configuration and production module smoke evidence is signed",
+        "write actions have PostgreSQL before/after marker evidence"
+      ],
+      "blockingReason": "Production module blocker ledger still contains 6 BLOCKED cases and production backlog still contains 9 unresolved items."
+    }
+  ],
+  "releaseRule": "Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_CUTOVER. A READY_FOR_PRODUCTION_CUTOVER status requires every gate to be READY, productionBlockers=0, productionBacklogItems=0, strict business smoke signoff, and real evidence paths instead of example templates.",
+  "sourceEvidence": {
+    "migrationReadiness": {
+      "path": "metadata/production-migration-readiness.json",
+      "generatedAt": "2026-06-22T07:40:40+00:00",
+      "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
+      "metrics": {
+        "totalTracks": 9,
+        "ready": 0,
+        "planned": 8,
+        "blocked": 1,
+        "notStarted": 0
+      }
+    },
+    "testEnvironmentSmoke": {
+      "path": "metadata/test-environment-smoke.json",
+      "generatedAt": "2026-06-21T01:28:43.256Z",
+      "status": "PASS",
+      "metrics": {
+        "totalChecks": 9,
+        "pass": 9,
+        "fail": 0,
+        "expectedContainerCount": 6,
+        "runningExpectedContainers": 6,
+        "sshHost": "100.99.133.43",
+        "baseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "platformValidationSmoke": {
+      "path": "metadata/platform-validation-smoke.json",
+      "generatedAt": "2026-06-21T12:13:01.954Z",
+      "status": "PASS",
+      "metrics": {
+        "ok": true,
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "baseUrl": "http://100.99.133.43:18080",
+        "browserBaseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "postgresRuntimeSmoke": {
+      "path": "metadata/postgres-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:10.911Z",
+      "status": "PASS",
+      "metrics": {
+        "status": "PASS",
+        "totalChecks": 8,
+        "pass": 8,
+        "fail": 0,
+        "publicTableCount": 1474,
+        "publicViewCount": 150,
+        "databaseSizeBytes": 590593383,
+        "expectedTables": 32,
+        "presentExpectedTables": 32,
+        "missingExpectedTables": 0,
+        "expectedColumns": 15,
+        "presentExpectedColumns": 15,
+        "expectedIndexes": 8,
+        "presentExpectedIndexes": 8
+      }
+    },
+    "nacosConfigSmoke": {
+      "path": "metadata/nacos-config-drift-smoke.json",
+      "generatedAt": "2026-06-21T00:09:15.729Z",
+      "status": "PASS",
+      "metrics": {
+        "dataIds": 44,
+        "remoteFetched": 44,
+        "missingRemote": 0,
+        "missingLocal": 0,
+        "exactMatches": 17,
+        "drifted": 27,
+        "oracleResidueFiles": 0,
+        "criticalChecks": 20,
+        "criticalPass": 20,
+        "criticalFail": 0,
+        "expectedServices": 18,
+        "healthyServices": 18,
+        "failedServices": 0,
+        "nacosServiceCount": 91,
+        "status": "PASS"
+      }
+    },
+    "keycloakJwtSmoke": {
+      "path": "metadata/keycloak-jwt-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:24.536Z",
+      "status": "PASS",
+      "metrics": {
+        "checks": 19,
+        "pass": 19,
+        "fail": 0,
+        "expectedClients": 2,
+        "clientScopes": 10,
+        "suposMappers": 17,
+        "keycloakPublicKeySha256Prefix": "9e9cea84527f841b",
+        "nacosJwtSha256Prefix": "9e9cea84527f841b",
+        "nacosHealthyKeycloakHosts": 2,
+        "gatewayMenuTargets": 374,
+        "status": "PASS"
+      }
+    },
+    "minioRuntimeSmoke": {
+      "path": "metadata/minio-runtime-smoke.json",
+      "generatedAt": "2026-06-21T00:09:14.970Z",
+      "status": "PASS",
+      "metrics": {
+        "status": "PASS",
+        "totalChecks": 8,
+        "pass": 8,
+        "fail": 0,
+        "bucketCount": 2,
+        "inspectedBucketCount": 2,
+        "bucketsWithObjects": 2,
+        "totalObjects": 31,
+        "totalSizeBytes": 104285
+      }
+    },
+    "productionBlockers": {
+      "path": "metadata/production-module-blockers.json",
+      "generatedAt": "2026-06-21T15:13:16+00:00",
+      "status": "BLOCKED",
+      "metrics": {
+        "blockers": 6,
+        "blockedCases": 6
+      }
+    },
+    "productionBacklog": {
+      "path": "metadata/production-module-backlog.json",
+      "generatedAt": "2026-06-22T01:27:49.172Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "totalItems": 9,
+        "blocked": 9,
+        "failBacklog": 0
+      }
+    },
+    "businessDependencyReadiness": {
+      "path": "metadata/business-dependency-readiness-smoke.json",
+      "generatedAt": "2026-06-22T01:36:29.672Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "dependencies": 2,
+        "ready": 0,
+        "blocked": 2,
+        "sshHost": "100.99.133.43",
+        "baseUrl": "http://100.99.133.43:18080"
+      }
+    },
+    "businessPackageScan": {
+      "path": "metadata/business-dependency-package-scan.json",
+      "generatedAt": "2026-06-20T16:05:25Z",
+      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "metrics": {
+        "filesVisited": 58889,
+        "archivesScanned": 1142,
+        "nestedArchivesScanned": 2139,
+        "archiveEntriesScanned": 429984,
+        "blockedDependencies": 2,
+        "candidateDependencies": 0
+      }
+    },
+    "productionExportReadiness": {
+      "path": "metadata/production-export-readiness-smoke.json",
+      "generatedAt": "2026-06-22T01:50:35.404Z",
+      "status": "BLOCKED",
+      "metrics": {
+        "targets": 6,
+        "pagePass": 6,
+        "visibleExportActions": 0,
+        "runtimeExportActions": 0,
+        "verifiedDataExports": 0,
+        "ready": 0,
+        "actionRequired": 1,
+        "blocked": 5
+      }
+    }
+  }
+}

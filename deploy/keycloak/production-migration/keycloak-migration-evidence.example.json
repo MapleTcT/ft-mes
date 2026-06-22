@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "CHANGE_ME",
+  "environment": "production",
+  "status": "PLANNED",
+  "owner": "identity-platform-owner",
+  "repoCommit": "CHANGE_ME",
+  "migrationWindow": "CHANGE_ME",
+  "targetDatabase": "PostgreSQL",
+  "sourceRealmRef": "CHANGE_ME",
+  "targetRealmRef": "CHANGE_ME",
+  "targetNacosGroup": "prod",
+  "phases": [
+    {
+      "id": "source-realm-inventory",
+      "title": "Source Realm Inventory",
+      "status": "PLANNED",
+      "owner": "identity-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "realm": "TBD",
+        "realmEnabled": false,
+        "clients": 0,
+        "roles": 0,
+        "clientScopes": 0,
+        "components": 0,
+        "users": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Production source realm inventory has not been exported."
+      ],
+      "nextActions": [
+        "Run production-keycloak-source-export against the signed source Keycloak endpoint."
+      ]
+    },
+    {
+      "id": "target-realm-inventory",
+      "title": "Target Realm Inventory",
+      "status": "PLANNED",
+      "owner": "identity-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "realm": "TBD",
+        "realmEnabled": false,
+        "clients": 0,
+        "roles": 0,
+        "clientScopes": 0,
+        "components": 0,
+        "users": 0,
+        "errors": 0
+      },
+      "blockingIssues": [
+        "Target realm inventory has not been exported after import or restore."
+      ],
+      "nextActions": [
+        "Run production-keycloak-target-export after the target realm is prepared."
+      ]
+    },
+    {
+      "id": "realm-inventory-comparison",
+      "title": "Realm Inventory Comparison",
+      "status": "PLANNED",
+      "owner": "identity-platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "totalChecks": 0,
+        "match": 0,
+        "differences": 0,
+        "unresolvedDifferences": 0,
+        "jwtKeyRotationApproved": false
+      },
+      "blockingIssues": [
+        "Source and target realm inventory comparison has not been reviewed."
+      ],
+      "nextActions": [
+        "Run production-keycloak-compare and review any JWT key or client differences."
+      ]
+    },
+    {
+      "id": "database-backup-restore-rehearsal",
+      "title": "Database Backup Restore Rehearsal",
+      "status": "PLANNED",
+      "owner": "dba",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "backupEvidence": "TBD",
+        "restoreChecks": 0,
+        "passed": 0,
+        "failed": 0
+      },
+      "blockingIssues": [
+        "Keycloak database backup and restore rehearsal has not been completed."
+      ],
+      "nextActions": [
+        "Restore a production-style Keycloak database backup into the rehearsal target and record restore checks."
+      ]
+    },
+    {
+      "id": "secret-rotation",
+      "title": "Admin And Client Secret Rotation",
+      "status": "PLANNED",
+      "owner": "security-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "adminAccountsRotated": 0,
+        "clientsRotated": 0,
+        "leakedSecrets": 0,
+        "secretManagerRef": "TBD"
+      },
+      "blockingIssues": [
+        "Admin credentials and client secrets have not been rotated in the target environment."
+      ],
+      "nextActions": [
+        "Rotate target admin credentials and confidential client secrets, then store evidence outside git."
+      ]
+    },
+    {
+      "id": "jwt-nacos-sync",
+      "title": "JWT Public Key Sync To Nacos",
+      "status": "PLANNED",
+      "owner": "runtime-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "keycloakPublicKeySha256Prefix": "TBD",
+        "nacosJwtSha256Prefix": "TBD",
+        "nacosDataIdsUpdated": 0,
+        "gatewayRestarted": false
+      },
+      "blockingIssues": [
+        "Target Keycloak public key has not been synced to Nacos and gateway consumers."
+      ],
+      "nextActions": [
+        "Run the JWT public key sync against the target realm, then restart and smoke gateway/auth consumers."
+      ]
+    },
+    {
+      "id": "post-migration-auth-smoke",
+      "title": "Post Migration Auth Smoke",
+      "status": "PLANNED",
+      "owner": "platform-owner",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "checks": 0,
+        "passed": 0,
+        "login": false,
+        "currentUser": false,
+        "menu": false,
+        "rbacAuthority": false,
+        "organizationSmoke": false
+      },
+      "blockingIssues": [
+        "Login/current-user/menu/RBAC/organization smoke has not passed against the target realm."
+      ],
+      "nextActions": [
+        "Run login, current-user, menu, RBAC authority and organization smoke against the target realm."
+      ]
+    },
+    {
+      "id": "rollback-link",
+      "title": "Rollback Link",
+      "status": "PLANNED",
+      "owner": "release-manager",
+      "evidenceRefs": [
+        "TBD"
+      ],
+      "summary": {
+        "status": "TBD",
+        "rollbackEvidence": "TBD",
+        "databaseRestoreEvidence": "TBD"
+      },
+      "blockingIssues": [
+        "Keycloak rollback or database restore evidence has not been linked."
+      ],
+      "nextActions": [
+        "Link the signed rollback evidence for realm restore, database restore and JWT/Nacos rollback."
+      ]
+    }
+  ],
+  "openIssues": [
+    {
+      "id": "KEYCLOAK-MIGRATION-001",
+      "severity": "BLOCKER",
+      "description": "This example is only a template and cannot be used as production READY evidence.",
+      "owner": "identity-platform-owner",
+      "nextAction": "Create a real evidence file outside git and run the strict-ready validator."
+    }
+  ]
+}

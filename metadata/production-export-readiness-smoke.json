@@ -1,0 +1,1862 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T01:50:35.404Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "production",
+  "caseId": "PROD-023",
+  "status": "BLOCKED",
+  "apiBaseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://222.88.185.146:18080",
+  "target": {
+    "baseUrl": "http://100.99.133.43:18080",
+    "browserBaseUrl": "http://222.88.185.146:18080",
+    "username": "admin",
+    "pageTimeoutMs": 240000,
+    "apiTimeoutMs": 30000
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "targets": 6,
+    "pagePass": 6,
+    "visibleExportActions": 0,
+    "runtimeExportActions": 0,
+    "nonEmptyDownloads": 1,
+    "backendQueryExportWorkbooks": 1,
+    "backendQueryExportErrors": 4,
+    "verifiedDataExports": 0,
+    "ready": 0,
+    "actionRequired": 1,
+    "blocked": 5
+  },
+  "items": [
+    {
+      "id": "wom-make-task",
+      "label": "WOM make task list",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "viewCode": "WOM_1.0.0_produceTask_makeTaskList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/WOM/produceTask/produceTask/downloadXls"
+        ],
+        "buttonTexts": [
+          "makeTaskList_startTask_add_WOM_1.0.0_produceTask_makeTaskList 开始 开始 开始 WOM_1.0.0_produceTask_makeTaskList_BUTTON_startTask",
+          "makeTaskList_pauseTask_add_WOM_1.0.0_produceTask_makeTaskList 保持 保持 保持 WOM_1.0.0_produceTask_makeTaskList_BUTTON_pauseTask",
+          "makeTaskList_recoveryTask_add_WOM_1.0.0_produceTask_makeTaskList 重启 重启 重启 WOM_1.0.0_produceTask_makeTaskList_BUTTON_recoveryTask",
+          "makeTaskList_stopTask_add_WOM_1.0.0_produceTask_makeTaskList 结束 结束 结束 WOM_1.0.0_produceTask_makeTaskList_BUTTON_stopTask",
+          "makeTaskList_earlyPutIn_recover_WOM_1.0.0_produceTask_makeTaskList 提前放料 提前放料 提前放料 WOM_1.0.0_produceTask_makeTaskList_BUTTON_earlyPutIn",
+          "makeTaskList_manuInspect_add_WOM_1.0.0_produceTask_makeTaskList 请检 请检 请检 WOM_1.0.0_produceTask_makeTaskList_BUTTON_manuInspect",
+          "makeTaskList_prodprocessView_add_WOM_1.0.0_produceTask_makeTaskList 生产过程追溯 生产过程追溯 生产过程追溯 WOM_1.0.0_produceTask_makeTaskList_BUTTON_prodprocessView",
+          "makeTaskList_generateCode_add_WOM_1.0.0_produceTask_makeTaskList 生成二维码 生成二维码 生成二维码 WOM_1.0.0_produceTask_makeTaskList_BUTTON_generateCode"
+        ]
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/WOM/produceTask/produceTask/downloadXls?viewCode=WOM_1.0.0_produceTask_makeTaskList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 0,
+        "first16Hex": "",
+        "magic": "EMPTY",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": false,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=EMPTY",
+                "queryExport.status=500",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": false,
+              "evidence": [
+                "downloadXls.bodySize=0",
+                "downloadXls.magic=EMPTY",
+                "queryExport.bodySize=52",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": false,
+              "evidence": [
+                "path=/msService/WOM/produceTask/produceTask/makeTaskList-query",
+                "status=500",
+                "contentType=application/json;charset=UTF-8",
+                "bodySize=52",
+                "magic=JSON"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven",
+            "successfulFileResponse is not proven",
+            "nonEmptyWorkbook is not proven",
+            "backendQueryExport is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/WOM/produceTask/produceTask/makeTaskList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "WOM_1.0.0_produceTask_makeTaskList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "WOM_1.0.0_produceTask_makeTaskList",
+          "viewCode": "WOM_1.0.0_produceTask_makeTaskList"
+        },
+        "status": 500,
+        "error": null,
+        "contentType": "application/json;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 52,
+        "first16Hex": "7b22636f6465223a3530302c22646174",
+        "magic": "JSON",
+        "jsonCode": 500,
+        "jsonMessage": "服务器异常",
+        "textSnippet": "{\"code\":500,\"data\":null,\"message\":\"服务器异常\"}",
+        "verifiedDataExport": false,
+        "issue": "query export returned a server error instead of a workbook."
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList.html",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/prepareMakeTaskList.html",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [
+          {
+            "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList.html",
+            "line": 81,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "下载导入模板"
+            ],
+            "snippet": "\"downloadXls\": \"/msService/WOM/produceTask/produceTask/downloadXls\", // 下载导入模板"
+          },
+          {
+            "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/prepareMakeTaskList.html",
+            "line": 81,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "下载导入模板"
+            ],
+            "snippet": "\"downloadXls\": \"/msService/WOM/produceTask/produceTask/downloadXls\", // 下载导入模板"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 182737,
+            "matched": [
+              "WOM_1.0.0_produceTask_makeTaskList",
+              "/msService/WOM/produceTask/produceTask/makeTaskList",
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...ARE runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"WOM.viewtitle.randon1575438513071\",\"url\":\"/msService/WOM/produceTask/produceTask/makeTaskList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"quer..."
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 182792,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...\"workAreaId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 182847,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...aramAna\",\"showType\":\"CHECKBOX\",\"showFormat\":\"CHECKBOX\",\"width\":120,\"isHidden\":false,\"columnType\":\"BOOLEAN\"}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 182902,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...e,\"columnType\":\"SYSTEMCODE\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"WOM_prePareNeedState\"}}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 182957,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...Contral\",\"showType\":\"CHECKBOX\",\"showFormat\":\"CHECKBOX\",\"width\":120,\"isHidden\":false,\"columnType\":\"BOOLEAN\"}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 183012,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...en\":false,\"columnType\":\"SYSTEMCODE\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"WOM_runState\"}}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 183067,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...en\":false,\"columnType\":\"SYSTEMCODE\",\"fill\":{\"fillName\":\"系统编码\",\"fillType\":\"3\",\"fillContent\":\"WOM_runState\"}}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          },
+          {
+            "path": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+            "line": 10,
+            "matched": [
+              "WOM_1.0.0_produceTask_makeTaskList",
+              "/msService/WOM/produceTask/produceTask/makeTaskList",
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...ARE runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"WOM.viewtitle.randon1575438513071\",\"url\":\"/msService/WOM/produceTask/produceTask/makeTaskList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"quer..."
+          },
+          {
+            "path": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+            "line": 41,
+            "matched": [
+              "/msService/WOM/produceTask/produceTask/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...\"workAreaId.id\",\"showType\":\"TEXTFIELD\",\"showFormat\":\"TEXT\",\"width\":120,\"isHidden\":true,\"columnType\":\"TEXT\"}],\"downloadXls\":\"/msService/WOM/produceTask/produceTask/downloadXls\",\"importMainXls\":\"/msService/WOM/produceTask/produceTask/importMainXls\"}]}],\"isFileView\":true,\"moveFlag\":false}';"
+          }
+        ],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "wom-make-task",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/WOM/produceTask/produceTask/downloadXls or /msService/WOM/produceTask/produceTask/makeTaskList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
+          "downloadXls returned an empty response body.",
+          "query export endpoint /msService/WOM/produceTask/produceTask/makeTaskList-query did not return 2xx; status=500."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "BLOCKED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "Direct downloadXls probe returned an empty body.",
+        "query export returned a server error instead of a workbook.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: successfulFileResponse is not proven",
+        "Export acceptance check failed: nonEmptyWorkbook is not proven",
+        "Export acceptance check failed: backendQueryExport is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    },
+    {
+      "id": "rm-batch-formula",
+      "label": "RM batch formula list",
+      "route": "/msService/RM/formula/formula/batchFormulaList",
+      "viewCode": "RM_1.0.0_formula_batchFormulaList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/RM/formula/formula/batchFormulaList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [
+          "下载模板",
+          "导入Excel"
+        ],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/RM/formula/formula/downloadXls"
+        ],
+        "buttonTexts": [
+          "下载模板 下载模板 RM_1.0.0_formula_batchFormulaList_downloadXls 下载模板 RM_1.0.0_formula_batchFormulaList_BUTTON_rmBatchFormulaDownloadTemplate",
+          "导入Excel 导入Excel RM_1.0.0_formula_batchFormulaList_importMainXls 导入Excel RM_1.0.0_formula_batchFormulaList_BUTTON_rmBatchFormulaImportMainXls"
+        ]
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/RM/formula/formula/downloadXls?viewCode=RM_1.0.0_formula_batchFormulaList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 8704,
+        "first16Hex": "d0cf11e0a1b11ae10000000000000000",
+        "magic": "OLE_XLS",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": true,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=OLE_XLS",
+                "queryExport.status=200",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": true,
+              "evidence": [
+                "downloadXls.bodySize=8704",
+                "downloadXls.magic=OLE_XLS",
+                "queryExport.bodySize=205",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": false,
+              "evidence": [
+                "path=/msService/RM/formula/formula/batchFormulaList-query",
+                "status=200",
+                "contentType=application/json",
+                "bodySize=205",
+                "magic=JSON"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven",
+            "backendQueryExport is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "Non-empty download was captured, but no visible/runtime export action proves this is list-data export rather than an import template."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/RM/formula/formula/batchFormulaList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "RM_1.0.0_formula_batchFormulaList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "RM_1.0.0_formula_batchFormulaList",
+          "viewCode": "RM_1.0.0_formula_batchFormulaList"
+        },
+        "status": 200,
+        "error": null,
+        "contentType": "application/json",
+        "contentDisposition": null,
+        "bodySize": 205,
+        "first16Hex": "7b22636f6465223a3230302c22646174",
+        "magic": "JSON",
+        "jsonCode": 200,
+        "jsonMessage": "操作成功",
+        "textSnippet": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[],\"totalCount\":0,\"totalPages\":0,\"treeToSurfaceMode\":false},\"message\":\"操作成功\"}",
+        "verifiedDataExport": false,
+        "issue": "query export returned JSON, not a workbook file."
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/141-rm-formula-import-template.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/160-rm-batch-formula-edit-view-runtime-json.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 183177,
+            "matched": [
+              "RM_1.0.0_formula_batchFormulaList",
+              "/msService/RM/formula/formula/batchFormulaList",
+              "/msService/RM/formula/formula/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...LARE runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"RM.viewtitle.randon1583373640631\",\"url\":\"/msService/RM/formula/formula/batchFormulaList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"query\",\"l..."
+          },
+          {
+            "path": "deploy/docker/postgres/init/141-rm-formula-import-template.sql",
+            "line": 118,
+            "matched": [
+              "RM_1.0.0_formula_batchFormulaList",
+              "/msService/RM/formula/formula/batchFormulaList",
+              "/msService/RM/formula/formula/downloadXls",
+              "downloadXls",
+              "importMainXls",
+              "下载模板",
+              "导入Excel"
+            ],
+            "snippet": "runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"RM.viewtitle.randon1583373640631\",\"url\":\"/msService/RM/formula/formula/batchFormulaList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"query\",\"l..."
+          }
+        ],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "rm-batch-formula",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/RM/formula/formula/downloadXls or /msService/RM/formula/formula/batchFormulaList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
+          "downloadXls returned a non-empty file, but browser/runtime/source evidence does not prove list-data export.",
+          "query export endpoint /msService/RM/formula/formula/batchFormulaList-query did not return a workbook; magic=JSON."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "BLOCKED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "A non-empty download exists, but no visible export action proves it is list-data export.",
+        "query export returned JSON, not a workbook file.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: backendQueryExport is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    },
+    {
+      "id": "wts-work-permit",
+      "label": "WTS work permit list",
+      "route": "/msService/WTS/workPermit/workPermit/workPermitList",
+      "viewCode": "WTS_1.0.0_workPermit_workPermitList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/WTS/workPermit/workPermit/workPermitList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=WTS_1.0.0_workPermit_workPermitList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/WTS/workPermit/workPermit/downloadXls"
+        ],
+        "buttonTexts": [
+          "workPermitList_add_add_WTS_1.0.0_workPermit_workPermitList 新增 新增 WTS_1.0.0_workPermit_workPermitList_BUTTON_add",
+          "workPermitList_edit_modify_WTS_1.0.0_workPermit_workPermitList 修改 修改 WTS_1.0.0_workPermit_workPermitList_BUTTON_edit"
+        ]
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/WTS/workPermit/workPermit/downloadXls?viewCode=WTS_1.0.0_workPermit_workPermitList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 0,
+        "first16Hex": "",
+        "magic": "EMPTY",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": true,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=EMPTY",
+                "queryExport.status=200",
+                "queryExport.magic=OLE_XLS"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": true,
+              "evidence": [
+                "downloadXls.bodySize=0",
+                "downloadXls.magic=EMPTY",
+                "queryExport.bodySize=8704",
+                "queryExport.magic=OLE_XLS"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": true,
+              "evidence": [
+                "path=/msService/WTS/workPermit/workPermit/workPermitList-query",
+                "status=200",
+                "contentType=application/binary;charset=UTF-8",
+                "bodySize=8704",
+                "magic=OLE_XLS"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/WTS/workPermit/workPermit/workPermitList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "WTS_1.0.0_workPermit_workPermitList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "WTS_1.0.0_workPermit_workPermitList",
+          "viewCode": "WTS_1.0.0_workPermit_workPermitList"
+        },
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": "attachment;fileName=WTS_1.0.0_workPermit_WorkPermit.xls",
+        "bodySize": 8704,
+        "first16Hex": "d0cf11e0a1b11ae10000000000000000",
+        "magic": "OLE_XLS",
+        "jsonCode": null,
+        "jsonMessage": null,
+        "textSnippet": "",
+        "verifiedDataExport": true,
+        "issue": null
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/153-wts-firework-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "line": 184002,
+            "matched": [
+              "WTS_1.0.0_workPermit_workPermitList",
+              "/msService/WTS/workPermit/workPermit/workPermitList",
+              "/msService/WTS/workPermit/workPermit/downloadXls",
+              "downloadXls",
+              "importMainXls"
+            ],
+            "snippet": "...ARE runtime_extra_view_payload text := '{\"pageType\":\"LIST\",\"title\":\"WTS.viewtitle.randon1574731248071\",\"url\":\"/msService/WTS/workPermit/workPermit/workPermitList\",\"isMain\":true,\"hasAttachment\":false,\"onlyForQuery\":false,\"components\":[{\"type\":\"layout\",\"layoutmethod\":\"column\",\"components\":[{\"type\":\"layoutSearchWidget\",\"code\":\"quer..."
+          }
+        ],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "wts-work-permit",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/WTS/workPermit/workPermit/downloadXls or /msService/WTS/workPermit/workPermit/workPermitList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=DOWNLOADXLS_IMPORT_TEMPLATE_OR_EMPTY_ENDPOINT_ONLY.",
+          "downloadXls returned an empty response body."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "ACTION_REQUIRED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "Direct downloadXls probe returned an empty body.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Target source/runtime hints expose downloadXls/importMainXls/import-template style entries, not an accepted list-data export action.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    },
+    {
+      "id": "qcs-inspect-report",
+      "label": "QCS inspect report list",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportList",
+      "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/QCS/inspectReport/inspectReport/manuInspReportList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/QCS/inspectReport/inspectReport/downloadXls"
+        ],
+        "buttonTexts": []
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/QCS/inspectReport/inspectReport/downloadXls?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 0,
+        "first16Hex": "",
+        "magic": "EMPTY",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": false,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=EMPTY",
+                "queryExport.status=500",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": false,
+              "evidence": [
+                "downloadXls.bodySize=0",
+                "downloadXls.magic=EMPTY",
+                "queryExport.bodySize=52",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": false,
+              "evidence": [
+                "path=/msService/QCS/inspectReport/inspectReport/manuInspReportList-query",
+                "status=500",
+                "contentType=application/json;charset=UTF-8",
+                "bodySize=52",
+                "magic=JSON"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven",
+            "successfulFileResponse is not proven",
+            "nonEmptyWorkbook is not proven",
+            "backendQueryExport is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/QCS/inspectReport/inspectReport/manuInspReportList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "QCS_5.0.0.0_inspectReport_manuInspReportList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "QCS_5.0.0.0_inspectReport_manuInspReportList",
+          "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportList"
+        },
+        "status": 500,
+        "error": null,
+        "contentType": "application/json;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 52,
+        "first16Hex": "7b22636f6465223a3530302c22646174",
+        "magic": "JSON",
+        "jsonCode": 500,
+        "jsonMessage": "服务器异常",
+        "textSnippet": "{\"code\":500,\"data\":null,\"message\":\"服务器异常\"}",
+        "verifiedDataExport": false,
+        "issue": "query export returned a server error instead of a workbook."
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/107-qcs-inspect-detail-tables.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/119-qcs-inspect-report-edit-runtime-json.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "NO_TARGET_EXPORT_SOURCE_FOUND",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "qcs-inspect-report",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/QCS/inspectReport/inspectReport/downloadXls or /msService/QCS/inspectReport/inspectReport/manuInspReportList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "downloadXls returned an empty response body.",
+          "query export endpoint /msService/QCS/inspectReport/inspectReport/manuInspReportList-query did not return 2xx; status=500."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "BLOCKED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "Direct downloadXls probe returned an empty body.",
+        "query export returned a server error instead of a workbook.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: successfulFileResponse is not proven",
+        "Export acceptance check failed: nonEmptyWorkbook is not proven",
+        "Export acceptance check failed: backendQueryExport is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    },
+    {
+      "id": "qcs-unqualified-deal",
+      "label": "QCS unqualified deal list",
+      "route": "/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList",
+      "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/QCS/unQlfDeal/unQlfDeal/downloadXls"
+        ],
+        "buttonTexts": []
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/QCS/unQlfDeal/unQlfDeal/downloadXls?viewCode=QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 0,
+        "first16Hex": "",
+        "magic": "EMPTY",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": false,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=EMPTY",
+                "queryExport.status=500",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": false,
+              "evidence": [
+                "downloadXls.bodySize=0",
+                "downloadXls.magic=EMPTY",
+                "queryExport.bodySize=52",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": false,
+              "evidence": [
+                "path=/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query",
+                "status=500",
+                "contentType=application/json;charset=UTF-8",
+                "bodySize=52",
+                "magic=JSON"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven",
+            "successfulFileResponse is not proven",
+            "nonEmptyWorkbook is not proven",
+            "backendQueryExport is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
+          "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList"
+        },
+        "status": 500,
+        "error": null,
+        "contentType": "application/json;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 52,
+        "first16Hex": "7b22636f6465223a3530302c22646174",
+        "magic": "JSON",
+        "jsonCode": 500,
+        "jsonMessage": "服务器异常",
+        "textSnippet": "{\"code\":500,\"data\":null,\"message\":\"服务器异常\"}",
+        "verifiedDataExport": false,
+        "issue": "query export returned a server error instead of a workbook."
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/121-qcs-unqualified-deal-workflow-config.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/122-qcs-unqualified-deal-runtime-compat.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "NO_TARGET_EXPORT_SOURCE_FOUND",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "qcs-unqualified-deal",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/QCS/unQlfDeal/unQlfDeal/downloadXls or /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "downloadXls returned an empty response body.",
+          "query export endpoint /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query did not return 2xx; status=500."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "BLOCKED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "Direct downloadXls probe returned an empty body.",
+        "query export returned a server error instead of a workbook.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: successfulFileResponse is not proven",
+        "Export acceptance check failed: nonEmptyWorkbook is not proven",
+        "Export acceptance check failed: backendQueryExport is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    },
+    {
+      "id": "qcs-inspect-release",
+      "label": "QCS inspect release list",
+      "route": "/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList",
+      "viewCode": "QCS_5.0.0.0_inspectRelease_manuInspReleaseList",
+      "page": {
+        "url": "http://222.88.185.146:18080/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList",
+        "navigationStatus": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "consoleErrors": [],
+        "pageErrors": [],
+        "requestFailures": [],
+        "networkErrors": [],
+        "exportLabels": [],
+        "downloadLikeLabels": [],
+        "ok": true
+      },
+      "layout": {
+        "method": "GET",
+        "path": "/msService/baseService/view/layoutJson?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseList&isEs5=true",
+        "status": 200,
+        "error": null,
+        "code": 200,
+        "message": "操作成功",
+        "hasPayload": true,
+        "exportButtonCandidates": [],
+        "downloadXlsFields": [
+          "/msService/QCS/inspectRelease/inspectRelease/downloadXls"
+        ],
+        "buttonTexts": []
+      },
+      "download": {
+        "method": "GET",
+        "path": "/msService/QCS/inspectRelease/inspectRelease/downloadXls?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseList",
+        "status": 200,
+        "error": null,
+        "contentType": "application/binary;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 0,
+        "first16Hex": "",
+        "magic": "EMPTY",
+        "verification": {
+          "verifiedDataExport": false,
+          "checks": [
+            {
+              "name": "visibleExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "runtimeExportAction",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "targetExportSourceHook",
+              "passed": false,
+              "evidence": []
+            },
+            {
+              "name": "successfulFileResponse",
+              "passed": false,
+              "evidence": [
+                "downloadXls.status=200",
+                "downloadXls.magic=EMPTY",
+                "queryExport.status=500",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "nonEmptyWorkbook",
+              "passed": false,
+              "evidence": [
+                "downloadXls.bodySize=0",
+                "downloadXls.magic=EMPTY",
+                "queryExport.bodySize=52",
+                "queryExport.magic=JSON"
+              ]
+            },
+            {
+              "name": "backendQueryExport",
+              "passed": false,
+              "evidence": [
+                "path=/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query",
+                "status=500",
+                "contentType=application/json;charset=UTF-8",
+                "bodySize=52",
+                "magic=JSON"
+              ]
+            }
+          ],
+          "failureReasons": [
+            "visibleExportAction is not proven",
+            "runtimeExportAction is not proven",
+            "targetExportSourceHook is not proven",
+            "successfulFileResponse is not proven",
+            "nonEmptyWorkbook is not proven",
+            "backendQueryExport is not proven"
+          ]
+        },
+        "verifiedDataExport": false,
+        "issue": "HTTP 200 returned an empty body, so this is not accepted as list-data export."
+      },
+      "queryExport": {
+        "method": "POST",
+        "path": "/msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query",
+        "requestPayload": {
+          "classifyCodes": "",
+          "customCondition": {},
+          "permissionCode": "QCS_5.0.0.0_inspectRelease_manuInspReleaseList",
+          "pageNo": 1,
+          "paging": true,
+          "pageSize": 20,
+          "crossCompanyFlag": "true",
+          "exportFlag": true,
+          "exportAuxiliaryModelFlag": false,
+          "useForImportFlag": false,
+          "properties": [],
+          "datagridCode": "QCS_5.0.0.0_inspectRelease_manuInspReleaseList",
+          "viewCode": "QCS_5.0.0.0_inspectRelease_manuInspReleaseList"
+        },
+        "status": 500,
+        "error": null,
+        "contentType": "application/json;charset=UTF-8",
+        "contentDisposition": null,
+        "bodySize": 52,
+        "first16Hex": "7b22636f6465223a3530302c22646174",
+        "magic": "JSON",
+        "jsonCode": 500,
+        "jsonMessage": "服务器异常",
+        "textSnippet": "{\"code\":500,\"data\":null,\"message\":\"服务器异常\"}",
+        "verifiedDataExport": false,
+        "issue": "query export returned a server error instead of a workbook."
+      },
+      "sourceAudit": {
+        "searchedRoots": [
+          "deploy/docker/assets/module-static",
+          "deploy/docker/postgres/init",
+          "backend/modules"
+        ],
+        "sourceFiles": [
+          {
+            "path": "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/124-qcs-inspect-release-runtime-json.sql",
+            "exists": true
+          },
+          {
+            "path": "deploy/docker/postgres/init/125-qcs-inspect-release-action-compat.sql",
+            "exists": true
+          }
+        ],
+        "downloadTemplateMatches": [],
+        "targetExportMatches": [],
+        "genericExportFrameworkAvailable": true,
+        "genericExportFrameworkMatches": [
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 3,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 94,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+            "line": 166,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 328,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+            "line": 933,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 327,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+          },
+          {
+            "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+            "line": 927,
+            "matched": [
+              "exportExcel"
+            ],
+            "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+          }
+        ],
+        "classification": "NO_TARGET_EXPORT_SOURCE_FOUND",
+        "issues": [
+          "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+          "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+        ]
+      },
+      "acceptanceContract": {
+        "targetId": "qcs-inspect-release",
+        "persistence": "NOT_APPLICABLE: list export must not create or mutate business rows.",
+        "requiredFrontendRuntime": "Expose a visible 导出/export action on the target list page and in layoutJson runtime button metadata.",
+        "requiredBackend": "Return a non-empty XLS/XLSX list-data file from /msService/QCS/inspectRelease/inspectRelease/downloadXls or /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query; import templates and JSON list responses are not accepted.",
+        "requiredSourceEvidence": "Target source/runtime hints must contain exportExcel/excelExport/导出 hooks tied to this view or route.",
+        "minimumPassConditions": [
+          "page.exportLabels contains a visible 导出/export action.",
+          "layout.exportButtonCandidates contains a runtime export action.",
+          "sourceAudit.classification is TARGET_EXPORT_HOOK_FOUND_NEEDS_BROWSER_FILE_PROOF.",
+          "download.status is 2xx.",
+          "download.bodySize is greater than 0.",
+          "download.magic is OLE_XLS or ZIP_XLSX.",
+          "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+          "download.verifiedDataExport is true."
+        ],
+        "currentGaps": [
+          "visibleExportAction missing from the real browser page.",
+          "runtimeExportAction missing from layoutJson metadata.",
+          "targetExportSourceHook missing; current sourceAudit.classification=NO_TARGET_EXPORT_SOURCE_FOUND.",
+          "downloadXls returned an empty response body.",
+          "query export endpoint /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query did not return 2xx; status=500."
+        ],
+        "recheckCommand": "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000"
+      },
+      "status": "BLOCKED",
+      "conclusion": "No accepted list-data export was proven. Persistence is NOT_APPLICABLE for file export; acceptance requires a real browser file response with non-empty list data.",
+      "issues": [
+        "No visible export action label was found on the page.",
+        "No runtime layout button candidate for export was found.",
+        "Direct downloadXls probe returned an empty body.",
+        "query export returned a server error instead of a workbook.",
+        "Export acceptance check failed: visibleExportAction is not proven",
+        "Export acceptance check failed: runtimeExportAction is not proven",
+        "Export acceptance check failed: targetExportSourceHook is not proven",
+        "Export acceptance check failed: successfulFileResponse is not proven",
+        "Export acceptance check failed: nonEmptyWorkbook is not proven",
+        "Export acceptance check failed: backendQueryExport is not proven",
+        "No target-specific exportExcel/excelExport/导出 hook was found in static or runtime source hints.",
+        "Generic platform export framework exists, but this production view does not enable a target-specific export hook."
+      ]
+    }
+  ],
+  "evidence": {
+    "method": "Authenticated real browser page probe, authenticated layoutJson runtime metadata probe, authenticated downloadXls file-response probe, and target source/runtime configuration audit.",
+    "persistence": "NOT_APPLICABLE: file export does not write business data; acceptance checks browser file response instead.",
+    "sourceAudit": "Generic export framework files are scanned separately from target production views; a generic export template is not accepted unless the target page/runtime enables an export hook and the browser file response proves list data.",
+    "genericExportFramework": {
+      "available": true,
+      "paths": [
+        "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_exportexcel.ftl",
+        "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+        "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+        "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl"
+      ],
+      "matches": [
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+          "line": 3,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "...Func=\"\",beforePageNav=\"\",treeView=false,postData=\"\",onclick=\"\",checkEditCondition=\"\",formId=\"\",firstLoad=true,exportExcel=false,dtPage=\"page\",pageOrder=\"DESC\",orderMode=\"frontstage\",style=\"\",dataUrl=\"\",displayRowsCount=0,width=0,height=0,transMethod=\"POST\",complex=true,editable=false,editableStrFlag=\"false\",insertRowAble=false,s..."
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+          "line": 94,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/cui/cui_datagrid.ftl",
+          "line": 166,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "<#if exportExcel>exportExcel:true,</#if>"
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+          "line": 328,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/datagrid/config-datagrid.ftl",
+          "line": 933,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+          "line": 327,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "...ertRow!false)?string(\"true\",\"false\")}\" autoAddRow=\"${(listProperty.autoAddRow!false)?string(\"true\",\"false\")}\" exportExcel=\"${(listProperty.exportExcel!false)?string(\"true\",\"false\")}\""
+        },
+        {
+          "path": "backend/modules/com/supcon/supfusion/configuration/configuration-services-open-api/1.0.0-SNAPSHOT/templates/view/config-datagrid.ftl",
+          "line": 927,
+          "matched": [
+            "exportExcel"
+          ],
+          "snippet": "<td class=\"la\" width=\"10%\" style=\"padding-right:10px;\"><input type=\"checkbox\" id=\"exportExcel\" /></td>"
+        }
+      ]
+    },
+    "secretHandling": "Login token and credentials are not written to this report."
+  }
+}

@@ -1,0 +1,1928 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-20T16:05:25Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "scanRoots": [
+    {
+      "path": "/Users/zhangchu/Documents/MES包",
+      "exists": true
+    },
+    {
+      "path": "/Users/zhangchu/Downloads/ADP/bap-server/base-Server",
+      "exists": true
+    },
+    {
+      "path": "/Users/zhangchu/Downloads/ADP/bap-server/config",
+      "exists": true
+    },
+    {
+      "path": "/Users/zhangchu/Downloads/ADP/Temp/static/custom",
+      "exists": true
+    }
+  ],
+  "coverage": {
+    "status": "PARTIAL_BOUNDED",
+    "nestedDepth": 1,
+    "textSuffixes": [
+      ".html",
+      ".java",
+      ".js",
+      ".json",
+      ".jsp",
+      ".md",
+      ".properties",
+      ".sql",
+      ".ts",
+      ".txt",
+      ".xml",
+      ".yaml",
+      ".yml"
+    ],
+    "archiveSuffixes": [
+      ".7z",
+      ".ear",
+      ".gz",
+      ".jar",
+      ".tar",
+      ".tgz",
+      ".war",
+      ".zip"
+    ],
+    "firstPartyArchiveHints": [
+      "baseset",
+      "eam",
+      "lims",
+      "material",
+      "orchid",
+      "processanalysis",
+      "qcs",
+      "rm",
+      "sparemanage",
+      "supcon",
+      "supplant",
+      "traceability",
+      "waps",
+      "wom",
+      "wts"
+    ],
+    "vendorArchiveHints": [
+      "cn/hutool",
+      "com/fasterxml",
+      "com/google",
+      "javax/",
+      "jdk",
+      "jre",
+      "missioncontrol",
+      "net/sf",
+      "org.apache",
+      "org/apache",
+      "org/eclipse",
+      "springframework"
+    ],
+    "limits": {
+      "maxTextBytes": 2097152,
+      "maxArchiveEntries": 2000000,
+      "maxArchiveTextEntries": 100000,
+      "maxNestedArchiveBytes": 20971520,
+      "maxTarScanBytes": 52428800,
+      "maxArchiveHashBytes": 0
+    },
+    "unscannedReasons": {
+      "skippedLargeNestedArchives": 28,
+      "unsupportedArchives": 2
+    }
+  },
+  "summary": {
+    "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+    "rootsRequested": 4,
+    "rootsExisting": 4,
+    "filesVisited": 58889,
+    "textFilesScanned": 31371,
+    "archivesScanned": 1142,
+    "nestedArchivesScanned": 2139,
+    "nestedArchivesSkippedByPath": 12168,
+    "skippedLargeNestedArchives": 28,
+    "archiveEntriesScanned": 429984,
+    "skippedArchiveEntries": 0,
+    "archiveTextEntriesScanned": 2499,
+    "skippedArchiveTextEntries": 0,
+    "archiveListingsScanned": 1,
+    "archiveTextEntriesSkippedByPath": 65282,
+    "skippedArchiveHashes": 1142,
+    "unsupportedArchives": 2,
+    "skippedLargeArchives": 0,
+    "readErrors": 0,
+    "dependencies": 2,
+    "blockedDependencies": 2,
+    "candidateDependencies": 0
+  },
+  "scannedArchives": [
+    {
+      "path": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip",
+      "sizeBytes": 9363578,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/配料/WOM_6.1.2.3.zip",
+      "sizeBytes": 9307709,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/supPlant-DocMgmt V6.1.2.2-220307-C.zip",
+      "sizeBytes": 2607217,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/XTYsupPlant-WOM V6.1.3.4-220722-C(α版).7z",
+      "sizeBytes": 92861725,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/supPlant-TeamMgmt V6.1.2.4-220307-C.zip",
+      "sizeBytes": 2765557,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/supPlant-Base V6.1.2.5-220222-C.zip",
+      "sizeBytes": 36715884,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/supPlant-Qualification V6.1.2.1-220311-C.zip",
+      "sizeBytes": 1929907,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/最新基础模块/supLIMS V6.1.3.5-220328-C.zip",
+      "sizeBytes": 42480849,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-CRAFT V6.1.2.3-220130-M.zip",
+      "sizeBytes": 18353414,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M.zip",
+      "sizeBytes": 202697269,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C.zip",
+      "sizeBytes": 888729522,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/安环作业票/supPlant-WTS V6.1.8.2-220630-C/03作业地图初始化数据.zip",
+      "sizeBytes": 8405,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/安环作业票/supPlant-WTS V6.1.8.2-220630-C/01业务包/WTS_6.1.8.2.zip",
+      "sizeBytes": 29024569,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/安环作业票/supPlant-WTS V6.1.8.2-220630-C/01业务包/workAppointment_6.1.8.2.zip",
+      "sizeBytes": 444737,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/安环作业票/supPlant-WTS V6.1.8.2-220630-C/02其他注意事项/附件/adp-tools.zip",
+      "sizeBytes": 201632124,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/安环作业票/supPlant-WTS V6.1.8.2-220630-C/02其他注意事项/附件/adp-admin.zip",
+      "sizeBytes": 45410190,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/工单/HNTLsupPlant-EAM V6.1.3.4-220707-C.zip",
+      "sizeBytes": 15292585,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/运行管理/EQPTOperation_6.1.9.3.zip",
+      "sizeBytes": 7415844,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/设备档案/EAM_6.1.3.3 (1).zip",
+      "sizeBytes": 25734816,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8.zip",
+      "sizeBytes": 45741579,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.12/framework-6.1.9.12.jar",
+      "sizeBytes": 115186,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.2.01/framework-6.1.2.01.jar",
+      "sizeBytes": 91497,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/1.0/framework-1.0.jar",
+      "sizeBytes": 94822,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.13/framework-6.1.9.13.jar",
+      "sizeBytes": 116639,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.01/framework-6.1.6.01.jar",
+      "sizeBytes": 98593,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.01/framework-6.1.9.01.jar",
+      "sizeBytes": 94833,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.14.RELEASE/framework-6.1.9.14.RELEASE.jar",
+      "sizeBytes": 145657,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.04/framework-6.1.6.04.jar",
+      "sizeBytes": 89881,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.03/framework-6.1.6.03.jar",
+      "sizeBytes": 91162,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.11/framework-6.1.9.11.jar",
+      "sizeBytes": 108020,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.13.ALPHA/framework-6.1.9.13.ALPHA.jar",
+      "sizeBytes": 116612,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.02/framework-6.1.6.02.jar",
+      "sizeBytes": 95092,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.05/framework-6.1.6.05.jar",
+      "sizeBytes": 95712,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.03/framework-6.1.9.03.jar",
+      "sizeBytes": 95099,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.04/framework-6.1.9.04.jar",
+      "sizeBytes": 95713,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.6.11/framework-6.1.6.11.jar",
+      "sizeBytes": 108018,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.05/framework-6.1.9.05.jar",
+      "sizeBytes": 98260,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.02/framework-6.1.9.02.jar",
+      "sizeBytes": 95085,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/com/supcon/orchid/EAMCustom/framework/6.1.9.13.RELEASE/framework-6.1.9.13.RELEASE.jar",
+      "sizeBytes": 133945,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/cn/hutool/hutool-http/5.4.7/hutool-http-5.4.7.jar",
+      "sizeBytes": 93297,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/cn/hutool/hutool-core/5.4.7/hutool-core-5.4.7.jar",
+      "sizeBytes": 893438,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/cn/hutool/hutool-core/5.4.0/hutool-core-5.4.0.jar",
+      "sizeBytes": 840174,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/cn/hutool/hutool-all/5.8.5/hutool-all-5.8.5.jar",
+      "sizeBytes": 2378189,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/6.1.9.8/EAM_6.1.9.8/maven/cn/hutool/hutool-all/5.8.0/hutool-all-5.8.0.jar",
+      "sizeBytes": 2278202,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/OverhaulTicket_6.1.9.3.zip",
+      "sizeBytes": 1948792,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/TOOL_6.1.9.3.zip",
+      "sizeBytes": 1350920,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/maintenance_6.1.9.3.zip",
+      "sizeBytes": 7456030,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/OverEquipEffect_6.1.9.3.zip",
+      "sizeBytes": 8742932,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/outagManage_6.1.9.3.zip",
+      "sizeBytes": 4346329,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/PartiManage_6.1.9.3.zip",
+      "sizeBytes": 6309061,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/Measure_6.1.9.3.zip",
+      "sizeBytes": 7724097,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/SpareManage_6.1.9.3.zip",
+      "sizeBytes": 7791814,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/EAM_6.1.9.3.zip",
+      "sizeBytes": 37701210,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/EQPTOperation_6.1.9.3.zip",
+      "sizeBytes": 7415844,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/设备/supEAM V6.1.9.3-220804-C/supEAM V6.1.9.3-220804-C/Special_6.1.9.3.zip",
+      "sizeBytes": 3451282,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-CRAFT V6.1.2.3-220130-M/craftGraph_6.1.2.3.zip",
+      "sizeBytes": 18645716,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-CRAFT V6.1.2.3-220130-M/数据初始化（无按钮功能代码版本).zip",
+      "sizeBytes": 43637,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/RM_6.1.2.3.zip",
+      "sizeBytes": 4100724,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/batchConfigure.zip",
+      "sizeBytes": 931,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0.zip",
+      "sizeBytes": 198507117,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/20220310/supPlant-CRAFT V6.1.2.3-220130-M.zip",
+      "sizeBytes": 18353414,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/20220310/supPlant-RM V6.1.2.3-220130-M.zip",
+      "sizeBytes": 202697269,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/20220310/supPlant-WOMmobile V6.1.2.2-211230-C.zip",
+      "sizeBytes": 215090,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/20220310/supPlant-WOM V6.1.3.1-220330-M.zip",
+      "sizeBytes": 8718665,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/batchService-1.0.0.jar",
+      "sizeBytes": 87890129,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/jconsole.jar",
+      "sizeBytes": 403780,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/javafx-doclet.jar",
+      "sizeBytes": 1101343,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/tools.jar",
+      "sizeBytes": 15270592,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/ant-javafx.jar",
+      "sizeBytes": 872299,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/javafx-mx.jar",
+      "sizeBytes": 68323,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/dt.jar",
+      "sizeBytes": 145610,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/sa-jdi.jar",
+      "sizeBytes": 2604436,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_it.jar",
+      "sizeBytes": 96334,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbytools.jar",
+      "sizeBytes": 175016,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyrun.jar",
+      "sizeBytes": 7114,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derby.war",
+      "sizeBytes": 1490,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_hu.jar",
+      "sizeBytes": 92971,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbynet.jar",
+      "sizeBytes": 239969,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_es.jar",
+      "sizeBytes": 97860,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyclient.jar",
+      "sizeBytes": 538445,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_cs.jar",
+      "sizeBytes": 92207,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_pt_BR.jar",
+      "sizeBytes": 88162,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_zh_TW.jar",
+      "sizeBytes": 100323,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_zh_CN.jar",
+      "sizeBytes": 97986,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_fr.jar",
+      "sizeBytes": 103088,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_ja_JP.jar",
+      "sizeBytes": 114408,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_ru.jar",
+      "sizeBytes": 118894,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derby.jar",
+      "sizeBytes": 2679163,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_ko_KR.jar",
+      "sizeBytes": 106473,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_de_DE.jar",
+      "sizeBytes": 103295,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/db/lib/derbyLocale_pl.jar",
+      "sizeBytes": 90910,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/mc.jar",
+      "sizeBytes": 8496,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.browser.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 30792,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.flightrecorder.ui.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 253373,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.apache.felix.gogo.shell_0.8.0.v201110170705.jar",
+      "sizeBytes": 60824,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.runtime.compatibility.auth.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2746,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.docs.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 41276,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.databinding_1.4.1.v20120912-135020.jar",
+      "sizeBytes": 202248,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.filesystem.win32.x86.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1482,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.components.ui_5.4.0.162463.jar",
+      "sizeBytes": 420005,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.notification.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 26141,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.sat4j.pb_2.3.0.v20110329.jar",
+      "sizeBytes": 140725,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jface_3.8.0.v20120912-135020.jar",
+      "sizeBytes": 1090101,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.event_1.2.200.v20120522-2049.jar",
+      "sizeBytes": 33746,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.http.servlet.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1416,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.updatechecker.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1368,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.http.jetty.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1473,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jface.text.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 12705,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.forms.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2491,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.databinding.observable.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1433,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.filesystem.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2981,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1848,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.net.win32.x86.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1446,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jetty.security_8.1.3.v20120522.jar",
+      "sizeBytes": 95308,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.operations.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2413,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.net.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3031,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.ui.sdk.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3006,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.runtime.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 4219,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.jsp.jasper.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1382,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 50283,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.databinding.beans.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1417,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.filesystem_1.3.200.v20130115-145044.jar",
+      "sizeBytes": 58000,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.extensionlocation.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1372,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.databinding.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2709,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.directorywatcher.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2983,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.apache.lucene_2.9.1.v201101211721.jar",
+      "sizeBytes": 71018,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.flightrecorder.ui.ja_5.4.0.162463.jar",
+      "sizeBytes": 265104,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.jsp.jasper.registry.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1389,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.touchpoint.eclipse_2.1.100.v20120428-0117.jar",
+      "sizeBytes": 125384,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.win32.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2719,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.workbench_3.8.2.v20121128-133708.jar",
+      "sizeBytes": 4177340,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.diagnostic.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 19132,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.flightrecorder.controlpanel.ui.ja_5.4.0.162463.jar",
+      "sizeBytes": 8203,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.greychart.ui.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 3131,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.jsp.jasper_1.0.400.v20120912-130548.jar",
+      "sizeBytes": 28287,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.garbagecollector_1.0.200.v20110808-1657.jar",
+      "sizeBytes": 26238,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.net.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2291,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.diagnostic.ja_5.4.0.162463.jar",
+      "sizeBytes": 21503,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.rcp.application.ja_5.4.0.162463.jar",
+      "sizeBytes": 3223,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.ql_2.0.100.v20110808-1657.jar",
+      "sizeBytes": 9259,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.launcher.win32.win32.x86.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1515,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui_5.4.0.162463.jar",
+      "sizeBytes": 290209,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar",
+      "sizeBytes": 106764,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.diagnostic_5.4.0.162463.jar",
+      "sizeBytes": 53886,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.greychart.ui_5.4.0.162463.jar",
+      "sizeBytes": 42206,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.apache.felix.gogo.command_0.8.0.v201108120515.jar",
+      "sizeBytes": 57580,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 6574,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/javax.servlet.jsp_2.2.0.v201112011158.jar",
+      "sizeBytes": 107235,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.rcp.intro_5.4.0.162463.jar",
+      "sizeBytes": 93524,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf_3.1.300.v20120610-1946.jar",
+      "sizeBytes": 94181,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jface.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 6694,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.commands.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1379,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.frameworkadmin.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1368,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.transport.ecf.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2625,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.swt.win32.win32.x86.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3646,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf.provider.filetransfer.httpclient.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2827,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.app.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3169,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.help.ui.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 5918,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.metadata.repository.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2931,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.event.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2936,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jetty.http.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2130,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.launcher.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1421,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.intro.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 4116,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.repository.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 6073,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.osgi.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 14069,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.components.ui.ja_5.4.0.162463.jar",
+      "sizeBytes": 5494,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.help.webapp_3.6.101.v20130116-182509.jar",
+      "sizeBytes": 609963,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jetty.io_8.1.3.v20120522.jar",
+      "sizeBytes": 111094,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.publisher.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2460,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.rjmx.ui.zh_CN_5.4.0.162463.jar",
+      "sizeBytes": 8594,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.ds.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3244,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.expressions_3.4.400.v20120523-2004.jar",
+      "sizeBytes": 88231,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf.provider.filetransfer.httpclient.ssl_1.0.0.v20120610-1946.jar",
+      "sizeBytes": 17935,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.security.win32.x86.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2862,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.director.app.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2597,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf.ssl_1.0.100.v20120610-1946.jar",
+      "sizeBytes": 12773,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.touchpoint.eclipse.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1371,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.jetty.servlet_8.1.3.v20120522.jar",
+      "sizeBytes": 102989,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.common.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3546,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.reconciler.dropins.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2869,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.expressions.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3130,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.attach_5.4.0.162463.jar",
+      "sizeBytes": 543,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.help.base.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 4481,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.help.webapp.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 4793,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.rcp_3.8.1.v201301310800.jar",
+      "sizeBytes": 13391,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.contenttype.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2766,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.jsp.jasper.registry_1.0.300.v20120912-130548.jar",
+      "sizeBytes": 12358,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ecf.provider.filetransfer.httpclient_4.0.200.v20120610-1946.jar",
+      "sizeBytes": 74130,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.text.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 4602,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.console.ui.notification.ja_5.4.0.162463.jar",
+      "sizeBytes": 29264,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.sat4j.core_2.3.0.v20110329.jar",
+      "sizeBytes": 210700,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.views.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 3323,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.console.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2438,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.ibm.icu_4.4.2.v20110823.jar",
+      "sizeBytes": 6701200,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.resources.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 9208,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.equinox.p2.jarprocessor_1.0.200.v20110808-1657.jar",
+      "sizeBytes": 69407,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/com.jrockit.mc.browser.attach.ja_5.4.0.162463.jar",
+      "sizeBytes": 4138,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.ui.workbench.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 31161,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.swt.nl_ja_4.2.0.v20130724060447.jar",
+      "sizeBytes": 1415,
+      "sha256": null
+    },
+    {
+      "path": "/Users/zhangchu/Documents/MES包/批次生产模块程序/supPlant-RM V6.1.2.3-220130-M/Supplant-Batch-SERVER V1.0/jdk-i586/lib/missioncontrol/plugins/org.eclipse.core.jobs.nl_zh_4.2.0.v20130724060447.jar",
+      "sizeBytes": 2449,
+      "sha256": null
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "material-service",
+      "title": "Material warehouse/inventory service",
+      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "requiredFor": [
+        "PROD-019",
+        "PROD-021",
+        "PROD-022"
+      ],
+      "searchCriteria": {
+        "targetTerms": [
+          "checkProdResult",
+          "generateProduceOutSing",
+          "produceOutSingle",
+          "material/foreign/foreign",
+          "produceOutSingle/produceOutSing"
+        ],
+        "moduleTerms": [
+          "serviceName=material",
+          "service-name=material",
+          "com/supcon/orchid/material"
+        ],
+        "knownAdjacentTerms": [
+          "LIMSMaterial",
+          "BaseSet/material",
+          "SpareManage",
+          "WOMPutInMaterial",
+          "WOMOutputMaterial",
+          "WOMRejectMaterial",
+          "WOMRemainMaterial"
+        ],
+        "callerOnlyHints": [
+          "WOMQCSServiceImpl",
+          "WOMPutInMaterialServiceImpl",
+          "WOMMatConsumRecodServiceImpl"
+        ],
+        "archiveContentPathHints": [
+          "material",
+          "wms",
+          "warehouse",
+          "inventory",
+          "stock",
+          "produceout",
+          "produce_out",
+          "outsingle",
+          "out_single",
+          "womqcsservice",
+          "womputinmaterial",
+          "wommatconsumrecod"
+        ],
+        "implementationExcludeHints": [
+          "LIMSMaterial",
+          "BaseSet",
+          "SpareManage",
+          "WOM_",
+          "wom",
+          "supPlant-WOM",
+          "WOMQCSServiceImpl",
+          "WOMPutInMaterialServiceImpl",
+          "WOMMatConsumRecodServiceImpl",
+          "QCS"
+        ]
+      },
+      "targetHitCount": 0,
+      "moduleHitCount": 0,
+      "knownAdjacentHitCount": 120,
+      "callerOnlyHitCount": 0,
+      "implementationCandidateCount": 0,
+      "implementationCandidates": [],
+      "targetHits": [],
+      "moduleHits": [],
+      "knownAdjacentHits": [
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputMaterialInterface"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMRejectMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMRejectMaterialInterface"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMRemainMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMRemainMaterialInterface"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/dto/WOMOutputMaterialDTO",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/dto/WOMOutputMaterialDTO"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/dto/WOMPutInMaterialDTO",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/dto/WOMPutInMaterialDTO"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/dto/WOMRejectMaterialDTO",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/dto/WOMRejectMaterialDTO"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/dto/WOMRemainMaterialDTO",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/dto/WOMRemainMaterialDTO"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialDTO.java",
+          "context": "ngine.entities.Pending; import com.supcon.orchid.workflow.engine.entities.WorkFlowVar; import com.supcon.orchid.WOM.DTO.WOMOutputMaterialSupervisionDTO; import com.supcon.orchid.foundation.entities.SystemCode; import com.supcon.orchid.foundation.entities.Do"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMOutputMaterialSupervisionDTO.java",
+          "context": "sionEntity; import com.supcon.orchid.orm.entities.IStaff; /** * WOM.outputMaterial.OutputMaterial. * */ public class WOMOutputMaterialSupervisionDTO extends AbstractSupervisionEntity implements IValid { private static final long serialVersionUID = 1L;"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialDTO.java",
+          "context": "ngine.entities.Pending; import com.supcon.orchid.workflow.engine.entities.WorkFlowVar; import com.supcon.orchid.WOM.DTO.WOMPutInMaterialSupervisionDTO; import com.supcon.orchid.foundation.entities.SystemCode; import com.supcon.orchid.foundation.entities.Do"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMPutInMaterialSupervisionDTO.java",
+          "context": "visionEntity; import com.supcon.orchid.orm.entities.IStaff; /** * WOM.putInMaterial.PutInMaterial. * */ public class WOMPutInMaterialSupervisionDTO extends AbstractSupervisionEntity implements IValid { private static final long serialVersionUID = 1L;"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMReMaterialPartDTO.java",
+          "context": ".orchid.ec.entities.abstracts.DTO.AbstractEcPartEntityDTO { private static final long serialVersionUID = 1L; private WOMRemainMaterialDTO headId; private WOMOutputDetailDTO outputDetail; private WOMPutinDetailDTO putinDetail; private Document docu"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialDTO.java",
+          "context": "ngine.entities.Pending; import com.supcon.orchid.workflow.engine.entities.WorkFlowVar; import com.supcon.orchid.WOM.DTO.WOMRejectMaterialSupervisionDTO; import com.supcon.orchid.foundation.entities.SystemCode; import com.supcon.orchid.foundation.entities.Do"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialSupervisionDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialSupervisionDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRejectMaterialSupervisionDTO.java",
+          "context": "ionEntity; import com.supcon.orchid.orm.entities.IStaff; /** * WOM.rejectMaterilal.RejectMaterial. * */ public class WOMRejectMaterialSupervisionDTO extends AbstractSupervisionEntity implements IValid { private static final long serialVersionUID = 1L;"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRemainMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRemainMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRemainMaterialDTO.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRemainMaterialDTO.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/DTO/WOMRemainMaterialDTO.java",
+          "context": "ort,WOM_1.0.0_remainMaterial_RemainMaterial,WOM_1.0.0) */ // 自定义代码 /* CUSTOM CODE END */ /** * 尾料表. */ public class WOMRemainMaterialDTO extends com.supcon.orchid.ec.entities.abstracts.DTO.AbstractEcFullEntityDTO { private static final long serialVersi"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMOutputMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMOutputMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMOutputMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMOutputMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMOutputMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMOutputMaterialClient.java",
+          "context": "package com.supcon.orchid.WOM.client; import com.supcon.orchid.WOM.DTO.WOMOutputMaterialDTO; import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass; import org.springframework.cloud"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMPutInMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMPutInMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMPutInMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMPutInMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMPutInMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMPutInMaterialClient.java",
+          "context": "package com.supcon.orchid.WOM.client; import com.supcon.orchid.WOM.DTO.WOMPutInMaterialDTO; import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass; import org.springframework.cloud"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMRejectMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMRejectMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMRejectMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMRejectMaterialClient.java"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRejectMaterial",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMRejectMaterialClient.java",
+          "context": "package com.supcon.orchid.WOM.client; import com.supcon.orchid.WOM.DTO.WOMRejectMaterialDTO; import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass; import org.springframework.cloud"
+        },
+        {
+          "dependency": "material-service",
+          "term": "WOMRemainMaterial",
+          "match_type": "path:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/java/com/supcon/orchid/WOM/client/IWOMRemainMaterialClient.java",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/java/com/supcon/orchid/WOM/client/IWOMRemainMaterialClient.java"
+        }
+      ],
+      "callerOnlyHits": [],
+      "nextAction": "Provide a package containing the missing service implementation, then rerun this scan and runtime dependency smoke."
+    },
+    {
+      "id": "process-analysis",
+      "title": "ProcessAnalysis traceability service",
+      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "requiredFor": [
+        "PROD-020"
+      ],
+      "searchCriteria": {
+        "targetTerms": [
+          "ProcessAnalysis",
+          "isProdprocessView",
+          "processBatchViewOut",
+          "analysisiTask",
+          "manualStatActive",
+          "manualStatProcess",
+          "paActiExeLog",
+          "paPrExeLog"
+        ],
+        "moduleTerms": [
+          "serviceName=ProcessAnalysis",
+          "service-name=ProcessAnalysis",
+          "com/supcon/orchid/ProcessAnalysis",
+          "processAnalysis_"
+        ],
+        "knownAdjacentTerms": [
+          "prodprocessView",
+          "makeTaskGraphList",
+          "processExeLogList",
+          "activeExeLogList"
+        ],
+        "callerOnlyHints": [
+          "customEvent.js",
+          "WOM_"
+        ],
+        "archiveContentPathHints": [
+          "processanalysis",
+          "processanalysis_",
+          "trace",
+          "traceability",
+          "analysisparam",
+          "paramstatrec",
+          "paramdetail",
+          "paacti",
+          "papr",
+          "exelogsecond",
+          "prodprocess",
+          "maketasklist",
+          "maketaskgraphlist",
+          "processexelog",
+          "activeexelog",
+          "maketaskexeculist"
+        ],
+        "implementationExcludeHints": [
+          "WOM_",
+          "wom",
+          "supPlant-WOM",
+          "customEvent.js",
+          "produceTask"
+        ]
+      },
+      "targetHitCount": 0,
+      "moduleHitCount": 0,
+      "knownAdjacentHitCount": 0,
+      "callerOnlyHitCount": 120,
+      "implementationCandidateCount": 0,
+      "implementationCandidates": [],
+      "targetHits": [],
+      "moduleHits": [],
+      "knownAdjacentHits": [],
+      "callerOnlyHits": [
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip",
+          "entry": "XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/pom.xml",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/pom.xml"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMActiExelogInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMActiExelogInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatMaterilPartInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatMaterilPartInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchDealInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchDealInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchInfoInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchInfoInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchMatNeedInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchMatNeedInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchMaterilInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchMaterilInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchingMateriInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchingMateriInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchingTaskInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMBatchingTaskInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMCheckRecordInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMCheckRecordInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMEleSignatureInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMEleSignatureInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMInterfaceInfosInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMInterfaceInfosInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMItemReviceRecoInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMItemReviceRecoInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakPreOrdrHeadInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakPreOrdrHeadInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakPreOrdrPartInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakPreOrdrPartInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakeBatOrdHeadInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakeBatOrdHeadInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakeBatOrdPartInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMakeBatOrdPartInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMatConsumRecodInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMatConsumRecodInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMatOutptRecordInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMatOutptRecordInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMMqinfoRelInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMMqinfoRelInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutMateDetailInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutMateDetailInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputDetailInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputDetailInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMOutputMaterialInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPackageQrcodeInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPackageQrcodeInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePareNeedInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePareNeedInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePareNeedRefInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePareNeedRefInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePraNeedPartInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePraNeedPartInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePraOrderInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrePraOrderInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepMatralPartInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepMatralPartInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepMatralRecoInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepMatralRecoInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepreMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrepreMaterialInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrintDateInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPrintDateInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProCheckDetailInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProCheckDetailInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcReportInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcReportInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcessExelogInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcessExelogInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProdTaskExelogInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProdTaskExelogInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProduceTaskInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProduceTaskInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "path:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
+          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutMateiDetailInterface",
+          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutMateiDetailInterface"
+        }
+      ],
+      "nextAction": "Provide a package containing the missing service implementation, then rerun this scan and runtime dependency smoke."
+    }
+  ],
+  "evidence": {
+    "method": "Read-only local package/source scan over configured roots; no archives are extracted into the repository.",
+    "limitations": [
+      "Encrypted or unsupported archives are recorded as unsupportedArchives.",
+      "Default nested-depth is 1 so vendor packages nested one level inside delivery archives are included.",
+      "Archive entry path scanning is capped at 2000000 entries.",
+      "Archive SHA-256 is only computed for files up to 0 bytes.",
+      "Archive entry paths are scanned broadly; archive text content is read only when the entry/source path matches dependency-specific archiveContentPathHints.",
+      "Archive text content reads that match archiveContentPathHints are capped at 100000 entries.",
+      "Nested archives are expanded only when their path matches firstPartyArchiveHints or dependency-specific archiveContentPathHints; vendor archive paths are counted but not expanded.",
+      "Tar archives larger than 52428800 bytes are recorded but not expanded by default.",
+      "Nested archives larger than 20971520 bytes are listed but not expanded by default.",
+      "A candidate hit is not acceptance; runtime Nacos/API/PostgreSQL marker verification is still required."
+    ]
+  }
+}

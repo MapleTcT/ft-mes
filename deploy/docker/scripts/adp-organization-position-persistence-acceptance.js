@@ -6,7 +6,7 @@ const path = require("path");
 const { execFileSync } = require("child_process");
 const { chromium, request } = require("playwright");
 
-const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
+const baseUrl = (process.env.ADP_BASE_URL || "http://100.99.133.43:18080").replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
 const headless = process.env.ADP_HEADLESS !== "false";
@@ -17,7 +17,7 @@ const outputPath =
   process.env.ADP_ORGANIZATION_POSITION_PERSISTENCE_OUTPUT ||
   path.join(outputDir, "organization-position-persistence-results.json");
 
-const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@10.11.100.17";
+const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@100.99.133.43";
 const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1";
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";

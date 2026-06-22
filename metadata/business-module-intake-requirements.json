@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T08:30:00Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "production",
+  "overallStatus": "BLOCKED",
+  "purpose": "Define what a later business package, endpoint recovery, external client or product decision must provide before any currently blocked production-module function can be promoted to PASS.",
+  "sourceReports": [
+    "metadata/production-module-backlog.json",
+    "metadata/production-module-blockers.json",
+    "metadata/business-dependency-contracts.json",
+    "metadata/business-dependency-readiness-smoke.json",
+    "metadata/business-dependency-package-scan.json",
+    "metadata/production-export-gap-breakdown.json",
+    "metadata/wom-toolbar-action-coverage.json",
+    "metadata/wom-qrcode-route-probe.json"
+  ],
+  "summary": {
+    "requirements": 9,
+    "blocked": 9,
+    "productDecision": 2,
+    "runtimeEndpointRecovery": 1,
+    "externalClientAdapter": 1,
+    "servicePackage": 2,
+    "servicePackageAndScopeDecision": 2,
+    "exportImplementation": 1,
+    "postgresCompatibilityGap": 0,
+    "requiresRealBrowserProof": 8,
+    "requiresPostgreSQLProof": 8,
+    "requiresFileResponseProof": 2
+  },
+  "requirements": [
+    {
+      "id": "PROD-ACTION-006",
+      "title": "WOM visible manual production-task create or import entry is not exposed",
+      "status": "BLOCKED",
+      "category": "product-scope-confirmation",
+      "sourceBacklogId": "PROD-ACTION-006",
+      "linkedBlockerCases": [],
+      "requiredIntakeType": "product-decision",
+      "dependencyContractIds": [],
+      "requiredPackages": [],
+      "packageSearchTerms": [
+        "makeTaskEdit/save",
+        "makeTaskEdit/submit",
+        "importMainXls",
+        "downloadXls",
+        "produceTaskCreated2"
+      ],
+      "frontendEntrypoints": [
+        "WOM_1.0.0_produceTask_makeTaskList",
+        "makeTaskEdit",
+        "makeTaskList import/create toolbar action"
+      ],
+      "apiEndpoints": [
+        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/save",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit",
+        "GET /msService/WOM/produceTask/produceTask/importMainXls",
+        "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2"
+      ],
+      "persistenceExpectation": "REQUIRED_IF_IN_SCOPE",
+      "targetTables": [
+        "wom_produce_tasks",
+        "workflow/runtime task tables selected by recovered create flow"
+      ],
+      "requiredEvidence": [
+        "product-owner scope decision for manual create/import versus daily-plan creation",
+        "real-browser visible entry proof if the flow is in scope",
+        "API request and response with ADP_E2E marker",
+        "PostgreSQL before/after query proving wom_produce_tasks and workflow target writes"
+      ],
+      "recheckCommands": [
+        "make discover-production-actions ADP_BROWSER_BASE_URL=http://222.88.185.146:18080",
+        "make persistence-acceptance-check"
+      ],
+      "passCriteria": [
+        "Product owner confirms the intended manufacturing-task creation entry.",
+        "If manual create/import is required, the real runtime/menu/button entry is visible and not a fake platform-only shortcut.",
+        "A marker create/import action writes the target PostgreSQL tables.",
+        "If out of scope, acceptance assets explicitly reclassify the action with product evidence."
+      ],
+      "nonSolutions": [
+        "Do not mark manual create/import PASS from produceTaskCreated2 alone.",
+        "Do not expose a fake save button without product-confirmed payload and PostgreSQL marker proof."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ]
+    },
+    {
+      "id": "PROD-ACTION-007",
+      "title": "public produceTaskCreated explicitly disabled pending product decision",
+      "status": "BLOCKED",
+      "category": "product-scope-confirmation",
+      "sourceBacklogId": "PROD-ACTION-007",
+      "linkedBlockerCases": [],
+      "requiredIntakeType": "product-decision",
+      "dependencyContractIds": [],
+      "requiredPackages": [],
+      "packageSearchTerms": [
+        "produceTaskCreated",
+        "creatProTask",
+        "WOMProduceTaskController",
+        "WOMProduceTaskServiceImpl"
+      ],
+      "frontendEntrypoints": [
+        "public integration contract",
+        "accepted replacement path produceTaskCreated2"
+      ],
+      "apiEndpoints": [
+        "POST /msService/public/WOM/produceTask/produceTask/produceTaskCreated"
+      ],
+      "persistenceExpectation": "REQUIRED_IF_SUPPORTED",
+      "targetTables": [
+        "wom_produce_tasks",
+        "workflow/runtime task tables selected by restored implementation"
+      ],
+      "requiredEvidence": [
+        "product-owner supported-vs-deprecated decision",
+        "explicit disabled response remains documented if deprecated",
+        "API marker request and response if restored",
+        "PostgreSQL marker count proving zero writes for disabled behavior or real writes for restored behavior"
+      ],
+      "recheckCommands": [
+        "make probe-wom-public-produce-task-created-noop",
+        "make persistence-acceptance-check"
+      ],
+      "passCriteria": [
+        "The endpoint is either formally deprecated with explicit failure behavior, or restored as a supported integration contract.",
+        "If restored, a unique ADP_E2E marker writes wom_produce_tasks and required workflow tables.",
+        "produceTaskCreated2 evidence remains separate and is not used to pass this public endpoint."
+      ],
+      "nonSolutions": [
+        "Do not mark HTTP 200/code 400 disabled behavior as functional PASS.",
+        "Do not count produceTaskCreated2 as proof that public produceTaskCreated works."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/wom-public-produce-task-created-analysis.json",
+        "metadata/wom-public-produce-task-created-noop-probe.json",
+        "docs/backend-table-audit/wom-public-produce-task-created-analysis.md"
+      ]
+    },
+    {
+      "id": "PROD-ACTION-008",
+      "title": "WOM makeTaskList QR code generation endpoint is missing",
+      "status": "BLOCKED",
+      "category": "missing-runtime-endpoint",
+      "sourceBacklogId": "PROD-ACTION-008",
+      "linkedBlockerCases": [],
+      "requiredIntakeType": "runtime-endpoint-recovery",
+      "dependencyContractIds": [],
+      "requiredPackages": [
+        "WOM printManage / QR endpoint package or source module"
+      ],
+      "packageSearchTerms": [
+        "printManage",
+        "generateQrCode",
+        "generateCode",
+        "backfill-printInfo",
+        "QrCode"
+      ],
+      "frontendEntrypoints": [
+        "WOM_1.0.0_produceTask_makeTaskList toolbar action generate-qrcode"
+      ],
+      "apiEndpoints": [
+        "GET /msService/WOM/printManage/printDate/generateCode",
+        "POST /msService/WOM/printManage/generateQrCode",
+        "POST /msService/WOM/printManage/backfill-printInfo"
+      ],
+      "persistenceExpectation": "REQUIRED_IF_QR_METADATA_PERSISTS",
+      "targetTables": [
+        "baseset_printers",
+        "baseset_qr_code_types",
+        "baseset_qr_detail_infos",
+        "confirmed QR/print metadata table from recovered endpoint"
+      ],
+      "requiredEvidence": [
+        "real-browser toolbar click from makeTaskList",
+        "endpoint probes no longer return HTTP 404",
+        "request payload, response body and visible Chinese user feedback",
+        "PostgreSQL marker proof if QR or print metadata is persisted, otherwise NOT_APPLICABLE file/print evidence"
+      ],
+      "recheckCommands": [
+        "make probe-wom-qrcode-route",
+        "make wom-toolbar-action-coverage-check",
+        "make smoke-wom-toolbar-row ADP_BASE_URL=http://222.88.185.146:18080"
+      ],
+      "passCriteria": [
+        "The toolbar no longer calls missing 404 printManage endpoints.",
+        "A recovered WOM endpoint/package handles generateQrCode through the normal gateway path.",
+        "The browser flow records usable QR/file/print or PostgreSQL metadata evidence."
+      ],
+      "nonSolutions": [
+        "Do not count opening the QR dialog shell as PASS while endpoints still return 404.",
+        "Do not seed printer rows alone without the missing endpoint implementation."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/wom-toolbar-action-coverage.json",
+        "docs/wom-toolbar-action-coverage.md",
+        "metadata/wom-qrcode-route-probe.json"
+      ]
+    },
+    {
+      "id": "PROD-010",
+      "title": "Batch formula visible manual edit entry requires external Batch client",
+      "status": "BLOCKED",
+      "category": "external-client-required",
+      "sourceBacklogId": "PROD-010",
+      "linkedBlockerCases": [
+        "PROD-010"
+      ],
+      "requiredIntakeType": "external-client-adapter",
+      "dependencyContractIds": [],
+      "requiredPackages": [
+        "External Batch client",
+        "Batch WebSocket or ActiveX bridge"
+      ],
+      "packageSearchTerms": [
+        "batchFormulaEdit",
+        "WebSocket",
+        "ActiveX",
+        "rm_formulas",
+        "rm_formula_processes",
+        "rm_process_actives"
+      ],
+      "frontendEntrypoints": [
+        "RM_1.0.0_formula_batchFormulaList",
+        "batchFormulaEdit opened by real external client flow"
+      ],
+      "apiEndpoints": [
+        "Batch client driven save/submit endpoint captured during real flow"
+      ],
+      "persistenceExpectation": "REQUIRED",
+      "targetTables": [
+        "rm_formulas",
+        "rm_formula_processes",
+        "rm_process_actives"
+      ],
+      "requiredEvidence": [
+        "real external-client driven browser entry",
+        "WebSocket/ActiveX bridge evidence where applicable",
+        "API request and response with ADP_E2E marker",
+        "PostgreSQL marker query against RM formula and process/activity tables"
+      ],
+      "recheckCommands": [
+        "make smoke-business-page",
+        "manual: provision external Batch client, trigger batchFormulaEdit, save with ADP_E2E marker and query RM target tables"
+      ],
+      "passCriteria": [
+        "The real external-client entry opens batchFormulaEdit.",
+        "The marker edit/save writes RM formula and process/activity tables.",
+        "Browser, API, backend and PostgreSQL evidence are added to acceptance reports."
+      ],
+      "nonSolutions": [
+        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
+        "Do not mark PASS from batch/sync import evidence alone."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/production-module-test-cases.json",
+        "docs/frontend-functional-test-report.md"
+      ]
+    },
+    {
+      "id": "PROD-019",
+      "title": "QCS bad-quantity and material inventory write-back remain unresolved",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "sourceBacklogId": "PROD-019",
+      "linkedBlockerCases": [
+        "PROD-019"
+      ],
+      "requiredIntakeType": "service-package-and-scope-decision",
+      "dependencyContractIds": [
+        "material-service"
+      ],
+      "requiredPackages": [
+        "material warehouse/inventory service package"
+      ],
+      "packageSearchTerms": [
+        "checkProdResult",
+        "generateProduceOutSing",
+        "produceOutSingle",
+        "material/foreign/foreign",
+        "stock-in",
+        "inventory"
+      ],
+      "frontendEntrypoints": [
+        "QCS report effective flow",
+        "WOM report-work inventory boundary"
+      ],
+      "apiEndpoints": [
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+      ],
+      "persistenceExpectation": "REQUIRED",
+      "targetTables": [
+        "confirmed material stock-in table",
+        "confirmed material inventory table"
+      ],
+      "requiredEvidence": [
+        "material service package candidate scan",
+        "healthy Nacos prod material service",
+        "endpoint probes no longer return tenant-service 503",
+        "real-browser or authenticated API marker flow for the material boundary",
+        "product decision for standalone bad-quantity route/table if required",
+        "PostgreSQL marker write to confirmed stock-in or inventory table"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: run material checkProdResult/generateProduceOutSing marker flow and query target stock-in tables"
+      ],
+      "passCriteria": [
+        "The material service contract is READY.",
+        "Inventory or stock-in target tables are mapped.",
+        "A marker flow proves the material write-back boundary in PostgreSQL.",
+        "Standalone bad quantity is tested only after product/package evidence defines it."
+      ],
+      "nonSolutions": [
+        "Do not treat QCS/WOM state backfill as inventory proof.",
+        "Do not invent a bad-quantity column without a recovered product route/table."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/business-dependency-contracts.json",
+        "metadata/material-service-dependency-analysis.json",
+        "metadata/wom-bad-quantity-analysis.json"
+      ]
+    },
+    {
+      "id": "PROD-020",
+      "title": "ProcessAnalysis traceability service is missing",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "sourceBacklogId": "PROD-020",
+      "linkedBlockerCases": [
+        "PROD-020"
+      ],
+      "requiredIntakeType": "service-package",
+      "dependencyContractIds": [
+        "process-analysis"
+      ],
+      "requiredPackages": [
+        "ProcessAnalysis traceability service package"
+      ],
+      "packageSearchTerms": [
+        "ProcessAnalysis",
+        "isProdprocessView",
+        "processBatchViewOut",
+        "analysisiTask",
+        "manualStatActive",
+        "manualStatProcess"
+      ],
+      "frontendEntrypoints": [
+        "WOM makeTaskList traceability button",
+        "processBatchViewOut"
+      ],
+      "apiEndpoints": [
+        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
+        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+        "GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess"
+      ],
+      "persistenceExpectation": "QUERY_AND_RUNTIME_TABLE_PROOF",
+      "targetTables": [
+        "ProcessAnalysis runtime/menu tables",
+        "confirmed ProcessAnalysis traceability tables"
+      ],
+      "requiredEvidence": [
+        "ProcessAnalysis package candidate scan",
+        "healthy Nacos prod ProcessAnalysis service",
+        "runtime_view/menu/table counts greater than zero",
+        "real-browser WOM traceability button opens marker batch page",
+        "PostgreSQL runtime and target table query evidence"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: open processBatchViewOut from the real WOM trace button with ADP_E2E marker batch"
+      ],
+      "passCriteria": [
+        "The process-analysis contract is READY.",
+        "Traceability runtime/menu/table metadata is present.",
+        "Authenticated endpoints return successful responses instead of 503.",
+        "The real WOM trace button reaches the target page with marker data."
+      ],
+      "nonSolutions": [
+        "Do not patch WOM alone and call traceability complete.",
+        "Do not use direct URL reachability without service registration and DB evidence."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/business-dependency-contracts.json",
+        "metadata/processanalysis-dependency-analysis.json",
+        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
+      ]
+    },
+    {
+      "id": "PROD-021",
+      "title": "Full report-work remains blocked at bad-quantity scope and material boundary",
+      "status": "BLOCKED",
+      "category": "composite-service-and-scope",
+      "sourceBacklogId": "PROD-021",
+      "linkedBlockerCases": [
+        "PROD-021"
+      ],
+      "requiredIntakeType": "service-package-and-scope-decision",
+      "dependencyContractIds": [
+        "material-service"
+      ],
+      "requiredPackages": [
+        "material warehouse/inventory service package"
+      ],
+      "packageSearchTerms": [
+        "checkProdResult",
+        "generateProduceOutSing",
+        "stock-in",
+        "inventory",
+        "bad quantity"
+      ],
+      "frontendEntrypoints": [
+        "WOM report-work pages",
+        "QCS/WOM material inventory boundary"
+      ],
+      "apiEndpoints": [
+        "accepted WOM report-work endpoints remain regression coverage",
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+      ],
+      "persistenceExpectation": "REQUIRED_FOR_MATERIAL_BOUNDARY",
+      "targetTables": [
+        "existing accepted WOM report-work tables",
+        "confirmed material stock-in or inventory table"
+      ],
+      "requiredEvidence": [
+        "accepted report-work subflows remain PASS",
+        "material service package candidate scan",
+        "healthy Nacos prod material service",
+        "real-browser or authenticated API marker flow for the material inventory boundary",
+        "PostgreSQL marker write to confirmed material table",
+        "product decision for standalone bad-quantity field/route/table if required"
+      ],
+      "recheckCommands": [
+        "make smoke-business-dependencies",
+        "manual: rerun accepted WOM report-work marker flows, then add material inventory marker acceptance"
+      ],
+      "passCriteria": [
+        "Existing report-work subflows still pass.",
+        "The material/inventory boundary is available and marker-tested.",
+        "Standalone bad quantity is accepted only after product/package evidence defines it."
+      ],
+      "nonSolutions": [
+        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
+        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/business-dependency-contracts.json",
+        "metadata/material-service-dependency-analysis.json",
+        "metadata/wom-bad-quantity-analysis.json"
+      ]
+    },
+    {
+      "id": "PROD-022",
+      "title": "Material warehouse/inventory service package is missing",
+      "status": "BLOCKED",
+      "category": "missing-service-package",
+      "sourceBacklogId": "PROD-022",
+      "linkedBlockerCases": [
+        "PROD-022"
+      ],
+      "requiredIntakeType": "service-package",
+      "dependencyContractIds": [
+        "material-service"
+      ],
+      "requiredPackages": [
+        "material warehouse/inventory service package"
+      ],
+      "packageSearchTerms": [
+        "material",
+        "warehouse",
+        "inventory",
+        "checkProdResult",
+        "generateProduceOutSing",
+        "produceOutSingle"
+      ],
+      "frontendEntrypoints": [
+        "WOM/QCS stock-in or inventory write-back flow"
+      ],
+      "apiEndpoints": [
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+      ],
+      "persistenceExpectation": "REQUIRED",
+      "targetTables": [
+        "confirmed material stock-in table",
+        "confirmed material inventory table"
+      ],
+      "requiredEvidence": [
+        "material package candidate scan",
+        "healthy Nacos prod material service",
+        "controller/service/DAO/SQL trace",
+        "real-browser or authenticated API marker flow for stock-in or inventory write-back",
+        "PostgreSQL marker write to confirmed inventory or stock-in table"
+      ],
+      "recheckCommands": [
+        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make smoke-business-dependencies",
+        "manual: run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
+      ],
+      "passCriteria": [
+        "The material-service contract is READY.",
+        "Target material tables are mapped.",
+        "Endpoint and PostgreSQL marker evidence prove the stock-in or inventory write."
+      ],
+      "nonSolutions": [
+        "Do not treat BaseSet material master data or WOM internal material tables as material-service stock-in targets.",
+        "Do not mark PASS from HTTP 200 alone without database write proof."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/business-dependency-contracts.json",
+        "metadata/material-service-dependency-analysis.json",
+        "docs/backend-table-audit/material-service-dependency-analysis.md"
+      ]
+    },
+    {
+      "id": "PROD-023",
+      "title": "Production list data export implementation is missing",
+      "status": "BLOCKED",
+      "category": "missing-export-implementation",
+      "sourceBacklogId": "PROD-023",
+      "linkedBlockerCases": [
+        "PROD-023"
+      ],
+      "requiredIntakeType": "export-implementation",
+      "dependencyContractIds": [],
+      "requiredPackages": [
+        "production list data-export backend implementation",
+        "runtime export button metadata"
+      ],
+      "packageSearchTerms": [
+        "exportExcel",
+        "excelExport",
+        "导出",
+        "downloadXls",
+        "query export workbook"
+      ],
+      "frontendEntrypoints": [
+        "WOM make task list",
+        "RM batch formula list",
+        "WTS work permit list",
+        "QCS inspect report list",
+        "QCS unqualified deal list",
+        "QCS inspect release list"
+      ],
+      "apiEndpoints": [
+        "target list query export endpoints recorded in metadata/production-export-gap-breakdown.json"
+      ],
+      "persistenceExpectation": "NOT_APPLICABLE_FILE_EXPORT",
+      "targetTables": [],
+      "requiredEvidence": [
+        "product-owner export scope decision",
+        "real-browser visible export action for each required list",
+        "runtime layoutJson export action",
+        "backend source hook for list-data export",
+        "non-empty workbook file response with filename, status, size and sample content",
+        "PostgreSQL persistence marked NOT_APPLICABLE for file export"
+      ],
+      "recheckCommands": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=120000 ADP_API_TIMEOUT_MS=30000",
+        "make production-export-gap-breakdown-check"
+      ],
+      "passCriteria": [
+        "Required export scope is confirmed.",
+        "Each required list has visible runtime export action and backend source implementation.",
+        "Real browser/network evidence proves non-empty data workbook responses.",
+        "Acceptance records file response proof instead of pretending export persists rows."
+      ],
+      "nonSolutions": [
+        "Do not accept empty HTTP 200 downloadXls responses as data export.",
+        "Do not confuse import-template download with list-data export."
+      ],
+      "sourceEvidenceRefs": [
+        "metadata/production-module-backlog.json",
+        "metadata/production-module-blockers.json",
+        "metadata/production-export-readiness-smoke.json",
+        "metadata/production-export-gap-breakdown.json",
+        "docs/production-export-gap-breakdown.md"
+      ]
+    }
+  ]
+}

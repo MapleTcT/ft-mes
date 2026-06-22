@@ -1,0 +1,4 @@
+# Replace this with the signed production bucket list before rehearsal.
+# The Windows/package archaeology found these likely ADP/MES buckets.
+mes
+transfer

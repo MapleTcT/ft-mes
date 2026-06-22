@@ -26,11 +26,14 @@ REQUIRED_PATHS = [
     "docs/oracle-to-postgres-transition.md",
     "docs/runtime-validation-scope.md",
     "docs/backend-table-audit-handoff.md",
+    "docs/module-intake-latest-basic-modules.md",
     "docs/functional-persistence-acceptance.md",
     "docs/frontend-functional-test-report.md",
     "docs/backend-table-audit/persistence-acceptance.md",
     "docs/backend-table-audit/business-production.md",
     "docs/production-module-functional-test-cases.md",
+    "docs/production-module-backlog.md",
+    "docs/business-module-intake-requirements.md",
     "docs/current-content-inventory.md",
     "docs/backend-module-dependency-inventory.md",
     "docs/oracle-migration-backlog.md",
@@ -38,43 +41,100 @@ REQUIRED_PATHS = [
     "docs/postgres-migration-index.md",
     "docs/production-migration-readiness.md",
     "docs/production-migration/README.md",
+    "docs/production-migration/rehearsal-plan.md",
     "docs/production-migration/rollback-runbook.md",
     "docs/production-migration/license-strategy.md",
     "docs/production-migration/minio-migration-runbook.md",
     "docs/production-migration/keycloak-production-runbook.md",
     "docs/production-migration/nacos-runtime-patch-runbook.md",
+    "docs/production-migration/runtime-patch-manifest.md",
     "docs/production-migration/network-tls-checklist.md",
     "docs/production-migration/security-hardening-checklist.md",
     "docs/production-migration/business-smoke-signoff-template.md",
     "metadata/current-content-inventory.json",
     "metadata/project-goal-acceptance.json",
     "metadata/backend-module-dependency-inventory.json",
+    "metadata/module-intake-latest-basic-modules.json",
     "metadata/oracle-migration-audit.json",
     "metadata/oracle-replacement-status.json",
     "metadata/postgres-migration-inventory.json",
     "metadata/persistence-acceptance.json",
+    "metadata/platform-validation-smoke.json",
     "metadata/production-module-test-cases.json",
+    "metadata/production-module-blockers.json",
+    "metadata/production-module-backlog.json",
+    "metadata/business-module-intake-requirements.json",
+    "metadata/business-dependency-package-scan.json",
+    "metadata/production-export-readiness-smoke.json",
     "metadata/production-migration-readiness.json",
+    "metadata/production-cutover-gate.json",
+    "metadata/production-rehearsal-plan.json",
+    "metadata/runtime-patch-manifest.json",
     ".github/workflows/verify.yml",
     "scripts/create-backend-source-module.py",
     "scripts/precheck-module-intake.py",
+    "scripts/verify-module-intake-candidate-report.py",
+    "scripts/verify-module-intake-precheck.py",
     "scripts/verify-source-modules.py",
     "scripts/generate-backend-dependency-inventory.py",
     "scripts/generate-oracle-replacement-status.py",
     "scripts/generate-postgres-migration-inventory.py",
     "scripts/verify-project-goal-acceptance.py",
     "scripts/verify-persistence-acceptance.py",
+    "scripts/verify-platform-validation-smoke.py",
     "scripts/verify-production-module-test-cases.py",
+    "scripts/verify-production-module-blockers.py",
+    "scripts/verify-production-module-backlog.py",
+    "scripts/verify-business-module-intake-requirements.py",
+    "scripts/scan-business-dependency-packages.py",
+    "scripts/verify-business-dependency-package-scan.py",
+    "scripts/verify-production-export-readiness.py",
     "scripts/verify-production-migration-readiness.py",
+    "scripts/verify-production-cutover-gate.py",
+    "scripts/refresh-production-source-evidence.py",
+    "scripts/generate-production-rehearsal-plan.py",
+    "scripts/generate-runtime-patch-manifest.py",
     "deploy/database/production-migration/README.md",
     "deploy/database/production-migration/.env.example",
     "deploy/database/production-migration/table-list.example.txt",
+    "deploy/database/production-migration/source-checksums.example.tsv",
+    "deploy/database/production-migration/target-checksums.example.tsv",
     "deploy/database/production-migration/scripts/run-target-preflight.sh",
+    "deploy/database/production-migration/scripts/run-source-inventory.sh",
+    "deploy/database/production-migration/scripts/compare-row-counts.py",
+    "deploy/database/production-migration/scripts/compare-checksums.py",
     "deploy/database/production-migration/sql/target-schema-inventory.sql",
     "deploy/database/production-migration/sql/target-row-counts-template.sql",
     "deploy/database/production-migration/sql/target-checksum-template.sql",
+    "deploy/minio/production-migration/README.md",
+    "deploy/minio/production-migration/.env.example",
+    "deploy/minio/production-migration/bucket-list.example.txt",
+    "deploy/minio/production-migration/scripts/run-bucket-inventory.sh",
+    "deploy/minio/production-migration/scripts/normalize-mc-ls-json.py",
+    "deploy/minio/production-migration/scripts/compare-bucket-inventory.py",
+    "deploy/keycloak/production-migration/README.md",
+    "deploy/keycloak/production-migration/.env.example",
+    "deploy/keycloak/production-migration/scripts/export-realm-inventory.sh",
+    "deploy/keycloak/production-migration/scripts/normalize-realm-inventory.py",
+    "deploy/keycloak/production-migration/scripts/compare-realm-inventory.py",
+    "deploy/rollback/production-migration/README.md",
+    "deploy/rollback/production-migration/rollback-evidence.example.json",
+    "deploy/rollback/production-migration/scripts/validate-rollback-evidence.py",
+    "deploy/license/production-migration/README.md",
+    "deploy/license/production-migration/license-decision.example.json",
+    "deploy/license/production-migration/scripts/validate-license-decision.py",
+    "deploy/network/production-migration/README.md",
+    "deploy/network/production-migration/network-tls-plan.example.json",
+    "deploy/network/production-migration/scripts/validate-network-tls-plan.py",
+    "deploy/security/production-migration/README.md",
+    "deploy/security/production-migration/security-hardening-plan.example.json",
+    "deploy/security/production-migration/scripts/validate-security-hardening-plan.py",
+    "deploy/business-smoke/production-migration/README.md",
+    "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
+    "deploy/business-smoke/production-migration/scripts/validate-business-smoke-signoff.py",
     "deploy/docker/scripts/adp-platform-validation-smoke.js",
     "deploy/docker/scripts/adp-production-action-discovery.js",
+    "deploy/docker/scripts/adp-production-export-readiness-smoke.js",
     "deploy/docker/scripts/patch-eam-reactapi-ready.py",
 ]
 
@@ -84,6 +144,8 @@ REQUIRED_TEXT = {
         "必须先验证真实前端行为",
         "真实落到 PostgreSQL",
         "不能只凭代码推断",
+        "不能跳到写文档结束",
+        "可交接、可复验、可继续推进",
     ],
     "docs/functional-persistence-acceptance.md": [
         "本次项目固定指令",
@@ -91,6 +153,8 @@ REQUIRED_TEXT = {
         "真实前端页面或等效 E2E",
         "唯一 marker",
         "metadata/persistence-acceptance.json",
+        "不能因为启动失败就跳到写文档结束",
+        "业务动作是否真实落库",
     ],
     "README.md": [
         "项目工作指令",
@@ -102,7 +166,20 @@ REQUIRED_TEXT = {
 ALLOWED_BINARY_FILES = {
     "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
     "deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar",
+    "deploy/docker/patches/rm-config-defaults/rm-config-defaults.jar",
+    "deploy/docker/patches/scaffold-dbp-postgresql-line/scaffold-dbp-postgresql-line.jar",
+    "deploy/docker/patches/scaffold-dbp-postgresql-url/scaffold-dbp-postgresql-url.jar",
     "deploy/docker/patches/scdog-test-bypass/lib/libSCDog.so",
+    "deploy/docker/patches/wom-config-default/wom-config-default.jar",
+}
+
+ALLOWED_GENERATED_FILES_WITH_SOURCE = {
+    "deploy/docker/patches/orgmanagement-standalone-auth-tasks/classes/com/supcon/supfusion/auth/service/task/AuthOnlionLoginTask.class": (
+        "deploy/docker/patches/orgmanagement-standalone-auth-tasks/src/com/supcon/supfusion/auth/service/task/AuthOnlionLoginTask.java"
+    ),
+    "deploy/docker/patches/signature-log-service-fallback/classes/com/supcon/supfusion/signature/services/service/impl/SignatureLogServiceImpl.class": (
+        "deploy/docker/patches/signature-log-service-fallback/src/com/supcon/supfusion/signature/services/service/impl/SignatureLogServiceImpl.java"
+    ),
 }
 
 BINARY_SUFFIXES = {
@@ -116,6 +193,45 @@ BINARY_SUFFIXES = {
     ".zip",
     ".7z",
     ".rar",
+}
+
+REQUIRED_GITIGNORE_PATTERNS = {
+    "**/.DS_Store",
+    "__pycache__/",
+    "*.pyc",
+    "/metadata/tmp/",
+    "/metadata/*.log",
+    "/metadata/*.cache",
+    "/test-environment-smoke.json",
+    "*.class",
+    "*.jar",
+    "*.war",
+    "*.ear",
+    "*.exe",
+    "*.dll",
+    "*.so",
+    "*.dylib",
+    "/logs/",
+    "/data/",
+    "/dist/",
+    "**/target/",
+    "/deploy/docker/patches/*/build/",
+    "/node_modules/",
+    "/deploy/docker/.env",
+    "/deploy/docker/nacos-rendered/",
+}
+
+TRACKED_GENERATED_MARKERS = (
+    "/__pycache__/",
+    "/node_modules/",
+    "/target/",
+    "/dist/",
+)
+
+TRACKED_GENERATED_SUFFIXES = {
+    ".pyc",
+    ".class",
+    ".log",
 }
 
 
@@ -260,12 +376,49 @@ def check_large_files(failures: list[str]) -> None:
             fail(f"tracked file exceeds 50 MiB: {relative}", failures)
 
 
+def check_gitignore_policy(failures: list[str]) -> None:
+    gitignore = ROOT / ".gitignore"
+    if not gitignore.exists():
+        fail(".gitignore is required to keep generated artifacts out of the sustainable repo", failures)
+        return
+
+    patterns = {
+        line.strip()
+        for line in gitignore.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+    missing = sorted(REQUIRED_GITIGNORE_PATTERNS - patterns)
+    if missing:
+        fail(".gitignore missing required generated-artifact patterns: " + ", ".join(missing), failures)
+
+
+def check_tracked_generated_artifacts(failures: list[str]) -> None:
+    for generated, source in ALLOWED_GENERATED_FILES_WITH_SOURCE.items():
+        if not (ROOT / generated).exists():
+            fail(f"allowed runtime patch generated file is missing: {generated}", failures)
+        if not (ROOT / source).exists():
+            fail(f"allowed runtime patch generated file must keep adjacent source: {generated} -> {source}", failures)
+
+    for relative in git_ls_files():
+        if relative in ALLOWED_GENERATED_FILES_WITH_SOURCE:
+            continue
+        normalized = f"/{relative}"
+        suffix = Path(relative).suffix.lower()
+        if suffix in TRACKED_GENERATED_SUFFIXES:
+            fail(f"tracked generated artifact is not allowed: {relative}", failures)
+            continue
+        if any(marker in normalized for marker in TRACKED_GENERATED_MARKERS):
+            fail(f"tracked generated directory artifact is not allowed: {relative}", failures)
+
+
 def main() -> int:
     failures: list[str] = []
     check_required_paths(failures)
     check_required_text(failures)
     check_maven_structure(failures)
     check_postgres_defaults(failures)
+    check_gitignore_policy(failures)
+    check_tracked_generated_artifacts(failures)
     check_binary_policy(failures)
     check_large_files(failures)
     if failures:

@@ -85,7 +85,7 @@ make backend-dependency-check
 make module-intake-check INTAKE=/path/to/package-or-dir
 ```
 
-准入预检发现的 Oracle 默认路径、二进制包和 SQL 方言风险，应进入幂等 PostgreSQL SQL、[Oracle 迁移 Backlog](oracle-migration-backlog.md) 或对应模块 backlog。
+准入预检会对目录、源码文件、外层 zip/jar/war/ear 和业务包中常见的内层 zip/jar/war/ear 做有界递归扫描；报告里的 `outer.zip!inner.jar!path` 表示风险来自内层归档。`.7z`、`.rar`、`.tar.gz` 等当前脚本无法检查的压缩包默认是阻断项，不能直接进入可维护源码区。准入预检发现的 Oracle 默认路径、二进制包、不可检查压缩包和 SQL 方言风险，应进入幂等 PostgreSQL SQL、[Oracle 迁移 Backlog](oracle-migration-backlog.md) 或对应模块 backlog。
 
 PostgreSQL 初始化和兼容 SQL 也要维护脚本索引：
 

@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-22T09:08:53.723Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "goalId": "G-012",
+  "overallStatus": "PARTIAL",
+  "summary": {
+    "totalAreas": 6,
+    "pass": 3,
+    "partial": 3,
+    "blocked": 0,
+    "notRun": 0,
+    "notApplicable": 0
+  },
+  "areas": [
+    {
+      "id": "systemcode-dictionary",
+      "title": "系统编码字典项/字典值",
+      "status": "PASS",
+      "route": "/systemcode/#/",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "entity create",
+        "entity update",
+        "value create",
+        "value update",
+        "value delete",
+        "entity delete with child cleanup"
+      ],
+      "apis": [
+        "POST /inter-api/systemcode/v1/entity",
+        "PUT /inter-api/systemcode/v1/entity",
+        "POST /inter-api/systemcode/v1/value",
+        "PUT /inter-api/systemcode/v1/value",
+        "DELETE /inter-api/systemcode/v1/{entityCode}/values/{valueCode}",
+        "DELETE /inter-api/systemcode/v1/entities/{entityCode}"
+      ],
+      "tables": [
+        "sys_entity",
+        "sys_code"
+      ],
+      "evidenceRefs": [
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "deploy/docker/scripts/adp-systemcode-persistence-acceptance.js"
+      ],
+      "recheckCommands": [
+        "make acceptance-systemcode-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCODE_PERSISTENCE_OUTPUT=/tmp/adp-systemcode-persistence-1009913343-current.json"
+      ],
+      "remainingGaps": []
+    },
+    {
+      "id": "systemconfig-app-catalog-value",
+      "title": "系统配置 app 目录/配置项/配置值",
+      "status": "PASS",
+      "route": "/systemconfig/#/sysconfig",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "catalog and config create",
+        "catalog search",
+        "catalog detail read",
+        "config value update",
+        "module/key read",
+        "catalog/config/version delete cleanup"
+      ],
+      "apis": [
+        "GET /inter-api/systemconfig/v1/config/catalog?keyword=&type=2",
+        "POST /open-api/systemconfig/v1/config/catalog",
+        "GET /inter-api/systemconfig/v1/config/catalog/{catalogId}",
+        "PUT /inter-api/systemconfig/v1/config/catalog/value",
+        "GET /inter-api/systemconfig/v1/config/catalog/by/module",
+        "DELETE /open-api/systemconfig/v1/config/catalog/{appCode}/{catalogCode}"
+      ],
+      "tables": [
+        "systemconfig_config_catalog",
+        "systemconfig_config_info",
+        "systemconfig_config_option",
+        "systemconfig_config_version"
+      ],
+      "evidenceRefs": [
+        "metadata/systemconfig-persistence-acceptance.json",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js"
+      ],
+      "recheckCommands": [
+        "make acceptance-systemconfig-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_PERSISTENCE_OUTPUT=metadata/systemconfig-persistence-acceptance.json"
+      ],
+      "remainingGaps": []
+    },
+    {
+      "id": "systemconfig-built-in-catalogs",
+      "title": "系统配置内置目录",
+      "status": "PARTIAL",
+      "route": "/systemconfig/#/sysconfig",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "built-in catalog list observed",
+        "built-in catalog detail read observed",
+        "built-in catalog metadata rows verified in PostgreSQL",
+        "QCS reportShowIndexRange controlled marker save/detail read/module read/PostgreSQL verification/rollback observed",
+        "QCS controlled-config rollback follow-up WOM checkoutBill quality-active regression observed",
+        "built-in catalog sensitivity classification and edit policy boundary observed",
+        "built-in config values redacted to count/hash summaries in committed evidence",
+        "QCS controlled-config rollback follow-up WOM createManuInspect manufacturing-inspection creation observed",
+        "QCS controlled-config rollback follow-up report save/effective qualified WOM backfill observed",
+        "QCS controlled-config rollback follow-up report save/effective unqualified WOM backfill and auto unqualified treatment observed",
+        "RM.MQ brokerUrl controlled marker save/detail read/module read/PostgreSQL verification/rollback observed",
+        "RM controlled-config rollback follow-up batch sync/delete regression observed",
+        "BaseSet.isEnable controlled marker save/detail read/module read/PostgreSQL verification/rollback observed",
+        "BaseSet controlled-config rollback follow-up WOM start regression observed",
+        "BaseSet controlled-config rollback follow-up WOM createManuInspect and QCS inspection generation observed"
+      ],
+      "observedCatalogs": [
+        "用户目录",
+        "打印服务授权",
+        "AK/SK凭证管理",
+        "密码配置",
+        "设备综合效率管理",
+        "notificationWechat.app_show_name",
+        "notificationMobile.mobile_app_show_name",
+        "notificationSMS.jin_cang_app_show_name",
+        "notificationDingtalk.app_show_name",
+        "质量检验配置",
+        "RM.ocd.RM",
+        "BaseSet.ocd.BaseSet"
+      ],
+      "apis": [
+        "GET /inter-api/systemconfig/v1/config/catalog?keyword=&type=2"
+      ],
+      "tables": [
+        "systemconfig_config_catalog",
+        "systemconfig_config_info"
+      ],
+      "evidenceRefs": [
+        "metadata/basic-config-action-matrix.json",
+        "docs/basic-config-action-matrix.md",
+        "scripts/verify-basic-config-action-matrix.py",
+        "metadata/systemconfig-builtins-readiness-smoke.json",
+        "metadata/systemconfig-persistence-acceptance.json",
+        "metadata/systemconfig-controlled-runtime-config-acceptance.json",
+        "metadata/qcs-runtime-config-wom-checkoutbill-regression.json",
+        "deploy/docker/scripts/adp-systemconfig-controlled-runtime-config-acceptance.js",
+        "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+        "metadata/qcs-report-chain-qualified-current.json",
+        "metadata/qcs-report-chain-unqualified-current.json",
+        "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js",
+        "metadata/systemconfig-controlled-runtime-config-rm-current.json",
+        "metadata/rm-runtime-config-batch-sync-regression.json",
+        "metadata/systemconfig-controlled-runtime-config-baseset-current.json",
+        "metadata/baseset-runtime-config-wom-start-regression.json",
+        "metadata/baseset-runtime-config-wom-manu-inspect-regression.json",
+        "deploy/docker/scripts/adp-wom-start-persistence-acceptance.js",
+        "deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js"
+      ],
+      "recheckCommands": [
+        "make smoke-systemconfig-builtins ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_BUILTINS_OUTPUT=metadata/systemconfig-builtins-readiness-smoke.json",
+        "make acceptance-systemconfig-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_PERSISTENCE_OUTPUT=metadata/systemconfig-persistence-acceptance.json",
+        "make acceptance-systemconfig-controlled-runtime-config ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_CONTROLLED_OUTPUT=metadata/systemconfig-controlled-runtime-config-acceptance.json",
+        "make acceptance-wom-checkoutbill-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 WOM_CHECKOUTBILL_PERSISTENCE_OUTPUT=metadata/qcs-runtime-config-wom-checkoutbill-regression.json",
+        "make acceptance-wom-manu-inspect-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 WOM_MANU_INSPECT_PERSISTENCE_OUTPUT=metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
+        "make acceptance-qcs-report-chain-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_MODE=qualified QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-qualified-current.json",
+        "make acceptance-qcs-report-chain-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_MODE=unqualified QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-unqualified-current.json",
+        "make acceptance-systemconfig-controlled-runtime-config ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_CONTROLLED_TARGET_MODE=rm SYSTEMCONFIG_CONTROLLED_OUTPUT=metadata/systemconfig-controlled-runtime-config-rm-current.json",
+        "ADP_BASE_URL=http://100.99.133.43:18080 ADP_E2E_MARKER=ADP_E2E_YYYYMMDD_HHMMSS_RM_CFG_REG ADP_RM_BATCH_FORMULA_ID=<unique-id> ADP_RM_BATCH_SYNC_PERSISTENCE_OUTPUT=metadata/rm-runtime-config-batch-sync-regression.json node deploy/docker/scripts/adp-rm-batch-sync-persistence-acceptance.js",
+        "make acceptance-systemconfig-controlled-runtime-config ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 SYSTEMCONFIG_CONTROLLED_TARGET_MODE=baseset SYSTEMCONFIG_CONTROLLED_OUTPUT=metadata/systemconfig-controlled-runtime-config-baseset-current.json",
+        "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_WOM_START_PERSISTENCE_OUTPUT=metadata/baseset-runtime-config-wom-start-regression.json node deploy/docker/scripts/adp-wom-start-persistence-acceptance.js",
+        "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_PAGE_TIMEOUT_MS=240000 ADP_NAV_WAIT_UNTIL=domcontentloaded ADP_WOM_MANU_INSPECT_PERSISTENCE_OUTPUT=metadata/baseset-runtime-config-wom-manu-inspect-regression.json node deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js"
+      ],
+      "remainingGaps": [
+        "QCS.reportShowIndexRange、RM.MQ brokerUrl 和 BaseSet.isEnable 均已完成单项受控配置保存/回读/PostgreSQL before-after/立即回滚；QCS、RM、BaseSet 对应代表性业务回归已复跑 PASS；其他内置目录配置项仍未逐项 marker 验收。",
+        "动作矩阵已将用户目录、打印服务授权、AK/SK 凭证管理和密码配置标为 READ_ONLY_GUARDED，禁止通用 smoke 改值。",
+        "动作矩阵仍将质量检验配置、RM.ocd.RM 和 BaseSet.ocd.BaseSet 标为 CONTROLLED_MARKER_REQUIRED；已经验证过的单项不代表后续任何新配置项可以跳过专用 marker、回滚方案和业务回归。",
+        "用户目录、打印服务授权、AK/SK 凭证、密码配置等敏感目录禁止由通用 smoke 改值；若要改值，必须先有单独 marker、回滚方案和业务/安全确认。",
+        "BaseSet 仍不能关闭 material 库存/入库 PROD-022 阻断；物料服务/库存写回必须等待对应业务包和 marker 落库验收。"
+      ]
+    },
+    {
+      "id": "configuration-entity-runtime",
+      "title": "实体/模型/低代码配置运行时",
+      "status": "PASS",
+      "route": "configuration/entity runtime pages",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "configuration runtime API readiness observed",
+        "configuration runtime browser pages observed",
+        "ec_* metadata rows verified in PostgreSQL",
+        "runtime_view/runtime_extra_view/runtime_button metadata rows verified in PostgreSQL",
+        "configuration menu metadata verified in PostgreSQL",
+        "custom-property model mapping enable/edit/restore/disable marker acceptance observed",
+        "entity/model create/edit/delete marker acceptance observed through real browser-page context and PostgreSQL before/after SQL",
+        "entity/model controlled cleanup left marker ec_entity/ec_model/ec_property rows at 0"
+      ],
+      "apis": [
+        "GET /inter-api/customProperty/modelManage/list",
+        "POST /inter-api/customProperty/modelManage/batcheUpdateEnabledStatus",
+        "POST /inter-api/customProperty/modelManage/save",
+        "GET /inter-api/customProperty/tree?type=module",
+        "POST /msService/ec/entity/save",
+        "POST /msService/ec/model/save",
+        "POST /msService/ec/model/ordinaryDelete",
+        "POST /msService/ec/entity/ordinaryDelete"
+      ],
+      "tables": [
+        "ec_entity",
+        "ec_model",
+        "ec_field",
+        "ec_view",
+        "ec_module",
+        "runtime_view",
+        "runtime_extra_view",
+        "runtime_button",
+        "rbac_menuinfo",
+        "base_cp_model_mapping",
+        "base_cp_view_mapping",
+        "runtime_property",
+        "project_property",
+        "ec_property",
+        "information_schema.tables"
+      ],
+      "evidenceRefs": [
+        "metadata/basic-config-action-matrix.json",
+        "docs/basic-config-action-matrix.md",
+        "scripts/verify-basic-config-action-matrix.py",
+        "metadata/runtime-configuration-readiness-smoke.json",
+        "deploy/docker/scripts/adp-runtime-configuration-readiness-smoke.js",
+        "metadata/custom-property-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-custom-property-persistence-acceptance.js",
+        "deploy/docker/postgres/init/169-custom-property-project-property-compat.sql",
+        "docs/postgres-migration-index.md",
+        "metadata/postgres-migration-inventory.json",
+        "docs/postgres-migration-watch-rationale.md",
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/entity-model-config-crud-readiness-probe.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js",
+        "scripts/verify-entity-model-config-crud-readiness.py",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md"
+      ],
+      "recheckCommands": [
+        "make smoke-runtime-configuration ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 RUNTIME_CONFIG_SMOKE_OUTPUT=metadata/runtime-configuration-readiness-smoke.json",
+        "make acceptance-custom-property-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080 CUSTOM_PROPERTY_ACCEPTANCE_OUTPUT=metadata/custom-property-persistence-acceptance.json ADP_API_TIMEOUT_MS=90000",
+        "make postgres-migration-check",
+        "make smoke-business-page ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://100.99.133.43:18080"
+      ],
+      "remainingGaps": [],
+      "acceptanceEvidence": {
+        "marker": "ADP_E2E_202606221433_ENTITY_MODEL",
+        "report": "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "route": "/msService/ec/engine/msManage",
+        "requests": [
+          "POST /msService/ec/entity/save entityCreate HTTP 200/success=true",
+          "POST /msService/ec/model/save modelCreate HTTP 200/success=true",
+          "POST /msService/ec/entity/save entityEdit HTTP 200/success=true",
+          "POST /msService/ec/model/save modelEdit HTTP 200/success=true",
+          "POST /msService/ec/model/ordinaryDelete HTTP 200/success=true",
+          "POST /msService/ec/entity/ordinaryDelete HTTP 200/success=true"
+        ],
+        "backendTrace": [
+          "EntityController.save/ordinaryDelete -> EntityServiceImpl -> entityDao",
+          "ModelController.save/ordinaryDelete -> ModelServiceImpl -> modelDao/propertyDao",
+          "DtoUtils.getEntity/getModelVO request DTO parsing"
+        ],
+        "postgreSqlEvidence": [
+          "after create ec_entity=1",
+          "after create ec_model=1",
+          "after create inherent ec_property=3",
+          "edit marker persisted to entity/model descriptions",
+          "ordinaryDelete soft-deleted entity/model/property rows",
+          "controlled cleanup left entity/model/property/physical table counts at 0"
+        ],
+        "postgresNote": "The PostgreSQL branch currently records entity/model/property metadata; ModelSyncDBUtils does not auto-create the physical DS_E2E_063301 table for PostgreSQL in this report."
+      },
+      "notes": [
+        "This PASS covers runtime/readiness metadata, customProperty mapping and entity/model metadata CRUD. It does not claim PostgreSQL physical model table auto-creation; the acceptance report records that the PostgreSQL branch did not create DS_E2E_063301."
+      ]
+    },
+    {
+      "id": "configuration-physical-model-table",
+      "title": "实体/模型 PostgreSQL 物理表自动创建",
+      "status": "PARTIAL",
+      "route": "/msService/ec/engine/msManage",
+      "requiresPersistence": true,
+      "acceptedOperations": [
+        "entity/model metadata CRUD acceptance observed",
+        "PostgreSQL information_schema physical-table verification SQL captured",
+        "current report explicitly records physical model table was not auto-created"
+      ],
+      "apis": [
+        "POST /msService/ec/model/save",
+        "POST /msService/ec/model/ordinaryDelete"
+      ],
+      "tables": [
+        "ec_model",
+        "ec_property",
+        "information_schema.tables",
+        "generated_model_physical_table"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-config-crud-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js",
+        "metadata/basic-config-action-matrix.json",
+        "docs/basic-config-action-matrix.md",
+        "docs/basic-config-coverage.md"
+      ],
+      "recheckCommands": [
+        "make basic-config-coverage-check",
+        "make basic-config-action-matrix-check",
+        "ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 ADP_ENTITY_MODEL_CONFIG_CRUD_OUTPUT=metadata/entity-model-config-crud-persistence-acceptance.json node deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js"
+      ],
+      "remainingGaps": [
+        "当前 PostgreSQL 验收只证明 ec_entity/ec_model/ec_property 元数据 CRUD；information_schema.tables 未出现 marker 物理模型表。",
+        "需要补 ModelSyncDBUtils PostgreSQL 物理表创建分支或形成正式产品风险接受，并用真实前端 marker 与 PostgreSQL before/after SQL 复验。"
+      ]
+    },
+    {
+      "id": "nacos-keycloak-production-config",
+      "title": "Nacos/Keycloak 生产配置链路",
+      "status": "PARTIAL",
+      "route": "production configuration runbooks",
+      "requiresPersistence": false,
+      "acceptedOperations": [
+        "test-environment Nacos drift smoke fetched prod group configs and verified critical PostgreSQL/JWT/service checks",
+        "test-environment Keycloak/JWT runtime smoke verified realm public key, Nacos JWT sync, gateway login and current-user menu",
+        "secret values are represented only by hashes or presence checks in committed reports"
+      ],
+      "apis": [],
+      "tables": [],
+      "evidenceRefs": [
+        "metadata/basic-config-action-matrix.json",
+        "docs/basic-config-action-matrix.md",
+        "scripts/verify-basic-config-action-matrix.py",
+        "metadata/nacos-config-drift-smoke.json",
+        "metadata/keycloak-jwt-runtime-smoke.json",
+        "docs/production-migration/nacos-runtime-patch-runbook.md",
+        "docs/production-migration/keycloak-production-runbook.md"
+      ],
+      "recheckCommands": [
+        "make smoke-nacos-config ADP_SSH_HOST=100.99.133.43 NACOS_CONFIG_SMOKE_OUTPUT=metadata/nacos-config-drift-smoke.json",
+        "make smoke-keycloak-jwt ADP_SSH_HOST=100.99.133.43 KEYCLOAK_JWT_SMOKE_OUTPUT=metadata/keycloak-jwt-runtime-smoke.json",
+        "make runtime-smoke-reports-check",
+        "make basic-config-coverage-check"
+      ],
+      "remainingGaps": [
+        "生产 Nacos export/diff 尚未执行。",
+        "Keycloak realm 生产迁移、client secret 轮换和登录 smoke 尚未执行。",
+        "生产配置回退/恢复演练仍归入 G-020 迁移前置项。"
+      ]
+    }
+  ]
+}

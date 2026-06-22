@@ -11,7 +11,7 @@ x-app-env: &app-env
   CLOUD_DISCOVERY_GROUP: ${CLOUD_DISCOVERY_GROUP:-prod}
   I18N_HOST: ${I18N_HOST:-i18n}
   I18N_PORT: ${I18N_PORT:-8080}
-  SUPOS_ADDRESS: ${SUPOS_ADDRESS:-http://10.11.100.17:18080}
+  SUPOS_ADDRESS: ${SUPOS_ADDRESS:-http://100.99.133.43:18080}
   SUPOS_SYSTEM_DB_TYPE: ${SUPOS_SYSTEM_DB_TYPE:-postgresql}
   SUPOS_SYSTEM_DB_USE: ${SUPOS_SYSTEM_DB_USE:-true}
   SUPOS_SYSTEM_DB_NAME: ${SUPOS_SYSTEM_DB_NAME:-adp}
@@ -51,6 +51,8 @@ x-app-env: &app-env
   SUPOS_MINIO_ACCESSKEY: ${SUPOS_MINIO_ACCESSKEY:-adpminio}
   SUPOS_MINIO_SECRETKEY: ${SUPOS_MINIO_SECRETKEY:-adpminio123}
   INTEGRATION_SUPOS_ENABLED: ${INTEGRATION_SUPOS_ENABLED:-false}
+  WOM_MES_PRO_BATCH: ${WOM_MES_PRO_BATCH:-false}
+  QCS_AUTO_UNQLF_DEAL: ${QCS_AUTO_UNQLF_DEAL:-manu}
   ADP_REMOTE_I18N_LOG_LEVEL: ${ADP_REMOTE_I18N_LOG_LEVEL:-OFF}
   ADP_SWAGGER_LOG_LEVEL: ${ADP_SWAGGER_LOG_LEVEL:-OFF}
   MONGO_USERNAME: ${MONGO_USERNAME:-root}
@@ -59,7 +61,7 @@ x-app-env: &app-env
   MONGO_PORT: ${MONGO_PORT:-27017}
   MONGO_DBNAME: ${MONGO_DBNAME:-supfusion}
   MONGO_AUTH_DBNAME: ${MONGO_AUTH_DBNAME:-admin}
-  ADP_PUBLIC_HOST: ${ADP_PUBLIC_HOST:-10.11.100.17}
+  ADP_PUBLIC_HOST: ${ADP_PUBLIC_HOST:-100.99.133.43}
   ADP_HTTP_PORT: ${ADP_HTTP_PORT:-18080}
   JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
   JAVA_TOOL_OPTIONS: -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai
@@ -378,6 +380,9 @@ services:
 
   RMMs:
     <<: *java-service
+    environment:
+      <<: *app-env
+      JAVA_OPTS: "${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai} -DRM/RM.Batch.username=${RM_BATCH_USERNAME:-admin} -DRM/RM.Batch.password=${RM_BATCH_PASSWORD:-123456} -DRM/RM.MQ.brokerUrl=${RM_BATCH_MQ_BROKER_HOST:-localhost}"
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar"]
 
   WOMMs:
@@ -437,6 +442,8 @@ services:
       - "${ADP_HTTP_PORT:-18080}:8080"
     volumes:
       - ../../runtime/bap-server/bap-workspace/bap-static:/usr/share/nginx/html:ro
+      - ./assets/module-static:/usr/share/nginx/module-static:ro
+      - ./nginx/gzip.conf:/etc/nginx/conf.d/00-gzip.conf:ro
       - ./nginx/adp.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - gateway

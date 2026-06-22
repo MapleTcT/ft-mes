@@ -1,0 +1,975 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-06-20T21:51:48.198Z",
+  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "areaId": "configuration-entity-runtime",
+  "status": "PASS",
+  "baseUrl": "http://100.99.133.43:18080",
+  "browserBaseUrl": "http://100.99.133.43:18080",
+  "route": "configuration/entity runtime pages",
+  "summary": {
+    "status": "PASS",
+    "apiChecks": 5,
+    "apiPassed": 5,
+    "browserPages": 4,
+    "browserPassed": 4,
+    "browserErrors": 0,
+    "ecEntityRows": 284,
+    "ecModelRows": 768,
+    "ecFieldRows": 52301,
+    "ecViewRows": 2094,
+    "runtimeViewRows": 2094,
+    "runtimeExtraViewRows": 2094,
+    "runtimeButtonRows": 2593
+  },
+  "checks": [
+    {
+      "name": "configuration-api-readiness",
+      "status": "PASS",
+      "evidence": "5/5 API/page endpoints passed"
+    },
+    {
+      "name": "configuration-browser-pages",
+      "status": "PASS",
+      "evidence": "4/4 browser pages passed"
+    },
+    {
+      "name": "configuration-postgres-metadata",
+      "status": "PASS",
+      "evidence": "ec_entity=284>=1; ec_model=768>=1; ec_field=52301>=1; ec_view=2094>=1; ec_module=33>=1; runtime_view=2094>=1; runtime_extra_view=2094>=1; runtime_button=2593>=1; rbac_menuinfo_ec=5>=3; runtime_extra_oid=1>=1"
+    },
+    {
+      "name": "configuration-menu-metadata",
+      "status": "PASS",
+      "evidence": "menuRows=5"
+    },
+    {
+      "name": "configuration-ec-view-samples",
+      "status": "PASS",
+      "evidence": "ecViewRows=40"
+    },
+    {
+      "name": "configuration-runtime-view-samples",
+      "status": "PASS",
+      "evidence": "runtimeRows=40"
+    }
+  ],
+  "apiResults": [
+    {
+      "name": "custom-property-tree",
+      "method": "GET",
+      "path": "/inter-api/customProperty/tree?type=module",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 67,
+      "ok": true
+    },
+    {
+      "name": "service-manager-apps",
+      "method": "GET",
+      "path": "/msService/servicemanager/msModule/supos/app/list",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 1,
+      "ok": true
+    },
+    {
+      "name": "ec-engine-datalist",
+      "method": "GET",
+      "path": "/msService/ec/engine/datalist",
+      "status": 200,
+      "contentType": "application/json;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true
+    },
+    {
+      "name": "ec-engine-msManage",
+      "method": "GET",
+      "path": "/msService/ec/engine/msManage",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true
+    },
+    {
+      "name": "ec-module-msManage",
+      "method": "GET",
+      "path": "/msService/ec/module/msManage",
+      "status": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "nodeCount": 0,
+      "ok": true
+    }
+  ],
+  "browserResults": [
+    {
+      "name": "ec-engine-msManage",
+      "path": "/msService/ec/engine/msManage",
+      "url": "http://100.99.133.43:18080/msService/ec/engine/msManage",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "networkErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "ok": true
+    },
+    {
+      "name": "ec-module-msManage",
+      "path": "/msService/ec/module/msManage",
+      "url": "http://100.99.133.43:18080/msService/ec/module/msManage",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "networkErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "ok": true
+    },
+    {
+      "name": "supplant-service-config",
+      "path": "/supplant/#/serviceConfig",
+      "url": "http://100.99.133.43:18080/supplant/#/serviceConfig",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "networkErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "ok": true
+    },
+    {
+      "name": "supplant-app-config",
+      "path": "/supplant/#/appConfig",
+      "url": "http://100.99.133.43:18080/supplant/#/appConfig",
+      "navigationStatus": 200,
+      "navigationError": null,
+      "visibleError": null,
+      "networkErrors": [],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "ok": true
+    }
+  ],
+  "databaseEvidence": {
+    "countSql": "select 'ec_entity', count(*) from public.ec_entity union all select 'ec_model', count(*) from public.ec_model union all select 'ec_field', count(*) from public.ec_field union all select 'ec_view', count(*) from public.ec_view union all select 'ec_module', count(*) from public.ec_module union all select 'runtime_view', count(*) from public.runtime_view union all select 'runtime_extra_view', count(*) from public.runtime_extra_view union all select 'runtime_button', count(*) from public.runtime_button union all select 'rbac_menuinfo_ec', count(*) from public.rbac_menuinfo where code::text in ('ec_entityConfig','ec_engineManage','ms_ec_projectManage','ec_ManageMs','appManage') or coalesce(url::text,'') like '/msService/ec/%' or coalesce(url::text,'') like '/supplant/#/%Config' union all select 'runtime_extra_oid', count(*) from information_schema.columns where table_schema='public' and table_name='runtime_extra_view' and column_name='view_json' and udt_name='oid'",
+    "menuSql": "select id::text, code::text, coalesce(name::text,''), coalesce(name_display::text,''), coalesce(url::text,''), coalesce(route::text,'') from public.rbac_menuinfo where code::text in ('ec_entityConfig','ec_engineManage','ms_ec_projectManage','ec_ManageMs','appManage') or coalesce(url::text,'') like '/msService/ec/%' or coalesce(url::text,'') like '/supplant/#/%Config' order by code::text limit 40",
+    "runtimeSql": "select code::text, coalesce(title::text,''), coalesce(display_name::text,''), coalesce(url::text,''), coalesce(module_code::text,''), coalesce(entity_code::text,''), coalesce(extra_view::text,'') from public.runtime_view order by code::text limit 40",
+    "ecViewSql": "select code::text, coalesce(title::text,''), coalesce(display_name::text,''), coalesce(url::text,''), coalesce(module_code::text,''), coalesce(entity_code::text,''), coalesce(extra_view::text,'') from public.ec_view order by code::text limit 40",
+    "counts": [
+      {
+        "name": "ec_entity",
+        "count": 284
+      },
+      {
+        "name": "ec_model",
+        "count": 768
+      },
+      {
+        "name": "ec_field",
+        "count": 52301
+      },
+      {
+        "name": "ec_view",
+        "count": 2094
+      },
+      {
+        "name": "ec_module",
+        "count": 33
+      },
+      {
+        "name": "runtime_view",
+        "count": 2094
+      },
+      {
+        "name": "runtime_extra_view",
+        "count": 2094
+      },
+      {
+        "name": "runtime_button",
+        "count": 2593
+      },
+      {
+        "name": "rbac_menuinfo_ec",
+        "count": 5
+      },
+      {
+        "name": "runtime_extra_oid",
+        "count": 1
+      }
+    ],
+    "menuRows": [
+      {
+        "id": "6576396571787780",
+        "code": "appManage",
+        "name": "rbac.MENU_NAME_MANAGE_APP",
+        "nameDisplay": "APP设置",
+        "url": "/supplant/#/appConfig",
+        "route": ""
+      },
+      {
+        "id": "6576396571787778",
+        "code": "ec_ManageMs",
+        "name": "rbac.MENU_NAME_MANAGE_MS",
+        "nameDisplay": "服务配置",
+        "url": "/supplant/#/serviceConfig",
+        "route": ""
+      },
+      {
+        "id": "6576396571787786",
+        "code": "ec_engineManage",
+        "name": "rbac.MENU_NAME_ENGINE_MANAGE",
+        "nameDisplay": "工程期配置",
+        "url": "/msService/ec/engine/msManage",
+        "route": ""
+      },
+      {
+        "id": "6576396571787777",
+        "code": "ec_entityConfig",
+        "name": "rbac.MENU_NAME_ENTITY_CONFIG",
+        "nameDisplay": "运维管理",
+        "url": "",
+        "route": ""
+      },
+      {
+        "id": "6576396571787779",
+        "code": "ms_ec_projectManage",
+        "name": "rbac.MENU_NAME_PROJECT_MANAGE",
+        "nameDisplay": "微服务模块配置",
+        "url": "/msService/ec/module/msManage",
+        "route": ""
+      }
+    ],
+    "ecViewRows": [
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateEdit",
+        "title": "BaseSet.viewtitle.randon1571808084999",
+        "displayName": "BaseSet.viewdisplayName.randon1571808085000",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateList",
+        "title": "BaseSet.viewtitle.randon1571807843474",
+        "displayName": "BaseSet.viewdisplayName.randon1571807843476",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateRef",
+        "title": "BaseSet.viewtitle.randon1591615356025",
+        "displayName": "BaseSet.viewdisplayName.randon1591615356026",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateView",
+        "title": "BaseSet.viewtitle.randon1610007867889",
+        "displayName": "BaseSet.viewdisplayName.randon1610007867890",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchDealList",
+        "title": "BaseSet.viewtitle.randon1571711427995",
+        "displayName": "BaseSet.viewdisplayName.randon1571711427997",
+        "url": "/msService/BaseSet/batchInfo/batchDeal/batchDealList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoList",
+        "title": "BaseSet.viewtitle.randon1571709826684",
+        "displayName": "BaseSet.viewdisplayName.randon1571709826687",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoRef",
+        "title": "BaseSet.viewtitle.randon1584494282683",
+        "displayName": "BaseSet.viewdisplayName.randon1584494282684",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1584494282683",
+        "displayName": "BaseSet.viewdisplayName.randon1584494282684",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_certificate_certLevelRef",
+        "title": "BaseSet.viewtitle.randon1576117398311",
+        "displayName": "BaseSet.viewdisplayName.randon1576117398312",
+        "url": "/msService/BaseSet/certificate/certLevel/certLevelRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_certificate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassEdit",
+        "title": "BaseSet.viewtitle.randon1571380954425",
+        "displayName": "BaseSet.viewdisplayName.randon1571380954426",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFramRef",
+        "title": "BaseSet.viewtitle.randon1571381250627",
+        "displayName": "BaseSet.viewdisplayName.randon1571381250628",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFramRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFramRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1571381250627",
+        "displayName": "BaseSet.viewdisplayName.randon1571381250628",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFramRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFrame",
+        "title": "BaseSet.viewtitle.randon1571829929412",
+        "displayName": "BaseSet.viewdisplayName.randon1571829929412",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFrame",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassLayout",
+        "title": "BaseSet.viewtitle.randon1571829864290",
+        "displayName": "BaseSet.viewdisplayName.randon1571829864290",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassLayoutRef",
+        "title": "BaseSet.viewtitle.randon1571381621550",
+        "displayName": "BaseSet.viewdisplayName.randon1571381621550",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassLayoutRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassTree",
+        "title": "BaseSet.viewtitle.randon1571381097171",
+        "displayName": "BaseSet.viewdisplayName.randon1571381097173",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassTree",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassTreeRef",
+        "title": "BaseSet.viewtitle.randon1571381537478",
+        "displayName": "BaseSet.viewdisplayName.randon1571381537479",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassTreeRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassView",
+        "title": "BaseSet.viewtitle.randon1609811535365",
+        "displayName": "BaseSet.viewdisplayName.randon1609811535367",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcEdit",
+        "title": "BaseSet.viewtitle.randon1571449861786",
+        "displayName": "BaseSet.viewdisplayName.randon1571449861786",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcFram",
+        "title": "BaseSet.viewtitle.randon1571452091347",
+        "displayName": "BaseSet.viewdisplayName.randon1571452091348",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcFram",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcLayout",
+        "title": "BaseSet.viewtitle.randon1571452289854",
+        "displayName": "BaseSet.viewdisplayName.randon1571452289855",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcLayoutRef",
+        "title": "BaseSet.viewtitle.randon1574075039260",
+        "displayName": "BaseSet.viewdisplayName.randon1574075039262",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcLayoutRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcMne",
+        "title": "BaseSet.viewtitle.randon1574246203418",
+        "displayName": "BaseSet.viewdisplayName.randon1574246203420",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcMne",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcPartRef",
+        "title": "BaseSet.viewtitle.randon1574074802729",
+        "displayName": "BaseSet.viewdisplayName.randon1574074802732",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcPartRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcPartRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1574074802729",
+        "displayName": "BaseSet.viewdisplayName.randon1574074802732",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcPartRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcView",
+        "title": "BaseSet.viewtitle.randon1609810945711",
+        "displayName": "BaseSet.viewdisplayName.randon1609810945712",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_conCertificateList",
+        "title": "BaseSet.viewtitle.randon1595465268509",
+        "displayName": "BaseSet.viewdisplayName.randon1595465268510",
+        "url": "/msService/BaseSet/cooperate/conCertificate/conCertificateList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contStaffCertiList",
+        "title": "BaseSet.viewtitle.randon1595477998103",
+        "displayName": "BaseSet.viewdisplayName.randon1595477998104",
+        "url": "/msService/BaseSet/cooperate/contStaffCerti/contStaffCertiList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contStaffCertiRef",
+        "title": "BaseSet.viewtitle.randon1596439534096",
+        "displayName": "BaseSet.viewdisplayName.randon1596439534097",
+        "url": "/msService/BaseSet/cooperate/contStaffCerti/contStaffCertiRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contractorStaffRef",
+        "title": "BaseSet.viewtitle.randon1577423643739",
+        "displayName": "BaseSet.viewdisplayName.randon1577423643740",
+        "url": "/msService/BaseSet/cooperate/contractorStaf/contractorStaffRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_supplierMaterRef",
+        "title": "BaseSet.viewtitle.randon1593325724847",
+        "displayName": "BaseSet.viewdisplayName.randon1593325724847",
+        "url": "/msService/BaseSet/cooperate/supplierMater/supplierMaterRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionEdit",
+        "title": "BaseSet.viewtitle.randon1615981721455",
+        "displayName": "BaseSet.viewdisplayName.randon1615981721456",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionList",
+        "title": "BaseSet.viewtitle.randon1615981655658",
+        "displayName": "BaseSet.viewdisplayName.randon1615981655659",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionRef",
+        "title": "BaseSet.viewtitle.randon1616477129296",
+        "displayName": "BaseSet.viewdisplayName.randon1616477129298",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distribClassTreeRef",
+        "title": "BaseSet.viewtitle.randon1576634855059",
+        "displayName": "BaseSet.viewdisplayName.randon1576634855062",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distribClassTreeRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassEdit",
+        "title": "BaseSet.viewtitle.randon1637202557914",
+        "displayName": "BaseSet.viewtitle.randon1637202394335",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassList",
+        "title": "BaseSet.viewtitle.randon1637202426590",
+        "displayName": "BaseSet.viewdisplayName.randon1637202426591",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassRef",
+        "title": "BaseSet.viewtitle.randon1576635063833",
+        "displayName": "BaseSet.viewdisplayName.randon1576635063835",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassTree",
+        "title": "BaseSet.viewtitle.randon1576476159635",
+        "displayName": "BaseSet.viewdisplayName.randon1576476159638",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassTree",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeLayout",
+        "title": "BaseSet.viewtitle.randon1637202744750",
+        "displayName": "BaseSet.viewtitle.randon1637202599370",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      }
+    ],
+    "runtimeRows": [
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateEdit",
+        "title": "BaseSet.viewtitle.randon1571808084999",
+        "displayName": "BaseSet.viewdisplayName.randon1571808085000",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateList",
+        "title": "BaseSet.viewtitle.randon1571807843474",
+        "displayName": "BaseSet.viewdisplayName.randon1571807843476",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateRef",
+        "title": "BaseSet.viewtitle.randon1591615356025",
+        "displayName": "BaseSet.viewdisplayName.randon1591615356026",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_actBatState_actBatStateView",
+        "title": "BaseSet.viewtitle.randon1610007867889",
+        "displayName": "BaseSet.viewdisplayName.randon1610007867890",
+        "url": "/msService/BaseSet/actBatState/actBatState/actBatStateView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_actBatState",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchDealList",
+        "title": "BaseSet.viewtitle.randon1571711427995",
+        "displayName": "BaseSet.viewdisplayName.randon1571711427997",
+        "url": "/msService/BaseSet/batchInfo/batchDeal/batchDealList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoList",
+        "title": "BaseSet.viewtitle.randon1571709826684",
+        "displayName": "BaseSet.viewdisplayName.randon1571709826687",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoRef",
+        "title": "BaseSet.viewtitle.randon1584494282683",
+        "displayName": "BaseSet.viewdisplayName.randon1584494282684",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_batchInfo_batchInfoRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1584494282683",
+        "displayName": "BaseSet.viewdisplayName.randon1584494282684",
+        "url": "/msService/BaseSet/batchInfo/batchInfo/batchInfoRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_batchInfo",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_certificate_certLevelRef",
+        "title": "BaseSet.viewtitle.randon1576117398311",
+        "displayName": "BaseSet.viewdisplayName.randon1576117398312",
+        "url": "/msService/BaseSet/certificate/certLevel/certLevelRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_certificate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassEdit",
+        "title": "BaseSet.viewtitle.randon1571380954425",
+        "displayName": "BaseSet.viewdisplayName.randon1571380954426",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFramRef",
+        "title": "BaseSet.viewtitle.randon1571381250627",
+        "displayName": "BaseSet.viewdisplayName.randon1571381250628",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFramRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFramRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1571381250627",
+        "displayName": "BaseSet.viewdisplayName.randon1571381250628",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFramRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassFrame",
+        "title": "BaseSet.viewtitle.randon1571829929412",
+        "displayName": "BaseSet.viewdisplayName.randon1571829929412",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassFrame",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassLayout",
+        "title": "BaseSet.viewtitle.randon1571829864290",
+        "displayName": "BaseSet.viewdisplayName.randon1571829864290",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassLayoutRef",
+        "title": "BaseSet.viewtitle.randon1571381621550",
+        "displayName": "BaseSet.viewdisplayName.randon1571381621550",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassLayoutRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassTree",
+        "title": "BaseSet.viewtitle.randon1571381097171",
+        "displayName": "BaseSet.viewdisplayName.randon1571381097173",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassTree",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassTreeRef",
+        "title": "BaseSet.viewtitle.randon1571381537478",
+        "displayName": "BaseSet.viewdisplayName.randon1571381537479",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassTreeRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperateClass_cmcClassView",
+        "title": "BaseSet.viewtitle.randon1609811535365",
+        "displayName": "BaseSet.viewdisplayName.randon1609811535367",
+        "url": "/msService/BaseSet/cooperateClass/cooperateClass/cmcClassView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperateClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcEdit",
+        "title": "BaseSet.viewtitle.randon1571449861786",
+        "displayName": "BaseSet.viewdisplayName.randon1571449861786",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcFram",
+        "title": "BaseSet.viewtitle.randon1571452091347",
+        "displayName": "BaseSet.viewdisplayName.randon1571452091348",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcFram",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcLayout",
+        "title": "BaseSet.viewtitle.randon1571452289854",
+        "displayName": "BaseSet.viewdisplayName.randon1571452289855",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcLayoutRef",
+        "title": "BaseSet.viewtitle.randon1574075039260",
+        "displayName": "BaseSet.viewdisplayName.randon1574075039262",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcLayoutRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcMne",
+        "title": "BaseSet.viewtitle.randon1574246203418",
+        "displayName": "BaseSet.viewdisplayName.randon1574246203420",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcMne",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcPartRef",
+        "title": "BaseSet.viewtitle.randon1574074802729",
+        "displayName": "BaseSet.viewdisplayName.randon1574074802732",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcPartRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcPartRef__mobile__",
+        "title": "BaseSet.viewtitle.randon1574074802729",
+        "displayName": "BaseSet.viewdisplayName.randon1574074802732",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcPartRef__mobile__",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_cmcView",
+        "title": "BaseSet.viewtitle.randon1609810945711",
+        "displayName": "BaseSet.viewdisplayName.randon1609810945712",
+        "url": "/msService/BaseSet/cooperate/cooperate/cmcView",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_conCertificateList",
+        "title": "BaseSet.viewtitle.randon1595465268509",
+        "displayName": "BaseSet.viewdisplayName.randon1595465268510",
+        "url": "/msService/BaseSet/cooperate/conCertificate/conCertificateList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contStaffCertiList",
+        "title": "BaseSet.viewtitle.randon1595477998103",
+        "displayName": "BaseSet.viewdisplayName.randon1595477998104",
+        "url": "/msService/BaseSet/cooperate/contStaffCerti/contStaffCertiList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contStaffCertiRef",
+        "title": "BaseSet.viewtitle.randon1596439534096",
+        "displayName": "BaseSet.viewdisplayName.randon1596439534097",
+        "url": "/msService/BaseSet/cooperate/contStaffCerti/contStaffCertiRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_contractorStaffRef",
+        "title": "BaseSet.viewtitle.randon1577423643739",
+        "displayName": "BaseSet.viewdisplayName.randon1577423643740",
+        "url": "/msService/BaseSet/cooperate/contractorStaf/contractorStaffRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_cooperate_supplierMaterRef",
+        "title": "BaseSet.viewtitle.randon1593325724847",
+        "displayName": "BaseSet.viewdisplayName.randon1593325724847",
+        "url": "/msService/BaseSet/cooperate/supplierMater/supplierMaterRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_cooperate",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionEdit",
+        "title": "BaseSet.viewtitle.randon1615981721455",
+        "displayName": "BaseSet.viewdisplayName.randon1615981721456",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionList",
+        "title": "BaseSet.viewtitle.randon1615981655658",
+        "displayName": "BaseSet.viewdisplayName.randon1615981655659",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_dataConversion_dataConversionRef",
+        "title": "BaseSet.viewtitle.randon1616477129296",
+        "displayName": "BaseSet.viewdisplayName.randon1616477129298",
+        "url": "/msService/BaseSet/dataConversion/dataConversion/dataConversionRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_dataConversion",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distribClassTreeRef",
+        "title": "BaseSet.viewtitle.randon1576634855059",
+        "displayName": "BaseSet.viewdisplayName.randon1576634855062",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distribClassTreeRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassEdit",
+        "title": "BaseSet.viewtitle.randon1637202557914",
+        "displayName": "BaseSet.viewtitle.randon1637202394335",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassEdit",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassList",
+        "title": "BaseSet.viewtitle.randon1637202426590",
+        "displayName": "BaseSet.viewdisplayName.randon1637202426591",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassList",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassRef",
+        "title": "BaseSet.viewtitle.randon1576635063833",
+        "displayName": "BaseSet.viewdisplayName.randon1576635063835",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassRef",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeClassTree",
+        "title": "BaseSet.viewtitle.randon1576476159635",
+        "displayName": "BaseSet.viewdisplayName.randon1576476159638",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeClassTree",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      },
+      {
+        "code": "BaseSet_1.0.0_distributeClass_distributeLayout",
+        "title": "BaseSet.viewtitle.randon1637202744750",
+        "displayName": "BaseSet.viewtitle.randon1637202599370",
+        "url": "/msService/BaseSet/distributeClass/distributeClas/distributeLayout",
+        "moduleCode": "BaseSet_1.0.0",
+        "entityCode": "BaseSet_1.0.0_distributeClass",
+        "extraView": ""
+      }
+    ]
+  },
+  "evidence": "Read-only smoke. It validates current configuration/entity runtime API, page, menu and PostgreSQL metadata availability only; it does not create, edit or delete configuration models."
+}
