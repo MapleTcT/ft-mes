@@ -40,6 +40,301 @@
 			});
 		};
 	</script>
+	<script>
+		(function installWomMakeTaskListCriticalToolbarFallback() {
+			if (window.__ADP_WOM_MAKETASKLIST_HEAD_FALLBACK__) {
+				return;
+			}
+			window.__ADP_WOM_MAKETASKLIST_HEAD_FALLBACK__ = true;
+
+			var gridId = "WOM_1.0.0_produceTask_makeTaskList_produceTask_sdg";
+			var translationFallbacks = {
+				"SupDatagrid.button.error": "请选择一条记录进行操作！",
+				"SupDatagrid.button.tit": "提示",
+				"ec.common.tableNo": "单据编号",
+				"ec.engine.view.dealsuccess": "操作成功",
+				"WOM.custom.random1613701402613": "“尾料量”必须小于“产出量”",
+				"WOM.custom.random1623129307428": "指令单已保持！",
+				"WOM.custom.random1623129401596": "指令单已重启！",
+				"WOM.custom.random1633930723936": "配方未配置检验部门和检验人！",
+				"WOM.custom.randon1575958091725": "只有非批控的工单才可以操作！",
+				"WOM.custom.randon1575958171058": "请先将指令单生效再进行操作！",
+				"WOM.custom.randon1575958246066": "只有【待执行】的指令单可以开始！",
+				"WOM.custom.randon1575958861853": "只有【执行中】或者【已暂停】的指令单可以结束！",
+				"WOM.custom.randon1575959595767": "只有【执行中】的指令单可以保持！",
+				"WOM.custom.randon1575968753369": "只有【已保持】的指令单可以重启！",
+				"WOM.custom.randon1591583966456": "该批次不能提前放料！",
+				"WOM.custom.randon1591599292328": "提前投料失败!",
+				"WOM.custom.randon1591755924139": "操作成功！",
+				"WOM.custom.randon1592209666643": "【{0}】，是否继续放料？",
+				"WOM.custom.randon1596434273127": "是",
+				"WOM.custom.randon1596434330969": "否",
+				"WOM.custom.randon1597044938864": "只有【执行中】的指令单允许提前放料！",
+				"WOM.custom.randon1597055078126": "是否提前放料？",
+				"WOM.custom.randon1597211462498": "所选指令单未生效！",
+				"WOM.custom.randon1597226087560": "该指令单检验状态为【{0}】",
+				"WOM.custom.randon1597227115284": ",检验结论为【{}】",
+				"WOM.custom.randon1597231220469": "处理成功！",
+				"WOM.custom.randon1597309436125": "是否发起检验申请？",
+				"WOM.custom.randon1597996619261": "只有【执行中】的指令单允许请检！",
+				"WOM.custom.randon1598424040495": "指令单已生成产品检验申请单，检验状态【待检】，是否发起检验申请？",
+				"WOM.custom.randon1598676953828": "该指令单产品无需质检！",
+				"WOM.custom.randon1602465957459": "当前指令单不允许该操作！",
+				"WOM.custom.randon1602655303748": "指令单已开始！"
+			};
+			window.InternationalResource = window.InternationalResource || {};
+			Object.keys(translationFallbacks).forEach(function seedTranslation(key) {
+				if (!window.InternationalResource[key] || window.InternationalResource[key] === key) {
+					window.InternationalResource[key] = translationFallbacks[key];
+				}
+			});
+
+			function translate(value) {
+				if (typeof value !== "string") {
+					return value;
+				}
+				if (window.InternationalResource && window.InternationalResource[value]) {
+					return window.InternationalResource[value];
+				}
+				if (translationFallbacks[value]) {
+					return translationFallbacks[value];
+				}
+				return value.replace(/(?:WOM\.custom\.(?:random|randon)\d+|ec\.common\.tableNo|SupDatagrid\.button\.(?:error|tit)|ec\.engine\.view\.dealsuccess)/g, function replaceKey(key) {
+					return (window.InternationalResource && window.InternationalResource[key]) || translationFallbacks[key] || key;
+				});
+			}
+
+			function translateOptions(options) {
+				if (!options || typeof options !== "object") {
+					return options;
+				}
+				var patched = {};
+				Object.keys(options).forEach(function copyOption(key) {
+					var optionValue = options[key];
+					patched[key] = typeof optionValue === "string" ? translate(optionValue) : optionValue;
+				});
+				return patched;
+			}
+
+			function patchReactApi() {
+				var api = window.ReactAPI;
+				var international = api && api.international;
+				if (international && typeof international.getText === "function" && !international.__adpWomMakeTaskListHeadI18nPatched) {
+					var originalGetText = international.getText.bind(international);
+					international.getText = function getTextWithWomHeadFallback(key) {
+						var value = originalGetText.apply(null, arguments);
+						if (!value || value === key || /(?:WOM\.custom\.|ec\.common\.|SupDatagrid\.button\.)/.test(String(value))) {
+							return translate(key);
+						}
+						return translate(value);
+					};
+					international.__adpWomMakeTaskListHeadI18nPatched = true;
+				}
+				if (
+					api &&
+					typeof api.showMessage === "function" &&
+					api.showMessage !== api.__adpWomMakeTaskListHeadShowMessageWrapper
+				) {
+					var originalShowMessage = api.showMessage;
+					var originalShowMessageBound = originalShowMessage.bind(api);
+					api.showMessage = function showMessageWithWomHeadFallback(type, message) {
+						var args = Array.prototype.slice.call(arguments);
+						args = args.map(function translateArg(arg) {
+							return typeof arg === "string" ? translate(arg) : translateOptions(arg);
+						});
+						return originalShowMessageBound.apply(null, args);
+					};
+					api.__adpWomMakeTaskListHeadShowMessageWrapper = api.showMessage;
+					api.__adpWomMakeTaskListHeadMessagePatched = true;
+				}
+				if (api) {
+					["openConfirm", "confirm", "showConfirm"].forEach(function patchConfirm(methodName) {
+						var wrapperKey = "__adpWomMakeTaskListHead" + methodName + "Wrapper";
+						if (typeof api[methodName] !== "function" || api[methodName] === api[wrapperKey]) {
+							return;
+						}
+						var original = api[methodName];
+						var originalBound = original.bind(api);
+						api[methodName] = function confirmWithWomHeadFallback(options) {
+							var args = Array.prototype.slice.call(arguments);
+							args[0] = translateOptions(args[0]);
+							return originalBound.apply(null, args);
+						};
+						api[wrapperKey] = api[methodName];
+					});
+				}
+				window.__ADP_WOM_MAKETASKLIST_HEAD_TRANSLATE__ = true;
+			}
+
+			function getGrid() {
+				var factory = window.ReactAPI && window.ReactAPI.getComponentAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+				return factory && typeof factory.APIs === "function" && factory.APIs(gridId);
+			}
+
+			function selectedRows() {
+				var grid = getGrid();
+				return grid && typeof grid.getSelecteds === "function" ? grid.getSelecteds() || [] : [];
+			}
+
+			function dependencyEnabled(name) {
+				var status = window.ADP_WOM_MAKETASKLIST_DEPENDENCIES || {};
+				return status[name] === true || status[name] === "true";
+			}
+
+			function stopToolbarEvent(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				if (typeof event.stopImmediatePropagation === "function") {
+					event.stopImmediatePropagation();
+				}
+			}
+
+			function showWarning(message) {
+				patchReactApi();
+				if (window.ReactAPI && typeof window.ReactAPI.showMessage === "function") {
+					window.ReactAPI.showMessage("w", translate(message));
+					return;
+				}
+				window.alert(translate(message));
+			}
+
+			function translateDomText(root) {
+				if (!root || !root.ownerDocument || !root.ownerDocument.createTreeWalker) {
+					return;
+				}
+				var doc = root.ownerDocument;
+				var nodeFilter = (doc.defaultView && doc.defaultView.NodeFilter) || window.NodeFilter;
+				if (!nodeFilter) {
+					return;
+				}
+				var walker = doc.createTreeWalker(root, nodeFilter.SHOW_TEXT, {
+					acceptNode: function acceptNode(node) {
+						var parent = node.parentNode;
+						if (!parent || /^(SCRIPT|STYLE|TEXTAREA|INPUT)$/i.test(parent.nodeName || "")) {
+							return nodeFilter.FILTER_REJECT;
+						}
+						return node.nodeValue && node.nodeValue.indexOf(".") !== -1
+							? nodeFilter.FILTER_ACCEPT
+							: nodeFilter.FILTER_REJECT;
+					}
+				});
+				var node;
+				while ((node = walker.nextNode())) {
+					var translated = translate(node.nodeValue);
+					if (translated !== node.nodeValue) {
+						node.nodeValue = translated;
+					}
+				}
+			}
+
+			function installVisibleTextFallback() {
+				if (!document.body) {
+					return;
+				}
+				if (!window.MutationObserver || window.__ADP_WOM_MAKETASKLIST_HEAD_DOM_TRANSLATE__) {
+					translateDomText(document.body);
+					return;
+				}
+				window.__ADP_WOM_MAKETASKLIST_HEAD_DOM_TRANSLATE__ = true;
+				var observer = new MutationObserver(function translateMutations(mutations) {
+					mutations.forEach(function translateMutation(mutation) {
+						if (mutation.type === "characterData") {
+							var translated = translate(mutation.target.nodeValue);
+							if (translated !== mutation.target.nodeValue) {
+								mutation.target.nodeValue = translated;
+							}
+							return;
+						}
+						Array.prototype.forEach.call(mutation.addedNodes || [], function translateNode(node) {
+							if (node.nodeType === 3) {
+								var text = translate(node.nodeValue);
+								if (text !== node.nodeValue) {
+									node.nodeValue = text;
+								}
+							} else if (node.nodeType === 1) {
+								translateDomText(node);
+							}
+						});
+					});
+				});
+				observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+				translateDomText(document.body);
+			}
+
+			function installEmptySearchSelectFallback() {
+				var searchSelect = document.getElementById("search_panel_selectField");
+				if (!searchSelect || searchSelect.getAttribute("data-adp-wom-empty-search-select") === "true") {
+					return;
+				}
+				var selectedValue = searchSelect.querySelector(".ant-select-selection-selected-value");
+				var placeholder = searchSelect.querySelector(".ant-select-selection__placeholder");
+				var selection = searchSelect.querySelector(".ant-select-selection");
+				if (!selectedValue || (selectedValue.textContent || "").trim()) {
+					return;
+				}
+				selectedValue.textContent = "全部";
+				selectedValue.setAttribute("title", "全部");
+				selectedValue.style.display = "block";
+				selectedValue.style.opacity = "1";
+				if (placeholder) {
+					placeholder.style.display = "none";
+				}
+				if (selection) {
+					selection.setAttribute("aria-disabled", "true");
+					selection.setAttribute("title", "当前无可选筛选字段，默认查询全部");
+				}
+				searchSelect.setAttribute("data-adp-wom-empty-search-select", "true");
+				["mousedown", "click", "keydown"].forEach(function blockEmptyDropdown(eventName) {
+					searchSelect.addEventListener(eventName, stopToolbarEvent, true);
+				});
+			}
+
+			document.addEventListener(
+				"click",
+				function guardEarlyToolbarClick(event) {
+					patchReactApi();
+					var target = event.target;
+					var button =
+						target &&
+						target.closest &&
+						target.closest("#btn-startTask, #btn-pauseTask, #btn-recoveryTask, #btn-stopTask, #btn-earlyPutIn, #btn-manuInspect, #btn-prodprocessView, #btn-generateCode");
+					if (!button) {
+						return;
+					}
+					var rows = selectedRows();
+					if (!rows.length) {
+						showWarning("请先选择一条指令单！");
+						stopToolbarEvent(event);
+						return;
+					}
+					if (rows.length > 1) {
+						showWarning("只可以进行单批次查看！");
+						stopToolbarEvent(event);
+						return;
+					}
+					if (button.id === "btn-prodprocessView" && !dependencyEnabled("processTrace")) {
+						showWarning("生产过程追溯服务未部署或暂不可用！");
+						stopToolbarEvent(event);
+					}
+					if (button.id === "btn-generateCode" && !dependencyEnabled("qrcode")) {
+						showWarning("二维码生成页面未部署或暂不可用！");
+						stopToolbarEvent(event);
+					}
+				},
+				true
+			);
+
+			patchReactApi();
+			[80, 250, 800, 2000].forEach(function queueHeadVisibleTextFallback(delay) {
+				window.setTimeout(installVisibleTextFallback, delay);
+			});
+			window.setInterval(function installHeadFallbacks() {
+				patchReactApi();
+				installVisibleTextFallback();
+				installEmptySearchSelectFallback();
+			}, 250);
+		})();
+	</script>
 
 	<!-- 自定义代码，在custom对应目录下 -->
 	<!-- head.html--start -->

@@ -18,8 +18,10 @@
     "SupDatagrid.button.tit": "提示",
     "ec.common.tableNo": "单据编号",
     "ec.engine.view.dealsuccess": "操作成功",
+    "WOM.custom.random1613701402613": "“尾料量”必须小于“产出量”",
     "WOM.custom.random1623129307428": "指令单已保持！",
     "WOM.custom.random1623129401596": "指令单已重启！",
+    "WOM.custom.random1633930723936": "配方未配置检验部门和检验人！",
     "WOM.custom.randon1575958091725": "只有非批控的工单才可以操作！",
     "WOM.custom.randon1575958171058": "请先将指令单生效再进行操作！",
     "WOM.custom.randon1575958246066": "只有【待执行】的指令单可以开始！",
@@ -230,9 +232,8 @@
     }
     var patched = {};
     Object.keys(options).forEach(function copyOption(key) {
-      patched[key] = /^(content|message|title|okText|cancelText)$/i.test(key)
-        ? translateMessage(options[key])
-        : options[key];
+      var optionValue = options[key];
+      patched[key] = typeof optionValue === "string" ? translateMessage(optionValue) : optionValue;
     });
     return patched;
   }
@@ -254,31 +255,42 @@
         international.__adpWomMakeTaskListBodyI18nPatched = true;
       }
 
-      if (!reactApi || reactApi.__adpWomMakeTaskListBodyMessagePatched) {
+      if (!reactApi) {
         return;
       }
 
-      if (typeof reactApi.showMessage === "function") {
-        var originalShowMessage = reactApi.showMessage.bind(reactApi);
+      if (
+        typeof reactApi.showMessage === "function" &&
+        reactApi.showMessage !== reactApi.__adpWomMakeTaskListBodyShowMessageWrapper
+      ) {
+        var originalShowMessage = reactApi.showMessage;
+        var originalShowMessageBound = originalShowMessage.bind(reactApi);
         reactApi.showMessage = function showMessageWithWomBodyFallback(type, message) {
           var args = Array.prototype.slice.call(arguments);
           args = args.map(function translateMessageArg(arg) {
             return typeof arg === "string" ? translateMessage(arg) : translateOptions(arg);
           });
-          return originalShowMessage.apply(null, args);
+          return originalShowMessageBound.apply(null, args);
         };
+        reactApi.__adpWomMakeTaskListBodyShowMessageWrapper = reactApi.showMessage;
       }
 
       ["openConfirm", "confirm", "showConfirm"].forEach(function patchConfirm(methodName) {
-        if (typeof reactApi[methodName] !== "function") {
+        var wrapperKey = "__adpWomMakeTaskListBody" + methodName + "Wrapper";
+        if (
+          typeof reactApi[methodName] !== "function" ||
+          reactApi[methodName] === reactApi[wrapperKey]
+        ) {
           return;
         }
-        var original = reactApi[methodName].bind(reactApi);
+        var original = reactApi[methodName];
+        var originalBound = original.bind(reactApi);
         reactApi[methodName] = function confirmWithWomBodyFallback(options) {
           var args = Array.prototype.slice.call(arguments);
           args[0] = translateOptions(args[0]);
-          return original.apply(null, args);
+          return originalBound.apply(null, args);
         };
+        reactApi[wrapperKey] = reactApi[methodName];
       });
 
       reactApi.__adpWomMakeTaskListBodyMessagePatched = true;
@@ -348,7 +360,9 @@
       reactApi &&
       reactApi.getComponentAPI &&
       reactApi.getComponentAPI("SupDataGrid");
-    return factory && factory.APIs && factory.APIs(gridId);
+    var grid = factory && factory.APIs && factory.APIs(gridId);
+    patchGridSelectionApi(grid);
+    return grid;
   }
 
   function asId(value) {
@@ -385,6 +399,25 @@
     row.taskRunState = exeState;
     row.taskRunStateId = exeState.id;
     row.taskRunStateName = exeState.value || exeState.name || exeState.fullPathName || exeState.id;
+  }
+
+  function patchGridSelectionApi(grid) {
+    if (!grid || grid.__adpWomMakeTaskListSelectionPatched || typeof grid.getSelecteds !== "function") {
+      return;
+    }
+    var originalGetSelecteds = grid.getSelecteds.bind(grid);
+    grid.getSelecteds = function getSelectedsWithRememberedTaskState() {
+      var rows = originalGetSelecteds.apply(this, arguments) || [];
+      rows.forEach(function patchSelectedRow(row) {
+        var remembered = row && taskStateById[asId(row.id)];
+        if (remembered) {
+          applyTaskState(row, remembered);
+        }
+      });
+      return rows;
+    };
+    grid.__adpWomMakeTaskListSelectionPatched = true;
+    window.__ADP_WOM_MAKETASKLIST_SELECTION_SYNC__ = true;
   }
 
   function gridRows(grid) {
@@ -565,16 +598,24 @@
   }
 
   installUpdateTaskStateSync();
+  window.__ADP_WOM_MAKETASKLIST_PATCH_SELECTION_SYNC__ = patchRememberedRows;
   installMessageTranslationFallback();
   installVisibleTextFallback();
   installEmptySearchSelectFallback();
+  [0, 80, 250, 750, 1500].forEach(function queueSelectionSync(delay) {
+    window.setTimeout(patchRememberedRows, delay);
+  });
   ["mousedown", "click", "keydown"].forEach(function blockEmptySearchSelect(eventName) {
     document.addEventListener(eventName, blockEmptySearchSelectEvent, true);
   });
   [0, 80, 250, 750, 1500].forEach(function queueEmptySearchSelectFallback(delay) {
     window.setTimeout(installEmptySearchSelectFallback, delay);
   });
+  [80, 250, 800, 2000].forEach(function queueVisibleTextFallback(delay) {
+    window.setTimeout(installVisibleTextFallback, delay);
+  });
   window.setInterval(function installToolbarFallbacks() {
+    patchRememberedRows();
     installMessageTranslationFallback();
     installVisibleTextFallback();
     installEmptySearchSelectFallback();
