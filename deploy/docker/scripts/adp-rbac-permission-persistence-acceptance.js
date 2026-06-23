@@ -19,6 +19,9 @@ const outputPath =
   path.join(outputDir, "rbac-permission-persistence-results.json");
 
 const dbSshTarget = process.env.ADP_DB_SSH_TARGET || "v6@100.99.133.43";
+const sshConnectTimeout = process.env.ADP_SSH_CONNECT_TIMEOUT || "8";
+const dbSqlRetries = Math.max(1, Number(process.env.ADP_DB_SQL_RETRIES || 4));
+const dbSqlRetryDelayMs = Math.max(0, Number(process.env.ADP_DB_SQL_RETRY_DELAY_MS || 3000));
 const dbContainer = process.env.ADP_DB_CONTAINER || "adp-mes-newbase-postgres-1";
 const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
@@ -105,6 +108,13 @@ function sqlLiteral(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+function sleepSync(ms) {
+  if (!ms) {
+    return;
+  }
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
 function runSql(sql) {
   const remoteCommand = [
     "docker",
@@ -124,10 +134,45 @@ function runSql(sql) {
   ]
     .map(shellQuote)
     .join(" ");
-  return execFileSync("ssh", ["-o", "BatchMode=yes", "-o", "ConnectTimeout=8", dbSshTarget, remoteCommand], {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-  }).trim();
+  const sshArgs = [
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    `ConnectTimeout=${sshConnectTimeout}`,
+    "-o",
+    "ConnectionAttempts=3",
+    "-o",
+    "ServerAliveInterval=15",
+    "-o",
+    "ServerAliveCountMax=2",
+    dbSshTarget,
+    remoteCommand,
+  ];
+  let lastError = null;
+  for (let attempt = 1; attempt <= dbSqlRetries; attempt += 1) {
+    try {
+      return execFileSync("ssh", sshArgs, {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      }).trim();
+    } catch (error) {
+      lastError = error;
+      if (attempt < dbSqlRetries) {
+        sleepSync(dbSqlRetryDelayMs);
+      }
+    }
+  }
+  const stderr = lastError && lastError.stderr ? String(lastError.stderr).trim() : "";
+  const stdout = lastError && lastError.stdout ? String(lastError.stdout).trim() : "";
+  throw new Error(
+    [
+      `runSql failed after ${dbSqlRetries} attempts via ${dbSshTarget}`,
+      stderr ? `stderr=${stderr}` : "",
+      stdout ? `stdout=${stdout}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ")
+  );
 }
 
 function parseTableRows(output, columns) {
