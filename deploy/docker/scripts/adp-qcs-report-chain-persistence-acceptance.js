@@ -368,6 +368,138 @@ ORDER BY id;
   };
 }
 
+function requiredId(value, label) {
+  const normalized = String(value || "");
+  if (!/^\d+$/.test(normalized)) {
+    throw new Error(`Missing or invalid ${label}: ${value}`);
+  }
+  return normalized;
+}
+
+function cleanupFixture(womEvidence, evidence) {
+  try {
+    const ids = womEvidence.ids || {};
+    const inspectId = requiredId(evidence.womManuInspect.inspectId, "inspectId");
+    const taskId = requiredId(ids.task, "taskId");
+    const batchNo = evidence.womManuInspect.batchNo;
+    const entityRaw = runSql(`
+SELECT 'inspect', id, table_info_id
+FROM public.qcs_inspects
+WHERE id = ${inspectId};
+
+SELECT 'report', id, table_info_id
+FROM public.qcs_inspect_reports
+WHERE inspect_id = ${inspectId};
+
+SELECT 'deal', d.id, d.table_info_id
+FROM public.qcs_un_qlf_deals d
+JOIN public.qcs_inspect_reports r ON r.id = d.report_id
+WHERE r.inspect_id = ${inspectId};
+`);
+    const entityRows = parseRows(entityRaw);
+    const entityIds = entityRows.map((row) => requiredId(row[1], `${row[0]} id`));
+    const tableInfoIds = entityRows.map((row) => requiredId(row[2], `${row[0]} tableInfoId`));
+    if (!entityIds.includes(inspectId)) {
+      throw new Error(`Cleanup could not resolve inspection entity ${inspectId}: ${entityRaw}`);
+    }
+    const entityIdList = entityIds.join(", ");
+    const tableInfoIdList = tableInfoIds.join(", ");
+    const reportIds = entityRows.filter((row) => row[0] === "report").map((row) => row[1]);
+    const reportIdList = reportIds.length ? reportIds.join(", ") : "-1";
+    const fixtureIds = Object.fromEntries(
+      Object.entries(ids).map(([key, value]) => [key, requiredId(value, `fixture ${key}`)])
+    );
+    const cleanupSql = `
+BEGIN;
+
+DELETE FROM public.jbpm4_task
+WHERE execution_ IN (
+  SELECT dbid_ FROM public.jbpm4_execution
+  WHERE tableinfo_id_ IN (${tableInfoIdList}) OR model_id_ IN (${entityIdList})
+);
+DELETE FROM public.jbpm4_variable
+WHERE execution_ IN (
+  SELECT dbid_ FROM public.jbpm4_execution
+  WHERE tableinfo_id_ IN (${tableInfoIdList}) OR model_id_ IN (${entityIdList})
+);
+DELETE FROM public.jbpm4_job
+WHERE execution_ IN (
+  SELECT dbid_ FROM public.jbpm4_execution
+  WHERE tableinfo_id_ IN (${tableInfoIdList}) OR model_id_ IN (${entityIdList})
+);
+DELETE FROM public.jbpm4_swimlane
+WHERE execution_ IN (
+  SELECT dbid_ FROM public.jbpm4_execution
+  WHERE tableinfo_id_ IN (${tableInfoIdList}) OR model_id_ IN (${entityIdList})
+);
+DELETE FROM public.jbpm4_execution
+WHERE tableinfo_id_ IN (${tableInfoIdList}) OR model_id_ IN (${entityIdList});
+DELETE FROM public.jbpm4_hist_actinst WHERE tableinfoid_ IN (${tableInfoIdList});
+
+DELETE FROM public.wfm_task_pending
+WHERE table_info_id IN (${tableInfoIdList})
+   OR model_id IN (${entityIdList})
+   OR id = ${fixtureIds.pending};
+DELETE FROM public.wf_deal_info
+WHERE table_info_id IN (${tableInfoIdList}, ${taskId})
+   OR main_obj IN (${entityIdList}, ${taskId});
+
+DELETE FROM public.qcs_report_coms WHERE report_id IN (${reportIdList});
+DELETE FROM public.qcs_un_qlf_deals_di WHERE main_obj IN (${entityIdList}) OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_un_qlf_deals_sv WHERE main_obj IN (${entityIdList}) OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_un_qlf_deals WHERE report_id IN (${reportIdList});
+DELETE FROM public.qcs_inspect_reports_di WHERE main_obj IN (${entityIdList}) OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_inspect_reports_sv WHERE main_obj IN (${entityIdList}) OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_inspect_reports WHERE inspect_id = ${inspectId};
+DELETE FROM public.qcs_inspect_coms WHERE inspect_id = ${inspectId};
+DELETE FROM public.qcs_inspect_stds WHERE inspect_id = ${inspectId};
+DELETE FROM public.qcs_inspects_di WHERE main_obj = ${inspectId} OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_inspects_sv WHERE main_obj = ${inspectId} OR table_info_id IN (${tableInfoIdList});
+DELETE FROM public.qcs_inspects WHERE id = ${inspectId};
+
+DELETE FROM public.baseset_batch_deals WHERE batch_num = ${sqlLiteral(batchNo)};
+DELETE FROM public.wom_produce_task_exelog WHERE task_id = ${taskId};
+DELETE FROM public.wom_wait_put_records WHERE task_id = ${taskId};
+DELETE FROM public.wom_produce_tasks WHERE id = ${taskId};
+DELETE FROM public.rm_formula_qualities WHERE id = ${fixtureIds.formulaQuality};
+DELETE FROM public.hm_factory_models WHERE id = ${fixtureIds.workUnit};
+DELETE FROM public.rm_formulas WHERE id = ${fixtureIds.formula};
+DELETE FROM public.limsba_spec_limits WHERE id = ${fixtureIds.specLimit};
+DELETE FROM public.limsba_std_ver_grades
+WHERE id IN (${fixtureIds.stdVerGradeUnqualified}, ${fixtureIds.stdVerGradeQualified});
+DELETE FROM public.limsba_std_ver_coms WHERE id = ${fixtureIds.stdVerCom};
+DELETE FROM public.limsba_test_components WHERE id = ${fixtureIds.testComponent};
+DELETE FROM public.limsba_analy_prod_stds WHERE id = ${fixtureIds.analyProdStd};
+DELETE FROM public.limsba_std_versions WHERE id = ${fixtureIds.stdVersion};
+DELETE FROM public.limsba_quality_stds WHERE id = ${fixtureIds.qualityStd};
+DELETE FROM public.baseset_batch_infos WHERE id = ${fixtureIds.batchInfo};
+DELETE FROM public.baseset_materials WHERE id = ${fixtureIds.material};
+
+COMMIT;
+
+SELECT 'cleanup',
+       (SELECT count(*) FROM public.qcs_inspects WHERE id = ${inspectId}),
+       (SELECT count(*) FROM public.qcs_inspect_reports WHERE inspect_id = ${inspectId}),
+       (SELECT count(*) FROM public.qcs_un_qlf_deals WHERE report_id IN (${reportIdList})),
+       (SELECT count(*) FROM public.wom_produce_tasks WHERE id = ${taskId}),
+       (SELECT count(*) FROM public.baseset_materials WHERE id = ${fixtureIds.material}),
+       (SELECT count(*) FROM public.rm_formulas WHERE id = ${fixtureIds.formula}),
+       (SELECT count(*) FROM public.wfm_task_pending WHERE table_info_id IN (${tableInfoIdList}) OR model_id IN (${entityIdList}));
+`;
+    const result = runSql(cleanupSql);
+    evidence.cleanup = {
+      status: /^cleanup\|0\|0\|0\|0\|0\|0\|0$/m.test(result) ? "PASS" : "FAIL",
+      entityDiscoverySql: entityRaw,
+      entityIds,
+      tableInfoIds,
+      verificationResult: result,
+      sql: cleanupSql.trim(),
+    };
+  } catch (error) {
+    evidence.cleanup = { status: "FAIL", error: error.stack || error.message };
+  }
+}
+
 function buildReportJson(report, reportComs) {
   const reportPayload = {
     id: report.id,
@@ -756,8 +888,9 @@ async function main() {
     reportSubmitAttempts: [],
   };
 
+  let womEvidence;
   try {
-    const womEvidence = runWomManufacturingInspect(evidence);
+    womEvidence = runWomManufacturingInspect(evidence);
     const api = await request.newContext({ ignoreHTTPSErrors: true });
     const loginResult = await login(api);
     await api.dispose();
@@ -774,8 +907,25 @@ async function main() {
   } catch (error) {
     evidence.status = "FAIL";
     evidence.error = error.stack || error.message;
+    if (!womEvidence && fs.existsSync(womOutputPath)) {
+      try {
+        womEvidence = JSON.parse(fs.readFileSync(womOutputPath, "utf8"));
+      } catch (_readError) {
+        womEvidence = null;
+      }
+    }
+    if (womEvidence && evidence.womManuInspect && evidence.womManuInspect.inspectId) {
+      cleanupFixture(womEvidence, evidence);
+    }
     fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
     throw error;
+  }
+
+  cleanupFixture(womEvidence, evidence);
+  if (evidence.cleanup.status !== "PASS") {
+    evidence.status = "FAIL";
+    evidence.error = `fixture cleanup failed: ${JSON.stringify(evidence.cleanup)}`;
+    process.exitCode = 1;
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));

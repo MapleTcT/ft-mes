@@ -128,9 +128,8 @@ window.InternationalResource["需要包装"] = "需要包装";
     var patched = {};
     for (var key in options) {
       if (Object.prototype.hasOwnProperty.call(options, key)) {
-        patched[key] = /^(content|message|title|okText|cancelText)$/i.test(key)
-          ? translate(options[key])
-          : options[key];
+        var optionValue = options[key];
+        patched[key] = typeof optionValue === "string" ? translate(optionValue) : optionValue;
       }
     }
     return patched;

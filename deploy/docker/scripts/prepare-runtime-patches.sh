@@ -79,6 +79,10 @@ if [ -f "$runtime_dir/module-Server/WOMMs/manual/WOMMs-1.0.0.jar" ]; then
     --input-wom-jar "$wom_jar" \
     --output-wom-jar "$wom_tmp_jar"
   mv "$wom_tmp_jar" "$wom_jar"
+  "$docker_dir/scripts/build-wom-core-production-boot-jar.sh" \
+    --input-wom-jar "$wom_jar" \
+    --output-wom-jar "$wom_tmp_jar"
+  mv "$wom_tmp_jar" "$wom_jar"
 fi
 if [ -f "$runtime_dir/module-Server/WTSs/manual/WTSs-1.0.0.jar" ]; then
   "$python_bin" "$docker_dir/scripts/patch-wts-runtime-compat.py" \

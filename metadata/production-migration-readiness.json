@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T11:28:19+00:00",
-  "repoCommit": "d06ae37a4bd875291d4009f640f905be17c53b30",
+  "generatedAt": "2026-07-10T03:33:49+00:00",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "database": "PostgreSQL",
   "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
   "summary": {
@@ -605,7 +605,7 @@
     },
     "productionBlockers": {
       "path": "metadata/production-module-blockers.json",
-      "generatedAt": "2026-06-21T15:13:16+00:00",
+      "generatedAt": "2026-07-10T03:05:57Z",
       "status": "BLOCKED",
       "metrics": {
         "blockers": 6,
@@ -614,7 +614,7 @@
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-06-22T01:27:49.172Z",
+      "generatedAt": "2026-07-10T03:05:57Z",
       "status": "BLOCKED",
       "metrics": {
         "totalItems": 9,

@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`171`。
-- 编号范围：`001` 到 `171`。
+- 脚本数量：`173`。
+- 编号范围：`001` 到 `173`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`60`。
+- 需关注语句：`62`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -24,32 +24,32 @@
 | business | 34 |
 | compatibility | 73 |
 | configuration | 41 |
-| general | 22 |
+| general | 23 |
 | notification | 9 |
-| platform | 48 |
-| workflow | 19 |
+| platform | 49 |
+| workflow | 20 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9324 |
+| alter-table | 9326 |
 | create-function | 68 |
-| create-index | 840 |
-| create-table | 523 |
+| create-index | 844 |
+| create-table | 524 |
 | create-view | 107 |
-| insert | 3874 |
-| update | 3936 |
+| insert | 3875 |
+| update | 3937 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 172 |
-| do-block | 272 |
-| if-exists | 89 |
-| if-not-exists | 11246 |
-| on-conflict | 3838 |
+| do-block | 274 |
+| if-exists | 90 |
+| if-not-exists | 11253 |
+| on-conflict | 3839 |
 | to-regclass | 152 |
 | where-not-exists | 26 |
 
@@ -228,6 +228,8 @@
 | 169 | 169-custom-property-project-property-compat.sql | configuration, compatibility | 10 | create-view:1 | 1 | - |
 | 170 | 170-rbac-pstaff-pposition-compat.sql | auth-rbac-org, compatibility | 104 | create-table:4, create-view:4, create-index:4 | 12 | - |
 | 171 | 171-wts-workpermit-export-action.sql | business | 308 | create-function:1, update:5 | 2 | - |
+| 172 | 172-wom-task-items-table.sql | general | 98 | create-table:1, create-index:4, alter-table:2 | 9 | - |
+| 173 | 173-wom-make-task-flow-runtime-metadata-sync.sql | platform, workflow | 205 | insert:1, update:1 | 2 | watch:2 |
 
 ## 规则
 

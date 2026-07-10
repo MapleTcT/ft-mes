@@ -126,6 +126,26 @@ function runSql(sql) {
   return runRemote(command, sql).trim();
 }
 
+function cleanupSeedFixture() {
+  const cleanupSql = seedEvidence.cleanup && seedEvidence.cleanup.sql;
+  if (!cleanupSql) {
+    return {
+      status: "FAIL",
+      error: "Seed evidence does not contain the deferred cleanup SQL.",
+    };
+  }
+  try {
+    const result = runSql(cleanupSql);
+    return {
+      status: /cleanup\|0\|0\|0\|0/.test(result) ? "PASS" : "FAIL",
+      result,
+      sql: cleanupSql,
+    };
+  } catch (error) {
+    return { status: "FAIL", error: error.stack || error.message, sql: cleanupSql };
+  }
+}
+
 function verificationSql() {
   return `
 SELECT 'task', id, table_no, task_run_state, status, version, coalesce(act_start_time::text, ''), coalesce(modify_time::text, '')
@@ -1479,6 +1499,7 @@ async function main() {
     preconditions: {},
     knownBlockers: {},
     persistence: {},
+    cleanup: null,
     verificationSql: verificationSql().trim(),
     requests: [],
     responses: [],
@@ -1502,6 +1523,11 @@ async function main() {
     report.status = "FAIL";
     report.failures.push(error && error.stack ? error.stack : String(error));
   } finally {
+    report.cleanup = cleanupSeedFixture();
+    if (report.cleanup.status !== "PASS") {
+      report.status = "FAIL";
+      report.failures.push(`WOM toolbar seed cleanup failed: ${JSON.stringify(report.cleanup)}`);
+    }
     await api.dispose();
     fs.writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`);
   }

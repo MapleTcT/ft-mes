@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T12:15:05+00:00",
-  "repoCommit": "df880ec235a5b6d8a517010f070f4cd8e3438a0a",
+  "generatedAt": "2026-07-10T03:33:49+00:00",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 327,
-    "totalBytes": 24781623,
+    "totalFiles": 328,
+    "totalBytes": 24717493,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 171,
-      "runtime-binary-patch": 8,
+      "postgres-init-sql": 173,
+      "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 24,
       "runtime-static-override": 57
     },
     "bytesByCategory": {
-      "nacos-config-template": 42767,
+      "nacos-config-template": 42353,
       "nginx-runtime-config": 10277,
-      "postgres-init-sql": 24107238,
-      "runtime-binary-patch": 107237,
+      "postgres-init-sql": 24117100,
+      "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
-      "runtime-script": 216957,
-      "runtime-static-override": 215059
+      "runtime-script": 217121,
+      "runtime-static-override": 218566
     }
   },
   "categoryDescriptions": {
@@ -45,8 +45,8 @@
     {
       "path": "deploy/nacos-config/greendill-auth.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 675,
-      "sha256": "df307c39f763798fcdda1c50620c49485705001c90be63a5122a49b8e14acedf"
+      "sizeBytes": 660,
+      "sha256": "b236a5d5d689e668a4f9b0a8af9aabf120e2f2404da7eea57033adfedf89ea8b"
     },
     {
       "path": "deploy/nacos-config/supfusion-adp-lite.properties",
@@ -57,8 +57,8 @@
     {
       "path": "deploy/nacos-config/supfusion-auth.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 622,
-      "sha256": "694062fca56c95daca15878a02a2aa81f08e0e00cb25d938e8cbbfb2836985ff"
+      "sizeBytes": 606,
+      "sha256": "f411c5d4af0e2886f0ed5c577ef055586a97e0e9213da7e1e8492f1208fcaf76"
     },
     {
       "path": "deploy/nacos-config/supfusion-baseApplications.properties",
@@ -69,32 +69,32 @@
     {
       "path": "deploy/nacos-config/supfusion-baseService.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 505,
-      "sha256": "dadf7ddaa7cbe038638e0778a3a8830e7e9c276bcda68d7d63f0d09145086adc"
+      "sizeBytes": 495,
+      "sha256": "29ca599161c97c134fed382efe6d72353c90f0b165542ecc41a0d4417d695414"
     },
     {
       "path": "deploy/nacos-config/supfusion-config-center-system.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 85,
-      "sha256": "d39e58c1d4e1d2b36d95f9a9aa6b54a71779fa9565ca38b8735c904a77317cc3"
+      "sizeBytes": 83,
+      "sha256": "8a16cd3f6fd1bb32bacabc386c058c3410fc9d5976e9938fcc5f2d222a6cb3b1"
     },
     {
       "path": "deploy/nacos-config/supfusion-configuration-services.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 663,
-      "sha256": "b153c4c45b05d09b5abff190549e2f3028bf77f8c6c082ee04a0880cbb2f321d"
+      "sizeBytes": 652,
+      "sha256": "7649b7818ad2206eba55db95b66ab77f97dd916dedd9249df31e1488a461f11d"
     },
     {
       "path": "deploy/nacos-config/supfusion-counter.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 566,
-      "sha256": "15d5d84c204b90a36f7804545119eb20234f7adc0fbdcd515838bf08006866ad"
+      "sizeBytes": 555,
+      "sha256": "3b6a671dbe903f9d942cbf37d0b695470c156458ce5b24e117a36c4afd123fa5"
     },
     {
       "path": "deploy/nacos-config/supfusion-coustom-property.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 640,
-      "sha256": "aedad097d8fee9fbf5d21f0fb6f16a9bae914c15ddd3dd7c6cc8a53758bc6f38"
+      "sizeBytes": 627,
+      "sha256": "882e16b22843da53564864a147d1b61ccb8c1f710a107d1092312b66bf93f51e"
     },
     {
       "path": "deploy/nacos-config/supfusion-datasource-system.properties",
@@ -117,8 +117,8 @@
     {
       "path": "deploy/nacos-config/supfusion-flow.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 624,
-      "sha256": "00aed3fa14c34ec33573f6b373823c820d9d71a26a69a70469d98fee783932ed"
+      "sizeBytes": 613,
+      "sha256": "88a7eafd98c21f47bce8b6aa2f366e7c568942b7704144cd0da0f659162285f3"
     },
     {
       "path": "deploy/nacos-config/supfusion-gateway.properties",
@@ -129,26 +129,26 @@
     {
       "path": "deploy/nacos-config/supfusion-i18n-system.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 142,
-      "sha256": "8c10b74140d5e8e44c35357709d372e77be5c585a1f43d96601f2ae570fbe370"
+      "sizeBytes": 140,
+      "sha256": "c7f7aa0f3d28066dcee847b08335694d6c9273b11074d93093bad81ef8dfbdb4"
     },
     {
       "path": "deploy/nacos-config/supfusion-i18n.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 1617,
-      "sha256": "ac190cafcdc833defb7424c2317e9de63c77793af8f11acb8b88fbb593957c26"
+      "sizeBytes": 1588,
+      "sha256": "286c6a64b34a9aec389239df4f1c4af9889de88934a823761f79698e0aa559ff"
     },
     {
       "path": "deploy/nacos-config/supfusion-iam.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 582,
-      "sha256": "cc1bd9908136e41250a658930136768b9f7ff623597f3116a7aa02428866cc35"
+      "sizeBytes": 570,
+      "sha256": "e989c8e4dca00d94658057146cd457993b4c48dd43ef531f2d319ae9dfb725f9"
     },
     {
       "path": "deploy/nacos-config/supfusion-integration.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 2723,
-      "sha256": "39dfb73b4f7ff86a65a1371ed11f511430797501644fb41dbe7e4b71c43c57c9"
+      "sizeBytes": 2673,
+      "sha256": "556e5a29e9b9636681d64bf5d09971375756394db5140242e8afe52a2d837537"
     },
     {
       "path": "deploy/nacos-config/supfusion-jwt-common.properties",
@@ -159,20 +159,20 @@
     {
       "path": "deploy/nacos-config/supfusion-kafka-system.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 353,
-      "sha256": "8a6044d1a7ae206f4f7c6702147efce07a204d420bd743a64eab0aac0a44fcd6"
+      "sizeBytes": 349,
+      "sha256": "db5bbbd28a7e0c1364f0ac02bf6db8fa224dead09d61e51b2b38c39c0fe0bde9"
     },
     {
       "path": "deploy/nacos-config/supfusion-license.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 71,
-      "sha256": "d0d88b09519d92c49423d537ad5d294b9ebda26045154e366ba26e0a8f6d3956"
+      "sizeBytes": 70,
+      "sha256": "226e5686033ccba51715e0e62cc8cc429a3e4e626e64c8b211deac9f5da22a08"
     },
     {
       "path": "deploy/nacos-config/supfusion-module-registry.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 370,
-      "sha256": "0a05ba609a51b73271b00fbc139826830c1f29f2ce5e759cd2f5d0de825b9474"
+      "sizeBytes": 362,
+      "sha256": "226b5258acde49fda66493412434ce332c405b220b749b3cdca36d26e5bd7d0f"
     },
     {
       "path": "deploy/nacos-config/supfusion-mongodb-system.properties",
@@ -183,44 +183,44 @@
     {
       "path": "deploy/nacos-config/supfusion-mybatis-common.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 274,
-      "sha256": "cfc4b95baf0af0d8ccb2c471bd7b7e5dae2d843f4899ee8779987bff1918401e"
+      "sizeBytes": 269,
+      "sha256": "2b75f8c9c229f687cf109c9d0ba584a9685b35ecb72de66d0e0ce0f140a8048b"
     },
     {
       "path": "deploy/nacos-config/supfusion-notification-admin.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 1103,
-      "sha256": "27d3f9d9605db612a4931a50617f2bab15033432364549b2d066811276ee70db"
+      "sizeBytes": 1083,
+      "sha256": "f6d93f361bc5fe91783af253362dafa02904c607803b2f2e2ce7352b95769209"
     },
     {
       "path": "deploy/nacos-config/supfusion-notification-apiserver.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 817,
-      "sha256": "7902686106b901df265d1dce2903e100094c3f12acdb9ce25082e21ba7836d4b"
+      "sizeBytes": 800,
+      "sha256": "69a716c62fffb0283af33cf8c3499f6c25c872559c48375ac2983d8cca909e48"
     },
     {
       "path": "deploy/nacos-config/supfusion-notification-app.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 121,
-      "sha256": "86173a48598bfeb6cc7177935386c6e0a84d660f660ed939bfd40f2f7deafe51"
+      "sizeBytes": 118,
+      "sha256": "5efae2245ca704a096b17a12055ce2657a1be38e8b0608f7c9be3d321f1f185a"
     },
     {
       "path": "deploy/nacos-config/supfusion-notification-engine.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 916,
-      "sha256": "13986984adca9d16ee1004da91625aafb17100de3356bac7962699b3d6a92f2a"
+      "sizeBytes": 897,
+      "sha256": "20bbe92f116f173ab0eeec823dc7db34dab0ee73972d64b1ca3340eeab7fda93"
     },
     {
       "path": "deploy/nacos-config/supfusion-notification-mobile.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 122,
-      "sha256": "d6358453a0b7926a6a1d9f748a5fc12461f00594926b2e4dd78be9eaee04a94d"
+      "sizeBytes": 120,
+      "sha256": "56c1a6c4c665dbf8e4bea510a03ae0e467bdceef4f98bc63d774bae2ec01a27f"
     },
     {
       "path": "deploy/nacos-config/supfusion-organization.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 436,
-      "sha256": "edd3c0ca3b7683ebb442d8886515470743fd35a9ce5bfa004d7abdd1160c7aea"
+      "sizeBytes": 427,
+      "sha256": "938bad59efd42f3d20945bf45e6f3d804cb0cdc1e88b0df96d63a584e465164f"
     },
     {
       "path": "deploy/nacos-config/supfusion-portal.properties",
@@ -231,14 +231,14 @@
     {
       "path": "deploy/nacos-config/supfusion-printer.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 351,
-      "sha256": "cda009dfae85b45c1ff7ed9dd1ed35cf6a4dc8c9cb60dee4b9f6de7925a6770d"
+      "sizeBytes": 343,
+      "sha256": "dfd6fa46bef5ac61cfa805c23b356dabc7ba72b1c81298d5e40ae3cec2977575"
     },
     {
       "path": "deploy/nacos-config/supfusion-rbac.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 1056,
-      "sha256": "acd13b858aa6cebaab13c8142975854506e99b38595c1b674c8f8d28c0c9853c"
+      "sizeBytes": 1035,
+      "sha256": "d1d0414ad4fb76ef3b7e7af372af03ad1600df5e5bc38670b21dade5e93d54f1"
     },
     {
       "path": "deploy/nacos-config/supfusion-redis-system.properties",
@@ -255,20 +255,20 @@
     {
       "path": "deploy/nacos-config/supfusion-signature.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 991,
-      "sha256": "d093593300c0c7a5ae43d58d2137d403043a1462be6ddb35948858dbb591ef9f"
+      "sizeBytes": 973,
+      "sha256": "c351d531df447822e5f221378af4977494340eecf17f6c558ed59faffd3e9153"
     },
     {
       "path": "deploy/nacos-config/supfusion-sms-jincang.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 428,
-      "sha256": "096444bac55b6933887fdcfe764b6b5b9179317c32554c83662a2ede837ffb49"
+      "sizeBytes": 420,
+      "sha256": "1a60d52fff19ccc6fe616ad5a2ce22bbc71c79888d62b12c606e41d3b04cfa32"
     },
     {
       "path": "deploy/nacos-config/supfusion-sms-jindi.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 426,
-      "sha256": "264784af6f81a3bf50a1f2eef6844bf90fb1a3a5e2f373884b709bb21f57cfe6"
+      "sizeBytes": 418,
+      "sha256": "28f3af1f688ab021c70bc91dad8193795ce65e38bf735d3325a344b69b03ad5c"
     },
     {
       "path": "deploy/nacos-config/supfusion-system-classified.properties",
@@ -279,26 +279,26 @@
     {
       "path": "deploy/nacos-config/supfusion-systemCode.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 789,
-      "sha256": "fa20f1b516d83d0ba81990784ef2cc458e42a823d00581a6f946260a1da1c4c6"
+      "sizeBytes": 771,
+      "sha256": "71bb80a35c2b1e9129c54d88c5890edc9b1a1c9a485b01cbb8f54dee5e51e102"
     },
     {
       "path": "deploy/nacos-config/supfusion-systemConfig.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 826,
-      "sha256": "f65fbed840930370267deefda87bd8d76201fcd19fafdcc117ecba8697a97f88"
+      "sizeBytes": 807,
+      "sha256": "557f134990f19b26597602b918aa3ce1f611d20ddcb4dfd828dd7c1f4e4805ea"
     },
     {
       "path": "deploy/nacos-config/supfusion-task-scheduler.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 1710,
-      "sha256": "28e62fb82a6827d073a3fbc55eb7c6964d6b3b8bac7a99602bab93891e3f2dff"
+      "sizeBytes": 1680,
+      "sha256": "578b65e2754b9053209fb17cac4d8f027e3a1279a6fdd35f75c8b8435579f4ad"
     },
     {
       "path": "deploy/nacos-config/supfusion-theme.properties",
       "category": "nacos-config-template",
-      "sizeBytes": 644,
-      "sha256": "ddf48db6f359b143fe3a2eff3aa60d8c278fb0532754ed96651facd293046ff6"
+      "sizeBytes": 630,
+      "sha256": "f62add6300bbb4758d3fba662cc7646530e9ecfbfe7da64452dbec2b30213c17"
     },
     {
       "path": "deploy/docker/nginx/adp.conf",
@@ -1339,10 +1339,16 @@
       "sha256": "9a030b54bec7942f3e497826e2ef609e0a3c85c5e80599a7d0f9b4ac3ec34876"
     },
     {
-      "path": "deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar",
-      "category": "runtime-binary-patch",
-      "sizeBytes": 77249,
-      "sha256": "b51852eaf20601e09f8c46f9658ec022576ef8f437bd3c2c6c7efe51262b5cb1"
+      "path": "deploy/docker/postgres/init/172-wom-task-items-table.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 3690,
+      "sha256": "6839be2fa00cd134840fc324e1fb59c0cce75ca10244e8c5b4b035858e64a5d6"
+    },
+    {
+      "path": "deploy/docker/postgres/init/173-wom-make-task-flow-runtime-metadata-sync.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6172,
+      "sha256": "d9adc9d89235a1228c6f60647d2377a4e49ffff3eb0cf158b43b0ac4aebb0a65"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
@@ -1647,8 +1653,8 @@
     {
       "path": "deploy/docker/scripts/prepare-runtime-patches.sh",
       "category": "runtime-script",
-      "sizeBytes": 3633,
-      "sha256": "a1dbea7f694b86adb1779bc9dfa882cabe090239e35e0075bc1b082af0559cc2"
+      "sizeBytes": 3797,
+      "sha256": "7b62c10e578a5f6dce42d73b61bba8b84e6b7163f236395f4eb7dce9cc69b6a3"
     },
     {
       "path": "deploy/docker/scripts/render-nacos-configs.py",
@@ -1677,20 +1683,20 @@
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
       "category": "runtime-static-override",
-      "sizeBytes": 22299,
-      "sha256": "38e326ff2e764d73ad0a2801e2d7a9872982aa2b69802d256389e505ee2f5948"
+      "sizeBytes": 24056,
+      "sha256": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
       "category": "runtime-static-override",
-      "sizeBytes": 22299,
-      "sha256": "38e326ff2e764d73ad0a2801e2d7a9872982aa2b69802d256389e505ee2f5948"
+      "sizeBytes": 24056,
+      "sha256": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
       "category": "runtime-static-override",
-      "sizeBytes": 13673,
-      "sha256": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648"
+      "sizeBytes": 13666,
+      "sha256": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskSubmitView.html",

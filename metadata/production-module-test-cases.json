@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-21T15:13:16+00:00",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T03:05:57Z",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
@@ -71,7 +71,9 @@
     "workAppointmentInitialPendingDatagridCompat": "/tmp/adp-waps-initial-after-common-20260619090956/result.json; deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon.js; deploy/docker/assets/module-static/workAppointment/commonJs/WAPSCommon-es5.js",
     "rmBatchFormulaEditViewRender": "2026-06-20: deploy/docker/postgres/init/160-rm-batch-formula-edit-view-runtime-json.sql restored runtime_extra_view.view_json for RM_1.0.0_formula_batchFormulaEdit and RM_1.0.0_formula_batchFormulaView. Real browser on same-environment public ingress http://222.88.185.146:18080 opened both pages with navigation 200, layoutJson HTTP 200/code=200, console/page/request failures 0, and screenshots /tmp/adp-public-RM-batch-formula-edit-new.png and /tmp/adp-public-RM-batch-formula-view-existing.png. SSH/DB proof used 100.99.133.43; direct Tailscale page navigation still timed out before domcontentloaded and remains a gateway/static-link risk.",
     "womBadQuantityAudit": "docs/backend-table-audit/wom-bad-quantity-analysis.md; metadata/wom-bad-quantity-analysis.json",
-    "womRejectMaterialMainFlows": "2026-06-20: Reconciled stale PROD-007 status with existing persistence acceptance. prePareReject save/delete and effective, materiaReject receive/effective with hm_factory_materias availi_quantity 10->8, and batchReject effective with wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num 0->2 are accepted with PostgreSQL evidence on 100.99.133.43."
+    "womRejectMaterialMainFlows": "2026-06-20: Reconciled stale PROD-007 status with existing persistence acceptance. prePareReject save/delete and effective, materiaReject receive/effective with hm_factory_materias availi_quantity 10->8, and batchReject effective with wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num 0->2 are accepted with PostgreSQL evidence on 100.99.133.43.",
+    "coreFlowAcceptance20260710": "metadata/core-flow-acceptance-20260710.json",
+    "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED."
   },
   "summary": {
     "totalCases": 43,
@@ -1669,6 +1671,7 @@
     "craftGraphVisibleSaveDelete": "2026-06-19: craftGraph basicInfo pure UI product selection, visible save, visible edit/update, and visible delete now have browser and PostgreSQL evidence. Product reference UI blocker is cleared; visible edit marker ADP_E2E_20260619071722_CRAFTGRAPH persisted version=1. PROD-012 is PASS. Remaining craftGraph notes are display clipping in edit modal and business confirmation on craft_tree_structures.valid after main soft delete.",
     "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
     "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Remaining material-service stock-in/inventory is tracked separately under PROD-022.",
-    "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance."
+    "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance.",
+    "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json."
   }
 }

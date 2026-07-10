@@ -1725,6 +1725,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/172-wom-task-items-table.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/173-wom-make-task-flow-runtime-metadata-sync.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -1965,6 +1977,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-manufacturing-order-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-prepare-need-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -2050,6 +2068,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/build-wom-config-default-patch.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/build-wom-core-production-boot-jar.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -3129,6 +3153,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/core-flow-acceptance-20260710.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/current-content-inventory.json",
       "state": "tracked",
       "tracked": true
@@ -3752,13 +3782,13 @@
       "tracked": 2
     },
     "deploy": {
-      "tracked": 450
+      "tracked": 454
     },
     "docs": {
       "tracked": 54
     },
     "metadata": {
-      "tracked": 67
+      "tracked": 68
     },
     "package.json": {
       "tracked": 1
@@ -3773,8 +3803,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 622,
-    "tracked": 622,
+    "totalFiles": 627,
+    "tracked": 627,
     "untracked": 0
   },
   "untrackedByDirectory": []

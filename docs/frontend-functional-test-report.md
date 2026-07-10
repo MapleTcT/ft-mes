@@ -1,5 +1,26 @@
 # 前端功能测试报告
 
+## 2026-07-10 生产质量核心主线增量复验
+
+本节只记录本轮 `10.11.100.17` 的新增证据。完整机器记录见
+`metadata/core-flow-acceptance-20260710.json`；既有六月历史记录保留在下文。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 环境/平台 | `http://10.11.100.17:18080` | 环境、登录、首页待办、组织、RBAC、40 个菜单页 | 登录、菜单、组织、待办等平台接口 | 环境 `9/9`、平台 `6/6`，无页面/网络/console 错误 | API `16/16`、RBAC `9/9` | PostgreSQL runtime `8/8` | PASS | 无 |
+| WOM 制造指令 | `makeTaskList`、生成后的 `makeTaskEdit` | 上游日计划生成、读取编辑数据、提交生效、应用删除回滚 | `produceTaskCreated2`、`data/{id}`、`makeTaskEdit/submit`、`delete` | 页面会话无 console/page/request failure；生成路径是上游接口，不冒充列表手工新增按钮 | 任务 `88 -> 99`，待办清零，生效 deal 落库，回滚后 `valid=false` | `wom_produce_tasks`、`wfm_task_pending`、`wf_deal_info`、`wf_transition` | PASS | 列表手工新增/导入是否支持仍需产品确认 |
+| WOM 工具栏 | `makeTaskList` | 查询、仅查待办、清空、开始、保持、重启、结束、提前放料、请检 | `makeTaskList-*`、`updateTaskState`、完工报工接口 | 普通鼠标真实点击；中文提示正常；结束弹窗正常；无 raw i18n key 和前端错误 | `runing -> iskeep -> runing`，报工/执行日志存在 | `wom_produce_tasks`、`wom_wait_put_records`、`wom_proc_reports`、`wom_produce_task_exelog` | PASS | 追溯与二维码按缺包状态显示中文守卫，不计入本行 PASS |
+| WOM 报工 | WOM 任务、工序、活动和完工报工页 | 下推备料、投入、工序开始/结束、工序单元、活动结束、完工产出 | WOM 对应写接口 | 各页面/浏览器上下文无阻断错误 | 动作级接口均业务成功 | WOM 任务、过程、投入、产出、执行日志表 | PASS | 部分动作夹具按审计要求暂留，详见机器记录 |
+| QCS 合格 | 制造检验列表、报告编辑页 | 请检、报告生成、结果保存、生效回写 | `createManuInspect`、`bulkSubmit`、`batchDealReports` | 页面和同源浏览器流程无 console/network/page error | 报告 `99/合格`，WOM `已检/合格`，批次可用 | `qcs_inspects`、`qcs_inspect_reports`、`qcs_report_coms`、WOM/批次表 | PASS | marker 与流程记录清理回查 7 项全为 0 |
+| QCS 不合格 | 制造检验列表、报告编辑页 | 不合格判定、生效回写、自动处理单 | 同上及 `manuUnQlfDealWorkFlow` | 页面和同源浏览器流程无 console/network/page error | 报告 `99/不合格`，WOM/批次不合格，自动处理单 `88` | 上述表及 `qcs_un_qlf_deals` | PASS | 待办和 JBPM execution 也完成定向清理 |
+| WOM 退料 | `prePareRejectEdit` | 保存草稿并应用删除 | `prePareRejectEdit/save`、`delete` | 页面上下文无前端错误 | `valid=true/pending=1 -> valid=false/pending=0` | `wom_reject_materials`、DI/SV、`wfm_task_pending` | PASS | 证明备料退料草稿/删除，不等于仓库库存总账回写 |
+| material/WMS | WOM/QCS 完工入库回写 | `checkProdResult`、`generateProduceOutSing` | material 网关接口 | 网关返回 503 | Nacos 所有候选服务健康实例均为 0 | 当前无可验收库存目标表 | BLOCKED | 缺真实 material/WMS 服务包，禁止虚构接口和表 |
+| ProcessAnalysis | WOM “生产过程追溯” | 批次、物料、工单追溯 | 5 个 ProcessAnalysis 入口 | 前端显示中文依赖提示，不再发出坏请求 | Nacos 零实例，端点 503 | 表、runtime view、menu 均为 0 | BLOCKED | 缺真实 ProcessAnalysis 包/服务/表/视图 |
+
+本轮 Mapper PostgreSQL 审计为 `error=0/warning=0`。迁移
+`173-wom-make-task-flow-runtime-metadata-sync.sql` 已连续执行两次，随后制造指令
+复验 `workflowMetadataDrift=false`。
+
 ## 2026-06-21 当前地址复验
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |

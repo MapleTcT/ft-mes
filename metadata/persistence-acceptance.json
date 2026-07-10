@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-22T06:37:19.684Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T03:05:57Z",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
   "latestRevalidation": {
@@ -282,8 +282,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 119,
-    "pass": 115,
+    "testedFeatures": 124,
+    "pass": 120,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 1
@@ -2861,6 +2861,123 @@
       "status": "PASS",
       "evidence": "Report metadata/entity-model-config-crud-persistence-acceptance.json. Real browser-page context opened http://222.88.185.146:18080/msService/ec/engine/msManage with navigationStatus=200 and no visible/console/page/request failure. Entity create, model create, entity edit, model edit, model ordinaryDelete and entity ordinaryDelete all returned HTTP 200/success=true. PostgreSQL evidence: after create ec_entity=1, ec_model=1, inherent ec_property=3; edit marker persisted to entity/model descriptions; delete path soft-deleted entity/model/property rows; controlled cleanup left entity/model/property/physical table counts at 0.",
       "issues": []
+    },
+    {
+      "module": "生产质量核心主线-WOM",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; generated makeTaskEdit pending",
+      "operation": "制造指令生成、编辑提交、生效及应用删除回滚",
+      "api": "POST /produceTaskCreated2; GET /data/{id}; POST /makeTaskEdit/submit; POST /delete",
+      "method": "MIXED",
+      "requiresPersistence": true,
+      "backendEntry": "WOMProduceTaskController.produceTaskCreated2/submit/delete -> WOMFormCreatServiceImpl -> WOMProduceTaskServiceImpl -> workflow InstanceService/TaskService",
+      "tables": [
+        "wom_produce_tasks",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "wf_transition"
+      ],
+      "marker": "ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER",
+      "verificationSql": "SELECT id,version,valid,status,table_info_id,table_no,deployment_id,process_key,produce_batch_num,convert_from(lo_get(remark),'UTF8') FROM wom_produce_tasks WHERE produce_batch_num='ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER_BATCH'; SELECT activity_name,outcome,outcome_des FROM wf_deal_info WHERE table_info_id=<tableInfoId>;",
+      "status": "PASS",
+      "evidence": "Artifact /tmp/adp-wom-manufacturing-order-metadata-sync-20260710.json. Authenticated same-origin browser session created the task through produceTaskCreated2, loaded edit data, submitted the runtime XML 生效 transition, and called application delete. PostgreSQL showed status 88/version 1 after create, status 99/version 3 and marker remark after submit, no active pending, and valid=false/version 4 after rollback. Migration 173 aligned wf_transition with the current XML; workflowMetadataDrift=false. Temporary BaseSet unit was restored and removed.",
+      "issues": [
+        "produceTaskCreated2 is the accepted upstream daily-plan generation path; the list still has no product-confirmed manual create/import entry."
+      ]
+    },
+    {
+      "module": "生产质量核心主线-WOM",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "制造指令列表查询和整排真实点击回归",
+      "api": "POST /makeTaskList-query; POST /makeTaskList-pending; POST /updateTaskState; GET /findProcReportIdByTaskId",
+      "method": "MIXED",
+      "requiresPersistence": true,
+      "backendEntry": "WOM makeTaskList generated handlers -> WOMProduceTaskController.updateTaskState -> WOMProduceTaskServiceImpl",
+      "tables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
+      "marker": "ADP_E2E_20260710031716_WOMSTART_HOLD_RESTART",
+      "verificationSql": "SELECT id,table_no,task_run_state,status,version FROM wom_produce_tasks WHERE id=9007190534366818; SELECT id,task_id,exe_state,proc_report_id,batch_sync_status FROM wom_wait_put_records WHERE task_id=9007190534366818;",
+      "status": "PASS",
+      "evidence": "After syncing the repository static patch to the running Nginx mount, artifact /tmp/adp-wom-toolbar-row-after-static-sync-20260710.json and screenshot /tmp/adp-wom-toolbar-row-after-static-sync-20260710.png proved real mouse clicks for no-selection guards, query, pending-only, clear, start/hold/restart, finish dialog, advance release and manufacturing inspection. No failed responses, console errors, request failures or page errors. State persisted runing -> iskeep -> runing; the downstream smoke then executed cleanup|0|0|0|0.",
+      "issues": [
+        "ProcessAnalysis and QR remain separately guarded missing dependencies and are not included in this PASS."
+      ]
+    },
+    {
+      "module": "生产质量核心主线-QCS",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operation": "QCS 合格报告生效并回写 WOM/批次",
+      "api": "POST /WOM/produceTask/produceTask/createManuInspect; POST /QCS/inspect/inspect/bulkSubmit; POST /QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "QCSInspectController/QCSInspectReportController -> QCS inspect/report services -> WOMQCSController.syncInspectReport",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "marker": "ADP_E2E_20260710024838_QCS_QUAL",
+      "verificationSql": "SELECT id,status,version,check_result,memo_field FROM qcs_inspect_reports WHERE batch_code='ADP_E2E_20260710024838_QCS_QUAL_BATCH'; SELECT id,check_state,check_result FROM wom_produce_tasks WHERE produce_batch_num='ADP_E2E_20260710024838_QCS_QUAL_BATCH'; SELECT id,check_state,check_result,active_batch_state_id,is_available FROM baseset_batch_infos WHERE batch_num='ADP_E2E_20260710024838_QCS_QUAL_BATCH';",
+      "status": "PASS",
+      "evidence": "Artifact /tmp/adp-qcs-report-chain-qualified-cleanup-20260710.json. Browser pages loaded without console/network/page errors. Report reached status=99/result=合格; WOM task/wait/exelog were 已检/合格; batch was qualified with active state 11000 and is_available=true. Controlled cleanup including QCS/WOM/workflow fixture rows returned cleanup|0|0|0|0|0|0|0.",
+      "issues": []
+    },
+    {
+      "module": "生产质量核心主线-QCS",
+      "route": "/msService/QCS/inspect/inspect/manuInspectList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operation": "QCS 不合格报告生效、WOM/批次回写及自动处理单",
+      "api": "POST /WOM/produceTask/produceTask/createManuInspect; POST /QCS/inspect/inspect/bulkSubmit; POST /QCS/inspectReport/inspectReport/batchDealReports",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "QCS inspect/report services -> judgeResultUnqualified/createUnQlfDeal -> WOMQCSController.syncInspectReport",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals",
+        "wfm_task_pending",
+        "jbpm4_execution",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "marker": "ADP_E2E_20260710024957_QCS_UNQLF",
+      "verificationSql": "SELECT id,status,version,check_result,un_qlf_deal_flag FROM qcs_inspect_reports WHERE batch_code='ADP_E2E_20260710024957_QCS_UNQLF_BATCH'; SELECT id,status,report_id,batch_code FROM qcs_un_qlf_deals WHERE batch_code='ADP_E2E_20260710024957_QCS_UNQLF_BATCH'; SELECT id,check_state,check_result,is_available,active_batch_state_id FROM baseset_batch_infos WHERE batch_num='ADP_E2E_20260710024957_QCS_UNQLF_BATCH';",
+      "status": "PASS",
+      "evidence": "Artifact /tmp/adp-qcs-report-chain-unqualified-cleanup-20260710.json. Report reached status=99/result=不合格; WOM task/wait/exelog were Checked/Unqualified; batch state was 11003/unqualified/is_available=false; automatic qcs_un_qlf_deals row was created at status=88. Controlled cleanup removed the active treatment pending and JBPM execution and returned cleanup|0|0|0|0|0|0|0.",
+      "issues": [
+        "Final warehouse disposition remains blocked by the missing material/WMS service."
+      ]
+    },
+    {
+      "module": "生产质量核心主线-WOM退料",
+      "route": "/msService/WOM/rejectMaterilal/rejectMaterial/prePareRejectEdit",
+      "operation": "备料退料保存和应用删除回滚",
+      "api": "POST /prePareRejectEdit/save; POST /rejectMaterial/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "WOMRejectMaterialController -> WOMRejectMaterialServiceImpl -> workflow TaskService",
+      "tables": [
+        "wom_reject_materials",
+        "wom_reject_materials_di",
+        "wom_reject_materials_sv",
+        "wfm_task_pending"
+      ],
+      "marker": "ADP_E2E_20260710030059_WOM_REJECT_MATERIAL",
+      "verificationSql": "SELECT id,version,valid,status,table_info_id,table_no,process_key,reject_type FROM wom_reject_materials WHERE id=764220460397824; SELECT count(*) FROM wfm_task_pending WHERE model_id=764220460397824 OR table_info_id=764220460434688;",
+      "status": "PASS",
+      "evidence": "Artifact /tmp/adp-wom-reject-material-make-target-20260710.json. Same-origin browser workflow saved the document with valid=true/version=1/pending_count=1 and used the application delete endpoint; PostgreSQL then showed valid=false/version=2/pending_count=0. Frontend console/page/request failures were empty.",
+      "issues": [
+        "This proves the prepare-return draft/delete path; material/WMS inventory ledger write-back remains a separate blocker."
+      ]
     }
   ],
   "evidence": [

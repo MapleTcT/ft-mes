@@ -18,6 +18,7 @@ const dbName = process.env.ADP_DB_NAME || "adp";
 const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 180000);
 const gridTimeoutMs = Number(process.env.ADP_GRID_TIMEOUT_MS || pageTimeoutMs);
+const keepFixtureForDownstreamSmoke = process.env.ADP_WOM_KEEP_FIXTURE === "true";
 const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const transitionConfigs = {
   start: {
@@ -81,7 +82,9 @@ const outputPath =
   process.env.ADP_WOM_START_PERSISTENCE_OUTPUT ||
   path.join(outputDir, `wom-${transitionName}-persistence-results.json`);
 // Keep marker rows above older seed data but below Number.MAX_SAFE_INTEGER for legacy frontend JSON handling.
-const idBase = 9000000000000000n + BigInt(Date.now() % 700000000) * 10n + BigInt(process.pid % 10);
+// Keep the short-lived marker above historical 9.0e15 fixtures while staying
+// below Number.MAX_SAFE_INTEGER because the generated grid parses ids as JS numbers.
+const idBase = 9007190000000000n + BigInt(Date.now() % 100000000) * 10n + BigInt(process.pid % 10);
 const ids = {
   material: idBase + 1n,
   formula: idBase + 2n,
@@ -338,6 +341,44 @@ WHERE out_mat_detail_id = ${ids.outputDetail};
 `;
 }
 
+function cleanupSql() {
+  return `
+BEGIN;
+DELETE FROM public.wom_mat_outpt_records WHERE out_mat_detail_id = ${ids.outputDetail};
+DELETE FROM public.wom_output_details
+ WHERE id = ${ids.outputDetail}
+    OR head_id IN (SELECT id FROM public.wom_proc_reports WHERE task_id = ${ids.task});
+DELETE FROM public.wom_task_act_itemss WHERE produce_batch_num = ${sqlLiteral(batchNo)};
+DELETE FROM public.wom_produce_task_exelog WHERE task_id = ${ids.task};
+DELETE FROM public.wom_proc_reports WHERE task_id = ${ids.task};
+DELETE FROM public.wf_deal_info WHERE table_info_id = ${ids.task};
+DELETE FROM public.wfm_task_pending WHERE id = ${ids.pending} OR table_info_id = ${ids.task};
+DELETE FROM public.wom_wait_put_records WHERE id = ${ids.wait} OR task_id = ${ids.task};
+DELETE FROM public.wom_produce_tasks WHERE id = ${ids.task};
+DELETE FROM public.rm_formulas WHERE id = ${ids.formula};
+DELETE FROM public.baseset_materials WHERE id = ${ids.material};
+COMMIT;
+SELECT 'cleanup',
+       (SELECT count(*) FROM public.wom_produce_tasks WHERE id = ${ids.task}),
+       (SELECT count(*) FROM public.wom_wait_put_records WHERE task_id = ${ids.task}),
+       (SELECT count(*) FROM public.rm_formulas WHERE id = ${ids.formula}),
+       (SELECT count(*) FROM public.baseset_materials WHERE id = ${ids.material});
+`;
+}
+
+function cleanupFixture(evidence) {
+  try {
+    const result = runSql(cleanupSql());
+    evidence.cleanup = {
+      sql: cleanupSql().trim(),
+      result,
+      status: /cleanup\|0\|0\|0\|0/.test(result) ? "PASS" : "FAIL",
+    };
+  } catch (error) {
+    evidence.cleanup = { status: "FAIL", error: error.stack || error.message };
+  }
+}
+
 function seedOutputDetailSql(procReportId) {
   const commonCols =
     "version, valid, cid, create_staff_id, create_time, create_department_id, create_position_id, group_id, owner_staff_id, owner_department_id, owner_position_id, position_lay_rec";
@@ -521,6 +562,9 @@ async function refreshMarkerGrid(page) {
 }
 
 async function selectMarkerRow(page) {
+  // The generated page fires its default pageSize=20 query after first render.
+  // Let that request settle so it cannot overwrite the marker refresh below.
+  await page.waitForTimeout(3000);
   await refreshMarkerGrid(page);
   await page.waitForFunction(
     ({ gridCode, expectedMarker }) => {
@@ -1204,10 +1248,24 @@ async function main() {
   } catch (error) {
     evidence.status = "FAIL";
     evidence.error = error.stack || error.message;
+    cleanupFixture(evidence);
     fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
     throw error;
   }
 
+  if (keepFixtureForDownstreamSmoke) {
+    evidence.cleanup = {
+      status: "DEFERRED",
+      reason: "Fixture retained only for the downstream WOM toolbar row browser smoke.",
+      sql: cleanupSql().trim(),
+    };
+  } else {
+    cleanupFixture(evidence);
+    if (evidence.cleanup.status !== "PASS") {
+      evidence.status = "FAIL";
+      evidence.error = `fixture cleanup failed: ${JSON.stringify(evidence.cleanup)}`;
+    }
+  }
   fs.writeFileSync(outputPath, JSON.stringify(evidence, null, 2));
   console.log(
     JSON.stringify(

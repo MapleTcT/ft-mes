@@ -1,5 +1,22 @@
 # 后端落库验收报告
 
+## 2026-07-10 核心主线增量
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 制造指令生成、提交、生效与回滚 | WOM 制造指令列表/生成后的编辑待办 | `produceTaskCreated2`、`makeTaskEdit/submit`、`delete` | `WOMProduceTaskController -> WOMFormCreatServiceImpl -> WOMProduceTaskServiceImpl -> workflow` | `wom_produce_tasks`、`wfm_task_pending`、`wf_deal_info` | marker `ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER`：`status 88 -> 99`、待办 1 -> 0、`valid true -> false`；流程 XML 与 `wf_transition` 均为 `SequenceFlow_0vcn8hp/生效` | PASS |
+| 开始/保持/重启和完工弹窗 | `makeTaskList` 真实行点击 | `updateTaskState`、`findProcReportIdByTaskId` | `WOMProduceTaskController/Service` | `wom_produce_tasks`、`wom_wait_put_records`、`wom_proc_reports`、`wom_produce_task_exelog` | 静态补丁同步后 marker `ADP_E2E_20260710031716_WOMSTART_HOLD_RESTART`，最终 `runing/status=99/version=3`；随后 `cleanup|0|0|0|0` | PASS |
+| 完工报工产出 | WOM 完工报工 | `updateTaskState`、`addOutputByOutPutDetails` | WOM 任务/报工服务 | `wom_output_details`、`wom_mat_outpt_records`、任务表 | marker `ADP_E2E_20260710023819_WOMSTART_STOP_OUTPUT`，产出明细和出料记录各 1，清理 PASS | PASS |
+| QCS 合格报告回写 | 制造检验列表/报告编辑页 | `createManuInspect`、`bulkSubmit`、`batchDealReports` | QCS 检验/报告服务 -> WOM QCS 回调 | QCS 检验/报告/明细、WOM 任务/待入库/执行日志、批次 | marker `ADP_E2E_20260710024838_QCS_QUAL`：报告 `99/合格`、WOM `已检/合格`、批次 `qualified/可用`；清理 7 项为 0 | PASS |
+| QCS 不合格和自动处理单 | 制造检验列表/报告编辑页 | 同上 | QCS 报告服务 -> `createUnQlfDeal` -> WOM 回调 | 上述表及 `qcs_un_qlf_deals`、待办/JBPM | marker `ADP_E2E_20260710024957_QCS_UNQLF`：报告 `99/不合格`、WOM/批次不合格、处理单 `88`；待办/JBPM 定向清理后 7 项为 0 | PASS |
+| 备料退料草稿和删除 | `prePareRejectEdit` | `save`、`delete` | `WOMRejectMaterialController/Service` | `wom_reject_materials`、DI/SV、`wfm_task_pending` | marker `ADP_E2E_20260710030059_WOM_REJECT_MATERIAL`：保存后 `valid=true/pending=1`，删除后 `valid=false/pending=0` | PASS |
+| 完工入库/库存回写 | WOM/QCS | material `checkProdResult`、`generateProduceOutSing` | 当前只有 WOM 调用方 | 未恢复 | Nacos 候选别名健康实例均为 0，两个端点均为 tenant-service 503 | BLOCKED |
+| 批次/物料/工单追溯 | WOM 生产过程追溯 | ProcessAnalysis 5 个入口 | 当前只有 WOM 调用方 | 未恢复 | Nacos 健康实例 0；5 个端点 503；表/runtime view/menu 均为 0 | BLOCKED |
+
+完整请求、响应、字段前后值、清理 SQL和临时证据路径见
+`metadata/core-flow-acceptance-20260710.json`。本轮没有用数据库直写冒充业务动作；直接 SQL
+只用于受控测试夹具准备、验收查询和定向清理。
+
 ## 2026-06-21 当前地址复验
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |

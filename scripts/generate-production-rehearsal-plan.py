@@ -28,6 +28,7 @@ SOURCE_LEDGER_PATHS = {
     "businessDependencyReadiness": "metadata/business-dependency-readiness-smoke.json",
     "businessPackageScan": "metadata/business-dependency-package-scan.json",
     "productionExportReadiness": "metadata/production-export-readiness-smoke.json",
+    "coreFlowAcceptance": "metadata/core-flow-acceptance-20260710.json",
 }
 
 TRACK_ORDER = [
@@ -58,6 +59,7 @@ RUNTIME_REPORTS_BY_TRACK = {
         "metadata/production-export-readiness-smoke.json",
         "metadata/production-module-blockers.json",
         "metadata/production-module-backlog.json",
+        "metadata/core-flow-acceptance-20260710.json",
     ],
 }
 

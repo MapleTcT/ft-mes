@@ -1,5 +1,21 @@
 # 生产模块功能测试用例矩阵
 
+## 2026-07-10 核心主线增量结论
+
+| 主线阶段 | 最新状态 | 本轮证据 | 当前边界 |
+|---|---|---|---|
+| 制造指令 | PASS | `ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER` 完成生成、编辑提交、生效、应用删除回滚；`workflowMetadataDrift=false` | `produceTaskCreated2` 是上游日计划生成路径；列表手工新增/导入仍需产品确认 |
+| 投入/工序/活动/完工报工 | PASS | 7 组动作级 marker；静态补丁同步后整排真实点击 marker `ADP_E2E_20260710031716_WOMSTART_HOLD_RESTART` | 独立不良数量在当前包中无字段/接口/表，继续作为产品范围决定 |
+| 生产请检 | PASS | `ADP_E2E_20260710023850_WOM_CHECKOUTBILL` 和 QCS 两条完整链 | 请检、报告和 WOM/批次质量状态已闭合 |
+| 合格处理 | PASS | `ADP_E2E_20260710024838_QCS_QUAL`，报告/WOM/批次落库并清理 | 库存总账回写不在现有 WOM/QCS 表内 |
+| 不合格处理 | PASS | `ADP_E2E_20260710024957_QCS_UNQLF`，自动生成处理单并清理待办/JBPM | 后续仓库处置仍依赖 material/WMS |
+| 退料 | PASS | `ADP_E2E_20260710030059_WOM_REJECT_MATERIAL` 保存、删除和待办清理 | 本轮复验的是备料退料；库存总账仍属 material/WMS |
+| 完工入库/库存回写 | BLOCKED | `material` 候选 Nacos 实例均为 0，两个关键端点 503 | 缺真实 material/WMS 服务包和目标表 |
+| 批次/物料/工单追溯 | BLOCKED | ProcessAnalysis Nacos/端点/表/runtime view/menu 全部缺失 | 缺真实 ProcessAnalysis 业务包 |
+
+机器记录：`metadata/core-flow-acceptance-20260710.json`。本轮环境 `9/9 PASS`、
+平台 `6/6 PASS`、PostgreSQL runtime `8/8 PASS`、Mapper 审计 `0 error/0 warning`。
+
 ## 当前结论
 
 本文件把生产模块从“页面能打开”提升为动作级验收清单。当前已经完成真实浏览器页面 smoke，并完成 WOM 制造任务“开始执行、保持、重启、无产出明细结束、完工报工产出明细、投入明细报工、提前放料确认、下推备料需求、工序开始/结束、活动开始/结束、简易活动报工、制造请检生成 QCS 请检单、QCS 审核生效后生成检验报告”的真实前端状态流转和 PostgreSQL 落库验收；请检和报告生成已不再是当前 blocker。QCS 报告编辑页原 `layoutJson` 500 已由 `119-qcs-inspect-report-edit-runtime-json.sql` 修复并在 PostgreSQL/API 层复验为 200，且已通过公网地址 `222.88.185.146:18080` 完成真实浏览器渲染复验；QCS 报告结果字段保存已通过真实页面运行时和 PostgreSQL 验收；报告审核提交到生效并回写 WOM 合格状态、不合格状态、自动生成不合格处理单以及处理单审核生效/WOM 处理单号回写已通过前端/API、LIMS/WOM 日志和 PostgreSQL 验收。本轮 marker `ADP_E2E_20260618_UNQLF_AUTO_DEAL_3` 验证 QCS 报告“不合格”生效后真实回写 WOM 任务、待入库记录、执行日志和批次状态，自动生成 `qcs_un_qlf_deals` 不合格处理单；后续 marker `ADP_E2E_20260618_UNQLF_DEAL_EFFECT` 验证处理单从审核节点生效，`qcs_un_qlf_deals.status=99`，WOM 任务/执行日志/批次均回填 `rejects_deal_id=756484120581376`。另外，QCS 产品紧急放行 edit/view 页原 `layoutJson` 500 已由 `124-qcs-inspect-release-runtime-json.sql` 修复，`125-qcs-inspect-release-action-compat.sql` 补齐 PostgreSQL 明细表、监督视图和工作流配置后，保存草稿 `ADP_E2E_20260618_INSP_RELEASE_SAVE_797449` 与提交审核 `ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449` 均完成前端/API/PostgreSQL 验收。2026-06-18 补测 WOM 领料退料、备料退料、批次退料和退料明细四个列表，公网入口真实浏览器均 `200` 且查询接口无错误；远端 PostgreSQL 确认 `wom_reject_materials`、`wom_rejct_matal_parts` 当前均为空，菜单元数据只暴露查询操作。同日补齐 WorkAppointment 恢复静态 HTML 的 `vendors.sesgis.js` 依赖后，作业计划编辑页和作业活动编辑页已真实渲染；随后 `148-runtime-visible-business-buttons.sql` 恢复 WorkAppointment 列表 `layoutJson` 的 `新增/删除` 按钮，`149-workappointment-i18n-resource-fixups.sql` 与 `148` 的 `namekey` 修正让列表显示中文 `新增/删除`，公网真实浏览器点击 `新增` 已打开 `workPlanEdit`，随后补充 `WAPSCommon` 初始化请求兼容并完成真实可见新增表单保存/删除清理，marker `ADP_E2E_20260619091757_WAPS_VISIBLE_FORM_SAVE` 已 PASS；调整/作废/审批已完成专项复验，组合用例改为 PASS。WTS 作业许可已通过真实浏览器页面上下文调用 `permitUltraSubmit` 保存主许可草稿并查 PostgreSQL 确认 `wts_work_permits` 落库，随后用删除接口清理为 `valid=false`；`148-runtime-visible-business-buttons.sql` 也恢复 WTS 列表中文 `新增/修改` 按钮，公网真实浏览器点击 `新增` 已打开 `workPermitEdit`。本轮 `152-wts-firework-workflow-config.sql` 补齐 `fireWorkWF` 的 PostgreSQL 工作流元数据后，marker `ADP_E2E_20260619095233_WTS_CHILD` 已证明动火子票 `wts_work_tickets`、开票申请待办 `wfm_task_pending` 和 `wts_work_tickets_di` 真实落库；随后 `153-wts-firework-runtime-json.sql`、`154-runtime-view-is-shadow-integer-compat.sql` 和 `patch-wts-runtime-compat.py` 修复动火节点页面/附件接口后，开票申请提交已生成风险确认与气体分析两个并行待办，两个后续页面真实浏览器渲染无错误。暂停/恢复已复验 PASS；选择 `WTS_processing/close` 后进入封票待办 PASS；本轮 marker `ADP_E2E_20260619142344_WTS_FIREWORK` 已完成从创建、审批、执行处理到封票生效的完整正常关闭，PostgreSQL 最终 `status=99/job_status=WTS_jobStatus/normalClose/pending=0`，正常关闭用例改为 PASS；未选处理方式已复验为业务校验 PASS，`WTS_processing/stop` 终止分支也已用 marker `ADP_E2E_20260619144549_WTS_FIREWORK_STOP` 完成真实前端/API/PostgreSQL 验收；若产品另有独立作废/cancel/delete 入口仍待确认。RM 批控配方导入入口已由运行时 HTML 补丁恢复，真实浏览器上传 Excel 后 `importMainXls` 返回导入成功，并在 PostgreSQL `rm_formulas` 查到 marker 行。当前 QCS/WOM 侧剩余 blocker 收窄为不良数登记和库存/入库相关回写；退料主链路已经通过备料退料、车间物料退料、批次退料三个专项真实前端/API/PostgreSQL 验收。让步放行处理方式已由 `ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE` 专项 PASS，拒收 `return` 已由 `ADP_E2E_20260619_QCS_RETURN_1` 专项 PASS。`100.99.133.43:18080` 仍有 Tailscale 慢链路残余风险，本次 RM 导入和 WTS 后续节点浏览器证据使用同环境公网 HTTP 入口 `222.88.185.146:18080`，导出和跨模块主流程仍需继续逐项真实前端验收。

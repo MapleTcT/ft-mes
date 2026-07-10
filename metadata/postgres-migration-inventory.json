@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 171,
+  "migrationCount": 173,
   "firstNumber": 1,
-  "lastNumber": 171,
+  "lastNumber": 173,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 60,
+  "watchStatementCount": 62,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 9324,
+    "alter-table": 9326,
     "create-function": 68,
-    "create-index": 840,
-    "create-table": 523,
+    "create-index": 844,
+    "create-table": 524,
     "create-view": 107,
-    "insert": 3874,
-    "update": 3936
+    "insert": 3875,
+    "update": 3937
   },
   "idempotencySignalTotals": {
     "create-or-replace": 172,
-    "do-block": 272,
-    "if-exists": 89,
-    "if-not-exists": 11246,
-    "on-conflict": 3838,
+    "do-block": 274,
+    "if-exists": 90,
+    "if-not-exists": 11253,
+    "on-conflict": 3839,
     "to-regclass": 152,
     "where-not-exists": 26
   },
@@ -34,10 +34,10 @@
     "business": 34,
     "compatibility": 73,
     "configuration": 41,
-    "general": 22,
+    "general": 23,
     "notification": 9,
-    "platform": 48,
-    "workflow": 19
+    "platform": 49,
+    "workflow": 20
   },
   "migrations": [
     {
@@ -6415,6 +6415,94 @@
       },
       "highRiskStatements": [],
       "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/172-wom-task-items-table.sql",
+      "name": "172-wom-task-items-table.sql",
+      "number": 172,
+      "slug": "wom-task-items-table",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 98,
+      "sha256": "6839be2fa00cd134840fc324e1fb59c0cce75ca10244e8c5b4b035858e64a5d6",
+      "statementCounts": {
+        "create-table": 1,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 4,
+        "alter-table": 2,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 7,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/173-wom-make-task-flow-runtime-metadata-sync.sql",
+      "name": "173-wom-make-task-flow-runtime-metadata-sync.sql",
+      "number": 173,
+      "slug": "wom-make-task-flow-runtime-metadata-sync",
+      "validName": true,
+      "tags": [
+        "platform",
+        "workflow"
+      ],
+      "lineCount": 205,
+      "sha256": "d9adc9d89235a1228c6f60647d2377a4e49ffff3eb0cf158b43b0ac4aebb0a65",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 1,
+        "update": 1
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 66,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wf_transition transition",
+          "statement": "DELETE FROM public.wf_transition transition USING current_flow WHERE transition.deployment_id = current_flow.deployment_id AND transition.code IN ( 'SequenceFlow_00a9xaa', 'SequenceFlow_0vcn8hp', 'SequenceFlow_0libf0v' )",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        },
+        {
+          "line": 88,
+          "pattern": "delete",
+          "excerpt": "DELETE FROM public.wf_task task",
+          "statement": "DELETE FROM public.wf_task task USING current_flow WHERE task.deployment_id = current_flow.deployment_id AND task.code = 'TaskEvent_023irnk';",
+          "safe": true,
+          "safety": "scoped-delete",
+          "issue": "",
+          "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
+        }
+      ],
       "unguardedStructuralStatements": []
     }
   ]

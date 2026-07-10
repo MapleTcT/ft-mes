@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-10T03:20:00Z",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "database": "PostgreSQL",
+  "target": {
+    "host": "100.99.133.43",
+    "baseUrl": "http://100.99.133.43:18080",
+    "legacyLanAlias": "10.11.100.17"
+  },
+  "scope": "production-quality-core-flow",
+  "overallStatus": "BLOCKED",
+  "statusReason": "EXTERNAL_PACKAGES",
+  "summary": {
+    "pass": 10,
+    "blocked": 2,
+    "fail": 0,
+    "environmentSmoke": "9/9 PASS",
+    "platformSmoke": "6/6 PASS",
+    "postgresRuntimeSmoke": "8/8 PASS",
+    "postgresMapperAudit": "0 error / 0 warning"
+  },
+  "items": [
+    {
+      "id": "CORE-001",
+      "operation": "制造指令生成、编辑提交、应用删除回滚",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "apis": [
+        "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2",
+        "GET /msService/WOM/produceTask/produceTask/data/{id}",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit?id={id}",
+        "POST /msService/WOM/produceTask/produceTask/delete"
+      ],
+      "tables": ["wom_produce_tasks", "wfm_task_pending", "wf_deal_info", "wf_transition"],
+      "result": "status 88 -> 99, pending cleared, 生效 deal persisted, valid true -> false rollback; workflowMetadataDrift=false",
+      "cleanup": "application soft-delete rollback plus temporary BaseSet unit cleanup PASS",
+      "artifact": "/tmp/adp-wom-manufacturing-order-metadata-sync-20260710.json"
+    },
+    {
+      "id": "CORE-002",
+      "operation": "制造指令列表整排真实点击",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710031716_WOMSTART_HOLD_RESTART",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "apis": [
+        "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+        "GET /msService/WOM/produceTask/produceTask/findProcReportIdByTaskId",
+        "GET /msService/WOM/procReport/procReport/outPutCommonTaskEdit"
+      ],
+      "tables": ["wom_produce_tasks", "wom_wait_put_records", "wom_proc_reports", "wom_produce_task_exelog"],
+      "result": "开始、保持、重启、结束弹窗、提前放料、请检及空选择守卫通过；无 raw i18n key、console error、network error 或 page error",
+      "cleanup": "cleanup|0|0|0|0 PASS",
+      "artifact": "/tmp/adp-wom-toolbar-row-after-static-sync-20260710.json",
+      "screenshot": "/tmp/adp-wom-toolbar-row-after-static-sync-20260710.png"
+    },
+    {
+      "id": "CORE-003",
+      "operation": "下推备料需求",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710022211_WOM_PREPARE_NEED",
+      "artifact": "/tmp/adp-wom-prepare-need-persistence-acceptance.json",
+      "cleanup": "retained as explicit audit fixture"
+    },
+    {
+      "id": "CORE-004",
+      "operation": "投入、工序开始/结束、工序工作单元、活动结束报工",
+      "status": "PASS",
+      "markers": [
+        "ADP_E2E_20260710022522_WOM_ACTIVE",
+        "ADP_E2E_20260710022531_WOM_ACTIVE",
+        "ADP_E2E_20260710022537_WOM_ACTIVE",
+        "ADP_E2E_20260710022549_WOM_ACTIVE",
+        "ADP_E2E_20260710022554_WOM_ACTIVE"
+      ],
+      "artifacts": [
+        "/tmp/adp-wom-putin-active-persistence-acceptance.json",
+        "/tmp/adp-wom-process-start-persistence-acceptance.json",
+        "/tmp/adp-wom-process-end-persistence-acceptance.json",
+        "/tmp/adp-wom-process-unit-persistence-acceptance.json",
+        "/tmp/adp-wom-active-end-persistence-acceptance.json"
+      ],
+      "cleanup": "retained as explicit action-level audit fixtures"
+    },
+    {
+      "id": "CORE-005",
+      "operation": "完工报工产出明细",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710023819_WOMSTART_STOP_OUTPUT",
+      "tables": ["wom_output_details", "wom_mat_outpt_records", "wom_produce_tasks"],
+      "cleanup": "PASS",
+      "artifact": "/tmp/adp-wom-stop-output-persistence-acceptance.json"
+    },
+    {
+      "id": "CORE-006",
+      "operation": "生产请检和质量活动生成检验单",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL",
+      "tables": ["qcs_inspects", "qcs_inspect_stds", "qcs_inspect_coms", "baseset_batch_infos"],
+      "artifact": "/tmp/adp-wom-checkoutbill-persistence-acceptance.json",
+      "cleanup": "retained as explicit audit fixture"
+    },
+    {
+      "id": "CORE-007",
+      "operation": "QCS 合格报告生效并回写 WOM",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710024838_QCS_QUAL",
+      "tables": ["qcs_inspects", "qcs_inspect_reports", "qcs_report_coms", "wom_produce_tasks", "wom_wait_put_records", "wom_produce_task_exelog", "baseset_batch_infos"],
+      "result": "报告 status=99/result=合格；WOM 已检/合格；批次 qualified/is_available=true",
+      "cleanup": "cleanup|0|0|0|0|0|0|0 PASS",
+      "artifact": "/tmp/adp-qcs-report-chain-qualified-cleanup-20260710.json"
+    },
+    {
+      "id": "CORE-008",
+      "operation": "QCS 不合格报告生效、WOM 回写及自动处理单",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710024957_QCS_UNQLF",
+      "tables": ["qcs_inspects", "qcs_inspect_reports", "qcs_report_coms", "qcs_un_qlf_deals", "wom_produce_tasks", "wom_wait_put_records", "wom_produce_task_exelog", "baseset_batch_infos"],
+      "result": "报告 status=99/result=不合格；WOM Checked/Unqualified；批次 unqualified/is_available=false；自动处理单 status=88",
+      "cleanup": "including pending and JBPM execution: cleanup|0|0|0|0|0|0|0 PASS",
+      "artifact": "/tmp/adp-qcs-report-chain-unqualified-cleanup-20260710.json"
+    },
+    {
+      "id": "CORE-009",
+      "operation": "备料退料保存与应用删除",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710030059_WOM_REJECT_MATERIAL",
+      "tables": ["wom_reject_materials", "wom_reject_materials_di", "wom_reject_materials_sv", "wfm_task_pending"],
+      "result": "save valid=true/pending=1; delete valid=false/pending=0",
+      "cleanup": "application soft-delete retained as audit record",
+      "artifact": "/tmp/adp-wom-reject-material-make-target-20260710.json"
+    },
+    {
+      "id": "CORE-010",
+      "operation": "平台和 PostgreSQL 回归",
+      "status": "PASS",
+      "artifacts": [
+        "/tmp/adp-test-environment-smoke-coreflow-20260710.json",
+        "/tmp/adp-platform-validation-coreflow-20260710/platform-validation-summary.json",
+        "/tmp/adp-postgres-runtime-smoke-coreflow-20260710.json"
+      ]
+    },
+    {
+      "id": "CORE-BLOCKER-001",
+      "operation": "完工入库和库存回写",
+      "status": "BLOCKED",
+      "dependency": "material/WMS service package",
+      "evidence": "Nacos aliases material/MATERIAL/wms/WMS/warehouse/inventory all have healthyHostCount=0; checkProdResult and generateProduceOutSing return tenant-service 503",
+      "artifact": "/tmp/adp-business-dependency-readiness-coreflow-20260710.json"
+    },
+    {
+      "id": "CORE-BLOCKER-002",
+      "operation": "批次、物料、工单追溯",
+      "status": "BLOCKED",
+      "dependency": "ProcessAnalysis package/service/schema",
+      "evidence": "Nacos aliases have healthyHostCount=0; five endpoints return tenant-service 503; processAnalysis table/runtimeView/menu counts are all 0",
+      "artifact": "/tmp/adp-business-dependency-readiness-coreflow-20260710.json"
+    }
+  ],
+  "scopeDecisionsRequired": [
+    "制造指令列表是否需要独立手工新增/导入入口；当前已验收的是上游日计划 produceTaskCreated2 生成路径。",
+    "当前恢复包没有独立不良数量字段、接口和目标表；若产品要求独立坏品数量，需要业务包或产品定义。"
+  ]
+}

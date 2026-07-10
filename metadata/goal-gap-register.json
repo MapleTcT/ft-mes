@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T13:38:22+00:00",
-  "repoCommit": "fe11653c9a07232d8314597395b9e5d20505f8d2",
+  "generatedAt": "2026-07-10T03:27:39+00:00",
+  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -313,7 +313,7 @@
       "scope": "PostgreSQL 默认运行、init SQL、mapper 方言审计和生产数据迁移。",
       "currentEvidence": [
         "make ci checks PostgreSQL migration inventory and mapper audit",
-        "make postgres-migration-check now verifies destructive reset statements are absent and watch statements are protected as DROP ... IF EXISTS or DELETE ... WHERE; docs/postgres-migration-watch-rationale.md currently records 60 watch statements with 0 safety issues.",
+        "make postgres-migration-check now verifies destructive reset statements are absent and watch statements are protected as DROP ... IF EXISTS or DELETE ... WHERE; docs/postgres-migration-watch-rationale.md currently records 62 watch statements with 0 safety issues.",
         "PostgreSQL init SQL scripts are indexed, including 073-auth-user-lock-status-compat.sql for auth_user.error_count compatibility, 074-rbac-roleuser-valid-default.sql for rbac_roleuser.valid default compatibility, 075-rbac-data-resource-permission-tables.sql for RBAC data resource permissions, and 079-wom-wait-put-records-table.sql for WOM_WAIT_PUT_RECORDS",
         "084-wom-output-common-task-edit-runtime-json.sql and 085-wom-output-common-task-edit-view-linkage.sql cover WOM outPutCommonTaskEdit runtime extra view/linkage for PostgreSQL default runtime",
         "101-wom-output-finish-num-sync.sql covers WOM output-detail finish_num sync on PostgreSQL.",
@@ -386,7 +386,7 @@
         "production module test matrix has 43 cases: 37 PASS, 6 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 6 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 9 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
-        "persistence acceptance ledger has 119 tested features: 115 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
+        "persistence acceptance ledger has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
         "business dependency package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it has 2/2 BLOCKED_NO_IMPLEMENTATION_CANDIDATE dependencies: material-service and process-analysis have no implementation candidates in the current bounded package scan.",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "business dependency readiness smoke was refreshed on 100.99.133.43 at 2026-06-21T13:46:42.816Z and has 2/2 BLOCKED external dependencies: material-service and process-analysis are not ready for marker acceptance. Evidence: /tmp/adp-business-dependency-readiness-smoke-current.json.",
@@ -436,11 +436,11 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 119 tested features: 115 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED",
-        "metadata/postgres-migration-inventory.json currently has 171 scripts, highRiskStatementCount=0, watchStatementCount=60, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
-        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 60 watch statements and 0 watch safety issues.",
+        "metadata/postgres-migration-inventory.json currently has 173 scripts, highRiskStatementCount=0, watchStatementCount=62, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 62 watch statements and 0 watch safety issues.",
         "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
         "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
         "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",

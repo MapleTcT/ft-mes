@@ -7,72 +7,72 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-06-22T12:15:05+00:00` |
-| Repo Commit | `df880ec235a5b6d8a517010f070f4cd8e3438a0a` |
+| Generated At | `2026-07-10T03:33:49+00:00` |
+| Repo Commit | `cbd191763436c894b1f8b3ded69ddfcde95e97ae` |
 | Database Target | `PostgreSQL` |
-| Total Files | `327` |
-| Total Bytes | `24781623` |
+| Total Files | `328` |
+| Total Bytes | `24717493` |
 
 ## Categories
 
 | Category | Files | Bytes | Description |
 | --- | ---: | ---: | --- |
-| `nacos-config-template` | 44 | 42767 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
+| `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
 | `nginx-runtime-config` | 2 | 10277 | Nginx runtime configuration used by the Docker frontend gateway. |
-| `postgres-init-sql` | 171 | 24107238 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
-| `runtime-binary-patch` | 8 | 107237 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
+| `postgres-init-sql` | 173 | 24117100 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
+| `runtime-binary-patch` | 7 | 29988 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 21 | 82088 | Source or template files used to rebuild runtime patch payloads. |
-| `runtime-script` | 24 | 216957 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
-| `runtime-static-override` | 57 | 215059 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
+| `runtime-script` | 24 | 217121 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
+| `runtime-static-override` | 57 | 218566 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
 
 | Category | Path | Size | SHA-256 |
 | --- | --- | ---: | --- |
 | `nacos-config-template` | `deploy/nacos-config/WOMMs-prod.properties` | 89 | `7622535e87a1451f6f57937a5deb2da009f2a995ec4c5f84941952cf60f7db88` |
-| `nacos-config-template` | `deploy/nacos-config/greendill-auth.properties` | 675 | `df307c39f763798fcdda1c50620c49485705001c90be63a5122a49b8e14acedf` |
+| `nacos-config-template` | `deploy/nacos-config/greendill-auth.properties` | 660 | `b236a5d5d689e668a4f9b0a8af9aabf120e2f2404da7eea57033adfedf89ea8b` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-adp-lite.properties` | 3076 | `cb80b0aed5b61659b5f1dac26753789e5118fd506b8288f32c2d40bc87178504` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-auth.properties` | 622 | `694062fca56c95daca15878a02a2aa81f08e0e00cb25d938e8cbbfb2836985ff` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-auth.properties` | 606 | `f411c5d4af0e2886f0ed5c577ef055586a97e0e9213da7e1e8492f1208fcaf76` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-baseApplications.properties` | 1809 | `80312021e0161138a2428254d6c2c269575484085960a5a4db9851017d1f56a8` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-baseService.properties` | 505 | `dadf7ddaa7cbe038638e0778a3a8830e7e9c276bcda68d7d63f0d09145086adc` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-config-center-system.properties` | 85 | `d39e58c1d4e1d2b36d95f9a9aa6b54a71779fa9565ca38b8735c904a77317cc3` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-configuration-services.properties` | 663 | `b153c4c45b05d09b5abff190549e2f3028bf77f8c6c082ee04a0880cbb2f321d` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-counter.properties` | 566 | `15d5d84c204b90a36f7804545119eb20234f7adc0fbdcd515838bf08006866ad` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-coustom-property.properties` | 640 | `aedad097d8fee9fbf5d21f0fb6f16a9bae914c15ddd3dd7c6cc8a53758bc6f38` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-baseService.properties` | 495 | `29ca599161c97c134fed382efe6d72353c90f0b165542ecc41a0d4417d695414` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-config-center-system.properties` | 83 | `8a16cd3f6fd1bb32bacabc386c058c3410fc9d5976e9938fcc5f2d222a6cb3b1` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-configuration-services.properties` | 652 | `7649b7818ad2206eba55db95b66ab77f97dd916dedd9249df31e1488a461f11d` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-counter.properties` | 555 | `3b6a671dbe903f9d942cbf37d0b695470c156458ce5b24e117a36c4afd123fa5` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-coustom-property.properties` | 627 | `882e16b22843da53564864a147d1b61ccb8c1f710a107d1092312b66bf93f51e` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-datasource-system.properties` | 1589 | `a11b357d5aa8671a4fe66896ac7c7427ea1213cbbae380dd57a99502d7d53d91` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-entityconf.properties` | 1120 | `b545efd19899188e857a71d03d9c0d2129074233d43e89ac7bc6cd2823138919` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-file-server.properties` | 963 | `8813b803f1ec3622137e102a1c502e8320e29843f9e584a4a60c71a82a009534` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-flow.properties` | 624 | `00aed3fa14c34ec33573f6b373823c820d9d71a26a69a70469d98fee783932ed` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-flow.properties` | 613 | `88a7eafd98c21f47bce8b6aa2f366e7c568942b7704144cd0da0f659162285f3` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-gateway.properties` | 9644 | `4a2dfa103a6f8334e0a94814362b0f60f18ae9e8849d4100293959efbcd3d3bf` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-i18n-system.properties` | 142 | `8c10b74140d5e8e44c35357709d372e77be5c585a1f43d96601f2ae570fbe370` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-i18n.properties` | 1617 | `ac190cafcdc833defb7424c2317e9de63c77793af8f11acb8b88fbb593957c26` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-iam.properties` | 582 | `cc1bd9908136e41250a658930136768b9f7ff623597f3116a7aa02428866cc35` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-integration.properties` | 2723 | `39dfb73b4f7ff86a65a1371ed11f511430797501644fb41dbe7e4b71c43c57c9` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-i18n-system.properties` | 140 | `c7f7aa0f3d28066dcee847b08335694d6c9273b11074d93093bad81ef8dfbdb4` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-i18n.properties` | 1588 | `286c6a64b34a9aec389239df4f1c4af9889de88934a823761f79698e0aa559ff` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-iam.properties` | 570 | `e989c8e4dca00d94658057146cd457993b4c48dd43ef531f2d319ae9dfb725f9` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-integration.properties` | 2673 | `556e5a29e9b9636681d64bf5d09971375756394db5140242e8afe52a2d837537` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-jwt-common.properties` | 233 | `749a05a59adbd141eb033ca15fc85ccc2bd9e5c588879e9c47b284773ff93e7b` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-kafka-system.properties` | 353 | `8a6044d1a7ae206f4f7c6702147efce07a204d420bd743a64eab0aac0a44fcd6` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-license.properties` | 71 | `d0d88b09519d92c49423d537ad5d294b9ebda26045154e366ba26e0a8f6d3956` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-module-registry.properties` | 370 | `0a05ba609a51b73271b00fbc139826830c1f29f2ce5e759cd2f5d0de825b9474` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-kafka-system.properties` | 349 | `db5bbbd28a7e0c1364f0ac02bf6db8fa224dead09d61e51b2b38c39c0fe0bde9` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-license.properties` | 70 | `226e5686033ccba51715e0e62cc8cc429a3e4e626e64c8b211deac9f5da22a08` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-module-registry.properties` | 362 | `226b5258acde49fda66493412434ce332c405b220b749b3cdca36d26e5bd7d0f` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-mongodb-system.properties` | 256 | `629458f7f34f1f47095d4feb7e55d763ce530563404f485ce1bcd72c670d10ef` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-mybatis-common.properties` | 274 | `cfc4b95baf0af0d8ccb2c471bd7b7e5dae2d843f4899ee8779987bff1918401e` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-admin.properties` | 1103 | `27d3f9d9605db612a4931a50617f2bab15033432364549b2d066811276ee70db` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-apiserver.properties` | 817 | `7902686106b901df265d1dce2903e100094c3f12acdb9ce25082e21ba7836d4b` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-app.properties` | 121 | `86173a48598bfeb6cc7177935386c6e0a84d660f660ed939bfd40f2f7deafe51` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-engine.properties` | 916 | `13986984adca9d16ee1004da91625aafb17100de3356bac7962699b3d6a92f2a` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-mobile.properties` | 122 | `d6358453a0b7926a6a1d9f748a5fc12461f00594926b2e4dd78be9eaee04a94d` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-organization.properties` | 436 | `edd3c0ca3b7683ebb442d8886515470743fd35a9ce5bfa004d7abdd1160c7aea` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-mybatis-common.properties` | 269 | `2b75f8c9c229f687cf109c9d0ba584a9685b35ecb72de66d0e0ce0f140a8048b` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-admin.properties` | 1083 | `f6d93f361bc5fe91783af253362dafa02904c607803b2f2e2ce7352b95769209` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-apiserver.properties` | 800 | `69a716c62fffb0283af33cf8c3499f6c25c872559c48375ac2983d8cca909e48` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-app.properties` | 118 | `5efae2245ca704a096b17a12055ce2657a1be38e8b0608f7c9be3d321f1f185a` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-engine.properties` | 897 | `20bbe92f116f173ab0eeec823dc7db34dab0ee73972d64b1ca3340eeab7fda93` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-notification-mobile.properties` | 120 | `56c1a6c4c665dbf8e4bea510a03ae0e467bdceef4f98bc63d774bae2ec01a27f` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-organization.properties` | 427 | `938bad59efd42f3d20945bf45e6f3d804cb0cdc1e88b0df96d63a584e465164f` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-portal.properties` | 1456 | `88154cd9f80736a13bb7516df1de2bf6efff1b343ec30eba9b5c805f684ef664` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-printer.properties` | 351 | `cda009dfae85b45c1ff7ed9dd1ed35cf6a4dc8c9cb60dee4b9f6de7925a6770d` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-rbac.properties` | 1056 | `acd13b858aa6cebaab13c8142975854506e99b38595c1b674c8f8d28c0c9853c` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-printer.properties` | 343 | `dfd6fa46bef5ac61cfa805c23b356dabc7ba72b1c81298d5e40ae3cec2977575` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-rbac.properties` | 1035 | `d1d0414ad4fb76ef3b7e7af372af03ad1600df5e5bc38670b21dade5e93d54f1` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-redis-system.properties` | 695 | `50c5abbe654128a1e1a6ca3690224f6d857882da5d1ace6eef31462a7a1bc194` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-registry.properties` | 556 | `d93393f1390c3845ee19a9c9f804b90b5578a12a209d00744ef60cbf42fd6ec2` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-signature.properties` | 991 | `d093593300c0c7a5ae43d58d2137d403043a1462be6ddb35948858dbb591ef9f` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-sms-jincang.properties` | 428 | `096444bac55b6933887fdcfe764b6b5b9179317c32554c83662a2ede837ffb49` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-sms-jindi.properties` | 426 | `264784af6f81a3bf50a1f2eef6844bf90fb1a3a5e2f373884b709bb21f57cfe6` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-signature.properties` | 973 | `c351d531df447822e5f221378af4977494340eecf17f6c558ed59faffd3e9153` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-sms-jincang.properties` | 420 | `1a60d52fff19ccc6fe616ad5a2ce22bbc71c79888d62b12c606e41d3b04cfa32` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-sms-jindi.properties` | 418 | `28f3af1f688ab021c70bc91dad8193795ce65e38bf735d3325a344b69b03ad5c` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-system-classified.properties` | 33 | `302bc44b28424dda922b6efdef6b7d260d9cceae3f77e5948445190a6630a9e4` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-systemCode.properties` | 789 | `fa20f1b516d83d0ba81990784ef2cc458e42a823d00581a6f946260a1da1c4c6` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 826 | `f65fbed840930370267deefda87bd8d76201fcd19fafdcc117ecba8697a97f88` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1710 | `28e62fb82a6827d073a3fbc55eb7c6964d6b3b8bac7a99602bab93891e3f2dff` |
-| `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 644 | `ddf48db6f359b143fe3a2eff3aa60d8c278fb0532754ed96651facd293046ff6` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-systemCode.properties` | 771 | `71bb80a35c2b1e9129c54d88c5890edc9b1a1c9a485b01cbb8f54dee5e51e102` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 807 | `557f134990f19b26597602b918aa3ce1f611d20ddcb4dfd828dd7c1f4e4805ea` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1680 | `578b65e2754b9053209fb17cac4d8f027e3a1279a6fdd35f75c8b8435579f4ad` |
+| `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 630 | `f62add6300bbb4758d3fba662cc7646530e9ecfbfe7da64452dbec2b30213c17` |
 | `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 10057 | `7436e19df73801a25f887a3c611a78c7fa2f5a75c2894e3c22ba4eae227dcc58` |
 | `nginx-runtime-config` | `deploy/docker/nginx/gzip.conf` | 220 | `605130384f1677fdd26d0ea7514d87b8ad2619c794548a3a1cf200a3aa0d0a64` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/001-adp-postgres-compat.sql` | 4430 | `cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96` |
@@ -246,7 +246,8 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/169-custom-property-project-property-compat.sql` | 457 | `ac93668e0bf2915972b09d14ba25a3d6bf710444a3364617529c38c44e7596fa` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/170-rbac-pstaff-pposition-compat.sql` | 2461 | `2aecd5ef4201d076073adde88d6decad5d506adce748a85e373a6bc665d8a914` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/171-wts-workpermit-export-action.sql` | 11981 | `9a030b54bec7942f3e497826e2ef609e0a3c85c5e80599a7d0f9b4ac3ec34876` |
-| `runtime-binary-patch` | `deploy/docker/patches/configuration-entity-model-compat/configuration-entity-model-compat.jar` | 77249 | `b51852eaf20601e09f8c46f9658ec022576ef8f437bd3c2c6c7efe51262b5cb1` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/172-wom-task-items-table.sql` | 3690 | `6839be2fa00cd134840fc324e1fb59c0cce75ca10244e8c5b4b035858e64a5d6` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/173-wom-make-task-flow-runtime-metadata-sync.sql` | 6172 | `d9adc9d89235a1228c6f60647d2377a4e49ffff3eb0cf158b43b0ac4aebb0a65` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |
 | `runtime-binary-patch` | `deploy/docker/patches/rm-config-defaults/rm-config-defaults.jar` | 2042 | `4c8179d3cbabd71f14fb7ff073997b4b32648924601c6cf9f1be8a71e9504a3a` |
@@ -297,14 +298,14 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/patch-sms-datasource.py` | 5566 | `03fbcad521c99c38b2cf1d8a2481852f85703faa8d44635d05b87ad4e4d8b3f5` |
 | `runtime-script` | `deploy/docker/scripts/patch-workappointment-upload-list-runtime-compat.py` | 9925 | `4953ea769bfc7be38a9775f34abd541f767e9c2d202289a35315be29e66ae6d6` |
 | `runtime-script` | `deploy/docker/scripts/patch-wts-runtime-compat.py` | 46418 | `4746cab144927f58beb1b78bb452ae9fe58ff29553dac66a228de79da265e560` |
-| `runtime-script` | `deploy/docker/scripts/prepare-runtime-patches.sh` | 3633 | `a1dbea7f694b86adb1779bc9dfa882cabe090239e35e0075bc1b082af0559cc2` |
+| `runtime-script` | `deploy/docker/scripts/prepare-runtime-patches.sh` | 3797 | `7b62c10e578a5f6dce42d73b61bba8b84e6b7163f236395f4eb7dce9cc69b6a3` |
 | `runtime-script` | `deploy/docker/scripts/render-nacos-configs.py` | 9124 | `10e97501621b82f3ba205a0ae25843af8607aa901f55837439cfca90c75a6145` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html` | 5299 | `61a018dfba75f33df6f566b09b83ca43f6df2ec08cef24469f790d49d89e560b` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskEdit.html` | 5189 | `4fe7d559bfa24d3752a3aa4237c843d181971f002ad01b5f7227e5687b33485a` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList.html` | 5195 | `d0fb1d9f39c510e1b743541ccbb1b025ea94449383b2106c3dba99a10cb9ab83` |
-| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js` | 22299 | `38e326ff2e764d73ad0a2801e2d7a9872982aa2b69802d256389e505ee2f5948` |
-| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js` | 22299 | `38e326ff2e764d73ad0a2801e2d7a9872982aa2b69802d256389e505ee2f5948` |
-| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js` | 13673 | `dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js` | 24056 | `5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js` | 24056 | `5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js` | 13666 | `a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskSubmitView.html` | 5072 | `5d1438e133dfca98f4db7665f521497880f12121f69e455acd441a8fb9640dca` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskView.html` | 5269 | `ff6c2d05228484eb3e8205ea2bb12a4a1d7e554d84f0746033263a64cc6ba447` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/prepareMakeTaskList.html` | 5179 | `eaf17eb0f63d21fb7fe50ce53756a970c63c78058f56ccee8602a7d1e8a5943b` |
