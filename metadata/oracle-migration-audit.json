@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T04:01:13+00:00",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
-  "findingCount": 958,
+  "generatedAt": "2026-07-10T07:44:47+00:00",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "findingCount": 959,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 186,
+    "documentation-or-workflow": 187,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -19,7 +19,7 @@
   "patternCounts": {
     "from-dual": 140,
     "ojdbc": 14,
-    "oracle-keyword": 628,
+    "oracle-keyword": 629,
     "rownum": 41,
     "sysdate": 135
   },
@@ -244,7 +244,7 @@
     },
     {
       "file": "Makefile",
-      "line": 184,
+      "line": 188,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -252,7 +252,7 @@
     },
     {
       "file": "Makefile",
-      "line": 185,
+      "line": 189,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -260,7 +260,7 @@
     },
     {
       "file": "Makefile",
-      "line": 188,
+      "line": 192,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -268,7 +268,7 @@
     },
     {
       "file": "Makefile",
-      "line": 189,
+      "line": 193,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -276,7 +276,7 @@
     },
     {
       "file": "Makefile",
-      "line": 282,
+      "line": 286,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -284,7 +284,7 @@
     },
     {
       "file": "Makefile",
-      "line": 539,
+      "line": 557,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -292,7 +292,7 @@
     },
     {
       "file": "Makefile",
-      "line": 540,
+      "line": 558,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -300,7 +300,7 @@
     },
     {
       "file": "Makefile",
-      "line": 542,
+      "line": 560,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -308,7 +308,7 @@
     },
     {
       "file": "Makefile",
-      "line": 543,
+      "line": 561,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -316,7 +316,7 @@
     },
     {
       "file": "Makefile",
-      "line": 551,
+      "line": 569,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -324,7 +324,7 @@
     },
     {
       "file": "Makefile",
-      "line": 552,
+      "line": 570,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -332,7 +332,7 @@
     },
     {
       "file": "Makefile",
-      "line": 554,
+      "line": 572,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -340,7 +340,7 @@
     },
     {
       "file": "Makefile",
-      "line": 555,
+      "line": 573,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -4851,6 +4851,14 @@
       "excerpt": "禁止用清库重建绕过缺表、缺列、类型不兼容或 Oracle 方言残留。"
     },
     {
+      "file": "docs/backend-table-audit/material-service-dependency-analysis.md",
+      "line": 18,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "This acceptance does not change the default datasource to Oracle. It also does"
+    },
+    {
       "file": "docs/backend-table-audit/wom-consumption-record-analysis.md",
       "line": 5,
       "pattern": "oracle-keyword",
@@ -4876,51 +4884,27 @@
     },
     {
       "file": "docs/business-dependency-contracts.md",
-      "line": 22,
+      "line": 14,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- `make module-intake-check INTAKE=/path/to/package` 通过，且 Oracle 只能作为 legacy/profile/source-snapshot 线索存在。"
+      "excerpt": "| material-service | READY | 源码模块和 Compose 编排；Nacos `prod` 健康实例；`generateProductInSingle`、`checkProdResult`、`generateProduceOutSing` 三个端点；真实浏览器；`ADP_E2E_*` PostgreSQL marker；清理回滚 | 只看 HTTP 200；只看到 BaseSet/WOM 物料表；重新切回 Or"
     },
     {
       "file": "docs/business-dependency-contracts.md",
-      "line": 23,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 默认运行 datasource 仍为 PostgreSQL，不能把 Oracle 配置重新带回默认路径。"
-    },
-    {
-      "file": "docs/business-dependency-contracts.md",
-      "line": 28,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- `make audit-postgres-mappings` 不能发现新增 Oracle/MySQL/SQL Server 方言。"
-    },
-    {
-      "file": "docs/business-dependency-contracts.md",
-      "line": 49,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 新发现 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，必须落到幂等 SQL 或模块 backlog。"
-    },
-    {
-      "file": "docs/business-module-intake-requirements.md",
-      "line": 27,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 默认运行路径必须继续是 PostgreSQL，Oracle 只能留在 legacy/template/source-snapshot 线索中。"
-    },
-    {
-      "file": "docs/business-module-intake-requirements.md",
       "line": 32,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "- 任何新增缺表、缺列、类型不兼容、Oracle 方言残留，都进入幂等 SQL 或 backlog，不能通过清库重建掩盖。"
+      "excerpt": "- 默认运行 datasource 为 PostgreSQL，Oracle 只允许 legacy/template 路径。"
+    },
+    {
+      "file": "docs/business-module-intake-requirements.md",
+      "line": 25,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- 默认运行路径继续使用 PostgreSQL，Oracle 只保留 legacy/template。"
     },
     {
       "file": "docs/current-content-inventory.md",
@@ -4932,7 +4916,7 @@
     },
     {
       "file": "docs/current-content-inventory.md",
-      "line": 146,
+      "line": 147,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4948,7 +4932,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 48,
+      "line": 57,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4956,7 +4940,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 56,
+      "line": 65,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4964,7 +4948,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 143,
+      "line": 152,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5283,6 +5267,14 @@
       "excerpt": "- `make oracle-replacement-check`"
     },
     {
+      "file": "docs/plans/2026-07-10-material-wms-completion-inbound-design.md",
+      "line": 5,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "新建可独立构建、部署和演进的 `material-wms` 服务，补齐当前 WOM 核心链路缺失的物料服务。首期以完工入库为主，同时兼容现有 WOM 已经固化的生产领料出库和质检结果回写接口。默认数据库只使用 PostgreSQL，不增加 Oracle 运行依赖，也不复用未验证的旧仓储表。"
+    },
+    {
       "file": "docs/production-migration-readiness.md",
       "line": 70,
       "pattern": "oracle-keyword",
@@ -5339,6 +5331,22 @@
       "excerpt": "- 发现 PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留，必须进入幂等 SQL 或模块 backlog，不允许清库重建掩盖。"
     },
     {
+      "file": "docs/production-migration/material-wms-deployment-runbook.md",
+      "line": 6,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "QCS, or Oracle legacy templates. The service registers as Nacos `prod@@material`."
+    },
+    {
+      "file": "docs/production-migration/material-wms-deployment-runbook.md",
+      "line": 58,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "Rollback must not change the default datasource to Oracle and must not delete"
+    },
+    {
       "file": "docs/production-migration/nacos-runtime-patch-runbook.md",
       "line": 45,
       "pattern": "oracle-keyword",
@@ -5348,7 +5356,7 @@
     },
     {
       "file": "docs/production-module-backlog.md",
-      "line": 55,
+      "line": 54,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5356,7 +5364,7 @@
     },
     {
       "file": "docs/production-module-functional-test-cases.md",
-      "line": 148,
+      "line": 151,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

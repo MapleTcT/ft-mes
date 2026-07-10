@@ -27,10 +27,7 @@ INTAKE_TYPE_BY_CATEGORY = {
     "missing-export-implementation": "export-implementation",
 }
 EXPECTED_DEPENDENCY_CONTRACTS = {
-    "PROD-019": {"material-service"},
     "PROD-020": {"process-analysis"},
-    "PROD-021": {"material-service"},
-    "PROD-022": {"material-service"},
 }
 REQUIRED_TOP_LEVEL_KEYS = {
     "schemaVersion",

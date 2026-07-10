@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-21T00:00:00+08:00",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "module": "production",
   "overallStatus": "BLOCKED",
   "summary": {
     "dependencies": 2,
-    "ready": 0,
-    "blocked": 2,
-    "productionBlockedCases": 4,
-    "requiredEndpointProbes": 7,
+    "ready": 1,
+    "blocked": 1,
+    "productionBlockedCases": 1,
+    "requiredEndpointProbes": 8,
     "requiredContractStages": 22,
     "requiredStartupEvidenceContracts": 2,
     "requiredStartupSmokeCommands": 8
@@ -25,12 +25,9 @@
     {
       "id": "material-service",
       "title": "Material warehouse/inventory service",
-      "status": "BLOCKED",
+      "status": "READY",
       "requiredFor": [
-        "PROD-019",
-        "PROD-021",
-        "PROD-022",
-        "WOM/QCS inventory and stock-in write-back"
+        "WOM/QCS completion inbound, quality release and production issue regression"
       ],
       "serviceAliases": [
         "material",
@@ -43,13 +40,13 @@
         "Inventory"
       ],
       "requiredPackageEvidence": {
-        "statusBeforePackage": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+        "statusBeforePackage": "CANDIDATE_FOUND",
         "candidateStatusAfterPackage": "CANDIDATE_FOUND",
         "requiredTerms": [
+          "generateProductInSingle",
           "checkProdResult",
           "generateProduceOutSing",
-          "produceOutSingle",
-          "material/foreign/foreign"
+          "material-wms"
         ],
         "notEnoughEvidence": [
           "LIMSMaterial master-data package only",
@@ -57,39 +54,44 @@
           "WOM internal material document DTO/interface only"
         ]
       },
-    "requiredRuntimeEvidence": {
-      "nacosGroup": "prod",
-      "minimumHealthyInstances": 1,
-      "endpointHttpStatusMustBe2xx": true,
-      "endpointTenantServiceMissingMustBeFalse": true,
-      "mustTraceBackendPath": true,
-      "mustMapTargetTables": true
-    },
-    "requiredStartupEvidence": {
-      "moduleIntakePrecheck": true,
-      "postgresDefaultRuntime": true,
-      "oracleLegacyOnly": true,
-      "nacosConfigRendered": true,
-      "dockerComposeRegistration": true,
-      "runtimePatchManifestUpdated": true,
-      "rollbackOrDisablePlan": true,
-      "startupSmokeCommands": [
-        "make module-intake-check INTAKE=/path/to/material-package",
-        "make render-config",
-        "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
-        "make audit-postgres-mappings"
-      ],
-      "notEnoughEvidence": [
-        "Dropping a jar into the runtime without source/intake scan.",
-        "A Nacos service registration that still points at Oracle/default legacy datasource.",
-        "A Compose service that starts but has no rollback/disable plan."
-      ]
-    },
-    "requiredEndpoints": [
+      "requiredRuntimeEvidence": {
+        "nacosGroup": "prod",
+        "minimumHealthyInstances": 1,
+        "endpointHttpStatusMustBe2xx": true,
+        "endpointTenantServiceMissingMustBeFalse": true,
+        "mustTraceBackendPath": true,
+        "mustMapTargetTables": true
+      },
+      "requiredStartupEvidence": {
+        "moduleIntakePrecheck": true,
+        "postgresDefaultRuntime": true,
+        "oracleLegacyOnly": true,
+        "nacosConfigRendered": true,
+        "dockerComposeRegistration": true,
+        "runtimePatchManifestUpdated": true,
+        "rollbackOrDisablePlan": true,
+        "startupSmokeCommands": [
+          "make module-intake-check INTAKE=/path/to/material-package",
+          "make render-config",
+          "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
+          "make audit-postgres-mappings"
+        ],
+        "notEnoughEvidence": [
+          "Dropping a jar into the runtime without source/intake scan.",
+          "A Nacos service registration that still points at Oracle/default legacy datasource.",
+          "A Compose service that starts but has no rollback/disable plan."
+        ]
+      },
+      "requiredEndpoints": [
+        {
+          "name": "generateProductInSingle",
+          "method": "POST",
+          "path": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle"
+        },
         {
           "name": "checkProdResult",
           "method": "POST",
-          "path": "/msService/material/foreign/foreign/checkProdResult?srcId=<marker-src-id>&checkResult=<marker-result>"
+          "path": "/msService/material/foreign/foreign/checkProdResult?srcId=<marker-line>&checkResult=<marker-result>"
         },
         {
           "name": "generateProduceOutSing",
@@ -98,9 +100,9 @@
         }
       ],
       "requiredDatabaseEvidence": [
-        "PostgreSQL target stock-in or inventory tables are identified and are not only BaseSet/WOM master-data tables.",
-        "A unique ADP_E2E marker writes to the confirmed stock-in or inventory target table.",
-        "Before/after SQL and query result summaries are added to persistence acceptance assets."
+        "PostgreSQL WMS target tables are mapped: wms_stock_documents, wms_stock_document_lines, wms_batch_stocks, wms_inventory_transactions, wms_quality_results.",
+        "Marker ADP_E2E_20260710074612_MATERIAL_WMS proves inbound, quality release, issue, idempotency and cleanup.",
+        "Browser/API/SQL evidence is stored in metadata/material-wms-persistence-acceptance.json."
       ],
       "acceptanceStages": [
         "package-candidate-scan",
@@ -121,17 +123,18 @@
         "metadata/material-service-dependency-analysis.json",
         "docs/backend-table-audit/material-service-dependency-analysis.md",
         "metadata/production-module-blockers.json",
-        "metadata/production-module-backlog.json"
+        "metadata/production-module-backlog.json",
+        "metadata/material-wms-persistence-acceptance.json",
+        "metadata/material-wms-completion-inbound.png"
       ],
       "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
+        "make material-wms-test",
         "make smoke-business-dependencies",
-        "manual: after package deployment, run checkProdResult/generateProduceOutSing with ADP_E2E marker data and query target stock-in/inventory tables"
+        "make acceptance-material-wms-persistence ADP_BASE_URL=http://100.99.133.43:18080"
       ],
       "nonSolutions": [
-        "Do not mark inventory write-back PASS from QCS/WOM state backfill alone.",
-        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
-        "Do not mark PASS from HTTP 200 without PostgreSQL marker writes."
+        "Do not regress the default datasource to Oracle.",
+        "Do not accept HTTP success without marker-scoped PostgreSQL state transitions and cleanup."
       ]
     },
     {
@@ -166,37 +169,37 @@
           "Runtime menu row without target service and tables"
         ]
       },
-    "requiredRuntimeEvidence": {
-      "nacosGroup": "prod",
-      "minimumHealthyInstances": 1,
-      "endpointHttpStatusMustBe2xx": true,
-      "endpointTenantServiceMissingMustBeFalse": true,
-      "runtimeViewCountMustBePositive": true,
+      "requiredRuntimeEvidence": {
+        "nacosGroup": "prod",
+        "minimumHealthyInstances": 1,
+        "endpointHttpStatusMustBe2xx": true,
+        "endpointTenantServiceMissingMustBeFalse": true,
+        "runtimeViewCountMustBePositive": true,
         "menuCountMustBePositive": true,
-      "tableCountMustBePositive": true,
-      "mustTraceBackendPath": true
-    },
-    "requiredStartupEvidence": {
-      "moduleIntakePrecheck": true,
-      "postgresDefaultRuntime": true,
-      "oracleLegacyOnly": true,
-      "nacosConfigRendered": true,
-      "dockerComposeRegistration": true,
-      "runtimePatchManifestUpdated": true,
-      "rollbackOrDisablePlan": true,
-      "startupSmokeCommands": [
-        "make module-intake-check INTAKE=/path/to/process-analysis-package",
-        "make render-config",
-        "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
-        "make audit-postgres-mappings"
-      ],
-      "notEnoughEvidence": [
-        "Only importing runtime menu rows without a healthy ProcessAnalysis service.",
-        "A traceability route that opens while backend endpoints still return tenant-service 503.",
-        "A service package that starts only with Oracle/default legacy datasource settings."
-      ]
-    },
-    "requiredEndpoints": [
+        "tableCountMustBePositive": true,
+        "mustTraceBackendPath": true
+      },
+      "requiredStartupEvidence": {
+        "moduleIntakePrecheck": true,
+        "postgresDefaultRuntime": true,
+        "oracleLegacyOnly": true,
+        "nacosConfigRendered": true,
+        "dockerComposeRegistration": true,
+        "runtimePatchManifestUpdated": true,
+        "rollbackOrDisablePlan": true,
+        "startupSmokeCommands": [
+          "make module-intake-check INTAKE=/path/to/process-analysis-package",
+          "make render-config",
+          "make smoke-business-dependencies ADP_BASE_URL=http://100.99.133.43:18080",
+          "make audit-postgres-mappings"
+        ],
+        "notEnoughEvidence": [
+          "Only importing runtime menu rows without a healthy ProcessAnalysis service.",
+          "A traceability route that opens while backend endpoints still return tenant-service 503.",
+          "A service package that starts only with Oracle/default legacy datasource settings."
+        ]
+      },
+      "requiredEndpoints": [
         {
           "name": "isProdprocessView",
           "method": "GET",

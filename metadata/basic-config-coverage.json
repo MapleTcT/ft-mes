@@ -176,7 +176,7 @@
         "动作矩阵已将用户目录、打印服务授权、AK/SK 凭证管理和密码配置标为 READ_ONLY_GUARDED，禁止通用 smoke 改值。",
         "动作矩阵仍将质量检验配置、RM.ocd.RM 和 BaseSet.ocd.BaseSet 标为 CONTROLLED_MARKER_REQUIRED；已经验证过的单项不代表后续任何新配置项可以跳过专用 marker、回滚方案和业务回归。",
         "用户目录、打印服务授权、AK/SK 凭证、密码配置等敏感目录禁止由通用 smoke 改值；若要改值，必须先有单独 marker、回滚方案和业务/安全确认。",
-        "BaseSet 仍不能关闭 material 库存/入库 PROD-022 阻断；物料服务/库存写回必须等待对应业务包和 marker 落库验收。"
+        "PROD-022 material/WMS 已单独通过 marker 验收；后续 BaseSet 变更必须把该 WMS 链作为专用回归。"
       ]
     },
     {

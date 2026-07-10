@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T08:30:00Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "module": "production",
   "overallStatus": "BLOCKED",
@@ -17,17 +17,17 @@
     "metadata/wom-qrcode-route-probe.json"
   ],
   "summary": {
-    "requirements": 9,
-    "blocked": 9,
-    "productDecision": 2,
+    "requirements": 8,
+    "blocked": 8,
+    "productDecision": 4,
     "runtimeEndpointRecovery": 1,
     "externalClientAdapter": 1,
-    "servicePackage": 2,
-    "servicePackageAndScopeDecision": 2,
+    "servicePackage": 1,
+    "servicePackageAndScopeDecision": 0,
     "exportImplementation": 1,
     "postgresCompatibilityGap": 0,
-    "requiresRealBrowserProof": 8,
-    "requiresPostgreSQLProof": 8,
+    "requiresRealBrowserProof": 7,
+    "requiresPostgreSQLProof": 7,
     "requiresFileResponseProof": 2
   },
   "requirements": [
@@ -270,70 +270,60 @@
     },
     {
       "id": "PROD-019",
-      "title": "QCS bad-quantity and material inventory write-back remain unresolved",
+      "title": "Standalone QCS bad-quantity registration requires product scope decision",
       "status": "BLOCKED",
-      "category": "composite-service-and-scope",
+      "category": "product-scope-confirmation",
       "sourceBacklogId": "PROD-019",
       "linkedBlockerCases": [
         "PROD-019"
       ],
-      "requiredIntakeType": "service-package-and-scope-decision",
-      "dependencyContractIds": [
-        "material-service"
-      ],
+      "requiredIntakeType": "product-decision",
+      "dependencyContractIds": [],
       "requiredPackages": [
-        "material warehouse/inventory service package"
+        "product manual or later business package defining standalone bad quantity"
       ],
       "packageSearchTerms": [
-        "checkProdResult",
-        "generateProduceOutSing",
-        "produceOutSingle",
-        "material/foreign/foreign",
-        "stock-in",
-        "inventory"
+        "bad quantity",
+        "defect quantity",
+        "scrap quantity",
+        "不良数"
       ],
       "frontendEntrypoints": [
-        "QCS report effective flow",
-        "WOM report-work inventory boundary"
+        "QCS inspection report and WOM report-work product scope"
       ],
       "apiEndpoints": [
-        "POST /msService/material/foreign/foreign/checkProdResult",
-        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+        "No standalone bad-quantity endpoint recovered; material WMS endpoints are accepted regression coverage"
       ],
-      "persistenceExpectation": "REQUIRED",
+      "persistenceExpectation": "REQUIRED_ONLY_IF_PRODUCT_SCOPE_CONFIRMED",
       "targetTables": [
-        "confirmed material stock-in table",
-        "confirmed material inventory table"
+        "PostgreSQL numeric bad-quantity target to be supplied only if product scope is confirmed"
       ],
       "requiredEvidence": [
-        "material service package candidate scan",
-        "healthy Nacos prod material service",
-        "endpoint probes no longer return tenant-service 503",
-        "real-browser or authenticated API marker flow for the material boundary",
-        "product decision for standalone bad-quantity route/table if required",
-        "PostgreSQL marker write to confirmed stock-in or inventory table"
+        "product decision",
+        "real browser field/route evidence if required",
+        "controller/service/repository trace if required",
+        "ADP_E2E_* marker and PostgreSQL before/after/cleanup evidence if required",
+        "material WMS remains PASS regression coverage"
       ],
       "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: run material checkProdResult/generateProduceOutSing marker flow and query target stock-in tables"
+        "make persistence-acceptance-check",
+        "manual: confirm standalone bad-quantity product scope; if required, execute a unique ADP_E2E marker and query its PostgreSQL target"
       ],
       "passCriteria": [
-        "The material service contract is READY.",
-        "Inventory or stock-in target tables are mapped.",
-        "A marker flow proves the material write-back boundary in PostgreSQL.",
-        "Standalone bad quantity is tested only after product/package evidence defines it."
+        "Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.",
+        "If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested.",
+        "If not required, the decision is recorded and the case is closed without inventing a field or table.",
+        "Material WMS completion inbound and inventory write-back remain PASS regression coverage."
       ],
       "nonSolutions": [
-        "Do not treat QCS/WOM state backfill as inventory proof.",
-        "Do not invent a bad-quantity column without a recovered product route/table."
+        "Do not invent a bad-quantity column or UI from inference.",
+        "Do not reopen the accepted material WMS inventory boundary."
       ],
       "sourceEvidenceRefs": [
         "metadata/production-module-backlog.json",
         "metadata/production-module-blockers.json",
-        "metadata/business-dependency-contracts.json",
-        "metadata/material-service-dependency-analysis.json",
-        "metadata/wom-bad-quantity-analysis.json"
+        "metadata/wom-bad-quantity-analysis.json",
+        "metadata/material-wms-persistence-acceptance.json"
       ]
     },
     {
@@ -408,133 +398,60 @@
     },
     {
       "id": "PROD-021",
-      "title": "Full report-work remains blocked at bad-quantity scope and material boundary",
+      "title": "Full report-work only awaits standalone bad-quantity scope decision",
       "status": "BLOCKED",
-      "category": "composite-service-and-scope",
+      "category": "product-scope-confirmation",
       "sourceBacklogId": "PROD-021",
       "linkedBlockerCases": [
         "PROD-021"
       ],
-      "requiredIntakeType": "service-package-and-scope-decision",
-      "dependencyContractIds": [
-        "material-service"
-      ],
+      "requiredIntakeType": "product-decision",
+      "dependencyContractIds": [],
       "requiredPackages": [
-        "material warehouse/inventory service package"
+        "product manual or later business package defining standalone bad quantity"
       ],
       "packageSearchTerms": [
-        "checkProdResult",
-        "generateProduceOutSing",
-        "stock-in",
-        "inventory",
-        "bad quantity"
+        "bad quantity",
+        "defect quantity",
+        "scrap quantity",
+        "不良数"
       ],
       "frontendEntrypoints": [
-        "WOM report-work pages",
-        "QCS/WOM material inventory boundary"
+        "QCS inspection report and WOM report-work product scope"
       ],
       "apiEndpoints": [
-        "accepted WOM report-work endpoints remain regression coverage",
-        "POST /msService/material/foreign/foreign/checkProdResult",
-        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+        "No standalone bad-quantity endpoint recovered; material WMS endpoints are accepted regression coverage"
       ],
-      "persistenceExpectation": "REQUIRED_FOR_MATERIAL_BOUNDARY",
+      "persistenceExpectation": "REQUIRED_ONLY_IF_PRODUCT_SCOPE_CONFIRMED",
       "targetTables": [
-        "existing accepted WOM report-work tables",
-        "confirmed material stock-in or inventory table"
+        "PostgreSQL numeric bad-quantity target to be supplied only if product scope is confirmed"
       ],
       "requiredEvidence": [
-        "accepted report-work subflows remain PASS",
-        "material service package candidate scan",
-        "healthy Nacos prod material service",
-        "real-browser or authenticated API marker flow for the material inventory boundary",
-        "PostgreSQL marker write to confirmed material table",
-        "product decision for standalone bad-quantity field/route/table if required"
+        "product decision",
+        "real browser field/route evidence if required",
+        "controller/service/repository trace if required",
+        "ADP_E2E_* marker and PostgreSQL before/after/cleanup evidence if required",
+        "material WMS remains PASS regression coverage"
       ],
       "recheckCommands": [
-        "make smoke-business-dependencies",
-        "manual: rerun accepted WOM report-work marker flows, then add material inventory marker acceptance"
+        "make persistence-acceptance-check",
+        "manual: confirm standalone bad-quantity product scope; if required, execute a unique ADP_E2E marker and query its PostgreSQL target"
       ],
       "passCriteria": [
-        "Existing report-work subflows still pass.",
-        "The material/inventory boundary is available and marker-tested.",
-        "Standalone bad quantity is accepted only after product/package evidence defines it."
+        "Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.",
+        "If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested.",
+        "If not required, the decision is recorded and the case is closed without inventing a field or table.",
+        "Material WMS completion inbound and inventory write-back remain PASS regression coverage."
       ],
       "nonSolutions": [
-        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
-        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
+        "Do not invent a bad-quantity column or UI from inference.",
+        "Do not reopen the accepted material WMS inventory boundary."
       ],
       "sourceEvidenceRefs": [
         "metadata/production-module-backlog.json",
         "metadata/production-module-blockers.json",
-        "metadata/business-dependency-contracts.json",
-        "metadata/material-service-dependency-analysis.json",
-        "metadata/wom-bad-quantity-analysis.json"
-      ]
-    },
-    {
-      "id": "PROD-022",
-      "title": "Material warehouse/inventory service package is missing",
-      "status": "BLOCKED",
-      "category": "missing-service-package",
-      "sourceBacklogId": "PROD-022",
-      "linkedBlockerCases": [
-        "PROD-022"
-      ],
-      "requiredIntakeType": "service-package",
-      "dependencyContractIds": [
-        "material-service"
-      ],
-      "requiredPackages": [
-        "material warehouse/inventory service package"
-      ],
-      "packageSearchTerms": [
-        "material",
-        "warehouse",
-        "inventory",
-        "checkProdResult",
-        "generateProduceOutSing",
-        "produceOutSingle"
-      ],
-      "frontendEntrypoints": [
-        "WOM/QCS stock-in or inventory write-back flow"
-      ],
-      "apiEndpoints": [
-        "POST /msService/material/foreign/foreign/checkProdResult",
-        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
-      ],
-      "persistenceExpectation": "REQUIRED",
-      "targetTables": [
-        "confirmed material stock-in table",
-        "confirmed material inventory table"
-      ],
-      "requiredEvidence": [
-        "material package candidate scan",
-        "healthy Nacos prod material service",
-        "controller/service/DAO/SQL trace",
-        "real-browser or authenticated API marker flow for stock-in or inventory write-back",
-        "PostgreSQL marker write to confirmed inventory or stock-in table"
-      ],
-      "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
-      ],
-      "passCriteria": [
-        "The material-service contract is READY.",
-        "Target material tables are mapped.",
-        "Endpoint and PostgreSQL marker evidence prove the stock-in or inventory write."
-      ],
-      "nonSolutions": [
-        "Do not treat BaseSet material master data or WOM internal material tables as material-service stock-in targets.",
-        "Do not mark PASS from HTTP 200 alone without database write proof."
-      ],
-      "sourceEvidenceRefs": [
-        "metadata/production-module-backlog.json",
-        "metadata/production-module-blockers.json",
-        "metadata/business-dependency-contracts.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md"
+        "metadata/wom-bad-quantity-analysis.json",
+        "metadata/material-wms-persistence-acceptance.json"
       ]
     },
     {

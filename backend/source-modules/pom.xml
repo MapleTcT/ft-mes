@@ -19,5 +19,6 @@
 
     <modules>
         <module>basicmanagement-auditlog</module>
+        <module>material-wms</module>
     </modules>
 </project>

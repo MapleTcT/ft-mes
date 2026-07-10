@@ -389,6 +389,14 @@ services:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar"]
 
+  material:
+    <<: *java-service
+    environment:
+      <<: *app-env
+      MATERIAL_WMS_PORT: "8080"
+      JAVA_OPTS: ${MATERIAL_WMS_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/material/manual/material-wms.jar"]
+
   FoundationMs:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"]

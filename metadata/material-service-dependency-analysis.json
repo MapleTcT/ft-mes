@@ -1,163 +1,269 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-20T04:37:54+08:00",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
+  "status": "PASS",
   "environment": {
-    "sshHost": "100.99.133.43",
-    "hostname": "v6-2288H-V6",
-    "frontendBaseUrl": "http://100.99.133.43:18080",
-    "nacosUrl": "http://127.0.0.1:8848/nacos inside adp-mes-newbase-nacos-1",
+    "host": "100.99.133.43",
+    "baseUrl": "http://100.99.133.43:18080",
+    "serviceName": "material",
     "nacosGroup": "prod"
-  },
-  "status": "BLOCKED_MISSING_MATERIAL_SERVICE",
-  "sourceDependencies": [
-    {
-      "caller": "WOMQCSServiceImpl.checkResultToWms",
-      "serviceName": "material",
-      "endpoint": "/material/foreign/foreign/checkProdResult"
-    },
-    {
-      "caller": "WOMPutInMaterialServiceImpl",
-      "serviceName": "material",
-      "endpoint": "/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
-    },
-    {
-      "caller": "WOMMatConsumRecodServiceImpl",
-      "serviceName": "material",
-      "endpoint": "/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
-    }
-  ],
-  "runtimeEvidence": {
-    "containersMissing": [
-      "material",
-      "wms",
-      "warehouse",
-      "stock",
-      "inventory"
-    ],
-    "nacosInstances": [
-      {
-        "serviceName": "material",
-        "hosts": []
-      },
-      {
-        "serviceName": "wms",
-        "hosts": []
-      },
-      {
-        "serviceName": "warehouse",
-        "hosts": []
-      },
-      {
-        "serviceName": "inventory",
-        "hosts": []
-      },
-      {
-        "serviceName": "WOMMs",
-        "hostsSummary": "healthy 172.25.0.55:8080"
-      },
-      {
-        "serviceName": "QCS",
-        "hostsSummary": "healthy 172.25.0.53:8080"
-      },
-      {
-        "serviceName": "RMMs",
-        "hostsSummary": "healthy 172.25.0.51:8080"
-      },
-      {
-        "serviceName": "LIMS",
-        "hostsSummary": "healthy 172.25.0.53:8080"
-      }
-    ],
-    "nacosServiceListMaterialLike": [
-      "LIMSMaterial"
-    ]
-  },
-  "endpointEvidence": [
-    {
-      "method": "POST",
-      "path": "/msService/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
-      "authenticated": true,
-      "status": 503,
-      "message": "can not find any tenant app service"
-    },
-    {
-      "method": "POST",
-      "path": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
-      "authenticated": true,
-      "status": 503,
-      "message": "can not find any tenant app service"
-    },
-    {
-      "method": "POST",
-      "path": "/msService/BasicMs/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
-      "authenticated": true,
-      "status": 404,
-      "message": "No message available"
-    },
-    {
-      "method": "POST",
-      "path": "/msService/BaseSet/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
-      "authenticated": true,
-      "status": 404,
-      "message": "No message available"
-    },
-    {
-      "method": "POST",
-      "path": "/msService/LIMSMaterial/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
-      "authenticated": true,
-      "status": 404,
-      "message": "No message available"
-    },
-    {
-      "method": "POST",
-      "path": "/msService/LIMSMaterial/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
-      "authenticated": true,
-      "status": 404,
-      "message": "No message available"
-    }
-  ],
-  "databaseEvidence": {
-    "verificationSql": "select tablename from pg_tables where schemaname = 'public' and (lower(tablename) like '%material%' or lower(tablename) like '%stock%' or lower(tablename) like '%warehouse%' or lower(tablename) like '%inventory%' or lower(tablename) like '%produce_out%' or lower(tablename) like '%out_single%') order by tablename;",
-    "tableGroupsFound": [
-      "baseset_material*",
-      "baseset_warehouse*",
-      "hm_material*",
-      "hm_stock*",
-      "wom_*material*"
-    ],
-    "materialServiceTargetTablesVerified": false
-  },
-  "packageEvidence": {
-    "found": [
-      "LIMSMaterial_6.1.3.5",
-      "BaseSet material and warehouse master-data files",
-      "SpareManage_6.1.9.3",
-      "WOM material document code"
-    ],
-    "notFound": [
-      "/material/foreign/foreign/checkProdResult implementation",
-      "/material/produceOutSingle/produceOutSing/generateProduceOutSing implementation",
-      "/public/material/produceOutSingle/produceOutSing/generateProduceOutSing implementation"
-    ]
   },
   "impactedAcceptanceCases": [
     "PROD-019",
     "PROD-021",
     "PROD-022"
   ],
-  "latestReadinessSmoke": {
-    "generatedAt": "2026-06-21T13:46:42.816Z",
-    "report": "metadata/business-dependency-readiness-smoke.json",
-    "externalEvidence": "/tmp/adp-business-dependency-readiness-smoke-current.json",
-    "status": "BLOCKED",
-    "summary": "material/MATERIAL/wms/WMS/warehouse/Warehouse/inventory/Inventory aliases all have healthyHostCount=0; checkProdResult and generateProduceOutSing still return tenant-service 503."
+  "sourceDependencies": [
+    {
+      "caller": "WOM completion inbound",
+      "endpoint": "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle"
+    },
+    {
+      "caller": "QCS quality result",
+      "endpoint": "POST /msService/material/foreign/foreign/checkProdResult"
+    },
+    {
+      "caller": "WOM production issue",
+      "endpoint": "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+    }
+  ],
+  "runtimeEvidence": {
+    "healthyNacosInstances": 1,
+    "serviceAddress": "172.25.0.60:8080",
+    "endpointHttp2xx": 3,
+    "tenantServiceMissing": 0,
+    "jarSha256": "9095731dcd50cde45337ffa67ef36f2b31b791da869866d1a64712acb163b8c9"
   },
+  "endpointEvidence": [
+    {
+      "method": "POST",
+      "url": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+      "payload": {
+        "srcID": "ADP_E2E_20260710074612_MATERIAL_WMS_IN",
+        "srcTableNo": "ADP_E2E_20260710074612_MATERIAL_WMS_IN_NO",
+        "directiveNo": "ADP_E2E_20260710074612_MATERIAL_WMS_MO",
+        "companyCode": "ADP_E2E_20260710074612_MATERIAL_WMS_COMP",
+        "userName": "admin",
+        "staffCode": "ADP_E2E",
+        "deptCode": "ADP_E2E",
+        "redBlue": "blue",
+        "comeType": "produceIn",
+        "workflowStateSetCode": "productInSingleFlw",
+        "storageDate": "2026-07-10",
+        "wareCode": "ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+        "detailList": [
+          {
+            "srcPartId": "ADP_E2E_20260710074612_MATERIAL_WMS_IN_LINE",
+            "goodCode": "ADP_E2E_20260710074612_MATERIAL_WMS_MAT",
+            "batchText": "ADP_E2E_20260710074612_MATERIAL_WMS_BATCH",
+            "produceBatchNum": "ADP_E2E_20260710074612_MATERIAL_WMS_PROD_BATCH",
+            "placeSetCode": "ADP_E2E_20260710074612_MATERIAL_WMS_LOC",
+            "quantity": 10
+          }
+        ]
+      },
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "documentId": 3,
+          "documentNo": "CIN-ADP_E2E_20260710074612_MATERIAL_WMS_IN-ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+          "documentType": "COMPLETION_INBOUND",
+          "idempotent": false
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+      "payload": {
+        "srcID": "ADP_E2E_20260710074612_MATERIAL_WMS_IN",
+        "srcTableNo": "ADP_E2E_20260710074612_MATERIAL_WMS_IN_NO",
+        "directiveNo": "ADP_E2E_20260710074612_MATERIAL_WMS_MO",
+        "companyCode": "ADP_E2E_20260710074612_MATERIAL_WMS_COMP",
+        "userName": "admin",
+        "staffCode": "ADP_E2E",
+        "deptCode": "ADP_E2E",
+        "redBlue": "blue",
+        "comeType": "produceIn",
+        "workflowStateSetCode": "productInSingleFlw",
+        "storageDate": "2026-07-10",
+        "wareCode": "ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+        "detailList": [
+          {
+            "srcPartId": "ADP_E2E_20260710074612_MATERIAL_WMS_IN_LINE",
+            "goodCode": "ADP_E2E_20260710074612_MATERIAL_WMS_MAT",
+            "batchText": "ADP_E2E_20260710074612_MATERIAL_WMS_BATCH",
+            "produceBatchNum": "ADP_E2E_20260710074612_MATERIAL_WMS_PROD_BATCH",
+            "placeSetCode": "ADP_E2E_20260710074612_MATERIAL_WMS_LOC",
+            "quantity": 10
+          }
+        ]
+      },
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "documentId": 3,
+          "documentNo": "CIN-ADP_E2E_20260710074612_MATERIAL_WMS_IN-ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+          "documentType": "COMPLETION_INBOUND",
+          "idempotent": true
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/msService/material/foreign/foreign/checkProdResult?srcId=ADP_E2E_20260710074612_MATERIAL_WMS_IN_LINE&checkResult=BaseSet_checkResult%2Fqualified",
+      "payload": {},
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "sourceLineId": "ADP_E2E_20260710074612_MATERIAL_WMS_IN_LINE",
+          "qualityStatus": "QUALIFIED",
+          "appliedLines": 1,
+          "pendingInbound": false,
+          "revision": 1
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+      "payload": {
+        "srcId": "ADP_E2E_20260710074612_MATERIAL_WMS_OUT",
+        "srcTableNo": "ADP_E2E_20260710074612_MATERIAL_WMS_OUT_NO",
+        "companyCode": "ADP_E2E_20260710074612_MATERIAL_WMS_COMP",
+        "redBlue": "blue",
+        "comeType": "produceOut",
+        "storageDate": "2026-07-10",
+        "wareCode": "ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+        "detailList": [
+          {
+            "goodCode": "ADP_E2E_20260710074612_MATERIAL_WMS_MAT",
+            "batchText": "ADP_E2E_20260710074612_MATERIAL_WMS_BATCH",
+            "productBatch": "ADP_E2E_20260710074612_MATERIAL_WMS_PROD_BATCH",
+            "placeSetCode": "ADP_E2E_20260710074612_MATERIAL_WMS_LOC",
+            "quantity": 3
+          }
+        ]
+      },
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "documentId": 4,
+          "documentNo": "PIS-ADP_E2E_20260710074612_MATERIAL_WMS_OUT-ADP_E2E_20260710074612_MATERIAL_WMS_WARE",
+          "documentType": "PRODUCTION_ISSUE",
+          "idempotent": false
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    }
+  ],
+  "databaseEvidence": {
+    "tables": [
+      "wms_stock_documents",
+      "wms_stock_document_lines",
+      "wms_batch_stocks",
+      "wms_inventory_transactions",
+      "wms_quality_results"
+    ],
+    "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+    "states": [
+      {
+        "label": "before",
+        "documents": 0,
+        "lines": 0,
+        "transactions": 0,
+        "qualityResults": 0,
+        "stockRows": 0,
+        "onHand": 0,
+        "available": 0,
+        "hold": 0,
+        "inboundQuality": ""
+      },
+      {
+        "label": "afterInbound",
+        "documents": 1,
+        "lines": 1,
+        "transactions": 1,
+        "qualityResults": 0,
+        "stockRows": 1,
+        "onHand": 10,
+        "available": 0,
+        "hold": 10,
+        "inboundQuality": "PENDING"
+      },
+      {
+        "label": "afterInboundRetry",
+        "documents": 1,
+        "lines": 1,
+        "transactions": 1,
+        "qualityResults": 0,
+        "stockRows": 1,
+        "onHand": 10,
+        "available": 0,
+        "hold": 10,
+        "inboundQuality": "PENDING"
+      },
+      {
+        "label": "afterQuality",
+        "documents": 1,
+        "lines": 1,
+        "transactions": 2,
+        "qualityResults": 1,
+        "stockRows": 1,
+        "onHand": 10,
+        "available": 10,
+        "hold": 0,
+        "inboundQuality": "QUALIFIED"
+      },
+      {
+        "label": "afterIssue",
+        "documents": 2,
+        "lines": 2,
+        "transactions": 3,
+        "qualityResults": 1,
+        "stockRows": 1,
+        "onHand": 7,
+        "available": 7,
+        "hold": 0,
+        "inboundQuality": "QUALIFIED"
+      },
+      {
+        "label": "afterCleanup",
+        "documents": 0,
+        "lines": 0,
+        "transactions": 0,
+        "qualityResults": 0,
+        "stockRows": 0,
+        "onHand": 0,
+        "available": 0,
+        "hold": 0,
+        "inboundQuality": ""
+      }
+    ],
+    "verificationSql": "SELECT json_build_object(\n    'documents', (SELECT count(*) FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'lines', (SELECT count(*) FROM wms_stock_document_lines WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'transactions', (SELECT count(*) FROM wms_inventory_transactions WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'qualityResults', (SELECT count(*) FROM wms_quality_results WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'stockRows', (SELECT count(*) FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'onHand', COALESCE((SELECT on_hand_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'available', COALESCE((SELECT available_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'hold', COALESCE((SELECT hold_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'inboundQuality', COALESCE((SELECT quality_status FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' AND document_type='COMPLETION_INBOUND' LIMIT 1), '')\n);",
+    "cleanupSql": "BEGIN;\nDELETE FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP';\nDELETE FROM wms_quality_results WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP';\nDELETE FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP';\nCOMMIT;"
+  },
+  "packageEvidence": {
+    "status": "CANDIDATE_FOUND",
+    "sourceModule": "backend/source-modules/material-wms",
+    "report": "metadata/business-dependency-package-scan.json"
+  },
+  "latestReadinessSmoke": "metadata/business-dependency-readiness-smoke.json",
   "nextActions": [
-    "Deploy the package that provides serviceName=material.",
-    "Confirm Nacos prod@@material has a healthy instance.",
-    "Re-run checkProdResult and generateProduceOutSing with marker data.",
-    "Trace controller/service/DAO/SQL and query PostgreSQL target tables before changing acceptance status."
+    "Keep material-wms tests and live marker acceptance as regression gates.",
+    "Do not conflate standalone bad-quantity product scope with the accepted WMS boundary."
   ]
 }

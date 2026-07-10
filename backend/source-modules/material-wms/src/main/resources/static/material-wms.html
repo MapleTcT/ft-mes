@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>完工入库</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #1f2937; background: #f6f7f9; font-family: Arial, "Microsoft YaHei", sans-serif; }
+    header { height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: #1668dc; color: #fff; }
+    h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: 0; }
+    main { padding: 20px 24px 32px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    input { width: min(360px, 100%); height: 36px; border: 1px solid #c9d0da; border-radius: 4px; padding: 0 12px; font-size: 14px; }
+    button { height: 36px; border: 1px solid #1668dc; border-radius: 4px; padding: 0 18px; background: #1668dc; color: #fff; font-size: 14px; cursor: pointer; }
+    button.secondary { background: #fff; color: #1668dc; }
+    button:disabled { cursor: wait; opacity: .55; }
+    .message { display: none; margin-bottom: 12px; padding: 10px 12px; border-left: 4px solid #d14343; background: #fff2f2; color: #9f1f1f; }
+    .table-wrap { overflow: auto; border: 1px solid #dce1e8; background: #fff; }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; table-layout: fixed; }
+    th, td { height: 44px; padding: 0 12px; border-bottom: 1px solid #e7eaf0; text-align: left; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    th { background: #f1f3f6; color: #4b5563; font-weight: 600; }
+    tbody tr:hover { background: #f5f9ff; }
+    tbody tr { cursor: pointer; }
+    .status { display: inline-flex; min-width: 72px; justify-content: center; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
+    .status.qualified { background: #eaf7ef; color: #18794e; }
+    .status.unqualified { background: #fff0f0; color: #b42318; }
+    .status.pending { background: #fff7e6; color: #945f00; }
+    .empty { padding: 54px 16px; text-align: center; color: #7b8493; background: #fff; }
+    .footer { display: flex; justify-content: flex-end; margin-top: 12px; color: #596273; font-size: 13px; }
+    dialog { width: min(980px, calc(100vw - 36px)); max-height: calc(100vh - 60px); border: 0; border-radius: 6px; padding: 0; box-shadow: 0 16px 48px rgba(25, 35, 50, .22); }
+    dialog::backdrop { background: rgba(15, 23, 42, .38); }
+    .dialog-head { height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid #dfe3e9; }
+    .dialog-head h2 { margin: 0; font-size: 17px; letter-spacing: 0; }
+    .dialog-head button { width: 34px; padding: 0; background: #fff; border-color: #c9d0da; color: #4b5563; font-size: 20px; }
+    .dialog-body { max-height: calc(100vh - 116px); overflow: auto; padding: 18px; }
+    .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px; margin-bottom: 20px; }
+    .fact dt { margin-bottom: 5px; color: #6b7280; font-size: 12px; }
+    .fact dd { margin: 0; overflow-wrap: anywhere; font-size: 14px; }
+    h3 { margin: 18px 0 10px; font-size: 15px; letter-spacing: 0; }
+    @media (max-width: 720px) {
+      header { padding: 0 14px; }
+      main { padding: 14px; }
+      .toolbar input { width: 100%; }
+      .facts { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>完工入库</h1><span id="service-state">material / PostgreSQL</span></header>
+  <main>
+    <div class="toolbar">
+      <input id="keyword" aria-label="搜索" placeholder="单号、来源单号、制造指令号">
+      <button id="search" type="button">查询</button>
+      <button id="clear" class="secondary" type="button">清空</button>
+    </div>
+    <div id="message" class="message" role="alert"></div>
+    <div class="table-wrap">
+      <table aria-label="完工入库列表">
+        <thead><tr>
+          <th style="width:170px">入库单号</th>
+          <th style="width:170px">来源单号</th>
+          <th style="width:150px">制造指令号</th>
+          <th style="width:110px">公司</th>
+          <th style="width:110px">仓库</th>
+          <th style="width:110px">入库日期</th>
+          <th style="width:100px">质量状态</th>
+          <th style="width:140px">创建时间</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty">暂无数据</div>
+    </div>
+    <div id="footer" class="footer">共 0 项</div>
+  </main>
+
+  <dialog id="detail-dialog">
+    <div class="dialog-head"><h2>入库单详情</h2><button id="close-detail" type="button" aria-label="关闭">×</button></div>
+    <div id="detail" class="dialog-body"></div>
+  </dialog>
+
+  <script>
+    (function () {
+      'use strict';
+      var apiPrefix = location.pathname.indexOf('/msService/') === 0 ? '/msService/material' : '/material';
+      var rows = document.getElementById('rows');
+      var empty = document.getElementById('empty');
+      var footer = document.getElementById('footer');
+      var message = document.getElementById('message');
+      var keyword = document.getElementById('keyword');
+      var search = document.getElementById('search');
+      var dialog = document.getElementById('detail-dialog');
+
+      function text(value) { return value === null || value === undefined || value === '' ? '-' : String(value); }
+      function cell(value) { var td = document.createElement('td'); td.textContent = text(value); return td; }
+      function status(value) {
+        var span = document.createElement('span');
+        var labels = { QUALIFIED: '合格', UNQUALIFIED: '不合格', PENDING: '待检' };
+        span.className = 'status ' + String(value || 'PENDING').toLowerCase();
+        span.textContent = labels[value] || text(value);
+        return span;
+      }
+      function showError(error) { message.textContent = error.message || String(error); message.style.display = 'block'; }
+      function clearError() { message.textContent = ''; message.style.display = 'none'; }
+      function request(url) {
+        return fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (response) { if (!response.ok) throw new Error('请求失败: HTTP ' + response.status); return response.json(); })
+          .then(function (body) { if (body.code !== 200) throw new Error(body.message || '请求失败'); return body.data; });
+      }
+      function load() {
+        clearError(); search.disabled = true;
+        request(apiPrefix + '/wms/completion-inbounds?size=100&keyword=' + encodeURIComponent(keyword.value.trim()))
+          .then(function (data) {
+            rows.textContent = '';
+            (data.items || []).forEach(function (item) {
+              var tr = document.createElement('tr'); tr.tabIndex = 0;
+              tr.appendChild(cell(item.document_no)); tr.appendChild(cell(item.source_document_no));
+              tr.appendChild(cell(item.directive_no)); tr.appendChild(cell(item.company_code));
+              tr.appendChild(cell(item.warehouse_code)); tr.appendChild(cell(item.storage_date));
+              var quality = document.createElement('td'); quality.appendChild(status(item.quality_status)); tr.appendChild(quality);
+              tr.appendChild(cell(item.created_at));
+              tr.addEventListener('click', function () { loadDetail(item.id); });
+              tr.addEventListener('keydown', function (event) { if (event.key === 'Enter') loadDetail(item.id); });
+              rows.appendChild(tr);
+            });
+            empty.style.display = data.items && data.items.length ? 'none' : 'block';
+            footer.textContent = '共 ' + data.total + ' 项';
+          })
+          .catch(showError)
+          .then(function () { search.disabled = false; });
+      }
+      function fact(label, value) {
+        var wrap = document.createElement('div'); wrap.className = 'fact';
+        var dt = document.createElement('dt'); dt.textContent = label;
+        var dd = document.createElement('dd'); dd.textContent = text(value);
+        wrap.appendChild(dt); wrap.appendChild(dd); return wrap;
+      }
+      function detailTable(items, columns) {
+        var wrap = document.createElement('div'); wrap.className = 'table-wrap';
+        var table = document.createElement('table'); var head = document.createElement('thead'); var headRow = document.createElement('tr');
+        columns.forEach(function (column) { var th = document.createElement('th'); th.textContent = column[0]; headRow.appendChild(th); });
+        head.appendChild(headRow); table.appendChild(head); var body = document.createElement('tbody');
+        (items || []).forEach(function (item) { var tr = document.createElement('tr'); columns.forEach(function (column) { tr.appendChild(cell(item[column[1]])); }); body.appendChild(tr); });
+        table.appendChild(body); wrap.appendChild(table); return wrap;
+      }
+      function loadDetail(id) {
+        clearError();
+        request(apiPrefix + '/wms/completion-inbounds/' + id).then(function (data) {
+          var root = document.getElementById('detail'); root.textContent = '';
+          var facts = document.createElement('dl'); facts.className = 'facts';
+          facts.appendChild(fact('入库单号', data.document.document_no)); facts.appendChild(fact('来源单号', data.document.source_document_no));
+          facts.appendChild(fact('制造指令号', data.document.directive_no)); facts.appendChild(fact('仓库', data.document.warehouse_code));
+          facts.appendChild(fact('入库日期', data.document.storage_date)); facts.appendChild(fact('质量状态', data.document.quality_status)); root.appendChild(facts);
+          var lineTitle = document.createElement('h3'); lineTitle.textContent = '入库明细'; root.appendChild(lineTitle);
+          root.appendChild(detailTable(data.lines, [['物料', 'material_code'], ['批次', 'batch_no'], ['库位', 'location_code'], ['数量', 'quantity'], ['质量状态', 'quality_status']]));
+          var txTitle = document.createElement('h3'); txTitle.textContent = '库存流水'; root.appendChild(txTitle);
+          root.appendChild(detailTable(data.transactions, [['类型', 'transaction_type'], ['现存变化', 'on_hand_delta'], ['可用变化', 'available_delta'], ['冻结变化', 'hold_delta'], ['时间', 'created_at']]));
+          dialog.showModal();
+        }).catch(showError);
+      }
+
+      search.addEventListener('click', load);
+      document.getElementById('clear').addEventListener('click', function () { keyword.value = ''; load(); });
+      keyword.addEventListener('keydown', function (event) { if (event.key === 'Enter') load(); });
+      document.getElementById('close-detail').addEventListener('click', function () { dialog.close(); });
+      load();
+    }());
+  </script>
+</body>
+</html>

@@ -1737,6 +1737,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/174-material-wms-completion-inbound.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -1798,6 +1804,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-keycloak-jwt-runtime-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-material-wms-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -2925,6 +2937,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-10-material-wms-completion-inbound-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -2980,6 +2998,12 @@
     {
       "ignored": false,
       "path": "docs/production-migration/license-strategy.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/production-migration/material-wms-deployment-runbook.md",
       "state": "tracked",
       "tracked": true
     },
@@ -3226,6 +3250,18 @@
     {
       "ignored": false,
       "path": "metadata/material-service-dependency-analysis.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/material-wms-completion-inbound.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/material-wms-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -3800,13 +3836,13 @@
       "tracked": 2
     },
     "deploy": {
-      "tracked": 455
+      "tracked": 457
     },
     "docs": {
-      "tracked": 55
+      "tracked": 57
     },
     "metadata": {
-      "tracked": 69
+      "tracked": 71
     },
     "package.json": {
       "tracked": 1
@@ -3821,8 +3857,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 630,
-    "tracked": 630,
+    "totalFiles": 636,
+    "tracked": 636,
     "untracked": 0
   },
   "untrackedByDirectory": []

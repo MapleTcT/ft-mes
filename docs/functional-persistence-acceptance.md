@@ -32,6 +32,15 @@
 
 ## 本轮执行口径
 
+### Material/WMS 最新验收
+
+2026-07-10 新增的 `material-wms` 模块已在真实测试环境完成前端、API 和
+PostgreSQL 闭环。Marker `ADP_E2E_20260710074612_MATERIAL_WMS` 验证完工
+入库、重复幂等、质检合格释放、生产领料和清理；机器证据为
+`metadata/material-wms-persistence-acceptance.json`，浏览器截图为
+`metadata/material-wms-completion-inbound.png`。该 PASS 不代表当前包存在
+独立不良数量字段；后者仍按产品范围决定处理。
+
 这条规则用于约束当前 ADP/MES 恢复仓库后续所有功能验证任务。进入验收时，优先级如下：
 
 1. 先启动或访问真实系统，确认前端、后端、PostgreSQL 的实际运行状态。

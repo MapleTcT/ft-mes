@@ -1,9 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-20T16:05:25Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T07:16:37Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "scanRoots": [
+    {
+      "path": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules",
+      "exists": true
+    },
     {
       "path": "/Users/zhangchu/Documents/MES包",
       "exists": true
@@ -94,11 +98,11 @@
     }
   },
   "summary": {
-    "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
-    "rootsRequested": 4,
-    "rootsExisting": 4,
-    "filesVisited": 58889,
-    "textFilesScanned": 31371,
+    "status": "CANDIDATE_FOUND",
+    "rootsRequested": 5,
+    "rootsExisting": 5,
+    "filesVisited": 58916,
+    "textFilesScanned": 31396,
     "archivesScanned": 1142,
     "nestedArchivesScanned": 2139,
     "nestedArchivesSkippedByPath": 12168,
@@ -114,8 +118,8 @@
     "skippedLargeArchives": 0,
     "readErrors": 0,
     "dependencies": 2,
-    "blockedDependencies": 2,
-    "candidateDependencies": 0
+    "blockedDependencies": 1,
+    "candidateDependencies": 1
   },
   "scannedArchives": [
     {
@@ -1123,7 +1127,7 @@
     {
       "id": "material-service",
       "title": "Material warehouse/inventory service",
-      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "status": "CANDIDATE_FOUND",
       "requiredFor": [
         "PROD-019",
         "PROD-021",
@@ -1132,10 +1136,12 @@
       "searchCriteria": {
         "targetTerms": [
           "checkProdResult",
+          "generateProductInSingle",
           "generateProduceOutSing",
           "produceOutSingle",
           "material/foreign/foreign",
-          "produceOutSingle/produceOutSing"
+          "produceOutSingle/produceOutSing",
+          "produceInSingles/produceInSingl"
         ],
         "moduleTerms": [
           "serviceName=material",
@@ -1183,13 +1189,343 @@
           "QCS"
         ]
       },
-      "targetHitCount": 0,
+      "targetHitCount": 21,
       "moduleHitCount": 0,
-      "knownAdjacentHitCount": 120,
+      "knownAdjacentHitCount": 99,
       "callerOnlyHitCount": 0,
-      "implementationCandidateCount": 0,
-      "implementationCandidates": [],
-      "targetHits": [],
+      "implementationCandidateCount": 21,
+      "implementationCandidates": [
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "gle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. The operational page is available through `/msServic"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "ervice name `material`. ## Supported compatibility endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/che"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "erial/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. T"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "y endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material"
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "ingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. The operational page is available th"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "y endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases a"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceInSingles/produceInSingl",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "aterial dependency under Nacos service name `material`. ## Supported compatibility endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /mate"
+        },
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "vletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/material/foreign/foreign/checkProdResult\", \"/public/material/foreign/foreign/checkProdResult\" }) public LegacyResult<Map<String, Object>> update"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "is.tenantResolver = tenantResolver; } @PostMapping({ \"/public/material/produceInSingles/produceInSingl/generateProductInSingle\", \"/material/produceInSingles/produceInSingl/generateProductInSingle\" }) public LegacyResult<Map<String"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "tCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\" }) public LegacyResult<Map<String,"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "solve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\""
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "enantResolver.resolve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/material/foreign/foreign/checkProdResult\", \"/public/material/foreign/foreign/checkProdResult\" }) public LegacyResult<Map<String,"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "solve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\" }) public L"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceInSingles/produceInSingl",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "e = inventoryService; this.tenantResolver = tenantResolver; } @PostMapping({ \"/public/material/produceInSingles/produceInSingl/generateProductInSingle\", \"/material/produceInSingles/produceInSingl/generateProductInSingle\" }) public"
+        },
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": ")); assertStock(\"10.000000\", \"0.000000\", \"10.000000\"); mockMvc.perform(post(\"/material/foreign/foreign/checkProdResult\") .header(\"X-Tenant-Id\", \"COMP\") .param(\"srcId\", \"ADP_TEST_LINE_1\") .pa"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "DP_TEST_IN_1\", \"ADP_TEST_LINE_1\", \"10\"); mockMvc.perform(post(\"/public/material/produceInSingles/produceInSingl/generateProductInSingle\") .contentType(MediaType.APPLICATION_JSON).content(inbound)) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "aceSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue)) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "h\\\":\\\"PB\\\",\" + \"\\\"placeSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue))"
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "wms_stock_document_lines\")); assertStock(\"10.000000\", \"0.000000\", \"10.000000\"); mockMvc.perform(post(\"/material/foreign/foreign/checkProdResult\") .header(\"X-Tenant-Id\", \"COMP\") .param(\"srcId\", \"ADP_TEST_LINE_1\")"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "h\\\":\\\"PB\\\",\" + \"\\\"placeSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue)) .andExpec"
+        }
+      ],
+      "targetHits": [
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "gle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. The operational page is available through `/msServic"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "ervice name `material`. ## Supported compatibility endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/che"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "erial/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. T"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "y endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material"
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "ingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases are supported as well. The operational page is available th"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "y endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /material/foreign/foreign/checkProdResult` Gateway-rewritten `/material/...` aliases a"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceInSingles/produceInSingl",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/README.md",
+          "entry": null,
+          "context": "aterial dependency under Nacos service name `material`. ## Supported compatibility endpoints - `POST /public/material/produceInSingles/produceInSingl/generateProductInSingle` - `POST /public/material/produceOutSingle/produceOutSing/generateProduceOutSing` - `POST /mate"
+        },
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "vletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/material/foreign/foreign/checkProdResult\", \"/public/material/foreign/foreign/checkProdResult\" }) public LegacyResult<Map<String, Object>> update"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "is.tenantResolver = tenantResolver; } @PostMapping({ \"/public/material/produceInSingles/produceInSingl/generateProductInSingle\", \"/material/produceInSingles/produceInSingl/generateProductInSingle\" }) public LegacyResult<Map<String"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "tCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\" }) public LegacyResult<Map<String,"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "solve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\""
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "enantResolver.resolve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/material/foreign/foreign/checkProdResult\", \"/public/material/foreign/foreign/checkProdResult\" }) public LegacyResult<Map<String,"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "solve(servletRequest, request.getCompanyCode()), request).toMap()); } @PostMapping({ \"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\", \"/material/produceOutSingle/produceOutSing/generateProduceOutSing\" }) public L"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceInSingles/produceInSingl",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+          "entry": null,
+          "context": "e = inventoryService; this.tenantResolver = tenantResolver; } @PostMapping({ \"/public/material/produceInSingles/produceInSingl/generateProductInSingle\", \"/material/produceInSingles/produceInSingl/generateProductInSingle\" }) public"
+        },
+        {
+          "dependency": "material-service",
+          "term": "checkProdResult",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": ")); assertStock(\"10.000000\", \"0.000000\", \"10.000000\"); mockMvc.perform(post(\"/material/foreign/foreign/checkProdResult\") .header(\"X-Tenant-Id\", \"COMP\") .param(\"srcId\", \"ADP_TEST_LINE_1\") .pa"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProductInSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "DP_TEST_IN_1\", \"ADP_TEST_LINE_1\", \"10\"); mockMvc.perform(post(\"/public/material/produceInSingles/produceInSingl/generateProductInSingle\") .contentType(MediaType.APPLICATION_JSON).content(inbound)) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "material-service",
+          "term": "generateProduceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "aceSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue)) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "h\\\":\\\"PB\\\",\" + \"\\\"placeSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue))"
+        },
+        {
+          "dependency": "material-service",
+          "term": "material/foreign/foreign",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "wms_stock_document_lines\")); assertStock(\"10.000000\", \"0.000000\", \"10.000000\"); mockMvc.perform(post(\"/material/foreign/foreign/checkProdResult\") .header(\"X-Tenant-Id\", \"COMP\") .param(\"srcId\", \"ADP_TEST_LINE_1\")"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceOutSingle/produceOutSing",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "h\\\":\\\"PB\\\",\" + \"\\\"placeSetCode\\\":\\\"LOC\\\",\\\"quantity\\\":3}]}\"; mockMvc.perform(post(\"/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\") .contentType(MediaType.APPLICATION_JSON).content(issue)) .andExpec"
+        },
+        {
+          "dependency": "material-service",
+          "term": "produceInSingles/produceInSingl",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+          "entry": null,
+          "context": "String inbound = inboundJson(\"ADP_TEST_IN_1\", \"ADP_TEST_LINE_1\", \"10\"); mockMvc.perform(post(\"/public/material/produceInSingles/produceInSingl/generateProductInSingle\") .contentType(MediaType.APPLICATION_JSON).content(inbound)) .andEx"
+        }
+      ],
       "moduleHits": [],
       "knownAdjacentHits": [
         {
@@ -1514,7 +1850,7 @@
         }
       ],
       "callerOnlyHits": [],
-      "nextAction": "Provide a package containing the missing service implementation, then rerun this scan and runtime dependency smoke."
+      "nextAction": "Inspect and deploy the implementation candidate, then rerun runtime dependency smoke and marker acceptance."
     },
     {
       "id": "process-analysis",

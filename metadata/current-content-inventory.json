@@ -587,9 +587,9 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 53,
+    "composeServiceCount": 54,
     "composeServiceKindCounts": {
-      "business-runtime": 14,
+      "business-runtime": 15,
       "infrastructure": 11,
       "platform-runtime": 28
     },
@@ -797,6 +797,11 @@
       {
         "service": "WOMMs",
         "jarPath": "bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "material",
+        "jarPath": "bap-server/module-Server/material/manual/material-wms.jar",
         "kind": "business-runtime"
       },
       {

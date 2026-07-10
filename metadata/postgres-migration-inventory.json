@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 173,
+  "migrationCount": 174,
   "firstNumber": 1,
-  "lastNumber": 173,
+  "lastNumber": 174,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -14,8 +14,8 @@
   "statementTotals": {
     "alter-table": 9326,
     "create-function": 68,
-    "create-index": 844,
-    "create-table": 524,
+    "create-index": 856,
+    "create-table": 529,
     "create-view": 107,
     "insert": 3875,
     "update": 3937
@@ -24,7 +24,7 @@
     "create-or-replace": 172,
     "do-block": 274,
     "if-exists": 90,
-    "if-not-exists": 11253,
+    "if-not-exists": 11270,
     "on-conflict": 3839,
     "to-regclass": 152,
     "where-not-exists": 26
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 73,
     "configuration": 41,
-    "general": 23,
+    "general": 24,
     "notification": 9,
     "platform": 49,
     "workflow": 20
@@ -6503,6 +6503,39 @@
           "rationale": "Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup."
         }
       ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/174-material-wms-completion-inbound.sql",
+      "name": "174-material-wms-completion-inbound.sql",
+      "number": 174,
+      "slug": "material-wms-completion-inbound",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 145,
+      "sha256": "17d6e53a8d0d5cd39b355ba68f7295561171000c2b518bcfbc5c8e13e71b2e01",
+      "statementCounts": {
+        "create-table": 5,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 12,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 17,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
       "unguardedStructuralStatements": []
     }
   ]

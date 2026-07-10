@@ -83,7 +83,7 @@ make entity-model-config-crud-readiness-check
 
 - QCS 运行配置变更前必须准备专用 `ADP_E2E` marker、回滚方案和 QCS 报告链路回归，并要求 `PROD-018/031/032/033/034/035/036/037/038/039/040/041/042` 当前保持 `PASS`；`PROD-019` 仍作为 material/坏品数量边界 blocker 单独跟踪。
 - RM 运行配置变更前必须准备专用 marker、回滚方案和 RM 配方回归，并要求 `PROD-008/009/043` 当前保持 `PASS`；`PROD-010` 外部 Batch 客户端编辑入口仍单独阻断。
-- BaseSet 运行配置变更前必须准备专用 marker、回滚方案和 WOM/QCS 回归，并要求 `PROD-001/002/003/004/031/035/036` 当前保持 `PASS`；`PROD-022` material 库存/入库边界仍单独阻断。
+- BaseSet 运行配置变更前必须准备专用 marker、回滚方案和 WOM/QCS/material 回归，并要求 `PROD-001/002/003/004/022/031/035/036` 当前保持 `PASS`。
 
 这三个动作从 `CONTROLLED_MARKER_REQUIRED` 升级前，必须记录前端请求、`systemconfig_config_info` / `systemconfig_config_version` 的 PostgreSQL before/after SQL、回滚后的查询结果，以及对应生产用例的回归结果。已经补过单配置 marker 的目录仍保持受控状态，因为后续任何新配置项、敏感配置或外部客户端入口都必须另有专用 marker 和业务回归。
 
@@ -155,7 +155,7 @@ PostgreSQL 确认 `wom_produce_tasks`、`wom_wait_put_records`、
 WOM 任务/待办/执行日志、`baseset_batch_infos` 待检状态以及
 `qcs_inspects/qcs_inspect_stds/qcs_inspect_coms` 均写入预期状态；证据见
 `metadata/baseset-runtime-config-wom-manu-inspect-regression.json`。本项仍不关闭
-`PROD-022` material 库存/入库阻断，也不代表后续 BaseSet 其他配置可跳过专用
+`PROD-022` material 库存/入库已通过 marker 验收，但也不代表后续 BaseSet 其他配置可跳过专用
 marker、回滚和业务回归。
 
 ## 安全规则

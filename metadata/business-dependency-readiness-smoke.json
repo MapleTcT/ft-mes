@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:55:34.526Z",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "generatedAt": "2026-07-10T07:16:11.006Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "target": {
     "baseUrl": "http://100.99.133.43:18080",
@@ -16,29 +16,33 @@
     "status": "BLOCKED",
     "dependencies": 2,
     "ready": 0,
-    "actionRequired": 0,
-    "blocked": 2
+    "actionRequired": 1,
+    "blocked": 1
   },
   "items": [
     {
       "id": "material-service",
       "title": "Material warehouse/inventory service",
-      "status": "BLOCKED",
+      "status": "ACTION_REQUIRED",
       "requiredFor": [
         "PROD-019",
         "PROD-021",
         "PROD-022",
         "WOM/QCS inventory and stock-in write-back"
       ],
-      "readyWhen": "serviceName=material has a healthy Nacos instance and marker inventory endpoints stop returning tenant-service 503.",
+      "readyWhen": "serviceName=material has a healthy Nacos instance; all three compatibility endpoints stop returning tenant-service 503; marker acceptance proves WMS PostgreSQL writes.",
       "services": [
         {
           "serviceName": "material",
           "fetched": true,
-          "hostCount": 0,
-          "healthyHostCount": 0,
-          "ports": [],
-          "instanceIds": []
+          "hostCount": 1,
+          "healthyHostCount": 1,
+          "ports": [
+            8080
+          ],
+          "instanceIds": [
+            "172.25.0.60#8080#DEFAULT#prod@@material"
+          ]
         },
         {
           "serviceName": "MATERIAL",
@@ -99,28 +103,38 @@
       ],
       "endpoints": [
         {
+          "name": "generateProductInSingle",
+          "method": "POST",
+          "path": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+          "status": 200,
+          "error": null,
+          "timeout": false,
+          "body": "{\"code\":400,\"data\":null,\"message\":\"srcID/srcId 不能为空\",\"msg\":\"srcID/srcId 不能为空\"}",
+          "tenantServiceMissing": false
+        },
+        {
           "name": "checkProdResult",
           "method": "POST",
           "path": "/msService/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/material/foreign/foreign/checkProdResult\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/material/foreign/foreign/checkProdResult] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.648+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":400,\"data\":null,\"message\":\"不支持的质检结果: 1\",\"msg\":\"不支持的质检结果: 1\"}",
+          "tenantServiceMissing": false
         },
         {
           "name": "generateProduceOutSing",
           "method": "POST",
           "path": "/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.661+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":400,\"data\":null,\"message\":\"srcID/srcId 不能为空\",\"msg\":\"srcID/srcId 不能为空\"}",
+          "tenantServiceMissing": false
         }
       ],
       "database": {
-        "materialLikeTableCount": 36,
+        "materialLikeTableCount": 40,
         "materialLikeTables": [
           "baseset_material_attributes",
           "baseset_material_attributes_di",
@@ -148,6 +162,10 @@
           "hm_material_saves",
           "hm_stock_menage",
           "hm_stock_menage_di",
+          "wms_batch_stocks",
+          "wms_inventory_transactions",
+          "wms_stock_document_lines",
+          "wms_stock_documents",
           "wom_output_materials",
           "wom_output_materials_sv",
           "wom_put_in_materials",
@@ -161,10 +179,9 @@
         ]
       },
       "issues": [
-        "No healthy Nacos service instance was found for the expected dependency aliases.",
-        "Authenticated endpoint probe still returns tenant-service 503."
+        "Dependency appears available now; rerun the corresponding marker persistence/browser acceptance before changing product cases to PASS."
       ],
-      "nextAction": "Deploy/register the warehouse/material service package, map target stock-in tables, then rerun marker inventory acceptance."
+      "nextAction": "Run the material WMS marker persistence/browser acceptance and keep it as regression evidence."
     },
     {
       "id": "process-analysis",
@@ -225,7 +242,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.674+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.929+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -235,7 +252,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.692+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.940+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -245,7 +262,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.705+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.952+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -255,7 +272,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.723+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.976+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -265,7 +282,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.734+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:11.005+0000\",\"status\":503}",
           "tenantServiceMissing": true
         }
       ],

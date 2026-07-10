@@ -155,6 +155,11 @@ def dependency_readiness_items(readiness: dict[str, Any]) -> list[dict[str, Any]
     for item in as_list(readiness.get("items")):
         if not isinstance(item, dict):
             continue
+        # Read-only smoke keeps newly available dependencies at ACTION_REQUIRED
+        # until marker persistence is checked elsewhere. The gap register should
+        # list only dependencies that are still genuinely blocked.
+        if item.get("status") != "BLOCKED":
+            continue
         services = [
             {
                 "serviceName": service.get("serviceName"),

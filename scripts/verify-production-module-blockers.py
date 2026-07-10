@@ -49,7 +49,8 @@ REQUIRED_BLOCKER_KEYS = [
     "nonSolutions",
 ]
 
-MATERIAL_CASES = {"PROD-019", "PROD-021", "PROD-022"}
+MATERIAL_CASES: set[str] = set()
+BAD_QUANTITY_CASES = {"PROD-019", "PROD-021"}
 PROCESS_CASES = {"PROD-020"}
 
 
@@ -207,6 +208,8 @@ def check_blocker(index: int, blocker: Any, failures: list[str]) -> str | None:
         for required in ("material-service-dependency-analysis", "business-dependency-readiness-smoke", "business-dependency-package-scan"):
             if required not in text:
                 fail(failures, f"{case_id} material blocker must reference {required}")
+    if case_id in BAD_QUANTITY_CASES and "wom-bad-quantity-analysis" not in text:
+        fail(failures, f"{case_id} bad-quantity scope blocker must reference wom-bad-quantity-analysis")
     if case_id in PROCESS_CASES:
         for required in ("processanalysis-dependency-analysis", "business-dependency-readiness-smoke", "business-dependency-package-scan"):
             if required not in text:
@@ -275,25 +278,29 @@ def check_report(report: dict[str, Any], matrix_blocked_ids: set[str], failures:
 def check_dependency_readiness(report: dict[str, Any], blockers: dict[str, dict[str, Any]], failures: list[str]) -> None:
     summary = as_dict(report.get("summary"))
     if summary.get("status") != "BLOCKED":
-        fail(failures, "business dependency readiness summary.status must remain BLOCKED while production blockers cite it")
-    if summary.get("blocked") != 2 or summary.get("ready") != 0:
-        fail(failures, "business dependency readiness summary must show blocked=2 and ready=0")
+        fail(failures, "business dependency readiness summary must remain BLOCKED while ProcessAnalysis is absent")
+    if summary.get("blocked") != 1 or summary.get("actionRequired") != 1:
+        fail(failures, "business dependency readiness summary must show ProcessAnalysis BLOCKED and material ACTION_REQUIRED")
 
     material = item_by_id(report, "items", "material-service")
     if material is None:
         fail(failures, "business dependency readiness report missing material-service item")
     else:
-        if material.get("status") != "BLOCKED":
-            fail(failures, "material-service readiness status must remain BLOCKED")
-        require_required_for(material, MATERIAL_CASES, "material-service readiness", failures)
+        if material.get("status") not in {"ACTION_REQUIRED", "READY"}:
+            fail(failures, "material-service readiness must be ACTION_REQUIRED or READY after deployment")
         services = as_list(material.get("services"))
         if not services:
             fail(failures, "material-service readiness must record Nacos service probes")
-        if any(healthy_host_count(service) != 0 for service in services):
-            fail(failures, "material-service readiness must keep all probed healthyHostCount values at 0")
+        if max((healthy_host_count(service) for service in services), default=0) <= 0:
+            fail(failures, "material-service readiness must include a healthy Nacos material instance")
         endpoints = as_list(material.get("endpoints"))
-        if len(endpoints) < 2 or not all(endpoint_is_blocked(endpoint) for endpoint in endpoints):
-            fail(failures, "material-service readiness endpoints must remain tenant-service 503 blockers")
+        if len(endpoints) < 3 or not all(
+            isinstance(endpoint, dict)
+            and 200 <= int(endpoint.get("status") or 0) < 300
+            and endpoint.get("tenantServiceMissing") is not True
+            for endpoint in endpoints
+        ):
+            fail(failures, "material-service readiness endpoints must all be reachable through the gateway")
         database = as_dict(material.get("database"))
         if not isinstance(database.get("materialLikeTableCount"), int) or database.get("materialLikeTableCount", 0) <= 0:
             fail(failures, "material-service readiness must include discovered PostgreSQL material-like tables")
@@ -326,12 +333,10 @@ def check_dependency_readiness(report: dict[str, Any], blockers: dict[str, dict[
 
 def check_package_scan(report: dict[str, Any], blockers: dict[str, dict[str, Any]], failures: list[str]) -> None:
     summary = as_dict(report.get("summary"))
-    if summary.get("status") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE":
-        fail(failures, "business dependency package scan summary.status must remain BLOCKED_NO_IMPLEMENTATION_CANDIDATE")
-    if summary.get("candidateDependencies") != 0:
-        fail(failures, "business dependency package scan summary.candidateDependencies must remain 0")
-    if summary.get("blockedDependencies") != 2:
-        fail(failures, "business dependency package scan summary.blockedDependencies must remain 2")
+    if summary.get("status") != "CANDIDATE_FOUND":
+        fail(failures, "business dependency package scan summary.status must be CANDIDATE_FOUND")
+    if summary.get("candidateDependencies") != 1 or summary.get("blockedDependencies") != 1:
+        fail(failures, "business dependency package scan must show one material candidate and one ProcessAnalysis blocker")
 
     expected_dependencies = {
         "material-service": MATERIAL_CASES,
@@ -342,13 +347,17 @@ def check_package_scan(report: dict[str, Any], blockers: dict[str, dict[str, Any
         if dependency is None:
             fail(failures, f"business dependency package scan missing dependency {dependency_id}")
             continue
-        if dependency.get("status") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE":
-            fail(failures, f"{dependency_id} package scan status must remain BLOCKED_NO_IMPLEMENTATION_CANDIDATE")
-        require_required_for(dependency, expected_cases, f"{dependency_id} package scan", failures)
-        if dependency.get("implementationCandidateCount") != 0:
-            fail(failures, f"{dependency_id} package scan implementationCandidateCount must remain 0")
-        if as_list(dependency.get("implementationCandidates")):
-            fail(failures, f"{dependency_id} package scan implementationCandidates must remain empty")
+        if dependency_id == "material-service":
+            if dependency.get("status") != "CANDIDATE_FOUND":
+                fail(failures, "material-service package scan must find the maintained source module")
+            if int(dependency.get("implementationCandidateCount") or 0) <= 0:
+                fail(failures, "material-service package scan must include implementation candidates")
+        else:
+            if dependency.get("status") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE":
+                fail(failures, f"{dependency_id} package scan must remain BLOCKED_NO_IMPLEMENTATION_CANDIDATE")
+            require_required_for(dependency, expected_cases, f"{dependency_id} package scan", failures)
+            if dependency.get("implementationCandidateCount") != 0:
+                fail(failures, f"{dependency_id} package scan implementationCandidateCount must remain 0")
 
     for case_id in sorted(MATERIAL_CASES | PROCESS_CASES):
         blocker = blockers.get(case_id)

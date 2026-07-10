@@ -1,289 +1,19 @@
 {
-  "generatedAt": "2026-07-10T03:55:34Z",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
   "latestRevalidation": {
-    "generatedAt": "2026-06-20T18:05:00.000Z",
-    "environment": "browser ingress http://222.88.185.146:18080; API/SSH/DB host 100.99.133.43; PostgreSQL database adp",
-    "database": "PostgreSQL",
-    "items": [
-      {
-        "scope": "platform",
-        "status": "PASS",
-        "evidence": "/tmp/adp-platform-validation-current-20260616132242/platform-validation-summary.json",
-        "summary": "Playwright/login 6/6, platform API 16/16, home todo ok, organization read ok, RBAC authority 9/9, menu pages 20/20."
-      },
-      {
-        "scope": "organization-department-crud",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260616052125_ORGDEP",
-        "evidence": "/tmp/adp-organization-persistence-current-20260616132124.json",
-        "summary": "POST/PUT/DELETE /inter-api/organization/v1/department returned 200; PostgreSQL org_department id 6589673980019216 changed to valid=0 after delete."
-      },
-      {
-        "scope": "rbac-permission-persistence",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260616052125_RBAC",
-        "evidence": "/tmp/adp-rbac-permission-persistence-current-20260616132124.json",
-        "summary": "Role, role-user, role permission, user permission, role/user data resource save-disable, and cleanup all returned 200 with PostgreSQL verification; no blocking console/network/page/visible errors."
-      },
-      {
-        "scope": "rbac-authority-smoke",
-        "status": "PASS",
-        "evidence": "/tmp/adp-rbac-authority-smoke-20260616052242.json",
-        "summary": "RBAC authority read smoke passed 9/9; current roleId=1 menuCount=628."
-      },
-      {
-        "scope": "qcs-manu-inspect-submit-report-generation",
-        "status": "FAIL",
-        "marker": "ADP_E2E_20260616050127_WOM_MANU_INSPECT",
-        "evidence": "Remote PostgreSQL and LIMS logs on 2026-06-16 13:35-13:36 Asia/Shanghai",
-        "summary": "QCS bulkSubmit used the same endpoint as the front-end list action. First submit consumed pending 755756626085120 and created pending 755764922471680; second submit changed qcs_inspects.id=755756625425664 to status=99 and wrote qcs_inspects_di outcome 生效, but LIMS logged NullPointerException at QCSInspectServiceImpl.syncEntity:2618 and qcs_inspect_reports/qcs_report_coms remained empty. Seed quality standard also has 0 limsba_std_ver_coms report items. Repository now adds 117-qcs-report-generation-support.sql and marker report-item seeding, but bulkSubmit has not been re-run after that change."
-      },
-      {
-        "scope": "qcs-inspect-report-result-save",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618033224_QCS_RESULT_SAVE",
-        "evidence": "LIMS logs 2026-06-18 11:32:33 CST plus PostgreSQL verification on 100.99.133.43",
-        "summary": "Real page runtime submit persisted qcs_inspect_reports.check_result, memo_field, and version for report id 755811962860800."
-      },
-      {
-        "scope": "qcs-inspect-release-save-submit",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618_INSP_RELEASE_SAVE_797449 / ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449",
-        "evidence": "/tmp/adp-qcs-insp-release-save-ADP_E2E_20260618_INSP_RELEASE_SAVE_797449/evidence.json; /tmp/adp-qcs-insp-release-submit-ADP_E2E_20260618_INSP_RELEASE_SUBMIT_797449/submit-evidence.json; /tmp/adp-qcs-inspect-release-view-after-sv-fix-20260618/evidence.json",
-        "summary": "QCS inspect release draft save and submit-to-audit returned 200 from the public browser ingress. PostgreSQL on 100.99.133.43 verified qcs_inspect_releases id 756521397810432, ec_table_info, wfm_task_pending audit task 756521872426240, and wf_deal_info outcome 审核."
-      },
-      {
-        "scope": "rm-batch-formula-sync-delete",
-        "status": "PASS_WITH_STATIC_LINK_RISK_ON_TAILSCALE_INGRESS",
-        "marker": "ADP_E2E_20260618154210_RMBATCH",
-        "evidence": "/tmp/adp-rm-batch-sync-persistence-20260618154210/rm-batch-sync-persistence-results.json; /tmp/adp-rm-batch-sync-persistence-20260618153330/rm-batch-sync-persistence-results.json",
-        "summary": "Public browser ingress had zero console/page/request failures and sync/delete both persisted to PostgreSQL. Direct 100.99 ingress also passed API/DB but still showed large static JS transfer risk, so frontend visual revalidation should use public ingress while SSH/DB uses 100.99."
-      },
-      {
-        "scope": "workappointment-workplan-save-delete",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618162703_WAPS_WORKPLAN; ADP_E2E_20260619091757_WAPS_VISIBLE_FORM_SAVE",
-        "evidence": "/tmp/adp-waps-workplan-persistence-20260618162703/waps-workplan-persistence-results.json; /tmp/adp-waps-visible-form-save-20260619091757/result.json",
-        "summary": "Public browser page-context save/delete returned HTTP 200 and earlier verified API-context persistence. Latest visible-form run clicked the real WorkAppointment 新增 button, filled the rendered workPlanEdit form, clicked visible 保存, captured POST /msService/workAppointment/workPlan/workTicketPlan/workPlanEdit/submit=200 plus list query/pending refresh=200 with datagridCode, and PostgreSQL on 100.99.133.43 verified waps_work_ticket_plans id=6598632862499520 valid=true/version=1 with pending_count=1, di_count=1, sv_count=1; delete then set valid=false/version=2 and pending_count=0. 100.99.133.43:18080 remains a slow Tailscale static-bundle ingress, so browser proof used same-host public ingress while SSH/DB proof used 100.99.133.43."
-      },
-      {
-        "scope": "wom-reject-material-save-delete",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618172234_WOM_REJECT_MATERIAL",
-        "evidence": "/tmp/adp-wom-reject-material-persistence-20260618172234/wom-reject-material-persistence-results.json",
-        "summary": "Public browser page-context prePareRejectEdit/save and delete returned HTTP 200 with zero console/page/request failures. PostgreSQL on 100.99.133.43 verified wom_reject_materials valid=true/version=1 with pending_count=1, di_count=1, sv_count=1 after save; after delete valid=false/version=2 and pending_count=0."
-      },
-      {
-        "scope": "wom-reject-material-effective",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618175855_WOM_REJECT_MATERIAL",
-        "evidence": "/tmp/adp-wom-reject-material-persistence-20260618175855/wom-reject-material-persistence-results.json",
-        "summary": "Public browser page-context prePareRejectEdit/save and submit returned HTTP 200 with zero console/page/request failures. Submit payload included workFlowVar.outcomeMap for SequenceFlow_1nu8kl7/生效. PostgreSQL on 100.99.133.43 verified wom_reject_materials id 756655464850688 changed from status=88/pending_count=1 to status=99/effect_time=2026-06-19 02:00:16.973/pending_count=0, with DI SequenceFlow_1nu8kl7 and JBPM history ending at end_xwzcjr1. Failure contrast /tmp/adp-wom-reject-material-persistence-20260618174042 showed top-level workFlowVar.outcome alone returned HTTP 200 but did not move the workflow."
-      },
-      {
-        "scope": "wom-reject-material-materia-effective-inventory",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618185904_WOM_REJECT_MATERIAL",
-        "evidence": "/tmp/adp-wom-reject-material-persistence-20260618185904/wom-reject-material-persistence-results.json",
-        "summary": "Public browser page-context materiaRejectEdit/save, materiaRejectEdit/submit, and materiaEditableEdit/submit all returned HTTP 200 with zero console/page/request failures. PostgreSQL on 100.99.133.43 verified wom_reject_materials id 756670413997312 moved from status=88 to status=99, DI outcomes SequenceFlow_1ubtbie/提交 and SequenceFlow_0igvfiq/生效 were persisted, wom_rejct_matal_parts kept reject_num=2.000000, and hm_factory_materias id 1781809163401314 availi_quantity changed from 10.00 to 8.00. Regression prepare effective evidence: /tmp/adp-wom-reject-material-persistence-20260618190319/wom-reject-material-persistence-results.json."
-      },
-      {
-        "scope": "wom-reject-material-batch-effective-writeback",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618192824_WOM_REJECT_MATERIAL",
-        "evidence": "/tmp/adp-wom-reject-material-persistence-20260618192824/wom-reject-material-persistence-results.json",
-        "summary": "Public browser page-context batchRejectEdit/save and batchRejectEdit/submit returned HTTP 200 with zero console/page/request failures. PostgreSQL on 100.99.133.43 verified wom_reject_materials id 756677581907200 moved from status=88 to status=99, DI outcome SequenceFlow_1dghow0/生效 persisted, wom_rejct_matal_parts row 756677582132480 kept batching_part_id 1781810918144456 and reject_num=2.000000, and wom_batch_mat_needs 1781810918144454 / wom_batch_materils 1781810918144455 / wom_bat_materil_parts 1781810918144456 return_num changed from 0 to 2 with part retirement_state WOM_retirementState/returned."
-      },
-      {
-        "scope": "wom-checkoutbill-quality-active",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL",
-        "evidence": "/tmp/adp-wom-checkoutbill-persistence-20260618200829/wom-checkoutbill-persistence-results.json",
-        "summary": "Public browser page-context makeTaskBatchView selected the seeded quality process/activity and called checkoutBill/generate/8991071330917347 with HTTP 200/code=200 and zero console/page/request failures. PostgreSQL on 100.99.133.43 verified wom_task_actives check_state=待检/check_times=1/inpect_deal_id=756687356716288/is_finish=true, wom_wait_put_records finished with proc_report_id=756687354574080, wom_proc_reports and wom_acti_exelogs persisted, qcs_inspects manuInspect_20260619_002/status=88 plus one qcs_inspect_stds and one qcs_inspect_coms row, and baseset_batch_infos BaseSet_checkState/waitForCheck."
-      },
-      {
-        "scope": "teaminfo-scheduleplan-save",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260619030900_TEAMINFO_SCHEDULE_PLAN",
-        "evidence": "/tmp/adp-teaminfo-scheduleplan-persistence-20260619030900/teaminfo-scheduleplan-persistence-results.json",
-        "summary": "Public browser page-context opened TeamInfo schedule plan list, clicked add, and saved a schedule plan through schedulePlanEdit/save with HTTP 200/code=200. PostgreSQL on 100.99.133.43 verified team_schedule_plans id 756790714983680 persisted with valid=true/status=99/schedule_rule=6590000000001004. Automatic team_schedules/team_schedule_plans_di side-effect counts were 0 and are not claimed as complete."
-      },
-      {
-        "scope": "craftgraph-pure-ui-product-save-delete",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260619064104_CRAFT_PUREUI",
-        "evidence": "/tmp/adp-material-ref-direct-20260619062825/result.json; /tmp/adp-craftgraph-pureui-ADP_E2E_20260619064104_CRAFT_PUREUI/result.json; /tmp/adp-craftgraph-pureui-delete3-ADP_E2E_20260619064104_CRAFT_PUREUI/result.json",
-        "summary": "Public browser opened craftGraph basicInfoList, clicked visible add, filled visible craftCode/craftName/versionInfo/remark, opened the BaseSet material reference popup, verified materialRef-query returned data.result rows and the UI rendered 共 118 项, selected product id 8991071330917338 through pure UI, clicked real Save, and PostgreSQL on 100.99.133.43 verified craft_basic_infos id 756842904339712 valid=true/version=0/product=8991071330917338 plus craft_tree_structures tree_node_id. The same browser then selected the visible row, clicked Delete/confirm, delete returned dealSuccessFlag=true, and PostgreSQL verified craft_basic_infos valid=false/version=1 while craft_tree_structures remained valid=true."
-      },
-      {
-        "scope": "wts-firework-deal-close",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260619095233_WTS_CHILD",
-        "evidence": "/tmp/adp-wts-firework-deal-close-20260619115852/evidence.json; /tmp/adp-wts-firework-close-page-retry-202606191207/evidence.json",
-        "summary": "Selecting processMethod=WTS_processing/close from fireworkDeal returned 200 and PostgreSQL advanced the pending task from execution to fireworkClose TaskEvent_0r1w2fv with process_method=WTS_processing/close/version=2."
-      },
-      {
-        "scope": "wts-firework-close-effect",
-        "status": "SUPERSEDED_BY_PASS",
-        "marker": "ADP_E2E_20260619122441_WTS_CLOSE_ACCEPT",
-        "evidence": "/tmp/adp-wts-firework-close-effect-20260619122019/evidence.json; /tmp/adp-wts-firework-close-effect-rerun-20260619122441/evidence.json",
-        "summary": "Historical fireworkClose failure kept for traceability: it exposed PostgreSQL text ~~ bigint compatibility and a null child-ticket lookup. The current runtime patch covers WorkTicket2PermitService fallback, WorkTicketEvent null-safe close handling, and AutoNodeEvent PLS event isolation. The full normal-close flow is superseded by marker ADP_E2E_20260619142344_WTS_FIREWORK with status=99/job_status=WTS_jobStatus/normalClose/pending=0."
-      },
-      {
-        "scope": "wts-firework-stop-effect",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260619144549_WTS_FIREWORK_STOP",
-        "evidence": "/tmp/adp-wts-firework-persistence-20260619144549/wts-firework-persistence-results.json",
-        "summary": "Public browser E2E used processMethod=WTS_processing/stop and completed production/work-unit safety stop confirmations. PostgreSQL on 100.99.133.43 verified wts_work_tickets id=6599277438911040 status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, and active pending count=0."
-      },
-      {
-        "scope": "systemconfig-catalog-value-persistence",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260620005540_SCFG",
-        "evidence": "metadata/systemconfig-persistence-acceptance.json",
-        "summary": "Real browser route /systemconfig/#/sysconfig loaded with navigation=200; POST open-api created catalog/config/version rows, PUT inter-api updated widget_value, module read returned the updated value, and DELETE open-api removed catalog/config/version rows in PostgreSQL."
-      },
-      {
-        "scope": "organization-current-address-crud",
-        "status": "PASS",
-        "baseUrl": "http://222.88.185.146:18080",
-        "sshHost": "100.99.133.43",
-        "markers": {
-          "department": "ADP_E2E_20260620061140_ORGDEP",
-          "group": "ADP_E2E_20260620063543_GRP",
-          "position": "ADP_E2E_20260620063543_POS",
-          "company": "ADP_E2E_20260620063543_COM",
-          "person": "ADP_E2E_20260620063832_PER",
-          "personUser": "ADP_E2E_20260620063832_PUSR"
-        },
-        "reports": [
-          "/tmp/adp-organization-persistence-1009913343-current.json",
-          "/tmp/adp-organization-group-persistence-1009913343-current.json",
-          "/tmp/adp-organization-position-persistence-1009913343-current.json",
-          "/tmp/adp-organization-company-persistence-1009913343-current.json",
-          "/tmp/adp-organization-person-persistence-1009913343-current.json",
-          "/tmp/adp-organization-person-user-persistence-1009913343-current.json"
-        ],
-        "tables": [
-          "org_department",
-          "org_group",
-          "org_position",
-          "org_position_mnecode",
-          "org_company",
-          "org_company_mnecode",
-          "org_person",
-          "org_person_position",
-          "org_person_department",
-          "org_person_company",
-          "org_person_mnecode",
-          "auth_user"
-        ],
-        "summary": "Current-address organization CRUD revalidation passed for department, group, position, company, person, and person createUser=true. Browser route navigation=200 and no console/page/request/visible errors; PostgreSQL on 100.99.133.43 verified create/update/delete, mnecode cleanup, relation invalidation, auth_user binding/update synchronization, and soft delete."
-      },
-      {
-        "scope": "current-address-test-environment",
-        "status": "PASS",
-        "baseUrl": "http://100.99.133.43:18080",
-        "sshHost": "100.99.133.43",
-        "evidence": "metadata/test-environment-smoke.json",
-        "summary": "HTTP 18080, SSH, and expected Nginx/Gateway/PostgreSQL/Nacos/Keycloak/MinIO containers passed 9/9."
-      },
-      {
-        "scope": "platform-api-home-organization-rbac-menu-current-address",
-        "status": "PASS_WITH_DIRECT_BROWSER_INGRESS_RISK",
-        "baseUrl": "http://100.99.133.43:18080",
-        "browserBaseUrl": "http://222.88.185.146:18080",
-        "evidence": "/tmp/adp-platform-validation-1009913343-20260621-public-browser; /tmp/adp-rbac-authority-smoke-1009913343-20260621.json; /tmp/adp-menu-smoke-1009913343-20260621-public-browser/menu-smoke-results.json",
-        "summary": "API 16/16, home/todo page, organization department smoke, RBAC authority 9/9, and menu sample 20/20 passed. Direct browser ingress http://100.99.133.43:18080 still timed out on home domcontentloaded, so browser evidence used the public ingress while API/DB stayed on 100.99.133.43."
-      },
-      {
-        "scope": "runtime-dependencies-current-address",
-        "status": "PASS",
-        "evidence": "metadata/postgres-runtime-smoke.json; metadata/nacos-config-drift-smoke.json; metadata/keycloak-jwt-runtime-smoke.json; metadata/minio-runtime-smoke.json",
-        "summary": "PostgreSQL runtime 8/8 with 1474 public tables and 150 views; Nacos config drift critical checks 20/20 with 0 Oracle residue files; Keycloak/JWT 19/19; MinIO runtime 8/8."
-      },
-      {
-        "scope": "business-pages-current-address",
-        "status": "PASS_WITH_DIRECT_BROWSER_INGRESS_RISK",
-        "baseUrl": "http://222.88.185.146:18080",
-        "sshHost": "100.99.133.43",
-        "evidence": "/tmp/adp-business-page-smoke-1009913343-20260621-public-browser/business-page-smoke-results.json; /tmp/adp-business-module-smoke-20260620174005.json",
-        "summary": "Business module API/layout smoke passed 53/53 and browser page smoke passed 53/53 across BaseSet, LIMS/QCS, WOM, RM, craftGraph, EAM, Measure, OEE, Overhaul, WTS, WAPS and related modules. Direct 100.99 browser run failed early due slow/static ingress and is recorded as ingress risk."
-      },
-      {
-        "scope": "teaminfo-scheduleplan-current-address",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260620174940_TEAMINFO_SCHEDULE_PLAN",
-        "baseUrl": "http://222.88.185.146:18080",
-        "sshHost": "100.99.133.43",
-        "evidence": "/tmp/adp-teaminfo-scheduleplan-persistence-20260621-current.json",
-        "summary": "Real browser/API save returned PASS and PostgreSQL verified team_schedule_plans id=757361058804992 valid=true/status=99/schedule_rule=6590000000001004."
-      },
-      {
-        "scope": "wom-start-current-address",
-        "status": "PASS",
-        "marker": "ADP_E2E_20260620180136_WOMSTART",
-        "baseUrl": "http://222.88.185.146:18080",
-        "sshHost": "100.99.133.43",
-        "evidence": "/tmp/adp-wom-start-persistence-20260621-rerun4.json",
-        "summary": "Real WOM makeTaskList button triggered updateTaskState HTTP 200/dealSuccessFlag=true/exeState=WOM_runState/runing. PostgreSQL verified wom_produce_tasks id=9000004784966217 running, wom_wait_put_records done with proc_report_id=757363979793664, plus wom_proc_reports and wom_produce_task_exelog rows."
-      },
-      {
-        "scope": "business-dependency-readiness-current-address",
-        "status": "BLOCKED",
-        "evidence": "metadata/business-dependency-readiness-smoke.json",
-        "summary": "material/WMS/warehouse/inventory and ProcessAnalysis dependencies remain missing: Nacos healthyHostCount=0 and authenticated probes return tenant-service 503. This is module/package backlog, not a PostgreSQL table patch."
-      }
-    ],
-    "wtsFireworkChildSubmit": {
-      "marker": "ADP_E2E_20260619095233_WTS_CHILD",
-      "evidence": "/tmp/adp-wts-child-submit-20260619095233/wts-child-submit-result.json",
-      "databaseHost": "100.99.133.43",
-      "browserBaseUrl": "http://222.88.185.146:18080"
-    },
-    "womProcessUnit": {
-      "generatedAt": "2026-06-19T17:50:31.680Z",
-      "marker": "ADP_E2E_20260619174817_WOM_ACTIVE",
-      "evidencePath": "/tmp/adp-wom-process-unit-persistence-current.json",
-      "status": "PASS"
-    },
-    "organizationDepartment": {
-      "generatedAt": "2026-06-20T06:12:37.950Z",
-      "marker": "ADP_E2E_20260620061140_ORGDEP",
-      "baseUrl": "http://222.88.185.146:18080",
-      "sshHost": "100.99.133.43",
-      "report": "/tmp/adp-organization-persistence-1009913343-current.json",
-      "status": "PASS"
-    },
-    "organizationCurrentAddressCrud": {
-      "generatedAt": "2026-06-20T06:45:41.873Z",
+    "generatedAt": "2026-07-10T07:25:00Z",
+    "materialWms": {
       "status": "PASS",
-      "baseUrl": "http://222.88.185.146:18080",
-      "sshHost": "100.99.133.43",
-      "markers": {
-        "department": "ADP_E2E_20260620061140_ORGDEP",
-        "group": "ADP_E2E_20260620063543_GRP",
-        "position": "ADP_E2E_20260620063543_POS",
-        "company": "ADP_E2E_20260620063543_COM",
-        "person": "ADP_E2E_20260620063832_PER",
-        "personUser": "ADP_E2E_20260620063832_PUSR"
-      },
-      "reports": [
-        "/tmp/adp-organization-persistence-1009913343-current.json",
-        "/tmp/adp-organization-group-persistence-1009913343-current.json",
-        "/tmp/adp-organization-position-persistence-1009913343-current.json",
-        "/tmp/adp-organization-company-persistence-1009913343-current.json",
-        "/tmp/adp-organization-person-persistence-1009913343-current.json",
-        "/tmp/adp-organization-person-user-persistence-1009913343-current.json"
-      ]
+      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+      "evidence": "metadata/material-wms-persistence-acceptance.json"
     }
   },
   "summary": {
-    "testedFeatures": 125,
-    "pass": 121,
+    "testedFeatures": 126,
+    "pass": 122,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 1
@@ -1216,47 +946,26 @@
       "issues": []
     },
     {
-      "module": "生产模块-WOM",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit; /makeTaskSubmitView; /makeTaskView; /makeTaskBatchView; /easyTaskOperateView; /msService/WOM/rejectMaterilal/rejectMaterial/materiaRejectList; /prePareRejectList; /batchRejectList; /prePareRejectEdit; /msService/WOM/rejectMaterilal/rejctMatalPart/batchRejectPrtList",
-      "operation": "不良数、完工入库/库存等剩余生产写动作落库验收",
-      "api": "No dedicated bad-quantity endpoint recovered; material-service inventory/stock-in endpoints remain blocked. WOM reject-material prePareReject/materiaReject/batchReject, checkoutBill/generate quality activity, and QCS treatment paths are accepted.",
-      "method": "MIXED",
+      "module": "生产模块-WOM/QCS",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
+      "operation": "独立不良数量登记产品范围验收",
+      "api": "No dedicated bad-quantity endpoint recovered; current accepted product behavior uses QCS inspection quantity/result, unqualified treatment and WOM quality state backfill.",
+      "method": "NOT_RECOVERED",
       "requiresPersistence": true,
-      "backendEntry": "Accepted paths include createManuInspect, QCS report generation/result/effective backfill, unqualified treatment creation/effective, output/input/process/active/easy activity report-work, reject-material prePareReject/materiaReject/batchReject main flows, inspect release, checkoutBill, QCS degradedRelease/return decisioning, and 2026-06-19 direct syncInspectReport qualified/unqualified WOM backfill. Remaining blockers are product-confirmed bad-quantity registration and material-service inventory/stock-in write-back. Source trace shows WOMQCSServiceImpl.checkResultToWms calls service material /material/foreign/foreign/checkProdResult, while WOMPutInMaterialServiceImpl and WOMMatConsumRecodServiceImpl call service material /public/material/produceOutSingle/produceOutSing/generateProduceOutSing. 2026-06-20 bad-quantity audit confirmed the recovered QCS/WOM model has no standalone bad-quantity source endpoint or PostgreSQL target column; see docs/backend-table-audit/wom-bad-quantity-analysis.md and metadata/wom-bad-quantity-analysis.json. 2026-06-20 material dependency audit on 100.99.133.43 confirmed serviceName=material is absent from containers/Nacos and endpoints return 503; see docs/backend-table-audit/material-service-dependency-analysis.md and metadata/material-service-dependency-analysis.json.",
+      "backendEntry": "No standalone bad-quantity controller/service/DAO path was recovered. Material WMS completion inbound and inventory write-back are accepted in a separate PASS item.",
       "tables": [
-        "public.wom_task_processes",
-        "public.wom_task_actives",
-        "public.wom_task_materials",
-        "public.wom_proc_reports",
-        "public.wom_putin_details",
-        "public.qcs_inspects",
-        "public.qcs_inspects_di",
-        "public.qcs_inspect_reports",
-        "public.qcs_report_coms",
-        "public.wom_reject_materials",
-        "public.wom_reject_materials_di",
-        "public.wom_reject_materials_sv",
-        "public.wom_rejct_matal_parts",
-        "public.wom_bat_materil_parts",
-        "public.wom_batch_materils",
-        "public.wom_batch_mat_needs",
-        "public.wom_wait_put_records",
-        "public.baseset_batch_infos",
-        "public.wom_produce_tasks",
-        "public.wom_produce_task_exelog",
-        "material service target tables (missing in current environment)",
-        "inventory tables",
-        "no dedicated bad quantity table/column found in current QCS/WOM schema audit"
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_un_qlf_deals",
+        "wom_produce_tasks",
+        "no dedicated numeric bad-quantity table/column recovered"
       ],
-      "marker": "ADP_E2E_20260619_QCSM2; ADP_E2E_20260619_QCSBAD",
-      "verificationSql": "QCS direct WOM backfill proof: select id, check_state, check_result, check_result_id from public.wom_produce_tasks where id in (8990084171374044,8990084191051167); select id, check_state, check_result from public.wom_wait_put_records where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id from public.wom_produce_task_exelog where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id, is_available, active_batch_state_id from public.baseset_batch_infos where batch_num in ('ADP_E2E_20260619_QCSM2_BATCH','ADP_E2E_20260619_QCSBAD_BATCH'); Material blocker proof: Nacos prod group serviceName=material returned hosts=[], authenticated POST /msService/material/foreign/foreign/checkProdResult and /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing returned 503 can not find any tenant app service; BasicMs/BaseSet/LIMSMaterial alternatives returned 404. Detailed proof: metadata/material-service-dependency-analysis.json. Bad quantity audit SQL returned only qcs_inspect_reports.un_qlf_deal_flag, qcs_table_types.un_qlf_code_rule/text_backup, and qcs_un_qlf_deals.un_qlf_reason for bad/defect/scrap/unqlf column search; no numeric bad quantity target was found.",
+      "marker": "",
+      "verificationSql": "See metadata/wom-bad-quantity-analysis.json for the PostgreSQL information_schema audit; it found result/treatment fields but no standalone numeric bad-quantity target.",
       "status": "BLOCKED",
-      "evidence": "WOM createManuInspect, QCS report generation, QCS report edit rendering/result save, qualified and unqualified QCS report effective/WOM backfill, automatic unqualified treatment creation/effective, QCS inspect release save/submit, WOM prePareReject draft save/delete/effective, WOM materiaReject receive/effective inventory deduction, WOM batchReject effective batching write-back, and WOM checkoutBill quality-active inspect creation and QCS degradedRelease treatment decisioning are now accepted separately with real frontend-equivalent endpoint calls and PostgreSQL proof. WOM return/reject pages materiaRejectList, prePareRejectList, batchRejectList, and batchRejectPrtList passed real browser smoke through http://222.88.185.146:18080 with no visible, console, page, request, or failed-response errors. checkoutBill evidence: /tmp/adp-wom-checkoutbill-persistence-20260618200829/wom-checkoutbill-persistence-results.json. materiaReject inventory evidence: /tmp/adp-wom-reject-material-persistence-20260618185904/wom-reject-material-persistence-results.json. batchReject write-back evidence: /tmp/adp-wom-reject-material-persistence-20260618192824/wom-reject-material-persistence-results.json. QCS degradedRelease evidence: /tmp/adp-qcs-dealway-persistence-ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE/evidence.json. Reject-material main flows are now accepted: prePareReject effective, materiaReject receive/effective inventory deduction, and batchReject batching return-number write-back. Remaining blocked actions are bad quantity and material-service inventory/stock-in paths. 2026-06-19 new-address proof: host 100.99.133.43 is the same v6-2288H-V6 test host; DB/log verification used SSH v6@100.99.133.43 and browser actions used the same environment via http://222.88.185.146:18080 because direct 100.99.133.43:18080 timed out loading the legacy SPA bundle. Marker ADP_E2E_20260619_QCSM2: real frontend createManuInspect PASS, then authenticated POST /msService/WOM/quality/quality/syncInspectReport with reportResult=true returned 200/needRejectReport=0; PostgreSQL verified WOM task/exelog/wait 已检/合格 and baseset_batch_infos qualified/is_available=true/active_batch_state_id=11000. Marker ADP_E2E_20260619_QCSBAD: same flow with reportResult=false returned 200/needRejectReport=1; PostgreSQL verified WOM task/exelog/wait 已检/不合格 and baseset_batch_infos unqualified/is_available=false/active_batch_state_id=11003. Inventory/stock-in remains BLOCKED because material service is absent: Nacos prod group material hosts=[], authenticated material checkProdResult and generateProduceOutSing requests both returned 503 can not find any tenant app service; BasicMs/BaseSet/LIMSMaterial trial paths returned 404. 2026-06-20 audit docs/backend-table-audit/wom-bad-quantity-analysis.md confirmed there is no standalone bad-quantity entry in the recovered package. Existing PASS evidence covers QCS inspection quantity, result judgement, unqualified treatment, WOM state/backfill, and the three main WOM reject-material flows; inventory/stock-in remains blocked by missing material service.",
+      "evidence": "Current QCS/WOM result and treatment flows are accepted. This item is only a product-scope decision for a separate bad-quantity feature. Material WMS is not part of this blocker. 专项分析：docs/backend-table-audit/wom-bad-quantity-analysis.md。",
       "issues": [
-        "No dedicated bad-quantity frontend route, runtime button, source endpoint, or PostgreSQL target column was recovered in current QCS/WOM packages.",
-        "If product documentation later identifies a standalone bad-quantity feature, add its route/field/table mapping before marker acceptance.",
-        "Inventory/stock-in write-back is blocked by the missing material tenant service, not by the WOM/QCS PostgreSQL state tables.",
-        "Reject-material prePareReject, materiaReject, and batchReject main flows are accepted separately and should not remain counted as blockers in this aggregate item."
+        "A product decision or later package must define the standalone bad-quantity field, route and PostgreSQL target before marker acceptance."
       ]
     },
     {
@@ -3002,6 +2711,27 @@
       "issues": [
         "This is test-environment WOM runtime rollback evidence, not production full-stack rollback evidence."
       ]
+    },
+    {
+      "module": "物料WMS完工入库",
+      "route": "/msService/material/wms",
+      "operation": "完工入库、幂等重试、质检释放、生产领料及清理回滚",
+      "api": "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle; POST /msService/material/foreign/foreign/checkProdResult; POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository -> PostgreSQL JDBC SQL",
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
+      ],
+      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+      "verificationSql": "SELECT json_build_object(\n    'documents', (SELECT count(*) FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'lines', (SELECT count(*) FROM wms_stock_document_lines WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'transactions', (SELECT count(*) FROM wms_inventory_transactions WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'qualityResults', (SELECT count(*) FROM wms_quality_results WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'stockRows', (SELECT count(*) FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP'),\n    'onHand', COALESCE((SELECT on_hand_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'available', COALESCE((SELECT available_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'hold', COALESCE((SELECT hold_quantity FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' LIMIT 1), 0),\n    'inboundQuality', COALESCE((SELECT quality_status FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710074612_MATERIAL_WMS_COMP' AND document_type='COMPLETION_INBOUND' LIMIT 1), '')\n);",
+      "status": "PASS",
+      "evidence": "metadata/material-wms-persistence-acceptance.json; metadata/material-wms-completion-inbound.png. Inbound 10 held, qualified release 10 available, issue 3 left 7, idempotent retry added no rows, cleanup returned marker rows to zero.",
+      "issues": []
     }
   ],
   "evidence": [

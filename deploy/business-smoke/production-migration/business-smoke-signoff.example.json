@@ -227,14 +227,13 @@
     {
       "id": "BUS-SIGNOFF-001",
       "severity": "BLOCKER",
-      "description": "Quality judgement, defect quantity, final stock-in and inventory write-back actions still lack complete marker PostgreSQL before/after evidence.",
+      "description": "Standalone bad-quantity scope, ProcessAnalysis traceability, external Batch editing and export gaps still prevent production signoff; material/WMS completion inbound is accepted.",
       "source": "metadata/production-module-blockers.json",
       "blockerCaseIds": [
         "PROD-010",
         "PROD-019",
         "PROD-020",
         "PROD-021",
-        "PROD-022",
         "PROD-023"
       ],
       "owner": "production-business-owner",
@@ -254,7 +253,6 @@
         "PROD-019",
         "PROD-020",
         "PROD-021",
-        "PROD-022",
         "PROD-023"
       ],
       "owner": "production-business-owner",

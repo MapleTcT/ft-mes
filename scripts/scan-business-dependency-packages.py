@@ -19,6 +19,7 @@ from typing import Any, Iterable
 ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_ROOTS = [
+    str(ROOT / "backend/source-modules"),
     "/Users/zhangchu/Documents/MES包",
     "/Users/zhangchu/Downloads/ADP/bap-server/base-Server",
     "/Users/zhangchu/Downloads/ADP/bap-server/config",
@@ -109,10 +110,12 @@ DEPENDENCIES = {
         "requiredFor": ["PROD-019", "PROD-021", "PROD-022"],
         "targetTerms": [
             "checkProdResult",
+            "generateProductInSingle",
             "generateProduceOutSing",
             "produceOutSingle",
             "material/foreign/foreign",
             "produceOutSingle/produceOutSing",
+            "produceInSingles/produceInSingl",
         ],
         "moduleTerms": ["serviceName=material", "service-name=material", "com/supcon/orchid/material"],
         "knownAdjacentTerms": [

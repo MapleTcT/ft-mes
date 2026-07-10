@@ -9,14 +9,14 @@ It is a no-cutover control surface, not a production approval.
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-10T04:01:20+00:00` |
-| Repo Commit | `93cf18ca13f08bf71aa4c2a89aeef985eaf22d52` |
+| Generated At | `2026-07-10T07:36:47+00:00` |
+| Repo Commit | `d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab` |
 | Database | `PostgreSQL` |
 | Status | `NOT_READY_FOR_PRODUCTION_CUTOVER` |
 | Gates | `9` |
 | Ready / Planned / Blocked / Not Started | `0 / 8 / 1 / 0` |
-| Production Blockers | `6` |
-| Production Backlog Items | `9` |
+| Production Blockers | `5` |
+| Production Backlog Items | `8` |
 
 ## Release Rule
 
@@ -47,10 +47,10 @@ Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_
 | `nacosConfigSmoke` | `metadata/nacos-config-drift-smoke.json` | `PASS` | criticalChecks=20, criticalFail=0, criticalPass=20, dataIds=44, drifted=27, exactMatches=17, expectedServices=18, failedServices=0, healthyServices=18, missingLocal=0, missingRemote=0, nacosServiceCount=91, oracleResidueFiles=0, remoteFetched=44, status=PASS |
 | `keycloakJwtSmoke` | `metadata/keycloak-jwt-runtime-smoke.json` | `PASS` | checks=19, clientScopes=10, expectedClients=2, fail=0, gatewayMenuTargets=374, keycloakPublicKeySha256Prefix=9e9cea84527f841b, nacosHealthyKeycloakHosts=2, nacosJwtSha256Prefix=9e9cea84527f841b, pass=19, status=PASS, suposMappers=17 |
 | `minioRuntimeSmoke` | `metadata/minio-runtime-smoke.json` | `PASS` | bucketCount=2, bucketsWithObjects=2, fail=0, inspectedBucketCount=2, pass=8, status=PASS, totalChecks=8, totalObjects=31, totalSizeBytes=104285 |
-| `productionBlockers` | `metadata/production-module-blockers.json` | `BLOCKED` | blockedCases=6, blockers=6 |
-| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=9, failBacklog=0, totalItems=9 |
-| `businessDependencyReadiness` | `metadata/business-dependency-readiness-smoke.json` | `BLOCKED` | baseUrl=http://100.99.133.43:18080, blocked=2, dependencies=2, ready=0, sshHost=100.99.133.43 |
-| `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `BLOCKED_NO_IMPLEMENTATION_CANDIDATE` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=2, candidateDependencies=0, filesVisited=58889, nestedArchivesScanned=2139 |
+| `productionBlockers` | `metadata/production-module-blockers.json` | `BLOCKED` | blockedCases=5, blockers=5 |
+| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=8, failBacklog=0, totalItems=8 |
+| `businessDependencyReadiness` | `metadata/business-dependency-readiness-smoke.json` | `BLOCKED` | baseUrl=http://100.99.133.43:18080, blocked=1, dependencies=2, ready=0, sshHost=100.99.133.43 |
+| `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `CANDIDATE_FOUND` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=1, candidateDependencies=1, filesVisited=58916, nestedArchivesScanned=2139 |
 | `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `BLOCKED` | actionRequired=0, blocked=5, pagePass=6, ready=1, runtimeExportActions=1, targets=6, verifiedDataExports=1, visibleExportActions=1 |
 
 ## Verification

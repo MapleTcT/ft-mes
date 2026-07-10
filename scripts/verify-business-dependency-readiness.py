@@ -32,7 +32,7 @@ REQUIRED_DEPENDENCIES = {
             "inventory",
             "Inventory",
         },
-        "endpoints": {"checkProdResult", "generateProduceOutSing"},
+        "endpoints": {"generateProductInSingle", "checkProdResult", "generateProduceOutSing"},
         "required_database_keys": {"materialLikeTableCount", "materialLikeTables"},
     },
     "process-analysis": {

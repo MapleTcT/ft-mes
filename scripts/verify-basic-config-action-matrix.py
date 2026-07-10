@@ -123,8 +123,8 @@ CONTROLLED_RUNTIME_CONFIG_CONTRACTS = {
     },
     "builtin-baseset-runtime-config": {
         "required_before": {"business-owner-approval", "dedicated-marker", "rollback-plan", "wom-qcs-regression"},
-        "required_pass_cases": {"PROD-001", "PROD-002", "PROD-003", "PROD-004", "PROD-031", "PROD-035", "PROD-036"},
-        "blocked_impact_cases": {"PROD-022"},
+        "required_pass_cases": {"PROD-001", "PROD-002", "PROD-003", "PROD-004", "PROD-022", "PROD-031", "PROD-035", "PROD-036"},
+        "blocked_impact_cases": set(),
         "required_tables": {"systemconfig_config_info", "systemconfig_config_version"},
         "minimum_fragments": {"ADP_E2E", "PostgreSQL", "BaseSet", "WOM", "QCS", "rollback"},
     },

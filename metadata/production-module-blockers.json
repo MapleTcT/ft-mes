@@ -1,40 +1,40 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:55:34Z",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "module": "production",
   "sourceMatrix": "metadata/production-module-test-cases.json",
   "summary": {
-    "blockedCases": 6,
-    "blockers": 6,
+    "blockedCases": 5,
+    "blockers": 5,
     "externalClientRequired": 1,
-    "missingServicePackage": 2,
-    "productScopeConfirmation": 0,
-    "compositeServiceAndScope": 2,
+    "missingServicePackage": 1,
+    "productScopeConfirmation": 2,
+    "compositeServiceAndScope": 0,
     "missingExportImplementation": 1
   },
   "latestEvidence": {
     "lastRemoteRecheckAt": "2026-06-22T11:24:47.554Z",
-    "businessDependencyLastRecheckAt": "2026-07-10T03:55:34.526Z",
-    "businessDependencyReadinessGeneratedAt": "2026-07-10T03:55:34.526Z",
+    "businessDependencyLastRecheckAt": "2026-07-10T07:16:11.006Z",
+    "businessDependencyReadinessGeneratedAt": "2026-07-10T07:16:11.006Z",
     "businessDependencyReadinessStatus": "BLOCKED",
     "businessDependencyReady": 0,
-    "businessDependencyBlocked": 2,
-    "businessPackageScanGeneratedAt": "2026-06-20T16:05:25Z",
-    "businessPackageScanStatus": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
-    "businessPackageScanCandidateDependencies": 0,
+    "businessDependencyBlocked": 1,
+    "businessPackageScanGeneratedAt": "2026-07-10T07:16:37Z",
+    "businessPackageScanStatus": "CANDIDATE_FOUND",
+    "businessPackageScanCandidateDependencies": 1,
     "productionExportReadinessGeneratedAt": "2026-06-22T11:24:47.554Z",
     "productionExportReadinessStatus": "BLOCKED",
     "productionExportVerifiedDataExports": 1,
     "productionExportPagePass": 6,
-    "coreFlowRecheckAt": "2026-07-10T03:55:34Z",
+    "coreFlowRecheckAt": "2026-07-10T07:25:00Z",
     "coreFlowEvidence": "metadata/core-flow-acceptance-20260710.json",
     "coreFlowRuntimeRollbackEvidence": "metadata/core-flow-runtime-rollback-rehearsal.json",
     "coreFlowRuntimeRollbackStatus": "PASS",
-    "coreFlowPass": 11,
-    "coreFlowBlocked": 2,
-    "materialHealthyHosts": 0,
+    "coreFlowPass": 12,
+    "coreFlowBlocked": 1,
+    "materialHealthyHosts": 1,
     "processAnalysisHealthyHosts": 0
   },
   "blockers": [
@@ -70,40 +70,33 @@
     },
     {
       "caseId": "PROD-019",
-      "title": "QCS 不良数和库存/入库相关回写",
+      "title": "独立不良数量登记产品范围确认",
       "status": "BLOCKED",
-      "category": "composite-service-and-scope",
-      "blockerCategory": "composite-service-and-scope",
-      "dependency": "material service package plus product confirmation for any standalone bad-quantity entry",
+      "category": "product-scope-confirmation",
+      "blockerCategory": "product-scope-confirmation",
+      "dependency": "product decision or later business package defining bad-quantity field/route/table",
       "currentEvidenceRefs": [
         "metadata/production-module-test-cases.json",
         "docs/production-module-functional-test-cases.md",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md",
         "metadata/wom-bad-quantity-analysis.json",
-        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md",
+        "metadata/material-wms-persistence-acceptance.json"
       ],
       "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: after material service deployment, run checkProdResult/generateProduceOutSing with marker inventory data and query material stock-in/inventory tables"
+        "make persistence-acceptance-check",
+        "manual: confirm standalone bad-quantity scope and marker-test only if it is required"
       ],
       "passCriteria": [
-        "material service has at least one healthy Nacos prod instance.",
-        "Authenticated material checkProdResult and generateProduceOutSing endpoints return HTTP 2xx and no longer return tenant-service 503.",
-        "A marker flow proves inventory/stock-in target table writes in PostgreSQL.",
-        "If standalone bad quantity is required, a product package or manual identifies the field, route, and target table before acceptance."
+        "Confirm whether standalone bad quantity is a supported product feature.",
+        "If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker.",
+        "If unsupported, record the scope decision and close without inventing data structures."
       ],
       "nextActions": [
-        "Deploy the material warehouse/inventory service package or map the correct serviceName.",
-        "Re-run business dependency readiness smoke.",
-        "Only reopen standalone bad-quantity acceptance if a later business package or product manual supplies the missing route/table."
+        "Obtain a product decision for standalone bad quantity."
       ],
       "nonSolutions": [
-        "Do not treat accepted QCS qualified/unqualified WOM state backfill as inventory stock-in proof.",
-        "Do not invent a bad-quantity database column when the recovered package has no route/table mapping."
+        "Do not infer a standalone bad-quantity feature from QCS result fields.",
+        "Do not count the accepted material WMS flow as blocked."
       ]
     },
     {
@@ -144,75 +137,33 @@
     },
     {
       "caseId": "PROD-021",
-      "title": "完整工序报工、产量、不良数登记",
+      "title": "完整报工仅剩独立不良数量范围确认",
       "status": "BLOCKED",
-      "category": "composite-service-and-scope",
-      "blockerCategory": "composite-service-and-scope",
-      "dependency": "material service package plus product confirmation for standalone bad-quantity entry",
+      "category": "product-scope-confirmation",
+      "blockerCategory": "product-scope-confirmation",
+      "dependency": "product decision or later business package defining bad-quantity field/route/table",
       "currentEvidenceRefs": [
         "metadata/production-module-test-cases.json",
         "docs/production-module-functional-test-cases.md",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md",
         "metadata/wom-bad-quantity-analysis.json",
-        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md",
+        "metadata/material-wms-persistence-acceptance.json"
       ],
       "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: rerun accepted WOM report-work marker flows, then add inventory/material marker acceptance once material service is available"
+        "make persistence-acceptance-check",
+        "manual: confirm standalone bad-quantity scope and marker-test only if it is required"
       ],
       "passCriteria": [
-        "Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity, and check activity.",
-        "The material/inventory service path is available and marker stock-in or inventory write-back is proven.",
-        "If product requires standalone bad quantity, the dedicated field/route/table is recovered and marker-tested."
+        "Confirm whether standalone bad quantity is a supported product feature.",
+        "If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker.",
+        "If unsupported, record the scope decision and close without inventing data structures."
       ],
       "nextActions": [
-        "Keep existing report-work PASS evidence as regression coverage.",
-        "Complete material service acceptance for the inventory boundary.",
-        "Only add a standalone bad-quantity case after product/package evidence exists."
+        "Obtain a product decision for standalone bad quantity."
       ],
       "nonSolutions": [
-        "Do not infer inventory write-back from wom_check_records or QCS state backfill.",
-        "Do not force wom_mat_consum_recods rows with a database trigger for the current manual-putin path."
-      ]
-    },
-    {
-      "caseId": "PROD-022",
-      "title": "完工入库或库存回写",
-      "status": "BLOCKED",
-      "category": "missing-service-package",
-      "blockerCategory": "missing-service-package",
-      "dependency": "material warehouse/inventory service package and target stock-in table map",
-      "currentEvidenceRefs": [
-        "metadata/production-module-test-cases.json",
-        "docs/production-module-functional-test-cases.md",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md"
-      ],
-      "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: after material service deployment, run checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables"
-      ],
-      "passCriteria": [
-        "serviceName=material or the confirmed warehouse service has healthy Nacos prod instances.",
-        "checkProdResult and generateProduceOutSing return HTTP 2xx and no longer return 503.",
-        "Controller/service/DAO/SQL path is traced.",
-        "PostgreSQL target inventory or stock-in tables show marker writes."
-      ],
-      "nextActions": [
-        "Deploy and register the material warehouse/inventory package.",
-        "Build the material-service table map.",
-        "Run marker stock-in/inventory acceptance before changing PROD-022 to PASS."
-      ],
-      "nonSolutions": [
-        "Do not treat BaseSet material master data or WOM internal material tables as the material-service stock-in target.",
-        "Do not mark PASS from HTTP 200 alone without database write proof."
+        "Do not infer a standalone bad-quantity feature from QCS result fields.",
+        "Do not count the accepted material WMS flow as blocked."
       ]
     },
     {

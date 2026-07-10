@@ -382,7 +382,7 @@
         "BaseSet.isEnable 已完成专用受控变更证据：真实 /systemconfig/#/sysconfig 页面上下文把值从 true 临时切到 false，通过详情 API、按模块读取 API 和 PostgreSQL before/after 查到 false，然后立即回滚为 true 并再次查库确认。",
         "回滚后 WOM 制造指令单开始已复跑 PASS，marker ADP_E2E_20260621180558_WOMSTART 写入 wom_produce_tasks、wom_wait_put_records、wom_proc_reports 和 wom_produce_task_exelog。",
         "回滚后 WOM 制造请检/QCS 请检单生成已复跑 PASS，marker ADP_E2E_20260621180914_WOM_MANU_INSPECT 写入 WOM 任务/待办/执行日志、BaseSet 批次待检状态和 qcs_inspects/qcs_inspect_stds/qcs_inspect_coms。",
-        "BaseSet 仍属于高风险运行配置；后续任何新配置项、物料/批次/库存边界或 PROD-022 material 入库链路仍必须专用 marker、回滚和业务回归。"
+        "BaseSet 仍属于高风险运行配置；后续任何新配置项、物料/批次/库存边界以及 PROD-022 material 入库链路后续变更仍必须专用 marker、回滚和业务回归。"
       ],
       "acceptanceContract": {
         "targetActionId": "builtin-baseset-runtime-config",
@@ -392,13 +392,12 @@
           "PROD-002",
           "PROD-003",
           "PROD-004",
+          "PROD-022",
           "PROD-031",
           "PROD-035",
           "PROD-036"
         ],
-        "blockedImpactCaseIds": [
-          "PROD-022"
-        ],
+        "blockedImpactCaseIds": [],
         "requiredTables": [
           "systemconfig_config_info",
           "systemconfig_config_version"
@@ -433,7 +432,7 @@
           "Dedicated BaseSet.isEnable controlled config evidence exists for save/read/rollback with marker ADP_E2E_20260621180355_SCFG_BASESET_RUNTIME; the persisted typed value was false and rollback restored true.",
           "WOM start regression was rerun after rollback and passed with marker ADP_E2E_20260621180558_WOMSTART.",
           "WOM createManuInspect/QCS inspection generation regression was rerun after rollback and passed with marker ADP_E2E_20260621180914_WOM_MANU_INSPECT.",
-          "Material warehouse/inventory stock-in remains blocked as PROD-022 and is not closed by BaseSet.isEnable regression."
+          "Material warehouse/inventory stock-in is PASS as PROD-022 with separate WMS marker evidence and remains required regression coverage after BaseSet changes."
         ]
       }
     },

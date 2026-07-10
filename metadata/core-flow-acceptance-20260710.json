@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:53:00Z",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "target": {
     "host": "100.99.133.43",
@@ -10,10 +10,10 @@
   },
   "scope": "production-quality-core-flow",
   "overallStatus": "BLOCKED",
-  "statusReason": "EXTERNAL_PACKAGES",
+  "statusReason": "PROCESS_ANALYSIS_PACKAGE",
   "summary": {
-    "pass": 11,
-    "blocked": 2,
+    "pass": 12,
+    "blocked": 1,
     "fail": 0,
     "environmentSmoke": "9/9 PASS",
     "platformSmoke": "6/6 PASS",
@@ -33,7 +33,12 @@
         "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit?id={id}",
         "POST /msService/WOM/produceTask/produceTask/delete"
       ],
-      "tables": ["wom_produce_tasks", "wfm_task_pending", "wf_deal_info", "wf_transition"],
+      "tables": [
+        "wom_produce_tasks",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "wf_transition"
+      ],
       "result": "status 88 -> 99, pending cleared, 生效 deal persisted, valid true -> false rollback; workflowMetadataDrift=false",
       "cleanup": "application soft-delete rollback plus temporary BaseSet unit cleanup PASS",
       "artifact": "/tmp/adp-wom-manufacturing-order-metadata-sync-20260710.json"
@@ -49,7 +54,12 @@
         "GET /msService/WOM/produceTask/produceTask/findProcReportIdByTaskId",
         "GET /msService/WOM/procReport/procReport/outPutCommonTaskEdit"
       ],
-      "tables": ["wom_produce_tasks", "wom_wait_put_records", "wom_proc_reports", "wom_produce_task_exelog"],
+      "tables": [
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
       "result": "开始、保持、重启、结束弹窗、提前放料、请检及空选择守卫通过；无 raw i18n key、console error、network error 或 page error",
       "cleanup": "cleanup|0|0|0|0 PASS",
       "artifact": "/tmp/adp-wom-toolbar-row-after-static-sync-20260710.json",
@@ -88,7 +98,11 @@
       "operation": "完工报工产出明细",
       "status": "PASS",
       "marker": "ADP_E2E_20260710023819_WOMSTART_STOP_OUTPUT",
-      "tables": ["wom_output_details", "wom_mat_outpt_records", "wom_produce_tasks"],
+      "tables": [
+        "wom_output_details",
+        "wom_mat_outpt_records",
+        "wom_produce_tasks"
+      ],
       "cleanup": "PASS",
       "artifact": "/tmp/adp-wom-stop-output-persistence-acceptance.json"
     },
@@ -97,7 +111,12 @@
       "operation": "生产请检和质量活动生成检验单",
       "status": "PASS",
       "marker": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL",
-      "tables": ["qcs_inspects", "qcs_inspect_stds", "qcs_inspect_coms", "baseset_batch_infos"],
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_stds",
+        "qcs_inspect_coms",
+        "baseset_batch_infos"
+      ],
       "artifact": "/tmp/adp-wom-checkoutbill-persistence-acceptance.json",
       "cleanup": "retained as explicit audit fixture"
     },
@@ -106,7 +125,15 @@
       "operation": "QCS 合格报告生效并回写 WOM",
       "status": "PASS",
       "marker": "ADP_E2E_20260710024838_QCS_QUAL",
-      "tables": ["qcs_inspects", "qcs_inspect_reports", "qcs_report_coms", "wom_produce_tasks", "wom_wait_put_records", "wom_produce_task_exelog", "baseset_batch_infos"],
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
       "result": "报告 status=99/result=合格；WOM 已检/合格；批次 qualified/is_available=true",
       "cleanup": "cleanup|0|0|0|0|0|0|0 PASS",
       "artifact": "/tmp/adp-qcs-report-chain-qualified-cleanup-20260710.json"
@@ -116,7 +143,16 @@
       "operation": "QCS 不合格报告生效、WOM 回写及自动处理单",
       "status": "PASS",
       "marker": "ADP_E2E_20260710024957_QCS_UNQLF",
-      "tables": ["qcs_inspects", "qcs_inspect_reports", "qcs_report_coms", "qcs_un_qlf_deals", "wom_produce_tasks", "wom_wait_put_records", "wom_produce_task_exelog", "baseset_batch_infos"],
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
       "result": "报告 status=99/result=不合格；WOM Checked/Unqualified；批次 unqualified/is_available=false；自动处理单 status=88",
       "cleanup": "including pending and JBPM execution: cleanup|0|0|0|0|0|0|0 PASS",
       "artifact": "/tmp/adp-qcs-report-chain-unqualified-cleanup-20260710.json"
@@ -126,7 +162,12 @@
       "operation": "备料退料保存与应用删除",
       "status": "PASS",
       "marker": "ADP_E2E_20260710030059_WOM_REJECT_MATERIAL",
-      "tables": ["wom_reject_materials", "wom_reject_materials_di", "wom_reject_materials_sv", "wfm_task_pending"],
+      "tables": [
+        "wom_reject_materials",
+        "wom_reject_materials_di",
+        "wom_reject_materials_sv",
+        "wfm_task_pending"
+      ],
       "result": "save valid=true/pending=1; delete valid=false/pending=0",
       "cleanup": "application soft-delete retained as audit record",
       "artifact": "/tmp/adp-wom-reject-material-make-target-20260710.json"
@@ -156,13 +197,27 @@
       "runbook": "docs/production-migration/core-flow-runtime-rollback-rehearsal.md"
     },
     {
-      "id": "CORE-BLOCKER-001",
-      "operation": "完工入库和库存回写",
-      "status": "BLOCKED",
-      "dependency": "material/WMS service package",
-      "evidence": "Nacos aliases material/MATERIAL/wms/WMS/warehouse/inventory all have healthyHostCount=0; checkProdResult and generateProduceOutSing return tenant-service 503",
-      "artifact": "metadata/business-dependency-readiness-smoke.json",
-      "recheckedAt": "2026-07-10T03:55:34.526Z"
+      "id": "CORE-012",
+      "operation": "完工入库、质检释放和生产领料",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+      "route": "/msService/material/wms",
+      "apis": [
+        "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+      ],
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
+      ],
+      "result": "inbound onHand=10/hold=10; qualified release available=10/hold=0; issue 3 leaves onHand=7/available=7; idempotent retry unchanged; cleanup all marker rows=0",
+      "artifact": "metadata/material-wms-persistence-acceptance.json",
+      "screenshot": "metadata/material-wms-completion-inbound.png",
+      "runtimeJarSha256": "9095731dcd50cde45337ffa67ef36f2b31b791da869866d1a64712acb163b8c9"
     },
     {
       "id": "CORE-BLOCKER-002",

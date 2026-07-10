@@ -32,6 +32,12 @@ const dependencies = [
     decisiveServiceName: "material",
     endpoints: [
       {
+        name: "generateProductInSingle",
+        method: "POST",
+        path: "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+        data: {},
+      },
+      {
         name: "checkProdResult",
         method: "POST",
         path: "/msService/material/foreign/foreign/checkProdResult?srcId=1&checkResult=1",
@@ -44,9 +50,9 @@ const dependencies = [
         data: {},
       },
     ],
-    readyWhen: "serviceName=material has a healthy Nacos instance and marker inventory endpoints stop returning tenant-service 503.",
+    readyWhen: "serviceName=material has a healthy Nacos instance; all three compatibility endpoints stop returning tenant-service 503; marker acceptance proves WMS PostgreSQL writes.",
     nextAction:
-      "Deploy/register the warehouse/material service package, map target stock-in tables, then rerun marker inventory acceptance.",
+      "Run the material WMS marker persistence/browser acceptance and keep it as regression evidence.",
   },
   {
     id: "process-analysis",

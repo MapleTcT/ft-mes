@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:55:34Z",
-  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "generatedAt": "2026-07-10T07:25:00Z",
+  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
@@ -78,12 +78,12 @@
   },
   "summary": {
     "totalCases": 43,
-    "pass": 37,
+    "pass": 38,
     "fail": 0,
-    "blocked": 6,
+    "blocked": 5,
     "notRun": 0,
     "requiresPersistence": 31,
-    "routeSmokePass": 41
+    "routeSmokePass": 42
   },
   "requiredCoverageTags": [
     "master-data",
@@ -606,10 +606,10 @@
       "evidence": "The original list/query smoke remains PASS for materiaRejectList, prePareRejectList, batchRejectList, and batchRejectPrtList. Subsequent persistence acceptance already proved the main reject-material write flows on 100.99.133.43. prePareReject marker ADP_E2E_20260618175855_WOM_REJECT_MATERIAL saved and submitted with workFlowVar.outcomeMap SequenceFlow_1nu8kl7/生效; PostgreSQL verified wom_reject_materials id 756655464850688 moved to status=99, effect_time set, pending_count=0, DI outcome persisted, and JBPM history ended at end_xwzcjr1. materiaReject marker ADP_E2E_20260618185904_WOM_REJECT_MATERIAL saved, submitted to receive, and receive-effective submitted; PostgreSQL verified wom_reject_materials id 756670413997312 status=99, wom_rejct_matal_parts reject_num=2.000000, DI outcomes SequenceFlow_1ubtbie/提交 and SequenceFlow_0igvfiq/生效, and hm_factory_materias id 1781809163401314 availi_quantity changed from 10.00 to 8.00. batchReject marker ADP_E2E_20260618192824_WOM_REJECT_MATERIAL saved and submitted effective; PostgreSQL verified wom_reject_materials id 756677581907200 status=99, wom_rejct_matal_parts reject_num=2.000000, DI SequenceFlow_1dghow0/生效, and wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num changed from 0 to 2 with retirement_state WOM_retirementState/returned. Evidence files: /tmp/adp-wom-reject-material-persistence-20260618175855/wom-reject-material-persistence-results.json, /tmp/adp-wom-reject-material-persistence-20260618185904/wom-reject-material-persistence-results.json, /tmp/adp-wom-reject-material-persistence-20260618192824/wom-reject-material-persistence-results.json.",
       "issues": [
         "List pages still do not expose a visible create button in menu metadata; accepted proof uses the recovered edit routes in authenticated real browser/page context.",
-        "This PASS covers prePareReject, materiaReject, and batchReject main flows plus their PostgreSQL effects. Final material-service stock-in/inventory paths remain tracked separately under PROD-022.",
+        "This PASS covers prePareReject, materiaReject, and batchReject main flows plus their PostgreSQL effects. Final material-service stock-in/inventory path is PASS under PROD-022 and remains regression coverage.",
         "A submit payload without workFlowVar.outcomeMap can return HTTP 200 while leaving status=88; database verification remains mandatory."
       ],
-      "nextAction": "Keep material-service stock-in and final inventory ledger acceptance under PROD-022. If a later business package introduces additional reject variants beyond prePareReject/materiaReject/batchReject, add a dedicated marker case rather than reopening this accepted main-flow item.",
+      "nextAction": "Keep material-wms stock-in and inventory acceptance under PROD-022 as regression coverage. If a later business package introduces additional reject variants beyond prePareReject/materiaReject/batchReject, add a dedicated marker case rather than reopening this accepted main-flow item.",
       "coverageTags": [
         "return-material",
         "material",
@@ -1270,7 +1270,7 @@
     {
       "id": "PROD-019",
       "domain": "质量联动",
-      "name": "QCS 不良数和库存/入库相关回写",
+      "name": "QCS 不良数范围确认（库存回写已验收）",
       "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit; WOM/库存回写",
       "operationType": "create-update-status",
       "requiresPersistence": true,
@@ -1278,13 +1278,11 @@
       "acceptanceStatus": "BLOCKED",
       "apiEndpoints": [
         "No dedicated bad-quantity endpoint recovered in current QCS/WOM package; see metadata/wom-bad-quantity-analysis.json",
-        "Material service dependency evidence: metadata/material-service-dependency-analysis.json",
-        "inventory/inbound endpoints not accepted because material tenant service is missing",
-        "POST /msService/WOM/quality/quality/syncInspectReport",
-        "POST /msService/material/foreign/foreign/checkProdResult (503, material service missing)",
-        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing (503, material service missing)"
+        "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
       ],
-      "backendTraceStatus": "partial-qcs-wom-backfill-pass-no-dedicated-bad-quantity-entry-material-service-missing",
+      "backendTraceStatus": "qcs-wom-backfill-pass-material-wms-pass-no-dedicated-bad-quantity-entry",
       "targetTables": [
         "qcs_inspects",
         "qcs_inspect_reports",
@@ -1294,19 +1292,20 @@
         "wom_wait_put_records",
         "wom_produce_task_exelog",
         "baseset_batch_infos",
-        "inventory tables",
-        "no dedicated bad quantity table/column found in current QCS/WOM schema audit"
+        "no dedicated bad quantity table/column found in current QCS/WOM schema audit",
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
       ],
-      "verificationSql": "QCS direct WOM backfill proof: select id, check_state, check_result, check_result_id from public.wom_produce_tasks where id in (8990084171374044,8990084191051167); select id, check_state, check_result from public.wom_wait_put_records where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id from public.wom_produce_task_exelog where task_id in (8990084171374044,8990084191051167); select id, check_state, check_result, check_result_id, is_available, active_batch_state_id from public.baseset_batch_infos where batch_num in ('ADP_E2E_20260619_QCSM2_BATCH','ADP_E2E_20260619_QCSBAD_BATCH'); Material blocker: Nacos prod group material hosts=[], authenticated material checkProdResult and generateProduceOutSing returned 503; package scan found no called material service implementation; PostgreSQL material-like tables are only foundation material/warehouse and WOM internal material tables. Bad quantity audit: select table_name,column_name,data_type from information_schema.columns where table_schema='public' and (table_name like 'qcs_%' or table_name like 'wom_%') and (lower(column_name) like '%bad%' or lower(column_name) like '%defect%' or lower(column_name) like '%scrap%' or lower(column_name) like '%unqualified%' or lower(column_name) like '%unqlf%' or lower(column_name) like '%un_qlf%') order by table_name, ordinal_position; result only contained qcs_inspect_reports.un_qlf_deal_flag, qcs_table_types.un_qlf_code_rule, qcs_table_types.un_qlf_code_rule_text_backup, and qcs_un_qlf_deals.un_qlf_reason.",
-      "evidence": "QCS manufacture inspection request, report generation, report edit rendering, report result save, qualified report effective/WOM backfill, unqualified report effective/WOM backfill, automatic unqualified treatment document creation, noDeal treatment effective, degradedRelease treatment effective (PROD-041), return treatment effective (PROD-042), inspect release save/submit, WOM quality activity checkout-bill generation, and WOM check activity generated check record are now accepted. Bad quantity and inventory/inbound write-back have not been executed from the frontend yet. 2026-06-19 new-address evidence: ADP_E2E_20260619_QCSM2 and ADP_E2E_20260619_QCSBAD proved direct syncInspectReport qualified/unqualified WOM state and batch availability persistence through PostgreSQL on 100.99.133.43. Inventory/inbound remains blocked by missing material service registration and package: Nacos prod group has no material instance; authenticated checkProdResult and generateProduceOutSing calls returned 503; BasicMs/BaseSet/LIMSMaterial alternatives returned 404; latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; the only adjacent material content remains LIMSMaterial, foundation material/warehouse master data, and SpareManage spare inventory content, not the invoked material/foreign or produceOutSingle service implementation. 2026-06-20 bad-quantity audit: docs/backend-table-audit/wom-bad-quantity-analysis.md and metadata/wom-bad-quantity-analysis.json confirmed no standalone bad-quantity frontend route, runtime button, source endpoint, or PostgreSQL target column was recovered. Current accepted product shape is QCS inspection quantity, check_result, unqualified treatment document, and WOM rejects_deal_id/batch availability write-back.",
+      "verificationSql": "Standalone bad-quantity schema audit remains documented in metadata/wom-bad-quantity-analysis.json. Material WMS is separately accepted by metadata/material-wms-persistence-acceptance.json using marker ADP_E2E_20260710074612_MATERIAL_WMS; completion inbound produced onHand=10/hold=10, quality release produced available=10/hold=0, production issue produced onHand=7/available=7, and cleanup returned all five WMS tables to zero marker rows.",
+      "evidence": "QCS qualified/unqualified judgement and WOM state backfill remain accepted. The material/WMS boundary is now PASS: a real gateway marker executed completion inbound, idempotent retry, qualified quality release and production issue; PostgreSQL before/after/cleanup proof is stored in metadata/material-wms-persistence-acceptance.json. This case remains BLOCKED only because the recovered product has no standalone bad-quantity field, route or numeric target column.",
       "issues": [
-        "Current recovered QCS/WOM package does not expose a dedicated bad-quantity field or target table; only qcs_inspects.quantity, qcs_inspect_reports.check_result/un_qlf_deal_flag, qcs_un_qlf_deals, and WOM rejects_deal_id/batch availability state are present.",
-        "Inventory/inbound write-back target route and tables still need the material tenant service package and a dedicated marker acceptance run.",
-        "WOM check activity record generation is accepted separately and does not prove inventory/inbound write-back.",
-        "QCS syncInspectReport qualified/unqualified state backfill is accepted and should not remain part of this blocker.",
-        "If the product manual expects a separate bad quantity entry, a later business package must provide field, route, and table mapping before PASS."
+        "No dedicated bad-quantity frontend route, runtime button, source endpoint, or PostgreSQL numeric target column was recovered in current QCS/WOM packages.",
+        "Material completion inbound, quality release and inventory issue are accepted separately and must not be counted as this blocker."
       ],
-      "nextAction": "Add/deploy the material warehouse/inventory service package or map the correct service name, then rerun checkProdResult/generateProduceOutSing with marker stock data. Only reopen bad-quantity acceptance if a product manual or later business package provides a dedicated field/route/table mapping.",
+      "nextAction": "Obtain a product decision or later business package that defines the standalone bad-quantity field, route and PostgreSQL target; otherwise formally mark it out of scope.",
       "coverageTags": [
         "quality",
         "status-flow",
@@ -1348,7 +1347,7 @@
     {
       "id": "PROD-021",
       "domain": "报工",
-      "name": "完整工序报工、产量、不良数登记",
+      "name": "完整工序报工、产量及不良数范围确认",
       "route": "",
       "operationType": "create-update",
       "requiresPersistence": true,
@@ -1358,9 +1357,12 @@
         "POST /msService/WOM/produceTask/taskProcess/start/{id}; POST /msService/WOM/produceTask/taskProcess/end/{id}",
         "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
         "POST /msService/WOM/procReport/putinDetail/remainMaterialView/save",
-        "GET /msService/WOM/produceTask/produceTask/endActive?activeId=8388184063665795"
+        "GET /msService/WOM/produceTask/produceTask/endActive?activeId=8388184063665795",
+        "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
       ],
-      "backendTraceStatus": "source-traced-ui-rendered-check-record-pass-qcs-state-pass-no-dedicated-bad-quantity-entry-material-service-missing",
+      "backendTraceStatus": "report-work-pass-material-wms-pass-no-dedicated-bad-quantity-entry",
       "targetTables": [
         "WOM_PROC_REPORTS",
         "WOM_TASK_ACTIVES",
@@ -1373,18 +1375,20 @@
         "QCS_INSPECTS.quantity",
         "QCS_INSPECT_REPORTS.check_result/un_qlf_deal_flag",
         "QCS_UN_QLF_DEALS",
-        "no dedicated bad quantity table/column found in current QCS/WOM schema audit"
+        "no dedicated bad quantity table/column found in current QCS/WOM schema audit",
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
       ],
-      "verificationSql": "Check activity PASS SQL: SELECT id, head_id, check_items, report_value, is_pass, valid FROM public.wom_pro_check_details WHERE id = 8388184063665806; SELECT id, check_items, report_num, produce_batch_num, data_source, valid, act_exelog_id FROM public.wom_check_records WHERE check_items = 'ADP_E2E_20260619034356_WOM_ACTIVE check item' OR report_num = 'ADP_E2E_20260619034356_WOM_ACTIVE report value' ORDER BY id DESC LIMIT 1. Bad quantity and inventory/inbound write-back SQL still not executed. Dedicated bad-quantity schema audit returned no bad/defect/scrap quantity target column; see metadata/wom-bad-quantity-analysis.json.",
-      "evidence": "WOM process start/end, activity start/end, output-detail report-work, input-detail report-work, easy activity report-work, and check activity end with generated check record now have separate PASS evidence: /tmp/adp-wom-process-end-persistence-current.json, /tmp/adp-wom-active-persistence-current.json, /tmp/adp-wom-active-end-persistence-current.json, /tmp/adp-wom-stop-output-persistence-current.json, /tmp/adp-wom-putin-active-persistence-current.json, /tmp/adp-wom-easy-active-persistence-current.json, and /tmp/adp-wom-check-active-persistence-make.json. Marker ADP_E2E_20260619034356_WOM_ACTIVE proved wom_pro_check_details and wom_check_records persistence after make acceptance-wom-check-active-persistence drove real browser endActive on RM_activeType/check. The missing wom_mat_consum_recods row after putin-end is explained as current RM_activeType/putin source behavior. Full process report-work remains BLOCKED for bad-quantity and final inventory/inbound paths. 2026-06-19 direct syncInspectReport proof with ADP_E2E_20260619_QCSM2/QCSBAD confirms QCS qualified/unqualified results update WOM task/exelog/wait and batch availability correctly; remaining report-work blocker is the product-specific bad-quantity registration and inventory/material service path, not ordinary QCS state backfill. 2026-06-20 audit docs/backend-table-audit/wom-bad-quantity-analysis.md confirmed the current recovered package has no independent bad-quantity registration entry. The executable acceptance boundary is production quantity/report-work, QCS result judgement, QCS unqualified treatment, and WOM/material inventory write-back once the material service is available.",
+      "verificationSql": "Existing WOM report-work marker SQL remains valid. Material WMS verification is recorded in metadata/material-wms-persistence-acceptance.json for marker ADP_E2E_20260710074612_MATERIAL_WMS. Standalone bad-quantity schema audit remains in metadata/wom-bad-quantity-analysis.json.",
+      "evidence": "Process/activity report-work, input/output details, inspection and quality handling remain PASS. The material boundary is also PASS through real gateway and PostgreSQL marker acceptance in metadata/material-wms-persistence-acceptance.json. The only unresolved part of this composite case is whether the product requires a separate bad-quantity registration beyond QCS inspection quantity/result and unqualified treatment.",
       "issues": [
-        "Check activity result-record persistence is accepted; do not infer final inventory/inbound write-back from it.",
-        "Input-detail save persisted wom_putin_details; wom_mat_consum_recods remains not applicable for the current manual-putin path unless product requires a new consumption-record design.",
-        "No independent bad-quantity field, frontend route, runtime button, source endpoint, or PostgreSQL target table was recovered in the current package.",
-        "QCS qualified/unqualified state backfill and unqualified treatment are accepted; remaining full report-work blocker is material inventory/stock-in plus any later product-confirmed bad-quantity extension.",
-        "Inventory/material service path is blocked by missing material service registration."
+        "No independent bad-quantity field, frontend route, runtime button, source endpoint, or PostgreSQL numeric target table was recovered.",
+        "Material completion inbound and inventory write-back are accepted and are no longer blockers for report-work."
       ],
-      "nextAction": "Continue inventory/material-service acceptance. Only add a bad-quantity marker case if the product manual or a new business package supplies the dedicated field, route, and target table.",
+      "nextAction": "Confirm standalone bad-quantity scope. If required, provide its field/route/table contract and run a new marker case; otherwise close the scope decision.",
       "coverageTags": [
         "report-work",
         "execution",
@@ -1396,32 +1400,28 @@
       "id": "PROD-022",
       "domain": "入库",
       "name": "完工入库或库存回写",
-      "route": "WOM/QCS -> material service",
+      "route": "/msService/material/wms",
       "operationType": "create-update",
       "requiresPersistence": true,
-      "routeSmokeStatus": "NOT_APPLICABLE",
-      "acceptanceStatus": "BLOCKED",
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
+        "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
         "POST /msService/material/foreign/foreign/checkProdResult",
         "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
       ],
-      "backendTraceStatus": "source-traced-material-service-missing",
+      "backendTraceStatus": "controller-service-repository-sql-traced-postgresql-marker-pass",
       "targetTables": [
-        "wom_mat_outpt_records",
-        "wom_mat_consum_recods",
-        "wom_put_matei_details",
-        "baseset_sync_logs",
-        "material service inventory/stock-in tables (missing)"
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
       ],
-      "verificationSql": "No material inventory target table verified because the material service is absent. Runtime proof: Nacos prod group serviceName=material returned hosts=[]; authenticated POST /msService/material/foreign/foreign/checkProdResult and /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing returned 503 can not find any tenant app service. Package/database proof: latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0 and did not find the called material endpoint implementations; PostgreSQL table scan only found baseset_material*, baseset_warehouse*, hm_*stock/material*, and wom_*material* tables. Detailed 2026-06-20 evidence: metadata/material-service-dependency-analysis.json.",
-      "evidence": "Source trace: WOMQCSServiceImpl.checkResultToWms calls service material path /material/foreign/foreign/checkProdResult; WOMPutInMaterialServiceImpl.generateProducerOut and WOMMatConsumRecodServiceImpl call service material path /public/material/produceOutSingle/produceOutSing/generateProduceOutSing. Runtime proof on 100.99.133.43: Nacos prod group lists 91 services but material hosts=[], no material container is running, authenticated material endpoints return 503 can not find any tenant app service, and BasicMs/BaseSet/LIMSMaterial alternatives return 404. Package proof: latest package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it only shows LIMSMaterial, BaseSet material/warehouse master-data interfaces, HierarchicalMod material/stock records, and SpareManage spare inventory; targeted content search did not find checkProdResult, generateProduceOutSing, or material/foreign implementations. PostgreSQL material-like tables are foundation material/warehouse and WOM internal material tables, not a verified material-service inventory target. Re-runnable readiness evidence in metadata/business-dependency-readiness-smoke.json confirms material aliases have 0 healthy Nacos instances, both authenticated dependency endpoints return 503, and the material-like PostgreSQL tables are foundation/WOM tables rather than a verified material-service stock-in target. 2026-06-20 material dependency report: docs/backend-table-audit/material-service-dependency-analysis.md and metadata/material-service-dependency-analysis.json. Completion inbound/inventory write-back cannot pass until the warehouse/material module package is deployed and registered.",
-      "issues": [
-        "Missing material tenant service/package in current test environment.",
-        "Local source/package scan found only LIMSMaterial, foundation material/warehouse master-data modules, and SpareManage spare inventory, not the invoked material service endpoints.",
-        "Need warehouse/inventory target table map after material service is deployed.",
-        "Current WOM/QCS internal state PASS does not prove stock-in or inventory write-back."
-      ],
-      "nextAction": "Deploy/register the material warehouse/inventory service package, confirm Nacos serviceName=material has instances, then rerun checkProdResult/generateProduceOutSing marker flows and query material stock/inbound tables.",
+      "verificationSql": "See metadata/material-wms-persistence-acceptance.json. Marker-scoped queries proved documents 0->1->2, lines 0->1->2, transactions 0->1->2->3, qualityResults 0->1, stock onHand 0->10->7, available 0->10->7, hold 0->10->0; cleanup returned all counts to 0.",
+      "evidence": "Deployed material-wms source module registered as healthy Nacos prod serviceName=material. Marker ADP_E2E_20260710074612_MATERIAL_WMS passed real gateway completion inbound, idempotent retry, quality release and production issue. Browser opened /msService/material/wms, displayed the marker and detail, with no console errors, request failures or bad responses. PostgreSQL and screenshot evidence: metadata/material-wms-persistence-acceptance.json and metadata/material-wms-completion-inbound.png.",
+      "issues": [],
+      "nextAction": "Keep make material-wms-test and make acceptance-material-wms-persistence as regression gates.",
       "coverageTags": [
         "inventory",
         "execution",
@@ -1438,13 +1438,13 @@
       "requiresPersistence": false,
       "routeSmokeStatus": "PASS",
       "acceptanceStatus": "BLOCKED",
-    "apiEndpoints": [
-      "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000 -> summary BLOCKED targets=6 pagePass=6 visibleExportActions=1 runtimeExportActions=1 nonEmptyDownloads=1 backendQueryExportWorkbooks=1 backendQueryExportErrors=4 verifiedDataExports=1 ready=1 actionRequired=0 blocked=5",
-      "WTS work permit has a user-visible runtime export button and real browser click file response; remaining WOM/RM/QCS targets still lack equivalent evidence.",
-      "sourceAudit proves the generic platform export framework exists; WTS now has target-specific runtime SQL source evidence, remaining targets still need target export hooks.",
+      "apiEndpoints": [
+        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000 -> summary BLOCKED targets=6 pagePass=6 visibleExportActions=1 runtimeExportActions=1 nonEmptyDownloads=1 backendQueryExportWorkbooks=1 backendQueryExportErrors=4 verifiedDataExports=1 ready=1 actionRequired=0 blocked=5",
+        "WTS work permit has a user-visible runtime export button and real browser click file response; remaining WOM/RM/QCS targets still lack equivalent evidence.",
+        "sourceAudit proves the generic platform export framework exists; WTS now has target-specific runtime SQL source evidence, remaining targets still need target export hooks.",
         "GET /msService/WOM/produceTask/produceTask/downloadXls?viewCode=WOM_1.0.0_produceTask_makeTaskList -> HTTP 200 bodySize=0",
         "GET /msService/RM/formula/formula/downloadXls?viewCode=RM_1.0.0_formula_batchFormulaList -> HTTP 200 bodySize=8704 OLE_XLS, but page/runtime only expose 下载模板/导入Excel and no export action",
-      "POST /msService/WTS/workPermit/workPermit/workPermitList-query?exportFlag=true -> HTTP 200 bodySize=8704 OLE_XLS; real browser click on 导出 downloads WTS_workPermitList.xls bodySize=8704 OLE_XLS",
+        "POST /msService/WTS/workPermit/workPermit/workPermitList-query?exportFlag=true -> HTTP 200 bodySize=8704 OLE_XLS; real browser click on 导出 downloads WTS_workPermitList.xls bodySize=8704 OLE_XLS",
         "GET /msService/QCS/inspectReport/inspectReport/downloadXls?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportList -> HTTP 200 bodySize=0",
         "GET /msService/QCS/unQlfDeal/unQlfDeal/downloadXls?viewCode=QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList -> HTTP 200 bodySize=0",
         "GET /msService/QCS/inspectRelease/inspectRelease/downloadXls?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseList -> HTTP 200 bodySize=0"
@@ -1452,12 +1452,12 @@
       "backendTraceStatus": "template-download-only-empty-export-hook",
       "targetTables": [],
       "verificationSql": "",
-  "evidence": "2026-06-22T11:24:47.554Z refreshed export readiness smoke with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. Authenticated real browser probed 6 production-related list pages with ADP_PAGE_TIMEOUT_MS=240000: WOM make task, RM batch formula, WTS work permit, QCS inspect report, QCS unqualified deal, and QCS inspect release. All 6 target pages reached HTTP/navigation success through the public browser ingress. The committed smoke summary remains BLOCKED with targets=6, pagePass=6, visibleExportActions=1, runtimeExportActions=1, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=1, ready=1, actionRequired=0 and blocked=5. WTS work permit is READY after deploy/docker/postgres/init/171-wts-workpermit-export-action.sql added runtime exportExcel/CUSTOM/funcbody/events; a real browser click on 导出 downloaded WTS_workPermitList.xls with bodySize=8704 and magic=OLE_XLS, and workPermitList-query exportFlag=true also returns 200/OLE_XLS/8704. WOM and 3 QCS query-export endpoints still return 500/JSON, RM query-export returns 200/JSON, and direct downloadXls remains empty or import-template-only for the unresolved targets. Evidence: metadata/production-export-readiness-smoke.json and real browser run output captured by make smoke-production-export-readiness.",
+      "evidence": "2026-06-22T11:24:47.554Z refreshed export readiness smoke with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. Authenticated real browser probed 6 production-related list pages with ADP_PAGE_TIMEOUT_MS=240000: WOM make task, RM batch formula, WTS work permit, QCS inspect report, QCS unqualified deal, and QCS inspect release. All 6 target pages reached HTTP/navigation success through the public browser ingress. The committed smoke summary remains BLOCKED with targets=6, pagePass=6, visibleExportActions=1, runtimeExportActions=1, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=1, ready=1, actionRequired=0 and blocked=5. WTS work permit is READY after deploy/docker/postgres/init/171-wts-workpermit-export-action.sql added runtime exportExcel/CUSTOM/funcbody/events; a real browser click on 导出 downloaded WTS_workPermitList.xls with bodySize=8704 and magic=OLE_XLS, and workPermitList-query exportFlag=true also returns 200/OLE_XLS/8704. WOM and 3 QCS query-export endpoints still return 500/JSON, RM query-export returns 200/JSON, and direct downloadXls remains empty or import-template-only for the unresolved targets. Evidence: metadata/production-export-readiness-smoke.json and real browser run output captured by make smoke-production-export-readiness.",
       "issues": [
-    "Runtime layout metadata and visible browser export action are proven only for the WTS work permit target.",
-    "sourceAudit has target-specific evidence only for WTS; generic platform export templates are present but not enabled by the remaining target views.",
+        "Runtime layout metadata and visible browser export action are proven only for the WTS work permit target.",
+        "sourceAudit has target-specific evidence only for WTS; generic platform export templates are present but not enabled by the remaining target views.",
         "The exposed downloadXls endpoints are template-download or empty paths, not verified list-data export paths.",
-    "WTS work permit query-export and real browser click are READY; WOM, RM, and QCS targets still need user-triggerable list-data export evidence.",
+        "WTS work permit query-export and real browser click are READY; WOM, RM, and QCS targets still need user-triggerable list-data export evidence.",
         "Need product confirmation whether these lists should support export; if yes, add or recover the export button and a non-empty data-export implementation before file-response acceptance."
       ],
       "nextAction": "If export is required, recover the runtime export button and backend data-export implementation for target list pages, then capture frontend file response status, filename, size, and sample workbook content with make smoke-production-export-readiness.",
@@ -1671,9 +1671,22 @@
     "runtimeVisibleBusinessButtons": "2026-06-19: 148-runtime-visible-business-buttons.sql patched runtime_extra_view/ec_extra_view and baseService was restarted. 150-craftgraph-visible-modify-button.sql then restored craftGraph visible 修改. layoutJson now returns WTS 新增/修改, craftGraph 新增/修改/删除, and WorkAppointment 新增/删除 buttons with Chinese namekey values. craftGraph visible create/update/delete is PASS; WorkAppointment and WTS full workflow clicks remain pending.",
     "craftGraphVisibleSaveDelete": "2026-06-19: craftGraph basicInfo pure UI product selection, visible save, visible edit/update, and visible delete now have browser and PostgreSQL evidence. Product reference UI blocker is cleared; visible edit marker ADP_E2E_20260619071722_CRAFTGRAPH persisted version=1. PROD-012 is PASS. Remaining craftGraph notes are display clipping in edit modal and business confirmation on craft_tree_structures.valid after main soft delete.",
     "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
-    "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Remaining material-service stock-in/inventory is tracked separately under PROD-022.",
+    "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Material-service stock-in/inventory is PASS under PROD-022 and remains regression coverage.",
     "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance.",
     "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json.",
     "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence."
+  },
+  "latestRevalidation": {
+    "generatedAt": "2026-07-10T07:25:00Z",
+    "database": "PostgreSQL",
+    "materialWms": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+      "evidence": "metadata/material-wms-persistence-acceptance.json"
+    },
+    "processAnalysis": {
+      "status": "BLOCKED",
+      "evidence": "metadata/business-dependency-readiness-smoke.json"
+    }
   }
 }

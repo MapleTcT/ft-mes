@@ -18,8 +18,9 @@ BACKLOG_PATH = ROOT / "metadata/production-module-backlog.json"
 
 REQUIRED_DEPENDENCIES = {
     "material-service": {
-        "blocked_cases": {"PROD-019", "PROD-021", "PROD-022"},
-        "endpoint_names": {"checkProdResult", "generateProduceOutSing"},
+        "blocked_cases": set(),
+        "endpoint_names": {"generateProductInSingle", "checkProdResult", "generateProduceOutSing"},
+        "current_package_status": "CANDIDATE_FOUND",
         "service_aliases": {"material", "MATERIAL", "wms", "WMS", "warehouse", "Warehouse", "inventory", "Inventory"},
         "required_runtime_keys": {
             "minimumHealthyInstances",
@@ -32,6 +33,7 @@ REQUIRED_DEPENDENCIES = {
     "process-analysis": {
         "blocked_cases": {"PROD-020"},
         "endpoint_names": {"isProdprocessView", "processBatchViewOut", "analysisiTask", "manualStatActive", "manualStatProcess"},
+        "current_package_status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
         "service_aliases": {"ProcessAnalysis", "processanalysis", "PROCESSANALYSIS", "Traceability", "traceability"},
         "required_runtime_keys": {
             "minimumHealthyInstances",
@@ -258,8 +260,8 @@ def check_dependency_shape(dependency: dict[str, Any], failures: list[str]) -> N
         fail(failures, f"{dependency_id}.requiredStartupEvidence.notEnoughEvidence must not be empty")
 
     package = as_dict(dependency.get("requiredPackageEvidence"))
-    if package.get("statusBeforePackage") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE":
-        fail(failures, f"{dependency_id} must document current package-scan blocker status")
+    if package.get("statusBeforePackage") not in {"BLOCKED_NO_IMPLEMENTATION_CANDIDATE", "CANDIDATE_FOUND"}:
+        fail(failures, f"{dependency_id} must document a valid package-scan status")
     if package.get("candidateStatusAfterPackage") != "CANDIDATE_FOUND":
         fail(failures, f"{dependency_id} must require CANDIDATE_FOUND after package intake")
     if not as_list(package.get("requiredTerms")):
@@ -305,10 +307,18 @@ def check_current_evidence(
 ) -> None:
     readiness_summary = as_dict(readiness.get("summary"))
     package_summary = as_dict(package_scan.get("summary"))
-    if readiness_summary.get("status") != "BLOCKED" or readiness_summary.get("ready") != 0:
-        fail(failures, "business dependency contracts expect current readiness to remain BLOCKED with ready=0")
-    if package_summary.get("status") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE" or package_summary.get("candidateDependencies") != 0:
-        fail(failures, "business dependency contracts expect current package scan to have no implementation candidates")
+    if (
+        readiness_summary.get("status") != "BLOCKED"
+        or readiness_summary.get("actionRequired") != 1
+        or readiness_summary.get("blocked") != 1
+    ):
+        fail(failures, "business dependency readiness must show one material acceptance follow-up and one blocked ProcessAnalysis dependency")
+    if (
+        package_summary.get("status") != "CANDIDATE_FOUND"
+        or package_summary.get("candidateDependencies") != 1
+        or package_summary.get("blockedDependencies") != 1
+    ):
+        fail(failures, "business dependency package scan must show material found and ProcessAnalysis still blocked")
 
     blocker_cases = {
         str(blocker.get("caseId"))
@@ -333,21 +343,36 @@ def check_current_evidence(
         if package_item is None:
             fail(failures, f"package scan report missing {dependency_id}")
             continue
-        if contract.get("status") != readiness_item.get("status"):
-            fail(failures, f"{dependency_id} contract status must match readiness status")
-        if package_item.get("status") != "BLOCKED_NO_IMPLEMENTATION_CANDIDATE":
-            fail(failures, f"{dependency_id} package scan must remain BLOCKED_NO_IMPLEMENTATION_CANDIDATE until a package arrives")
-        if int(package_item.get("implementationCandidateCount") or 0) != 0:
-            fail(failures, f"{dependency_id} package scan candidate count must remain 0 in current contract")
+        if package_item.get("status") != expected["current_package_status"]:
+            fail(failures, f"{dependency_id} package scan status must be {expected['current_package_status']}")
         if not expected["service_aliases"].issubset(service_names(readiness_item)):
             fail(failures, f"{dependency_id} readiness smoke missing expected service probes")
-        if healthy_count(readiness_item) != 0:
-            fail(failures, f"{dependency_id} readiness smoke should still have healthy service count 0")
-        if blocked_endpoints(readiness_item) < len(expected["endpoint_names"]):
-            fail(failures, f"{dependency_id} readiness smoke should still show all required endpoints as tenant-service 503")
         missing_endpoint_names = sorted(expected["endpoint_names"] - endpoint_names(readiness_item))
         if missing_endpoint_names:
             fail(failures, f"{dependency_id} readiness smoke missing endpoint probes: " + ", ".join(missing_endpoint_names))
+        if dependency_id == "material-service":
+            if contract.get("status") != "READY":
+                fail(failures, "material-service contract must be READY after marker persistence acceptance")
+            if readiness_item.get("status") not in {"ACTION_REQUIRED", "READY"}:
+                fail(failures, "material-service readiness must be ACTION_REQUIRED or READY")
+            if int(package_item.get("implementationCandidateCount") or 0) < 1:
+                fail(failures, "material-service package scan must contain an implementation candidate")
+            if healthy_count(readiness_item) < 1:
+                fail(failures, "material-service readiness must show a healthy Nacos service instance")
+            if blocked_endpoints(readiness_item) != 0:
+                fail(failures, "material-service compatibility endpoints must not return tenant-service 503")
+            for endpoint in as_list(readiness_item.get("endpoints")):
+                if isinstance(endpoint, dict) and not (200 <= int(endpoint.get("status") or 0) < 300):
+                    fail(failures, f"material-service endpoint {endpoint.get('name')} must return HTTP 2xx")
+        else:
+            if contract.get("status") != "BLOCKED" or readiness_item.get("status") != "BLOCKED":
+                fail(failures, f"{dependency_id} contract and readiness status must remain BLOCKED")
+            if int(package_item.get("implementationCandidateCount") or 0) != 0:
+                fail(failures, f"{dependency_id} package scan candidate count must remain 0")
+            if healthy_count(readiness_item) != 0:
+                fail(failures, f"{dependency_id} readiness smoke should still have healthy service count 0")
+            if blocked_endpoints(readiness_item) < len(expected["endpoint_names"]):
+                fail(failures, f"{dependency_id} readiness smoke should still show all required endpoints as tenant-service 503")
         missing_blockers = sorted(expected["blocked_cases"] - blocker_cases)
         if missing_blockers:
             fail(failures, f"{dependency_id} contracts reference blocker cases not present in blocker ledger: " + ", ".join(missing_blockers))

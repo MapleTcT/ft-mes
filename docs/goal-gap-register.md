@@ -7,14 +7,14 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-10T04:02:14+00:00` |
-| Repo Commit | `93cf18ca13f08bf71aa4c2a89aeef985eaf22d52` |
+| Generated At | `2026-07-10T07:46:51+00:00` |
+| Repo Commit | `d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `11` |
 | Ready / Partial / Blocked Goals | `9 / 9 / 2` |
-| Production Blocked Cases | `6` |
-| Production Backlog Items | `9` |
+| Production Blocked Cases | `5` |
+| Production Backlog Items | `8` |
 | Business Dependency Status | `BLOCKED` |
 | Production Export Status | `BLOCKED` |
 | Production Export Ready / Action Required / Blocked | `1 / 0 / 5` |
@@ -30,12 +30,12 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-002` | `PARTIAL` | 当前内容迁移 | 业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。 | 后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。 |
 | `G-003` | `PARTIAL` | Oracle 替换为 PostgreSQL 默认路径 | Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies. | 逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。 |
 | `G-012` | `PARTIAL` | 基础配置 | QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射和实体/模型元数据 CRUD 已分别完成 marker/typed mutation 保存、回读、PostgreSQL before/after 和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、PostgreSQL 物理模型表自动创建能力、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。 | 继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。 |
-| `G-013` | `BLOCKED` | 生产模块完整功能 | 剩余 6 条生产用例仍 BLOCKED：RM 批量配方外部 Batch 客户端编辑入口、material 物料/库存入库服务、ProcessAnalysis 追溯服务、完整报工中的独立不良数/库存边界、生产相关导出实现和产品范围确认仍缺真实 marker 或业务包证据。 | 补齐外部 Batch 客户端、物料/库存、ProcessAnalysis 等业务包和入口后，先运行 make business-package-scan、make smoke-business-dependencies 和 make smoke-production-export-readiness，再从真实前端复验剩余 6 条 BLOCKED 用例并查 PostgreSQL。 |
+| `G-013` | `BLOCKED` | 生产模块完整功能 | 剩余 5 条生产用例仍 BLOCKED：RM 外部 Batch 客户端、ProcessAnalysis 追溯、独立不良数量范围、生产列表导出和其他明确产品范围/运行端点项。material/WMS 完工入库已 PASS。 | 保持制造-质量-material/WMS marker 回归，优先接入 ProcessAnalysis；并完成独立不良数量范围、外部 Batch 客户端、二维码端点和生产导出。 |
 | `G-014` | `PARTIAL` | Nacos 配置链路 | 测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。 | 导出生产 Nacos 配置，和 rendered 配置做差异账本。 |
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |
 | `G-016` | `PARTIAL` | PostgreSQL 运行与迁移治理 | 生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。 | 用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。 |
-| `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退已完成，但生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补；material/WMS 入库回写仍缺真实服务包。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
-| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 6 条生产用例、3 个动作级 backlog 和业务负责人签字未完成。 | 按生产矩阵继续执行剩余 BLOCKED 用例；业务包部署后先运行 make business-package-scan、make smoke-business-dependencies 和 make smoke-production-export-readiness，再补齐 before/after SQL、文件响应和业务签字 evidence。 |
+| `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退和 material/WMS 部署回退手册已完成；生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
+| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
 
@@ -44,10 +44,9 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | Case | Category | Dependency | Recheck | PASS Criteria |
 | --- | --- | --- | --- | --- |
 | `PROD-010` | `external-client-required` | External Batch client / IE ActiveX / WebSocket push path | make smoke-business-page<br>manual: provision external Batch client, trigger WebSocket push to batchFormulaEdit, then run a marker save/submit and query rm_formulas/rm_formula_processes/rm_process_actives | A real user-visible or external-client driven edit entry opens batchFormulaEdit without adding a fake platform-only button.<br>The edit/save/submit action uses a unique ADP_E2E marker. (+1) |
-| `PROD-019` | `composite-service-and-scope` | material service package plus product confirmation for any standalone bad-quantity entry | make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json<br>make smoke-business-dependencies (+1) | material service has at least one healthy Nacos prod instance.<br>Authenticated material checkProdResult and generateProduceOutSing endpoints return HTTP 2xx and no longer return tenant-service 503. (+2) |
+| `PROD-019` | `product-scope-confirmation` | product decision or later business package defining bad-quantity field/route/table | make persistence-acceptance-check<br>manual: confirm standalone bad-quantity scope and marker-test only if it is required | Confirm whether standalone bad quantity is a supported product feature.<br>If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker. (+1) |
 | `PROD-020` | `missing-service-package` | ProcessAnalysis / Traceability service package, runtime metadata, menu, permissions, and PostgreSQL schema | make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json<br>make smoke-business-dependencies (+1) | ProcessAnalysis or traceability service has at least one healthy Nacos prod instance.<br>ProcessAnalysis runtime_view/menu/table counts are non-zero and mapped to the deployed module. (+2) |
-| `PROD-021` | `composite-service-and-scope` | material service package plus product confirmation for standalone bad-quantity entry | make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json<br>make smoke-business-dependencies (+1) | Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity, and check activity.<br>The material/inventory service path is available and marker stock-in or inventory write-back is proven. (+1) |
-| `PROD-022` | `missing-service-package` | material warehouse/inventory service package and target stock-in table map | make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json<br>make smoke-business-dependencies (+1) | serviceName=material or the confirmed warehouse service has healthy Nacos prod instances.<br>checkProdResult and generateProduceOutSing return HTTP 2xx and no longer return 503. (+2) |
+| `PROD-021` | `product-scope-confirmation` | product decision or later business package defining bad-quantity field/route/table | make persistence-acceptance-check<br>manual: confirm standalone bad-quantity scope and marker-test only if it is required | Confirm whether standalone bad quantity is a supported product feature.<br>If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker. (+1) |
 | `PROD-023` | `missing-export-implementation` | Product decision and backend data-export implementation for production list pages | make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000<br>manual: after export button/backend implementation is recovered, capture browser file response, filename, size, and workbook sample | Product owner confirms which production lists must support data export.<br>Runtime button/menu metadata exposes an export action for each required list. (+4) |
 
 ## Production Backlog
@@ -58,17 +57,15 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `PROD-ACTION-007` | `BLOCKED` | `product-scope-confirmation` | `module-backlog` | `False` | Product owner confirms whether the public endpoint is still a supported contract.<br>If supported, WOMProduceTaskServiceImpl.creatProTask is restored or replaced and a marker request writes wom_produce_tasks plus required workflow tables. (+2) |
 | `PROD-ACTION-008` | `BLOCKED` | `missing-runtime-endpoint` | `module-backlog` | `False` | The real WOM makeTaskList 生成二维码 toolbar action no longer calls missing 404 printManage endpoints.<br>The recovered WOM package or source module exposes /WOM/printManage/generateQrCode and any required print/backfill endpoints through the normal gateway path. (+3) |
 | `PROD-010` | `BLOCKED` | `external-client-required` | `module-backlog` | `False` | The real external-client driven edit entry opens batchFormulaEdit without a fake platform-only button.<br>A unique marker proves edit/save persistence in rm_formulas and related RM process/activity tables. (+1) |
-| `PROD-019` | `BLOCKED` | `composite-service-and-scope` | `module-backlog` | `False` | material service has a healthy Nacos prod instance.<br>checkProdResult and generateProduceOutSing no longer return tenant-service 503. (+2) |
+| `PROD-019` | `BLOCKED` | `product-scope-confirmation` | `module-backlog` | `False` | Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.<br>If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested. (+2) |
 | `PROD-020` | `BLOCKED` | `missing-service-package` | `module-backlog` | `False` | ProcessAnalysis or traceability service has a healthy Nacos prod instance.<br>ProcessAnalysis runtime_view, menu and table counts are non-zero and mapped to the deployed module. (+2) |
-| `PROD-021` | `BLOCKED` | `composite-service-and-scope` | `module-backlog` | `False` | Accepted report-work subflows remain green: process start/end, activity start/end, output detail, input detail, easy activity and check activity.<br>The material/inventory service path is available and marker stock-in or inventory write-back is proven. (+1) |
-| `PROD-022` | `BLOCKED` | `missing-service-package` | `module-backlog` | `False` | serviceName=material or the confirmed warehouse service has a healthy Nacos prod instance.<br>checkProdResult and generateProduceOutSing no longer return 503. (+2) |
+| `PROD-021` | `BLOCKED` | `product-scope-confirmation` | `module-backlog` | `False` | Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.<br>If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested. (+2) |
 | `PROD-023` | `BLOCKED` | `missing-export-implementation` | `module-backlog` | `False` | Product owner confirms which production lists must support data export.<br>Runtime button/menu metadata exposes an export action for each required list. (+3) |
 
 ## Business Dependency Readiness
 
 | Dependency | Status | Required For | Ready When | Issues |
 | --- | --- | --- | --- | --- |
-| `material-service` | `BLOCKED` | PROD-019<br>PROD-021<br>PROD-022<br>WOM/QCS inventory and stock-in write-back | serviceName=material has a healthy Nacos instance and marker inventory endpoints stop returning tenant-service 503. | No healthy Nacos service instance was found for the expected dependency aliases.<br>Authenticated endpoint probe still returns tenant-service 503. |
 | `process-analysis` | `BLOCKED` | PROD-020<br>WOM production process traceability | ProcessAnalysis has healthy service registration, runtime/menu metadata, PostgreSQL target tables, and authenticated endpoints no longer return tenant-service 503. | No healthy Nacos service instance was found for the expected dependency aliases.<br>Authenticated endpoint probe still returns tenant-service 503.<br>No ProcessAnalysis runtime_view metadata was found. |
 
 ## Production Migration Gaps
