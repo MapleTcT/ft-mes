@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:05:57Z",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T03:55:34Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
@@ -73,6 +73,7 @@
     "womBadQuantityAudit": "docs/backend-table-audit/wom-bad-quantity-analysis.md; metadata/wom-bad-quantity-analysis.json",
     "womRejectMaterialMainFlows": "2026-06-20: Reconciled stale PROD-007 status with existing persistence acceptance. prePareReject save/delete and effective, materiaReject receive/effective with hm_factory_materias availi_quantity 10->8, and batchReject effective with wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num 0->2 are accepted with PostgreSQL evidence on 100.99.133.43.",
     "coreFlowAcceptance20260710": "metadata/core-flow-acceptance-20260710.json",
+    "coreFlowRuntimeRollbackRehearsal": "metadata/core-flow-runtime-rollback-rehearsal.json; marker ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK; rollback and restore each completed a distinct WOM Spring Boot start, Nacos healthy registration and page HTTP 200; post-restore manufacturing-order and toolbar markers passed.",
     "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED."
   },
   "summary": {
@@ -1672,6 +1673,7 @@
     "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
     "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Remaining material-service stock-in/inventory is tracked separately under PROD-022.",
     "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance.",
-    "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json."
+    "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json.",
+    "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence."
   }
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:05:57Z",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T03:55:34Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "module": "production",
   "sourceMatrix": "metadata/production-module-test-cases.json",
@@ -16,7 +16,8 @@
   },
   "latestEvidence": {
     "lastRemoteRecheckAt": "2026-06-22T11:24:47.554Z",
-    "businessDependencyReadinessGeneratedAt": "2026-06-22T01:36:29.672Z",
+    "businessDependencyLastRecheckAt": "2026-07-10T03:55:34.526Z",
+    "businessDependencyReadinessGeneratedAt": "2026-07-10T03:55:34.526Z",
     "businessDependencyReadinessStatus": "BLOCKED",
     "businessDependencyReady": 0,
     "businessDependencyBlocked": 2,
@@ -27,9 +28,11 @@
     "productionExportReadinessStatus": "BLOCKED",
     "productionExportVerifiedDataExports": 1,
     "productionExportPagePass": 6,
-    "coreFlowRecheckAt": "2026-07-10T03:01:48Z",
+    "coreFlowRecheckAt": "2026-07-10T03:55:34Z",
     "coreFlowEvidence": "metadata/core-flow-acceptance-20260710.json",
-    "coreFlowPass": 10,
+    "coreFlowRuntimeRollbackEvidence": "metadata/core-flow-runtime-rollback-rehearsal.json",
+    "coreFlowRuntimeRollbackStatus": "PASS",
+    "coreFlowPass": 11,
     "coreFlowBlocked": 2,
     "materialHealthyHosts": 0,
     "processAnalysisHealthyHosts": 0

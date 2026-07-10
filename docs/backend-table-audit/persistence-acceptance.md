@@ -6,6 +6,7 @@
 |---|---|---|---|---|---|---|
 | 制造指令生成、提交、生效与回滚 | WOM 制造指令列表/生成后的编辑待办 | `produceTaskCreated2`、`makeTaskEdit/submit`、`delete` | `WOMProduceTaskController -> WOMFormCreatServiceImpl -> WOMProduceTaskServiceImpl -> workflow` | `wom_produce_tasks`、`wfm_task_pending`、`wf_deal_info` | marker `ADP_E2E_20260710025954_WOM_MANUFACTURING_ORDER`：`status 88 -> 99`、待办 1 -> 0、`valid true -> false`；流程 XML 与 `wf_transition` 均为 `SequenceFlow_0vcn8hp/生效` | PASS |
 | 开始/保持/重启和完工弹窗 | `makeTaskList` 真实行点击 | `updateTaskState`、`findProcReportIdByTaskId` | `WOMProduceTaskController/Service` | `wom_produce_tasks`、`wom_wait_put_records`、`wom_proc_reports`、`wom_produce_task_exelog` | 静态补丁同步后 marker `ADP_E2E_20260710031716_WOMSTART_HOLD_RESTART`，最终 `runing/status=99/version=3`；随后 `cleanup|0|0|0|0` | PASS |
+| 核心补丁恢复后制造指令与工具栏回归 | `makeTaskList` | `produceTaskCreated2`、`makeTaskEdit/submit`、`updateTaskState`、`delete` | WOM Controller/Service/Workflow | `wom_produce_tasks`、`wfm_task_pending`、`wf_deal_info`、过程/执行日志表 | runtime 回退恢复后 marker `ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER` 完成生成、生效和软删回滚；marker `ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART` 完成 `runing -> iskeep -> runing`，清理 `0/0/0/0` | PASS |
 | 完工报工产出 | WOM 完工报工 | `updateTaskState`、`addOutputByOutPutDetails` | WOM 任务/报工服务 | `wom_output_details`、`wom_mat_outpt_records`、任务表 | marker `ADP_E2E_20260710023819_WOMSTART_STOP_OUTPUT`，产出明细和出料记录各 1，清理 PASS | PASS |
 | QCS 合格报告回写 | 制造检验列表/报告编辑页 | `createManuInspect`、`bulkSubmit`、`batchDealReports` | QCS 检验/报告服务 -> WOM QCS 回调 | QCS 检验/报告/明细、WOM 任务/待入库/执行日志、批次 | marker `ADP_E2E_20260710024838_QCS_QUAL`：报告 `99/合格`、WOM `已检/合格`、批次 `qualified/可用`；清理 7 项为 0 | PASS |
 | QCS 不合格和自动处理单 | 制造检验列表/报告编辑页 | 同上 | QCS 报告服务 -> `createUnQlfDeal` -> WOM 回调 | 上述表及 `qcs_un_qlf_deals`、待办/JBPM | marker `ADP_E2E_20260710024957_QCS_UNQLF`：报告 `99/不合格`、WOM/批次不合格、处理单 `88`；待办/JBPM 定向清理后 7 项为 0 | PASS |
@@ -16,6 +17,10 @@
 完整请求、响应、字段前后值、清理 SQL和临时证据路径见
 `metadata/core-flow-acceptance-20260710.json`。本轮没有用数据库直写冒充业务动作；直接 SQL
 只用于受控测试夹具准备、验收查询和定向清理。
+
+运行补丁回退/恢复本身不修改业务表；恢复后重新执行真实业务 API 和 PostgreSQL
+marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器证据见
+`metadata/core-flow-runtime-rollback-rehearsal.json`。
 
 ## 2026-06-21 当前地址复验
 

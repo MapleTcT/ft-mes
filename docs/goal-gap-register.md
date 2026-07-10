@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-10T03:27:39+00:00` |
-| Repo Commit | `cbd191763436c894b1f8b3ded69ddfcde95e97ae` |
+| Generated At | `2026-07-10T04:02:14+00:00` |
+| Repo Commit | `93cf18ca13f08bf71aa4c2a89aeef985eaf22d52` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `11` |
@@ -34,7 +34,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-014` | `PARTIAL` | Nacos 配置链路 | 测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。 | 导出生产 Nacos 配置，和 rendered 配置做差异账本。 |
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |
 | `G-016` | `PARTIAL` | PostgreSQL 运行与迁移治理 | 生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。 | 用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。 |
-| `G-017` | `PARTIAL` | runtime patch | 生产签名 patch 包、生产 Nacos diff、回退演练未补；QCS 请检明细表缺口已补齐，但 WOM 请检、质量/入库等动作仍缺 marker 业务数据验收。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
+| `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退已完成，但生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补；material/WMS 入库回写仍缺真实服务包。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 6 条生产用例、3 个动作级 backlog 和业务负责人签字未完成。 | 按生产矩阵继续执行剩余 BLOCKED 用例；业务包部署后先运行 make business-package-scan、make smoke-business-dependencies 和 make smoke-production-export-readiness，再补齐 before/after SQL、文件响应和业务签字 evidence。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |

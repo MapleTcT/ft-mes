@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-10T03:46:38.472Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
+  "database": "PostgreSQL",
+  "target": {
+    "sshHost": "100.99.133.43",
+    "remoteRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "womContainer": "adp-mes-newbase-WOMMs-1",
+    "nacosContainer": "adp-mes-newbase-nacos-1",
+    "httpPort": 18080
+  },
+  "marker": "ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK",
+  "backupTag": "20260710-coreflow",
+  "status": "PASS",
+  "localStaticHashes": {
+    "bodyJs": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+    "bodyEs5Js": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+    "i18nValueJs": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29"
+  },
+  "stages": {
+    "precheck": {
+      "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+      "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+      "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+      "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+      "womRunning": "true",
+      "womStatus": "running",
+      "womStartedAt": "2026-07-10T03:43:55.869434017Z",
+      "bootLogReady": "true",
+      "nacosHealthyCount": "1",
+      "pageHttp": "200"
+    },
+    "snapshot": {
+      "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+      "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+      "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+      "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+      "womRunning": "true",
+      "womStatus": "running",
+      "womStartedAt": "2026-07-10T03:43:55.869434017Z",
+      "bootLogReady": "true",
+      "nacosHealthyCount": "1",
+      "pageHttp": "200"
+    },
+    "rollback": {
+      "womJarHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+      "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+      "bodyJsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyEs5JsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "i18nValueJsHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+      "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+      "womRunning": "true",
+      "womStatus": "running",
+      "womStartedAt": "2026-07-10T03:46:46.005480077Z",
+      "bootLogReady": "true",
+      "nacosHealthyCount": "1",
+      "pageHttp": "200"
+    },
+    "restore": {
+      "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+      "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+      "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+      "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+      "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+      "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+      "womRunning": "true",
+      "womStatus": "running",
+      "womStartedAt": "2026-07-10T03:48:11.780923494Z",
+      "bootLogReady": "true",
+      "nacosHealthyCount": "1",
+      "pageHttp": "200"
+    }
+  },
+  "checks": [
+    {
+      "name": "precheck runtime ready",
+      "passed": true,
+      "detail": {
+        "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+        "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+        "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "womRunning": "true",
+        "womStatus": "running",
+        "womStartedAt": "2026-07-10T03:43:55.869434017Z",
+        "bootLogReady": "true",
+        "nacosHealthyCount": "1",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "bodyJs matches repository",
+      "passed": true,
+      "detail": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
+    },
+    {
+      "name": "bodyEs5Js matches repository",
+      "passed": true,
+      "detail": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
+    },
+    {
+      "name": "i18nValueJs matches repository",
+      "passed": true,
+      "detail": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29"
+    },
+    {
+      "name": "patched runtime differs from rollback backup",
+      "passed": true,
+      "detail": "Every patched artifact must differ from its pre-coreflow backup."
+    },
+    {
+      "name": "rollback runtime ready",
+      "passed": true,
+      "detail": {
+        "womJarHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "bodyJsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "i18nValueJsHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "womRunning": "true",
+        "womStatus": "running",
+        "womStartedAt": "2026-07-10T03:46:46.005480077Z",
+        "bootLogReady": "true",
+        "nacosHealthyCount": "1",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "rollback hashes match backups",
+      "passed": true,
+      "detail": {
+        "womJarHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "bodyJsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "i18nValueJsHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "womRunning": "true",
+        "womStatus": "running",
+        "womStartedAt": "2026-07-10T03:46:46.005480077Z",
+        "bootLogReady": "true",
+        "nacosHealthyCount": "1",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "restored runtime ready",
+      "passed": true,
+      "detail": {
+        "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+        "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+        "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "womRunning": "true",
+        "womStatus": "running",
+        "womStartedAt": "2026-07-10T03:48:11.780923494Z",
+        "bootLogReady": "true",
+        "nacosHealthyCount": "1",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "restored hashes match precheck",
+      "passed": true,
+      "detail": {
+        "womJarHash": "167bd1e3694ca5927c209f6c832262cf51fb961f1780dcd45eb66ee1c8a3e768",
+        "womJarBackupHash": "2579c2cc4d716f1b8baf8b26bc5c2f300655714c852170d72690cc2dd1c0db03",
+        "bodyJsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyJsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "bodyEs5JsHash": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090",
+        "bodyEs5JsBackupHash": "cac6956921ae681a33d11207dcd61d87cc0848a36413ea081c9452e28aec2e9a",
+        "i18nValueJsHash": "a74d243c227fab1826e9d15efefb0950b3d88755535b093d9671782b6f6b4a29",
+        "i18nValueJsBackupHash": "dbacab64f9a77b9cdbc2421ca1bc0d718f4e360a19e69f31e895dd05345ab648",
+        "womRunning": "true",
+        "womStatus": "running",
+        "womStartedAt": "2026-07-10T03:48:11.780923494Z",
+        "bootLogReady": "true",
+        "nacosHealthyCount": "1",
+        "pageHttp": "200"
+      }
+    }
+  ],
+  "issues": []
+}

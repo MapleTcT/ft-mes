@@ -10,6 +10,7 @@
 | 合格处理 | PASS | `ADP_E2E_20260710024838_QCS_QUAL`，报告/WOM/批次落库并清理 | 库存总账回写不在现有 WOM/QCS 表内 |
 | 不合格处理 | PASS | `ADP_E2E_20260710024957_QCS_UNQLF`，自动生成处理单并清理待办/JBPM | 后续仓库处置仍依赖 material/WMS |
 | 退料 | PASS | `ADP_E2E_20260710030059_WOM_REJECT_MATERIAL` 保存、删除和待办清理 | 本轮复验的是备料退料；库存总账仍属 material/WMS |
+| 核心运行补丁回滚 | PASS | `ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK` 完成旧版本回退、完整启动、当前补丁恢复和恢复后业务回归 | 只覆盖测试环境 WOM JAR/静态补丁，不替代生产全栈回切演练 |
 | 完工入库/库存回写 | BLOCKED | `material` 候选 Nacos 实例均为 0，两个关键端点 503 | 缺真实 material/WMS 服务包和目标表 |
 | 批次/物料/工单追溯 | BLOCKED | ProcessAnalysis Nacos/端点/表/runtime view/menu 全部缺失 | 缺真实 ProcessAnalysis 业务包 |
 

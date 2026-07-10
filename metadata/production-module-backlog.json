@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:05:57Z",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T03:55:34Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "module": "production",
   "overallStatus": "OPEN",
@@ -12,13 +12,14 @@
     "metadata/wom-toolbar-action-coverage.json",
     "metadata/wom-public-produce-task-created-analysis.json",
     "metadata/wom-public-produce-task-created-noop-probe.json",
-    "metadata/core-flow-acceptance-20260710.json"
+    "metadata/core-flow-acceptance-20260710.json",
+    "metadata/core-flow-runtime-rollback-rehearsal.json"
   ],
   "latestCoreFlowEvidence": {
-    "generatedAt": "2026-07-10T03:05:57Z",
+    "generatedAt": "2026-07-10T03:55:34Z",
     "path": "metadata/core-flow-acceptance-20260710.json",
     "status": "BLOCKED",
-    "pass": 10,
+    "pass": 11,
     "blocked": 2,
     "remainingCoreDependencies": ["material/WMS", "ProcessAnalysis"]
   },

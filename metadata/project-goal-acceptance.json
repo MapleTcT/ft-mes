@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:24:00Z",
+  "generatedAt": "2026-07-10T03:55:34Z",
   "generatedFromCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
@@ -36,7 +36,7 @@
         "make ci passed on 2026-06-15 after commit d13b817",
         "make sustainable-check now validates generated-artifact ignore rules and blocks tracked __pycache__, pyc, target, node_modules, dist, class and log artifacts except narrow runtime patch class allowlist with adjacent source.",
         "make ci now includes runtime-smoke-reports-check so committed runtime smoke reports are checked for schema, PASS status, current host, expected checks, and secret hygiene.",
-        "make ci now includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 627 CI/governance/runtime assets, 627 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, production rehearsal verifier, and verifier assets were added to Git tracking.",
+        "make ci now includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 630 CI/governance/runtime assets, 630 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, core runtime rollback rehearsal, production rehearsal verifier, and verifier assets were added to Git tracking.",
         "make ci now includes goal-gap-register-check; metadata/goal-gap-register.json and docs/goal-gap-register.md are generated from the project goal ledger, production blockers, backlog, dependency readiness, export readiness and production migration ledgers so open gaps cannot be hidden by localized PASS evidence.",
         "make ci-required-file-strict-check now passes and scripts/verify-project-goal-acceptance.py rejects G-001 READY if the strict inventory is not clean or if the inventory generator/report artifacts are not tracked."
       ],
@@ -536,6 +536,9 @@
         "docs/production-migration/nacos-runtime-patch-runbook.md",
         "metadata/runtime-patch-manifest.json",
         "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js",
+        "metadata/core-flow-runtime-rollback-rehearsal.json",
+        "docs/production-migration/core-flow-runtime-rollback-rehearsal.md",
         "deploy/nacos/production-migration/README.md",
         "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
         "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py"
@@ -546,19 +549,20 @@
         "084/085 were applied to 10.11.100.17 and the minimal stop acceptance no longer has layoutJson frontend errors",
         "WOM config default patch and WOMMs-prod test config support output-detail report-work acceptance.",
         "metadata/runtime-patch-manifest.json and docs/production-migration/runtime-patch-manifest.md record current runtime patch, PostgreSQL init SQL, and Nacos template checksums.",
-        "Nacos/runtime patch 生产 evidence manifest 和 strict READY 校验器已建立。"
+        "Nacos/runtime patch 生产 evidence manifest 和 strict READY 校验器已建立。",
+        "2026-07-10 测试环境 WOM 核心 JAR/静态补丁已完成真实回退和恢复演练；两个版本分别完成本次 Spring Boot 启动、Nacos healthy 注册和页面 200，恢复后环境 9/9、制造指令和工具栏 marker 回归 PASS。"
       ],
       "blockingIssues": [
-        "生产签名 patch 包、生产 Nacos diff、回退演练未补；QCS 请检明细表缺口已补齐，但 WOM 请检、质量/入库等动作仍缺 marker 业务数据验收。"
+        "测试环境 WOM 核心补丁回退已完成，但生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补；material/WMS 入库回写仍缺真实服务包。"
       ],
       "nextActions": [
         "用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。",
-        "补生产 Nacos export/diff 和回滚步骤。",
+        "基于已验证的测试环境脚本补生产 Nacos export/diff、签名包和全栈回滚步骤。",
         "在 marker 数据准备后执行真实前端写动作并补 PostgreSQL before/after 证据。",
         "用 production-nacos-runtime-patch-ready-check 把生产 Nacos export/diff、签名 patch 包、post-publish smoke 和回滚演练补成 READY evidence。"
       ],
-      "evidence": "runtime patch scripts, WOM runtime JSON SQL, outPutCommonTaskEdit runtime linkage, WOM config default patch, and runtime patch checksum manifest are tracked.",
-      "gap": "Signed production patch bundle, production Nacos diff, and rollback rehearsal are still missing; remaining WOM input-detail/inspection actions still need marker acceptance."
+      "evidence": "runtime patch scripts, WOM runtime JSON SQL, outPutCommonTaskEdit runtime linkage, WOM config default patch, runtime patch checksum manifest, and test-environment core runtime rollback/restore evidence are tracked.",
+      "gap": "Signed production patch bundle, production Nacos diff, and full-stack production rollback rehearsal are still missing; material/WMS inventory write-back remains externally blocked."
     },
     {
       "id": "G-018",
@@ -596,7 +600,7 @@
         "production module test matrix has 43 cases: 37 PASS, 6 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 6 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 9 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
-        "persistence acceptance ledger has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
+        "persistence acceptance ledger has 125 tested features: 121 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
         "business dependency package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it has 2/2 BLOCKED_NO_IMPLEMENTATION_CANDIDATE dependencies: material-service and process-analysis have no implementation candidates in the current bounded package scan.",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "business dependency readiness smoke was refreshed on 100.99.133.43 at 2026-06-21T13:46:42.816Z and has 2/2 BLOCKED external dependencies: material-service and process-analysis are not ready for marker acceptance. Evidence: /tmp/adp-business-dependency-readiness-smoke-current.json.",
@@ -637,7 +641,7 @@
       ],
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 125 tested features: 121 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED",
         "metadata/postgres-migration-inventory.json currently has 173 scripts, highRiskStatementCount=0, watchStatementCount=62, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
@@ -655,7 +659,7 @@
       "nextActions": [
         "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
       ],
-      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE, and metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; PostgreSQL migration inventory has 173 scripts, highRiskStatementCount=0, watchStatementCount=62, watchSafetyIssueCount=0; RBAC validations closed rbac_roleuser.valid, RBAC data resource missing tables, and role data resource inherited-user persistence gap; WOM tracing closed missing WOM_WAIT_PUT_RECORDS with 079 and process start/end PostgreSQL gaps with 104/105/106; customProperty model mapping closed legacy project_property table-name compatibility with 169; WTS work permit export runtime action compatibility is tracked by 171; WOM task item persistence and make-task workflow metadata drift are covered by idempotent migrations 172 and 173. The latest WOM toolbar row-click blockers are service/package/runtime endpoint issues, not new SQL patches. 模块准入门禁现在同时校验扫描覆盖，防止新业务包因不透明压缩包或超大文本跳过而绕过 PostgreSQL/Oracle 方言治理。"
+      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 125 tested features: 121 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE, and metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; PostgreSQL migration inventory has 173 scripts, highRiskStatementCount=0, watchStatementCount=62, watchSafetyIssueCount=0; RBAC validations closed rbac_roleuser.valid, RBAC data resource missing tables, and role data resource inherited-user persistence gap; WOM tracing closed missing WOM_WAIT_PUT_RECORDS with 079 and process start/end PostgreSQL gaps with 104/105/106; customProperty model mapping closed legacy project_property table-name compatibility with 169; WTS work permit export runtime action compatibility is tracked by 171; WOM task item persistence and make-task workflow metadata drift are covered by idempotent migrations 172 and 173. The latest WOM toolbar row-click blockers are service/package/runtime endpoint issues, not new SQL patches. 模块准入门禁现在同时校验扫描覆盖，防止新业务包因不透明压缩包或超大文本跳过而绕过 PostgreSQL/Oracle 方言治理。"
     },
     {
       "id": "G-020",

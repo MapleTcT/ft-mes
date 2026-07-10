@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-22T01:36:29.672Z",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-10T03:55:34.526Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "target": {
     "baseUrl": "http://100.99.133.43:18080",
@@ -10,7 +10,7 @@
     "nacosContainer": "adp-mes-newbase-nacos-1",
     "postgresContainer": "adp-mes-newbase-postgres-1",
     "nacosGroup": "prod",
-    "apiTimeoutMs": 8000
+    "apiTimeoutMs": 20000
   },
   "summary": {
     "status": "BLOCKED",
@@ -105,7 +105,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/material/foreign/foreign/checkProdResult\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/material/foreign/foreign/checkProdResult] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:24.083+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/material/foreign/foreign/checkProdResult\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/material/foreign/foreign/checkProdResult] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.648+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -115,7 +115,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:24.605+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.661+0000\",\"status\":503}",
           "tenantServiceMissing": true
         }
       ],
@@ -225,7 +225,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:25.027+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.674+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -235,7 +235,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:26.330+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.692+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -245,7 +245,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:27.364+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.705+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -255,7 +255,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:28.336+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.723+0000\",\"status\":503}",
           "tenantServiceMissing": true
         },
         {
@@ -265,7 +265,7 @@
           "status": 503,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-06-22T01:36:29.003+0000\",\"status\":503}",
+          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-07-10T03:55:34.734+0000\",\"status\":503}",
           "tenantServiceMissing": true
         }
       ],

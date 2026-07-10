@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:27:39+00:00",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T04:02:14+00:00",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -354,14 +354,15 @@
         "084/085 were applied to 10.11.100.17 and the minimal stop acceptance no longer has layoutJson frontend errors",
         "WOM config default patch and WOMMs-prod test config support output-detail report-work acceptance.",
         "metadata/runtime-patch-manifest.json and docs/production-migration/runtime-patch-manifest.md record current runtime patch, PostgreSQL init SQL, and Nacos template checksums.",
-        "Nacos/runtime patch 生产 evidence manifest 和 strict READY 校验器已建立。"
+        "Nacos/runtime patch 生产 evidence manifest 和 strict READY 校验器已建立。",
+        "2026-07-10 测试环境 WOM 核心 JAR/静态补丁已完成真实回退和恢复演练；两个版本分别完成本次 Spring Boot 启动、Nacos healthy 注册和页面 200，恢复后环境 9/9、制造指令和工具栏 marker 回归 PASS。"
       ],
       "blockingIssues": [
-        "生产签名 patch 包、生产 Nacos diff、回退演练未补；QCS 请检明细表缺口已补齐，但 WOM 请检、质量/入库等动作仍缺 marker 业务数据验收。"
+        "测试环境 WOM 核心补丁回退已完成，但生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补；material/WMS 入库回写仍缺真实服务包。"
       ],
       "nextActions": [
         "用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。",
-        "补生产 Nacos export/diff 和回滚步骤。",
+        "基于已验证的测试环境脚本补生产 Nacos export/diff、签名包和全栈回滚步骤。",
         "在 marker 数据准备后执行真实前端写动作并补 PostgreSQL before/after 证据。",
         "用 production-nacos-runtime-patch-ready-check 把生产 Nacos export/diff、签名 patch 包、post-publish smoke 和回滚演练补成 READY evidence。"
       ],
@@ -371,6 +372,9 @@
         "docs/production-migration/nacos-runtime-patch-runbook.md",
         "metadata/runtime-patch-manifest.json",
         "docs/production-migration/runtime-patch-manifest.md",
+        "deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js",
+        "metadata/core-flow-runtime-rollback-rehearsal.json",
+        "docs/production-migration/core-flow-runtime-rollback-rehearsal.md",
         "deploy/nacos/production-migration/README.md",
         "deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json",
         "deploy/nacos/production-migration/scripts/validate-nacos-runtime-patch-evidence.py"
@@ -386,7 +390,7 @@
         "production module test matrix has 43 cases: 37 PASS, 6 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 6 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 9 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
-        "persistence acceptance ledger has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
+        "persistence acceptance ledger has 125 tested features: 121 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE",
         "business dependency package scan covered 58889 files, 1142 outer archives, 2139 first-party/dependency-relevant nested archives, and 429984 archive entries across /Users/zhangchu/Documents/MES包 plus ADP base-Server/config/static roots; archive entry/text cap skips are 0; it has 2/2 BLOCKED_NO_IMPLEMENTATION_CANDIDATE dependencies: material-service and process-analysis have no implementation candidates in the current bounded package scan.",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "business dependency readiness smoke was refreshed on 100.99.133.43 at 2026-06-21T13:46:42.816Z and has 2/2 BLOCKED external dependencies: material-service and process-analysis are not ready for marker acceptance. Evidence: /tmp/adp-business-dependency-readiness-smoke-current.json.",
@@ -436,7 +440,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 124 tested features: 120 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 125 tested features: 121 PASS, 0 FAIL, 3 BLOCKED, 1 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check now cross-check the coverage.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 9 backlog items, 0 FAIL_BACKLOG and 9 BLOCKED",
         "metadata/postgres-migration-inventory.json currently has 173 scripts, highRiskStatementCount=0, watchStatementCount=62, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",

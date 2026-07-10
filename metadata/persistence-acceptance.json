@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-10T03:05:57Z",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T03:55:34Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
   "latestRevalidation": {
@@ -282,8 +282,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 124,
-    "pass": 120,
+    "testedFeatures": 125,
+    "pass": 121,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 1
@@ -2977,6 +2977,30 @@
       "evidence": "Artifact /tmp/adp-wom-reject-material-make-target-20260710.json. Same-origin browser workflow saved the document with valid=true/version=1/pending_count=1 and used the application delete endpoint; PostgreSQL then showed valid=false/version=2/pending_count=0. Frontend console/page/request failures were empty.",
       "issues": [
         "This proves the prepare-return draft/delete path; material/WMS inventory ledger write-back remains a separate blocker."
+      ]
+    },
+    {
+      "module": "生产质量核心主线-runtime回滚",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "WOM 核心 JAR/静态补丁回退恢复后的制造指令和工具栏落库回归",
+      "api": "POST /produceTaskCreated2; POST /makeTaskEdit/submit; POST /updateTaskState; POST /delete",
+      "method": "MIXED",
+      "requiresPersistence": true,
+      "backendEntry": "runtime rollback/restore -> WOMProduceTaskController/Service -> workflow -> PostgreSQL",
+      "tables": [
+        "wom_produce_tasks",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "wom_wait_put_records",
+        "wom_proc_reports",
+        "wom_produce_task_exelog"
+      ],
+      "marker": "ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK",
+      "verificationSql": "SELECT id,version,valid,status,produce_batch_num FROM wom_produce_tasks WHERE produce_batch_num='ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER_BATCH'; SELECT count(*) FROM wom_produce_tasks WHERE table_no='ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART_TASK_TN';",
+      "status": "PASS",
+      "evidence": "metadata/core-flow-runtime-rollback-rehearsal.json proves distinct rollback and restore boots with Nacos healthy registration and restored hashes. Post-restore marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER passed create/submit/effect/application-delete rollback with workflowMetadataDrift=false. Marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed real browser/API/PostgreSQL state transitions and cleanup|0|0|0|0.",
+      "issues": [
+        "This is test-environment WOM runtime rollback evidence, not production full-stack rollback evidence."
       ]
     }
   ],

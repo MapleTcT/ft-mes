@@ -1761,6 +1761,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-craftgraph-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -2961,6 +2967,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/production-migration/core-flow-runtime-rollback-rehearsal.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/production-migration/keycloak-production-runbook.md",
       "state": "tracked",
       "tracked": true
@@ -3154,6 +3166,12 @@
     {
       "ignored": false,
       "path": "metadata/core-flow-acceptance-20260710.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/core-flow-runtime-rollback-rehearsal.json",
       "state": "tracked",
       "tracked": true
     },
@@ -3782,13 +3800,13 @@
       "tracked": 2
     },
     "deploy": {
-      "tracked": 454
+      "tracked": 455
     },
     "docs": {
-      "tracked": 54
+      "tracked": 55
     },
     "metadata": {
-      "tracked": 68
+      "tracked": 69
     },
     "package.json": {
       "tracked": 1
@@ -3803,8 +3821,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 627,
-    "tracked": 627,
+    "totalFiles": 630,
+    "tracked": 630,
     "untracked": 0
   },
   "untrackedByDirectory": []

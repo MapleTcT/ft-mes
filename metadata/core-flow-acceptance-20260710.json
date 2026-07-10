@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:20:00Z",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T03:53:00Z",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "target": {
     "host": "100.99.133.43",
@@ -12,7 +12,7 @@
   "overallStatus": "BLOCKED",
   "statusReason": "EXTERNAL_PACKAGES",
   "summary": {
-    "pass": 10,
+    "pass": 11,
     "blocked": 2,
     "fail": 0,
     "environmentSmoke": "9/9 PASS",
@@ -142,12 +142,27 @@
       ]
     },
     {
+      "id": "CORE-011",
+      "operation": "WOM 核心运行补丁回退、恢复及恢复后业务回归",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK",
+      "result": "pre-coreflow backup rollback and patched runtime restore both completed a distinct Spring Boot start, Nacos healthy registration and page HTTP 200; restored hashes equal precheck",
+      "postRestoreMarkers": [
+        "ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER",
+        "ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART"
+      ],
+      "cleanup": "toolbar cleanup|0|0|0|0 PASS; remote rehearsal snapshot removed only after successful restore",
+      "artifact": "metadata/core-flow-runtime-rollback-rehearsal.json",
+      "runbook": "docs/production-migration/core-flow-runtime-rollback-rehearsal.md"
+    },
+    {
       "id": "CORE-BLOCKER-001",
       "operation": "完工入库和库存回写",
       "status": "BLOCKED",
       "dependency": "material/WMS service package",
       "evidence": "Nacos aliases material/MATERIAL/wms/WMS/warehouse/inventory all have healthyHostCount=0; checkProdResult and generateProduceOutSing return tenant-service 503",
-      "artifact": "/tmp/adp-business-dependency-readiness-coreflow-20260710.json"
+      "artifact": "metadata/business-dependency-readiness-smoke.json",
+      "recheckedAt": "2026-07-10T03:55:34.526Z"
     },
     {
       "id": "CORE-BLOCKER-002",
@@ -155,7 +170,8 @@
       "status": "BLOCKED",
       "dependency": "ProcessAnalysis package/service/schema",
       "evidence": "Nacos aliases have healthyHostCount=0; five endpoints return tenant-service 503; processAnalysis table/runtimeView/menu counts are all 0",
-      "artifact": "/tmp/adp-business-dependency-readiness-coreflow-20260710.json"
+      "artifact": "metadata/business-dependency-readiness-smoke.json",
+      "recheckedAt": "2026-07-10T03:55:34.526Z"
     }
   ],
   "scopeDecisionsRequired": [

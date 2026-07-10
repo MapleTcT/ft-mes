@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T03:33:49+00:00",
-  "repoCommit": "cbd191763436c894b1f8b3ded69ddfcde95e97ae",
+  "generatedAt": "2026-07-10T04:01:20+00:00",
+  "repoCommit": "93cf18ca13f08bf71aa4c2a89aeef985eaf22d52",
   "database": "PostgreSQL",
   "status": "REHEARSAL_BLOCKED",
   "environment": {
@@ -25,12 +25,13 @@
     "businessDependencyReadiness": "metadata/business-dependency-readiness-smoke.json",
     "businessPackageScan": "metadata/business-dependency-package-scan.json",
     "productionExportReadiness": "metadata/production-export-readiness-smoke.json",
-    "coreFlowAcceptance": "metadata/core-flow-acceptance-20260710.json"
+    "coreFlowAcceptance": "metadata/core-flow-acceptance-20260710.json",
+    "coreFlowRuntimeRollback": "metadata/core-flow-runtime-rollback-rehearsal.json"
   },
   "sourceEvidence": {
     "migrationReadiness": {
       "path": "metadata/production-migration-readiness.json",
-      "generatedAt": "2026-07-10T03:33:49+00:00",
+      "generatedAt": "2026-07-10T04:01:20+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
       "metrics": {
         "totalTracks": 9,
@@ -42,7 +43,7 @@
     },
     "cutoverGate": {
       "path": "metadata/production-cutover-gate.json",
-      "generatedAt": "2026-07-10T03:33:49+00:00",
+      "generatedAt": "2026-07-10T04:01:20+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
       "metrics": {
         "totalGates": 9,
@@ -56,7 +57,7 @@
     },
     "productionBlockers": {
       "path": "metadata/production-module-blockers.json",
-      "generatedAt": "2026-07-10T03:05:57Z",
+      "generatedAt": "2026-07-10T03:55:34Z",
       "status": "BLOCKED",
       "metrics": {
         "blockers": 6,
@@ -65,7 +66,7 @@
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-07-10T03:05:57Z",
+      "generatedAt": "2026-07-10T03:55:34Z",
       "status": "BLOCKED",
       "metrics": {
         "totalItems": 9,
@@ -179,7 +180,7 @@
     },
     "businessDependencyReadiness": {
       "path": "metadata/business-dependency-readiness-smoke.json",
-      "generatedAt": "2026-06-22T01:36:29.672Z",
+      "generatedAt": "2026-07-10T03:55:34.526Z",
       "status": "BLOCKED",
       "metrics": {
         "dependencies": 2,
@@ -219,10 +220,10 @@
     },
     "coreFlowAcceptance": {
       "path": "metadata/core-flow-acceptance-20260710.json",
-      "generatedAt": "2026-07-10T03:20:00Z",
+      "generatedAt": "2026-07-10T03:53:00Z",
       "status": "BLOCKED",
       "metrics": {
-        "pass": 10,
+        "pass": 11,
         "blocked": 2,
         "fail": 0,
         "environmentSmoke": "9/9 PASS",
@@ -230,6 +231,12 @@
         "postgresRuntimeSmoke": "8/8 PASS",
         "postgresMapperAudit": "0 error / 0 warning"
       }
+    },
+    "coreFlowRuntimeRollback": {
+      "path": "metadata/core-flow-runtime-rollback-rehearsal.json",
+      "generatedAt": "2026-07-10T03:46:38.472Z",
+      "status": "PASS",
+      "metrics": {}
     }
   },
   "summary": {
@@ -585,7 +592,8 @@
         "metadata/nacos-config-drift-smoke.json",
         "scripts/verify-runtime-smoke-reports.py",
         "metadata/runtime-patch-manifest.json",
-        "docs/production-migration/runtime-patch-manifest.md"
+        "docs/production-migration/runtime-patch-manifest.md",
+        "metadata/core-flow-runtime-rollback-rehearsal.json"
       ]
     },
     {

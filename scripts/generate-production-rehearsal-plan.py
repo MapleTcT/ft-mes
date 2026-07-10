@@ -29,6 +29,7 @@ SOURCE_LEDGER_PATHS = {
     "businessPackageScan": "metadata/business-dependency-package-scan.json",
     "productionExportReadiness": "metadata/production-export-readiness-smoke.json",
     "coreFlowAcceptance": "metadata/core-flow-acceptance-20260710.json",
+    "coreFlowRuntimeRollback": "metadata/core-flow-runtime-rollback-rehearsal.json",
 }
 
 TRACK_ORDER = [
@@ -50,6 +51,7 @@ RUNTIME_REPORTS_BY_TRACK = {
     "nacos-runtime-patch": [
         "metadata/nacos-config-drift-smoke.json",
         "metadata/runtime-patch-manifest.json",
+        "metadata/core-flow-runtime-rollback-rehearsal.json",
     ],
     "ports-domain-tls": ["metadata/test-environment-smoke.json"],
     "business-smoke-signoff": [
