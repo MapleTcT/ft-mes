@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`174`。
-- 编号范围：`001` 到 `174`。
+- 脚本数量：`175`。
+- 编号范围：`001` 到 `175`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 73 |
 | configuration | 41 |
-| general | 24 |
+| general | 25 |
 | notification | 9 |
 | platform | 49 |
 | workflow | 20 |
@@ -35,11 +35,11 @@
 | --- | --- |
 | alter-table | 9326 |
 | create-function | 68 |
-| create-index | 856 |
-| create-table | 529 |
+| create-index | 866 |
+| create-table | 530 |
 | create-view | 107 |
-| insert | 3875 |
-| update | 3937 |
+| insert | 3877 |
+| update | 3939 |
 
 ## 幂等信号统计
 
@@ -48,10 +48,10 @@
 | create-or-replace | 172 |
 | do-block | 274 |
 | if-exists | 90 |
-| if-not-exists | 11270 |
-| on-conflict | 3839 |
+| if-not-exists | 11281 |
+| on-conflict | 3840 |
 | to-regclass | 152 |
-| where-not-exists | 26 |
+| where-not-exists | 27 |
 
 ## 脚本清单
 
@@ -231,6 +231,7 @@
 | 172 | 172-wom-task-items-table.sql | general | 98 | create-table:1, create-index:4, alter-table:2 | 9 | - |
 | 173 | 173-wom-make-task-flow-runtime-metadata-sync.sql | platform, workflow | 205 | insert:1, update:1 | 2 | watch:2 |
 | 174 | 174-material-wms-completion-inbound.sql | general | 145 | create-table:5, create-index:12 | 17 | - |
+| 175 | 175-process-analysis-traceability.sql | general | 98 | create-table:1, create-index:10, insert:2, update:2 | 13 | - |
 
 ## 规则
 

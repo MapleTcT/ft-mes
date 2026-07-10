@@ -587,9 +587,9 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 54,
+    "composeServiceCount": 55,
     "composeServiceKindCounts": {
-      "business-runtime": 15,
+      "business-runtime": 16,
       "infrastructure": 11,
       "platform-runtime": 28
     },
@@ -802,6 +802,11 @@
       {
         "service": "material",
         "jarPath": "bap-server/module-Server/material/manual/material-wms.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "ProcessAnalysis",
+        "jarPath": "bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar",
         "kind": "business-runtime"
       },
       {

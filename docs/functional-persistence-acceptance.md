@@ -41,6 +41,16 @@ PostgreSQL 闭环。Marker `ADP_E2E_20260710074612_MATERIAL_WMS` 验证完工
 `metadata/material-wms-completion-inbound.png`。该 PASS 不代表当前包存在
 独立不良数量字段；后者仍按产品范围决定处理。
 
+### ProcessAnalysis 最新验收
+
+2026-07-10 新增的 `process-analysis` 模块已在真实测试环境完成 WOM 按钮、
+兼容 API、Nacos 和 PostgreSQL 闭环。Marker
+`ADP_E2E_20260710084011_PROCESS_ANALYSIS` 验证任务、工序、活动三类快照
+的幂等 revision、跨 WOM/QCS/WMS 时间轴和清理；机器证据为
+`metadata/process-analysis-persistence-acceptance.json`，浏览器截图为
+`metadata/process-analysis-trace.png`。追溯查询本身是读操作，手工统计快照
+和 marker-scoped WMS fixture 是本轮明确的写入验收边界。
+
 这条规则用于约束当前 ADP/MES 恢复仓库后续所有功能验证任务。进入验收时，优先级如下：
 
 1. 先启动或访问真实系统，确认前端、后端、PostgreSQL 的实际运行状态。

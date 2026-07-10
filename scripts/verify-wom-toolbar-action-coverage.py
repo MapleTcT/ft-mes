@@ -347,7 +347,8 @@ def check_row_smoke_alignment(
     if i18n.get("hasRawWomCustom") is not False or i18n.get("hasTableNoKey") is not False:
         fail(failures, "row smoke must prove raw WOM/custom table i18n keys are not visible")
 
-    check_known_blocker(row_smoke, "processAnalysis", "生产过程追溯服务未部署或暂不可用！", failures)
+    # The committed row smoke predates ProcessAnalysis recovery and remains historical
+    # evidence. Current traceability acceptance is checked through the action ledger.
     check_known_blocker(row_smoke, "qrcode", "二维码生成页面未部署或暂不可用！", failures)
 
     persistence = as_dict(row_smoke.get("persistence"))
@@ -362,7 +363,7 @@ def check_row_smoke_alignment(
         if row_ref not in as_list(action.get("externalEvidenceRefs")):
             fail(failures, f"{action_id} externalEvidenceRefs must include {row_ref}")
         action_text = json.dumps(action, ensure_ascii=False)
-        if marker and marker not in action_text:
+        if action_id != "process-traceability" and marker and marker not in action_text:
             fail(failures, f"{action_id} must mention latest row smoke marker {marker}")
 
     actions_by_id = {str(action.get("id")): action for action in actions}

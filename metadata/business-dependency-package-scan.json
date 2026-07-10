@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:16:37Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:46:19Z",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
   "database": "PostgreSQL",
   "scanRoots": [
     {
@@ -101,8 +101,8 @@
     "status": "CANDIDATE_FOUND",
     "rootsRequested": 5,
     "rootsExisting": 5,
-    "filesVisited": 58916,
-    "textFilesScanned": 31396,
+    "filesVisited": 58932,
+    "textFilesScanned": 31412,
     "archivesScanned": 1142,
     "nestedArchivesScanned": 2139,
     "nestedArchivesSkippedByPath": 12168,
@@ -118,8 +118,8 @@
     "skippedLargeArchives": 0,
     "readErrors": 0,
     "dependencies": 2,
-    "blockedDependencies": 1,
-    "candidateDependencies": 1
+    "blockedDependencies": 0,
+    "candidateDependencies": 2
   },
   "scannedArchives": [
     {
@@ -1855,7 +1855,7 @@
     {
       "id": "process-analysis",
       "title": "ProcessAnalysis traceability service",
-      "status": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+      "status": "CANDIDATE_FOUND",
       "requiredFor": [
         "PROD-020"
       ],
@@ -1912,16 +1912,555 @@
           "produceTask"
         ]
       },
-      "targetHitCount": 0,
+      "targetHitCount": 41,
       "moduleHitCount": 0,
-      "knownAdjacentHitCount": 0,
-      "callerOnlyHitCount": 120,
-      "implementationCandidateCount": 0,
-      "implementationCandidates": [],
-      "targetHits": [],
+      "knownAdjacentHitCount": 3,
+      "callerOnlyHitCount": 76,
+      "implementationCandidateCount": 38,
+      "implementationCandidates": [
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "uild and test: ```bash make process-analysis-test make process-analysis-stage-runtime ``` Service registration name: `ProcessAnalysis` in Nacos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelog"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "isProdprocessView",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "Service registration name: `ProcessAnalysis` in Nacos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analy"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "processBatchViewOut",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "cos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProc"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "analysisiTask",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "sView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatActive",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "`/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatProcess",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "ssBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/resources/application.yml",
+          "entry": null,
+          "context": "spring: application: name: ProcessAnalysis datasource: url: jdbc:postgresql://${SUPOS_SYSTEM_DB_HOST:postgres}:${SUPOS_SYSTEM_DB_PORT:5432}/${SUPOS_SYSTEM_D"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis; import org.springframework.boot.SpringApplication; import org.springframework.boot.autoconfigure.SpringBootApplicatio"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.repository; import com.mapletct.ftmes.processanalysis.domain.SnapshotType; import org.springframework.dao.DuplicateKey"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.support; import org.springframework.beans.factory.annotation.Value; import org.springframework.stereotype.Component;"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; import com.mapletct.ftmes.processanalysis.domain.ProcessAnalysisBusinessException; import org.slf4j.Logger; impor"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; public final class LegacyResult<T> { private final int code; private final T data; private final Str"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; import com.mapletct.ftmes.processanalysis.domain.ProcessAnalysisBusinessException; import com.mapletct.ftmes.proc"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "isProdprocessView",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "traceabilityService; this.tenantResolver = tenantResolver; } @GetMapping(\"/analysisParam/analysisParam/isProdprocessView\") public LegacyResult<Map<String, Object>> availability(@RequestParam(\"batchNo\") String batchNo) { return L"
+        }
+      ],
+      "targetHits": [
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "uild and test: ```bash make process-analysis-test make process-analysis-stage-runtime ``` Service registration name: `ProcessAnalysis` in Nacos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelog"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "isProdprocessView",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "Service registration name: `ProcessAnalysis` in Nacos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analy"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "processBatchViewOut",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "cos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProc"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "analysisiTask",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "sView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatActive",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "`/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatProcess",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "ssBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analysisiTask` - `/paramStatRec/paramStatRec/manualStatProcess` - `/paramStatRec/paramStatRec/manualStatActive`"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/resources/application.yml",
+          "entry": null,
+          "context": "spring: application: name: ProcessAnalysis datasource: url: jdbc:postgresql://${SUPOS_SYSTEM_DB_HOST:postgres}:${SUPOS_SYSTEM_DB_PORT:5432}/${SUPOS_SYSTEM_D"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis; import org.springframework.boot.SpringApplication; import org.springframework.boot.autoconfigure.SpringBootApplicatio"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.repository; import com.mapletct.ftmes.processanalysis.domain.SnapshotType; import org.springframework.dao.DuplicateKey"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.support; import org.springframework.beans.factory.annotation.Value; import org.springframework.stereotype.Component;"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; import com.mapletct.ftmes.processanalysis.domain.ProcessAnalysisBusinessException; import org.slf4j.Logger; impor"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; public final class LegacyResult<T> { private final int code; private final T data; private final Str"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.api; import com.mapletct.ftmes.processanalysis.domain.ProcessAnalysisBusinessException; import com.mapletct.ftmes.proc"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "isProdprocessView",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "traceabilityService; this.tenantResolver = tenantResolver; } @GetMapping(\"/analysisParam/analysisParam/isProdprocessView\") public LegacyResult<Map<String, Object>> availability(@RequestParam(\"batchNo\") String batchNo) { return L"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "processBatchViewOut",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "ess(traceabilityService.availability(batchNo)); } @GetMapping(value = { \"/processAnalysis/exelogSecond/processBatchViewOut\", \"/processAnalysis/exelogSecond/processView\" }, produces = MediaType.TEXT_HTML_VALUE) public ResponseE"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "analysisiTask",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "tyService.trace(tenantResolver.resolve(request), batchNo, productNo)); } @GetMapping(\"/paramDetail/paramDetail/analysisiTask\") public LegacyResult<Map<String, Object>> analyzeTask( HttpServletRequest request, @Reques"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatActive",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "( tenantResolver.resolve(request), processExecutionId)); } @GetMapping(\"/paramStatRec/paramStatRec/manualStatActive\") public LegacyResult<Map<String, Object>> analyzeActivity( HttpServletRequest request, @Re"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatProcess",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "ult.of(exception.getCode(), data, exception.getMessage()); } } @GetMapping(\"/paramStatRec/paramStatRec/manualStatProcess\") public LegacyResult<Map<String, Object>> analyzeProcess( HttpServletRequest request, @Req"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "paActiExeLog",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "tenantResolver.resolve(request), SnapshotType.PROCESS, page, size)); } @PostMapping(\"/produceTask/paActiExeLog/paActiExeLogList-query\") public LegacyResult<Map<String, Object>> activitySnapshots( HttpServletRequest"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "paPrExeLog",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "lyzeActivity( tenantResolver.resolve(request), activityExecutionId)); } @PostMapping(\"/produceTask/paPrExeLog/paPrExeLogList-query\") public LegacyResult<Map<String, Object>> processSnapshots( HttpServletRequest re"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/service/TraceabilityService.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/service/TraceabilityService.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/service/TraceabilityService.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.service; import com.fasterxml.jackson.core.JsonProcessingException; import com.fasterxml.jackson.databind.ObjectMapper"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/ProcessAnalysisBusinessException.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/ProcessAnalysisBusinessException.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/ProcessAnalysisBusinessException.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.domain; public class ProcessAnalysisBusinessException extends RuntimeException { private final int code; pub"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/SnapshotType.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/SnapshotType.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/SnapshotType.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis.domain; public enum SnapshotType { TASK, PROCESS, ACTIVITY }"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/resources/static/process-batch-trace.html",
+          "entry": null,
+          "context": "productNo = params.get(\"productNo\") || params.get(\"product\") || \"\"; var prefix = window.location.pathname.split(\"/processAnalysis/\")[0]; var state = document.getElementById(\"state\"); function text(value) { return value === null"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "path:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java "
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "ProcessAnalysis",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "package com.mapletct.ftmes.processanalysis; import org.junit.Before; import org.junit.Test; import org.junit.runner.RunWith; import org.springframework.beans.fac"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "isProdprocessView",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "RealSourceFactsAndRendersOperationalPage() throws Exception { mockMvc.perform(get(\"/analysisParam/analysisParam/isProdprocessView\").param(\"batchNo\", BATCH)) .andExpect(status().isOk()) .andExpect(jsonPath(\"$.code\").value(200)"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "processBatchViewOut",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "(\"$.data.quality.reportItems[0].report_name\").value(\"含量\")); mockMvc.perform(get(\"/processAnalysis/exelogSecond/processBatchViewOut\").param(\"batchNo\", BATCH)) .andExpect(status().isOk()) .andExpect(content().string(containsStri"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "analysisiTask",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "cyManualStatisticsPersistIdempotentSnapshots() throws Exception { mockMvc.perform(get(\"/paramDetail/paramDetail/analysisiTask\") .header(\"X-Tenant-Id\", \"COMP\").param(\"taskExeLogId\", \"101\")) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatActive",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": ".isOk()) .andExpect(jsonPath(\"$.code\").value(200)); mockMvc.perform(get(\"/paramStatRec/paramStatRec/manualStatActive\") .header(\"X-Tenant-Id\", \"COMP\").param(\"activeId\", \"301\")) .andExpect(status().isOk())"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "manualStatProcess",
+          "match_type": "content:targetTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "dExpect(jsonPath(\"$.data.snapshot.source_type\").value(\"TASK\")); mockMvc.perform(get(\"/paramStatRec/paramStatRec/manualStatProcess\") .header(\"X-Tenant-Id\", \"COMP\").param(\"processId\", \"201\")) .andExpect(status().isOk())"
+        }
+      ],
       "moduleHits": [],
-      "knownAdjacentHits": [],
+      "knownAdjacentHits": [
+        {
+          "dependency": "process-analysis",
+          "term": "prodprocessView",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/README.md",
+          "entry": null,
+          "context": "Service registration name: `ProcessAnalysis` in Nacos group `prod`. Primary routes: - `/analysisParam/analysisParam/isProdprocessView` - `/processAnalysis/exelogSecond/processBatchViewOut` - `/processAnalysis/api/trace` - `/paramDetail/paramDetail/analy"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "prodprocessView",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+          "entry": null,
+          "context": "aceabilityService; this.tenantResolver = tenantResolver; } @GetMapping(\"/analysisParam/analysisParam/isProdprocessView\") public LegacyResult<Map<String, Object>> availability(@RequestParam(\"batchNo\") String batchNo) { return L"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "prodprocessView",
+          "match_type": "content:knownAdjacentTerms",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "alSourceFactsAndRendersOperationalPage() throws Exception { mockMvc.perform(get(\"/analysisParam/analysisParam/isProdprocessView\").param(\"batchNo\", BATCH)) .andExpect(status().isOk()) .andExpect(jsonPath(\"$.code\").value(200)"
+        }
+      ],
       "callerOnlyHits": [
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "content:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+          "entry": null,
+          "context": "+ \"t.finish_num, t.act_start_time, t.act_end_time, t.create_time, t.modify_time \" + \"FROM wom_produce_tasks t LEFT JOIN baseset_materials m ON m.id = t.product_id \" + \"WHERE t.valid IS DISTINCT FROM"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "content:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/service/TraceabilityService.java",
+          "entry": null,
+          "context": "Map<String, Object>> events = new ArrayList<Map<String, Object>>(); addEvent(events, \"TASK_CREATED\", \"制造指令创建\", \"wom_produce_tasks\", task, \"create_time\", \"task_run_state\"); addEvent(events, \"TASK_STARTED\", \"制造指令开始\", \"wom_produce_"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "content:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/resources/process-analysis-test-schema.sql",
+          "entry": null,
+          "context": "CREATE TABLE wom_produce_tasks ( id BIGINT PRIMARY KEY, table_no VARCHAR(128), produce_batch_num VARCHAR(128), product_id BIGINT, tas"
+        },
+        {
+          "dependency": "process-analysis",
+          "term": "WOM_",
+          "match_type": "content:callerOnlyHints",
+          "source": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+          "entry": null,
+          "context": "nts\", \"qcs_un_qlf_deals\", \"qcs_report_coms\", \"qcs_inspect_reports\", \"qcs_inspects\", \"baseset_batch_infos\", \"wom_mat_outpt_records\", \"wom_output_details\", \"wom_putin_details\", \"wom_acti_exelogs\", \"wom_task_actives\", \"wom_"
+        },
         {
           "dependency": "process-analysis",
           "term": "WOM_",
@@ -2209,41 +2748,9 @@
           "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
           "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcessExelogInterface",
           "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProcessExelogInterface"
-        },
-        {
-          "dependency": "process-analysis",
-          "term": "WOM_",
-          "match_type": "path:callerOnlyHints",
-          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
-          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProdTaskExelogInterface",
-          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProdTaskExelogInterface"
-        },
-        {
-          "dependency": "process-analysis",
-          "term": "WOM_",
-          "match_type": "path:callerOnlyHints",
-          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
-          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMProduceTaskInterface",
-          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMProduceTaskInterface"
-        },
-        {
-          "dependency": "process-analysis",
-          "term": "WOM_",
-          "match_type": "path:callerOnlyHints",
-          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
-          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface",
-          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutInMaterialInterface"
-        },
-        {
-          "dependency": "process-analysis",
-          "term": "WOM_",
-          "match_type": "path:callerOnlyHints",
-          "source": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip",
-          "entry": "api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutMateiDetailInterface",
-          "context": "/Users/zhangchu/Documents/MES包/配料/XTYsupPlant-WOM V6.1.3.3-220705-C.zip!XTYsupPlant-WOM V6.1.3.3-220705-C/WOM_6.1.3.3.zip api/src/main/custom/com/supcon/orchid/WOM/client/WOMPutMateiDetailInterface"
         }
       ],
-      "nextAction": "Provide a package containing the missing service implementation, then rerun this scan and runtime dependency smoke."
+      "nextAction": "Inspect and deploy the implementation candidate, then rerun runtime dependency smoke and marker acceptance."
     }
   ],
   "evidence": {

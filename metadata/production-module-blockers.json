@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
   "sourceMatrix": "metadata/production-module-test-cases.json",
   "summary": {
-    "blockedCases": 5,
-    "blockers": 5,
+    "blockedCases": 4,
+    "blockers": 4,
     "externalClientRequired": 1,
-    "missingServicePackage": 1,
+    "missingServicePackage": 0,
     "productScopeConfirmation": 2,
     "compositeServiceAndScope": 0,
     "missingExportImplementation": 1
   },
   "latestEvidence": {
     "lastRemoteRecheckAt": "2026-06-22T11:24:47.554Z",
-    "businessDependencyLastRecheckAt": "2026-07-10T07:16:11.006Z",
-    "businessDependencyReadinessGeneratedAt": "2026-07-10T07:16:11.006Z",
-    "businessDependencyReadinessStatus": "BLOCKED",
-    "businessDependencyReady": 0,
-    "businessDependencyBlocked": 1,
-    "businessPackageScanGeneratedAt": "2026-07-10T07:16:37Z",
+    "businessDependencyLastRecheckAt": "2026-07-10T09:18:52.471Z",
+    "businessDependencyReadinessGeneratedAt": "2026-07-10T09:18:52.471Z",
+    "businessDependencyReadinessStatus": "READY",
+    "businessDependencyReady": 2,
+    "businessDependencyBlocked": 0,
+    "businessPackageScanGeneratedAt": "2026-07-10T08:46:19Z",
     "businessPackageScanStatus": "CANDIDATE_FOUND",
-    "businessPackageScanCandidateDependencies": 1,
+    "businessPackageScanCandidateDependencies": 2,
     "productionExportReadinessGeneratedAt": "2026-06-22T11:24:47.554Z",
     "productionExportReadinessStatus": "BLOCKED",
     "productionExportVerifiedDataExports": 1,
@@ -32,10 +32,10 @@
     "coreFlowEvidence": "metadata/core-flow-acceptance-20260710.json",
     "coreFlowRuntimeRollbackEvidence": "metadata/core-flow-runtime-rollback-rehearsal.json",
     "coreFlowRuntimeRollbackStatus": "PASS",
-    "coreFlowPass": 12,
-    "coreFlowBlocked": 1,
+    "coreFlowPass": 13,
+    "coreFlowBlocked": 0,
     "materialHealthyHosts": 1,
-    "processAnalysisHealthyHosts": 0
+    "processAnalysisHealthyHosts": 1
   },
   "blockers": [
     {
@@ -97,42 +97,6 @@
       "nonSolutions": [
         "Do not infer a standalone bad-quantity feature from QCS result fields.",
         "Do not count the accepted material WMS flow as blocked."
-      ]
-    },
-    {
-      "caseId": "PROD-020",
-      "title": "批次、物料、工单追溯查询",
-      "status": "BLOCKED",
-      "category": "missing-service-package",
-      "blockerCategory": "missing-service-package",
-      "dependency": "ProcessAnalysis / Traceability service package, runtime metadata, menu, permissions, and PostgreSQL schema",
-      "currentEvidenceRefs": [
-        "metadata/production-module-test-cases.json",
-        "docs/production-module-functional-test-cases.md",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/processanalysis-dependency-analysis.json",
-        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
-      ],
-      "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: after ProcessAnalysis deployment, open isProdprocessView/processBatchViewOut from the real WOM trace button with a marker batch"
-      ],
-      "passCriteria": [
-        "ProcessAnalysis or traceability service has at least one healthy Nacos prod instance.",
-        "ProcessAnalysis runtime_view/menu/table counts are non-zero and mapped to the deployed module.",
-        "Authenticated traceability endpoints return HTTP 2xx successful responses instead of 503.",
-        "The real WOM trace button opens processBatchViewOut and any target query tables are verified in PostgreSQL."
-      ],
-      "nextActions": [
-        "Recover or deploy the ProcessAnalysis module package.",
-        "Apply module runtime views, menus, permissions, and PostgreSQL tables.",
-        "Run marker browser/API/DB acceptance before changing PROD-020 to PASS."
-      ],
-      "nonSolutions": [
-        "Do not patch WOM alone and call traceability done; the target module is absent.",
-        "Do not use a direct URL smoke without ProcessAnalysis service registration and DB evidence."
       ]
     },
     {

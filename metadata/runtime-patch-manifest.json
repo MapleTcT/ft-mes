@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:46:51+00:00",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T09:07:44+00:00",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 329,
-    "totalBytes": 24724405,
+    "totalFiles": 330,
+    "totalBytes": 24729281,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 174,
+      "postgres-init-sql": 175,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 24,
@@ -19,11 +19,11 @@
     "bytesByCategory": {
       "nacos-config-template": 42353,
       "nginx-runtime-config": 10277,
-      "postgres-init-sql": 24124012,
+      "postgres-init-sql": 24128630,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
       "runtime-script": 217121,
-      "runtime-static-override": 218566
+      "runtime-static-override": 218824
     }
   },
   "categoryDescriptions": {
@@ -1357,6 +1357,12 @@
       "sha256": "17d6e53a8d0d5cd39b355ba68f7295561171000c2b518bcfbc5c8e13e71b2e01"
     },
     {
+      "path": "deploy/docker/postgres/init/175-process-analysis-traceability.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 4618,
+      "sha256": "9cd5798bc813d0e9966d634e0642c6c187930b03b0f6cab4940228a81aad647a"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1683,20 +1689,20 @@
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList.html",
       "category": "runtime-static-override",
-      "sizeBytes": 5195,
-      "sha256": "d0fb1d9f39c510e1b743541ccbb1b025ea94449383b2106c3dba99a10cb9ab83"
+      "sizeBytes": 5373,
+      "sha256": "e00db2fdc0998612da02ba02dc27923b611ef4652930c73fb91fe99ca4776c97"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
       "category": "runtime-static-override",
-      "sizeBytes": 24056,
-      "sha256": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
+      "sizeBytes": 24096,
+      "sha256": "b05eb43c593489f1095616bb2a8f1b6231449583fdd7f3e65248c45dd76c1936"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
       "category": "runtime-static-override",
-      "sizeBytes": 24056,
-      "sha256": "5eb740c7abe578dd62dd81ad936a146ac1bb0a61a686fa046691b72e2fe18090"
+      "sizeBytes": 24096,
+      "sha256": "b05eb43c593489f1095616bb2a8f1b6231449583fdd7f3e65248c45dd76c1936"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",

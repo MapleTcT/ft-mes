@@ -972,8 +972,14 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
             fail(failures, "business dependency contracts database must remain PostgreSQL")
         if dependency_contracts.get("module") != "production":
             fail(failures, "business dependency contracts module must be production")
-        if dependency_contracts.get("overallStatus") != "BLOCKED" and (blocked > 0 or backlog_items > 0):
-            fail(failures, "business dependency contracts must remain BLOCKED while production cases/backlog are unresolved")
+        contract_statuses = {
+            str(item.get("status"))
+            for item in as_list(dependency_contracts.get("dependencies"))
+            if isinstance(item, dict)
+        }
+        expected_contract_status = "READY" if contract_statuses == {"READY"} else "BLOCKED"
+        if dependency_contracts.get("overallStatus") != expected_contract_status:
+            fail(failures, f"business dependency contracts overallStatus must be {expected_contract_status}")
         contract_ids = {
             str(item.get("id"))
             for item in as_list(dependency_contracts.get("dependencies"))

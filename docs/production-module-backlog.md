@@ -39,7 +39,6 @@ make business-dependency-contract-check
 | PROD-ACTION-008 | BLOCKED | missing-runtime-endpoint | WOM `makeTaskList` 生成二维码运行包接口缺失 | `metadata/wom-toolbar-action-coverage.json`；`metadata/wom-qrcode-route-probe.json`，2026-06-22 09:27 复验仍为三端点 404 且 WOMMs jar 无匹配实现 | `make probe-wom-qrcode-route`，恢复 WOM printManage QR endpoint/package 后从真实工具栏点击复验 | `generateCode/generateQrCode/backfill-printInfo` 不再 404；浏览器点击、请求/响应、文件或 PostgreSQL QR/打印表证据闭合 |
 | PROD-010 | BLOCKED | external-client-required | RM 批量配方可见显式编辑入口 | `metadata/production-module-blockers.json`；`docs/frontend-functional-test-report.md` | 外部 Batch 客户端/ActiveX/WebSocket 联调后做 marker 保存 | 真实外部编辑入口打开并写入 RM 相关表 |
 | PROD-019 | BLOCKED | product-scope-confirmation | 独立 QCS 不良数量登记范围确认 | `metadata/wom-bad-quantity-analysis.json`；`metadata/material-wms-persistence-acceptance.json` | 产品确认独立不良数量是否属于支持范围 | 若需要，必须提供真实字段/路由/后端/PostgreSQL 数值表并 marker 验收；material/WMS 保持 PASS |
-| PROD-020 | BLOCKED | missing-service-package | 批次、物料、工单追溯查询 | `metadata/processanalysis-dependency-analysis.json` | `make smoke-business-dependencies`，补 ProcessAnalysis 后从 WOM 追溯按钮复验 | ProcessAnalysis 服务、菜单、runtime、表均可用，追溯页面返回成功 |
 | PROD-021 | BLOCKED | product-scope-confirmation | 完整报工仅剩独立不良数量范围确认 | `metadata/production-module-test-cases.json`；`metadata/wom-bad-quantity-analysis.json`；`metadata/material-wms-persistence-acceptance.json` | 保持报工和 material/WMS 回归，产品确认独立不良数量范围 | 只在产品确认需要时新增字段/路由/表并 marker 验收 |
 | PROD-023 | BLOCKED | missing-export-implementation | 生产相关列表导出 | `metadata/production-export-readiness-smoke.json` | `make smoke-production-export-readiness`，实现导出后抓真实文件响应和 sourceAudit | 可见/runtime/sourceAudit 导出入口存在，后端返回非空列表数据文件 |
 
@@ -49,6 +48,6 @@ make business-dependency-contract-check
 - 生产模块矩阵新增 `BLOCKED` 时，必须同步 `metadata/production-module-blockers.json` 和本账本。
 - `metadata/wom-toolbar-action-coverage.json` 中没有生产用例 ID 覆盖的 `BLOCKED` 工具栏动作，必须用 `womToolbarActionIds` 在本账本中登记。
 - 每个新增或变更的生产 backlog 项必须同步 `metadata/business-module-intake-requirements.json`，并通过 `make business-module-intake-requirements-check`。
-- ProcessAnalysis backlog 转为 PASS 前，必须先满足 `docs/business-dependency-contracts.md` 的接入契约。material-service 已完成，后续由 `make material-wms-test` 和 marker 落库验收做回归。
+- ProcessAnalysis 与 material-service 已满足 `docs/business-dependency-contracts.md` 的接入契约；后续分别由 `make process-analysis-test`、`make material-wms-test` 和 marker 落库验收做回归。
 - 任何 backlog 项转为 PASS 前，必须把真实浏览器/API/PostgreSQL 或文件响应证据写回对应验收报告。
 - PostgreSQL 缺表、缺列、类型不兼容或 Oracle 方言残留仍优先落到幂等 SQL；无法立即修复时必须在本账本或模块专项 backlog 中登记，不能靠清库重建掩盖。

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
   "overallStatus": "BLOCKED",
@@ -17,17 +17,17 @@
     "metadata/wom-qrcode-route-probe.json"
   ],
   "summary": {
-    "requirements": 8,
-    "blocked": 8,
+    "requirements": 7,
+    "blocked": 7,
     "productDecision": 4,
     "runtimeEndpointRecovery": 1,
     "externalClientAdapter": 1,
-    "servicePackage": 1,
+    "servicePackage": 0,
     "servicePackageAndScopeDecision": 0,
     "exportImplementation": 1,
     "postgresCompatibilityGap": 0,
-    "requiresRealBrowserProof": 7,
-    "requiresPostgreSQLProof": 7,
+    "requiresRealBrowserProof": 6,
+    "requiresPostgreSQLProof": 6,
     "requiresFileResponseProof": 2
   },
   "requirements": [
@@ -324,76 +324,6 @@
         "metadata/production-module-blockers.json",
         "metadata/wom-bad-quantity-analysis.json",
         "metadata/material-wms-persistence-acceptance.json"
-      ]
-    },
-    {
-      "id": "PROD-020",
-      "title": "ProcessAnalysis traceability service is missing",
-      "status": "BLOCKED",
-      "category": "missing-service-package",
-      "sourceBacklogId": "PROD-020",
-      "linkedBlockerCases": [
-        "PROD-020"
-      ],
-      "requiredIntakeType": "service-package",
-      "dependencyContractIds": [
-        "process-analysis"
-      ],
-      "requiredPackages": [
-        "ProcessAnalysis traceability service package"
-      ],
-      "packageSearchTerms": [
-        "ProcessAnalysis",
-        "isProdprocessView",
-        "processBatchViewOut",
-        "analysisiTask",
-        "manualStatActive",
-        "manualStatProcess"
-      ],
-      "frontendEntrypoints": [
-        "WOM makeTaskList traceability button",
-        "processBatchViewOut"
-      ],
-      "apiEndpoints": [
-        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
-        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
-        "GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
-        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive",
-        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess"
-      ],
-      "persistenceExpectation": "QUERY_AND_RUNTIME_TABLE_PROOF",
-      "targetTables": [
-        "ProcessAnalysis runtime/menu tables",
-        "confirmed ProcessAnalysis traceability tables"
-      ],
-      "requiredEvidence": [
-        "ProcessAnalysis package candidate scan",
-        "healthy Nacos prod ProcessAnalysis service",
-        "runtime_view/menu/table counts greater than zero",
-        "real-browser WOM traceability button opens marker batch page",
-        "PostgreSQL runtime and target table query evidence"
-      ],
-      "recheckCommands": [
-        "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
-        "make smoke-business-dependencies",
-        "manual: open processBatchViewOut from the real WOM trace button with ADP_E2E marker batch"
-      ],
-      "passCriteria": [
-        "The process-analysis contract is READY.",
-        "Traceability runtime/menu/table metadata is present.",
-        "Authenticated endpoints return successful responses instead of 503.",
-        "The real WOM trace button reaches the target page with marker data."
-      ],
-      "nonSolutions": [
-        "Do not patch WOM alone and call traceability complete.",
-        "Do not use direct URL reachability without service registration and DB evidence."
-      ],
-      "sourceEvidenceRefs": [
-        "metadata/production-module-backlog.json",
-        "metadata/production-module-blockers.json",
-        "metadata/business-dependency-contracts.json",
-        "metadata/processanalysis-dependency-analysis.json",
-        "docs/backend-table-audit/processanalysis-dependency-analysis.md"
       ]
     },
     {

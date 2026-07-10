@@ -397,6 +397,14 @@ services:
       JAVA_OPTS: ${MATERIAL_WMS_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/material/manual/material-wms.jar"]
 
+  ProcessAnalysis:
+    <<: *java-service
+    environment:
+      <<: *app-env
+      PROCESS_ANALYSIS_PORT: "8080"
+      JAVA_OPTS: ${PROCESS_ANALYSIS_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar"]
+
   FoundationMs:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"]

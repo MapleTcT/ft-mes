@@ -1,22 +1,21 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 8 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 7 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
 make business-module-intake-requirements-check
 ```
 
-material/WMS 已完成，不再是待接入服务包。当前仍缺的服务包只有
-ProcessAnalysis；`PROD-019` 和 `PROD-021` 已收敛为独立不良数量的产品
-范围决定。
+material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
+`PROD-019` 和 `PROD-021` 已收敛为独立不良数量的产品范围决定。
 
 | 类型 | 数量 | 涉及项 |
 |---|---:|---|
 | 产品范围决定 | 4 | `PROD-ACTION-006`、`PROD-ACTION-007`、`PROD-019`、`PROD-021` |
 | 缺 runtime endpoint | 1 | `PROD-ACTION-008` |
 | 外部客户端 | 1 | `PROD-010` |
-| 缺服务包 | 1 | `PROD-020` |
+| 缺服务包 | 0 | 无 |
 | 缺导出实现 | 1 | `PROD-023` |
 
 ## 验收总规则
@@ -38,9 +37,10 @@ ProcessAnalysis；`PROD-019` 和 `PROD-021` 已收敛为独立不良数量的产
 | `PROD-ACTION-008` | runtime endpoint | 恢复 WOM `printManage/generateQrCode`，真实点击不再 `404` |
 | `PROD-010` | 外部客户端 | 通过 Batch 客户端/ActiveX/WebSocket 打开真实编辑链 |
 | `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
-| `PROD-020` | 服务包 | 接入 ProcessAnalysis 服务、runtime/menu/schema 和五个追溯端点 |
 | `PROD-021` | 产品范围决定 | 保持报工和 material 回归，仅决策独立不良数量范围 |
 | `PROD-023` | 导出实现 | 补可见导出、后端 list-data export 和非空 workbook |
 
 `PROD-022` 完工入库已由 material/WMS marker 验收转为 PASS，证据为
 `metadata/material-wms-persistence-acceptance.json`，不再出现在接入需求中。
+`PROD-020` 追溯已由 ProcessAnalysis marker 验收转为 PASS，证据为
+`metadata/process-analysis-persistence-acceptance.json`。

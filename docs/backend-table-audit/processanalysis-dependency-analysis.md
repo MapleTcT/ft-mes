@@ -1,193 +1,104 @@
-# ProcessAnalysis Dependency Analysis
+# ProcessAnalysis 追溯模块恢复与验收
 
-Generated at: 2026-06-20
+验收时间：2026-07-10
 
-Environment: `100.99.133.43` / `v6-2288H-V6`
+环境：`100.99.133.43` / `v6-2288H-V6`
 
-Database: PostgreSQL
+数据库：PostgreSQL
 
-## Conclusion
+## 结论
 
-WOM traceability cannot be accepted in the current test environment because the
-called `ProcessAnalysis` tenant service is not deployed or registered.
+WOM 的“生产过程追溯”入口已经从缺包阻断恢复为可维护源码模块，`PROD-020` 验收状态为 `PASS`。真实浏览器从制造任务列表选择后点击 `prodprocessView`，经过兼容预检打开 ProcessAnalysis 批次追溯页；页面、API、Nacos、PostgreSQL 快照落库和清理均有 marker 证据。
 
-This is not a WOM button issue. The WOM manufacturing task list exposes the
-`prodprocessView` action, but that action delegates batch/material/work-order
-traceability to a separate `ProcessAnalysis` module that is absent from the
-current package/runtime set.
+机器可读证据：
 
-## Source Dependency
+- `metadata/process-analysis-persistence-acceptance.json`
+- `metadata/process-analysis-trace.png`
+- `metadata/business-dependency-readiness-smoke.json`
+- `metadata/business-dependency-package-scan.json`
 
-| Caller | Source path | Called service/API |
-| --- | --- | --- |
-| WOM manufacturing task list trace button | `modules/wom/WOM_6.1.3.1/service/src/main/resources/custom/WOM/produceTask/produceTask/makeTaskList/eventJs/customEvent.js` | `ProcessAnalysis` `/analysisParam/analysisParam/isProdprocessView` and `/processAnalysis/exelogSecond/processBatchViewOut` |
-| WOM manufacturing task graph trace button | `modules/wom/WOM_6.1.3.1/service/src/main/resources/custom/WOM/produceTask/produceTask/makeTaskGraphList/eventJs/customEvent.js` | `ProcessAnalysis` `/analysisParam/analysisParam/isProdprocessView` and `/processAnalysis/exelogSecond/processBatchViewOut` |
-| WOM process execution log manual statistics | `modules/wom/WOM_6.1.3.1/service/src/main/resources/custom/WOM/produceTask/processExelog/processExeLogList/eventJs/customEvent.js` | `ProcessAnalysis` `/paramStatRec/paramStatRec/manualStatProcess` and `/produceTask/paPrExeLog/paPrExeLogList-query` |
-| WOM activity execution log manual statistics | `modules/wom/WOM_6.1.3.1/service/src/main/resources/custom/WOM/produceTask/actiExelog/activeExeLogList/eventJs/customEvent.js` | `ProcessAnalysis` `/paramStatRec/paramStatRec/manualStatActive` and `/produceTask/paActiExeLog/paActiExeLogList-query` |
-| WOM task execution parameter analysis | `modules/wom/WOM_6.1.3.1/service/src/main/resources/custom/WOM/produceTask/prodTaskExelog/makeTaskExecuList/eventJs/customEvent.js` | `ProcessAnalysis` `/paramDetail/paramDetail/analysisiTask` |
+## 源码与启动边界
 
-The same caller-side references exist in recovered WOM `6.1.2.3`, `6.1.3.3`,
-and `6.1.3.4` sources. The current recovered source tree contains the WOM
-callers, but no matching `ProcessAnalysis` Java controller/service package.
-
-## Runtime Evidence
-
-Remote container inventory on `100.99.133.43` includes `WOMMs` and Nacos, but no
-`ProcessAnalysis` or traceability service container.
-
-Nacos `prod` group checks from inside `adp-mes-newbase-nacos-1`:
-
-| Service name | Result |
+| 层次 | 路径/说明 |
 | --- | --- |
-| `ProcessAnalysis` | `hosts=[]` |
-| `processanalysis` | `hosts=[]` |
-| `PROCESSANALYSIS` | `hosts=[]` |
-| `Traceability` | `hosts=[]` |
-| `traceability` | `hosts=[]` |
-| `WOMMs` | healthy instance at `172.25.0.55:8080` |
+| Maven 模块 | `backend/source-modules/process-analysis` |
+| 父级聚合 | `backend/source-modules/pom.xml` |
+| Docker 编排 | `deploy/docker/docker-compose.yml` 中 `ProcessAnalysis` 服务 |
+| PostgreSQL 迁移 | `deploy/docker/postgres/init/175-process-analysis-traceability.sql` |
+| WOM 入口 | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList.html` |
+| 验收脚本 | `deploy/docker/scripts/adp-process-analysis-persistence-acceptance.js` |
 
-## Endpoint Evidence
+服务保持 PostgreSQL 默认运行路径，Oracle 仅保留 legacy template，不参与本模块默认启动。
 
-Authenticated login to `http://100.99.133.43:18080` as `admin` succeeded using
-the repository Playwright request flow. The token was used only for verification
-and was not recorded.
+## 兼容接口
 
-| Method | Endpoint | Status | Result |
-| --- | --- | --- | --- |
-| `GET` | `/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH` | `503` | `can not find any tenant app service` |
-| `GET` | `/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?...` | `503` | `can not find any tenant app service` |
-| `GET` | `/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask` | `503` | `can not find any tenant app service` |
-| `GET` | `/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=1` | `503` | `can not find any tenant app service` |
-| `GET` | `/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=1` | `503` | `can not find any tenant app service` |
+模块保持旧 WOM 调用契约及网关 `/ProcessAnalysis` 前缀：
 
-## Re-runnable Smoke
+| Method | Endpoint | 验收结果 |
+| --- | --- | --- |
+| `GET` | `/analysisParam/analysisParam/isProdprocessView` | HTTP 200，真实批次返回可追溯 |
+| `GET` | `/processAnalysis/exelogSecond/processBatchViewOut` | HTTP 200，渲染批次追溯页 |
+| `GET` | `/processAnalysis/api/trace` | HTTP 200，返回工单、工序、物料、质量、WMS 时间轴 |
+| `GET` | `/paramDetail/paramDetail/analysisiTask` | HTTP 200；缺少参数时返回兼容失败体，不抛空指针 |
+| `GET` | `/paramStatRec/paramStatRec/manualStatProcess` | HTTP 200，幂等写入工序快照 |
+| `GET` | `/paramStatRec/paramStatRec/manualStatActive` | HTTP 200，幂等写入活动快照 |
+| `GET` | `/produceTask/paPrExeLog/paPrExeLogList-query` | HTTP 200，查询工序执行记录 |
+| `GET` | `/produceTask/paActiExeLog/paActiExeLogList-query` | HTTP 200，查询活动执行记录 |
 
-The dependency can be rechecked without writing business data:
+`metadata/business-dependency-readiness-smoke.json` 当前状态为 `READY`：两个维护依赖均可用，ProcessAnalysis 在 Nacos `prod` 组有健康实例，五个兼容探针均为 HTTP 2xx。
 
-```bash
-make smoke-business-dependencies \
-  BUSINESS_DEPENDENCY_SMOKE_OUTPUT=/tmp/adp-business-dependency-readiness-smoke.json
-```
+## PostgreSQL 落库验收
 
-The current committed report is
-`metadata/business-dependency-readiness-smoke.json`; it was refreshed against
-`100.99.133.43` at `2026-06-21T13:46:42.816Z` and records `process-analysis` as
-`BLOCKED`: all ProcessAnalysis/traceability Nacos aliases have
-`healthyHostCount=0`, five authenticated dependency endpoints return
-tenant-service `503`, and PostgreSQL `processAnalysisTableCount`,
-`processAnalysisRuntimeViewCount`, and `processAnalysisMenuCount` are all `0`.
+验收 marker：`ADP_E2E_20260710084011_PROCESS_ANALYSIS`
 
-`make business-dependency-readiness-check` now rejects a `READY`
-ProcessAnalysis dependency unless the expected Nacos service is healthy, all
-traceability endpoints return HTTP 2xx, and PostgreSQL table, runtime_view, and
-menu evidence are non-zero.
+目标表：`pa_trace_snapshots`。同一业务键重复执行采用 revision 更新，不制造重复快照。本轮实际状态：
 
-The local package/source candidate scan is also repeatable:
+| 阶段 | 快照数 | task revision | process revision | activity revision | WMS 单据/流水 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 操作前 | 0 | 0 | 0 | 0 | 0 / 0 |
+| 执行统计后 | 3 | 2 | 1 | 1 | 1 / 2 |
+| 清理后 | 0 | 0 | 0 | 0 | 0 / 0 |
 
-```bash
-make business-package-scan \
-  BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json
-```
-
-The current report `metadata/business-dependency-package-scan.json` scans
-`/Users/zhangchu/Documents/MES包` plus ADP base-Server/config/static roots in
-read-only mode. The latest scan visited `58889` files, scanned `1142` outer
-archives, `2139` first-party/dependency-relevant nested archives, and `429984`
-archive entries; archive entry/text cap skips are `0`. It records
-`process-analysis` as `BLOCKED_NO_IMPLEMENTATION_CANDIDATE`: no
-ProcessAnalysis/traceability implementation candidate was found in the bounded
-package scan. This does not replace runtime proof after a new package arrives;
-it only keeps the current missing-package conclusion reproducible.
-
-## Database Evidence
-
-Current PostgreSQL ProcessAnalysis-like table scan:
+验收 SQL：
 
 ```sql
-select table_name
-from information_schema.tables
-where table_schema = 'public'
-  and (
-    table_name ~* '^pa_'
-    or table_name ~* 'process.*analysis'
-    or table_name ~* 'trace'
-    or table_name ~* 'process_batch'
-  )
-order by table_name;
-```
+select snapshot_type, source_id, batch_no, revision
+from public.pa_trace_snapshots
+where marker = 'ADP_E2E_20260710084011_PROCESS_ANALYSIS'
+order by snapshot_type;
 
-Result:
-
-```text
-0 rows
-```
-
-Runtime metadata scan:
-
-```sql
 select count(*)
 from public.runtime_view
-where code ilike '%ProcessAnalysis%'
-   or url ilike '%ProcessAnalysis%'
-   or code ilike '%trace%'
-   or url ilike '%trace%';
+where code = 'ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut';
 
 select count(*)
 from public.rbac_menuinfo
-where code ilike '%ProcessAnalysis%'
-   or url ilike '%ProcessAnalysis%'
-   or code ilike '%trace%'
-   or url ilike '%trace%';
+where code = 'ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut';
 ```
 
-Result:
+迁移、运行视图和菜单记录均已应用，运行视图与菜单计数均为正数。验收脚本最后删除 marker 产生的追溯快照和 WMS 测试数据，清理后计数为 0。
 
-```text
-runtime_view: 0
-rbac_menuinfo: 0
+## 浏览器证据
+
+真实页面入口为 `/msService/WOM/produceTask/produceTask/makeTaskList`。脚本把真实查询响应交给 `SupDataGrid.setDatagridData`，选中任务 `8991075113025740` 后点击实际 `#btn-prodprocessView`，弹窗打开：
+
+`/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH&productNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT`
+
+页面显示 10 个时间轴事件，浏览器 console error、失败 response 和 request failure 均为 0。截图见 `metadata/process-analysis-trace.png`。
+
+## 后端链路
+
+`ProcessAnalysisController / AnalysisParamController / ParamStatController` 调用 `TraceabilityService`，由 `TraceabilityRepository` 使用 Spring JDBC 查询 WOM、QCS、WMS 与基础物料表，并写入 `pa_trace_snapshots`。查询按产品、批次和 tenant 约束，质量明细来自 `qcs_report_coms`，WMS 只读取当前 tenant 数据。
+
+## 复验命令
+
+```bash
+make business-package-scan
+make process-analysis-test
+make process-analysis-package
+make acceptance-process-analysis-persistence
+make smoke-business-dependencies
+make business-dependency-readiness-check
 ```
 
-## Package Evidence
-
-The current source scan found only caller-side WOM event scripts that reference
-`ProcessAnalysis`. It did not find an implementation for:
-
-- `/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView`
-- `/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut`
-- `/ProcessAnalysis/paramDetail/paramDetail/analysisiTask`
-- `/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive`
-- `/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess`
-- `/ProcessAnalysis/produceTask/paActiExeLog/paActiExeLogList-query`
-- `/ProcessAnalysis/produceTask/paPrExeLog/paPrExeLogList-query`
-
-The local filename scan under `/Users/zhangchu/Documents/MES包`,
-`/Users/zhangchu/Downloads/ADP`, and `/Users/zhangchu/Documents/ADP` also found
-no `ProcessAnalysis`, `process analysis`, or traceability module package.
-
-## Acceptance Impact
-
-`PROD-020` remains `BLOCKED`. The accepted WOM behavior still stands:
-
-1. The manufacturing task list button is visible.
-2. The WOM caller route and JavaScript event function are identified.
-3. The target module is missing from service registration, runtime metadata, and
-   PostgreSQL schema.
-
-The blocker is the missing `ProcessAnalysis` business module package/service,
-not a PostgreSQL compatibility patch that can be completed inside WOM alone.
-
-## Next Acceptance Steps
-
-When a later business package arrives:
-
-1. Identify the package that provides `serviceName=ProcessAnalysis`.
-2. Deploy it to the test composition and confirm Nacos `prod@@ProcessAnalysis`
-   contains at least one healthy host.
-3. Apply or recover the module runtime views, menu entries, permissions, and
-   PostgreSQL tables.
-4. Re-run the authenticated `isProdprocessView` precheck with a marker batch.
-5. Open `processBatchViewOut` from the real WOM button or equivalent browser
-   context.
-6. Capture the target controller/service/DAO/SQL path.
-7. Query the `ProcessAnalysis` target tables directly in PostgreSQL before
-   changing `PROD-020` from `BLOCKED` to `PASS`.
+历史上未部署时，网关曾返回 tenant-service `503`；该状态只作为恢复背景保留，不再代表当前环境。

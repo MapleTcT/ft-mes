@@ -92,10 +92,10 @@
 | 工艺路线新增、编辑、删除 | PASS | craftGraph 基础信息已通过可见新增、修改、删除；marker `ADP_E2E_20260619071722_CRAFTGRAPH` 查库确认 `craft_basic_infos` 与 `craft_tree_structures` 写入、更新和删除清理 |
 | WTS 作业许可 `WTS_processing/stop` 终止分支 | PASS | marker `ADP_E2E_20260619144549_WTS_FIREWORK_STOP` 已通过公网真实浏览器 E2E 和 `100.99.133.43` PostgreSQL 验收：最终 `status=99/job_status=WTS_jobStatus/errorClose/process_method=WTS_processing/stop/pending=0`；若产品另有独立作废/cancel/delete 入口仍需确认后单独验收 |
 | 作业计划新建、调整、作废、审批生效 | PASS | marker `ADP_E2E_20260619161920_WAPS_WORKPLAN` 完成新建、调整、作废；marker `ADP_E2E_20260619162733_WAPS_WORKPLAN_APPROVE` 完成四段审批到生效；PostgreSQL 回查 `workplan` 主表、待办和 `wf_deal_info` 均符合预期 |
-| 不良数和库存/入库回写 | BLOCKED | WOM `createManuInspect`、QCS 报告生成、报告编辑页、结果保存、合格/不合格报告生效回写、自动不合格处理单创建、处理单审核生效、让步放行/拒收处理方式生效回写 WOM，以及紧急放行 edit/view/保存/提交已通过真实前端/API 与 PostgreSQL 验收；当前 blocker 是不良数和库存相关动作尚未完成真实前端落库验收 |
-| 批次/物料/工单追溯 | BLOCKED | WOM 追溯按钮和调用链已定位，但目标 `ProcessAnalysis` 服务缺失：`100.99.133.43` 认证调用 5 个入口均为 `503 can not find any tenant app service`，Nacos 无实例，PostgreSQL 无 `runtime_view/rbac_menuinfo` 或严格命名业务表。详见 `processanalysis-dependency-analysis.md` |
+| 不良数和库存/入库回写 | BLOCKED | 完工入库、质检释放、领料和库存回写已由 material/WMS marker 验收 PASS；当前只剩“独立不良数量”是否属于产品范围的决定，不能据此重开已通过的库存链 |
+| 批次/物料/工单追溯 | PASS | `process-analysis` 源码模块已部署，真实 WOM `prodprocessView` 点击打开 10 个时间轴事件；Nacos、兼容端点、runtime/menu、`pa_trace_snapshots` revision 和 marker 清理均通过。详见 `processanalysis-dependency-analysis.md` |
 | 工序报工 | BLOCKED | 源事件已定位 `startProcess/endProcess`、`addOutputByOutPutDetails`、`remainMaterialView/save`、`endEasyActive` 和 `WOM_PROC_REPORTS/WOM_PUTIN_DETAILS`；`makeTaskView/makeTaskBatchView/easyTaskOperateView` 已真实浏览器渲染成功，工序 `startProcess/endProcess`、活动 `startActive/endActive`、产出明细报工、投入明细报工和简易活动报工已专项 PASS；`wom_mat_consum_recods=0` 已解释为当前 `RM_activeType/putin` 路径不生成 `WOMActiExelog`，不良数/质量登记仍缺 marker 前置数据 |
-| 完工入库或库存回写 | BLOCKED | 需要仓储/库存模块包和表结构 |
+| 完工入库或库存回写 | PASS | material/WMS 源码模块、三个兼容端点和五张 PostgreSQL 表已通过 `ADP_E2E_20260710074612_MATERIAL_WMS` 入库、幂等、质检释放、领料和清理验收 |
 
 ## 初始页面/API 入口
 
@@ -134,5 +134,5 @@
 | PROD-DB-011 | 已处理 QCS PostgreSQL 缺表、报告生成前置、报告编辑页和紧急放行页 | 远端 PostgreSQL 原只有 QCS 主表和 `_sv` 视图，缺少 `init.xml` 声明的请检明细、报告明细和 DI 表，且缺报告生成前置、数据接口兼容、报告编辑页运行时 JSON 和紧急放行 edit/view 运行时 JSON | `107-qcs-inspect-detail-tables.sql` 已补明细/DI 表和 `qcs_inspect_reports_sv` 兼容视图；`113`/`117` 已补工作流与自动报告前置；`118` 修复 `varchar/text = bytea` legacy 比较；`119` 恢复报告编辑页 runtime JSON；`120` 补合格/不合格批次状态种子；`124` 恢复紧急放行 edit/view runtime JSON。`createManuInspect`、报告生成、报告编辑页、报告保存、合格/不合格回写和紧急放行页面渲染均 PASS |
 | PROD-DB-007 | 已处理缺表/状态同步 | `updateTaskState` 依赖 `WOM_WAIT_PUT_RECORDS`，测试机原先缺少对应 PostgreSQL 表；hold/restart 曾出现任务状态和待办状态不同步 | 已用 `079-wom-wait-put-records-table.sql` 建立 `public.wom_wait_put_records`，并用 `080-wom-wait-record-state-sync-trigger.sql` 同步 workOrder 待办状态；start/hold/restart 已复验 PASS |
 | PROD-DB-008 | 已处理完工报工弹窗 layoutJson | `outPutCommonTaskEdit` 曾在 baseService 缓存缺失 `extraView` 后抛 `NullPointerException` | 已用 `084-wom-output-common-task-edit-runtime-json.sql` 恢复 `runtime_extra_view.view_json`，并用 `085-wom-output-common-task-edit-view-linkage.sql` 补齐 `runtime_view.extra_view/ec_env` 链路；在线环境应用后需重启 `baseService` 或清 layout cache |
-| PROD-DB-003 | 缺映射 | 完工入库或库存回写链路未定位 | 等待仓储/库存模块包 |
-| PROD-DB-004 | 缺服务/缺映射 | 追溯入口已定位到 `ProcessAnalysis`，但当前包缺被调服务、运行时视图/菜单和目标表 | 等待 `ProcessAnalysis` 业务模块包；补齐后按 `processanalysis-dependency-analysis.md` 复验 |
+| PROD-DB-003 | 已关闭 | 完工入库和库存回写由 material/WMS 模块提供 | 五张 `wms_*` 表、真实页面和 marker 清理已验收 |
+| PROD-DB-004 | 已关闭 | 追溯入口由 `ProcessAnalysis` 源码模块、运行时视图/菜单和 `pa_trace_snapshots` 提供 | 按 `processanalysis-dependency-analysis.md` 的浏览器/API/PostgreSQL 证据复验 PASS |

@@ -29,16 +29,15 @@ make production-export-gap-breakdown-check
 | --- | --- | --- | --- | --- | --- |
 | PROD-010 | external-client-required | 外部 Batch client / IE ActiveX / WebSocket 推送 | `make smoke-business-page`；接入 Batch 客户端后触发真实 `batchFormulaEdit` | 真实编辑入口打开；marker 保存/提交；PostgreSQL 证明 `rm_formulas` 和配套过程/活动表写入 | 连接 Batch 客户端/服务端路径，不用假按钮替代 |
 | PROD-019 | product-scope-confirmation | 独立不良数量是否属于产品范围 | `make persistence-acceptance-check`；产品范围确认 | 若要求独立不良数，必须先有字段/路由/PostgreSQL 数值表并 marker 验收 | 产品确认；不得重新把已 PASS 的 material/WMS 计入阻断 |
-| PROD-020 | missing-service-package | `ProcessAnalysis` / Traceability 服务包、视图、菜单、表 | `make business-package-scan`；`make smoke-business-dependencies`；从 WOM 追溯按钮打开 marker 批次 | ProcessAnalysis 包扫描出现实现候选；Nacos healthy；runtime/menu/table 非 0；追溯端点 HTTP 2xx 且不再 503；PostgreSQL 目标表可查 | 补 ProcessAnalysis 包、运行时元数据、菜单权限和 PostgreSQL schema |
 | PROD-021 | product-scope-confirmation | 完整报工仅剩独立不良数量范围 | `make persistence-acceptance-check`；回归 WOM 报工和 WMS | 报工与 material/WMS 保持 PASS；独立不良数仅在产品提供字段后验收 | 完成范围决策 |
 | PROD-023 | missing-export-implementation | 产品确认导出范围 + 后端数据导出实现 | `make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000`；恢复导出按钮后抓浏览器文件响应；sourceAudit 必须证明目标页存在导出 hook；`acceptanceContract` 必须列出每个目标的当前缺口 | 产品确认需导出的列表；运行时有导出入口；目标源码/运行时有 `exportExcel/导出` hook；后端返回非空数据文件；`download.verifiedDataExport=true`；记录文件名/大小/样本内容 | 确认导出需求，恢复或实现数据导出按钮和后端方法 |
 
 ## 更新规则
 
 - `make production-blocker-check` 必须保证本账本与 `metadata/production-module-test-cases.json` 中的 BLOCKED 用例完全一致。
-- `make production-blocker-check` 会交叉校验 material 已有健康实例/候选实现和三个可达端点，同时要求 ProcessAnalysis 继续保留 Nacos healthy=0、tenant-service 503、包扫描无实现候选的真实证据。
+- `make production-blocker-check` 会交叉校验 material 与 ProcessAnalysis 都有健康实例、实现候选和可达端点；`PROD-020` 已从阻断账本移除，回归证据为 `metadata/process-analysis-persistence-acceptance.json`。
 - 每个 blocker 必须有仓库内证据引用、复验命令、PASS 条件、下一步和明确的非解法。
-- ProcessAnalysis 阻断必须引用 package scan、readiness smoke 和专项分析。material/WMS 已转由 `metadata/material-wms-persistence-acceptance.json` 作为 PASS 回归证据。
+- ProcessAnalysis 与 material/WMS 分别由 `metadata/process-analysis-persistence-acceptance.json`、`metadata/material-wms-persistence-acceptance.json` 作为 PASS 回归证据。
 - 新业务包导入后，先运行 `make business-package-scan`；若出现实现候选，再运行 `make smoke-business-dependencies` 和真实前端 marker 落库验收。
 - `PROD-023` 导出阻断项必须引用 `metadata/production-export-readiness-smoke.json`，并通过 `make smoke-production-export-readiness` 重新捕获浏览器文件响应、目标源码/运行时 sourceAudit 和逐目标 `acceptanceContract` 后才能改状态。
 - `PROD-023` 的逐目标导出缺口必须用 `make production-export-gap-breakdown` 从最新 smoke 报告生成，并用 `make production-export-gap-breakdown-check` 校验；不能手写一份会漂移的导出结论。

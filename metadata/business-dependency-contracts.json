@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
-  "overallStatus": "BLOCKED",
+  "overallStatus": "READY",
   "summary": {
     "dependencies": 2,
-    "ready": 1,
-    "blocked": 1,
-    "productionBlockedCases": 1,
+    "ready": 2,
+    "blocked": 0,
+    "productionBlockedCases": 0,
     "requiredEndpointProbes": 8,
     "requiredContractStages": 22,
     "requiredStartupEvidenceContracts": 2,
@@ -140,7 +140,7 @@
     {
       "id": "process-analysis",
       "title": "ProcessAnalysis traceability service",
-      "status": "BLOCKED",
+      "status": "READY",
       "requiredFor": [
         "PROD-020",
         "WOM production process traceability"
@@ -153,7 +153,7 @@
         "traceability"
       ],
       "requiredPackageEvidence": {
-        "statusBeforePackage": "BLOCKED_NO_IMPLEMENTATION_CANDIDATE",
+        "statusBeforePackage": "CANDIDATE_FOUND",
         "candidateStatusAfterPackage": "CANDIDATE_FOUND",
         "requiredTerms": [
           "ProcessAnalysis",
@@ -249,13 +249,15 @@
         "metadata/business-dependency-package-scan.json",
         "metadata/processanalysis-dependency-analysis.json",
         "docs/backend-table-audit/processanalysis-dependency-analysis.md",
+        "metadata/process-analysis-persistence-acceptance.json",
+        "metadata/process-analysis-trace.png",
         "metadata/production-module-blockers.json",
         "metadata/production-module-backlog.json"
       ],
       "recheckCommands": [
         "make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json",
         "make smoke-business-dependencies",
-        "manual: after ProcessAnalysis deployment, open processBatchViewOut from the real WOM trace button with an ADP_E2E marker batch"
+        "make acceptance-process-analysis-persistence"
       ],
       "nonSolutions": [
         "Do not patch WOM alone and call traceability complete.",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:36:47+00:00",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T09:22:00+00:00",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
   "database": "PostgreSQL",
   "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
   "sourceLedgers": {
@@ -27,8 +27,8 @@
     "planned": 8,
     "blocked": 1,
     "notStarted": 0,
-    "productionBlockers": 5,
-    "productionBacklogItems": 8
+    "productionBlockers": 4,
+    "productionBacklogItems": 7
   },
   "gates": [
     {
@@ -221,7 +221,7 @@
   "sourceEvidence": {
     "migrationReadiness": {
       "path": "metadata/production-migration-readiness.json",
-      "generatedAt": "2026-07-10T07:36:47+00:00",
+      "generatedAt": "2026-07-10T09:22:00+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
       "metrics": {
         "totalTracks": 9,
@@ -337,46 +337,46 @@
     },
     "productionBlockers": {
       "path": "metadata/production-module-blockers.json",
-      "generatedAt": "2026-07-10T07:25:00Z",
+      "generatedAt": "2026-07-10T08:40:11.239Z",
       "status": "BLOCKED",
       "metrics": {
-        "blockers": 5,
-        "blockedCases": 5
+        "blockers": 4,
+        "blockedCases": 4
       }
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-07-10T07:25:00Z",
+      "generatedAt": "2026-07-10T08:40:11.239Z",
       "status": "BLOCKED",
       "metrics": {
-        "totalItems": 8,
-        "blocked": 8,
+        "totalItems": 7,
+        "blocked": 7,
         "failBacklog": 0
       }
     },
     "businessDependencyReadiness": {
       "path": "metadata/business-dependency-readiness-smoke.json",
-      "generatedAt": "2026-07-10T07:16:11.006Z",
-      "status": "BLOCKED",
+      "generatedAt": "2026-07-10T09:18:52.471Z",
+      "status": "READY",
       "metrics": {
         "dependencies": 2,
-        "ready": 0,
-        "blocked": 1,
+        "ready": 2,
+        "blocked": 0,
         "sshHost": "100.99.133.43",
         "baseUrl": "http://100.99.133.43:18080"
       }
     },
     "businessPackageScan": {
       "path": "metadata/business-dependency-package-scan.json",
-      "generatedAt": "2026-07-10T07:16:37Z",
+      "generatedAt": "2026-07-10T08:46:19Z",
       "status": "CANDIDATE_FOUND",
       "metrics": {
-        "filesVisited": 58916,
+        "filesVisited": 58932,
         "archivesScanned": 1142,
         "nestedArchivesScanned": 2139,
         "archiveEntriesScanned": 429984,
-        "blockedDependencies": 1,
-        "candidateDependencies": 1
+        "blockedDependencies": 0,
+        "candidateDependencies": 2
       }
     },
     "productionExportReadiness": {

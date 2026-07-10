@@ -20,5 +20,6 @@
     <modules>
         <module>basicmanagement-auditlog</module>
         <module>material-wms</module>
+        <module>process-analysis</module>
     </modules>
 </project>

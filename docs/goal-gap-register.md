@@ -7,15 +7,15 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-10T07:46:51+00:00` |
-| Repo Commit | `d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab` |
+| Generated At | `2026-07-10T09:24:58+00:00` |
+| Repo Commit | `cb130b0304d1900e60e438a12873f7805ffa79ef` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `11` |
 | Ready / Partial / Blocked Goals | `9 / 9 / 2` |
-| Production Blocked Cases | `5` |
-| Production Backlog Items | `8` |
-| Business Dependency Status | `BLOCKED` |
+| Production Blocked Cases | `4` |
+| Production Backlog Items | `7` |
+| Business Dependency Status | `READY` |
 | Production Export Status | `BLOCKED` |
 | Production Export Ready / Action Required / Blocked | `1 / 0 / 5` |
 | Production Export Verified Data Files | `1` |
@@ -45,7 +45,6 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | --- | --- | --- | --- | --- |
 | `PROD-010` | `external-client-required` | External Batch client / IE ActiveX / WebSocket push path | make smoke-business-page<br>manual: provision external Batch client, trigger WebSocket push to batchFormulaEdit, then run a marker save/submit and query rm_formulas/rm_formula_processes/rm_process_actives | A real user-visible or external-client driven edit entry opens batchFormulaEdit without adding a fake platform-only button.<br>The edit/save/submit action uses a unique ADP_E2E marker. (+1) |
 | `PROD-019` | `product-scope-confirmation` | product decision or later business package defining bad-quantity field/route/table | make persistence-acceptance-check<br>manual: confirm standalone bad-quantity scope and marker-test only if it is required | Confirm whether standalone bad quantity is a supported product feature.<br>If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker. (+1) |
-| `PROD-020` | `missing-service-package` | ProcessAnalysis / Traceability service package, runtime metadata, menu, permissions, and PostgreSQL schema | make business-package-scan BUSINESS_PACKAGE_SCAN_OUTPUT=metadata/business-dependency-package-scan.json<br>make smoke-business-dependencies (+1) | ProcessAnalysis or traceability service has at least one healthy Nacos prod instance.<br>ProcessAnalysis runtime_view/menu/table counts are non-zero and mapped to the deployed module. (+2) |
 | `PROD-021` | `product-scope-confirmation` | product decision or later business package defining bad-quantity field/route/table | make persistence-acceptance-check<br>manual: confirm standalone bad-quantity scope and marker-test only if it is required | Confirm whether standalone bad quantity is a supported product feature.<br>If supported, expose the real field/route/backend path and prove its PostgreSQL numeric target with an ADP_E2E marker. (+1) |
 | `PROD-023` | `missing-export-implementation` | Product decision and backend data-export implementation for production list pages | make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000<br>manual: after export button/backend implementation is recovered, capture browser file response, filename, size, and workbook sample | Product owner confirms which production lists must support data export.<br>Runtime button/menu metadata exposes an export action for each required list. (+4) |
 
@@ -58,7 +57,6 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `PROD-ACTION-008` | `BLOCKED` | `missing-runtime-endpoint` | `module-backlog` | `False` | The real WOM makeTaskList 生成二维码 toolbar action no longer calls missing 404 printManage endpoints.<br>The recovered WOM package or source module exposes /WOM/printManage/generateQrCode and any required print/backfill endpoints through the normal gateway path. (+3) |
 | `PROD-010` | `BLOCKED` | `external-client-required` | `module-backlog` | `False` | The real external-client driven edit entry opens batchFormulaEdit without a fake platform-only button.<br>A unique marker proves edit/save persistence in rm_formulas and related RM process/activity tables. (+1) |
 | `PROD-019` | `BLOCKED` | `product-scope-confirmation` | `module-backlog` | `False` | Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.<br>If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested. (+2) |
-| `PROD-020` | `BLOCKED` | `missing-service-package` | `module-backlog` | `False` | ProcessAnalysis or traceability service has a healthy Nacos prod instance.<br>ProcessAnalysis runtime_view, menu and table counts are non-zero and mapped to the deployed module. (+2) |
 | `PROD-021` | `BLOCKED` | `product-scope-confirmation` | `module-backlog` | `False` | Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.<br>If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested. (+2) |
 | `PROD-023` | `BLOCKED` | `missing-export-implementation` | `module-backlog` | `False` | Product owner confirms which production lists must support data export.<br>Runtime button/menu metadata exposes an export action for each required list. (+3) |
 
@@ -66,7 +64,6 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Dependency | Status | Required For | Ready When | Issues |
 | --- | --- | --- | --- | --- |
-| `process-analysis` | `BLOCKED` | PROD-020<br>WOM production process traceability | ProcessAnalysis has healthy service registration, runtime/menu metadata, PostgreSQL target tables, and authenticated endpoints no longer return tenant-service 503. | No healthy Nacos service instance was found for the expected dependency aliases.<br>Authenticated endpoint probe still returns tenant-service 503.<br>No ProcessAnalysis runtime_view metadata was found. |
 
 ## Production Migration Gaps
 

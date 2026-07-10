@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:44:47+00:00",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
-  "findingCount": 959,
+  "generatedAt": "2026-07-10T09:07:03+00:00",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
+  "findingCount": 960,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 187,
+    "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -19,7 +19,7 @@
   "patternCounts": {
     "from-dual": 140,
     "ojdbc": 14,
-    "oracle-keyword": 629,
+    "oracle-keyword": 630,
     "rownum": 41,
     "sysdate": 135
   },
@@ -244,7 +244,7 @@
     },
     {
       "file": "Makefile",
-      "line": 188,
+      "line": 192,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -252,7 +252,7 @@
     },
     {
       "file": "Makefile",
-      "line": 189,
+      "line": 193,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -260,7 +260,7 @@
     },
     {
       "file": "Makefile",
-      "line": 192,
+      "line": 196,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -268,7 +268,7 @@
     },
     {
       "file": "Makefile",
-      "line": 193,
+      "line": 197,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -276,7 +276,7 @@
     },
     {
       "file": "Makefile",
-      "line": 286,
+      "line": 290,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -284,7 +284,7 @@
     },
     {
       "file": "Makefile",
-      "line": 557,
+      "line": 575,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -292,7 +292,7 @@
     },
     {
       "file": "Makefile",
-      "line": 558,
+      "line": 576,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -300,7 +300,7 @@
     },
     {
       "file": "Makefile",
-      "line": 560,
+      "line": 578,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -308,7 +308,7 @@
     },
     {
       "file": "Makefile",
-      "line": 561,
+      "line": 579,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -316,7 +316,7 @@
     },
     {
       "file": "Makefile",
-      "line": 569,
+      "line": 587,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -324,7 +324,7 @@
     },
     {
       "file": "Makefile",
-      "line": 570,
+      "line": 588,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -332,7 +332,7 @@
     },
     {
       "file": "Makefile",
-      "line": 572,
+      "line": 590,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -340,7 +340,7 @@
     },
     {
       "file": "Makefile",
-      "line": 573,
+      "line": 591,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -4859,6 +4859,14 @@
       "excerpt": "This acceptance does not change the default datasource to Oracle. It also does"
     },
     {
+      "file": "docs/backend-table-audit/processanalysis-dependency-analysis.md",
+      "line": 31,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "服务保持 PostgreSQL 默认运行路径，Oracle 仅保留 legacy template，不参与本模块默认启动。"
+    },
+    {
       "file": "docs/backend-table-audit/wom-consumption-record-analysis.md",
       "line": 5,
       "pattern": "oracle-keyword",
@@ -4884,7 +4892,7 @@
     },
     {
       "file": "docs/business-dependency-contracts.md",
-      "line": 14,
+      "line": 15,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4892,7 +4900,7 @@
     },
     {
       "file": "docs/business-dependency-contracts.md",
-      "line": 32,
+      "line": 45,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4900,7 +4908,7 @@
     },
     {
       "file": "docs/business-module-intake-requirements.md",
-      "line": 25,
+      "line": 24,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4916,7 +4924,7 @@
     },
     {
       "file": "docs/current-content-inventory.md",
-      "line": 147,
+      "line": 148,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4932,7 +4940,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 57,
+      "line": 67,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4940,7 +4948,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 65,
+      "line": 75,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -4948,7 +4956,7 @@
     },
     {
       "file": "docs/functional-persistence-acceptance.md",
-      "line": 152,
+      "line": 162,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5356,7 +5364,7 @@
     },
     {
       "file": "docs/production-module-backlog.md",
-      "line": 54,
+      "line": 53,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5400,7 +5408,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `0 FAIL / 3 BLOCKED` 落库未闭合行；`metadata/production-module-backlo"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `127` 项，其中 `123 PASS / 0 FAIL / 3 BLOCKED / 1 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",

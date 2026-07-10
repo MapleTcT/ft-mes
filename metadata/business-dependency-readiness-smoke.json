@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:16:11.006Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T09:18:52.471Z",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
   "database": "PostgreSQL",
   "target": {
     "baseUrl": "http://100.99.133.43:18080",
@@ -13,17 +13,17 @@
     "apiTimeoutMs": 20000
   },
   "summary": {
-    "status": "BLOCKED",
+    "status": "READY",
     "dependencies": 2,
-    "ready": 0,
-    "actionRequired": 1,
-    "blocked": 1
+    "ready": 2,
+    "actionRequired": 0,
+    "blocked": 0
   },
   "items": [
     {
       "id": "material-service",
       "title": "Material warehouse/inventory service",
-      "status": "ACTION_REQUIRED",
+      "status": "READY",
       "requiredFor": [
         "PROD-019",
         "PROD-021",
@@ -133,6 +133,24 @@
           "tenantServiceMissing": false
         }
       ],
+      "acceptance": {
+        "path": "metadata/material-wms-persistence-acceptance.json",
+        "status": "PASS",
+        "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
+        "generatedAt": "2026-07-10T07:46:12.378Z",
+        "cleanup": {
+          "label": "afterCleanup",
+          "documents": 0,
+          "lines": 0,
+          "transactions": 0,
+          "qualityResults": 0,
+          "stockRows": 0,
+          "onHand": 0,
+          "available": 0,
+          "hold": 0,
+          "inboundQuality": ""
+        }
+      },
       "database": {
         "materialLikeTableCount": 40,
         "materialLikeTables": [
@@ -178,15 +196,13 @@
           "wom_task_materials"
         ]
       },
-      "issues": [
-        "Dependency appears available now; rerun the corresponding marker persistence/browser acceptance before changing product cases to PASS."
-      ],
+      "issues": [],
       "nextAction": "Run the material WMS marker persistence/browser acceptance and keep it as regression evidence."
     },
     {
       "id": "process-analysis",
       "title": "ProcessAnalysis traceability service",
-      "status": "BLOCKED",
+      "status": "READY",
       "requiredFor": [
         "PROD-020",
         "WOM production process traceability"
@@ -196,10 +212,14 @@
         {
           "serviceName": "ProcessAnalysis",
           "fetched": true,
-          "hostCount": 0,
-          "healthyHostCount": 0,
-          "ports": [],
-          "instanceIds": []
+          "hostCount": 1,
+          "healthyHostCount": 1,
+          "ports": [
+            8080
+          ],
+          "instanceIds": [
+            "172.25.0.61#8080#DEFAULT#prod@@ProcessAnalysis"
+          ]
         },
         {
           "serviceName": "processanalysis",
@@ -239,64 +259,80 @@
           "name": "isProdprocessView",
           "method": "GET",
           "path": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_DEPENDENCY_SMOKE_BATCH",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.929+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":200,\"data\":{\"dealRes\":false,\"batchNo\":\"ADP_DEPENDENCY_SMOKE_BATCH\",\"taskId\":null},\"message\":\"success\",\"msg\":\"success\"}",
+          "tenantServiceMissing": false
         },
         {
           "name": "processBatchViewOut",
           "method": "GET",
           "path": "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_DEPENDENCY_SMOKE_BATCH&productNo=ADP_DEPENDENCY_SMOKE_MAT",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.940+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "<!doctype html> <html lang=\"zh-CN\"> <head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <title>生产过程追溯</title> <style> :root { color-scheme: light; --blue: #2674d9; --blue-soft: #eef5ff; --green: #138a63; --orange: #c26b16; --red: #c8404b; --ink: #243142; --muted: #6b7788; --line: #dbe2ea; --band: #f6f8fb; --white: #ffffff; } * { box-sizing: border-box; } html, body { margin: 0; min-height: 100%; background: var(--white); color: var(--ink); font-fami",
+          "tenantServiceMissing": false
         },
         {
           "name": "analysisiTask",
           "method": "GET",
           "path": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.952+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":400,\"data\":{\"success\":false,\"message\":\"执行记录 ID 必须大于 0\"},\"message\":\"执行记录 ID 必须大于 0\",\"msg\":\"执行记录 ID 必须大于 0\"}",
+          "tenantServiceMissing": false
         },
         {
           "name": "manualStatActive",
           "method": "GET",
           "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=1",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:10.976+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":404,\"data\":null,\"message\":\"ACTIVITY 执行记录不存在\",\"msg\":\"ACTIVITY 执行记录不存在\"}",
+          "tenantServiceMissing": false
         },
         {
           "name": "manualStatProcess",
           "method": "GET",
           "path": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=1",
-          "status": 503,
+          "status": 200,
           "error": null,
           "timeout": false,
-          "body": "{\"server\":\"supos-gateway\",\"path\":\"/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess\",\"error\":\"Service Unavailable\",\"message\":\"Request [/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess] can not find any tenant app service\",\"timestamp\":\"2026-07-10T07:16:11.005+0000\",\"status\":503}",
-          "tenantServiceMissing": true
+          "body": "{\"code\":404,\"data\":null,\"message\":\"PROCESS 执行记录不存在\",\"msg\":\"PROCESS 执行记录不存在\"}",
+          "tenantServiceMissing": false
         }
       ],
-      "database": {
-        "processAnalysisTableCount": 0,
-        "processAnalysisTables": [],
-        "processAnalysisRuntimeViewCount": 0,
-        "processAnalysisMenuCount": 0
+      "acceptance": {
+        "path": "metadata/process-analysis-persistence-acceptance.json",
+        "status": "PASS",
+        "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
+        "generatedAt": "2026-07-10T08:40:11.239Z",
+        "cleanup": {
+          "label": "afterCleanup",
+          "snapshotCount": 0,
+          "taskRevision": 0,
+          "processRevision": 0,
+          "activityRevision": 0,
+          "batchRows": 0,
+          "wmsDocuments": 0,
+          "wmsTransactions": 0,
+          "wmsStockRows": 0,
+          "sourceRows": 1
+        }
       },
-      "issues": [
-        "No healthy Nacos service instance was found for the expected dependency aliases.",
-        "Authenticated endpoint probe still returns tenant-service 503.",
-        "No ProcessAnalysis runtime_view metadata was found."
-      ],
+      "database": {
+        "processAnalysisTableCount": 1,
+        "processAnalysisTables": [
+          "pa_trace_snapshots"
+        ],
+        "processAnalysisRuntimeViewCount": 1,
+        "processAnalysisMenuCount": 1
+      },
+      "issues": [],
       "nextAction": "Deploy/recover the ProcessAnalysis package and schema, then rerun traceability browser/API/DB marker acceptance from the WOM button."
     }
   ],

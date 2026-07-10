@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
   "latestRevalidation": {
@@ -12,8 +12,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 126,
-    "pass": 122,
+    "testedFeatures": 127,
+    "pass": 123,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 1
@@ -2732,6 +2732,32 @@
       "status": "PASS",
       "evidence": "metadata/material-wms-persistence-acceptance.json; metadata/material-wms-completion-inbound.png. Inbound 10 held, qualified release 10 available, issue 3 left 7, idempotent retry added no rows, cleanup returned marker rows to zero.",
       "issues": []
+    },
+    {
+      "module": "生产追溯-ProcessAnalysis",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> #btn-prodprocessView -> /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+      "operation": "真实 WOM 任务追溯、任务/工序/活动手工统计快照、WMS/质量时间轴查询与清理",
+      "api": "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView; GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut; GET /msService/ProcessAnalysis/processAnalysis/api/trace; GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask; GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess; GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "ProcessAnalysis controllers -> TraceabilityService -> TraceabilityRepository -> Spring JDBC / PostgreSQL",
+      "tables": [
+        "pa_trace_snapshots",
+        "runtime_view",
+        "rbac_menuinfo",
+        "wom_produce_tasks",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wms_stock_documents",
+        "wms_inventory_transactions"
+      ],
+      "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
+      "verificationSql": "select snapshot_type, source_id, batch_no, revision from public.pa_trace_snapshots where marker='ADP_E2E_20260710084011_PROCESS_ANALYSIS' order by snapshot_type; select count(*) from public.runtime_view where code='ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut'; select count(*) from public.rbac_menuinfo where code='ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut';",
+      "status": "PASS",
+      "evidence": "metadata/process-analysis-persistence-acceptance.json and metadata/process-analysis-trace.png. Real WOM button selected task 8991075113025740, opened the trace page with 10 timeline events and no console/network failures. PostgreSQL changed from 0 to 3 snapshots; task revision reached 2, process/activity revision reached 1; WMS fixture produced one document and two transactions. Cleanup returned marker snapshot, document and transaction counts to 0.",
+      "issues": [
+        "Production full-stack migration and rollback remain independent cutover gates."
+      ]
     }
   ],
   "evidence": [

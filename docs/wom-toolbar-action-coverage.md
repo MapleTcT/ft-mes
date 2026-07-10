@@ -52,9 +52,9 @@ make wom-toolbar-action-coverage-check
 2026-06-21 19:50 针对工具栏外部依赖按钮追加前端兜底：
 `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js`
 和 `body-es5.js` 通过 `deploy/docker/nginx/adp.conf` 精确映射到测试机。
-当前 `生产过程追溯`、`生成二维码` 在依赖服务缺失时会显示中文提示，不再
-打开空白弹窗或无反馈。证据截图：`/tmp/adp-wom-toolbar-guard-current.png`。
-这只是交互兜底，不改变两个动作的业务验收状态。
+当时 `生产过程追溯`、`生成二维码` 在依赖服务缺失时会显示中文提示，不再
+打开空白弹窗或无反馈。该段保留为历史证据；2026-07-10 生产过程追溯已由
+真实 WOM 点击和 ProcessAnalysis marker 验收为 PASS，二维码仍保持兜底。
 
 2026-06-21 20:31 追加连续点击状态同步修复。此前复验发现 `开始`
 接口和 PostgreSQL 落库已成功，但页面下一次读取选中行时仍可能拿到旧的
@@ -477,7 +477,7 @@ DERP 慢链路阻断，不应用来判断按钮逻辑是否失败。
 | 结束 | `updateTaskState`、`findProcReportIdByTaskId`、`addOutputByOutPutDetails` | PASS | PAGE_CONTEXT_RUNTIME_EVENT | `PROD-025`、`PROD-026` | 最小结束和产出明细报工均已查 PostgreSQL；17:34 普通点击已能打开真实“指令单完工报工”入口，`findProcReportIdByTaskId/outPutCommonTaskEdit` 均为 200，并确认页面可见 `生产批号/产品编码/产品名称/计划数量` 和当前 marker 批次。 | 最终“完成/保存”落库仍以专项 marker 报告为准。 |
 | 提前放料 | `GET /msService/WOM/produceTask/produceTask/setAdvanceTrue/{taskId}` | PASS | PAGE_CONTEXT_RUNTIME_EVENT | `PROD-027` | `advance_charge/is_advanced/feed_condition` 已查 PostgreSQL；17:34 普通点击在不允许提前放料的执行中行上显示中文提示“该批次不能提前放料！”，没有 raw key。 | 有效提前放料落库仍以专项 marker 报告为准。 |
 | 请检 | `POST /msService/WOM/produceTask/produceTask/createManuInspect` | PASS | PAGE_CONTEXT_RUNTIME_EVENT | `PROD-031`、`PROD-032`、`PROD-035`、`PROD-036` | WOM/QCS 请检、报告、合格/不合格回写和不合格处理单均已有 marker 验证；17:34 普通点击在无需质检产品上显示中文提示“该指令单产品无需质检！”。 | 有效请检创建仍以 WOM/QCS 专项 marker 报告为准。 |
-| 生产过程追溯 | `ProcessAnalysis/traceability` 系列接口 | BLOCKED | DEPENDENCY_BLOCKED | `PROD-020` | 17:34 复验已由前端守卫拦截：点击后显示 `生产过程追溯服务未部署或暂不可用！`，不再发起缺失 `ProcessAnalysis` 请求。当前不是 PostgreSQL 小修能闭合，缺 ProcessAnalysis 服务、运行元数据、菜单和 schema。 | 需要补业务包和服务注册；前端兜底不能替代业务验收。 |
+| 生产过程追溯 | `ProcessAnalysis` 预检、追溯页和 trace API | PASS | NORMAL_MOUSE_CLICK | `PROD-020` | Marker `ADP_E2E_20260710084011_PROCESS_ANALYSIS` 真实选择 WOM 任务并点击按钮，页面显示 10 个事件；Nacos/端点/runtime/menu/快照 revision 与清理均通过。 | 证据：`metadata/process-analysis-persistence-acceptance.json`；继续做回归。 |
 | 生成二维码 | `GET /msService/WOM/printManage/printDate/generateCode`；`POST /msService/WOM/printManage/generateQrCode`；`POST /msService/WOM/printManage/backfill-printInfo` | BLOCKED | DEPENDENCY_BLOCKED | 尚未纳入生产矩阵 | 17:34 复验已由前端守卫拦截：点击后显示 `二维码生成页面未部署或暂不可用！`，不再发起缺失 `/WOM/printManage` 请求。09:27 `make probe-wom-qrcode-route` 仍复验三个 WOM `printManage` 端点均为 404，WOM service jar 无匹配实现。 | 当前运行包缺 WOM 二维码生成接口实现；补业务包/控制器后仍需补打印机/包装配置并做 marker 落库和可选打印回填验收。 |
 
 ## 不能替代的证据
@@ -485,5 +485,5 @@ DERP 慢链路阻断，不应用来判断按钮逻辑是否失败。
 - `078-wom-list-button-runtime-json.sql` 和 i18n 静态覆盖只能证明按钮可见、文字正常。
 - `168-wom-maketasklist-toolbar-interaction-compat.sql` 证明保持/重启等按钮配置修正，但仍需要动作级请求和查库。
 - `body.js/body-es5.js` 的状态同步和短窗口选中行恢复兜底只解决连续点击时的前端旧状态/丢选择问题；最终通过仍以 `updateTaskState` 响应和 PostgreSQL 回查为准。
-- 生产过程追溯依赖 ProcessAnalysis，不能用 WOM 自身表补 SQL 来冒充通过。
+- 生产过程追溯已通过 ProcessAnalysis 独立源码模块验收，后续仍不能用 WOM 自身表替代该服务回归。
 - 生成二维码当前不是简单前端/i18n 问题：`metadata/wom-qrcode-route-probe.json` 证明按钮目标端点在现运行包中 404 且 WOM service jar 无匹配实现。补齐 WOM `printManage` 业务包/控制器后，还必须单独做 `generateQrCode`、可选打印、`backfill-printInfo` 的 marker 验收。

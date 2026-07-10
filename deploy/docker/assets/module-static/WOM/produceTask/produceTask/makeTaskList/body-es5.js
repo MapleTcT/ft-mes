@@ -49,6 +49,7 @@
   };
 
   var dependencyStatus = window.ADP_WOM_MAKETASKLIST_DEPENDENCIES || {};
+  dependencyStatus.processTrace = true;
 
   function accessibleWindows() {
     var result = [];

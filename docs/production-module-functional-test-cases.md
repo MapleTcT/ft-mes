@@ -12,7 +12,7 @@
 | 退料 | PASS | `ADP_E2E_20260710030059_WOM_REJECT_MATERIAL` 保存、删除和待办清理 | 现有退料主链保持回归 |
 | 核心运行补丁回滚 | PASS | `ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK` 完成旧版本回退、完整启动、当前补丁恢复和恢复后业务回归 | 只覆盖测试环境 WOM JAR/静态补丁，不替代生产全栈回切演练 |
 | 完工入库/库存回写 | PASS | `ADP_E2E_20260710074612_MATERIAL_WMS` 完成入库、幂等、质检释放、领料和清理；浏览器无错误 | 五张 PostgreSQL WMS 表和三个 WOM/QCS 兼容端点已闭合 |
-| 批次/物料/工单追溯 | BLOCKED | ProcessAnalysis Nacos/端点/表/runtime view/menu 全部缺失 | 缺真实 ProcessAnalysis 业务包 |
+| 批次/物料/工单追溯 | PASS | `ADP_E2E_20260710084011_PROCESS_ANALYSIS` 从真实 WOM 按钮打开追溯页，五个兼容端点、Nacos、runtime/menu 和 PostgreSQL 快照 revision/清理均通过 | 生产切换仍需独立迁移、备份和全栈回滚门禁 |
 
 机器记录：`metadata/core-flow-acceptance-20260710.json`。本轮环境 `9/9 PASS`、
 平台 `6/6 PASS`、PostgreSQL runtime `8/8 PASS`、Mapper 审计 `0 error/0 warning`。
@@ -27,12 +27,12 @@
 
 2026-07-10 `100.99.133.43` material/WMS 复验：源码模块 `backend/source-modules/material-wms` 已部署并注册为 Nacos `prod@@material` 健康实例。三个兼容端点 `generateProductInSingle`、`checkProdResult`、`generateProduceOutSing` 均经网关返回 HTTP 2xx。Marker `ADP_E2E_20260710074612_MATERIAL_WMS` 证明入库 10 先进入待检，合格后可用 10，生产领料 3 后结存 7；重复请求未增加数据，清理后五张 WMS 表 marker 行均为 0。真实浏览器打开 `/msService/material/wms`，marker 和明细可见，console/network/page 均无错误。证据见 `metadata/material-wms-persistence-acceptance.json` 和 `metadata/material-wms-completion-inbound.png`。
 
-追溯专项结论：WOM 制造任务列表“生产过程追溯”按钮入口已定位到 `ProcessAnalysis` 模块。真实浏览器使用 marker 批次 `ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH` 请求 `/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView` 与 `/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut` 均返回 `503`；2026-06-20 在 `100.99.133.43` 用仓库 Playwright request 登录 `admin` 后复验 `isProdprocessView`、`processBatchViewOut`、`analysisiTask`、`manualStatActive`、`manualStatProcess` 均返回 `503 can not find any tenant app service`，Nacos `prod@@ProcessAnalysis/processanalysis/PROCESSANALYSIS/Traceability/traceability` 均为 `hosts=[]`，而 `WOMMs` 有健康实例。远端 PostgreSQL 严格按 `^pa_`、`process.*analysis`、`trace`、`process_batch` 扫描为 0 张表，`runtime_view` 和 `rbac_menuinfo` 也无 `ProcessAnalysis/trace` 行；当前本地源码只找到 WOM 调用方脚本，未找到 `ProcessAnalysis` 被调实现或模块包。该项不是按钮缺失，而是当前测试包缺追溯模块包/服务/视图/表。专项报告见 `docs/backend-table-audit/processanalysis-dependency-analysis.md` 和 `metadata/processanalysis-dependency-analysis.json`。
+追溯专项结论：WOM 制造任务列表“生产过程追溯”已由源码模块 `backend/source-modules/process-analysis` 恢复。真实浏览器选择任务 `8991075113025740` 并点击实际 `#btn-prodprocessView`，预检和追溯页均为 HTTP 200，页面显示 10 个时间轴事件且 console/network/request failure 为 0。Marker `ADP_E2E_20260710084011_PROCESS_ANALYSIS` 证明任务、工序和活动三类 `pa_trace_snapshots` 幂等写入，task revision=2，process/activity revision=1；联动 WMS 完工入库有 1 张单据和 2 条库存流水，清理后 marker 行均为 0。专项报告见 `docs/backend-table-audit/processanalysis-dependency-analysis.md`、`metadata/processanalysis-dependency-analysis.json` 和 `metadata/process-analysis-persistence-acceptance.json`。
 
-2026-07-10 readiness smoke 显示 material 已有健康实例，三个兼容端点均可达；因为只读 smoke 不写业务数据，material 项为 `ACTION_REQUIRED`，最终 `READY` 由 marker 持久化报告确认。ProcessAnalysis 仍为 `BLOCKED`：候选实现、健康实例、五个端点、runtime/menu/table 均未恢复。
+2026-07-10 readiness smoke 显示 material 与 ProcessAnalysis 均有健康实例，兼容端点全部可达，两个依赖均为 `READY`；各自 marker 持久化报告补齐了只读 smoke 不覆盖的真实落库和清理证据。
 
 可复验命令为 `make smoke-business-dependencies`；依赖契约 ID 分别为
-`material-service`（已完成 marker 验收）和 `process-analysis`（仍阻断）。
+`material-service` 与 `process-analysis`（均已完成 marker 验收）。
 
 ```bash
 make production-testcase-check

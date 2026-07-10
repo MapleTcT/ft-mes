@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
@@ -78,12 +78,12 @@
   },
   "summary": {
     "totalCases": 43,
-    "pass": 38,
+    "pass": 39,
     "fail": 0,
-    "blocked": 5,
+    "blocked": 4,
     "notRun": 0,
     "requiresPersistence": 31,
-    "routeSmokePass": 42
+    "routeSmokePass": 43
   },
   "requiredCoverageTags": [
     "master-data",
@@ -1320,26 +1320,34 @@
       "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> prodprocessView -> /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView and /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
       "operationType": "read",
       "requiresPersistence": false,
-      "routeSmokeStatus": "BLOCKED",
-      "acceptanceStatus": "BLOCKED",
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH",
-        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH&productNo=ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_MAT"
+        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH&productNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+        "GET /msService/ProcessAnalysis/processAnalysis/api/trace?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH&productNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+        "GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess"
       ],
-      "backendTraceStatus": "button-route-confirmed-missing-processanalysis-module",
+      "backendTraceStatus": "TRACED",
       "targetTables": [
-        "ProcessAnalysis runtime_view not present",
-        "ProcessAnalysis rbac_menuinfo not present",
-        "ProcessAnalysis strict business tables not present"
+        "pa_trace_snapshots",
+        "runtime_view",
+        "rbac_menuinfo",
+        "wom_produce_tasks",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wms_stock_documents",
+        "wms_inventory_transactions"
       ],
-      "verificationSql": "select table_name from information_schema.tables where table_schema='public' and (table_name ~* '^pa_' or table_name ~* 'process.*analysis' or table_name ~* 'trace' or table_name ~* 'process_batch') order by table_name; select count(*) from public.runtime_view where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%'; select count(*) from public.rbac_menuinfo where code ilike '%ProcessAnalysis%' or url ilike '%ProcessAnalysis%' or code ilike '%trace%' or url ilike '%trace%';",
-      "evidence": "WOM makeTaskList runtime button prodprocessView opens trace through ProcessAnalysis: first isProdprocessView(batchNo), then processBatchViewOut. Real browser request through http://222.88.185.146:18080 using marker batch ADP_E2E_20260618_UNQLF_AUTO_DEAL_3_BATCH returned HTTP 503 for both URLs; body showed supplantFrontend.err503.info. 2026-06-20 revalidation on 100.99.133.43 used repository Playwright request login as admin and authenticated five ProcessAnalysis endpoints: isProdprocessView, processBatchViewOut, analysisiTask, manualStatActive, and manualStatProcess all returned HTTP 503 can not find any tenant app service. Nacos prod@@ProcessAnalysis/processanalysis/PROCESSANALYSIS/Traceability/traceability hosts=[] while WOMMs is healthy. Remote PostgreSQL found strict ProcessAnalysis-like tables=0, runtime_view rows=0, and rbac_menuinfo rows=0. Local source scan found only WOM caller-side event scripts and no ProcessAnalysis Java/controller/module implementation. Re-runnable readiness evidence in metadata/business-dependency-readiness-smoke.json confirms ProcessAnalysis aliases have 0 healthy Nacos instances, five authenticated endpoints return 503, and processAnalysis DB/runtime/menu counts are 0. Evidence: /tmp/adp-wom-trace-processanalysis-20260618094108/processanalysis-trace-report.json; docs/backend-table-audit/processanalysis-dependency-analysis.md; metadata/processanalysis-dependency-analysis.json; metadata/business-dependency-readiness-smoke.json.",
+      "verificationSql": "select snapshot_type, source_id, batch_no, revision from public.pa_trace_snapshots where marker='ADP_E2E_20260710084011_PROCESS_ANALYSIS' order by snapshot_type; select count(*) from public.runtime_view where code='ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut'; select count(*) from public.rbac_menuinfo where code='ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut';",
+      "evidence": "Marker ADP_E2E_20260710084011_PROCESS_ANALYSIS. Real browser opened WOM makeTaskList, loaded a real task query response into SupDataGrid, selected task 8991075113025740 and clicked actual #btn-prodprocessView. The compatibility precheck and popup returned HTTP 200; trace page displayed the marker batch and 10 timeline events with zero console errors, failed responses or request failures. PostgreSQL before/after/cleanup verification found 3 pa_trace_snapshots after manual statistics, task revision=2, process revision=1, activity revision=1, one WMS completion document and two inventory transactions, then 0 marker snapshots/documents/transactions after cleanup. Nacos and all required endpoints are READY. Evidence: metadata/process-analysis-persistence-acceptance.json; metadata/process-analysis-trace.png; metadata/business-dependency-readiness-smoke.json; docs/backend-table-audit/processanalysis-dependency-analysis.md.",
       "issues": [
-        "Traceability button exists in WOM makeTaskList runtime JSON, but target ProcessAnalysis module is absent in the current deployment.",
-        "Local source/package scan found WOM caller-side event scripts only, with no ProcessAnalysis, processBatchViewOut, isProdprocessView, or traceability module implementation in the current material set.",
-        "Need ProcessAnalysis package/service/view metadata/tables before batch/material/work-order traceability can be accepted."
+        "The traceability page is read-oriented; manual statistics snapshots and marker-scoped WMS fixtures are the persistence boundaries exercised by this acceptance.",
+        "Production cutover still requires the independent migration, backup and rollback gates."
       ],
-      "nextAction": "Deploy or recover the ProcessAnalysis module package, re-run the isProdprocessView precheck, then open processBatchViewOut with a marker batch and record API/page/DB evidence.",
+      "nextAction": "Keep ProcessAnalysis in regression through make process-analysis-test, make smoke-business-dependencies and marker acceptance after datasource or schema changes.",
       "coverageTags": [
         "traceability"
       ]
@@ -1672,12 +1680,12 @@
     "craftGraphVisibleSaveDelete": "2026-06-19: craftGraph basicInfo pure UI product selection, visible save, visible edit/update, and visible delete now have browser and PostgreSQL evidence. Product reference UI blocker is cleared; visible edit marker ADP_E2E_20260619071722_CRAFTGRAPH persisted version=1. PROD-012 is PASS. Remaining craftGraph notes are display clipping in edit modal and business confirmation on craft_tree_structures.valid after main soft delete.",
     "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
     "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Material-service stock-in/inventory is PASS under PROD-022 and remains regression coverage.",
-    "businessDependencies": "2026-06-20: make smoke-business-dependencies targets 100.99.133.43 by default and produced metadata/business-dependency-readiness-smoke.json. Current result is BLOCKED for material-service and process-analysis; rerun this smoke after new business packages are deployed before reopening PROD-020/022 marker acceptance.",
+    "businessDependencies": "2026-07-10: material-service and process-analysis both have maintained source modules, healthy Nacos services, reachable compatibility endpoints and marker acceptance. Current metadata/business-dependency-readiness-smoke.json status is READY.",
     "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json.",
     "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence."
   },
   "latestRevalidation": {
-    "generatedAt": "2026-07-10T07:25:00Z",
+    "generatedAt": "2026-07-10T08:40:11.239Z",
     "database": "PostgreSQL",
     "materialWms": {
       "status": "PASS",
@@ -1685,8 +1693,9 @@
       "evidence": "metadata/material-wms-persistence-acceptance.json"
     },
     "processAnalysis": {
-      "status": "BLOCKED",
-      "evidence": "metadata/business-dependency-readiness-smoke.json"
+      "status": "PASS",
+      "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
+      "evidence": "metadata/process-analysis-persistence-acceptance.json"
     }
   }
 }

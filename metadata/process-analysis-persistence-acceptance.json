@@ -1,0 +1,626 @@
+{
+  "generatedAt": "2026-07-10T09:20:56.758Z",
+  "repoCommit": "cb130b0304d1900e60e438a12873f7805ffa79ef",
+  "database": "PostgreSQL",
+  "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
+  "tenantId": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+  "persistenceSourceFixture": {
+    "taskId": "8991075113025740",
+    "taskExecutionId": "8991075113025744",
+    "processExecutionId": "8991075113025745",
+    "activityExecutionId": "764215029294336",
+    "tableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+    "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+    "productNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+    "ownership": "retained WOM/QCS audit fixture; ProcessAnalysis writes only marker-scoped snapshots"
+  },
+  "browserSourceFixture": {
+    "taskId": "8991075113025740",
+    "tableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+    "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+    "ownership": "retained WOM/QCS task returned by the real makeTaskList query grid; read-only trace click"
+  },
+  "status": "PASS",
+  "requests": [
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "dealRes": true,
+          "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "taskId": 8991075113025740
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+      "payload": {
+        "srcID": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN",
+        "srcTableNo": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN_NO",
+        "directiveNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+        "companyCode": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+        "deptCode": "ADP_E2E",
+        "staffCode": "ADP_E2E",
+        "userName": "admin",
+        "wareCode": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WARE",
+        "storageDate": "2026-07-10",
+        "comeType": "produceIn",
+        "redBlue": "blue",
+        "detailList": [
+          {
+            "srcPartId": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+            "goodCode": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_MAT",
+            "batchText": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "produceBatchNum": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "placeSetCode": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_LOC",
+            "quantity": 1
+          }
+        ]
+      },
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "documentId": 15,
+          "documentNo": "CIN-60710084011_PROCESS_ANALYSIS_WMS_IN-ADP_E2E_20260710084011_PROCESS_ANALYSIS_WARE",
+          "documentType": "COMPLETION_INBOUND",
+          "idempotent": false
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/msService/material/foreign/foreign/checkProdResult?srcId=ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE&checkResult=BaseSet_checkResult%2Fqualified",
+      "payload": {},
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "sourceLineId": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+          "qualityStatus": "QUALIFIED",
+          "appliedLines": 1,
+          "pendingInbound": false,
+          "revision": 1
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/processAnalysis/api/trace?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH&productNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "productNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+          "task": {
+            "id": 8991075113025740,
+            "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+            "produce_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "product_id": 8991075113025733,
+            "product_code": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+            "product_name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material",
+            "task_run_state": "WOM_runState/runing",
+            "check_state": null,
+            "check_result": null,
+            "plan_num": 1,
+            "finish_num": 0,
+            "act_start_time": "2026-07-10T02:38:51.242+0000",
+            "act_end_time": null,
+            "create_time": "2026-07-10T02:38:51.242+0000",
+            "modify_time": null
+          },
+          "taskExecutions": [
+            {
+              "id": 8991075113025744,
+              "task_id": 8991075113025740,
+              "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_EXELOG_TN",
+              "produce_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "product_id": 8991075113025733,
+              "task_run_state": "WOM_runState/runing",
+              "check_state": null,
+              "check_result": null,
+              "finish_num": null,
+              "analysis_flag": null,
+              "act_start_time": "2026-07-10T02:38:51.242+0000",
+              "act_end_time": null,
+              "create_time": "2026-07-10T02:38:51.242+0000",
+              "modify_time": null
+            }
+          ],
+          "processes": [
+            {
+              "id": 8991075113025741,
+              "task_id": 8991075113025740,
+              "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_PROCESS_TN",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL process",
+              "exe_order": 1,
+              "process_run_state": "WOM_runState/runing",
+              "act_start_time": "2026-07-10T02:38:51.242+0000",
+              "act_end_time": null,
+              "plan_end_time": null,
+              "create_time": "2026-07-10T02:38:51.242+0000",
+              "modify_time": null
+            }
+          ],
+          "processExecutions": [
+            {
+              "id": 8991075113025745,
+              "task_id": 8991075113025740,
+              "task_process_id": 8991075113025741,
+              "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_PROCESS_EXELOG_TN",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL process",
+              "produce_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "process_run_state": "WOM_runState/runing",
+              "analysis_flag": null,
+              "act_start_time": "2026-07-10T02:38:51.242+0000",
+              "act_end_time": null,
+              "long_time": null,
+              "create_time": "2026-07-10T02:38:51.242+0000",
+              "modify_time": null
+            }
+          ],
+          "activities": [
+            {
+              "id": 8991075113025742,
+              "task_id": 8991075113025740,
+              "task_process_id": 8991075113025741,
+              "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_ACTIVE_TN",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL quality active",
+              "material_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "material_id": 8991075113025733,
+              "run_state": "WOM_runState/runing",
+              "check_state": "待检",
+              "check_result": null,
+              "plan_quantity": 1,
+              "sum_num": null,
+              "act_start_time": "2026-07-10T02:38:54.770+0000",
+              "act_end_time": "2026-07-10T02:38:55.643+0000",
+              "create_time": "2026-07-10T02:38:51.242+0000",
+              "modify_time": "2026-07-10T02:38:55.660+0000"
+            }
+          ],
+          "activityExecutions": [
+            {
+              "id": 764215029294336,
+              "task_id": 8991075113025740,
+              "task_process_id": 8991075113025741,
+              "task_active_id": 8991075113025742,
+              "table_no": null,
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL quality active",
+              "produce_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "material_batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "material_id": 8991075113025733,
+              "run_state": "WOM_runState/finished",
+              "analysis_flag": false,
+              "actual_num": null,
+              "use_num": null,
+              "act_start_time": "2026-07-10T02:38:54.770+0000",
+              "act_end_time": null,
+              "create_time": "2026-07-10T02:38:54.886+0000",
+              "modify_time": "2026-07-10T02:38:55.661+0000"
+            }
+          ],
+          "batchInfo": [
+            {
+              "id": 8991075113025739,
+              "table_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH_INFO_TN",
+              "batch_num": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+              "material_id": 8991075113025733,
+              "source_type": null,
+              "production_date": null,
+              "in_store_date": null,
+              "check_state": "BaseSet_checkState/waitForCheck",
+              "check_result": null,
+              "pass_state": null,
+              "is_available": null,
+              "create_time": "2026-07-10T02:38:51.242+0000",
+              "modify_time": "2026-07-10T02:38:55.614+0000"
+            }
+          ],
+          "materials": {
+            "inputs": [],
+            "outputs": [],
+            "outputRecords": [],
+            "lineage": []
+          },
+          "quality": {
+            "inspections": [
+              {
+                "id": 764215030580480,
+                "table_no": "manuInspect_20260710_003",
+                "source_id": 764215029294336,
+                "source_type": "QCS_sourceType/manuComplete",
+                "sourc_table_no": null,
+                "batch_code": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "prod_id": 8991075113025733,
+                "quantity": null,
+                "check_state": "QCS_checkState/untested",
+                "closed": false,
+                "apply_time": "2026-07-10T02:38:55.006+0000",
+                "create_time": "2026-07-10T02:38:55.200+0000",
+                "modify_time": "2026-07-10T02:38:55.446+0000"
+              }
+            ],
+            "reports": [],
+            "reportItems": [],
+            "dispositions": []
+          },
+          "inventory": {
+            "documents": [
+              {
+                "id": 15,
+                "document_no": "CIN-60710084011_PROCESS_ANALYSIS_WMS_IN-ADP_E2E_20260710084011_PROCESS_ANALYSIS_WARE",
+                "document_type": "COMPLETION_INBOUND",
+                "source_document_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN",
+                "source_document_no": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN_NO",
+                "directive_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+                "warehouse_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WARE",
+                "storage_date": "2026-07-10",
+                "status": "POSTED",
+                "quality_status": "QUALIFIED",
+                "created_at": "2026-07-10T09:20:58.151+0000",
+                "updated_at": "2026-07-10T09:20:58.192+0000"
+              }
+            ],
+            "lines": [
+              {
+                "id": 15,
+                "document_id": 15,
+                "source_line_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+                "material_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_MAT",
+                "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "production_batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "warehouse_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WARE",
+                "location_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_LOC",
+                "quantity": 1,
+                "quality_status": "QUALIFIED",
+                "created_at": "2026-07-10T09:20:58.151+0000",
+                "updated_at": "2026-07-10T09:20:58.192+0000"
+              }
+            ],
+            "transactions": [
+              {
+                "id": 26,
+                "event_key": "COMPLETION_INBOUND:ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+                "transaction_type": "COMPLETION_INBOUND",
+                "source_document_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN",
+                "source_line_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+                "material_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_MAT",
+                "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "production_batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "on_hand_delta": 1,
+                "available_delta": 0,
+                "hold_delta": 1,
+                "balance_on_hand": 1,
+                "balance_available": 0,
+                "balance_hold": 1,
+                "created_at": "2026-07-10T09:20:58.151+0000"
+              },
+              {
+                "id": 27,
+                "event_key": "QUALITY:ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE:1",
+                "transaction_type": "QUALITY_RELEASE",
+                "source_document_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_IN",
+                "source_line_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE",
+                "material_code": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_MAT",
+                "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "production_batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+                "on_hand_delta": 0,
+                "available_delta": 1,
+                "hold_delta": -1,
+                "balance_on_hand": 1,
+                "balance_available": 1,
+                "balance_hold": 0,
+                "created_at": "2026-07-10T09:20:58.192+0000"
+              }
+            ]
+          },
+          "timeline": [
+            {
+              "type": "TASK_CREATED",
+              "title": "制造指令创建",
+              "sourceTable": "wom_produce_tasks",
+              "sourceId": 8991075113025740,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN"
+            },
+            {
+              "type": "TASK_STARTED",
+              "title": "制造指令开始",
+              "sourceTable": "wom_produce_tasks",
+              "sourceId": 8991075113025740,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN"
+            },
+            {
+              "type": "TASK_EXECUTION",
+              "title": "任务执行记录",
+              "sourceTable": "wom_produce_task_exelog",
+              "sourceId": 8991075113025744,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_EXELOG_TN"
+            },
+            {
+              "type": "PROCESS_PLANNED",
+              "title": "工序",
+              "sourceTable": "wom_task_processes",
+              "sourceId": 8991075113025741,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL process"
+            },
+            {
+              "type": "PROCESS_EXECUTION",
+              "title": "工序执行",
+              "sourceTable": "wom_process_exelogs",
+              "sourceId": 8991075113025745,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL process"
+            },
+            {
+              "type": "ACTIVITY_PLANNED",
+              "title": "活动",
+              "sourceTable": "wom_task_actives",
+              "sourceId": 8991075113025742,
+              "occurredAt": "2026-07-10 10:38:51.242103",
+              "state": "WOM_runState/runing",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL quality active"
+            },
+            {
+              "type": "ACTIVITY_EXECUTION",
+              "title": "活动执行",
+              "sourceTable": "wom_acti_exelogs",
+              "sourceId": 764215029294336,
+              "occurredAt": "2026-07-10 10:38:54.77",
+              "state": "WOM_runState/finished",
+              "name": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL quality active"
+            },
+            {
+              "type": "INSPECTION",
+              "title": "生产请检",
+              "sourceTable": "qcs_inspects",
+              "sourceId": 764215030580480,
+              "occurredAt": "2026-07-10 10:38:55.2",
+              "state": "QCS_checkState/untested",
+              "name": "manuInspect_20260710_003"
+            },
+            {
+              "type": "INVENTORY_TRANSACTION",
+              "title": "库存流水",
+              "sourceTable": "wms_inventory_transactions",
+              "sourceId": 26,
+              "occurredAt": "2026-07-10 17:20:58.15155",
+              "state": "COMPLETION_INBOUND",
+              "name": "COMPLETION_INBOUND:ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE"
+            },
+            {
+              "type": "INVENTORY_TRANSACTION",
+              "title": "库存流水",
+              "sourceTable": "wms_inventory_transactions",
+              "sourceId": 27,
+              "occurredAt": "2026-07-10 17:20:58.192685",
+              "state": "QUALITY_RELEASE",
+              "name": "QUALITY:ADP_E2E_20260710084011_PROCESS_ANALYSIS_WMS_LINE:1"
+            }
+          ],
+          "summary": {
+            "processCount": 1,
+            "activityCount": 1,
+            "materialEventCount": 0,
+            "qualityEventCount": 1,
+            "inventoryEventCount": 2,
+            "timelineEventCount": 10
+          }
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=8991075113025744",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "success": true,
+          "snapshot": {
+            "id": 49,
+            "tenant_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+            "source_type": "TASK",
+            "source_id": 8991075113025744,
+            "task_id": 8991075113025740,
+            "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "source_state": "WOM_runState/runing",
+            "revision": 1,
+            "source_updated_at": "2026-07-10T02:38:51.242+0000",
+            "created_at": "2026-07-10T09:20:58.285+0000",
+            "updated_at": "2026-07-10T09:20:58.285+0000"
+          }
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess?processId=8991075113025745",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "success": true,
+          "snapshot": {
+            "id": 50,
+            "tenant_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+            "source_type": "PROCESS",
+            "source_id": 8991075113025745,
+            "task_id": 8991075113025740,
+            "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "source_state": "WOM_runState/runing",
+            "revision": 1,
+            "source_updated_at": "2026-07-10T02:38:51.242+0000",
+            "created_at": "2026-07-10T09:20:58.310+0000",
+            "updated_at": "2026-07-10T09:20:58.310+0000"
+          }
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive?activeId=764215029294336",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "success": true,
+          "snapshot": {
+            "id": 51,
+            "tenant_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+            "source_type": "ACTIVITY",
+            "source_id": 764215029294336,
+            "task_id": 8991075113025740,
+            "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "source_state": "WOM_runState/finished",
+            "revision": 1,
+            "source_updated_at": "2026-07-10T02:38:55.661+0000",
+            "created_at": "2026-07-10T09:20:58.342+0000",
+            "updated_at": "2026-07-10T09:20:58.342+0000"
+          }
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask?taskExeLogId=8991075113025744",
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "success": true,
+          "snapshot": {
+            "id": 49,
+            "tenant_id": "ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT",
+            "source_type": "TASK",
+            "source_id": 8991075113025744,
+            "task_id": 8991075113025740,
+            "batch_no": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+            "source_state": "WOM_runState/runing",
+            "revision": 2,
+            "source_updated_at": "2026-07-10T02:38:51.242+0000",
+            "created_at": "2026-07-10T09:20:58.285+0000",
+            "updated_at": "2026-07-10T09:20:58.394+0000"
+          }
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    }
+  ],
+  "states": [
+    {
+      "label": "before",
+      "snapshotCount": 0,
+      "taskRevision": 0,
+      "processRevision": 0,
+      "activityRevision": 0,
+      "batchRows": 0,
+      "wmsDocuments": 0,
+      "wmsTransactions": 0,
+      "wmsStockRows": 0,
+      "sourceRows": 1
+    },
+    {
+      "label": "afterManualStatistics",
+      "snapshotCount": 3,
+      "taskRevision": 2,
+      "processRevision": 1,
+      "activityRevision": 1,
+      "batchRows": 3,
+      "wmsDocuments": 1,
+      "wmsTransactions": 2,
+      "wmsStockRows": 1,
+      "sourceRows": 1
+    },
+    {
+      "label": "afterCleanup",
+      "snapshotCount": 0,
+      "taskRevision": 0,
+      "processRevision": 0,
+      "activityRevision": 0,
+      "batchRows": 0,
+      "wmsDocuments": 0,
+      "wmsTransactions": 0,
+      "wmsStockRows": 0,
+      "sourceRows": 1
+    }
+  ],
+  "browser": {
+    "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+    "navigationStatus": 200,
+    "selected": {
+      "rowIndex": 0,
+      "id": "8991075113025740",
+      "tableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+      "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+      "taskRunState": "WOM_runState/runing",
+      "selectionSource": "makeTaskList-query response loaded through SupDataGrid.setDatagridData"
+    },
+    "powerCodeProbe": {
+      "ok": true,
+      "type": "object",
+      "value": {}
+    },
+    "precheck": {
+      "status": 200,
+      "body": {
+        "code": 200,
+        "data": {
+          "dealRes": true,
+          "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "taskId": 8991075113025740
+        },
+        "message": "success",
+        "msg": "success"
+      }
+    },
+    "popupUrl": "http://100.99.133.43:18080/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut?__pc__=&workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut&openType=page&batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH&productNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+    "traceMarkerVisible": true,
+    "traceTitleVisible": true,
+    "traceState": "追溯数据已加载：ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH，共 10 个时间轴事件。",
+    "listConsoleErrors": [],
+    "traceConsoleErrors": [],
+    "traceBadResponses": [],
+    "traceRequestFailures": [],
+    "processResponses": [
+      {
+        "method": "GET",
+        "url": "http://100.99.133.43:18080/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView?batchNo=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+        "status": 200
+      }
+    ],
+    "screenshot": "metadata/process-analysis-trace.png"
+  },
+  "verificationSql": "SELECT json_build_object(\n    'snapshotCount', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT'),\n    'taskRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT' AND source_type='TASK' AND source_id=8991075113025744), 0),\n    'processRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT' AND source_type='PROCESS' AND source_id=8991075113025745), 0),\n    'activityRevision', COALESCE((SELECT revision FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT' AND source_type='ACTIVITY' AND source_id=764215029294336), 0),\n    'batchRows', (SELECT count(*) FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT' AND batch_no='ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH'),\n    'wmsDocuments', (SELECT count(*) FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT'),\n    'wmsTransactions', (SELECT count(*) FROM wms_inventory_transactions WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT'),\n    'wmsStockRows', (SELECT count(*) FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT'),\n    'sourceRows', (\n      SELECT count(*) FROM wom_produce_tasks t\n      JOIN wom_produce_task_exelog te ON te.task_id=t.id\n      WHERE t.id=8991075113025740 AND t.produce_batch_num='ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH'\n    )\n  );",
+  "cleanupSql": "BEGIN;\nDELETE FROM pa_trace_snapshots WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT';\nDELETE FROM wms_stock_documents WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT';\nDELETE FROM wms_quality_results WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT';\nDELETE FROM wms_batch_stocks WHERE tenant_id='ADP_E2E_20260710084011_PROCESS_ANALYSIS_TENANT';\nCOMMIT;",
+  "issues": []
+}

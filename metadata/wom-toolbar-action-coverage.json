@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "reportKind": "wom-toolbar-action-coverage",
-  "generatedAt": "2026-06-22T13:29:53.159Z",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
   "database": "PostgreSQL",
   "module": "WOM",
   "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
@@ -522,13 +522,13 @@
   },
   "summary": {
     "totalActions": 8,
-    "pass": 6,
-    "blocked": 2,
+    "pass": 7,
+    "blocked": 1,
     "notVerified": 0,
     "notApplicable": 0,
     "requiresPersistence": 7,
     "persistencePass": 6,
-    "directNormalClickPass": 3,
+    "directNormalClickPass": 4,
     "pageContextRuntimeEventPass": 3
   },
   "actions": [
@@ -977,22 +977,29 @@
       "label": "生产过程追溯",
       "buttonCode": "makeTaskList_prodprocessView_add_WOM_1.0.0_produceTask_makeTaskList",
       "apiEndpoints": [
-        "GET /msService/ProcessAnalysis/traceability/traceability/isProdprocessView",
-        "GET /msService/ProcessAnalysis/traceability/traceability/processBatchViewOut"
+        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
+        "GET /msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut",
+        "GET /msService/ProcessAnalysis/processAnalysis/api/trace"
       ],
       "requiresPersistence": false,
-      "acceptanceStatus": "BLOCKED",
-      "clickEvidence": "DEPENDENCY_BLOCKED",
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "NORMAL_MOUSE_CLICK",
       "productionCaseIds": [
         "PROD-020"
       ],
-      "targetTables": [],
-      "marker": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART",
-      "verificationSql": "select table_name from information_schema.tables where table_schema='public' and (table_name ~* '^pa_' or table_name ~* 'process.*analysis' or table_name ~* 'trace' or table_name ~* 'process_batch') order by table_name;",
+      "targetTables": [
+        "pa_trace_snapshots",
+        "runtime_view",
+        "rbac_menuinfo"
+      ],
+      "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
+      "verificationSql": "select snapshot_type, source_id, batch_no, revision from public.pa_trace_snapshots where marker='ADP_E2E_20260710084011_PROCESS_ANALYSIS' order by snapshot_type;",
       "sourceEvidenceRefs": [
         "metadata/production-module-test-cases.json",
         "metadata/business-dependency-readiness-smoke.json",
         "metadata/processanalysis-dependency-analysis.json",
+        "metadata/process-analysis-persistence-acceptance.json",
+        "metadata/process-analysis-trace.png",
         "docs/backend-table-audit/processanalysis-dependency-analysis.md",
         "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
         "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
@@ -1016,10 +1023,11 @@
       ],
       "recheckCommands": [
         "make smoke-business-dependencies",
-        "manual: after ProcessAnalysis deployment, click the WOM trace button with a marker batch and verify traceability runtime/menu/schema",
-        "make smoke-wom-toolbar-row"
+        "make acceptance-process-analysis-persistence",
+        "make process-analysis-test"
       ],
       "issues": [
+        "2026-07-10 current acceptance PASS: marker ADP_E2E_20260710084011_PROCESS_ANALYSIS selected a real WOM task and clicked #btn-prodprocessView; trace page showed 10 events without console/network failures, and PostgreSQL marker rows were verified and cleaned. The following entries are retained as pre-recovery history.",
         "ProcessAnalysis has no healthy Nacos prod instance in the current test environment.",
         "The current recovered package has WOM caller-side scripts only; ProcessAnalysis runtime metadata, menu entries, PostgreSQL schema, and service implementation are missing. 2026-06-21 18:46 direct row-click smoke clicked 生产过程追溯; GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView returned HTTP 503.",
         "2026-06-21 19:50 applied WOM makeTaskList body.js/body-es5.js and nginx aliases on the test server; the toolbar now guards the missing ProcessAnalysis dependency with a Chinese prompt instead of opening a blank/no-feedback interaction. This is a frontend guard only and does not close PROD-020.",

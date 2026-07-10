@@ -236,6 +236,11 @@ def check_status_semantics(item: dict[str, Any], expected: dict[str, Any], failu
     database = as_dict(item.get("database"))
 
     if status == "READY":
+        acceptance = as_dict(item.get("acceptance"))
+        if acceptance.get("status") != "PASS":
+            fail(failures, f"{dependency_id} READY must reference PASS marker acceptance evidence")
+        if not str(acceptance.get("path", "")).startswith("metadata/"):
+            fail(failures, f"{dependency_id} READY acceptance path must point to committed metadata")
         if not has_healthy_service(item, expected):
             fail(failures, f"{dependency_id} READY must have at least one healthy expected Nacos service")
         if not endpoints_are_successful(item):
@@ -280,7 +285,7 @@ def check_dependency(index: int, item: Any, failures: list[str]) -> str | None:
         return None
     expected = REQUIRED_DEPENDENCIES[dependency_id]
 
-    for key in ("id", "title", "status", "requiredFor", "readyWhen", "services", "endpoints", "database", "issues", "nextAction"):
+    for key in ("id", "title", "status", "requiredFor", "readyWhen", "services", "endpoints", "database", "acceptance", "issues", "nextAction"):
         if key not in item:
             fail(failures, f"{dependency_id} missing required key: {key}")
 

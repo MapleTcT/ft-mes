@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T07:25:00Z",
-  "repoCommit": "d7cc28d2a6e526079ed5909d8e6b0fa06e4001ab",
+  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "target": {
     "host": "100.99.133.43",
@@ -9,11 +9,11 @@
     "legacyLanAlias": "10.11.100.17"
   },
   "scope": "production-quality-core-flow",
-  "overallStatus": "BLOCKED",
-  "statusReason": "PROCESS_ANALYSIS_PACKAGE",
+  "overallStatus": "PASS",
+  "statusReason": "CORE_PRODUCTION_QUALITY_TRACEABILITY_CHAIN_ACCEPTED",
   "summary": {
-    "pass": 12,
-    "blocked": 1,
+    "pass": 13,
+    "blocked": 0,
     "fail": 0,
     "environmentSmoke": "9/9 PASS",
     "platformSmoke": "6/6 PASS",
@@ -220,13 +220,13 @@
       "runtimeJarSha256": "9095731dcd50cde45337ffa67ef36f2b31b791da869866d1a64712acb163b8c9"
     },
     {
-      "id": "CORE-BLOCKER-002",
+      "id": "CORE-013",
       "operation": "批次、物料、工单追溯",
-      "status": "BLOCKED",
-      "dependency": "ProcessAnalysis package/service/schema",
-      "evidence": "Nacos aliases have healthyHostCount=0; five endpoints return tenant-service 503; processAnalysis table/runtimeView/menu counts are all 0",
-      "artifact": "metadata/business-dependency-readiness-smoke.json",
-      "recheckedAt": "2026-07-10T03:55:34.526Z"
+      "status": "PASS",
+      "dependency": "ProcessAnalysis source module, service, runtime metadata and PostgreSQL schema",
+      "evidence": "Real WOM button opened marker trace page; Nacos and five compatibility endpoints are healthy; pa_trace_snapshots revisions and WMS fixture rows were verified and cleaned",
+      "artifact": "metadata/process-analysis-persistence-acceptance.json",
+      "recheckedAt": "2026-07-10T08:40:11.239Z"
     }
   ],
   "scopeDecisionsRequired": [

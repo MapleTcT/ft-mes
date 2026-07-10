@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>生产过程追溯</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue: #2674d9;
+      --blue-soft: #eef5ff;
+      --green: #138a63;
+      --orange: #c26b16;
+      --red: #c8404b;
+      --ink: #243142;
+      --muted: #6b7788;
+      --line: #dbe2ea;
+      --band: #f6f8fb;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--white); color: var(--ink); font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif; }
+    body { min-width: 320px; }
+    header { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 24px; background: #2f76bd; color: #fff; }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 0; }
+    header p { margin: 4px 0 0; font-size: 13px; opacity: .9; }
+    button { min-width: 88px; height: 36px; border: 1px solid rgba(255,255,255,.75); background: transparent; color: #fff; cursor: pointer; border-radius: 4px; font-size: 14px; }
+    button:hover { background: rgba(255,255,255,.12); }
+    .state { min-height: 42px; display: flex; align-items: center; padding: 8px 24px; border-bottom: 1px solid var(--line); background: var(--band); color: var(--muted); font-size: 14px; }
+    .state.error { color: var(--red); background: #fff4f4; }
+    main { width: 100%; }
+    section { border-bottom: 1px solid var(--line); }
+    .inner { width: min(1480px, 100%); margin: 0 auto; padding: 20px 24px; }
+    h2 { margin: 0 0 14px; font-size: 17px; font-weight: 600; letter-spacing: 0; }
+    h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+    .summary { display: grid; grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(108px, 1fr)); border: 1px solid var(--line); }
+    .summary > div { min-height: 84px; padding: 14px 16px; border-right: 1px solid var(--line); background: #fff; overflow: hidden; }
+    .summary > div:last-child { border-right: 0; }
+    .summary label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+    .summary strong { display: block; font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
+    .summary .identity strong { font-size: 15px; line-height: 1.55; }
+    .summary .identity span { display: block; color: var(--muted); overflow-wrap: anywhere; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .table-wrap { width: 100%; overflow: auto; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 13px; }
+    th, td { height: 42px; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { position: sticky; top: 0; background: var(--band); color: #536176; font-weight: 600; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: var(--blue-soft); }
+    .empty { min-height: 88px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .timeline { border-left: 2px solid var(--line); margin-left: 8px; }
+    .event { position: relative; display: grid; grid-template-columns: 176px minmax(160px, 1fr) minmax(140px, 1fr) minmax(150px, 1fr); gap: 14px; min-height: 52px; padding: 8px 12px 8px 22px; border-bottom: 1px solid var(--line); font-size: 13px; align-items: center; }
+    .event:before { content: ""; position: absolute; width: 10px; height: 10px; left: -6px; top: 20px; border-radius: 50%; background: var(--blue); border: 2px solid #fff; }
+    .event time { color: var(--muted); }
+    .event .type { font-weight: 600; }
+    .event .source { color: var(--muted); overflow-wrap: anywhere; }
+    .tag { display: inline-block; max-width: 100%; padding: 3px 7px; border: 1px solid #afd5c6; color: var(--green); background: #f0faf6; border-radius: 3px; overflow-wrap: anywhere; }
+    .lineage { display: grid; grid-template-columns: minmax(180px, 1fr) 110px minmax(180px, 1fr); align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .lineage:last-child { border-bottom: 0; }
+    .lineage .arrow { text-align: center; color: var(--orange); font-weight: 600; }
+    .muted { color: var(--muted); }
+    @media (max-width: 980px) {
+      header { align-items: flex-start; padding: 12px 16px; }
+      .inner { padding: 16px; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .summary > div { border-bottom: 1px solid var(--line); }
+      .two { grid-template-columns: 1fr; }
+      .event { grid-template-columns: 1fr; gap: 4px; }
+      .event:before { top: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>生产过程追溯</h1>
+      <p>制造指令、物料、质量与库存事实链</p>
+    </div>
+    <button id="refresh" type="button">刷新</button>
+  </header>
+  <div id="state" class="state">正在读取生产追溯数据...</div>
+  <main>
+    <section>
+      <div class="inner">
+        <div id="summary" class="summary"></div>
+      </div>
+    </section>
+    <section>
+      <div class="inner">
+        <h2>生产时间轴</h2>
+        <div id="timeline" class="timeline"></div>
+      </div>
+    </section>
+    <section>
+      <div class="inner two">
+        <div>
+          <h2>工序执行</h2>
+          <div id="processes"></div>
+        </div>
+        <div>
+          <h2>活动执行</h2>
+          <div id="activities"></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="inner">
+        <h2>物料谱系</h2>
+        <div id="lineage" class="table-wrap"></div>
+        <div class="two">
+          <div><h3>投入记录</h3><div id="inputs"></div></div>
+          <div><h3>产出记录</h3><div id="outputs"></div></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="inner">
+        <h2>质量闭环</h2>
+        <div id="quality"></div>
+      </div>
+    </section>
+    <section>
+      <div class="inner">
+        <h2>完工入库与库存流水</h2>
+        <div id="inventory"></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+      var params = new URLSearchParams(window.location.search);
+      var batchNo = params.get("batchNo") || "";
+      var productNo = params.get("productNo") || params.get("product") || "";
+      var prefix = window.location.pathname.split("/processAnalysis/")[0];
+      var state = document.getElementById("state");
+
+      function text(value) {
+        return value === null || value === undefined || value === "" ? "-" : String(value);
+      }
+
+      function escapeHtml(value) {
+        return text(value).replace(/[&<>"']/g, function (char) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char];
+        });
+      }
+
+      function empty(message) {
+        return '<div class="empty">' + escapeHtml(message || "暂无数据") + "</div>";
+      }
+
+      function table(rows, columns) {
+        if (!rows || !rows.length) return empty();
+        var head = columns.map(function (column) { return "<th>" + escapeHtml(column[0]) + "</th>"; }).join("");
+        var body = rows.map(function (row) {
+          return "<tr>" + columns.map(function (column) {
+            return "<td>" + escapeHtml(row[column[1]]) + "</td>";
+          }).join("") + "</tr>";
+        }).join("");
+        return '<div class="table-wrap"><table><thead><tr>' + head + "</tr></thead><tbody>" + body + "</tbody></table></div>";
+      }
+
+      function render(data) {
+        var task = data.task || {};
+        var summary = data.summary || {};
+        document.getElementById("summary").innerHTML = [
+          '<div class="identity"><label>制造指令 / 生产批次</label><strong>' + escapeHtml(task.table_no) + "</strong><span>" + escapeHtml(data.batchNo) + "</span></div>",
+          "<div><label>工序</label><strong>" + escapeHtml(summary.processCount || 0) + "</strong></div>",
+          "<div><label>活动</label><strong>" + escapeHtml(summary.activityCount || 0) + "</strong></div>",
+          "<div><label>物料事件</label><strong>" + escapeHtml(summary.materialEventCount || 0) + "</strong></div>",
+          "<div><label>质量事件</label><strong>" + escapeHtml(summary.qualityEventCount || 0) + "</strong></div>",
+          "<div><label>库存事件</label><strong>" + escapeHtml(summary.inventoryEventCount || 0) + "</strong></div>"
+        ].join("");
+
+        var timeline = data.timeline || [];
+        document.getElementById("timeline").innerHTML = timeline.length ? timeline.map(function (event) {
+          return '<div class="event"><time>' + escapeHtml(event.occurredAt) + '</time><div class="type">' +
+            escapeHtml(event.title) + '</div><div><span class="tag">' + escapeHtml(event.state) +
+            '</span></div><div class="source">' + escapeHtml(event.sourceTable) + " #" + escapeHtml(event.sourceId) + "</div></div>";
+        }).join("") : empty();
+
+        document.getElementById("processes").innerHTML = table(data.processExecutions || data.processes, [
+          ["工序", "name"], ["状态", "process_run_state"], ["开始时间", "act_start_time"], ["结束时间", "act_end_time"]
+        ]);
+        document.getElementById("activities").innerHTML = table(data.activityExecutions || data.activities, [
+          ["活动", "name"], ["状态", "run_state"], ["物料批次", "material_batch_num"], ["开始时间", "act_start_time"], ["结束时间", "act_end_time"]
+        ]);
+
+        var materials = data.materials || {};
+        var lineage = materials.lineage || [];
+        document.getElementById("lineage").innerHTML = lineage.length ? lineage.map(function (edge) {
+          return '<div class="lineage"><strong>' + escapeHtml(edge.fromBatch) + '</strong><div class="arrow">' +
+            escapeHtml(edge.relation) + ' &gt;</div><strong>' + escapeHtml(edge.toBatch) + "</strong></div>";
+        }).join("") : empty("当前批次暂无投入/产出谱系记录");
+        document.getElementById("inputs").innerHTML = table(materials.inputs, [
+          ["物料ID", "material_id"], ["物料批次", "material_batch_num"], ["投料量", "putin_num"], ["使用量", "use_num"], ["投料时间", "putin_time"]
+        ]);
+        var outputs = (materials.outputs || []).concat(materials.outputRecords || []);
+        document.getElementById("outputs").innerHTML = table(outputs, [
+          ["物料ID", "material_id"], ["产出批次", "mat_batch_num"], ["生产批次", "produce_batch_num"], ["产出量", "output_num"], ["产出时间", "output_time"]
+        ]);
+
+        var quality = data.quality || {};
+        var qualityRows = [];
+        (quality.inspections || []).forEach(function (row) { qualityRows.push({ type: "请检", no: row.table_no, state: row.check_state, result: "", time: row.create_time }); });
+        (quality.reports || []).forEach(function (row) { qualityRows.push({ type: "检验报告", no: row.table_no, state: row.check_res_code, result: row.check_result, time: row.create_time }); });
+        (quality.reportItems || []).forEach(function (row) { qualityRows.push({ type: "检测项", no: row.report_name, state: row.check_result, result: row.disp_value, time: row.create_time }); });
+        (quality.dispositions || []).forEach(function (row) { qualityRows.push({ type: "不合格处置", no: row.table_no, state: row.status, result: row.un_qlf_reason, time: row.create_time }); });
+        document.getElementById("quality").innerHTML = table(qualityRows, [
+          ["类型", "type"], ["单号", "no"], ["状态", "state"], ["结论/原因", "result"], ["时间", "time"]
+        ]);
+
+        var inventory = data.inventory || {};
+        document.getElementById("inventory").innerHTML = table(inventory.transactions, [
+          ["流水类型", "transaction_type"], ["物料", "material_code"], ["批次", "batch_no"], ["生产批次", "production_batch_no"], ["库存变化", "on_hand_delta"], ["可用变化", "available_delta"], ["冻结变化", "hold_delta"], ["时间", "created_at"]
+        ]);
+      }
+
+      async function load() {
+        if (!batchNo) {
+          state.className = "state error";
+          state.textContent = "缺少 batchNo，无法执行追溯。";
+          return;
+        }
+        state.className = "state";
+        state.textContent = "正在读取批次 " + batchNo + " 的生产追溯数据...";
+        try {
+          var url = prefix + "/processAnalysis/api/trace?batchNo=" + encodeURIComponent(batchNo) + "&productNo=" + encodeURIComponent(productNo);
+          var response = await fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } });
+          var body = await response.json();
+          if (!response.ok || body.code !== 200) throw new Error(body.message || ("HTTP " + response.status));
+          render(body.data);
+          state.textContent = "追溯数据已加载：" + batchNo + "，共 " + (body.data.summary.timelineEventCount || 0) + " 个时间轴事件。";
+        } catch (error) {
+          state.className = "state error";
+          state.textContent = "追溯加载失败：" + error.message;
+        }
+      }
+
+      document.getElementById("refresh").addEventListener("click", load);
+      load();
+    })();
+  </script>
+</body>
+</html>

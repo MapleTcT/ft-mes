@@ -1743,6 +1743,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/175-process-analysis-traceability.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -1894,6 +1900,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-postgres-runtime-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-process-analysis-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -2943,6 +2955,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/plans/2026-07-10-process-analysis-traceability-design.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/postgres-migration-index.md",
       "state": "tracked",
       "tracked": true
@@ -3334,6 +3352,18 @@
     {
       "ignored": false,
       "path": "metadata/postgres-source-mapping-conversion.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/process-analysis-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/process-analysis-trace.png",
       "state": "tracked",
       "tracked": true
     },
@@ -3836,13 +3866,13 @@
       "tracked": 2
     },
     "deploy": {
-      "tracked": 457
+      "tracked": 459
     },
     "docs": {
-      "tracked": 57
+      "tracked": 58
     },
     "metadata": {
-      "tracked": 71
+      "tracked": 73
     },
     "package.json": {
       "tracked": 1
@@ -3857,8 +3887,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 636,
-    "tracked": 636,
+    "totalFiles": 641,
+    "tracked": 641,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -227,12 +227,11 @@
     {
       "id": "BUS-SIGNOFF-001",
       "severity": "BLOCKER",
-      "description": "Standalone bad-quantity scope, ProcessAnalysis traceability, external Batch editing and export gaps still prevent production signoff; material/WMS completion inbound is accepted.",
+      "description": "Standalone bad-quantity scope, external Batch editing and export gaps still prevent production signoff; material/WMS completion inbound and ProcessAnalysis traceability are accepted.",
       "source": "metadata/production-module-blockers.json",
       "blockerCaseIds": [
         "PROD-010",
         "PROD-019",
-        "PROD-020",
         "PROD-021",
         "PROD-023"
       ],
@@ -251,7 +250,6 @@
         "PROD-ACTION-008",
         "PROD-010",
         "PROD-019",
-        "PROD-020",
         "PROD-021",
         "PROD-023"
       ],

@@ -30,6 +30,7 @@ const dependencies = [
     requiredFor: ["PROD-019", "PROD-021", "PROD-022", "WOM/QCS inventory and stock-in write-back"],
     serviceNames: ["material", "MATERIAL", "wms", "WMS", "warehouse", "Warehouse", "inventory", "Inventory"],
     decisiveServiceName: "material",
+    acceptancePath: "metadata/material-wms-persistence-acceptance.json",
     endpoints: [
       {
         name: "generateProductInSingle",
@@ -60,6 +61,7 @@ const dependencies = [
     requiredFor: ["PROD-020", "WOM production process traceability"],
     serviceNames: ["ProcessAnalysis", "processanalysis", "PROCESSANALYSIS", "Traceability", "traceability"],
     decisiveServiceName: "ProcessAnalysis",
+    acceptancePath: "metadata/process-analysis-persistence-acceptance.json",
     endpoints: [
       {
         name: "isProdprocessView",
@@ -123,6 +125,23 @@ function parseJson(text, fallback) {
   } catch (_error) {
     return fallback;
   }
+}
+
+function readAcceptance(dependency) {
+  const relativePath = dependency.acceptancePath;
+  if (!relativePath) return { path: null, status: "MISSING" };
+  const absolutePath = path.join(repoRoot, relativePath);
+  if (!fs.existsSync(absolutePath)) return { path: relativePath, status: "MISSING" };
+  const payload = parseJson(fs.readFileSync(absolutePath, "utf8"), {});
+  const states = Array.isArray(payload.states) ? payload.states : [];
+  const cleanup = states.find((state) => state && state.label === "afterCleanup") || {};
+  return {
+    path: relativePath,
+    status: payload.status || "UNKNOWN",
+    marker: payload.marker || null,
+    generatedAt: payload.generatedAt || null,
+    cleanup,
+  };
 }
 
 function parseDelimited(stdout, beginPrefix, endPattern) {
@@ -406,17 +425,19 @@ async function probeEndpoint(api, ticket, endpoint) {
   }
 }
 
-function decideStatus(dependency, serviceEvidence, endpointEvidence, databaseEvidence) {
+function decideStatus(dependency, serviceEvidence, endpointEvidence, databaseEvidence, acceptanceEvidence) {
   const decisiveService = serviceEvidence[dependency.decisiveServiceName] || { healthyHostCount: 0 };
   const anyHealthyAlias = dependency.serviceNames.some((serviceName) => {
     const service = serviceEvidence[serviceName];
     return service && service.healthyHostCount > 0;
   });
   const tenantMissingEndpoints = endpointEvidence.filter((endpoint) => endpoint.tenantServiceMissing).length;
+  const endpointsHealthy = endpointEvidence.every((endpoint) => endpoint.status >= 200 && endpoint.status < 300);
+  const acceptancePassed = acceptanceEvidence.status === "PASS";
 
   if (dependency.id === "material-service") {
-    if (decisiveService.healthyHostCount > 0 && tenantMissingEndpoints === 0) {
-      return "ACTION_REQUIRED";
+    if (decisiveService.healthyHostCount > 0 && tenantMissingEndpoints === 0 && endpointsHealthy) {
+      return acceptancePassed ? "READY" : "ACTION_REQUIRED";
     }
     return "BLOCKED";
   }
@@ -426,8 +447,8 @@ function decideStatus(dependency, serviceEvidence, endpointEvidence, databaseEvi
       Number(databaseEvidence.processAnalysisTableCount || 0) > 0 ||
       Number(databaseEvidence.processAnalysisRuntimeViewCount || 0) > 0 ||
       Number(databaseEvidence.processAnalysisMenuCount || 0) > 0;
-    if (anyHealthyAlias && metadataPresent && tenantMissingEndpoints === 0) {
-      return "ACTION_REQUIRED";
+    if (anyHealthyAlias && metadataPresent && tenantMissingEndpoints === 0 && endpointsHealthy) {
+      return acceptancePassed ? "READY" : "ACTION_REQUIRED";
     }
     return "BLOCKED";
   }
@@ -443,12 +464,13 @@ async function buildReport() {
   try {
     const items = [];
     for (const dependency of dependencies) {
+      const acceptance = readAcceptance(dependency);
       const endpoints = [];
       for (const endpoint of dependency.endpoints) {
         endpoints.push(await probeEndpoint(api, ticket, endpoint));
       }
       const services = dependency.serviceNames.map((serviceName) => serviceEvidence[serviceName]);
-      const status = decideStatus(dependency, serviceEvidence, endpoints, databaseEvidence);
+      const status = decideStatus(dependency, serviceEvidence, endpoints, databaseEvidence, acceptance);
       const issues = [];
       if (status === "BLOCKED") {
         if (!services.some((service) => service && service.healthyHostCount > 0)) {
@@ -478,6 +500,7 @@ async function buildReport() {
         readyWhen: dependency.readyWhen,
         services,
         endpoints,
+        acceptance,
         database:
           dependency.id === "material-service"
             ? {
