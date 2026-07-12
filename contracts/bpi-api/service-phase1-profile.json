@@ -22,10 +22,16 @@
       "method": "POST",
       "path": "/internal/bpi/v1/telemetry",
       "purpose": "Feature-gated replay staging for telemetry persistence acceptance; disabled by default and not the production Kafka path"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/bpi/v1/candidate-events",
+      "purpose": "Feature-gated BatchCandidateV1 Protobuf bridge for stream-to-PostgreSQL acceptance; disabled by default until the Kafka consumer is wired"
     }
   ],
   "internalEndpointModes": {
-    "/internal/bpi/v1/telemetry": "SHORT_LIVED_REPLAY_STAGING"
+    "/internal/bpi/v1/telemetry": "SHORT_LIVED_REPLAY_STAGING",
+    "/internal/bpi/v1/candidate-events": "SHORT_LIVED_PROTOBUF_BRIDGE"
   },
   "mode": "SHADOW_ONLY",
   "excludedWrites": ["WOM", "QCS", "WMS", "PLC", "DCS"]

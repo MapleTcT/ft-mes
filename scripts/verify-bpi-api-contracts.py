@@ -105,15 +105,20 @@ def main() -> int:
     required_internal_endpoints = {
         ("POST", "/internal/bpi/v1/candidates"),
         ("POST", "/internal/bpi/v1/telemetry"),
+        ("POST", "/internal/bpi/v1/candidate-events"),
     }
     if internal_endpoints != required_internal_endpoints:
         failures.append(
-            "service Phase 1 profile must expose only the approved candidate and telemetry internal endpoints"
+            "service Phase 1 profile must expose only the approved candidate, candidate-event and telemetry internal endpoints"
         )
     if service_profile.get("internalEndpointModes", {}).get("/internal/bpi/v1/telemetry") != (
         "SHORT_LIVED_REPLAY_STAGING"
     ):
         failures.append("telemetry HTTP ingress must remain explicitly marked as replay staging")
+    if service_profile.get("internalEndpointModes", {}).get("/internal/bpi/v1/candidate-events") != (
+        "SHORT_LIVED_PROTOBUF_BRIDGE"
+    ):
+        failures.append("candidate Protobuf HTTP ingress must remain explicitly marked as a short-lived bridge")
 
     channels = asyncapi.get("channels", {})
     messages = asyncapi.get("components", {}).get("messages", {})

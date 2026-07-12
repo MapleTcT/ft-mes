@@ -50,6 +50,9 @@ class BoundaryReplayEngineTest {
         assertEquals("MO-20260712-001", candidate.getContextOrderId());
         assertEquals(0.9, candidate.getConfidence());
         assertEquals(List.of("EVT-ORDER", "EVT-FLOW", "EVT-PUMP"), candidate.getEvidenceEventIdsList());
+        assertEquals(3, candidate.getEvidenceCount());
+        assertEquals("feed.flow", candidate.getEvidence(1).getSignal());
+        assertEquals(List.of("column.level"), candidate.getMissingSignalsList());
         assertTrue(BpiContractValidator.validate(candidate).isEmpty());
     }
 

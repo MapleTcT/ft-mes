@@ -3,6 +3,7 @@ package com.mapletct.ftmes.bpi.stream;
 import com.mapletct.ftmes.bpi.contract.identity.CandidateKeyFactory;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
 import com.mapletct.ftmes.bpi.rules.BoundaryEvidenceSnapshot;
 import com.mapletct.ftmes.bpi.rules.BoundaryKind;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
@@ -11,6 +12,8 @@ import com.mapletct.ftmes.bpi.rules.ConditionStatus;
 
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class BoundaryCandidateProjector {
 
@@ -53,14 +56,36 @@ public final class BoundaryCandidateProjector {
         } else {
             candidate.setBatchId(context.batchId());
         }
+        Set<String> eventIds = new HashSet<>();
         result.evidence().stream()
-                .filter(item -> item.status() == ConditionStatus.TRUE && item.eventId() != null)
-                .sorted(Comparator.comparing(BoundaryEvidenceSnapshot::eventTime)
+                .sorted(Comparator.comparing(
+                                BoundaryEvidenceSnapshot::eventTime,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
                         .thenComparing(BoundaryEvidenceSnapshot::signal))
-                .map(BoundaryEvidenceSnapshot::eventId)
-                .distinct()
-                .forEach(candidate::addEvidenceEventIds);
+                .forEach(item -> addEvidence(candidate, item, eventIds));
         return candidate.build();
+    }
+
+    private static void addEvidence(
+            BatchCandidateV1.Builder candidate,
+            BoundaryEvidenceSnapshot item,
+            Set<String> eventIds) {
+        if (item.status() != ConditionStatus.TRUE || item.eventId() == null) {
+            candidate.addMissingSignals(item.signal());
+            return;
+        }
+        if (eventIds.add(item.eventId())) {
+            candidate.addEvidenceEventIds(item.eventId());
+        }
+        candidate.addEvidence(CandidateEvidenceV1.newBuilder()
+                .setEventId(item.eventId())
+                .setSignal(item.signal())
+                .setClassification(item.classification().name())
+                .setSatisfied(true)
+                .setValue(item.value())
+                .setQualityCode(item.quality().name())
+                .setEventTimeMs(item.eventTime().toEpochMilli())
+                .setSource("bpi-stream-engine"));
     }
 
     private static String required(String value, String field) {

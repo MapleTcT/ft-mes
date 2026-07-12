@@ -16,6 +16,7 @@
     <name>FT MES BPI Service Parent</name>
     <description>Independent Java 17 build boundary for BPI domain ownership.</description>
     <modules>
+        <module>../../contracts/bpi-events</module>
         <module>batch-rule-runtime</module>
         <module>app</module>
     </modules>

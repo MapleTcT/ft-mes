@@ -3,6 +3,7 @@ package com.mapletct.ftmes.bpi.contract.validation;
 import com.mapletct.ftmes.bpi.contract.identity.CandidateKeyFactory;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
@@ -136,6 +137,30 @@ public class BpiContractValidatorTest {
         List<ContractViolation> violations = BpiContractValidator.validate(candidate);
 
         assertTrue(containsCode(violations, "NON_DETERMINISTIC_ID"));
+    }
+
+    @Test
+    public void richCandidateEvidenceMustMatchTheStableEventIndex() {
+        BatchCandidateV1 candidate = validEndCandidate().toBuilder()
+            .addEvidence(CandidateEvidenceV1.newBuilder()
+                .setEventId("EVENT_END_8")
+                .setSignal("feed.flow")
+                .setClassification("QUORUM")
+                .setSatisfied(true)
+                .setValue("0.1")
+                .setUnit("t/h")
+                .setQualityCode("GOOD")
+                .setEventTimeMs(1_720_000_100_000L)
+                .setSource("bpi-stream-engine"))
+            .build();
+
+        assertTrue(BpiContractValidator.validate(candidate).isEmpty());
+
+        BatchCandidateV1 mismatched = candidate.toBuilder()
+            .setEvidence(0, candidate.getEvidence(0).toBuilder().setEventId("NOT_INDEXED"))
+            .build();
+        assertTrue(containsCode(BpiContractValidator.validate(mismatched), "EVIDENCE_INDEX_MISMATCH"));
+        assertTrue(containsCode(BpiContractValidator.validate(mismatched), "QUORUM_EVIDENCE_DETAIL_MISSING"));
     }
 
     private static TelemetryEnvelopeV1 validEnvelope() {

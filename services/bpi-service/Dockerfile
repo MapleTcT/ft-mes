@@ -3,8 +3,10 @@ ARG JAVA_IMAGE=eclipse-temurin:17-jre-jammy
 
 FROM ${MAVEN_IMAGE} AS build
 WORKDIR /workspace
+COPY pom.xml pom.xml
+COPY contracts contracts
 COPY services/bpi-service services/bpi-service
-RUN mvn -q -f services/bpi-service/pom.xml -DskipTests package
+RUN mvn -B -ntp -f services/bpi-service/pom.xml -DskipTests package
 
 FROM ${JAVA_IMAGE}
 RUN groupadd --system --gid 10001 bpi \

@@ -23,6 +23,9 @@
 | `material-service-dependency-analysis.md` | 已完成专项解释 | WOM/QCS 完工入库、库存回写依赖缺失的 `material` 租户服务；`100.99.133.43` Nacos、网关、PostgreSQL 和包扫描均已复验 |
 | `processanalysis-dependency-analysis.md` | 已恢复并验收 | WOM 生产过程追溯由 `process-analysis` 源码模块恢复；`100.99.133.43` Nacos、网关、真实按钮和 PostgreSQL marker 均已复验 |
 | `business-equipment-energy-ehs.md` | 待开始 | 设备、能源、安环 |
+| `bpi-phase1-persistence.md` | 已恢复并验收 | BPI 候选确认、影子批次、证据、状态和审计 PostgreSQL 事务链 |
+| `bpi-telemetry-ingress.md` | 已恢复并验收 | 遥测 replay 幂等、序列状态、点级拒绝和隔离；HTTP 默认关闭 |
+| `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库并确认影子批次；Kafka/浏览器远端验收待继续 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |
 
 ## 验收规则

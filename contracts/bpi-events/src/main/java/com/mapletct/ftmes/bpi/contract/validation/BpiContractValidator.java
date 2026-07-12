@@ -3,6 +3,7 @@ package com.mapletct.ftmes.bpi.contract.validation;
 import com.mapletct.ftmes.bpi.contract.identity.CandidateKeyFactory;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
@@ -18,6 +19,9 @@ public final class BpiContractValidator {
 
     private static final Set<String> QUALITY_CODES = Collections.unmodifiableSet(
         new HashSet<String>(Arrays.asList("GOOD", "UNCERTAIN", "BAD", "STALE", "SUBSTITUTED"))
+    );
+    private static final Set<String> EVIDENCE_CLASSES = Collections.unmodifiableSet(
+        new HashSet<String>(Arrays.asList("REQUIRED", "QUORUM", "OPTIONAL"))
     );
 
     private BpiContractValidator() {
@@ -101,9 +105,58 @@ public final class BpiContractValidator {
                 "evidence must include the first quorum event"
             ));
         }
+        validateCandidateEvidence(candidate, violations);
 
         validateCandidateIdentity(candidate, violations);
         return Collections.unmodifiableList(violations);
+    }
+
+    private static void validateCandidateEvidence(
+        BatchCandidateV1 candidate,
+        List<ContractViolation> violations
+    ) {
+        if (candidate.getEvidenceCount() == 0) {
+            return;
+        }
+        Set<String> eventIds = new HashSet<String>();
+        for (int index = 0; index < candidate.getEvidenceCount(); index++) {
+            CandidateEvidenceV1 evidence = candidate.getEvidence(index);
+            String prefix = "evidence[" + index + "].";
+            required(evidence.getEventId(), prefix + "event_id", violations);
+            required(evidence.getSignal(), prefix + "signal", violations);
+            required(evidence.getClassification(), prefix + "classification", violations);
+            required(evidence.getQualityCode(), prefix + "quality_code", violations);
+            required(evidence.getSource(), prefix + "source", violations);
+            positive(evidence.getEventTimeMs(), prefix + "event_time_ms", violations);
+            if (!isBlank(evidence.getClassification())
+                && !EVIDENCE_CLASSES.contains(evidence.getClassification())) {
+                violations.add(violation(
+                    prefix + "classification", "UNKNOWN_CLASSIFICATION",
+                    "classification must be REQUIRED, QUORUM or OPTIONAL"
+                ));
+            }
+            if (!isBlank(evidence.getQualityCode()) && !QUALITY_CODES.contains(evidence.getQualityCode())) {
+                violations.add(violation(
+                    prefix + "quality_code", "UNKNOWN_QUALITY",
+                    "quality code must come from the controlled dictionary"
+                ));
+            }
+            if (!isBlank(evidence.getEventId())) {
+                eventIds.add(evidence.getEventId());
+            }
+            if (!candidate.getEvidenceEventIdsList().contains(evidence.getEventId())) {
+                violations.add(violation(
+                    prefix + "event_id", "EVIDENCE_INDEX_MISMATCH",
+                    "detailed evidence must be present in evidence_event_ids"
+                ));
+            }
+        }
+        if (!eventIds.contains(candidate.getFirstQuorumEvidenceEventId())) {
+            violations.add(violation(
+                "evidence", "QUORUM_EVIDENCE_DETAIL_MISSING",
+                "detailed evidence must include the first quorum event"
+            ));
+        }
     }
 
     private static void validateCandidateIdentity(

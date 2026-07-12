@@ -3273,6 +3273,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-candidate-protobuf-ingress.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-phase1-persistence.md",
       "state": "tracked",
       "tracked": true
@@ -3766,6 +3772,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-boundary-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-candidate-protobuf-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4545,6 +4557,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateIngestionService.java",
       "state": "tracked",
       "tracked": true
@@ -4695,6 +4713,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -4773,6 +4797,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalTelemetryController.java",
       "state": "tracked",
       "tracked": true
@@ -4846,6 +4876,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5138,13 +5174,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 68
+      "tracked": 69
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 81
+      "tracked": 82
     },
     "package.json": {
       "tracked": 1
@@ -5156,7 +5192,7 @@
       "tracked": 50
     },
     "services": {
-      "tracked": 79
+      "tracked": 83
     },
     "simulation": {
       "tracked": 4
@@ -5168,8 +5204,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 852,
-    "tracked": 852,
+    "totalFiles": 858,
+    "tracked": 858,
     "untracked": 0
   },
   "untrackedByDirectory": []

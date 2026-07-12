@@ -53,6 +53,17 @@ M|ftmes.bpi.contract.v1.BatchCandidateV1|confidence|14|DOUBLE|SINGULAR|-
 M|ftmes.bpi.contract.v1.BatchCandidateV1|evidence_event_ids|15|STRING|REPEATED|-
 M|ftmes.bpi.contract.v1.BatchCandidateV1|emitted_at_ms|16|INT64|SINGULAR|-
 M|ftmes.bpi.contract.v1.BatchCandidateV1|headers|17|MAP<STRING,STRING>|MAP|-
+M|ftmes.bpi.contract.v1.BatchCandidateV1|evidence|18|MESSAGE:ftmes.bpi.contract.v1.CandidateEvidenceV1|REPEATED|-
+M|ftmes.bpi.contract.v1.BatchCandidateV1|missing_signals|19|STRING|REPEATED|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|event_id|1|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|signal|2|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|classification|3|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|satisfied|4|BOOL|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|value|5|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|unit|6|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|quality_code|7|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|event_time_ms|8|INT64|SINGULAR|-
+M|ftmes.bpi.contract.v1.CandidateEvidenceV1|source|9|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.DataQualityEventV1|event_id|1|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.DataQualityEventV1|source_event_id|2|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.DataQualityEventV1|tenant_id|3|STRING|SINGULAR|-

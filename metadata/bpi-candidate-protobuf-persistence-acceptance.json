@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-07-12T20:08:00+08:00",
+  "repoCommit": "f14c5e0",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "databaseVersion": "16.13",
+  "databaseName": "ft_mes_bpi",
+  "schema": "bpi",
+  "api": "/internal/bpi/v1/candidate-events",
+  "contentType": "application/x-protobuf",
+  "productionDefault": "DISABLED",
+  "markerPattern": "ADP_E2E_BPI_PROTO_<UUID>",
+  "summary": {
+    "testedFeatures": 4,
+    "pass": 4,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "serviceTestsRun": 6,
+    "serviceTestsPassed": 6,
+    "contractTestsRun": 14,
+    "contractTestsPassed": 14
+  },
+  "items": [
+    {
+      "operation": "BatchCandidateV1 Protobuf ingestion",
+      "tables": ["bpi.bpi_inbox_events", "bpi.bpi_batch_candidates"],
+      "actualStatus": 201,
+      "result": "PENDING candidate with rich evidence and missing signals",
+      "status": "PASS"
+    },
+    {
+      "operation": "Candidate confirmation",
+      "tables": ["bpi.bpi_batch_candidates", "bpi.bpi_batch_instances", "bpi.bpi_boundary_evidence", "bpi.bpi_batch_state_events", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "actualStatus": 200,
+      "result": "CONFIRMED revision=2 and one shadow batch",
+      "status": "PASS"
+    },
+    {
+      "operation": "Cross-tenant event rejection",
+      "tables": [],
+      "actualStatus": 403,
+      "status": "PASS"
+    },
+    {
+      "operation": "Evidence-free event rejection",
+      "tables": [],
+      "actualStatus": 422,
+      "status": "PASS"
+    }
+  ],
+  "verificationSql": "SELECT candidate_key,state,evidence->0->>'source',missing_signals->>0 FROM bpi.bpi_batch_candidates WHERE tenant_id=:tenant_marker; SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id=:tenant_marker;",
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiPostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.CandidateEventMapperTest.xml",
+    "docs/backend-table-audit/bpi-candidate-protobuf-ingress.md"
+  ],
+  "limitations": [
+    "Kafka consumer and exactly-once transport are not connected yet.",
+    "The Protobuf HTTP bridge is disabled by default and is not the final production data plane.",
+    "Remote Docker and browser E2E acceptance are not completed yet."
+  ]
+}

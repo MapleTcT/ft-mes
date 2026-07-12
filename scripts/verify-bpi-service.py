@@ -21,15 +21,21 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
     "docs/backend-table-audit/bpi-phase1-persistence.md",
     "docs/backend-table-audit/bpi-telemetry-ingress.md",
     "docs/testing/bpi-boundary-runtime-acceptance.md",
+    "docs/backend-table-audit/bpi-candidate-protobuf-ingress.md",
     "metadata/bpi-phase1-persistence-acceptance.json",
     "metadata/bpi-telemetry-persistence-acceptance.json",
     "metadata/bpi-boundary-runtime-acceptance.json",
+    "metadata/bpi-candidate-protobuf-persistence-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -63,7 +69,7 @@ def main() -> int:
         fail(f"BPI Java version must remain 17, found {java_version!r}", failures)
     if boot_version != "3.4.7":
         fail(f"BPI Spring Boot baseline must remain 3.4.7, found {boot_version!r}", failures)
-    if modules != {"batch-rule-runtime", "app"}:
+    if modules != {"../../contracts/bpi-events", "batch-rule-runtime", "app"}:
         fail(f"unexpected BPI reactor modules: {sorted(modules)}", failures)
 
     require_text(
@@ -119,7 +125,15 @@ def main() -> int:
     )
     require_text(
         SERVICE / "app/src/main/resources/application.yml",
-        ["BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false"],
+        [
+            "BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false",
+            "BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED:false",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
+        ["application/x-protobuf", "protobufHttpIngressEnabled", "BatchCandidateV1.parseFrom"],
         failures,
     )
     require_text(
@@ -129,9 +143,17 @@ def main() -> int:
     )
     require_text(
         ROOT / "deploy/docker/docker-compose.yml",
-        ["bpi-migrate:", "bpi-service:", "BPI_FLYWAY_ENABLED: \"false\"", "profiles: [\"bpi\"]"],
+        [
+            "bpi-migrate:",
+            "bpi-service:",
+            "BPI_FLYWAY_ENABLED: \"false\"",
+            "BPI_TELEMETRY_HTTP_INGRESS_ENABLED",
+            "BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED",
+            "profiles: [\"bpi\"]",
+        ],
         failures,
     )
+    require_text(SERVICE / "Dockerfile", ["COPY pom.xml pom.xml", "COPY contracts contracts"], failures)
 
     runtime_files = list(SERVICE.rglob("*.java")) + list(SERVICE.rglob("*.sql")) + [
         SERVICE / "app/src/main/resources/application.yml",
