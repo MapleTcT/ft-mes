@@ -68,7 +68,17 @@ def main() -> int:
             failures.append(f"BoundaryCandidateProjector is missing contract marker {marker!r}")
 
     operator_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastFunction.java").read_text(encoding="utf-8")
-    for marker in ("KeyedBroadcastProcessFunction", "ValueState<byte[]>", "registerEventTimeTimer", "LATE_EVENT_REPLAY_REQUIRED", "LATE_EVENT_REVISION_REQUIRED", "toByteArray"):
+    for marker in (
+        "KeyedBroadcastProcessFunction",
+        "ValueState<byte[]>",
+        "registerEventTimeTimer",
+        "MAX_BUFFERED_OBSERVATIONS",
+        "recalculate(",
+        "observationHistoryComplete",
+        "withWindowAndObservations",
+        "LATE_EVENT_REVISION_REQUIRED",
+        "toByteArray",
+    ):
         if marker not in operator_source:
             failures.append(f"BoundaryKeyedBroadcastFunction is missing runtime marker {marker!r}")
 

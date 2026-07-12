@@ -56,6 +56,21 @@ class BoundaryKeyedBroadcastFunctionTest {
                 BoundaryKeyedBroadcastFunction.nextDeadline(rule, state, T0));
     }
 
+    @Test
+    void nextDeadlineRoundsSubMillisecondMaturityUpToTheNextFlinkTimestamp() {
+        BoundaryRuleDefinition rule = rule();
+        Instant observedAt = T0.plusSeconds(1).plusNanos(500_000);
+        BoundaryWindowState state = observe(
+                rule,
+                BoundaryWindowState.empty(),
+                SignalObservation.numeric(
+                        "FLOW", "feed.flow", new BigDecimal("3"), SignalQuality.GOOD, observedAt));
+
+        assertEquals(
+                T0.plusSeconds(11).plusMillis(1).toEpochMilli(),
+                BoundaryKeyedBroadcastFunction.nextDeadline(rule, state, observedAt));
+    }
+
     private static BoundaryWindowState observe(
             BoundaryRuleDefinition rule,
             BoundaryWindowState state,

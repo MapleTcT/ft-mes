@@ -10,6 +10,7 @@ import com.mapletct.ftmes.bpi.rules.EvidenceClass;
 import com.mapletct.ftmes.bpi.rules.EvidenceCondition;
 import com.mapletct.ftmes.bpi.rules.EvidenceSignalState;
 import com.mapletct.ftmes.bpi.rules.SignalQuality;
+import com.mapletct.ftmes.bpi.rules.SignalObservation;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -18,10 +19,12 @@ import java.io.DataOutputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BoundaryCodecsTest {
@@ -51,6 +54,12 @@ class BoundaryCodecsTest {
                 context,
                 new BoundaryRuleRef("START-01", "1.2.3"),
                 new BoundaryWindowState(Map.of(numeric.signal(), numeric, bool.signal(), bool), false, null),
+                List.of(
+                        SignalObservation.numeric(
+                                "EVT-2", "feed.flow", new BigDecimal("2.3400"),
+                                SignalQuality.UNCERTAIN, T0.plusSeconds(1)),
+                        SignalObservation.bool(
+                                "EVT-3", "feed.pump", true, SignalQuality.GOOD, T0.plusSeconds(2))),
                 T0.plusSeconds(10).toEpochMilli());
 
         BoundaryOperatorState restored = BoundaryOperatorStateCodec.decode(
@@ -97,6 +106,32 @@ class BoundaryCodecsTest {
                 Arrays.toString(BoundaryOperatorStateCodec.encode(right)));
     }
 
+    @Test
+    void operatorStateCodecReadsVersionOneWithEmptyObservationHistory() throws Exception {
+        BoundaryOperatorState restored = BoundaryOperatorStateCodec.decode(legacyVersionOneState());
+
+        assertEquals("TENANT-LEGACY", restored.context().tenantId());
+        assertEquals("START-LEGACY", restored.ruleRef().ruleCode());
+        assertFalse(restored.observationHistoryComplete());
+        assertEquals(List.of(), restored.observations());
+        assertEquals(BoundaryOperatorState.NO_TIMER, restored.nextTimerEpochMs());
+    }
+
+    @Test
+    void operatorStateCodecRejectsObservationHistoryBeyondTheHardLimit() {
+        SignalObservation observation = SignalObservation.bool(
+                "EVT", "order.active", true, SignalQuality.GOOD, T0);
+        BoundaryOperatorState oversized = new BoundaryOperatorState(
+                new BoundaryExecutionContext(
+                        "T", "P", "L", "G", "TOPO", "1", "MO", null),
+                new BoundaryRuleRef("R", "1"),
+                BoundaryWindowState.empty(),
+                Collections.nCopies(10_001, observation),
+                BoundaryOperatorState.NO_TIMER);
+
+        assertThrows(IllegalStateException.class, () -> BoundaryOperatorStateCodec.encode(oversized));
+    }
+
     private static BoundaryRuleDefinition rule() {
         return new BoundaryRuleDefinition(
                 "START-01", "1.2.3", BoundaryKind.START, 1, 0.75, 0.2,
@@ -131,6 +166,29 @@ class BoundaryCodecsTest {
             output.writeLong(30_000);
             output.writeUTF("QUORUM");
             output.writeInt(100);
+        }
+        return bytes.toByteArray();
+    }
+
+    private static byte[] legacyVersionOneState() throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(0x42504953);
+            output.writeInt(1);
+            output.writeUTF("TENANT-LEGACY");
+            output.writeUTF("PLANT-01");
+            output.writeUTF("LINE-01");
+            output.writeUTF("FEED");
+            output.writeUTF("TOPO-1");
+            output.writeUTF("1");
+            BoundaryRuleCodec.writeNullable(output, "MO-1");
+            BoundaryRuleCodec.writeNullable(output, null);
+            output.writeUTF("START-LEGACY");
+            output.writeUTF("1");
+            output.writeLong(BoundaryOperatorState.NO_TIMER);
+            output.writeBoolean(false);
+            BoundaryRuleCodec.writeNullable(output, null);
+            output.writeInt(0);
         }
         return bytes.toByteArray();
     }

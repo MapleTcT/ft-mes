@@ -1,17 +1,34 @@
 {
-  "generatedAt": "2026-07-12T21:30:00+08:00",
-  "status": "PARTIAL_PASS",
+  "generatedAt": "2026-07-12T21:38:02+08:00",
+  "repoCommit": "823644e",
+  "workingTree": "uncommitted",
+  "status": "PASS",
   "ruleCodecWriteVersion": 2,
   "ruleCodecReadVersions": [1, 2],
+  "stateCodecWriteVersion": 2,
+  "stateCodecReadVersions": [1, 2],
   "versionedFields": ["allowedLateness", "watermarkDelay", "evaluationTimeout"],
   "lateEventRoutes": {
-    "withinAllowedLateness": "LATE_EVENT_REPLAY_REQUIRED",
-    "beyondAllowedLateness": "LATE_EVENT_REVISION_REQUIRED"
+    "withinAllowedLatenessAndOpenWindow": "IN_OPERATOR_EVENT_TIME_RECOMPUTATION",
+    "beyondAllowedLateness": "LATE_EVENT_REVISION_REQUIRED",
+    "afterCandidateEmission": "LATE_EVENT_REVISION_REQUIRED"
   },
-  "candidateMutationOnLateEvent": false,
+  "retention": {
+    "signals": "active-rule-signals-only",
+    "eventTimeRange": "evaluationTimeout + allowedLateness",
+    "maxObservationsPerKey": 10000
+  },
+  "emittedCandidateMutationOnLateEvent": false,
+  "verified": [
+    "deterministic event-time recomputation",
+    "duplicate replay idempotency",
+    "candidate immutability",
+    "checkpoint observation-history restore",
+    "BPIS/v1 fail-closed late-event compatibility"
+  ],
   "remaining": [
-    "bounded event-time observation buffer",
-    "in-window deterministic recomputation",
-    "Kafka replay route wiring"
+    "Kafka source watermark strategy wiring",
+    "durable revision side-output sink and consumer",
+    "target-cluster BPIS/v1 to BPIS/v2 savepoint rehearsal"
   ]
 }

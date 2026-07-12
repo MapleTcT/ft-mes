@@ -159,35 +159,141 @@ class BoundaryKeyedBroadcastHarnessTest {
     }
 
     @Test
-    void lateEventsAreClassifiedByTheVersionedAllowedLatenessWindow() throws Exception {
+    void lateEventWithinAllowedLatenessRecomputesTheOpenWindowInEventTimeOrder() throws Exception {
         try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
                      harness = harness()) {
             harness.open();
-            BoundaryRuleDefinition timedRule = new BoundaryRuleDefinition(
-                    "START-01", "2", BoundaryKind.START, 1, 1.0, 0,
-                    new BoundaryTimingPolicy(
-                            Duration.ofSeconds(30), Duration.ofSeconds(5), Duration.ofMinutes(2)),
-                    rule().conditions());
+            BoundaryRuleDefinition timedRule = timedRule();
+            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
+                    T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-STOP", "feed.flow", BigDecimal.ZERO,
+                            SignalQuality.GOOD, T0.plusSeconds(20))),
+                    T0.plusSeconds(20).toEpochMilli());
+            harness.watermark(T0.plusSeconds(25).toEpochMilli());
+
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-LATE", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            List<BatchCandidateV1> candidates = candidates(harness.getOutput());
+            assertEquals(1, candidates.size());
+            assertEquals(T0.plusSeconds(11).toEpochMilli(), candidates.get(0).getBoundaryEventTimeMs());
+            assertEquals(List.of("ORDER", "FLOW-LATE"), candidates.get(0).getEvidenceEventIdsList());
+            assertTrue(issueCodes(harness).isEmpty());
+
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-LATE", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+            assertEquals(1, candidates(harness.getOutput()).size());
+            assertTrue(issueCodes(harness).isEmpty());
+        }
+    }
+
+    @Test
+    void lateEventBeyondAllowedLatenessRequiresRevision() throws Exception {
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     harness = harness()) {
+            harness.open();
+            BoundaryRuleDefinition timedRule = timedRule();
             harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
             harness.watermark(T0.plusSeconds(60).toEpochMilli());
 
             harness.processElement(
                     input(timedRule, SignalObservation.bool(
-                            "LATE-WITHIN", "order.active", true, SignalQuality.GOOD, T0.plusSeconds(40))),
-                    T0.plusSeconds(40).toEpochMilli());
-            harness.processElement(
-                    input(timedRule, SignalObservation.bool(
                             "LATE-BEYOND", "order.active", true, SignalQuality.GOOD, T0.plusSeconds(20))),
                     T0.plusSeconds(20).toEpochMilli());
 
-            List<String> codes = harness.getSideOutput(BoundaryKeyedBroadcastFunction.ISSUES).stream()
-                    .map(StreamRecord::getValue)
-                    .map(BoundaryProcessingIssue::code)
-                    .toList();
-            assertEquals(
-                    List.of("LATE_EVENT_REPLAY_REQUIRED", "LATE_EVENT_REVISION_REQUIRED"),
-                    codes);
+            assertEquals(List.of("LATE_EVENT_REVISION_REQUIRED"), issueCodes(harness));
             assertTrue(candidates(harness.getOutput()).isEmpty());
+        }
+    }
+
+    @Test
+    void malformedLateObservationGoesToIssueStreamWithoutFailingTheOperator() throws Exception {
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     harness = harness()) {
+            harness.open();
+            BoundaryRuleDefinition timedRule = timedRule();
+            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.watermark(T0.plusSeconds(5).toEpochMilli());
+
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "BAD-LATE", "feed.flow", true, SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            assertTrue(candidates(harness.getOutput()).isEmpty());
+            assertEquals(List.of("EVALUATION_REJECTED"), issueCodes(harness));
+        }
+    }
+
+    @Test
+    void emittedCandidateIsImmutableWhenMoreLateEvidenceArrives() throws Exception {
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     harness = harness()) {
+            harness.open();
+            BoundaryRuleDefinition timedRule = timedRule();
+            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
+                    T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+            harness.watermark(T0.plusSeconds(11).toEpochMilli());
+            assertEquals(1, candidates(harness.getOutput()).size());
+
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-CORRECTION", "feed.flow", new BigDecimal("4"),
+                            SignalQuality.GOOD, T0.plusSeconds(5))),
+                    T0.plusSeconds(5).toEpochMilli());
+
+            assertEquals(1, candidates(harness.getOutput()).size());
+            assertEquals(List.of("LATE_EVENT_REVISION_REQUIRED"), issueCodes(harness));
+        }
+    }
+
+    @Test
+    void checkpointRestorePreservesObservationHistoryForLateRecomputation() throws Exception {
+        OperatorSubtaskState snapshot;
+        BoundaryRuleDefinition timedRule = timedRule();
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     first = harness()) {
+            first.open();
+            first.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            first.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
+                    T0.toEpochMilli());
+            snapshot = first.snapshot(2, T0.plusSeconds(1).toEpochMilli());
+        }
+
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     restored = harness()) {
+            restored.initializeState(snapshot);
+            restored.open();
+            restored.watermark(T0.plusSeconds(15).toEpochMilli());
+            restored.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-LATE", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            assertEquals(1, candidates(restored.getOutput()).size());
+            assertTrue(issueCodes(restored).isEmpty());
         }
     }
 
@@ -244,6 +350,27 @@ class BoundaryKeyedBroadcastHarnessTest {
                         new EvidenceCondition(
                                 "feed.flow", ConditionOperator.GREATER_THAN, new BigDecimal("2"),
                                 Duration.ofSeconds(10), Duration.ofSeconds(30), EvidenceClass.QUORUM, 50)));
+    }
+
+    private static BoundaryRuleDefinition timedRule() {
+        return new BoundaryRuleDefinition(
+                "START-01", "2", BoundaryKind.START, 1, 1.0, 0,
+                new BoundaryTimingPolicy(
+                        Duration.ofSeconds(30), Duration.ofSeconds(5), Duration.ofMinutes(2)),
+                rule().conditions());
+    }
+
+    private static List<String> issueCodes(KeyedBroadcastOperatorTestHarness<
+            String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]> harness) {
+        ConcurrentLinkedQueue<StreamRecord<BoundaryProcessingIssue>> issues =
+                harness.getSideOutput(BoundaryKeyedBroadcastFunction.ISSUES);
+        if (issues == null) {
+            return List.of();
+        }
+        return issues.stream()
+                .map(StreamRecord::getValue)
+                .map(BoundaryProcessingIssue::code)
+                .toList();
     }
 
     private static List<BatchCandidateV1> candidates(ConcurrentLinkedQueue<Object> output) {

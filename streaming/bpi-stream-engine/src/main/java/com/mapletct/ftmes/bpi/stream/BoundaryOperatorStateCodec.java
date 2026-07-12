@@ -4,6 +4,7 @@ import com.mapletct.ftmes.bpi.rules.BoundaryWindowState;
 import com.mapletct.ftmes.bpi.rules.ConditionStatus;
 import com.mapletct.ftmes.bpi.rules.EvidenceSignalState;
 import com.mapletct.ftmes.bpi.rules.SignalQuality;
+import com.mapletct.ftmes.bpi.rules.SignalObservation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,13 +21,19 @@ import java.util.Map;
 public final class BoundaryOperatorStateCodec {
 
     private static final int MAGIC = 0x42504953;
-    private static final int VERSION = 1;
+    private static final int LEGACY_VERSION = 1;
+    private static final int VERSION = 2;
     private static final int MAX_SIGNALS = 100_000;
+    private static final int MAX_OBSERVATIONS = 10_000;
 
     private BoundaryOperatorStateCodec() {
     }
 
     public static byte[] encode(BoundaryOperatorState state) {
+        if (state.observations().size() > MAX_OBSERVATIONS) {
+            throw new IllegalStateException(
+                    "cannot encode boundary operator state: observation count exceeds " + MAX_OBSERVATIONS);
+        }
         try {
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (DataOutputStream output = new DataOutputStream(bytes)) {
@@ -45,6 +52,16 @@ public final class BoundaryOperatorStateCodec {
                 for (String signal : signals) {
                     writeSignal(output, window.signals().get(signal));
                 }
+                output.writeBoolean(state.observationHistoryComplete());
+                List<SignalObservation> observations = new ArrayList<>(state.observations());
+                observations.sort(java.util.Comparator
+                        .comparing(SignalObservation::eventTime)
+                        .thenComparing(SignalObservation::eventId)
+                        .thenComparing(SignalObservation::signal));
+                output.writeInt(observations.size());
+                for (SignalObservation observation : observations) {
+                    writeObservation(output, observation);
+                }
             }
             return bytes.toByteArray();
         } catch (IOException error) {
@@ -54,7 +71,13 @@ public final class BoundaryOperatorStateCodec {
 
     public static BoundaryOperatorState decode(byte[] bytes) {
         try (DataInputStream input = new DataInputStream(new ByteArrayInputStream(bytes))) {
-            BoundaryRuleCodec.requireHeader(input, MAGIC, VERSION, "boundary operator state");
+            if (input.readInt() != MAGIC) {
+                throw new IOException("invalid boundary operator state magic");
+            }
+            int version = input.readInt();
+            if (version != LEGACY_VERSION && version != VERSION) {
+                throw new IOException("unsupported boundary operator state version: " + version);
+            }
             BoundaryExecutionContext context = readContext(input);
             BoundaryRuleRef ruleRef = new BoundaryRuleRef(input.readUTF(), input.readUTF());
             long nextTimer = input.readLong();
@@ -68,11 +91,23 @@ public final class BoundaryOperatorStateCodec {
                     throw new IOException("duplicate signal in boundary operator state: " + signal.signal());
                 }
             }
+            List<SignalObservation> observations = new ArrayList<>();
+            boolean observationHistoryComplete = false;
+            if (version == VERSION) {
+                observationHistoryComplete = input.readBoolean();
+                int observationCount = BoundaryRuleCodec.boundedCount(
+                        input.readInt(), MAX_OBSERVATIONS, "observation");
+                for (int index = 0; index < observationCount; index++) {
+                    observations.add(readObservation(input));
+                }
+            }
             BoundaryRuleCodec.requireFullyRead(input, "boundary operator state");
             return new BoundaryOperatorState(
                     context,
                     ruleRef,
                     new BoundaryWindowState(signals, candidateEmitted, firstQuorumEvent),
+                    observationHistoryComplete,
+                    observations,
                     nextTimer);
         } catch (IOException | IllegalArgumentException error) {
             throw new IllegalStateException("cannot decode boundary operator state", error);
@@ -127,6 +162,27 @@ public final class BoundaryOperatorStateCodec {
                 readDecimal(input),
                 readBoolean(input),
                 SignalQuality.valueOf(input.readUTF()));
+    }
+
+    private static void writeObservation(
+            DataOutputStream output,
+            SignalObservation observation) throws IOException {
+        output.writeUTF(observation.eventId());
+        output.writeUTF(observation.signal());
+        writeDecimal(output, observation.numericValue());
+        writeBoolean(output, observation.booleanValue());
+        output.writeUTF(observation.quality().name());
+        writeInstant(output, observation.eventTime());
+    }
+
+    private static SignalObservation readObservation(DataInputStream input) throws IOException {
+        return new SignalObservation(
+                input.readUTF(),
+                input.readUTF(),
+                readDecimal(input),
+                readBoolean(input),
+                SignalQuality.valueOf(input.readUTF()),
+                readInstant(input));
     }
 
     private static void writeInstant(DataOutputStream output, Instant value) throws IOException {

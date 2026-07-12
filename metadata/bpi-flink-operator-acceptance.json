@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-07-12T19:57:00+08:00",
-  "repoCommit": "4516414",
+  "generatedAt": "2026-07-12T21:38:02+08:00",
+  "repoCommit": "823644e",
   "workingTree": "uncommitted",
   "runtime": "streaming/bpi-stream-engine",
   "java": "17",
   "flink": "2.2.1",
   "stateCodecs": {
-    "keyedWindow": "BPIS/v1",
-    "broadcastRule": "BPIR/v1"
+    "keyedWindow": "BPIS/write-v2/read-v1-v2",
+    "broadcastRule": "BPIR/write-v2/read-v1-v2"
   },
   "summary": {
-    "testsRun": 14,
-    "pass": 14,
+    "testsRun": 23,
+    "pass": 23,
     "fail": 0,
     "blocked": 0,
-    "flinkHarnessTests": 5
+    "flinkHarnessTests": 10
   },
   "capabilities": [
     "keyed locality partitioning",
@@ -23,6 +23,12 @@
     "event-time hold and maxSilence timers",
     "versioned deterministic byte state",
     "checkpoint restoration of keyed state, broadcast state and timers",
+    "bounded event-time observation retention",
+    "in-window deterministic late-event recomputation",
+    "late-event revision routing after expiry or candidate emission",
+    "checkpoint restoration of late-replay observation history",
+    "fail-closed late-event handling after BPIS/v1 restore",
+    "malformed late-observation issue isolation",
     "contract-valid BatchCandidateV1 wire output",
     "rule, key, timestamp, lateness and identity issue side output",
     "single candidate per execution-context lifecycle"
@@ -34,7 +40,8 @@
   ],
   "limitations": [
     "Kafka source and sink are not connected yet.",
-    "Allowed-lateness correction state is not implemented yet.",
-    "Live IoT replay and PostgreSQL marker acceptance are not completed yet."
+    "Rule watermarkDelay is not connected to a Kafka source watermark strategy yet.",
+    "The revision side output has no durable sink or workflow consumer yet.",
+    "BPIS/v1 to BPIS/v2 savepoint compatibility has not been rehearsed on the target Flink cluster yet."
   ]
 }
