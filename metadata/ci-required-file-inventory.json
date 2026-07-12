@@ -3213,6 +3213,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/core-flow-regression-20260712.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/core-flow-runtime-rollback-rehearsal.json",
       "state": "tracked",
       "tracked": true
@@ -3872,7 +3878,7 @@
       "tracked": 58
     },
     "metadata": {
-      "tracked": 73
+      "tracked": 74
     },
     "package.json": {
       "tracked": 1
@@ -3887,8 +3893,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 641,
-    "tracked": 641,
+    "totalFiles": 642,
+    "tracked": 642,
     "untracked": 0
   },
   "untrackedByDirectory": []

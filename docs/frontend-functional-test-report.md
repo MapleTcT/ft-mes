@@ -1,5 +1,22 @@
 # 前端功能测试报告
 
+## 2026-07-12 核心主线当前运行时回归
+
+本轮在 `http://100.99.133.43:18080` 重新执行真实页面、API 和 PostgreSQL
+marker 验收。机器记录见 `metadata/core-flow-regression-20260712.json`；本节是
+当前运行时回归，不覆盖 2026-07-10 的制造指令、投料、报工和补丁回退明细。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| 环境/平台 | 测试入口、首页、待办、组织、RBAC、菜单页 | HTTP/SSH/容器探活及登录后页面回归 | 平台登录、菜单、待办、组织、RBAC 接口 | 环境 `9/9`、平台 `6/6`；API `16/16`、RBAC `9/9`、菜单 `40/40`，无前端阻断错误 | PostgreSQL runtime `8/8`，material/ProcessAnalysis `2/2 READY` | PostgreSQL 预期表 `32/32`、兼容列 `15/15`、索引 `8/8` | PASS | 无 |
+| WOM/QCS 合格链 | `makeTaskList` -> 制造检验列表 -> 报告编辑页 | 生产请检、报告保存/生效、WOM 和批次回写 | `createManuInspect`、`bulkSubmit`、`batchDealReports` | 真实页面 marker 可见，无 console/network/page error | marker `ADP_E2E_20260712015927_QCS_QUAL`；报告 `99/合格`，WOM `已检/合格`，批次可用 | QCS 检验/报告/明细、WOM 任务/待入库/执行日志、批次表 | PASS | 定向清理 7 项均为 0 |
+| WOM/QCS 不合格链 | 同上 | 不合格报告生效、WOM/批次回写、自动处置单 | 同上及自动 `createUnQlfDeal` | 真实页面 marker 可见，无 console/network/page error | marker `ADP_E2E_20260712020028_QCS_UNQLF`；报告 `99/不合格`，批次不可用，自动处置单 `88` | 上述表及 `qcs_un_qlf_deals` | PASS | 待办/JBPM 和业务 marker 定向清理后均为 0 |
+| material/WMS | `/msService/material/wms` | 完工入库、重复幂等、质检释放、生产领料、查看详情 | `generateProductInSingle`、`checkProdResult`、`generateProduceOutSing` | marker 和详情可见，无 console/network/page error | marker `ADP_E2E_20260712020139_MATERIAL_WMS`；库存 `0 -> 10(冻结) -> 10(可用) -> 7`，重复入库不重复记账 | 五张 `wms_*` 表 | PASS | 清理后 marker 行为 0 |
+| ProcessAnalysis | WOM “生产过程追溯” | 选择真实任务、点击追溯、统计任务/工序/活动 | 预检、trace、`analysisiTask`、`manualStatProcess`、`manualStatActive` | 真实按钮打开页面，显示 10 个时间轴事件；无 console/network/request error | marker `ADP_E2E_20260712020150_PROCESS_ANALYSIS`；3 类快照 revision `2/1/1`，WMS 联动存在 | `pa_trace_snapshots` 及 WOM/QCS/WMS 只读源表 | PASS | 清理 marker 快照和 WMS 记录，保留只读审计夹具 |
+
+本轮未发现新的核心业务代码阻断。独立坏品数量、外部 Batch 客户端和生产导出仍按
+既有范围记录处理，不计入本次“制造 -> 请检 -> 处置 -> 入库 -> 追溯”主链失败。
+
 ## 2026-07-10 生产质量核心主线增量复验
 
 本节只记录本轮 `100.99.133.43` 的新增证据。完整机器记录见

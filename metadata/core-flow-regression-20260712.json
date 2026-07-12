@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T02:02:43.004Z",
+  "repoCommit": "7674a32cb7517c94867f66cd4ddd32ceb45b1c21",
+  "database": "PostgreSQL",
+  "target": {
+    "host": "100.99.133.43",
+    "baseUrl": "http://100.99.133.43:18080",
+    "legacyLanAlias": "10.11.100.17"
+  },
+  "scope": "production-quality-core-flow-current-runtime-regression",
+  "overallStatus": "PASS",
+  "summary": {
+    "tested": 8,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 0,
+    "environmentSmoke": "9/9 PASS",
+    "platformSmoke": "6/6 PASS",
+    "postgresRuntimeSmoke": "8/8 PASS",
+    "businessDependencies": "2/2 READY"
+  },
+  "items": [
+    {
+      "id": "REG-001",
+      "operation": "测试环境和容器探活",
+      "status": "PASS",
+      "result": "两个 HTTP 入口、SSH 和 Nginx/Gateway/PostgreSQL/Nacos/Keycloak/MinIO 六个容器全部正常",
+      "artifact": "/tmp/adp-test-environment-smoke-20260712.json"
+    },
+    {
+      "id": "REG-002",
+      "operation": "平台登录、首页待办、组织、RBAC 和菜单页面回归",
+      "status": "PASS",
+      "route": "http://100.99.133.43:18080",
+      "result": "平台 API 16/16、RBAC 9/9、菜单 40/40；无 console、network 或 page error",
+      "artifact": "/tmp/adp-platform-validation-20260712/platform-validation-summary.json"
+    },
+    {
+      "id": "REG-003",
+      "operation": "PostgreSQL 运行时结构回归",
+      "status": "PASS",
+      "result": "public 表 1500、视图 155；预期表 32/32、兼容列 15/15、索引 8/8",
+      "artifact": "/tmp/adp-postgres-runtime-smoke-20260712.json"
+    },
+    {
+      "id": "REG-004",
+      "operation": "material 和 ProcessAnalysis 业务依赖就绪检查",
+      "status": "PASS",
+      "result": "两个服务均有健康 Nacos 实例，兼容端点可达，2/2 READY",
+      "artifact": "/tmp/adp-business-dependency-readiness-20260712.json"
+    },
+    {
+      "id": "REG-005",
+      "operation": "生产请检、QCS 合格报告生效和 WOM/批次回写",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712015927_QCS_QUAL",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/QCS/inspect/inspect/manuInspectList -> manuInspReportEdit",
+      "apis": [
+        "POST /msService/WOM/produceTask/produceTask/createManuInspect",
+        "POST /msService/QCS/inspect/inspect/bulkSubmit",
+        "POST /msService/QCS/inspectReport/inspectReport/batchDealReports"
+      ],
+      "backendEntry": "WOMProduceTaskController -> QCS inspect workflow -> inspect report workflow -> WOM quality callback",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "verificationSql": "按 inspect/report/task/batch marker 联查 QCS 报告、WOM 任务/待入库/执行日志和批次状态",
+      "result": "报告 status=99/result=合格；WOM 已检/合格；批次 qualified/is_available=true；浏览器错误计数均为 0",
+      "cleanup": "cleanup|0|0|0|0|0|0|0 PASS",
+      "artifact": "/tmp/adp-qcs-report-chain-qualified-20260712.json"
+    },
+    {
+      "id": "REG-006",
+      "operation": "QCS 不合格报告生效、WOM/批次回写和自动处置单",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020028_QCS_UNQLF",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/QCS/inspect/inspect/manuInspectList -> manuInspReportEdit",
+      "apis": [
+        "POST /msService/WOM/produceTask/produceTask/createManuInspect",
+        "POST /msService/QCS/inspect/inspect/bulkSubmit",
+        "POST /msService/QCS/inspectReport/inspectReport/batchDealReports"
+      ],
+      "backendEntry": "WOMProduceTaskController -> QCS inspect workflow -> inspect report workflow -> createUnQlfDeal -> WOM quality callback",
+      "tables": [
+        "qcs_inspects",
+        "qcs_inspect_reports",
+        "qcs_report_coms",
+        "qcs_un_qlf_deals",
+        "wom_produce_tasks",
+        "wom_wait_put_records",
+        "wom_produce_task_exelog",
+        "baseset_batch_infos"
+      ],
+      "verificationSql": "按 inspect/report/deal/task/batch marker 联查不合格报告、自动处置单、WOM 和批次状态",
+      "result": "报告 status=99/result=不合格；WOM Checked/Unqualified；批次 unqualified/is_available=false；自动处置单 status=88；浏览器错误计数均为 0",
+      "cleanup": "cleanup|0|0|0|0|0|0|0 PASS",
+      "artifact": "/tmp/adp-qcs-report-chain-unqualified-20260712.json"
+    },
+    {
+      "id": "REG-007",
+      "operation": "完工入库、幂等重试、质检释放和生产领料",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020139_MATERIAL_WMS",
+      "route": "/msService/material/wms",
+      "apis": [
+        "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+        "POST /msService/material/foreign/foreign/checkProdResult",
+        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+      ],
+      "backendEntry": "MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository",
+      "tables": [
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions",
+        "wms_quality_results"
+      ],
+      "verificationSql": "按 tenant marker 汇总单据、行、流水、质检结果、批次库存和 on_hand/available/hold 数量",
+      "result": "入库后 10/0/10；重复请求保持幂等；合格释放后 10/10/0；领料 3 后 7/7/0；页面 marker 和详情可见且无前端错误",
+      "cleanup": "五张表 marker 行全部为 0",
+      "artifact": "/tmp/adp-material-wms-acceptance-20260712.json"
+    },
+    {
+      "id": "REG-008",
+      "operation": "批次、物料和工单生产过程追溯",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020150_PROCESS_ANALYSIS",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> prodprocessView -> processBatchViewOut",
+      "apis": [
+        "GET /msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
+        "GET /msService/ProcessAnalysis/processAnalysis/api/trace",
+        "GET /msService/ProcessAnalysis/paramDetail/paramDetail/analysisiTask",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatProcess",
+        "GET /msService/ProcessAnalysis/paramStatRec/paramStatRec/manualStatActive"
+      ],
+      "backendEntry": "ProcessAnalysisController -> TraceabilityService -> TraceabilityRepository",
+      "tables": [
+        "pa_trace_snapshots",
+        "wom_produce_tasks",
+        "wom_produce_task_exelog",
+        "wom_process_exelogs",
+        "wom_acti_exelogs",
+        "qcs_inspects",
+        "wms_stock_documents",
+        "wms_inventory_transactions"
+      ],
+      "verificationSql": "按 tenant marker 查询三类快照 revision、批次快照数和 WMS 联动记录，并确认 WOM 源任务仍存在",
+      "result": "真实 WOM 按钮打开追溯页并显示 10 个时间轴事件；TASK/PROCESS/ACTIVITY 快照 revision=2/1/1；无 console、network 或 request error",
+      "cleanup": "快照和 WMS marker 行全部为 0，保留只读 WOM/QCS 审计夹具",
+      "artifact": "/tmp/adp-process-analysis-acceptance-20260712.json"
+    }
+  ],
+  "scopeNotes": [
+    "本记录是当前运行时核心链回归，不覆盖 2026-07-10 已验收的制造指令生成、投料、报工、退料和运行补丁回退细节。",
+    "独立坏品数量、外部 Batch 客户端和生产导出仍按既有产品范围/外部依赖处理，不计入本次核心链失败。",
+    "Oracle 未作为默认运行或绕行路径使用。"
+  ]
+}

@@ -1,5 +1,18 @@
 # 后端落库验收报告
 
+## 2026-07-12 核心主线当前运行时回归
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 生产请检和 QCS 合格报告生效 | WOM 制造任务和 QCS 报告页 | `createManuInspect`、`bulkSubmit`、`batchDealReports` | `WOMProduceTaskController -> QCS inspect/report workflow -> WOM quality callback` | `qcs_inspects`、`qcs_inspect_reports`、`qcs_report_coms`、WOM 任务/待入库/执行日志、`baseset_batch_infos` | marker `ADP_E2E_20260712015927_QCS_QUAL`：报告 `99/合格`，WOM `已检/合格`，批次 `qualified/is_available=true`；定向清理回查 `0/0/0/0/0/0/0` | PASS |
+| QCS 不合格报告和自动处置 | WOM 制造任务和 QCS 报告页 | 同上 | QCS report workflow -> `createUnQlfDeal` -> WOM quality callback | 上述表及 `qcs_un_qlf_deals` | marker `ADP_E2E_20260712020028_QCS_UNQLF`：报告 `99/不合格`，WOM `Checked/Unqualified`，批次不可用，自动处置单 `status=88`；清理回查 7 项为 0 | PASS |
+| 完工入库、质检释放和生产领料 | `/msService/material/wms` | `generateProductInSingle`、`checkProdResult`、`generateProduceOutSing` | `MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository` | `wms_stock_documents`、`wms_stock_document_lines`、`wms_batch_stocks`、`wms_inventory_transactions`、`wms_quality_results` | marker `ADP_E2E_20260712020139_MATERIAL_WMS`：入库 `onHand/available/hold=10/0/10`，幂等重试不增行，质检后 `10/10/0`，领料后 `7/7/0`，清理后五表为 0 | PASS |
+| 生产过程追溯和统计快照 | WOM 生产过程追溯真实按钮 | ProcessAnalysis 预检、trace、任务/工序/活动统计接口 | `ProcessAnalysisController -> TraceabilityService -> TraceabilityRepository` | `pa_trace_snapshots` 及 WOM/QCS/WMS 只读源表 | marker `ADP_E2E_20260712020150_PROCESS_ANALYSIS`：快照数 3，TASK/PROCESS/ACTIVITY revision `2/1/1`，追溯页显示 10 个事件；清理后快照/WMS marker 行为 0，源任务仍为 1 | PASS |
+
+完整请求 payload、响应关键字段、验证 SQL、字段前后值和清理记录见
+`metadata/core-flow-regression-20260712.json` 及其列出的 `/tmp` 原始报告。本轮 SQL
+只用于受控夹具、验收查询和定向清理，没有用数据库直写冒充业务动作。
+
 ## 2026-07-10 核心主线增量
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |

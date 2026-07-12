@@ -1,14 +1,33 @@
 {
-  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "generatedAt": "2026-07-12T02:02:43.004Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
   "latestRevalidation": {
-    "generatedAt": "2026-07-10T07:25:00Z",
+    "generatedAt": "2026-07-12T02:02:43.004Z",
+    "coreFlow": {
+      "status": "PASS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "qcsQualified": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712015927_QCS_QUAL",
+      "cleanup": "0/0/0/0/0/0/0"
+    },
+    "qcsUnqualified": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020028_QCS_UNQLF",
+      "cleanup": "0/0/0/0/0/0/0"
+    },
     "materialWms": {
       "status": "PASS",
-      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
-      "evidence": "metadata/material-wms-persistence-acceptance.json"
+      "marker": "ADP_E2E_20260712020139_MATERIAL_WMS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "processAnalysis": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020150_PROCESS_ANALYSIS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
     }
   },
   "summary": {

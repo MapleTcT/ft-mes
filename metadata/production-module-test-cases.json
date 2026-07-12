@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "generatedAt": "2026-07-12T02:02:43.004Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -73,6 +73,7 @@
     "womBadQuantityAudit": "docs/backend-table-audit/wom-bad-quantity-analysis.md; metadata/wom-bad-quantity-analysis.json",
     "womRejectMaterialMainFlows": "2026-06-20: Reconciled stale PROD-007 status with existing persistence acceptance. prePareReject save/delete and effective, materiaReject receive/effective with hm_factory_materias availi_quantity 10->8, and batchReject effective with wom_batch_mat_needs/wom_batch_materils/wom_bat_materil_parts return_num 0->2 are accepted with PostgreSQL evidence on 100.99.133.43.",
     "coreFlowAcceptance20260710": "metadata/core-flow-acceptance-20260710.json",
+    "coreFlowRegression20260712": "metadata/core-flow-regression-20260712.json; current runtime environment 9/9, platform 6/6, PostgreSQL 8/8, business dependencies 2/2 READY, QCS qualified/unqualified, material WMS and ProcessAnalysis all PASS with marker cleanup.",
     "coreFlowRuntimeRollbackRehearsal": "metadata/core-flow-runtime-rollback-rehearsal.json; marker ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK; rollback and restore each completed a distinct WOM Spring Boot start, Nacos healthy registration and page HTTP 200; post-restore manufacturing-order and toolbar markers passed.",
     "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED."
   },
@@ -1685,17 +1686,31 @@
     "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence."
   },
   "latestRevalidation": {
-    "generatedAt": "2026-07-10T08:40:11.239Z",
+    "generatedAt": "2026-07-12T02:02:43.004Z",
     "database": "PostgreSQL",
+    "coreFlow": {
+      "status": "PASS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "qcsQualified": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712015927_QCS_QUAL",
+      "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "qcsUnqualified": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260712020028_QCS_UNQLF",
+      "evidence": "metadata/core-flow-regression-20260712.json"
+    },
     "materialWms": {
       "status": "PASS",
-      "marker": "ADP_E2E_20260710074612_MATERIAL_WMS",
-      "evidence": "metadata/material-wms-persistence-acceptance.json"
+      "marker": "ADP_E2E_20260712020139_MATERIAL_WMS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
     },
     "processAnalysis": {
       "status": "PASS",
-      "marker": "ADP_E2E_20260710084011_PROCESS_ANALYSIS",
-      "evidence": "metadata/process-analysis-persistence-acceptance.json"
+      "marker": "ADP_E2E_20260712020150_PROCESS_ANALYSIS",
+      "evidence": "metadata/core-flow-regression-20260712.json"
     }
   }
 }
