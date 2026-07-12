@@ -23,7 +23,7 @@
 | `material-service-dependency-analysis.md` | 已完成专项解释 | WOM/QCS 完工入库、库存回写依赖缺失的 `material` 租户服务；`100.99.133.43` Nacos、网关、PostgreSQL 和包扫描均已复验 |
 | `processanalysis-dependency-analysis.md` | 已恢复并验收 | WOM 生产过程追溯由 `process-analysis` 源码模块恢复；`100.99.133.43` Nacos、网关、真实按钮和 PostgreSQL marker 均已复验 |
 | `business-equipment-energy-ehs.md` | 待开始 | 设备、能源、安环 |
-| `bpi-phase1-persistence.md` | 已恢复并验收 | BPI 候选确认、影子批次、证据、状态和审计 PostgreSQL 事务链 |
+| `bpi-phase1-persistence.md` | 已恢复并验收 | BPI 候选确认/拒绝、影子批次、证据、状态、幂等和审计 PostgreSQL 事务链 |
 | `bpi-telemetry-ingress.md` | 已恢复并验收 | 遥测 replay 幂等、序列状态、点级拒绝和隔离；HTTP 默认关闭 |
 | `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库并确认影子批次；Kafka/浏览器远端验收待继续 |
 | `bpi-candidate-kafka-ingress.md` | 已恢复并验收 | 本地真实 listener、重复投递幂等和 candidate DLQ 已通过；三节点/Flink/浏览器联合 marker 受测试机磁盘门禁阻断 |

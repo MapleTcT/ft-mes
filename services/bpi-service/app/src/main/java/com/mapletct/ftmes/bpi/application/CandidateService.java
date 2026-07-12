@@ -77,9 +77,7 @@ public class CandidateService {
                 UUID.randomUUID(), actor.tenantId(), idempotencyKey, "POST", path, checksum);
         if (!owner) {
             IdempotencyRecord previous = repository.lockIdempotency(actor.tenantId(), idempotencyKey);
-            if (!checksum.equals(previous.requestChecksum())) {
-                throw new BpiConflictException("Idempotency-Key was reused with a different request.", null);
-            }
+            assertIdempotencyReplay(previous, "POST", path, checksum);
             if ("COMPLETED".equals(previous.state()) && previous.responseBody() != null) {
                 CandidateConfirmation response = repository.readJson(
                         previous.responseBody(), new TypeReference<CandidateConfirmation>() {});
@@ -127,9 +125,69 @@ public class CandidateService {
         return new CommandResult<>(response, false);
     }
 
+    @Transactional(timeout = 15)
+    public CommandResult<BatchCandidate> reject(
+            ActorContext actor,
+            UUID candidateId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateCommandHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        BatchCandidate visibleCandidate = repository.findCandidate(actor, candidateId);
+        assertScope(actor, visibleCandidate);
+        if (!repository.commandsEnabled(actor, visibleCandidate)) {
+            throw new BpiForbiddenException("BPI commands are disabled for this scope.");
+        }
+        String path = "/bpi/v1/candidates/" + candidateId + "/reject";
+        String checksum = Checksums.sha256(candidateId + "|" + expectedRevision + "|" + command.reason() + "|" + command.comment());
+        boolean owner = repository.reserveIdempotency(
+                UUID.randomUUID(), actor.tenantId(), idempotencyKey, "POST", path, checksum);
+        if (!owner) {
+            IdempotencyRecord previous = repository.lockIdempotency(actor.tenantId(), idempotencyKey);
+            assertIdempotencyReplay(previous, "POST", path, checksum);
+            if ("COMPLETED".equals(previous.state()) && previous.responseBody() != null) {
+                BatchCandidate response = repository.readJson(
+                        previous.responseBody(), new TypeReference<BatchCandidate>() {});
+                return new CommandResult<>(response, true);
+            }
+            throw new BpiConflictException("The command is still processing.", null);
+        }
+
+        PersistedCandidate persisted = repository.lockCandidate(actor, candidateId);
+        BatchCandidate candidate = persisted.candidate();
+        assertScope(actor, candidate);
+        if (candidate.revision() != expectedRevision) {
+            throw new BpiConflictException("Candidate revision is stale.", candidate.revision());
+        }
+        if (candidate.state() != CandidateState.PENDING) {
+            throw new BpiConflictException("Candidate is already " + candidate.state() + ".", candidate.revision());
+        }
+
+        repository.rejectCandidate(candidateId, expectedRevision, actor.userId(), command.reason());
+        repository.insertAudit(
+                actor, candidate, "CANDIDATE_REJECTED", expectedRevision, expectedRevision + 1,
+                command.reason(), traceId,
+                Map.of("candidateKey", candidate.candidateKey(), "boundaryType", candidate.boundaryType()));
+
+        BatchCandidate response = repository.findCandidate(actor, candidateId);
+        repository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(response));
+        return new CommandResult<>(response, false);
+    }
+
     private void assertScope(ActorContext actor, BatchCandidate candidate) {
         if (!actor.canAccess(candidate.plantId(), candidate.lineId())) {
             throw new BpiForbiddenException("Token scope does not allow this candidate.");
+        }
+    }
+
+    private void assertIdempotencyReplay(
+            IdempotencyRecord previous, String method, String path, String checksum) {
+        if (!method.equals(previous.method())
+                || !path.equals(previous.resourcePath())
+                || !checksum.equals(previous.requestChecksum())) {
+            throw new BpiConflictException("Idempotency-Key was reused with a different request.", null);
         }
     }
 
@@ -154,7 +212,7 @@ public class CandidateService {
         }
     }
 
-    private String writeJson(CandidateConfirmation response) {
+    private String writeJson(Object response) {
         try {
             return objectMapper.writeValueAsString(response);
         } catch (Exception exception) {

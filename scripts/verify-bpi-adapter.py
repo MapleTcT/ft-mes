@@ -46,6 +46,11 @@ def main() -> int:
             if forbidden in proxy:
                 failures.append(f"BPI adapter trusts forbidden browser scope header {forbidden!r}")
 
+        route_policy = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java").read_text(encoding="utf-8")
+        for required in ("confirm", "reject"):
+            if required not in route_policy:
+                failures.append(f"BPI adapter route policy is missing candidate command {required!r}")
+
         properties = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiAdapterProperties.java").read_text(encoding="utf-8")
         for required in ("at least 32 UTF-8 bytes", "Duration.ofMinutes(15)", "parseRoleRules", "parseSubjectScopeRules", "roleMappings.isEmpty()", "subjectScopes.isEmpty()"):
             if required not in properties:
@@ -69,8 +74,8 @@ def main() -> int:
 
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         summary = evidence.get("summary", {})
-        if summary.get("tests") != 6 or summary.get("pass") != 6:
-            failures.append("BPI adapter acceptance must record six passing tests")
+        if summary.get("tests") != 7 or summary.get("pass") != 7:
+            failures.append("BPI adapter acceptance must record seven passing tests")
         if summary.get("runtimeSmokeChecks") != 2 or summary.get("runtimeSmokePass") != 2:
             failures.append("BPI adapter acceptance must record two passing runtime smoke checks")
         limitations = " ".join(evidence.get("limitations", []))

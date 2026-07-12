@@ -42,7 +42,7 @@ def main() -> int:
                 failures.append(f"BPI UI package is missing {name!r} script")
 
         api = (UI / "src/api.ts").read_text(encoding="utf-8")
-        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match"):
+        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate"):
             if required not in api:
                 failures.append(f"BPI UI API client is missing {required!r}")
         forbidden = ("BPI_INTERNAL_JWT_SECRET", "http://bpi-service", "https://bpi-service")
@@ -54,7 +54,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 
@@ -62,8 +62,8 @@ def main() -> int:
         if acceptance.get("scope") != "deterministic BPI simulator browser acceptance":
             failures.append("BPI UI acceptance must declare its deterministic simulator scope")
         summary = acceptance.get("summary", {})
-        if summary.get("browserTests") != 2 or summary.get("pass") != 2:
-            failures.append("BPI UI acceptance must record two passing browser tests")
+        if summary.get("browserTests") != 3 or summary.get("pass") != 3:
+            failures.append("BPI UI acceptance must record three passing browser tests")
         if any(summary.get(key) != 0 for key in ("consoleErrors", "pageErrors", "requestFailures")):
             failures.append("BPI UI acceptance contains browser errors")
         limitations = " ".join(acceptance.get("limitations", []))

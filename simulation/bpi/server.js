@@ -65,23 +65,32 @@ function commandContext(req, res, operationId, entityRevision, state, pathname) 
     );
     return null;
   }
-  const cacheKey = `${req.method}:${pathname}:${key}`;
+  const cacheKey = String(key);
   if (state.idempotency.has(cacheKey)) {
     const cached = state.idempotency.get(cacheKey);
+    if (cached.method !== req.method || cached.pathname !== pathname) {
+      send(res, 409, problem(409, 'Idempotency Conflict', 'Idempotency-Key was reused for another command.', operationId), operationId);
+      return null;
+    }
     send(res, cached.status, cached.body, operationId, { 'Idempotent-Replay': 'true' });
     return null;
   }
   if (revision !== entityRevision) {
     const body = problem(409, 'Revision Conflict', `Expected revision ${entityRevision}, received ${revision}.`, operationId, entityRevision);
-    state.idempotency.set(cacheKey, { status: 409, body });
+    state.idempotency.set(cacheKey, { method: req.method, pathname, status: 409, body });
     send(res, 409, body, operationId);
     return null;
   }
-  return { key, cacheKey };
+  return { key, cacheKey, method: req.method, pathname };
 }
 
 function rememberAndSend(state, context, res, status, body, operationId) {
-  state.idempotency.set(context.cacheKey, { status, body: clone(body) });
+  state.idempotency.set(context.cacheKey, {
+    method: context.method,
+    pathname: context.pathname,
+    status,
+    body: clone(body),
+  });
   send(res, status, body, operationId);
 }
 
@@ -123,7 +132,9 @@ function createHandler(state) {
         return send(res, 200, envelope('getCurrentLineState', state.line), 'getCurrentLineState');
       }
       if (req.method === 'GET' && path === '/bpi/v1/candidates') {
-        return send(res, 200, envelope('listBatchCandidates', [state.candidate]), 'listBatchCandidates');
+        const requestedState = url.searchParams.get('state');
+        const candidates = !requestedState || state.candidate.state === requestedState ? [state.candidate] : [];
+        return send(res, 200, envelope('listBatchCandidates', candidates), 'listBatchCandidates');
       }
       ids = match(path, /^\/bpi\/v1\/candidates\/([^/]+)$/);
       if (req.method === 'GET' && ids) {
@@ -154,6 +165,29 @@ function createHandler(state) {
         state.line.currentBatchId = batch.id;
         state.line.pendingCandidates = 0;
         const response = envelope(operationId, { candidate: state.candidate, batch });
+        return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/candidates\/([^/]+)\/reject$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'rejectBatchCandidate';
+        if (ids[0] !== state.candidate.id) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, state.candidate.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (state.candidate.state !== 'PENDING') {
+          const response = problem(409, 'Candidate Already Processed', 'The candidate is no longer pending.', operationId, state.candidate.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        state.candidate.state = 'REJECTED';
+        state.candidate.revision += 1;
+        state.candidate.batchId = null;
+        state.candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
+        state.line.pendingCandidates = 0;
+        const response = envelope(operationId, state.candidate);
         return rememberAndSend(state, context, res, 200, response, operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/batches') {

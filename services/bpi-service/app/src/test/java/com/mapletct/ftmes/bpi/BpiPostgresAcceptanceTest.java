@@ -281,6 +281,88 @@ class BpiPostgresAcceptanceTest {
     }
 
     @Test
+    void realApiRejectsCandidateOnceWithoutCreatingShadowBatch() throws Exception {
+        String ingestToken = token(
+                tenantId, List.of("BPI_EVENT_INGEST"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult ingested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingestPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID candidateId = UUID.fromString(objectMapper.readTree(
+                ingested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String shiftToken = token(
+                tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        String commandBody = objectMapper.writeValueAsString(Map.of("reason", "现场确认该边界为流量波动误判"));
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/reject", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commandBody))
+                .andExpect(status().is(428));
+
+        String idempotencyKey = "reject-" + candidateKey;
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/reject", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", idempotencyKey)
+                        .header("If-Match", "1")
+                        .header("X-Trace-Id", "TRACE-REJECT-" + candidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commandBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("REJECTED"))
+                .andExpect(jsonPath("$.data.revision").value(2))
+                .andExpect(jsonPath("$.data.batchId").doesNotExist());
+
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/reject", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", idempotencyKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commandBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.state").value("REJECTED"));
+
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", idempotencyKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commandBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("reused")));
+
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "confirm-after-reject-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("reason", "过期确认不得成功"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.currentRevision").value(2));
+
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || reviewed_by || '|' || review_reason
+                  FROM bpi.bpi_batch_candidates
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, candidateId))
+                .isEqualTo("REJECTED|2|acceptance-user|现场确认该边界为流量波动误判");
+        assertThat(jdbc.queryForObject("""
+                SELECT action || '|' || before_revision || '|' || after_revision
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                """, String.class, tenantId, candidateId))
+                .isEqualTo("CANDIDATE_REJECTED|1|2");
+        assertThat(count("bpi_batch_instances")).isZero();
+        assertThat(count("bpi_batch_state_events")).isZero();
+        assertThat(count("bpi_boundary_evidence")).isZero();
+        assertThat(count("bpi_audit_events")).isEqualTo(1);
+        assertThat(count("bpi_api_idempotency")).isEqualTo(1);
+    }
+
+    @Test
     void protobufCandidateEventPersistsRichEvidenceAndConfirmsShadowBatch() throws Exception {
         String evidenceEventId = "ADP_E2E_BPI_PROTO_FLOW_" + candidateKey;
         String orderId = "ADP_E2E_BPI_PROTO_ORDER_" + candidateKey;

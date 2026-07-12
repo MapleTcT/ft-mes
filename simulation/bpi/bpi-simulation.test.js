@@ -98,6 +98,44 @@ test('candidate confirmation creates exactly one idempotent shadow batch', async
   assert.equal(result.json.data[0].action, 'SHADOW_BATCH_CREATED');
 });
 
+test('candidate rejection is idempotent and never creates a shadow batch', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  const headers = commandHeaders('reject-candidate-0001', 3);
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/reject', {
+    headers,
+    body: { reason: '现场确认该边界为流量波动误判' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'REJECTED');
+  assert.equal(result.json.data.revision, 4);
+  assert.equal(result.json.data.batchId, null);
+  const firstResponse = result.json;
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/reject', {
+    headers,
+    body: { reason: '现场确认该边界为流量波动误判' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, firstResponse);
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/confirm', {
+    headers,
+    body: { reason: '现场确认该边界为流量波动误判' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.match(result.json.detail, /reused/);
+
+  result = await request('GET', '/bpi/v1/candidates?plantId=PLANT-01&state=PENDING');
+  assert.deepEqual(result.json.data, []);
+  result = await request('GET', '/bpi/v1/batches?plantId=PLANT-01');
+  assert.deepEqual(result.json.data, []);
+  result = await request('GET', '/bpi/v1/overview?plantId=PLANT-01');
+  assert.equal(result.json.data[0].pendingCandidates, 0);
+});
+
 test('rule simulation checksum gates publication', async () => {
   let result = await request('GET', '/bpi/v1/rules?plantId=PLANT-01');
   assert.equal(result.json.data[0].revision, 7);

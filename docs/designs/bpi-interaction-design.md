@@ -129,6 +129,9 @@ required 信号异常或上下文过期的产线。没有生产时显示最后�
 **冲突处理：** 第二位用户确认已处理候选时，不弹泛化错误，直接刷新为“已由某人确认”，
 保留其审核备注和时间。
 
+拒绝候选必须填写误判、上下文错误或现场处置依据。拒绝成功后候选变为 `REJECTED`，从待处理队列
+移除且不得创建影子批次；同一幂等键重试返回原拒绝结果。已拒绝候选不能再被旧页面确认。
+
 **主要 API：** `listBatchCandidates`、`getBatchCandidate`、`confirmBatchCandidate`、
 `rejectBatchCandidate`。
 

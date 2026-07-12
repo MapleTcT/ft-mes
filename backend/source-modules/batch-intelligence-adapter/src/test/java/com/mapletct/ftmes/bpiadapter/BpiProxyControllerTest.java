@@ -56,6 +56,33 @@ public class BpiProxyControllerTest {
         upstream.verify();
     }
 
+    @Test
+    public void forwardsCandidateRejectionWithConcurrencyHeaders() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/candidates/" + id + "/reject"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "reject-command-1"))
+                .andExpect(header("If-Match", "4"))
+                .andRespond(withSuccess("{\"code\":200}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/candidates/" + id + "/reject");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        request.addHeader("Idempotency-Key", "reject-command-1");
+        request.addHeader("If-Match", "4");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request,
+                "{\"reason\":\"operator rejected\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        upstream.verify();
+    }
+
     private BpiAdapterProperties properties() {
         BpiAdapterProperties properties = new BpiAdapterProperties();
         properties.setUpstreamBaseUrl("http://bpi-service:19091");

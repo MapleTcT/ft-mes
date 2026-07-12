@@ -156,6 +156,8 @@ td > svg { width: 16px; color: #8b96a1; }
 .button--primary { background: var(--blue); border-color: var(--blue); color: #fff; }
 .button--primary:hover { background: var(--blue-strong); }
 .button--secondary { background: #fff; border-color: var(--line-strong); color: #44515d; }
+.button--danger { background: #fff; border-color: #d77b82; color: var(--red); }
+.button--danger:hover { background: #fff0f1; border-color: var(--red); }
 .trend-plot { position: relative; height: 148px; display: flex; align-items: flex-end; gap: 6px; padding: 14px 12px 0; background: #f4f7f9; border: 1px solid var(--line); overflow: hidden; }
 .trend-plot::before { content: ""; position: absolute; z-index: 0; left: 0; right: 0; top: 36px; height: 1px; background: #dfe5ea; box-shadow: 0 36px 0 #dfe5ea, 0 72px 0 #dfe5ea; }
 .trend-plot i { position: relative; z-index: 1; flex: 1; min-width: 6px; max-width: 28px; background: #2b82bd; }

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-12T17:38:24+08:00",
-  "repoCommit": "5143328",
+  "generatedAt": "2026-07-13T01:23:29+08:00",
+  "repoCommit": "ab1e506",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 2,
-    "pass": 2,
+    "browserTests": 3,
+    "pass": 3,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -59,6 +59,28 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-mobile.png"
+    },
+    {
+      "id": "desktop-candidate-rejection",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/candidates"
+      ],
+      "operations": [
+        "open pending candidate",
+        "open explicit rejection command",
+        "submit mandatory rejection reason",
+        "verify pending queue is empty",
+        "verify no shadow batch was created"
+      ],
+      "apis": [
+        "GET /bpi/v1/candidates",
+        "GET /bpi/v1/candidates/{id}",
+        "POST /bpi/v1/candidates/{id}/reject",
+        "GET /bpi/v1/batches"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-candidate-rejected.png"
     }
   ],
   "persistence": {
@@ -69,8 +91,8 @@
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite.",
-    "The Java 8 authentication adapter and production JWKS validation are not implemented.",
-    "The console is not yet mounted in the legacy MES shell or its menu and RBAC model.",
+    "The Java 8 authentication adapter route and JWT scope boundary are implemented and unit tested; target Keycloak/JWKS browser acceptance remains pending.",
+    "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
     "No real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]

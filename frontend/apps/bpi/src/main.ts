@@ -37,6 +37,7 @@ const state = {
   batches: [] as Batch[],
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
+  candidateCommand: null as 'confirm' | 'reject' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -105,10 +106,10 @@ function shell(): void {
       <aside id="detail-drawer" class="detail-drawer" aria-label="详情" aria-hidden="true"></aside>
       <dialog id="confirm-dialog" class="command-dialog">
         <form method="dialog" id="confirm-form">
-          <header><div><span>候选批次</span><h2>确认启动边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <header><div><span>候选批次</span><h2 id="command-title">审核候选边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
           <div class="command-summary" id="command-summary"></div>
-          <label>确认原因<textarea id="confirm-reason" minlength="3" maxlength="500" required placeholder="填写现场确认依据"></textarea></label>
-          <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">确认并生成影子批次</button></footer>
+          <label><span id="command-reason-label">审核原因</span><textarea id="confirm-reason" minlength="3" maxlength="500" required placeholder="填写现场审核依据"></textarea></label>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">提交</button></footer>
         </form>
       </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -285,19 +286,36 @@ async function openCandidate(candidateId: string): Promise<void> {
       <div class="candidate-hero"><div><span>边界时间</span><b>${formatTime(candidate.boundaryTime)}</b></div><div><span>置信度</span><strong>${number(candidate.confidence * 100, 0)}%</strong></div></div>
       <div class="drawer-section facts-grid"><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>状态</span>${statusChip(candidate.state)}</div><div><span>规则版本</span><b>${escapeHtml(candidate.ruleVersion)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(candidate.topologyVersion)}</b></div></div>
       <div class="drawer-section"><div class="section-title"><h3>规则证据</h3><span>${candidate.evidence.filter((item) => item.satisfied).length}/${candidate.evidence.length} 已满足</span></div><ul class="evidence-list">${evidence}</ul></div>
-      <footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>暂不处理</button><button class="button button--primary" id="open-confirm" ${candidate.state !== 'PENDING' ? 'disabled' : ''}>确认候选</button></footer>`);
-    document.querySelector('#open-confirm')?.addEventListener('click', openConfirmDialog);
+      <footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>暂不处理</button><button class="button button--danger" id="open-reject" ${candidate.state !== 'PENDING' ? 'disabled' : ''}>拒绝候选</button><button class="button button--primary" id="open-confirm" ${candidate.state !== 'PENDING' ? 'disabled' : ''}>确认候选</button></footer>`);
+    document.querySelector('#open-confirm')?.addEventListener('click', () => openCandidateCommandDialog('confirm'));
+    document.querySelector('#open-reject')?.addEventListener('click', () => openCandidateCommandDialog('reject'));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
 }
 
-function openConfirmDialog(): void {
+function openCandidateCommandDialog(command: 'confirm' | 'reject'): void {
   const candidate = state.selectedCandidate;
   if (!candidate) return;
-  document.querySelector('#command-summary')!.innerHTML = `<div><span>产线</span><b>${escapeHtml(candidate.lineId)}</b></div><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>拟定批次</span><b>BPI · ${formatTime(candidate.boundaryTime)}</b></div><div><span>版本</span><b>r${candidate.revision}</b></div>`;
+  state.candidateCommand = command;
+  const isReject = command === 'reject';
+  document.querySelector('#command-title')!.textContent = isReject ? '拒绝候选边界' : '确认启动边界';
+  document.querySelector('#command-reason-label')!.textContent = isReject ? '拒绝原因' : '确认原因';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>产线</span><b>${escapeHtml(candidate.lineId)}</b></div><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>${isReject ? '处理结果' : '拟定批次'}</span><b>${isReject ? '不生成批次' : `BPI · ${formatTime(candidate.boundaryTime)}`}</b></div><div><span>版本</span><b>r${candidate.revision}</b></div>`;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
   reason.value = '';
+  reason.placeholder = isReject ? '填写误判、上下文错误或现场处置依据' : '填写现场确认依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = `button ${isReject ? 'button--danger' : 'button--primary'}`;
+  button.textContent = isReject ? '拒绝候选' : '确认并生成影子批次';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
+}
+
+function applyCandidateReview(candidate: Candidate): void {
+  state.selectedCandidate = candidate;
+  state.candidates = state.candidates.map((item) => item.id === candidate.id ? candidate : item);
+  state.lines = state.lines.map((line) => line.lineId === candidate.lineId
+    ? { ...line, pendingCandidates: Math.max(0, line.pendingCandidates - 1) }
+    : line);
 }
 
 async function handleConfirm(event: SubmitEvent): Promise<void> {
@@ -305,13 +323,26 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
   const candidate = state.selectedCandidate;
+  const command = state.candidateCommand;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
-  if (!candidate || reason.length < 3) return;
+  if (!candidate || !command || reason.length < 3) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;
-  button.textContent = '确认中...';
+  button.textContent = command === 'reject' ? '拒绝中...' : '确认中...';
   try {
+    if (command === 'reject') {
+      const response = await bpiApi.rejectCandidate(candidate, reason, crypto.randomUUID());
+      applyCandidateReview(response.data);
+      document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+      closeDrawer();
+      showToast('候选已拒绝，未生成影子批次');
+      state.view = 'candidates';
+      history.replaceState(null, '', '#/candidates');
+      await loadView();
+      return;
+    }
     const response = await bpiApi.confirmCandidate(candidate, reason, crypto.randomUUID());
+    applyCandidateReview(response.data.candidate);
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
     closeDrawer();
     showToast(`影子批次 ${response.data.batch.batchNo} 已生成`);
@@ -326,7 +357,8 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
-    button.textContent = '确认并生成影子批次';
+    button.className = `button ${command === 'reject' ? 'button--danger' : 'button--primary'}`;
+    button.textContent = command === 'reject' ? '拒绝候选' : '确认并生成影子批次';
   }
 }
 

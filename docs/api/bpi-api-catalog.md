@@ -15,7 +15,8 @@
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
 - 事件状态 `JOB_WIRED` 表示 Kafka/Flink 作业图、Harness 和事务 sink 已接线，不表示真实 broker、Flink HA、
   checkpoint storage 或端到端 PostgreSQL 已验收；只有完成实机证据后才能标记 `CLUSTER_ACCEPTED`。
-- Java 17 服务当前只实现 `service-phase1-profile.json` 中的 9 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 10 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -31,18 +32,18 @@
 
 | 模块 | Method | Path | operationId | Phase 1 |
 |---|---|---|---|---|
-| 实时态势 | GET | `/bpi/v1/overview` | `getBpiOverview` | SIMULATED |
-| 实时态势 | GET | `/bpi/v1/lines/{lineId}/current-state` | `getCurrentLineState` | SIMULATED |
-| 候选批次 | GET | `/bpi/v1/candidates` | `listBatchCandidates` | SIMULATED |
-| 候选批次 | GET | `/bpi/v1/candidates/{candidateId}` | `getBatchCandidate` | SIMULATED |
-| 候选批次 | POST | `/bpi/v1/candidates/{candidateId}/confirm` | `confirmBatchCandidate` | SIMULATED |
-| 候选批次 | POST | `/bpi/v1/candidates/{candidateId}/reject` | `rejectBatchCandidate` | CONTRACT_ONLY |
-| 批次档案 | GET | `/bpi/v1/batches` | `listBatches` | SIMULATED |
-| 批次档案 | GET | `/bpi/v1/batches/{batchId}` | `getBatch` | SIMULATED |
-| 批次档案 | GET | `/bpi/v1/batches/{batchId}/evidence` | `getBatchEvidence` | SIMULATED |
+| 实时态势 | GET | `/bpi/v1/overview` | `getBpiOverview` | SERVICE_IMPLEMENTED |
+| 实时态势 | GET | `/bpi/v1/lines/{lineId}/current-state` | `getCurrentLineState` | SERVICE_IMPLEMENTED |
+| 候选批次 | GET | `/bpi/v1/candidates` | `listBatchCandidates` | SERVICE_IMPLEMENTED |
+| 候选批次 | GET | `/bpi/v1/candidates/{candidateId}` | `getBatchCandidate` | SERVICE_IMPLEMENTED |
+| 候选批次 | POST | `/bpi/v1/candidates/{candidateId}/confirm` | `confirmBatchCandidate` | SERVICE_IMPLEMENTED |
+| 候选批次 | POST | `/bpi/v1/candidates/{candidateId}/reject` | `rejectBatchCandidate` | SERVICE_IMPLEMENTED |
+| 批次档案 | GET | `/bpi/v1/batches` | `listBatches` | SERVICE_IMPLEMENTED |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}` | `getBatch` | SERVICE_IMPLEMENTED |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/evidence` | `getBatchEvidence` | SERVICE_IMPLEMENTED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/balance` | `getBatchBalance` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/genealogy` | `getBatchGenealogy` | SIMULATED |
-| 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SIMULATED |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |

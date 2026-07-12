@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-12T17:01:20+08:00",
-  "repoCommit": "65ee6e1",
+  "generatedAt": "2026-07-13T01:31:36+08:00",
+  "repoCommit": "ab1e506",
   "workingTree": "uncommitted",
   "database": {
     "engine": "PostgreSQL",
-    "version": "16",
-    "location": "local",
-    "name": "ft_mes_bpi",
+    "version": "16.13",
+    "location": "isolated local Docker network",
+    "name": "bpi_acceptance",
     "schema": "bpi",
-    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql"
+    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql + V3__bpi_telemetry_ingress.sql"
   },
   "runtime": {
     "java": "17",
@@ -16,21 +16,28 @@
   },
   "scope": "BPI Phase 1 shadow-batch vertical slice only",
   "summary": {
-    "testedItems": 13,
-    "pass": 13,
+    "testedItems": 19,
+    "pass": 19,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 0,
     "postgresAcceptanceTests": {
-      "run": 1,
-      "passed": 1,
+      "run": 4,
+      "passed": 4,
       "failed": 0,
       "errors": 0,
       "skipped": 0
     },
     "ruleRuntimeTests": {
-      "run": 2,
-      "passed": 2,
+      "run": 9,
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "serviceTests": {
+      "run": 15,
+      "passed": 15,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -133,6 +140,84 @@
       "evidence": "Idempotent-Replay=true and the original batch ID were returned without duplicate persistence."
     },
     {
+      "id": "reject-precondition",
+      "operation": "Reject a candidate without Idempotency-Key and If-Match",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/reject",
+      "expectedStatus": 428,
+      "actualStatus": 428,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "The rejection was denied before command persistence."
+    },
+    {
+      "id": "reject-candidate",
+      "operation": "Reject a false candidate without creating a shadow batch",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/reject",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "Candidate became REJECTED at revision 2 with reviewer and reason; audit action was CANDIDATE_REJECTED from revision 1 to 2."
+    },
+    {
+      "id": "reject-command-replay",
+      "operation": "Replay the rejection with the same idempotency key",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/reject",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": [
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "Idempotent-Replay=true returned the original REJECTED candidate without another audit or state transition."
+    },
+    {
+      "id": "confirm-after-reject-conflict",
+      "operation": "Confirm a rejected candidate from a stale page",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "The stale confirmation returned currentRevision=2 and its transaction left no idempotency row."
+    },
+    {
+      "id": "cross-command-idempotency-conflict",
+      "operation": "Reuse a completed rejection key for candidate confirmation",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "tables": [
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "Method and resource_path were revalidated with the checksum; the rejection response could not be replayed through the confirmation endpoint."
+    },
+    {
+      "id": "reject-zero-batch-side-effects",
+      "operation": "Verify rejection does not create batch facts",
+      "method": "SQL",
+      "api": "NOT_APPLICABLE",
+      "expectedStatus": 0,
+      "actualStatus": 0,
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence"
+      ],
+      "status": "PASS",
+      "evidence": "All three marker-scoped row counts remained zero after rejection and idempotent replay."
+    },
+    {
       "id": "command-replay-line-scope",
       "operation": "Replay a completed idempotent command with a token that no longer covers the candidate line",
       "method": "POST",
@@ -217,6 +302,15 @@
       "bpi.bpi_audit_events": 1,
       "bpi.bpi_api_idempotency": 1
     },
+    "rejectionCounts": {
+      "bpi.bpi_batch_candidates": 1,
+      "bpi.bpi_audit_events": 1,
+      "bpi.bpi_api_idempotency": 1,
+      "bpi.bpi_batch_instances": 0,
+      "bpi.bpi_batch_state_events": 0,
+      "bpi.bpi_boundary_evidence": 0
+    },
+    "rejectionState": "REJECTED|2|acceptance-user|现场确认该边界为流量波动误判",
     "idempotencyCountNote": "The actual test assertion is 1, not 2. The successful command and same-key replay share one row; the stale-revision command uses a new key but its transaction rolls back on 409, so it leaves no persistent row.",
     "cleanup": "After each test, targeted DELETE statements remove only rows belonging to the dynamic tenant marker, including the seeded rule and topology versions."
   },
@@ -226,13 +320,13 @@
   ],
   "limitations": [
     "This is only the BPI Phase 1 shadow-batch vertical slice and is not a full Phase 1 production acceptance.",
-    "Kafka transport, partitioning, backlog recovery and consumer replay were not tested.",
-    "Flink event-time processing, watermarks, late events and state recovery were not tested.",
+    "Kafka listener, duplicate delivery and DLQ were tested with a local embedded broker; the target three-broker cluster remains blocked by host disk capacity.",
+    "Flink logic and deterministic replay are covered separately, but target-cluster event-time, checkpoint and recovery acceptance remains blocked by host disk capacity.",
     "The candidate payload came from an acceptance replay and not from a real IoT or JetLinks source.",
-    "No browser UI flow was exercised.",
+    "Browser confirmation and rejection were exercised against the deterministic simulator; browser-to-PostgreSQL target acceptance is still pending.",
     "No WOM, QCS or WMS write was executed; wmsStatus=NOT_REQUESTED is expected for this slice.",
     "Acceptance JWTs use a short-lived HS256 internal test secret; production JWKS/asymmetric signing and key rotation remain pending.",
-    "Docker Compose rendered successfully, but the local Docker daemon was unavailable for container runtime acceptance.",
+    "Local PostgreSQL 16.13 ran in an isolated Docker network; this does not replace target-host Compose deployment acceptance.",
     "Production deployment, concurrency load, fault injection, backup restore and soak testing remain out of scope."
   ]
 }

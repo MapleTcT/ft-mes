@@ -277,12 +277,14 @@ public class BpiPostgresRepository {
 
     public IdempotencyRecord lockIdempotency(String tenantId, String key) {
         return jdbc.queryForObject("""
-                SELECT request_checksum, state, response_status, response_body::text AS response_body
+                SELECT method, resource_path, request_checksum, state,
+                       response_status, response_body::text AS response_body
                   FROM bpi.bpi_api_idempotency
                  WHERE tenant_id = :tenantId AND idempotency_key = :key
                  FOR UPDATE
                 """, new MapSqlParameterSource().addValue("tenantId", tenantId).addValue("key", key),
                 (rs, rowNum) -> new IdempotencyRecord(
+                        rs.getString("method"), rs.getString("resource_path"),
                         rs.getString("request_checksum"), rs.getString("state"),
                         rs.getObject("response_status", Integer.class), rs.getString("response_body")));
     }
@@ -319,6 +321,20 @@ public class BpiPostgresRepository {
                        reviewed_by = :actorId, review_reason = :reason, reviewed_at = now(), updated_at = now()
                  WHERE id = :candidateId AND revision = :expectedRevision AND state = 'PENDING'
                 """, new MapSqlParameterSource().addValue("batchId", batchId).addValue("actorId", actorId)
+                .addValue("reason", reason).addValue("candidateId", candidateId)
+                .addValue("expectedRevision", expectedRevision));
+        if (updated != 1) {
+            throw new BpiConflictException("Candidate was changed by another command.", expectedRevision);
+        }
+    }
+
+    public void rejectCandidate(UUID candidateId, long expectedRevision, String actorId, String reason) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_candidates
+                   SET state = 'REJECTED', revision = revision + 1, batch_id = NULL,
+                       reviewed_by = :actorId, review_reason = :reason, reviewed_at = now(), updated_at = now()
+                 WHERE id = :candidateId AND revision = :expectedRevision AND state = 'PENDING'
+                """, new MapSqlParameterSource().addValue("actorId", actorId)
                 .addValue("reason", reason).addValue("candidateId", candidateId)
                 .addValue("expectedRevision", expectedRevision));
         if (updated != 1) {

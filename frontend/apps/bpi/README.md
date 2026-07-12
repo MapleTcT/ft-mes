@@ -15,5 +15,5 @@ npm run build
 npm run test:e2e
 ```
 
-The Playwright test exercises desktop candidate confirmation and mobile layout. Screenshots are written
-to `/tmp`, not committed as product assets.
+The Playwright test exercises desktop candidate confirmation, candidate rejection without batch creation,
+and mobile layout. Screenshots are written to `/tmp`, not committed as product assets.

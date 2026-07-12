@@ -75,4 +75,24 @@ public class CandidateController {
         }
         return response.body(ApiResponse.of(result.data(), request));
     }
+
+    @PostMapping("/bpi/v1/candidates/{candidateId}/reject")
+    @PreAuthorize("hasAnyRole('BPI_SHIFT_LEAD', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<BatchCandidate>> reject(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID candidateId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        ActorContext actor = actorContextFactory.from(jwt);
+        String traceId = String.valueOf(request.getAttribute(TraceIdFilter.ATTRIBUTE));
+        CommandResult<BatchCandidate> result = candidateService.reject(
+                actor, candidateId, idempotencyKey, ifMatch, command, traceId);
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) {
+            response.header("Idempotent-Replay", "true");
+        }
+        return response.body(ApiResponse.of(result.data(), request));
+    }
 }

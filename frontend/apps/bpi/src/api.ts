@@ -60,6 +60,12 @@ export const bpiApi = {
       headers: { 'Idempotency-Key': key, 'If-Match': String(candidate.revision) },
       body: JSON.stringify({ reason }),
     }),
+  rejectCandidate: (candidate: Candidate, reason: string, key: string) =>
+    request<Candidate>(`/candidates/${encodeURIComponent(candidate.id)}/reject`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(candidate.revision) },
+      body: JSON.stringify({ reason }),
+    }),
   batches: (plantId: string) =>
     request<Batch[]>(`/batches?plantId=${encodeURIComponent(plantId)}&limit=100`),
   batch: (id: string) => request<Batch>(`/batches/${encodeURIComponent(id)}`),
