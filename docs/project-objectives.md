@@ -205,6 +205,12 @@
 
 ## 当前下一步
 
+面向数采、批次、工艺、质量、物料、能源和训练数据的一体化新产品方向，已经形成
+[智能批次与工艺数据中心（BPI）设计](designs/batch-process-intelligence.md)及
+[工程测试计划](testing/bpi-engineering-test-plan.md)。该设计采用 JetLinks -> Kafka ->
+Flink -> BPI -> WOM/QCS/WMS 的分层路线；当前仅完成设计和工程审查，实施必须从 Phase 0
+契约/基准与 Phase 1 影子批次开始，不能把文档状态误记为功能已经交付。
+
 当前下一步不是继续补治理层，也不是只跑静态检查。必须先按 [功能验收与落库验收规则](functional-persistence-acceptance.md) 启动或访问真实系统，通过前端页面/E2E 操作验证当前功能，并对每个会改变业务数据的动作完成 PostgreSQL 落库验收。
 
 优先顺序：

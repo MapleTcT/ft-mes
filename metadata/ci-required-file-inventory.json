@@ -2901,6 +2901,18 @@
     },
     {
       "ignored": false,
+      "path": "docs/designs/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/designs/batch-process-intelligence.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/frontend-functional-test-report.md",
       "state": "tracked",
       "tracked": true
@@ -3118,6 +3130,12 @@
     {
       "ignored": false,
       "path": "docs/sustainable-development.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-engineering-test-plan.md",
       "state": "tracked",
       "tracked": true
     },
@@ -3875,7 +3893,7 @@
       "tracked": 459
     },
     "docs": {
-      "tracked": 58
+      "tracked": 61
     },
     "metadata": {
       "tracked": 74
@@ -3893,8 +3911,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 642,
-    "tracked": 642,
+    "totalFiles": 645,
+    "tracked": 645,
     "untracked": 0
   },
   "untrackedByDirectory": []

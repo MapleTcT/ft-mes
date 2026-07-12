@@ -1,0 +1,8 @@
+# 产品与技术设计
+
+本目录保存进入团队实施阶段的产品和技术设计。设计文档不等于功能完成；实现后仍需遵守
+仓库的真实前端、API、PostgreSQL marker、清理回滚和长期运行验收规则。
+
+| 设计 | 状态 | 工程测试计划 |
+|---|---|---|
+| [智能批次与工艺数据中心（BPI）](batch-process-intelligence.md) | PROMOTED；Phase 0/1 待实施 | [BPI Engineering Test Plan](../testing/bpi-engineering-test-plan.md) |

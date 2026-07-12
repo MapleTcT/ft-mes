@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T02:09:59+00:00",
-  "repoCommit": "7674a32cb7517c94867f66cd4ddd32ceb45b1c21",
-  "findingCount": 960,
+  "generatedAt": "2026-07-12T04:42:58+00:00",
+  "repoCommit": "ef089b4f38fd97d169bf48deef9a23f28a4d0183",
+  "findingCount": 961,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 188,
+    "documentation-or-workflow": 189,
     "frontend-row-index-noise": 4,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
@@ -19,7 +19,7 @@
   "patternCounts": {
     "from-dual": 140,
     "ojdbc": 14,
-    "oracle-keyword": 630,
+    "oracle-keyword": 631,
     "rownum": 41,
     "sysdate": 135
   },
@@ -4929,6 +4929,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- 如果清单变化引入 Oracle 配置，必须进入 `oracle-legacy` 路径并补迁移 issue。"
+    },
+    {
+      "file": "docs/designs/batch-process-intelligence.md",
+      "line": 969,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "- Oracle 新适配：BPI 默认且仅以 PostgreSQL 为生产路径。"
     },
     {
       "file": "docs/frontend-functional-test-report.md",
