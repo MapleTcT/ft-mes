@@ -3279,6 +3279,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-telemetry-ingress.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/business-production-action-map.md",
       "state": "tracked",
       "tracked": true
@@ -3742,6 +3748,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-telemetry-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4521,6 +4533,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/UuidV5.java",
       "state": "tracked",
       "tracked": true
@@ -4623,6 +4641,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryIngestResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryValue.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -4648,6 +4678,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/security/SecurityConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/telemetry/BpiTelemetryProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/telemetry/TelemetryPostgresRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4689,6 +4731,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalTelemetryController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/OverviewController.java",
       "state": "tracked",
       "tracked": true
@@ -4702,6 +4750,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ResponseMeta.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TelemetryEnvelopeRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TelemetryPointRequest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4731,7 +4791,19 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4826,13 +4898,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 64
+      "tracked": 65
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 77
+      "tracked": 78
     },
     "package.json": {
       "tracked": 1
@@ -4844,7 +4916,7 @@
       "tracked": 49
     },
     "services": {
-      "tracked": 55
+      "tracked": 65
     },
     "simulation": {
       "tracked": 4
@@ -4853,8 +4925,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 800,
-    "tracked": 800,
+    "totalFiles": 812,
+    "tracked": 812,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -38,3 +38,10 @@ bpi:
     issuer: ${BPI_INTERNAL_JWT_ISSUER:ft-mes-adapter}
     audience: ${BPI_INTERNAL_JWT_AUDIENCE:bpi-service}
     max-token-ttl: ${BPI_INTERNAL_JWT_MAX_TTL:15m}
+  telemetry:
+    http-ingress-enabled: ${BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false}
+    max-payload-bytes: ${BPI_TELEMETRY_MAX_PAYLOAD_BYTES:524288}
+    max-points-per-envelope: ${BPI_TELEMETRY_MAX_POINTS:500}
+    max-future-skew: ${BPI_TELEMETRY_MAX_FUTURE_SKEW:2m}
+    accepted-units: ${BPI_TELEMETRY_ACCEPTED_UNITS:1,bool,%,t/h,kg/h,m3/h,m3/s,kg/s,degC,kPa,MPa,Baume,Brix}
+    accepted-qualities: GOOD,UNCERTAIN,BAD,STALE,SUBSTITUTED

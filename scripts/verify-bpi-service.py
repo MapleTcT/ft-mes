@@ -18,10 +18,14 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/application.yml",
     "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
     "docs/backend-table-audit/bpi-phase1-persistence.md",
+    "docs/backend-table-audit/bpi-telemetry-ingress.md",
     "metadata/bpi-phase1-persistence-acceptance.json",
+    "metadata/bpi-telemetry-persistence-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -82,8 +86,36 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
+        [
+            "bpi_telemetry_source_state",
+            "bpi_telemetry_events",
+            "bpi_telemetry_points",
+            "bpi_telemetry_point_rejects",
+            "bpi_telemetry_quarantine",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
+        [
+            "BPI_EVENT_INGEST",
+            "httpIngressEnabled",
+            "lockEventIdentity",
+            "findSourceIdentity",
+            "SOURCE_EPOCH_REGRESSION",
+            "sequence.apply().run()",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/application.yml",
+        ["BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false"],
         failures,
     )
     require_text(
@@ -109,6 +141,13 @@ def main() -> int:
     database_engine = database.get("engine") if isinstance(database, dict) else database
     if database_engine != "PostgreSQL":
         fail("BPI persistence acceptance must identify PostgreSQL", failures)
+    telemetry_acceptance = json.loads(
+        (ROOT / "metadata/bpi-telemetry-persistence-acceptance.json").read_text(encoding="utf-8")
+    )
+    if telemetry_acceptance.get("database") != "PostgreSQL":
+        fail("BPI telemetry acceptance must identify PostgreSQL", failures)
+    if telemetry_acceptance.get("summary", {}).get("fail") != 0:
+        fail("BPI telemetry acceptance must not contain failed items", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

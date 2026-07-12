@@ -73,6 +73,35 @@ public class BpiContractValidatorTest {
     }
 
     @Test
+    public void emptyPointSetAndZeroBasedUnsignedIdentityRemainValidFacts() throws Exception {
+        TelemetryEnvelopeV1 envelope = validEnvelope().toBuilder()
+            .setSequence(0L)
+            .setSourceEpoch(0L)
+            .clearPoints()
+            .build();
+
+        TelemetryEnvelopeValidationResult result = BpiContractValidator.validate(envelope);
+
+        assertTrue(result.isEnvelopeAccepted());
+        assertTrue(result.getAcceptedPointIndexes().isEmpty());
+        assertTrue(result.getPointRejections().isEmpty());
+    }
+
+    @Test
+    public void unsigned64MaximumSurvivesProtobufRoundTrip() throws Exception {
+        TelemetryEnvelopeV1 original = validEnvelope().toBuilder()
+            .setSequence(-1L)
+            .setSourceEpoch(-1L)
+            .build();
+
+        TelemetryEnvelopeV1 restored = TelemetryEnvelopeV1.parseFrom(original.toByteArray());
+
+        assertEquals("18446744073709551615", Long.toUnsignedString(restored.getSequence()));
+        assertEquals("18446744073709551615", Long.toUnsignedString(restored.getSourceEpoch()));
+        assertTrue(BpiContractValidator.validate(restored).isEnvelopeAccepted());
+    }
+
+    @Test
     public void deterministicStartCandidateIsAccepted() {
         String candidateKey = CandidateKeyFactory.startKey(
             "TENANT_A", "LINE_01", "RULE_1.0.0", "ORDER_42", "EVENT_START_7"

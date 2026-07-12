@@ -13,7 +13,7 @@
 - Phase 1 只创建 `shadow=true` 的 BPI 批次，不写 WOM、QCS、WMS，也不控制 PLC/DCS。
 - 列表响应固定 `snapshotAt`，大数据列表使用 cursor，不用页码推断实时数据位置。
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
-- Java 17 服务当前只实现 `service-phase1-profile.json` 中的 9 个公开操作和 1 个内部候选接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前只实现 `service-phase1-profile.json` 中的 9 个公开操作，以及候选、遥测 2 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -68,7 +68,22 @@
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events/{auditId}` | `getAuditEvent` | CONTRACT_ONLY |
 
-## 3. 事件 API
+## 3. 内部受信接入 API
+
+| Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
+|---|---|---|---|---|---|
+| POST | `/internal/bpi/v1/candidates` | Flink/候选适配器 | `BPI_EVENT_INGEST` + tenant/plant/line scope | `201` 候选；重复事件返回原对象；冲突 `409` | inbox、candidate |
+| POST | `/internal/bpi/v1/telemetry` | 仅受控 replay/验收工具 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 接收；幂等重放 `200`；隔离 `202`；身份冲突 `409` | 短期 staging：event、point、point reject、source state、quarantine |
+
+遥测入口使用 `(tenantId,eventId)` 作为全局重放身份，并使用
+`(tenantId,gatewayId,deviceId,sourceEpoch,sequence)` 约束源序列身份。一个 envelope 中的非法点只进入
+`bpi_telemetry_point_rejects`，其余合法点仍可落入事实表；envelope 级错误和 source epoch 回退进入
+`bpi_telemetry_quarantine`，不得按零值参与后续规则计算。该 HTTP 入口默认关闭，只有设置
+`BPI_TELEMETRY_HTTP_INGRESS_ENABLED=true` 才能用于受控 replay 验收；它不属于生产数据平面，也不得由
+JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` + Protobuf `TelemetryEnvelopeV1` + Flink，
+原始测点权威数据保留在 JetLinks/时序库，BPI PostgreSQL 最终只保存事件索引、聚合和业务事实。
+
+## 4. 事件 API
 
 | Topic | Key | Protobuf message | 方向 | 当前状态 |
 |---|---|---|---|---|
@@ -79,7 +94,7 @@
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |
 
-## 4. 首期模拟验收
+## 5. 首期模拟验收
 
 模拟场景固定为 `PLANT-01 / LINE-S07-01`，从待确认 START 候选开始：
 

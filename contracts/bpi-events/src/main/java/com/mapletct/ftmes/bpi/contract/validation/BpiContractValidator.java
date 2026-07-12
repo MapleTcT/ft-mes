@@ -35,14 +35,15 @@ public final class BpiContractValidator {
         }
 
         required(envelope.getEventId(), "event_id", envelopeViolations);
+        required(envelope.getMessageId(), "message_id", envelopeViolations);
         required(envelope.getTenantId(), "tenant_id", envelopeViolations);
         required(envelope.getPlantId(), "plant_id", envelopeViolations);
         required(envelope.getLineId(), "line_id", envelopeViolations);
+        required(envelope.getGatewayId(), "gateway_id", envelopeViolations);
+        required(envelope.getProductId(), "product_id", envelopeViolations);
         required(envelope.getDeviceId(), "device_id", envelopeViolations);
         positive(envelope.getEventTimeMs(), "event_time_ms", envelopeViolations);
         positive(envelope.getIngestTimeMs(), "ingest_time_ms", envelopeViolations);
-        positive(envelope.getSequence(), "sequence", envelopeViolations);
-        positive(envelope.getSourceEpoch(), "source_epoch", envelopeViolations);
         if (envelope.getSequenceOrigin() == SequenceOrigin.SEQUENCE_ORIGIN_UNSPECIFIED
             || envelope.getSequenceOrigin() == SequenceOrigin.UNRECOGNIZED) {
             envelopeViolations.add(violation(
@@ -51,10 +52,6 @@ public final class BpiContractValidator {
                 "sequence origin must identify device, gateway or exporter"
             ));
         }
-        if (envelope.getPointsCount() == 0) {
-            envelopeViolations.add(violation("points", "EMPTY", "at least one point is required"));
-        }
-
         if (!envelopeViolations.isEmpty()) {
             return new TelemetryEnvelopeValidationResult(
                 envelopeViolations,
@@ -162,6 +159,7 @@ public final class BpiContractValidator {
             violations.add(violation(prefix + "value", "REQUIRED", "point value is required"));
         }
         required(point.getQualityCode(), prefix + "quality_code", violations);
+        required(point.getUnit(), prefix + "unit", violations);
         if (!isBlank(point.getQualityCode()) && !QUALITY_CODES.contains(point.getQualityCode())) {
             violations.add(violation(
                 prefix + "quality_code",

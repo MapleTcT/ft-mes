@@ -1,0 +1,175 @@
+{
+  "generatedAt": "2026-07-12T18:56:20+08:00",
+  "repoCommit": "92b8926",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "databaseVersion": "16.13",
+  "databaseName": "ft_mes_bpi",
+  "schema": "bpi",
+  "runtime": {
+    "java": "17.0.1",
+    "springBoot": "3.4.7",
+    "maven": "3.9.9"
+  },
+  "markerPattern": "ADP_E2E_TELEMETRY_<UUID>",
+  "mode": "SHORT_LIVED_REPLAY_STAGING",
+  "productionDefault": "DISABLED",
+  "summary": {
+    "testedFeatures": 13,
+    "pass": 13,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "testsRun": 2,
+    "testsPassed": 2
+  },
+  "items": [
+    {
+      "operation": "Partial point acceptance",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_source_state", "bpi.bpi_telemetry_events", "bpi.bpi_telemetry_points", "bpi.bpi_telemetry_point_rejects"],
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "result": "PARTIAL: accepted=2, rejected=1",
+      "status": "PASS"
+    },
+    {
+      "operation": "Identical event replay",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_events", "bpi.bpi_telemetry_points"],
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "result": "replay=true and row counts unchanged",
+      "status": "PASS"
+    },
+    {
+      "operation": "eventId payload conflict",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": [],
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "status": "PASS"
+    },
+    {
+      "operation": "Source identity conflict",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": [],
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "status": "PASS"
+    },
+    {
+      "operation": "Sequence gap",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_source_state", "bpi.bpi_telemetry_events", "bpi.bpi_telemetry_points"],
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "result": "GAP and last_sequence=3",
+      "status": "PASS"
+    },
+    {
+      "operation": "Out-of-order fact",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_events", "bpi.bpi_telemetry_points"],
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "result": "OUT_OF_ORDER and source state remained 3",
+      "status": "PASS"
+    },
+    {
+      "operation": "Source epoch regression quarantine",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_quarantine"],
+      "expectedStatus": 202,
+      "actualStatus": 202,
+      "status": "PASS"
+    },
+    {
+      "operation": "Invalid envelope quarantine",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_quarantine"],
+      "expectedStatus": 202,
+      "actualStatus": 202,
+      "status": "PASS"
+    },
+    {
+      "operation": "Null envelope quarantine",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_quarantine"],
+      "expectedStatus": 202,
+      "actualStatus": 202,
+      "result": "QUARANTINED without null-pointer 500",
+      "status": "PASS"
+    },
+    {
+      "operation": "Empty point set",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_source_state", "bpi.bpi_telemetry_events"],
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "result": "EMPTY and last_sequence=4",
+      "status": "PASS"
+    },
+    {
+      "operation": "Role isolation",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": [],
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "status": "PASS"
+    },
+    {
+      "operation": "Line scope isolation",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": [],
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "status": "PASS"
+    },
+    {
+      "operation": "Concurrent identical envelope replay",
+      "api": "/internal/bpi/v1/telemetry",
+      "method": "POST",
+      "tables": ["bpi.bpi_telemetry_source_state", "bpi.bpi_telemetry_events", "bpi.bpi_telemetry_points"],
+      "expectedStatus": "200 + 201",
+      "actualStatus": "200 + 201",
+      "result": "event=1, point=1, source state=1; no unique-key 500",
+      "status": "PASS"
+    }
+  ],
+  "persistenceCountsBeforeCleanup": {
+    "bpi.bpi_telemetry_source_state": 1,
+    "bpi.bpi_telemetry_events": 4,
+    "bpi.bpi_telemetry_points": 4,
+    "bpi.bpi_telemetry_point_rejects": 1,
+    "bpi.bpi_telemetry_quarantine": 3
+  },
+  "concurrencyCountsBeforeCleanup": {
+    "bpi.bpi_telemetry_source_state": 1,
+    "bpi.bpi_telemetry_events": 1,
+    "bpi.bpi_telemetry_points": 1
+  },
+  "verificationSql": "SELECT count(*) FROM bpi.<telemetry_table> WHERE tenant_id = :tenant_marker; SELECT last_sequence FROM bpi.bpi_telemetry_source_state WHERE tenant_id = :tenant_marker AND gateway_id = 'GW-S07-01' AND device_id = 'FLOW-S07-01';",
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiTelemetryPostgresAcceptanceTest.xml",
+    "docs/backend-table-audit/bpi-telemetry-ingress.md"
+  ],
+  "limitations": [
+    "JetLinks exporter, Kafka transport and Flink event-time processing are not included in this acceptance.",
+    "The accepted input was a trusted HTTP replay, not a live production telemetry stream.",
+    "The HTTP ingress is disabled by default and must not become the production telemetry data plane or raw point authority.",
+    "Concurrency load, container runtime, fault recovery and production deployment remain pending."
+  ]
+}

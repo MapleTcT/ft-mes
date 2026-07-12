@@ -9,7 +9,8 @@ This directory is the public integration boundary for BPI.
 
 All state-changing HTTP operations require `Idempotency-Key` and `If-Match`. The simulator is not a
 production backend and does not prove JetLinks, Kafka, Flink or PostgreSQL connectivity. The service profile
-proves only the shadow-batch vertical slice and explicitly excludes WOM/QCS/WMS/PLC/DCS writes.
+proves the shadow-batch vertical slice plus the trusted telemetry fact ingress. It explicitly excludes
+WOM/QCS/WMS/PLC/DCS writes and does not yet prove Kafka or Flink runtime connectivity.
 
 Validation:
 

@@ -97,6 +97,23 @@ def main() -> int:
     required_exclusions = {"WOM", "QCS", "WMS", "PLC", "DCS"}
     if set(service_profile.get("excludedWrites", [])) != required_exclusions:
         failures.append("service Phase 1 profile must exclude WOM/QCS/WMS/PLC/DCS writes")
+    internal_endpoints = {
+        (item.get("method"), item.get("path"))
+        for item in service_profile.get("internalEndpoints", [])
+        if isinstance(item, dict)
+    }
+    required_internal_endpoints = {
+        ("POST", "/internal/bpi/v1/candidates"),
+        ("POST", "/internal/bpi/v1/telemetry"),
+    }
+    if internal_endpoints != required_internal_endpoints:
+        failures.append(
+            "service Phase 1 profile must expose only the approved candidate and telemetry internal endpoints"
+        )
+    if service_profile.get("internalEndpointModes", {}).get("/internal/bpi/v1/telemetry") != (
+        "SHORT_LIVED_REPLAY_STAGING"
+    ):
+        failures.append("telemetry HTTP ingress must remain explicitly marked as replay staging")
 
     channels = asyncapi.get("channels", {})
     messages = asyncapi.get("components", {}).get("messages", {})
