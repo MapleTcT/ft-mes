@@ -6,8 +6,9 @@
 `BpiKafkaJob`。本里程碑状态为 **JOB_WIRED / HARNESS_PASS**：生产数据面、控制面、候选输出和
 数据质量输出已经在作业图中闭合，但尚未在真实 Kafka/Flink 集群完成运行验收。
 
-当前 Java 17 streaming reactor 为 **71/71 PASS**；连同事件契约 14 项和规则运行时 9 项，
-本次 Reactor 共 **94/94 PASS**。
+当前 Java 17 streaming module 为 **75/75 PASS**；连同事件契约 14 项和规则运行时 9 项，
+本次 Reactor 共 **98/98 PASS**。其中新增 4 项覆盖唯一 marker 的集群 replay fixture、范围过滤、
+fail-closed 配置和机器可读报告；实机 replay 仍受测试机磁盘阻断。
 
 ## 作业链路
 

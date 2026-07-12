@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-12T23:12:34+08:00",
-  "repoCommit": "1972998",
+  "generatedAt": "2026-07-13T00:08:00+08:00",
+  "repoCommit": "0b9f0de",
   "workingTree": "uncommitted",
   "status": "JOB_WIRED_HARNESS_PASS",
   "runtime": "streaming/bpi-stream-engine",
@@ -8,13 +8,13 @@
   "flink": "2.2.1",
   "kafkaConnector": "5.0.0-2.2",
   "summary": {
-    "streamTestsRun": 71,
-    "streamPass": 71,
+    "streamTestsRun": 75,
+    "streamPass": 75,
     "streamFail": 0,
     "contractTestsRun": 14,
     "ruleRuntimeTestsRun": 9,
-    "reactorTestsRun": 94,
-    "reactorPass": 94,
+    "reactorTestsRun": 98,
+    "reactorPass": 98,
     "realClusterAccepted": false
   },
   "topics": {
@@ -47,7 +47,8 @@
     "source watermarks and idleness",
     "bounded context and boundary keyed-state TTL",
     "stable operator UIDs",
-    "exactly-once candidate and data-quality Kafka sinks"
+    "exactly-once candidate and data-quality Kafka sinks",
+    "marker-scoped read-committed Kafka cluster replay harness"
   ],
   "limitations": [
     "No real Kafka or Flink HA cluster acceptance was performed.",

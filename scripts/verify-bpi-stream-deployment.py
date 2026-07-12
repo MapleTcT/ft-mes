@@ -14,6 +14,7 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/create-topics.sh",
     "deploy/bpi-streaming/scripts/preflight.sh",
     "deploy/bpi-streaming/scripts/smoke-cluster.sh",
+    "deploy/bpi-streaming/scripts/run-replay.sh",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
     "metadata/bpi-test-host-capacity-preflight.json",
 ]
@@ -38,6 +39,7 @@ def main() -> int:
         "execution.checkpointing.dir: s3://",
         "flink-s3-fs-presto-2.2.1.jar",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaJob",
+        "com.mapletct.ftmes.bpi.stream.BpiKafkaAcceptanceReplay",
         "127.0.0.1",
     ):
         if marker not in compose:

@@ -26,6 +26,9 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPointCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJobConfig.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplayConfig.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenario.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationLifecycleFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleRoutingBroadcastFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleUpdateCodec.java",
@@ -33,18 +36,21 @@ REQUIRED_FILES = [
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicy.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
     "docs/testing/bpi-production-context-join-acceptance.md",
     "docs/testing/bpi-stream-replay-acceptance.md",
     "docs/testing/bpi-kafka-flink-topology-acceptance.md",
+    "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
     "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-rule-timing-acceptance.json",
     "metadata/bpi-rule-publication-routing-acceptance.json",
     "metadata/bpi-production-context-join-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
     "metadata/bpi-kafka-flink-topology-acceptance.json",
+    "metadata/bpi-kafka-cluster-replay-acceptance.json",
 ]
 
 
@@ -143,6 +149,17 @@ def main() -> int:
         if marker not in job_source:
             failures.append(f"BpiKafkaJob is missing production topology marker {marker!r}")
 
+    replay_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java").read_text(encoding="utf-8")
+    for marker in (
+        'ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed"',
+        "positionAtEnd",
+        "candidateCount != 1",
+        "matchesIssue",
+        "inactivePublication",
+    ):
+        if marker not in replay_source:
+            failures.append(f"BPI Kafka acceptance replay is missing marker {marker!r}")
+
     forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
     for path in STREAMING.rglob("*"):
         if path.is_file() and path.suffix in {".java", ".xml", ".md"} and "target" not in path.parts:
@@ -172,6 +189,15 @@ def main() -> int:
         failures.append("BPI Kafka/Flink topology acceptance must not contain failed stream tests")
     if topology_acceptance.get("summary", {}).get("realClusterAccepted") is not False:
         failures.append("BPI Kafka/Flink topology acceptance must not claim live cluster acceptance")
+    cluster_replay = json.loads(
+        (ROOT / "metadata/bpi-kafka-cluster-replay-acceptance.json").read_text(encoding="utf-8")
+    )
+    if cluster_replay.get("status") != "HARNESS_READY_CLUSTER_BLOCKED_DISK":
+        failures.append("BPI Kafka cluster replay must not claim live acceptance while disk is blocked")
+    if cluster_replay.get("summary", {}).get("liveClusterAccepted") is not False:
+        failures.append("BPI Kafka cluster replay cannot claim live cluster acceptance")
+    if cluster_replay.get("summary", {}).get("postgresMarkerAccepted") is not False:
+        failures.append("BPI Kafka cluster replay cannot claim PostgreSQL marker acceptance")
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

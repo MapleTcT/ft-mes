@@ -34,6 +34,7 @@ make bpi-stream-deploy-preflight
 ```bash
 make up-bpi-stream
 make bpi-stream-cluster-smoke
+make bpi-stream-cluster-replay
 make down-bpi-stream
 ```
 
@@ -48,8 +49,14 @@ Smoke 必须同时满足：
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 
-该 smoke 只证明集群和作业恢复基础可用，不替代 IoT Protobuf replay、候选确认、PostgreSQL
-marker、浏览器操作和长稳压测验收。
+`bpi-stream-cluster-replay` 在 smoke 通过后生成唯一 `ADP_E2E_*` marker，向 Kafka 发布规则、
+生产上下文和三条遥测，等待 read-committed 候选，验证候选只出现一次且没有 marker 关联的
+数据质量错误；遥测默认间隔 2 秒以覆盖真实调度，随后发布同版本 `INACTIVE` 规则移除测试路由。输入和输出 partition/offset、
+candidate key、Flink job ID 和 checkpoint ID 写入
+`${BPI_REPLAY_EVIDENCE_DIR}/bpi-kafka-replay.json`。
+
+该 replay 证明 Kafka -> Flink -> Kafka 候选数据面，不替代候选进入 BPI PostgreSQL、浏览器
+确认、WOM 写回和长稳压测验收。
 
 ## 回滚
 

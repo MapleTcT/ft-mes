@@ -209,6 +209,37 @@ services:
     deploy:
       replicas: ${BPI_TASKMANAGER_REPLICAS:-2}
 
+  bpi-cluster-replay:
+    profiles: [acceptance]
+    image: ${BPI_FLINK_IMAGE:-flink:2.2.1-scala_2.12-java17}
+    user: "${BPI_HOST_UID:-1000}:${BPI_HOST_GID:-1000}"
+    entrypoint: ["java"]
+    command:
+      - -cp
+      - /opt/bpi/bpi-stream-engine-job.jar
+      - com.mapletct.ftmes.bpi.stream.BpiKafkaAcceptanceReplay
+    environment:
+      BPI_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
+      BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+      BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
+      BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+      BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
+      BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+      BPI_REPLAY_MARKER: ${BPI_REPLAY_MARKER:-}
+      BPI_REPLAY_TIMEOUT_SECONDS: ${BPI_REPLAY_TIMEOUT_SECONDS:-180}
+      BPI_REPLAY_RULE_SETTLE_MS: ${BPI_REPLAY_RULE_SETTLE_MS:-5000}
+      BPI_REPLAY_TELEMETRY_SPACING_MS: ${BPI_REPLAY_TELEMETRY_SPACING_MS:-2000}
+      BPI_REPLAY_RESULT_GRACE_MS: ${BPI_REPLAY_RESULT_GRACE_MS:-5000}
+      BPI_REPLAY_REPORT: ${BPI_REPLAY_REPORT:-/evidence/bpi-kafka-replay.json}
+    volumes:
+      - ${BPI_JOB_JAR:?BPI_JOB_JAR is required}:/opt/bpi/bpi-stream-engine-job.jar:ro
+      - ${BPI_REPLAY_EVIDENCE_DIR:-/tmp/bpi-streaming-evidence}:/evidence
+    depends_on:
+      bpi-jobmanager:
+        condition: service_started
+    networks:
+      - bpi-streaming
+
 networks:
   bpi-streaming:
     driver: bridge

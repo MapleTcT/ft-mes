@@ -34,6 +34,7 @@
 1. 用户确认可删除的历史部署副本，或为 Docker 数据目录扩容；
 2. 空闲空间达到 25 GiB 后执行 `make bpi-stream-deploy-preflight`；
 3. 启动集群并产生首个成功 checkpoint；
-4. 执行 IoT Protobuf replay、Kafka offset、候选 key、PostgreSQL marker 联合验收；
-5. 执行 savepoint 升级、TaskManager 重启、broker 故障和 rollback 演练；
-6. 开始 24 小时逐级负载/长稳测试。
+4. 执行 `make bpi-stream-cluster-replay`，确认 IoT Protobuf、Kafka offset 和候选 key；
+5. 接通候选 consumer/受控桥，完成 BPI inbox 和 PostgreSQL marker 联合验收；
+6. 执行 savepoint 升级、TaskManager 重启、broker 故障和 rollback 演练；
+7. 开始 24 小时逐级负载/长稳测试。

@@ -519,6 +519,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-replay.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/smoke-cluster.sh",
       "state": "tracked",
       "tracked": true
@@ -3693,6 +3699,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-kafka-flink-topology-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -3880,6 +3892,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-iot-replay-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-kafka-cluster-replay-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5331,6 +5349,24 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplayConfig.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenario.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaIO.java",
       "state": "tracked",
       "tracked": true
@@ -5523,6 +5559,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJobConfigTest.java",
       "state": "tracked",
       "tracked": true
@@ -5612,16 +5654,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 466
+      "tracked": 467
     },
     "docs": {
-      "tracked": 75
+      "tracked": 76
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 88
+      "tracked": 89
     },
     "package.json": {
       "tracked": 1
@@ -5639,14 +5681,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 68
+      "tracked": 72
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 931,
-    "tracked": 931,
+    "totalFiles": 938,
+    "tracked": 938,
     "untracked": 0
   },
   "untrackedByDirectory": []

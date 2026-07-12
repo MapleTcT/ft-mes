@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-07-13T00:08:00+08:00",
+  "sourceRepoCommit": "0b9f0de",
+  "status": "HARNESS_READY_CLUSTER_BLOCKED_DISK",
+  "java": "17",
+  "flink": "2.2.1",
+  "kafka": "4.2.0",
+  "summary": {
+    "replayTestsRun": 4,
+    "replayPass": 4,
+    "streamTestsRun": 75,
+    "streamPass": 75,
+    "reactorTestsRun": 98,
+    "reactorPass": 98,
+    "liveClusterAccepted": false,
+    "postgresMarkerAccepted": false
+  },
+  "assertions": [
+    "unique marker rule, context and telemetry contracts are valid",
+    "consumer begins at topic end and uses read_committed isolation",
+    "matching candidate is scoped by tenant, plant, line, rule and order",
+    "exactly one matching candidate is required",
+    "zero marker-related data-quality issues are required",
+    "active replay rule is retired with a typed inactive publication",
+    "cluster smoke checkpoint evidence is merged into the replay report"
+  ],
+  "limitations": [
+    "The target host is still blocked by less than one GiB free root filesystem space.",
+    "No Kafka/Flink containers were started for this milestone.",
+    "Kafka candidate to BPI inbox and PostgreSQL marker persistence is not yet live-accepted."
+  ],
+  "evidence": [
+    "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
+    "deploy/bpi-streaming/scripts/run-replay.sh",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java"
+  ]
+}
