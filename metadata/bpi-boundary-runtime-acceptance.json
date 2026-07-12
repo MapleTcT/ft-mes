@@ -1,0 +1,34 @@
+{
+  "generatedAt": "2026-07-12T19:14:00+08:00",
+  "repoCommit": "2d0cae9",
+  "workingTree": "uncommitted",
+  "runtime": "services/bpi-service/batch-rule-runtime",
+  "java": "17",
+  "summary": {
+    "testsRun": 6,
+    "pass": 6,
+    "fail": 0,
+    "blocked": 0
+  },
+  "capabilities": [
+    "event-time hold windows",
+    "maxSilence UNKNOWN transition",
+    "required and quorum evidence",
+    "quality factor scoring",
+    "composite penalty cap",
+    "numeric and boolean predicates",
+    "RISING predicate",
+    "out-of-order ignore",
+    "single candidate emission per state lifecycle",
+    "deterministic first quorum evidence identity"
+  ],
+  "evidence": [
+    "services/bpi-service/batch-rule-runtime/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.rules.BoundaryWindowEvaluatorTest.xml",
+    "docs/testing/bpi-boundary-runtime-acceptance.md"
+  ],
+  "limitations": [
+    "No Kafka or Flink runtime is implemented by this milestone.",
+    "Allowed-lateness recomputation and checkpoint recovery remain pending.",
+    "No BatchCandidateV1 was emitted to the BPI inbox in this milestone."
+  ]
+}

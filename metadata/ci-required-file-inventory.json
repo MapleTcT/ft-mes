@@ -3609,6 +3609,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-boundary-runtime-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-engineering-test-plan.md",
       "state": "tracked",
       "tracked": true
@@ -3742,6 +3748,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-adapter-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-boundary-runtime-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4821,7 +4833,55 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryEvidenceSnapshot.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryKind.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryRuleDefinition.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryRuleRuntime.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowState.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/ConditionOperator.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/ConditionStatus.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4833,13 +4893,49 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/EvidenceCondition.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/EvidenceSignalState.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/RuleEvidence.java",
       "state": "tracked",
       "tracked": true
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/ScoredRuleEvidence.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/SignalObservation.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/SignalQuality.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryRuleRuntimeTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4898,13 +4994,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 65
+      "tracked": 66
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 78
+      "tracked": 79
     },
     "package.json": {
       "tracked": 1
@@ -4916,7 +5012,7 @@
       "tracked": 49
     },
     "services": {
-      "tracked": 65
+      "tracked": 79
     },
     "simulation": {
       "tracked": 4
@@ -4925,8 +5021,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 812,
-    "tracked": 812,
+    "totalFiles": 828,
+    "tracked": 828,
     "untracked": 0
   },
   "untrackedByDirectory": []

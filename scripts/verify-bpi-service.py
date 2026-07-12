@@ -21,11 +21,15 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
+    "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
+    "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
     "docs/backend-table-audit/bpi-phase1-persistence.md",
     "docs/backend-table-audit/bpi-telemetry-ingress.md",
+    "docs/testing/bpi-boundary-runtime-acceptance.md",
     "metadata/bpi-phase1-persistence-acceptance.json",
     "metadata/bpi-telemetry-persistence-acceptance.json",
+    "metadata/bpi-boundary-runtime-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -116,6 +120,11 @@ def main() -> int:
     require_text(
         SERVICE / "app/src/main/resources/application.yml",
         ["BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false"],
+        failures,
+    )
+    require_text(
+        SERVICE / "batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
+        ["onObservation", "advanceEventTime", "maxSilence", "firstQuorumEvidenceEvent"],
         failures,
     )
     require_text(

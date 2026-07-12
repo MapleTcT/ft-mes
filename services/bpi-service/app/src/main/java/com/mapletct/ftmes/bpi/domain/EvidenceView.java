@@ -14,7 +14,7 @@ public record EvidenceView(
         boolean satisfied,
         @Size(max = 1024) String value,
         @Size(max = 32) String unit,
-        @NotBlank @Pattern(regexp = "GOOD|UNCERTAIN|BAD|STALE") String quality,
+        @NotBlank @Pattern(regexp = "GOOD|UNCERTAIN|BAD|STALE|SUBSTITUTED") String quality,
         @NotNull Instant eventTime,
         @NotBlank @Size(max = 128) String source) {
 }
