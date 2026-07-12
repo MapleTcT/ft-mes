@@ -16,9 +16,14 @@ REQUIRED_FILES = [
     "streaming/README.md",
     "streaming/bpi-stream-engine/pom.xml",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryCandidateProjector.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryOperatorStateCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngine.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
+    "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-stream-replay-acceptance.md",
+    "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
 ]
 
@@ -59,6 +64,11 @@ def main() -> int:
         if marker not in projector_source:
             failures.append(f"BoundaryCandidateProjector is missing contract marker {marker!r}")
 
+    operator_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastFunction.java").read_text(encoding="utf-8")
+    for marker in ("KeyedBroadcastProcessFunction", "ValueState<byte[]>", "registerEventTimeTimer", "LATE_EVENT_UNSUPPORTED", "toByteArray"):
+        if marker not in operator_source:
+            failures.append(f"BoundaryKeyedBroadcastFunction is missing runtime marker {marker!r}")
+
     forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
     for path in STREAMING.rglob("*"):
         if path.is_file() and path.suffix in {".java", ".xml", ".md"} and "target" not in path.parts:
@@ -72,6 +82,13 @@ def main() -> int:
         failures.append("BPI stream acceptance must identify Flink 2.2.1")
     if acceptance.get("summary", {}).get("fail") != 0:
         failures.append("BPI stream acceptance must not contain failed items")
+    flink_acceptance = json.loads(
+        (ROOT / "metadata/bpi-flink-operator-acceptance.json").read_text(encoding="utf-8")
+    )
+    if flink_acceptance.get("flink") != "2.2.1":
+        failures.append("BPI Flink operator acceptance must identify Flink 2.2.1")
+    if flink_acceptance.get("summary", {}).get("fail") != 0:
+        failures.append("BPI Flink operator acceptance must not contain failed items")
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

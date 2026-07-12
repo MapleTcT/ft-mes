@@ -4,10 +4,11 @@ This Java 17 reactor contains the BPI event-time processing path. It reuses the
 versioned Protobuf contracts from `contracts/bpi-events` and the deterministic
 boundary formulas from `services/bpi-service/batch-rule-runtime`.
 
-The current milestone provides a deterministic single-context replay engine
-that projects START and END decisions into contract-valid `BatchCandidateV1`
-messages. It is the executable semantic baseline for the upcoming Flink
-`KeyedBroadcastProcessFunction`; it is not yet the production Kafka data plane.
+The current milestone provides both a deterministic single-context replay
+engine and a Flink `KeyedBroadcastProcessFunction`. The Flink path stores
+versioned `byte[]` keyed/broadcast state, uses event-time timers, emits
+`BatchCandidateV1` wire bytes, and routes rejected inputs to a side output. It
+is not yet wired to the production Kafka source and sink.
 
 Run the module with:
 
