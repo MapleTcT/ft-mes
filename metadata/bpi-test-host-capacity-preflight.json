@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-07-12T23:46:30+08:00",
+  "sourceRepoCommit": "c6c01ab",
+  "host": {
+    "handle": "ubuntu-test",
+    "address": "100.99.133.43",
+    "hostname": "v6-2288H-V6"
+  },
+  "status": "BLOCKED_DISK",
+  "deploymentStarted": false,
+  "destructiveActionsPerformed": false,
+  "thresholds": {
+    "minimumFreeDiskGiB": 25
+  },
+  "observations": {
+    "rootFilesystemSizeGiB": 438,
+    "rootFilesystemUsedGiB": 415,
+    "rootFilesystemAvailableGiB": 0.47,
+    "rootFilesystemUsePercent": 100,
+    "dockerImagesCount": 235,
+    "dockerImagesSizeGB": 134.6,
+    "dockerImagesReportedReclaimableGB": 63.62,
+    "dockerContainersCount": 158,
+    "dockerContainersActive": 108,
+    "dockerVolumesCount": 38,
+    "dockerVolumesActive": 30,
+    "dockerVolumesSizeGB": 96.29,
+    "dockerVolumesReportedReclaimableGB": 6.799
+  },
+  "largePathCandidates": [
+    {
+      "path": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+      "reportedSize": "101G",
+      "approvedForDeletion": false
+    },
+    {
+      "path": "/home/v6/codex-validation",
+      "reportedSize": "35G",
+      "approvedForDeletion": false
+    },
+    {
+      "path": "/home/v6/new-datahub-submenu-qa-d932b2f5-20260621133804",
+      "reportedSize": "14G",
+      "approvedForDeletion": false
+    },
+    {
+      "path": "/home/v6/adp-mes-docker",
+      "reportedSize": "9.3G",
+      "approvedForDeletion": false
+    }
+  ],
+  "nextGate": "Free or add storage until Docker storage has at least 25 GiB available, then rerun the read-only preflight."
+}

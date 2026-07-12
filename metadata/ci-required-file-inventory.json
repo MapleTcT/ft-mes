@@ -489,6 +489,42 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/.env.example",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/docker-compose.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/create-topics.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/preflight.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/smoke-cluster.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/business-smoke/production-migration/README.md",
       "state": "tracked",
       "tracked": true
@@ -3687,6 +3723,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-test-environment-deployment-readiness.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -3880,6 +3922,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-telemetry-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-test-host-capacity-preflight.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4426,6 +4474,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-bpi-service.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-bpi-stream-deployment.py",
       "state": "tracked",
       "tracked": true
     },
@@ -5558,16 +5612,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 460
+      "tracked": 466
     },
     "docs": {
-      "tracked": 74
+      "tracked": 75
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 87
+      "tracked": 88
     },
     "package.json": {
       "tracked": 1
@@ -5576,7 +5630,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 50
+      "tracked": 51
     },
     "services": {
       "tracked": 85
@@ -5591,8 +5645,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 922,
-    "tracked": 922,
+    "totalFiles": 931,
+    "tracked": 931,
     "untracked": 0
   },
   "untrackedByDirectory": []

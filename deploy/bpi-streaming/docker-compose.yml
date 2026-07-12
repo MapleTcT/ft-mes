@@ -1,0 +1,220 @@
+x-kafka-environment: &kafka-environment
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+  KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  CLUSTER_ID: ${BPI_KAFKA_CLUSTER_ID:?BPI_KAFKA_CLUSTER_ID is required}
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_DEFAULT_REPLICATION_FACTOR: "3"
+  KAFKA_MIN_INSYNC_REPLICAS: "2"
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "3"
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "3"
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "2"
+  KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: "3"
+  KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: "2"
+  KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: "false"
+  KAFKA_NUM_PARTITIONS: "6"
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+  KAFKA_LOG_RETENTION_HOURS: "72"
+  KAFKA_LOG_SEGMENT_BYTES: "536870912"
+  KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "300000"
+  KAFKA_HEAP_OPTS: -Xms512m -Xmx512m
+  TZ: ${TZ:-Asia/Shanghai}
+
+x-kafka-service: &kafka-service
+  image: ${BPI_KAFKA_IMAGE:-apache/kafka:4.2.0}
+  restart: unless-stopped
+  environment: *kafka-environment
+  healthcheck:
+    test:
+      - CMD-SHELL
+      - /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:19092 >/dev/null 2>&1
+    interval: 10s
+    timeout: 10s
+    retries: 18
+    start_period: 30s
+  networks:
+    - bpi-streaming
+
+x-flink-environment: &flink-environment
+  ENABLE_BUILT_IN_PLUGINS: flink-s3-fs-presto-2.2.1.jar
+  BPI_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
+  BPI_KAFKA_GROUP_PREFIX: ${BPI_KAFKA_GROUP_PREFIX:-ft-mes-bpi}
+  BPI_DEPLOYMENT_ID: ${BPI_DEPLOYMENT_ID:?BPI_DEPLOYMENT_ID is required}
+  BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+  BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
+  BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+  BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
+  BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+  BPI_CHECKPOINT_INTERVAL_MS: ${BPI_CHECKPOINT_INTERVAL_MS:-30000}
+  BPI_CHECKPOINT_TIMEOUT_MS: ${BPI_CHECKPOINT_TIMEOUT_MS:-120000}
+  BPI_CHECKPOINT_MIN_PAUSE_MS: ${BPI_CHECKPOINT_MIN_PAUSE_MS:-10000}
+  BPI_CONTEXT_WAIT_MS: ${BPI_CONTEXT_WAIT_MS:-120000}
+  BPI_CONTEXT_RETENTION_MS: ${BPI_CONTEXT_RETENTION_MS:-86400000}
+  BPI_WATERMARK_DELAY_MS: ${BPI_WATERMARK_DELAY_MS:-30000}
+  BPI_SOURCE_IDLENESS_MS: ${BPI_SOURCE_IDLENESS_MS:-60000}
+  BPI_BOUNDARY_STATE_TTL_MS: ${BPI_BOUNDARY_STATE_TTL_MS:-2592000000}
+  BPI_TRANSACTION_TIMEOUT_MS: ${BPI_TRANSACTION_TIMEOUT_MS:-900000}
+  BPI_PARALLELISM: ${BPI_PARALLELISM:-3}
+  FLINK_PROPERTIES: |
+    jobmanager.rpc.address: bpi-jobmanager
+    jobmanager.memory.process.size: ${BPI_JOBMANAGER_MEMORY:-1536m}
+    taskmanager.memory.process.size: ${BPI_TASKMANAGER_MEMORY:-3072m}
+    taskmanager.numberOfTaskSlots: ${BPI_TASK_SLOTS:-3}
+    parallelism.default: ${BPI_PARALLELISM:-3}
+    state.backend.type: rocksdb
+    execution.checkpointing.storage: filesystem
+    execution.checkpointing.dir: s3://${BPI_CHECKPOINT_BUCKET:-ft-mes-bpi-checkpoints}/checkpoints
+    execution.checkpointing.savepoint-dir: s3://${BPI_CHECKPOINT_BUCKET:-ft-mes-bpi-checkpoints}/savepoints
+    execution.checkpointing.incremental: true
+    s3.endpoint: http://bpi-minio:9000
+    s3.path.style.access: true
+    s3.access-key: ${BPI_MINIO_ROOT_USER:?BPI_MINIO_ROOT_USER is required}
+    s3.secret-key: ${BPI_MINIO_ROOT_PASSWORD:?BPI_MINIO_ROOT_PASSWORD is required}
+    restart-strategy.type: fixed-delay
+    restart-strategy.fixed-delay.attempts: 10
+    restart-strategy.fixed-delay.delay: 10 s
+
+x-flink-service: &flink-service
+  image: ${BPI_FLINK_IMAGE:-flink:2.2.1-scala_2.12-java17}
+  restart: unless-stopped
+  environment: *flink-environment
+  volumes:
+    - ${BPI_JOB_JAR:?BPI_JOB_JAR is required}:/opt/flink/usrlib/bpi-stream-engine-job.jar:ro
+  networks:
+    - bpi-streaming
+
+services:
+  kafka-1:
+    <<: *kafka-service
+    hostname: kafka-1
+    ports:
+      - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_KAFKA_1_PORT:-29092}:9092"
+    environment:
+      <<: *kafka-environment
+      KAFKA_NODE_ID: "1"
+      KAFKA_LISTENERS: INTERNAL://:19092,CONTROLLER://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:19092,EXTERNAL://${BPI_KAFKA_ADVERTISED_HOST:-127.0.0.1}:${BPI_KAFKA_1_PORT:-29092}
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-1-data:/var/lib/kafka/data
+
+  kafka-2:
+    <<: *kafka-service
+    hostname: kafka-2
+    ports:
+      - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_KAFKA_2_PORT:-39092}:9092"
+    environment:
+      <<: *kafka-environment
+      KAFKA_NODE_ID: "2"
+      KAFKA_LISTENERS: INTERNAL://:19092,CONTROLLER://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:19092,EXTERNAL://${BPI_KAFKA_ADVERTISED_HOST:-127.0.0.1}:${BPI_KAFKA_2_PORT:-39092}
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-2-data:/var/lib/kafka/data
+
+  kafka-3:
+    <<: *kafka-service
+    hostname: kafka-3
+    ports:
+      - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_KAFKA_3_PORT:-49092}:9092"
+    environment:
+      <<: *kafka-environment
+      KAFKA_NODE_ID: "3"
+      KAFKA_LISTENERS: INTERNAL://:19092,CONTROLLER://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:19092,EXTERNAL://${BPI_KAFKA_ADVERTISED_HOST:-127.0.0.1}:${BPI_KAFKA_3_PORT:-49092}
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-3-data:/var/lib/kafka/data
+
+  bpi-topic-init:
+    image: ${BPI_KAFKA_IMAGE:-apache/kafka:4.2.0}
+    restart: "no"
+    entrypoint: ["/bin/sh", "/opt/bpi/create-topics.sh"]
+    environment:
+      BPI_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
+      BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+      BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
+      BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+      BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
+      BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+      BPI_DATA_PARTITIONS: ${BPI_DATA_PARTITIONS:-6}
+      BPI_CONTROL_PARTITIONS: ${BPI_CONTROL_PARTITIONS:-3}
+    volumes:
+      - ./scripts/create-topics.sh:/opt/bpi/create-topics.sh:ro
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+    networks:
+      - bpi-streaming
+
+  bpi-minio:
+    image: ${BPI_MINIO_IMAGE:-minio/minio:RELEASE.2025-07-18T21-56-31Z}
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${BPI_MINIO_ROOT_USER:?BPI_MINIO_ROOT_USER is required}
+      MINIO_ROOT_PASSWORD: ${BPI_MINIO_ROOT_PASSWORD:?BPI_MINIO_ROOT_PASSWORD is required}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - minio-data:/data
+    networks:
+      - bpi-streaming
+
+  bpi-minio-init:
+    image: ${BPI_MINIO_MC_IMAGE:-minio/mc:RELEASE.2025-07-21T05-28-08Z}
+    restart: "no"
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        until mc alias set bpi http://bpi-minio:9000 "$${BPI_MINIO_ROOT_USER}" "$${BPI_MINIO_ROOT_PASSWORD}"; do sleep 2; done
+        mc mb --ignore-existing "bpi/$${BPI_CHECKPOINT_BUCKET}"
+    environment:
+      BPI_MINIO_ROOT_USER: ${BPI_MINIO_ROOT_USER:?BPI_MINIO_ROOT_USER is required}
+      BPI_MINIO_ROOT_PASSWORD: ${BPI_MINIO_ROOT_PASSWORD:?BPI_MINIO_ROOT_PASSWORD is required}
+      BPI_CHECKPOINT_BUCKET: ${BPI_CHECKPOINT_BUCKET:-ft-mes-bpi-checkpoints}
+    depends_on:
+      bpi-minio:
+        condition: service_started
+    networks:
+      - bpi-streaming
+
+  bpi-jobmanager:
+    <<: *flink-service
+    hostname: bpi-jobmanager
+    command:
+      - standalone-job
+      - --job-classname
+      - com.mapletct.ftmes.bpi.stream.BpiKafkaJob
+    ports:
+      - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_FLINK_REST_PORT:-18081}:8081"
+    depends_on:
+      bpi-topic-init:
+        condition: service_completed_successfully
+      bpi-minio-init:
+        condition: service_completed_successfully
+
+  bpi-taskmanager:
+    <<: *flink-service
+    command: taskmanager
+    depends_on:
+      bpi-jobmanager:
+        condition: service_started
+    deploy:
+      replicas: ${BPI_TASKMANAGER_REPLICAS:-2}
+
+networks:
+  bpi-streaming:
+    driver: bridge
+
+volumes:
+  kafka-1-data:
+  kafka-2-data:
+  kafka-3-data:
+  minio-data:

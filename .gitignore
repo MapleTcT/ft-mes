@@ -32,3 +32,4 @@ __pycache__/
 # Local Docker deployment overrides.
 /deploy/docker/.env
 /deploy/docker/nacos-rendered/
+/deploy/bpi-streaming/.env

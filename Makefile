@@ -127,10 +127,15 @@ BUSINESS_SMOKE_SIGNOFF ?= deploy/business-smoke/production-migration/business-sm
 NACOS_RUNTIME_PATCH_EVIDENCE ?= deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json
 CI_REQUIRED_FILE_INVENTORY ?= metadata/ci-required-file-inventory.json
 GOAL_GAP_REGISTER ?= metadata/goal-gap-register.json
+BPI_STREAM_DEPLOY_DIR ?= deploy/bpi-streaming
+BPI_STREAM_ENV_FILE ?= $(BPI_STREAM_DEPLOY_DIR)/.env
+BPI_STREAM_ENV_EXAMPLE ?= $(BPI_STREAM_DEPLOY_DIR)/.env.example
+BPI_STREAM_COMPOSE_ENV := $(if $(wildcard $(BPI_STREAM_ENV_FILE)),$(BPI_STREAM_ENV_FILE),$(BPI_STREAM_ENV_EXAMPLE))
+BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(BPI_STREAM_DEPLOY_DIR)/docker-compose.yml
 
 .PHONY: help ci verify verify-pom compose-config runtime-script-check sustainable-check ci-required-file-inventory ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown production-export-gap-breakdown-check production-source-evidence-refresh production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-doc production-cutover-gate-check production-rehearsal-plan production-rehearsal-plan-check production-evidence-ready-gate-regression-check runtime-patch-manifest runtime-patch-manifest-check bpi-contracts-test source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test create-backend-module module-intake-check material-wms-test material-wms-package material-wms-stage-runtime acceptance-material-wms-persistence process-analysis-test process-analysis-package process-analysis-stage-runtime acceptance-process-analysis-persistence inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check production-source-inventory production-target-preflight production-rowcount-compare production-checksum-compare production-db-migration-evidence-check production-db-migration-ready-check production-minio-source-inventory production-minio-target-inventory production-minio-compare production-minio-migration-evidence-check production-minio-migration-ready-check production-keycloak-source-export production-keycloak-target-export production-keycloak-compare production-keycloak-migration-evidence-check production-keycloak-migration-ready-check production-rollback-evidence-check production-rollback-ready-check production-license-strategy-check production-license-ready-check production-network-tls-check production-network-tls-ready-check production-security-hardening-check production-security-hardening-ready-check production-business-smoke-signoff-check production-business-smoke-signoff-ready-check production-nacos-runtime-patch-check production-nacos-runtime-patch-ready-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization smoke-test-environment smoke-postgres-runtime smoke-nacos-config smoke-keycloak-jwt smoke-minio-runtime smoke-business-dependencies business-package-scan smoke-production-export-readiness acceptance-organization-persistence acceptance-organization-group-persistence acceptance-organization-position-persistence acceptance-organization-position-role-persistence acceptance-organization-company-persistence acceptance-organization-person-persistence acceptance-organization-person-user-persistence acceptance-auth-user-persistence acceptance-rbac-permission-persistence acceptance-systemcode-persistence acceptance-systemconfig-persistence smoke-systemconfig-builtins acceptance-systemconfig-controlled-runtime-config smoke-runtime-configuration smoke-entity-model-config-crud-readiness acceptance-custom-property-persistence acceptance-wom-manufacturing-order-persistence acceptance-wom-start-persistence acceptance-wom-hold-restart-persistence smoke-wom-toolbar-row acceptance-wom-stop-persistence acceptance-wom-stop-output-persistence acceptance-wom-advance-release-persistence acceptance-wom-prepare-need-persistence acceptance-wom-active-persistence acceptance-wom-active-end-persistence acceptance-wom-easy-active-persistence acceptance-wom-putin-active-persistence acceptance-wom-check-active-persistence acceptance-wom-process-start-persistence acceptance-wom-process-end-persistence acceptance-wom-process-unit-persistence acceptance-wom-manu-inspect-persistence acceptance-wom-checkoutbill-persistence acceptance-wom-reject-material-persistence probe-wom-public-produce-task-created-noop probe-wom-qrcode-route acceptance-qcs-report-chain-persistence acceptance-teaminfo-scheduleplan-persistence acceptance-craftgraph-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 .PHONY: rehearse-core-flow-runtime-rollback
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-stream-static-check bpi-stream-test bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -145,6 +150,13 @@ help:
 	@printf '%s\n' '  make bpi-service-package   Build the executable BPI service JAR with Java 17'
 	@printf '%s\n' '  make bpi-stream-static-check Validate the Java 17/Flink streaming module boundaries'
 	@printf '%s\n' '  make bpi-stream-test       Run deterministic BPI stream replay tests with Java 17'
+	@printf '%s\n' '  make bpi-stream-package    Build the deployable BPI Flink job JAR with Java 17'
+	@printf '%s\n' '  make bpi-stream-deployment-check Validate isolated Kafka/Flink deployment assets'
+	@printf '%s\n' '  make bpi-stream-compose-config Render the isolated Kafka/Flink Compose project'
+	@printf '%s\n' '  make bpi-stream-deploy-preflight Run read-only target-host capacity and artifact gates'
+	@printf '%s\n' '  make up-bpi-stream         Start only the isolated BPI Kafka/Flink project after preflight'
+	@printf '%s\n' '  make bpi-stream-cluster-smoke Require replicated topics, RUNNING job and checkpoint'
+	@printf '%s\n' '  make down-bpi-stream       Stop BPI Kafka/Flink containers and preserve volumes'
 	@printf '%s\n' '  make bpi-runtime-replay-test Run IoT signal to Protobuf/PostgreSQL runtime acceptance'
 	@printf '%s\n' '  make bpi-adapter-static-check Validate the Java 8 adapter trust boundaries'
 	@printf '%s\n' '  make bpi-adapter-test      Test the Java 8 Keycloak/BPI adapter boundary'
@@ -304,7 +316,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-runtime-replay-test bpi-adapter-static-check bpi-ui-static-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-runtime-replay-test bpi-adapter-static-check bpi-ui-static-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 verify: verify-pom compose-config
 
@@ -315,6 +327,10 @@ compose-config:
 	$(COMPOSE) config --quiet
 
 runtime-script-check:
+	sh -n deploy/bpi-streaming/scripts/create-topics.sh
+	sh -n deploy/bpi-streaming/scripts/preflight.sh
+	sh -n deploy/bpi-streaming/scripts/smoke-cluster.sh
+	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh
 	sh -n deploy/docker/scripts/build-wom-public-produce-created-disabled-boot-jar.sh
@@ -553,6 +569,30 @@ bpi-stream-static-check:
 
 bpi-stream-test:
 	$(MVN) -f streaming/pom.xml -pl bpi-stream-engine -am test
+
+bpi-stream-package:
+	$(MVN) -f streaming/pom.xml -pl bpi-stream-engine -am -DskipTests package
+
+bpi-stream-deployment-check:
+	$(PYTHON) scripts/verify-bpi-stream-deployment.py
+
+bpi-stream-compose-config:
+	$(BPI_STREAM_COMPOSE) config --quiet
+
+bpi-stream-deploy-preflight: bpi-stream-package
+	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: copy deploy/bpi-streaming/.env.example to deploy/bpi-streaming/.env and replace secrets' >&2; exit 1; fi
+	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/preflight.sh "$(BPI_STREAM_ENV_FILE)"
+
+up-bpi-stream: bpi-stream-deploy-preflight
+	$(BPI_STREAM_COMPOSE) up -d
+
+bpi-stream-cluster-smoke:
+	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
+	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/smoke-cluster.sh "$(BPI_STREAM_ENV_FILE)"
+
+down-bpi-stream:
+	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
+	$(BPI_STREAM_COMPOSE) down
 
 bpi-runtime-replay-test:
 	$(MVN) -q -f acceptance/bpi-runtime/pom.xml test
