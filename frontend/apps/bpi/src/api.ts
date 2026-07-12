@@ -6,7 +6,11 @@ import type {
   Evidence,
   LineState,
   ProblemDetail,
+  RuleSimulation,
+  RuleSimulationCommand,
+  RuleVersion,
   StateEvent,
+  TopologyVersion,
 } from './types';
 
 const API_ROOT = '/bpi-api';
@@ -83,4 +87,22 @@ export const bpiApi = {
     }),
   evidence: (id: string) => request<{ start: Evidence[]; end: Evidence[] }>(`/batches/${encodeURIComponent(id)}/evidence`),
   timeline: (id: string) => request<StateEvent[]>(`/batches/${encodeURIComponent(id)}/timeline`),
+  topologies: (plantId: string) =>
+    request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
+  topology: (id: string) => request<TopologyVersion>(`/topologies/${encodeURIComponent(id)}`),
+  rules: (plantId: string) => request<RuleVersion[]>(`/rules?plantId=${encodeURIComponent(plantId)}`),
+  rule: (id: string) => request<RuleVersion>(`/rules/${encodeURIComponent(id)}`),
+  simulation: (id: string) => request<RuleSimulation>(`/rule-simulations/${encodeURIComponent(id)}`),
+  simulateRule: (rule: RuleVersion, command: RuleSimulationCommand, key: string) =>
+    request<RuleSimulation>(`/rules/${encodeURIComponent(rule.id)}/simulate`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
+      body: JSON.stringify(command),
+    }),
+  publishRule: (rule: RuleVersion, simulation: RuleSimulation, reason: string, key: string) =>
+    request<RuleVersion>(`/rules/${encodeURIComponent(rule.id)}/publish`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
+      body: JSON.stringify({ reason, simulationId: simulation.id, simulationChecksum: simulation.checksum }),
+    }),
 };

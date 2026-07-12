@@ -41,7 +41,7 @@
     {
       "id": "phase1-route-allowlist",
       "status": "PASS",
-      "evidence": "Only Phase 1 reads, candidate confirmation/rejection and batch suspend/resume were allowed; force-close, method changes and path traversal were denied."
+      "evidence": "Only Phase 1 reads, candidate/batch lifecycle, scoped topology/rule reads, rule simulation/result and publication were allowed; drafts, topology publication, force-close, method changes and path traversal were denied."
     },
     {
       "id": "fixed-upstream-proxy",

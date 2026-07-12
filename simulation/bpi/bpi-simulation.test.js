@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const { createBpiSimulator, listen } = require('./server');
 
 const profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../../contracts/bpi-api/simulation-profile.json'), 'utf8'));
+const RULE_ID = '78d57d90-fdc8-4a57-a660-a1ae73c2bc96';
 const covered = new Set();
 let server;
 let baseUrl;
@@ -265,10 +266,16 @@ test('candidate rejection is idempotent and never creates a shadow batch', async
 });
 
 test('rule simulation checksum gates publication', async () => {
+  let topologyResult = await request('GET', '/bpi/v1/topologies?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(topologyResult.json.data.length, 1);
+  assert.equal(topologyResult.json.data[0].code, 'TOPO-S07');
+  topologyResult = await request('GET', `/bpi/v1/topologies/${topologyResult.json.data[0].id}`);
+  assert.equal(topologyResult.json.data.definition.bindings.length, 2);
+
   let result = await request('GET', '/bpi/v1/rules?plantId=PLANT-01');
   assert.equal(result.json.data[0].revision, 7);
 
-  result = await request('GET', '/bpi/v1/rules/RULE-S07-START');
+  result = await request('GET', `/bpi/v1/rules/${RULE_ID}`);
   assert.equal(result.json.data.state, 'DRAFT');
 
   const simulationInput = {
@@ -279,24 +286,28 @@ test('rule simulation checksum gates publication', async () => {
     calibrationVersion: 'CAL-S07@2',
     goldenSetId: 'GOLDEN-S07-2026Q2',
   };
-  result = await request('POST', '/bpi/v1/rules/RULE-S07-START/simulate', {
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/simulate`, {
     headers: commandHeaders('simulate-rule-0001', 7), body: simulationInput,
   });
   assert.equal(result.response.status, 202);
   assert.equal(result.json.data.state, 'PASSED');
+  assert.equal(result.json.data.metrics.missed, 0);
+  assert.equal(result.json.data.metrics.falsePositive, 0);
+  assert.equal(result.json.data.inputManifest.observationCount, 18640);
+  assert.deepEqual(result.json.data.emittedBoundaries, ['2026-07-12T07:59:40.000Z']);
   assert.match(result.json.data.checksum, /^[a-f0-9]{64}$/);
   const simulation = result.json.data;
 
   result = await request('GET', `/bpi/v1/rule-simulations/${simulation.id}`);
   assert.deepEqual(result.json.data, simulation);
 
-  result = await request('POST', '/bpi/v1/rules/RULE-S07-START/publish', {
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/publish`, {
     headers: commandHeaders('publish-rule-bad-0001', 8),
     body: { reason: '审批发布', simulationId: simulation.id, simulationChecksum: 'bad-checksum' },
   });
   assert.equal(result.response.status, 422);
 
-  result = await request('POST', '/bpi/v1/rules/RULE-S07-START/publish', {
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/publish`, {
     headers: commandHeaders('publish-rule-good-0002', 8),
     body: { reason: '审批发布', simulationId: simulation.id, simulationChecksum: simulation.checksum },
   });

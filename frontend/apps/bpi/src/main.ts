@@ -8,8 +8,11 @@ import {
   Clock3,
   Factory,
   Filter,
+  FlaskConical,
   Gauge,
   ListChecks,
+  Network,
+  Play,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -17,10 +20,21 @@ import {
   createIcons,
 } from 'lucide';
 import { ApiProblem, bpiApi } from './api';
-import type { Batch, Candidate, Evidence, LineState, ResponseMeta, StateEvent } from './types';
+import type {
+  Batch,
+  Candidate,
+  Evidence,
+  LineState,
+  ResponseMeta,
+  RuleSimulation,
+  RuleSimulationCommand,
+  RuleVersion,
+  StateEvent,
+  TopologyVersion,
+} from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches';
+type View = 'overview' | 'candidates' | 'batches' | 'rules';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) throw new Error('BPI app root is missing');
@@ -35,10 +49,15 @@ const state = {
   lines: [] as LineState[],
   candidates: [] as Candidate[],
   batches: [] as Batch[],
+  rules: [] as RuleVersion[],
+  topologies: [] as TopologyVersion[],
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
+  selectedRule: null as RuleVersion | null,
+  selectedSimulation: null as RuleSimulation | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
+  ruleCommand: null as 'publish' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -89,6 +108,7 @@ function shell(): void {
           <button class="nav-item" data-view="overview">${icon('activity', '实时生产态势')}</button>
           <button class="nav-item" data-view="candidates">${icon('list-checks', '候选批次')}<b id="candidate-count">0</b></button>
           <button class="nav-item" data-view="batches">${icon('archive', '批次档案')}</button>
+          <button class="nav-item" data-view="rules">${icon('network', '规则与拓扑')}</button>
         </nav>
         <div class="mode-flag"><i data-lucide="shield-check"></i><div><strong>SHADOW</strong><span>外部写入关闭</span></div></div>
       </aside>
@@ -113,6 +133,19 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">提交</button></footer>
         </form>
       </dialog>
+      <dialog id="simulation-dialog" class="command-dialog simulation-dialog">
+        <form method="dialog" id="simulation-form">
+          <header><div><span>规则验证</span><h2>运行历史回放</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="simulation-fields">
+            <label><span>开始时间</span><input id="simulation-from" type="datetime-local" step="1" required /></label>
+            <label><span>结束时间</span><input id="simulation-to" type="datetime-local" step="1" required /></label>
+            <label><span>校准版本</span><input id="simulation-calibration" value="CAL-1" required /></label>
+            <label><span>金标准集</span><input id="simulation-golden" value="GOLDEN-S07-2026Q2" required /></label>
+          </div>
+          <div class="simulation-guard"><i data-lucide="shield-check"></i><span>回放读取 PostgreSQL 校准测点并使用同源规则运行时；最多 100,000 个观测值。</span></div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="simulation-submit" value="default" class="button button--primary">开始回放</button></footer>
+        </form>
+      </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>`;
   document.querySelector<HTMLSelectElement>('#plant-id')!.value = state.plantId;
@@ -121,7 +154,7 @@ function shell(): void {
 }
 
 function refreshIcons(): void {
-  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Factory, Filter, Gauge, ListChecks, RefreshCw, Search, ShieldCheck, X } });
+  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, RefreshCw, Search, ShieldCheck, X } });
 }
 
 function bindShellEvents(): void {
@@ -135,6 +168,7 @@ function bindShellEvents(): void {
     void loadView();
   });
   document.querySelector<HTMLFormElement>('#confirm-form')?.addEventListener('submit', handleConfirm);
+  document.querySelector<HTMLFormElement>('#simulation-form')?.addEventListener('submit', handleRuleSimulation);
 }
 
 function navigate(view: View): void {
@@ -159,10 +193,18 @@ async function loadView(silent = false): Promise<void> {
       const response = await bpiApi.candidates(state.plantId);
       state.candidates = response.data;
       state.meta = response.meta;
-    } else {
+    } else if (state.view === 'batches') {
       const response = await bpiApi.batches(state.plantId);
       state.batches = response.data;
       state.meta = response.meta;
+    } else {
+      const [rules, topologies] = await Promise.all([
+        bpiApi.rules(state.plantId),
+        bpiApi.topologies(state.plantId),
+      ]);
+      state.rules = rules.data;
+      state.topologies = topologies.data;
+      state.meta = rules.meta;
     }
   } catch (error) {
     state.error = error instanceof Error ? error : new Error(String(error));
@@ -183,6 +225,7 @@ function renderView(): void {
     overview: ['生产运行', '实时生产态势'],
     candidates: ['边界审核', '候选批次'],
     batches: ['生产事实', '批次档案'],
+    rules: ['边界治理', '规则与拓扑'],
   };
   document.querySelector('#view-kicker')!.textContent = titles[state.view][0];
   document.querySelector('#view-title')!.textContent = titles[state.view][1];
@@ -194,7 +237,8 @@ function renderView(): void {
   if (state.error) renderError();
   else if (state.view === 'overview') renderOverview();
   else if (state.view === 'candidates') renderCandidates();
-  else renderBatches();
+  else if (state.view === 'batches') renderBatches();
+  else renderRules();
   refreshIcons();
 }
 
@@ -298,6 +342,7 @@ function openCandidateCommandDialog(command: 'confirm' | 'reject'): void {
   if (!candidate) return;
   state.candidateCommand = command;
   state.batchCommand = null;
+  state.ruleCommand = null;
   const isReject = command === 'reject';
   const isEnd = candidate.boundaryType === 'END';
   document.querySelector('#command-kicker')!.textContent = '候选批次';
@@ -332,6 +377,10 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   const submitter = event.submitter as HTMLButtonElement | null;
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
+  if (state.ruleCommand) {
+    await handleRulePublish();
+    return;
+  }
   if (state.batchCommand) {
     await handleBatchCommand();
     return;
@@ -389,6 +438,151 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   }
 }
 
+function ruleConditions(rule: RuleVersion): Array<Record<string, unknown>> {
+  const conditions = rule.ast.conditions;
+  return Array.isArray(conditions) ? conditions.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object') : [];
+}
+
+function renderRules(): void {
+  const content = document.querySelector('#content')!;
+  const topology = state.topologies[0];
+  const bindings = topology?.definition.bindings || [];
+  const rows = state.rules.map((rule) => `
+    <tr data-rule-id="${escapeHtml(rule.id)}" tabindex="0">
+      <td><strong>${escapeHtml(rule.code)}</strong><small>${escapeHtml(rule.id)}</small></td>
+      <td>${escapeHtml(rule.lineId)}</td><td>${escapeHtml(rule.version)}</td><td>${statusChip(rule.state)}</td>
+      <td>${escapeHtml(rule.topologyVersion)}</td><td>${ruleConditions(rule).length}</td>
+      <td>${rule.latestSimulationId ? '<span class="evidence-state evidence-state--ok"></span> 已回放' : '未回放'}</td>
+      <td><span class="revision">r${rule.revision}</span></td><td><i data-lucide="chevron-right"></i></td>
+    </tr>`).join('');
+  const bindingRows = bindings.map((binding) => `<tr><td><strong>${escapeHtml(binding.signal)}</strong></td><td>${escapeHtml(binding.propertyId)}</td><td>${escapeHtml(binding.unit)}</td><td>${escapeHtml(binding.calibrationVersion)}</td></tr>`).join('');
+  content.innerHTML = `
+    <div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="rule-search" placeholder="规则编码、产线、拓扑版本" /></label><span class="toolbar-note"><i data-lucide="shield-check"></i>发布前必须通过同源回放</span></div>
+    <div class="rule-workbench">
+      <section><div class="section-bar"><div><i data-lucide="flask-conical"></i><strong>边界规则版本</strong></div><span>${state.rules.length} 个版本</span></div>
+        ${rows ? `<div class="table-frame"><table class="rule-table"><thead><tr><th>规则</th><th>产线</th><th>版本</th><th>状态</th><th>拓扑</th><th>条件</th><th>模拟</th><th>版本号</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="network"></i><strong>暂无作用域规则</strong><span>仅展示当前工厂和令牌范围内的版本。</span></div>`}
+      </section>
+      <section><div class="section-bar"><div><i data-lucide="network"></i><strong>当前工艺拓扑</strong></div>${topology ? statusChip(topology.state) : ''}</div>
+        ${topology ? `<div class="topology-summary"><div><span>版本</span><b>${escapeHtml(topology.code)}@${escapeHtml(topology.version)}</b></div><div><span>作用域</span><b>${escapeHtml(topology.plantId)} / ${escapeHtml(topology.lineId)}</b></div><div><span>节点</span><b>${topology.definition.nodes?.length || 0}</b></div><div><span>测点绑定</span><b>${bindings.length}</b></div></div><div class="table-frame"><table class="binding-table"><thead><tr><th>语义信号</th><th>数采属性</th><th>单位</th><th>校准版本</th></tr></thead><tbody>${bindingRows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="network"></i><strong>暂无已发布拓扑</strong><span>规则模拟将保持关闭。</span></div>`}
+      </section>
+    </div>`;
+  content.querySelectorAll('[data-rule-id]').forEach((row) => row.addEventListener('click', () => void openRule(String((row as HTMLElement).dataset.ruleId))));
+  content.querySelector<HTMLInputElement>('#rule-search')?.addEventListener('input', (event) => {
+    const keyword = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    content.querySelectorAll<HTMLTableRowElement>('[data-rule-id]').forEach((row) => { row.hidden = !row.textContent!.toLowerCase().includes(keyword); });
+  });
+}
+
+async function openRule(ruleId: string): Promise<void> {
+  try {
+    const ruleResponse = await bpiApi.rule(ruleId);
+    const rule = ruleResponse.data;
+    state.selectedRule = rule;
+    state.selectedSimulation = rule.latestSimulationId
+      ? (await bpiApi.simulation(rule.latestSimulationId)).data
+      : null;
+    const topology = state.topologies.find((item) => `${item.code}@${item.version}` === rule.topologyVersion);
+    const conditions = ruleConditions(rule).map((condition) => `<li><div><strong>${escapeHtml(condition.signal)}</strong><small>${escapeHtml(condition.classification)} · ${escapeHtml(condition.operator)}</small></div><b>${escapeHtml(condition.threshold)}</b><em>${escapeHtml(condition.holdSeconds)}s</em></li>`).join('');
+    const simulation = state.selectedSimulation;
+    const simulationHtml = simulation ? `<div class="simulation-result simulation-result--${simulation.state === 'PASSED' ? 'pass' : 'fail'}"><div class="section-title"><h3>最近回放</h3>${statusChip(simulation.state)}</div><div class="metric-grid"><div><span>命中</span><b>${simulation.metrics.matched}</b></div><div><span>漏检</span><b>${simulation.metrics.missed}</b></div><div><span>误报</span><b>${simulation.metrics.falsePositive}</b></div><div><span>平均偏差</span><b>${number(simulation.metrics.meanBoundaryErrorSeconds)}s</b></div></div><dl class="manifest"><div><dt>观测值</dt><dd>${simulation.inputManifest.observationCount ?? '-'}</dd></div><div><dt>金标准边界</dt><dd>${simulation.inputManifest.goldenBoundaryCount ?? '-'}</dd></div><div><dt>发射边界</dt><dd>${simulation.emittedBoundaries.map(formatTime).join('、') || '-'}</dd></div></dl><div class="checksum"><span>simulation checksum</span><code>${escapeHtml(simulation.checksum)}</code></div>${simulation.failureReason ? `<p>${escapeHtml(simulation.failureReason)}</p>` : ''}</div>` : `<div class="simulation-empty"><i data-lucide="flask-conical"></i><span>尚未使用 PostgreSQL 历史测点和人工金标准执行回放。</span></div>`;
+    const canPublish = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
+    openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${simulationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${canPublish ? '<button class="button button--primary" id="open-rule-publish">发布规则版本</button>' : ''}</footer>`);
+    document.querySelector('#open-simulation')?.addEventListener('click', openRuleSimulationDialog);
+    document.querySelector('#open-rule-publish')?.addEventListener('click', openRulePublishDialog);
+  } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
+}
+
+function openRuleSimulationDialog(): void {
+  const rule = state.selectedRule;
+  if (!rule) return;
+  document.querySelector<HTMLInputElement>('#simulation-from')!.value = '2026-07-01T00:00:00';
+  document.querySelector<HTMLInputElement>('#simulation-to')!.value = '2026-07-12T00:00:00';
+  document.querySelector<HTMLDialogElement>('#simulation-dialog')!.showModal();
+}
+
+async function handleRuleSimulation(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  const rule = state.selectedRule;
+  if (!rule) return;
+  const command: RuleSimulationCommand = {
+    lineId: rule.lineId,
+    from: new Date(document.querySelector<HTMLInputElement>('#simulation-from')!.value).toISOString(),
+    to: new Date(document.querySelector<HTMLInputElement>('#simulation-to')!.value).toISOString(),
+    topologyVersion: rule.topologyVersion,
+    calibrationVersion: document.querySelector<HTMLInputElement>('#simulation-calibration')!.value.trim(),
+    goldenSetId: document.querySelector<HTMLInputElement>('#simulation-golden')!.value.trim(),
+  };
+  const button = document.querySelector<HTMLButtonElement>('#simulation-submit')!;
+  button.disabled = true;
+  button.textContent = '回放中...';
+  try {
+    const response = await bpiApi.simulateRule(rule, command, crypto.randomUUID());
+    state.selectedSimulation = response.data;
+    state.selectedRule = (await bpiApi.rule(rule.id)).data;
+    state.rules = state.rules.map((item) => item.id === rule.id ? state.selectedRule! : item);
+    document.querySelector<HTMLDialogElement>('#simulation-dialog')!.close();
+    showToast(response.data.state === 'PASSED' ? '历史回放通过，可提交发布' : '历史回放未通过，规则保持草稿');
+    renderRules();
+    await openRule(rule.id);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '开始回放';
+  }
+}
+
+function openRulePublishDialog(): void {
+  const rule = state.selectedRule;
+  const simulation = state.selectedSimulation;
+  if (!rule || !simulation || simulation.state !== 'PASSED') return;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.ruleCommand = 'publish';
+  document.querySelector('#command-kicker')!.textContent = '规则版本控制';
+  document.querySelector('#command-title')!.textContent = '发布边界规则';
+  document.querySelector('#command-reason-label')!.textContent = '发布依据';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>规则</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>作用域</span><b>${escapeHtml(rule.lineId)}</b></div><div><span>回放结果</span><b>${simulation.metrics.matched} 命中 / ${simulation.metrics.missed} 漏检 / ${simulation.metrics.falsePositive} 误报</b></div><div><span>版本</span><b>r${rule.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = '填写回放批次范围、现场复核和发布依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = 'button button--primary';
+  button.textContent = '确认发布';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleRulePublish(): Promise<void> {
+  const rule = state.selectedRule;
+  const simulation = state.selectedSimulation;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (!rule || !simulation || reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.disabled = true;
+  button.textContent = '发布中...';
+  try {
+    const response = await bpiApi.publishRule(rule, simulation, reason, crypto.randomUUID());
+    state.selectedRule = response.data;
+    state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    state.ruleCommand = null;
+    showToast(`规则 ${response.data.code}@${response.data.version} 已发布`);
+    renderRules();
+    await openRule(response.data.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`规则已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openRule(rule.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '确认发布';
+  }
+}
+
 function renderBatches(): void {
   const content = document.querySelector('#content')!;
   const rows = state.batches.map((batch) => `<tr data-batch-id="${escapeHtml(batch.id)}" tabindex="0"><td><strong>${escapeHtml(batch.batchNo)}</strong>${batch.shadow ? '<small>SHADOW</small>' : ''}</td><td>${escapeHtml(batch.materialCode || '-')}</td><td>${escapeHtml(batch.lineId)}</td><td>${escapeHtml(batch.stageCode)}</td><td>${formatTime(batch.startTime)}</td><td class="metric"><b>${number(batch.quantity)}</b><small>${escapeHtml(batch.quantityUnit)}</small></td><td>${statusChip(batch.qualityGate)}</td><td>${statusChip(batch.wmsStatus)}</td><td>${statusChip(batch.state)}</td><td><span class="revision">r${batch.revision}</span></td><td><i data-lucide="chevron-right"></i></td></tr>`).join('');
@@ -426,6 +620,7 @@ function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
   const isSuspend = command === 'suspend';
   state.candidateCommand = null;
   state.batchCommand = command;
+  state.ruleCommand = null;
   document.querySelector('#command-kicker')!.textContent = '批次运行控制';
   document.querySelector('#command-title')!.textContent = isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
   document.querySelector('#command-reason-label')!.textContent = isSuspend ? '暂停原因' : '恢复原因';
@@ -497,6 +692,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'rules'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

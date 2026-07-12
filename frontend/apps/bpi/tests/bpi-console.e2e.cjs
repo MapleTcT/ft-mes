@@ -7,6 +7,7 @@ const { createBpiSimulator, listen } = require('../../../../simulation/bpi/serve
 
 const APP_ROOT = path.resolve(__dirname, '..');
 const APP_URL = 'http://127.0.0.1:4173';
+const RULE_ID = '78d57d90-fdc8-4a57-a660-a1ae73c2bc96';
 let simulator;
 let vite;
 let browser;
@@ -184,6 +185,10 @@ test('mobile layout keeps navigation usable without page-level horizontal overfl
   assert.ok(dimensions.scroll <= dimensions.client, `page overflow: ${JSON.stringify(dimensions)}`);
   await page.locator('[data-view="overview"]').click();
   await page.getByRole('heading', { name: '实时生产态势' }).waitFor();
+  await page.locator('[data-view="rules"]').click();
+  await page.getByRole('heading', { name: '规则与拓扑' }).waitFor();
+  const ruleDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  assert.ok(ruleDimensions.scroll <= ruleDimensions.client, `rules page overflow: ${JSON.stringify(ruleDimensions)}`);
   await page.screenshot({ path: '/tmp/bpi-console-mobile.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
@@ -212,6 +217,47 @@ test('shift lead rejects a false candidate without creating a batch', async () =
   assert.equal(candidate.data.revision, 4);
   assert.deepEqual(batches.data, []);
   await page.screenshot({ path: '/tmp/bpi-console-candidate-rejected.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('process engineer replays PostgreSQL evidence and publishes a checksum-gated rule', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/rules`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('heading', { name: '规则与拓扑' }).waitFor();
+  await page.locator('.topology-summary').getByText('TOPO-S07@3', { exact: true }).waitFor();
+  await page.locator('.binding-table').getByText('flow.instant', { exact: true }).first().waitFor();
+  await page.locator('[data-rule-id]').click();
+  await page.getByRole('heading', { name: 'RULE-S07-START@1.2.0' }).waitFor();
+  await page.getByText('尚未使用 PostgreSQL 历史测点和人工金标准执行回放。').waitFor();
+
+  await page.getByRole('button', { name: '运行历史回放' }).click();
+  await page.getByRole('heading', { name: '运行历史回放' }).waitFor();
+  await page.getByRole('button', { name: '开始回放' }).click();
+  await page.getByText('历史回放通过，可提交发布').waitFor();
+  await page.locator('.simulation-result').getByText('PASSED', { exact: true }).waitFor();
+  assert.match(await page.locator('.simulation-result').textContent(), /命中42/);
+  assert.match(await page.locator('.simulation-result').textContent(), /漏检0/);
+  assert.match(await page.locator('.simulation-result').textContent(), /误报0/);
+  assert.match(await page.locator('.simulation-result').textContent(), /观测值18640/);
+
+  await page.getByRole('button', { name: '发布规则版本' }).click();
+  await page.getByRole('heading', { name: '发布边界规则' }).waitFor();
+  await page.locator('#confirm-reason').fill('S07 历史批次回放通过并完成工艺工程师复核');
+  await page.getByRole('button', { name: '确认发布' }).click();
+  await page.getByText('规则 RULE-S07-START@1.2.0 已发布').waitFor();
+  await page.locator('.batch-state-band').getByText('PUBLISHED', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 9/);
+
+  const rule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
+  assert.equal(rule.data.state, 'PUBLISHED');
+  assert.equal(rule.data.revision, 9);
+  assert.ok(rule.data.latestSimulationId);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-published.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

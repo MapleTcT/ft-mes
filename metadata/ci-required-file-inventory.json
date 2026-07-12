@@ -3363,6 +3363,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-rule-management.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-telemetry-ingress.md",
       "state": "tracked",
       "tracked": true
@@ -3946,6 +3952,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-production-context-join-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-management-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4779,6 +4791,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleDefinitionParser.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
       "state": "tracked",
       "tracked": true
@@ -4875,6 +4899,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/GoldenBoundary.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/LineState.java",
       "state": "tracked",
       "tracked": true
@@ -4887,13 +4917,37 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleSimulationView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleVersionView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryIngestResult.java",
       "state": "tracked",
       "tracked": true
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryObservation.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryValue.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TopologyVersionView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4948,6 +5002,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PersistedCandidate.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5043,6 +5103,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RulePublishCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleSimulationCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TelemetryEnvelopeRequest.java",
       "state": "tracked",
       "tracked": true
@@ -5091,6 +5169,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V5__bpi_rule_simulation_and_topology_scope.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5098,6 +5182,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5747,13 +5837,13 @@
       "tracked": 468
     },
     "docs": {
-      "tracked": 78
+      "tracked": 79
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 91
+      "tracked": 92
     },
     "package.json": {
       "tracked": 1
@@ -5765,7 +5855,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 95
+      "tracked": 108
     },
     "simulation": {
       "tracked": 4
@@ -5777,8 +5867,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 953,
-    "tracked": 953,
+    "totalFiles": 968,
+    "tracked": 968,
     "untracked": 0
   },
   "untrackedByDirectory": []

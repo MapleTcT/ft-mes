@@ -8,7 +8,7 @@
     "location": "isolated local Docker network",
     "name": "bpi",
     "schema": "bpi",
-    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql + V3__bpi_telemetry_ingress.sql + V4__bpi_end_boundary_lifecycle.sql"
+    "migration": "Flyway V1__bpi_phase1_baseline.sql through V5__bpi_rule_simulation_and_topology_scope.sql"
   },
   "runtime": {
     "java": "17",
@@ -22,8 +22,8 @@
     "blocked": 0,
     "notApplicable": 0,
     "postgresAcceptanceTests": {
-      "run": 7,
-      "passed": 7,
+      "run": 9,
+      "passed": 9,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -36,8 +36,8 @@
       "skipped": 0
     },
     "serviceTests": {
-      "run": 18,
-      "passed": 18,
+      "run": 20,
+      "passed": 20,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -486,6 +486,7 @@
   },
   "evidence": [
     "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiPostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRulePostgresAcceptanceTest.xml",
     "services/bpi-service/batch-rule-runtime/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.rules.BoundaryRuleRuntimeTest.xml"
   ],
   "limitations": [

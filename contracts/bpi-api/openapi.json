@@ -202,14 +202,14 @@
       "get": {
         "tags": ["Topologies"], "operationId": "listTopologies", "summary": "查询工艺拓扑和版本",
         "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}],
-        "responses": {"200": {"description": "拓扑列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericListResponse"}}}}}
+        "responses": {"200": {"description": "拓扑列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyListResponse"}}}}}
       }
     },
     "/bpi/v1/topologies/{topologyId}": {
       "get": {
         "tags": ["Topologies"], "operationId": "getTopologyVersion", "summary": "查询拓扑节点、连接和测点绑定",
         "parameters": [{"$ref": "#/components/parameters/TopologyId"}],
-        "responses": {"200": {"description": "拓扑版本", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}}, "404": {"$ref": "#/components/responses/NotFound"}}
+        "responses": {"200": {"description": "拓扑版本", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyResponse"}}}}, "404": {"$ref": "#/components/responses/NotFound"}}
       }
     },
     "/bpi/v1/topologies/drafts": {
@@ -285,6 +285,7 @@
         "responses": {
           "202": {"description": "模拟任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SimulationResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
           "428": {"$ref": "#/components/responses/PreconditionRequired"}
         }
       }
@@ -527,13 +528,16 @@
           "meta": {"$ref": "#/components/schemas/ResponseMeta"}
         }
       },
-      "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "checksum"], "properties": {"id": {"type": "string"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"]}}},
+      "Topology": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "checksum", "definition"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string"}, "revision": {"type": "integer", "minimum": 0}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string"}, "definition": {"type": "object"}}},
+      "TopologyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Topology"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "TopologyListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Topology"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "topologyVersion", "checksum", "ast"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"], "format": "uuid"}}},
       "RuleResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Rule"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "RuleListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Rule"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "RuleDraftCommand": {"type": "object", "required": ["code", "lineId", "topologyVersion", "ast"], "properties": {"code": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "ast": {"type": "object"}, "reason": {"type": "string"}}},
-      "RuleSimulationCommand": {"type": "object", "required": ["lineId", "from", "to", "topologyVersion", "calibrationVersion"], "properties": {"lineId": {"type": "string"}, "from": {"type": "string", "format": "date-time"}, "to": {"type": "string", "format": "date-time"}, "topologyVersion": {"type": "string"}, "calibrationVersion": {"type": "string"}, "goldenSetId": {"type": ["string", "null"]}}},
+      "RuleSimulationCommand": {"type": "object", "required": ["lineId", "from", "to", "topologyVersion", "calibrationVersion", "goldenSetId"], "properties": {"lineId": {"type": "string"}, "from": {"type": "string", "format": "date-time"}, "to": {"type": "string", "format": "date-time"}, "topologyVersion": {"type": "string"}, "calibrationVersion": {"type": "string"}, "goldenSetId": {"type": "string"}}},
       "RulePublishCommand": {"type": "object", "required": ["reason", "simulationId", "simulationChecksum"], "properties": {"reason": {"type": "string"}, "simulationId": {"type": "string"}, "simulationChecksum": {"type": "string"}}},
-      "Simulation": {"type": "object", "required": ["id", "ruleId", "state", "checksum", "metrics"], "properties": {"id": {"type": "string"}, "ruleId": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "metrics": {"type": "object", "properties": {"matched": {"type": "integer"}, "missed": {"type": "integer"}, "falsePositive": {"type": "integer"}, "meanBoundaryErrorSeconds": {"type": "number"}}}, "inputManifest": {"type": "object"}}},
+      "Simulation": {"type": "object", "required": ["id", "ruleId", "state", "checksum", "metrics", "inputManifest", "emittedBoundaries"], "properties": {"id": {"type": "string", "format": "uuid"}, "ruleId": {"type": "string", "format": "uuid"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "metrics": {"type": "object", "properties": {"matched": {"type": "integer"}, "missed": {"type": "integer"}, "falsePositive": {"type": "integer"}, "meanBoundaryErrorSeconds": {"type": "number"}}}, "inputManifest": {"type": "object"}, "emittedBoundaries": {"type": "array", "items": {"type": "string", "format": "date-time"}}, "failureReason": {"type": ["string", "null"]}}},
       "SimulationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Simulation"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "Incident": {"type": "object", "required": ["id", "issueCode", "severity", "state", "revision", "affectedLines", "affectedRules", "eventCount"], "properties": {"id": {"type": "string"}, "issueCode": {"type": "string"}, "severity": {"type": "string"}, "state": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}, "revision": {"type": "integer"}, "source": {"type": "string"}, "propertyId": {"type": "string"}, "affectedLines": {"type": "array", "items": {"type": "string"}}, "affectedRules": {"type": "array", "items": {"type": "string"}}, "affectedBatches": {"type": "array", "items": {"type": "string"}}, "eventCount": {"type": "integer"}, "firstSeen": {"type": "string", "format": "date-time"}, "lastSeen": {"type": "string", "format": "date-time"}}},
       "IncidentResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Incident"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},

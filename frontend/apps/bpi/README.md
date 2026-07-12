@@ -1,7 +1,7 @@
 # BPI Console
 
 Independent TypeScript/Vite operator console for the Java 17 BPI service. It implements the Phase 1
-overview, candidate review and shadow-batch archive workflows from
+overview, candidate review, shadow-batch archive, and checksum-gated rule/topology workflows from
 `docs/designs/bpi-interaction-design.md`.
 
 The browser calls only the same-origin `/bpi-api` boundary. In the MES shell it forwards the existing
@@ -16,5 +16,7 @@ npm run test:e2e
 ```
 
 The Playwright suite exercises START shadow-batch creation, END closure to `CLOSED_RAW`, candidate
-rejection without batch creation, batch suspend/resume, and mobile layout. Screenshots are written to
-`/tmp`, not committed as product assets.
+rejection without batch creation, batch suspend/resume, rule replay/publication, and mobile layout.
+Screenshots are written to `/tmp`, not committed as product assets. Rule browser tests use the
+deterministic simulator; real PostgreSQL evidence is recorded separately in
+`metadata/bpi-rule-management-acceptance.json`.

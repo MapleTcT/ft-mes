@@ -216,18 +216,18 @@ public class BpiPostgresRepository {
     }
 
     public boolean commandsEnabled(ActorContext actor, BatchCandidate candidate) {
-        return commandsEnabled(actor, candidate.plantId(), candidate.lineId());
+        return featureEnabled(actor, candidate.plantId(), candidate.lineId(), "bpi.commands");
     }
 
     public boolean commandsEnabled(ActorContext actor, BatchInstance batch) {
-        return commandsEnabled(actor, batch.plantId(), batch.lineId());
+        return featureEnabled(actor, batch.plantId(), batch.lineId(), "bpi.commands");
     }
 
-    private boolean commandsEnabled(ActorContext actor, String plantId, String lineId) {
+    public boolean featureEnabled(ActorContext actor, String plantId, String lineId, String flagKey) {
         List<Boolean> matches = jdbc.query("""
                 SELECT enabled
                   FROM bpi.bpi_feature_flags
-                 WHERE flag_key = 'bpi.commands'
+                 WHERE flag_key = :flagKey
                    AND tenant_id IN (:tenantId, '*')
                    AND (
                         (tenant_id = :tenantId AND scope_type = 'LINE' AND scope_key = :lineId)
@@ -247,7 +247,8 @@ public class BpiPostgresRepository {
                 """, new MapSqlParameterSource()
                 .addValue("tenantId", actor.tenantId())
                 .addValue("plantId", plantId)
-                .addValue("lineId", lineId),
+                .addValue("lineId", lineId)
+                .addValue("flagKey", flagKey),
                 (rs, rowNum) -> rs.getBoolean("enabled"));
         return !matches.isEmpty() && matches.get(0);
     }

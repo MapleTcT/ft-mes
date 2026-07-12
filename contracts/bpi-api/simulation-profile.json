@@ -16,6 +16,8 @@
     "getBatchTimeline",
     "suspendBatch",
     "resumeBatch",
+    "listTopologies",
+    "getTopologyVersion",
     "listRules",
     "getRuleVersion",
     "simulateRule",

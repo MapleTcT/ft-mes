@@ -69,17 +69,38 @@ function createScenario() {
     affectedRules: 1, lastEventTime: '2026-07-12T07:59:58.000Z',
   };
 
+  const topology = {
+    id: '9f73950f-5bc3-4d95-a504-90557905d17b', code: 'TOPO-S07', version: '3',
+    state: 'PUBLISHED', revision: 1, plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+    checksum: sha256({ code: 'TOPO-S07', version: '3', lineId: 'LINE-S07-01' }),
+    definition: {
+      stages: [{ code: 'EVAPORATION', name: '蒸发浓缩' }],
+      nodes: [
+        { code: 'PUMP-S07-FEED', type: 'PUMP', name: 'S07 进料泵' },
+        { code: 'TANK-S07-TARGET', type: 'TANK', name: 'S07 接收罐' },
+      ],
+      bindings: [
+        { signal: 'flow.instant', propertyId: 'flow.instant', unit: 't/h', calibrationVersion: 'CAL-1' },
+        { signal: 'pump.running', propertyId: 'pump.running', unit: 'bool', calibrationVersion: 'CAL-1' },
+      ],
+    },
+  };
+
   const ruleBody = {
-    code: 'RULE-S07-START', version: '1.2.0', topologyVersion: 'TOPO-S07@3',
+    code: 'RULE-S07-START', version: '1.2.0', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+    topologyVersion: 'TOPO-S07@3',
     ast: {
-      all: [{ signal: 'productionOrderReleased', equals: true }],
-      quorum: { minimum: 2, of: ['feedPumpRunning', 'instantFlowAboveThreshold', 'targetTankLevelRising'] },
-      holdSeconds: 15,
+      boundaryType: 'START', quorumMinimum: 2, minimumConfidence: 0.8, maxCompositePenalty: 0.25,
+      timing: { allowedLatenessSeconds: 30, watermarkDelaySeconds: 10, evaluationTimeoutSeconds: 300 },
+      conditions: [
+        { signal: 'flow.instant', operator: 'GREATER_THAN', threshold: 15, holdSeconds: 15, maxSilenceSeconds: 30, classification: 'QUORUM', weight: 55 },
+        { signal: 'pump.running', operator: 'EQUALS_TRUE', holdSeconds: 15, maxSilenceSeconds: 30, classification: 'QUORUM', weight: 45 },
+      ],
     },
   };
 
   const rule = {
-    id: 'RULE-S07-START', ...ruleBody, state: 'DRAFT', revision: 7,
+    id: '78d57d90-fdc8-4a57-a660-a1ae73c2bc96', ...ruleBody, state: 'DRAFT', revision: 7,
     checksum: sha256(ruleBody), latestSimulationId: null,
   };
 
@@ -96,6 +117,7 @@ function createScenario() {
     endCandidate: null,
     batches: [],
     batchEvents: [],
+    topology,
     rule,
     simulations: new Map(),
     incident,

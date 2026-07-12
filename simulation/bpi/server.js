@@ -333,6 +333,14 @@ function createHandler(state) {
         }[ids[1]];
         return send(res, 200, envelope(operationId, data), operationId);
       }
+      if (req.method === 'GET' && path === '/bpi/v1/topologies') {
+        return send(res, 200, envelope('listTopologies', [state.topology]), 'listTopologies');
+      }
+      ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        if (ids[0] !== state.topology.id) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', 'getTopologyVersion'), 'getTopologyVersion');
+        return send(res, 200, envelope('getTopologyVersion', state.topology), 'getTopologyVersion');
+      }
       if (req.method === 'GET' && path === '/bpi/v1/rules') {
         return send(res, 200, envelope('listRules', [state.rule]), 'listRules');
       }
@@ -348,17 +356,19 @@ function createHandler(state) {
         const context = commandContext(req, res, operationId, state.rule.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
-        const required = ['lineId', 'from', 'to', 'topologyVersion', 'calibrationVersion'];
+        const required = ['lineId', 'from', 'to', 'topologyVersion', 'calibrationVersion', 'goldenSetId'];
         const missing = required.filter((key) => body[key] === undefined);
         if (missing.length) {
           const response = problem(422, 'Validation Failed', `Missing fields: ${missing.join(', ')}.`, operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
         const simulation = {
-          id: 'SIM-RULE-S07-001', ruleId: state.rule.id, state: 'PASSED',
+          id: '5b0c7926-eeac-42f0-a4ce-5d32a5cc51bb', ruleId: state.rule.id, state: 'PASSED',
           checksum: sha256({ ruleChecksum: state.rule.checksum, input: body }),
-          metrics: { matched: 42, missed: 1, falsePositive: 2, meanBoundaryErrorSeconds: 8.4 },
-          inputManifest: clone(body),
+          metrics: { matched: 42, missed: 0, falsePositive: 0, meanBoundaryErrorSeconds: 2.4 },
+          inputManifest: { ...clone(body), observationCount: 18640, goldenBoundaryCount: 42 },
+          emittedBoundaries: ['2026-07-12T07:59:40.000Z'],
+          failureReason: null,
         };
         state.simulations.set(simulation.id, simulation);
         state.rule.latestSimulationId = simulation.id;

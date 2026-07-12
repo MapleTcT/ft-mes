@@ -158,6 +158,46 @@ td > svg { width: 16px; color: #8b96a1; }
 .button--secondary { background: #fff; border-color: var(--line-strong); color: #44515d; }
 .button--danger { background: #fff; border-color: #d77b82; color: var(--red); }
 .button--danger:hover { background: #fff0f1; border-color: var(--red); }
+.button > svg { width: 15px; height: 15px; margin-right: 6px; vertical-align: -3px; }
+.rule-workbench { display: grid; gap: 16px; }
+.rule-workbench > section { min-width: 0; background: #fff; border: 1px solid var(--line); }
+.section-bar { min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+.section-bar > div { display: flex; align-items: center; gap: 8px; }
+.section-bar svg { width: 16px; color: var(--blue); }
+.section-bar strong { font-size: 13px; }
+.section-bar > span { color: var(--muted); font-size: 11px; }
+.rule-table { min-width: 980px; }
+.binding-table { min-width: 680px; }
+.topology-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+.topology-summary > div { min-width: 0; display: grid; gap: 5px; padding: 14px; border-right: 1px solid var(--line); }
+.topology-summary > div:last-child { border-right: 0; }
+.topology-summary span { color: var(--muted); font-size: 10px; }
+.topology-summary b { overflow-wrap: anywhere; font-size: 13px; }
+.rule-condition-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
+.mono-value, .checksum code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; overflow-wrap: anywhere; }
+.simulation-result { padding: 14px; border: 1px solid var(--line); border-left-width: 4px; }
+.simulation-result--pass { border-left-color: var(--green); background: #f5fbf8; }
+.simulation-result--fail { border-left-color: var(--red); background: #fff7f7; }
+.simulation-result h3 { margin: 0; }
+.metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin-top: 14px; background: var(--line); border: 1px solid var(--line); }
+.metric-grid > div { display: grid; gap: 5px; padding: 11px; background: #fff; }
+.metric-grid span { color: var(--muted); font-size: 10px; }
+.metric-grid b { font-size: 16px; }
+.manifest { margin: 12px 0; display: grid; gap: 7px; }
+.manifest > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; font-size: 11px; }
+.manifest dt { color: var(--muted); }
+.manifest dd { margin: 0; overflow-wrap: anywhere; }
+.checksum { display: grid; gap: 5px; padding-top: 10px; border-top: 1px solid var(--line); }
+.checksum span { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.checksum code { display: block; color: #40505d; }
+.simulation-empty { min-height: 100px; display: grid; place-content: center; justify-items: center; gap: 9px; color: var(--muted); border: 1px dashed var(--line-strong); text-align: center; font-size: 11px; }
+.simulation-empty svg { width: 22px; }
+.simulation-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 18px; }
+.simulation-fields label { min-width: 0; display: grid; gap: 6px; color: #4a5662; font-size: 11px; }
+.simulation-fields input { min-width: 0; height: 38px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 4px; outline: 0; }
+.simulation-fields input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(23, 105, 170, 0.12); }
+.simulation-guard { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; margin: 0 18px 18px; padding: 11px; background: #edf5fb; border: 1px solid #c7dce9; color: #4a6579; font-size: 11px; }
+.simulation-guard svg { width: 16px; color: var(--green); }
 .trend-plot { position: relative; height: 148px; display: flex; align-items: flex-end; gap: 6px; padding: 14px 12px 0; background: #f4f7f9; border: 1px solid var(--line); overflow: hidden; }
 .trend-plot::before { content: ""; position: absolute; z-index: 0; left: 0; right: 0; top: 36px; height: 1px; background: #dfe5ea; box-shadow: 0 36px 0 #dfe5ea, 0 72px 0 #dfe5ea; }
 .trend-plot i { position: relative; z-index: 1; flex: 1; min-width: 6px; max-width: 28px; background: #2b82bd; }
@@ -194,7 +234,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .command-summary b { overflow-wrap: anywhere; font-size: 12px; }
 .command-dialog footer { display: flex; justify-content: flex-end; gap: 9px; padding: 13px 18px; background: #f6f8f9; border-top: 1px solid var(--line); }
 
-.toast { position: fixed; z-index: 80; right: 22px; bottom: 82px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(8px); transition: 150ms ease-out; font-size: 13px; }
+.toast { position: fixed; z-index: 80; top: 86px; right: 22px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(-8px); transition: 150ms ease-out; font-size: 13px; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast.is-error { background: #502229; border-left-color: #ee7b84; }
 
@@ -214,7 +254,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .console-shell { display: block; }
   .side-nav { position: fixed; z-index: 30; top: auto; bottom: 0; width: 100%; height: 58px; display: block; border-top: 1px solid #0d141c; }
   .brand-mark, .mode-flag { display: none; }
-  .side-nav nav { height: 58px; grid-template-columns: repeat(3, 1fr); padding: 4px 8px; }
+  .side-nav nav { height: 58px; grid-template-columns: repeat(4, 1fr); padding: 4px 4px; }
   .nav-item { height: 48px; grid-template-columns: 18px auto; justify-content: center; gap: 6px; }
   .nav-item span { display: inline; font-size: 11px; }
   .nav-item.is-active::before { left: 25%; bottom: -4px; width: 50%; height: 2px; }
@@ -230,7 +270,8 @@ td > svg { width: 16px; color: #8b96a1; }
   .facts-grid { grid-template-columns: 1fr; }
   .candidate-hero { grid-template-columns: 1fr 100px; }
   .command-summary { grid-template-columns: 1fr; }
-  .toast { right: 12px; bottom: 74px; max-width: calc(100vw - 24px); }
+  .topology-summary, .metric-grid, .simulation-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toast { top: 74px; right: 12px; max-width: calc(100vw - 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

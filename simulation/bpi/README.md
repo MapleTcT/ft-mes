@@ -3,8 +3,9 @@
 This deterministic HTTP simulator exercises the BPI interaction and API state machine before real
 JetLinks, Kafka, Flink and PostgreSQL integration is available.
 
-It creates only in-memory `shadow=true` batch facts. It never calls WOM, QCS, WMS, PLC/DCS or an
-external database, and a passing simulation is not production persistence acceptance.
+It creates only in-memory `shadow=true` batch facts and deterministic topology/rule results. It never
+calls WOM, QCS, WMS, PLC/DCS or an external database, and a passing simulation is not production
+persistence acceptance.
 
 Run the automated acceptance flow:
 

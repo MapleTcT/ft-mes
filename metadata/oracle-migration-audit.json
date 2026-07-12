@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T18:41:48+00:00",
-  "repoCommit": "235f56171d2f37225f759ad14f4089892a08d0b2",
-  "findingCount": 974,
+  "generatedAt": "2026-07-12T19:20:27+00:00",
+  "repoCommit": "28a1beb1caf7dc4534c3eed4d100283659bf9d0b",
+  "findingCount": 981,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 189,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 8,
+    "java-row-index-noise": 15,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 6,
@@ -21,7 +21,7 @@
     "from-dual": 140,
     "ojdbc": 15,
     "oracle-keyword": 634,
-    "rownum": 50,
+    "rownum": 57,
     "sysdate": 135
   },
   "topFiles": [
@@ -7021,7 +7021,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 237,
+      "line": 282,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -7885,7 +7885,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 251,
+      "line": 252,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7893,7 +7893,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 260,
+      "line": 261,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7901,7 +7901,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 294,
+      "line": 295,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7909,7 +7909,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 546,
+      "line": 547,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7917,7 +7917,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 560,
+      "line": 561,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7925,7 +7925,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 586,
+      "line": 587,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -7933,11 +7933,67 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
-      "line": 604,
+      "line": 605,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
       "excerpt": "return (rs, rowNum) -> new BatchInstance("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 58,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> new TopologyVersionView("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 69,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> new TopologyVersionView("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 90,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> mapRule(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 107,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> mapRule(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 147,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> new TelemetryObservation("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 176,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> new GoldenBoundary("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
+      "line": 227,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> {"
     }
   ]
 }

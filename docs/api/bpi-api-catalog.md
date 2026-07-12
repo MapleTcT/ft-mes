@@ -17,7 +17,7 @@
 - 事件状态 `JOB_WIRED` 表示 Kafka/Flink 作业图、Harness 和事务 sink 已接线，不表示真实 broker、Flink HA、
   checkpoint storage 或端到端 PostgreSQL 已验收；只有完成实机证据后才能标记 `CLUSTER_ACCEPTED`。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 12 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 19 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -26,7 +26,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；请求体上限为 64 KiB。
-- 当前允许 GET overview/line/candidate/batch 读取，以及 POST candidate confirm/reject、batch suspend/resume。未在白名单中的 Phase 2/3 契约即使存在于 OpenAPI 也返回 403。
+- 当前允许 GET overview/line/candidate/batch/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、rule simulate/publish。规则/拓扑草稿和拓扑发布仍返回 403。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -49,17 +49,17 @@
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
-| 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | CONTRACT_ONLY |
-| 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | CONTRACT_ONLY |
+| 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | SERVICE_IMPLEMENTED |
+| 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/drafts` | `createTopologyDraft` | CONTRACT_ONLY |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/validate` | `validateTopologyDraft` | CONTRACT_ONLY |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/publish` | `publishTopologyVersion` | CONTRACT_ONLY |
-| 边界规则 | GET | `/bpi/v1/rules` | `listRules` | SIMULATED |
-| 边界规则 | GET | `/bpi/v1/rules/{ruleId}` | `getRuleVersion` | SIMULATED |
+| 边界规则 | GET | `/bpi/v1/rules` | `listRules` | SERVICE_IMPLEMENTED |
+| 边界规则 | GET | `/bpi/v1/rules/{ruleId}` | `getRuleVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/drafts` | `createRuleDraft` | CONTRACT_ONLY |
-| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/simulate` | `simulateRule` | SIMULATED |
-| 边界规则 | GET | `/bpi/v1/rule-simulations/{simulationId}` | `getRuleSimulation` | SIMULATED |
-| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SIMULATED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/simulate` | `simulateRule` | SERVICE_IMPLEMENTED |
+| 边界规则 | GET | `/bpi/v1/rule-simulations/{simulationId}` | `getRuleSimulation` | SERVICE_IMPLEMENTED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SIMULATED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SIMULATED |
 | 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | CONTRACT_ONLY |
@@ -77,6 +77,15 @@
 - `START`：按 tenant/line 加事务锁，拒绝已有 `ACTIVE/SUSPENDED` 批次的重复启动，生成唯一影子批次；
 - `END`：锁定同 tenant/plant/line/order 的 `ACTIVE` 批次，要求结束时间晚于开始时间，写入 END 证据并
   迁移到 `CLOSED_RAW`。两种路径都使用候选 revision、幂等键、功能开关和审计。
+
+`simulateRule` 不是固定成功桩。它按规则作用域读取 PostgreSQL `bpi_telemetry_points` 的校准测点，调用与在线
+候选相同的 `batch-rule-runtime`，再与 `bpi_rule_golden_boundaries` 的人工边界按容差匹配。空窗口、空金标准集
+和超过 100,000 个观测值均返回 `422` 并回滚幂等预留。结果写入 `bpi_rule_simulations`，并把规则推进到
+`SIMULATION_PASSED` 或退回 `DRAFT`。
+
+`publishRuleVersion` 只接受当前规则最近一次 `PASSED` 模拟的 simulationId 和 checksum；revision、checksum 或
+作用域不匹配均 fail closed。成功后规则进入 `PUBLISHED`，并写入 `RULE_PUBLISHED` 审计。该技术门已经实现，
+生产要求的双人审批工作流仍是未完成项。
 
 ## 3. 内部受信接入 API
 
@@ -126,8 +135,9 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 7. 独立场景暂停 `ACTIVE` 批次并确认变为 `SUSPENDED/r2`，重复暂停和跨命令复用 key 返回 `409`。
 8. 恢复 `SUSPENDED` 批次并确认变为 `ACTIVE/r3`，时间线追加暂停和恢复事件。
 9. 查询批次头、START/END 证据、平衡、谱系和 append-only 时间线。
-10. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
-11. 查询数据质量影响和集成降级影响。
+10. 查询作用域拓扑和测点绑定。
+11. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
+12. 查询数据质量影响和集成降级影响。
 
 运行命令：
 

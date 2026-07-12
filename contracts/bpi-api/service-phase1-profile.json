@@ -13,7 +13,14 @@
     "getBatchEvidence",
     "getBatchTimeline",
     "suspendBatch",
-    "resumeBatch"
+    "resumeBatch",
+    "listTopologies",
+    "getTopologyVersion",
+    "listRules",
+    "getRuleVersion",
+    "simulateRule",
+    "getRuleSimulation",
+    "publishRuleVersion"
   ],
   "internalEndpoints": [
     {

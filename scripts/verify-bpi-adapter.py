@@ -47,7 +47,7 @@ def main() -> int:
                 failures.append(f"BPI adapter trusts forbidden browser scope header {forbidden!r}")
 
         route_policy = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java").read_text(encoding="utf-8")
-        for required in ("confirm", "reject", "suspend", "resume"):
+        for required in ("confirm", "reject", "suspend", "resume", "topologies", "rules", "rule-simulations", "simulate", "publish"):
             if required not in route_policy:
                 failures.append(f"BPI adapter route policy is missing approved command {required!r}")
 

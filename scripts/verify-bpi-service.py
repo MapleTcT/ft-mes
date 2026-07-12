@@ -20,12 +20,17 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V4__bpi_end_boundary_lifecycle.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V5__bpi_rule_simulation_and_topology_scope.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/IdempotencyRecord.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/CandidateController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
@@ -49,6 +54,8 @@ REQUIRED_FILES = [
     "metadata/bpi-candidate-protobuf-persistence-acceptance.json",
     "docs/backend-table-audit/bpi-candidate-kafka-ingress.md",
     "metadata/bpi-candidate-kafka-persistence-acceptance.json",
+    "docs/backend-table-audit/bpi-rule-management.md",
+    "metadata/bpi-rule-management-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -129,6 +136,16 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V5__bpi_rule_simulation_and_topology_scope.sql",
+        [
+            "bpi_rule_golden_boundaries",
+            "bpi_rule_simulations",
+            "latest_simulation_id",
+            "'bpi.rule-management', false",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
          "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
@@ -154,6 +171,34 @@ def main() -> int:
     require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/BatchController.java",
         ["/bpi/v1/batches/{batchId}/suspend", "/bpi/v1/batches/{batchId}/resume"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
+        [
+            "BoundaryWindowEvaluator",
+            "findObservations",
+            "findGoldenBoundaries",
+            "MAX_REPLAY_OBSERVATIONS",
+            "simulationChecksum",
+            "RULE_SIMULATED",
+            "RULE_PUBLISHED",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
+        [
+            "/bpi/v1/topologies",
+            "/bpi/v1/rules/{ruleId}/simulate",
+            "/bpi/v1/rule-simulations/{simulationId}",
+            "/bpi/v1/rules/{ruleId}/publish",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
+        ["replayEmitsAtTheExactHoldTimerInsteadOfTheWindowEnd", "expectedBoundary", "meanBoundaryErrorSeconds"],
         failures,
     )
     require_text(
@@ -260,6 +305,13 @@ def main() -> int:
         fail("BPI Kafka candidate acceptance must identify PostgreSQL", failures)
     if kafka_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI Kafka candidate acceptance must not contain failed items", failures)
+    rule_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-management-acceptance.json").read_text(encoding="utf-8")
+    )
+    if rule_acceptance.get("database") != "PostgreSQL":
+        fail("BPI rule management acceptance must identify PostgreSQL", failures)
+    if rule_acceptance.get("summary", {}).get("fail") != 0:
+        fail("BPI rule management acceptance must not contain failed items", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

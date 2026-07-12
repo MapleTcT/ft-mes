@@ -100,3 +100,61 @@ export interface StateEvent {
   actorId?: string;
   reason?: string;
 }
+
+export interface TopologyVersion {
+  id: string;
+  code: string;
+  version: string;
+  state: BpiStatus;
+  revision: number;
+  plantId: string;
+  lineId: string;
+  checksum: string;
+  definition: {
+    stages?: Array<{ code: string; name: string }>;
+    nodes?: Array<{ code: string; type: string; name: string }>;
+    bindings?: Array<{ signal: string; propertyId: string; unit: string; calibrationVersion: string }>;
+  };
+}
+
+export interface RuleVersion {
+  id: string;
+  code: string;
+  version: string;
+  state: BpiStatus;
+  revision: number;
+  plantId: string;
+  lineId: string;
+  topologyVersion: string;
+  checksum: string;
+  ast: Record<string, unknown>;
+  latestSimulationId?: string | null;
+}
+
+export interface RuleSimulationCommand {
+  lineId: string;
+  from: string;
+  to: string;
+  topologyVersion: string;
+  calibrationVersion: string;
+  goldenSetId: string;
+}
+
+export interface RuleSimulation {
+  id: string;
+  ruleId: string;
+  state: 'PASSED' | 'FAILED' | 'QUEUED' | 'RUNNING';
+  checksum: string;
+  metrics: {
+    matched: number;
+    missed: number;
+    falsePositive: number;
+    meanBoundaryErrorSeconds: number;
+  };
+  inputManifest: RuleSimulationCommand & {
+    observationCount?: number;
+    goldenBoundaryCount?: number;
+  };
+  emittedBoundaries: string[];
+  failureReason?: string | null;
+}

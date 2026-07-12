@@ -10,9 +10,12 @@ public class BpiRoutePolicy {
 
     private static final String ID = "[A-Za-z0-9._:-]{1,128}";
     private static final Pattern GET_ROUTE = Pattern.compile(
-            "^/(?:overview|lines/" + ID + "/current-state|candidates(?:/" + ID + ")?|batches(?:/" + ID + "(?:/(?:evidence|timeline))?)?)$");
+            "^/(?:overview|lines/" + ID + "/current-state|candidates(?:/" + ID + ")?|"
+                    + "batches(?:/" + ID + "(?:/(?:evidence|timeline))?)?|"
+                    + "topologies(?:/" + ID + ")?|rules(?:/" + ID + ")?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
-            "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume))$");
+            "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
+                    + "rules/" + ID + "/(?:simulate|publish))$");
 
     public boolean allows(HttpMethod method, String path) {
         if (method == HttpMethod.GET) return GET_ROUTE.matcher(path).matches();

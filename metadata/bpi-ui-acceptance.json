@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 5,
-    "pass": 5,
+    "browserTests": 6,
+    "pass": 6,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -100,12 +100,13 @@
       "viewport": "390x844",
       "routes": [
         "/bpi/#/batches",
-        "/bpi/#/overview"
+        "/bpi/#/overview",
+        "/bpi/#/rules"
       ],
       "operations": [
         "use fixed bottom navigation",
-        "switch from batches to overview",
-        "verify page-level horizontal overflow is absent"
+        "switch from batches to overview and rules",
+        "verify overview and rule workbench have no page-level horizontal overflow"
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-mobile.png"
@@ -131,12 +132,37 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-candidate-rejected.png"
+    },
+    {
+      "id": "desktop-rule-replay-and-publication",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/rules"
+      ],
+      "operations": [
+        "inspect scoped topology and telemetry bindings",
+        "open a controlled AST rule",
+        "submit a historical replay with calibration and golden set",
+        "verify matched, missed, false positive, observation count and checksum",
+        "publish the rule with reason, simulation proof and current revision",
+        "verify PUBLISHED revision 9 through the API"
+      ],
+      "apis": [
+        "GET /bpi/v1/topologies",
+        "GET /bpi/v1/rules",
+        "GET /bpi/v1/rules/{id}",
+        "POST /bpi/v1/rules/{id}/simulate",
+        "GET /bpi/v1/rule-simulations/{id}",
+        "POST /bpi/v1/rules/{id}/publish"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-rule-published.png"
     }
   ],
   "persistence": {
     "performed": false,
     "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
-    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json"
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json and metadata/bpi-rule-management-acceptance.json"
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
