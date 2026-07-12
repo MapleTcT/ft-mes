@@ -15,8 +15,11 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/preflight.sh",
     "deploy/bpi-streaming/scripts/smoke-cluster.sh",
     "deploy/bpi-streaming/scripts/run-replay.sh",
+    "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
+    "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
     "metadata/bpi-test-host-capacity-preflight.json",
+    "metadata/bpi-kafka-postgres-replay-acceptance.json",
 ]
 
 
@@ -69,6 +72,21 @@ def main() -> int:
     if "bpi.batch.candidate.dlq.v1" not in topic_script:
         failures.append("BPI topic initialization must create the candidate DLQ")
 
+    postgres_replay = (
+        ROOT / "deploy/bpi-streaming/scripts/run-postgres-replay.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "TENANT=TENANT-E2E",
+        "BPI_PERSISTENCE_REPLAY_KEEP_MARKER",
+        "DLQ_BEFORE",
+        "candidateCount",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates",
+        "cleanup_marker",
+    ):
+        if marker not in postgres_replay:
+            failures.append(f"BPI PostgreSQL replay is missing marker: {marker}")
+
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")
     )
@@ -80,6 +98,14 @@ def main() -> int:
         failures.append("capacity evidence cannot claim destructive cleanup")
     if evidence.get("thresholds", {}).get("minimumFreeDiskGiB", 0) < 25:
         failures.append("BPI streaming free-disk gate must be at least 25 GiB")
+
+    persistence = json.loads(
+        (ROOT / "metadata/bpi-kafka-postgres-replay-acceptance.json").read_text(encoding="utf-8")
+    )
+    if persistence.get("status") != "HARNESS_READY_CLUSTER_BLOCKED_DISK":
+        failures.append("Kafka/Flink/PostgreSQL replay must remain blocked until a live target rerun passes")
+    if persistence.get("targetEvidence", {}).get("destructiveActionsPerformed") is not False:
+        failures.append("Kafka/Flink/PostgreSQL replay cannot claim destructive cleanup")
 
     return report(failures)
 

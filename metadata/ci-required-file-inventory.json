@@ -519,6 +519,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/run-replay.sh",
       "state": "tracked",
       "tracked": true
@@ -3717,6 +3723,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-production-context-join-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -3916,6 +3928,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-kafka-flink-topology-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-kafka-postgres-replay-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5714,16 +5732,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 467
+      "tracked": 468
     },
     "docs": {
-      "tracked": 77
+      "tracked": 78
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 90
+      "tracked": 91
     },
     "package.json": {
       "tracked": 1
@@ -5747,8 +5765,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 948,
-    "tracked": 948,
+    "totalFiles": 951,
+    "tracked": 951,
     "untracked": 0
   },
   "untrackedByDirectory": []

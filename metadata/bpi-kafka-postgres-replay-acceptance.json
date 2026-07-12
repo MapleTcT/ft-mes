@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-07-13T01:10:00+08:00",
+  "repoCommit": "ce5cace",
+  "database": "PostgreSQL",
+  "status": "HARNESS_READY_CLUSTER_BLOCKED_DISK",
+  "entrypoint": "make bpi-stream-postgres-replay",
+  "script": "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
+  "localEvidence": {
+    "kafkaBroker": "embedded Kafka 3.8.1",
+    "postgresql": "16.13",
+    "serviceTests": 14,
+    "failures": 0,
+    "skipped": 0,
+    "validated": [
+      "real listener delivery",
+      "one inbox row",
+      "one candidate row",
+      "at-least-once duplicate suppression",
+      "same-partition poison DLQ"
+    ]
+  },
+  "targetEvidence": {
+    "host": "100.99.133.43",
+    "minimumFreeDiskGiB": 25,
+    "observedFreeDiskGiB": 0.45,
+    "deploymentStarted": false,
+    "destructiveActionsPerformed": false
+  },
+  "liveAcceptance": {
+    "flinkCandidate": "BLOCKED_DISK",
+    "postgresInbox": "BLOCKED_DISK",
+    "postgresCandidate": "BLOCKED_DISK",
+    "candidateDlq": "BLOCKED_DISK",
+    "browserConfirmation": "BLOCKED_DISK"
+  },
+  "evidence": [
+    "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
+    "docs/backend-table-audit/bpi-candidate-kafka-ingress.md",
+    "metadata/bpi-candidate-kafka-persistence-acceptance.json",
+    "metadata/bpi-test-host-capacity-preflight.json"
+  ]
+}

@@ -35,6 +35,7 @@ make bpi-stream-deploy-preflight
 make up-bpi-stream
 make bpi-stream-cluster-smoke
 make bpi-stream-cluster-replay
+make bpi-stream-postgres-replay
 make down-bpi-stream
 ```
 
@@ -54,6 +55,23 @@ Smoke 必须同时满足：
 数据质量错误；遥测默认间隔 2 秒以覆盖真实调度，随后发布同版本 `INACTIVE` 规则移除测试路由。输入和输出 partition/offset、
 candidate key、Flink job ID 和 checkpoint ID 写入
 `${BPI_REPLAY_EVIDENCE_DIR}/bpi-kafka-replay.json`。
+
+`bpi-stream-postgres-replay` 在上述回放外再要求运行中的 BPI 服务已显式启用 candidate consumer，
+并且仅允许测试租户/工厂：
+
+```dotenv
+BPI_CANDIDATE_KAFKA_ENABLED=true
+BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS=TENANT-E2E
+BPI_CANDIDATE_KAFKA_ALLOWED_PLANT_IDS=PLANT-E2E
+BPI_CANDIDATE_KAFKA_ALLOWED_LINE_IDS=*
+```
+
+由于 line 包含每次唯一 marker，测试环境只在已经限定 tenant 和 plant 后允许 line `*`。流环境的
+Kafka bind/advertised host 与 BPI 服务 bootstrap 地址必须使用容器可达的 Tailscale 地址。脚本会先写入
+`TENANT-E2E` 的已发布拓扑/marker 规则 fixture，再执行 Flink 回放，要求 PostgreSQL inbox/candidate
+均为 1、candidate 为 `PENDING`、evidence source 为 `bpi-stream-engine`，同时要求 candidate DLQ end
+offset 前后不变。默认退出时只清理本 marker 的 candidate/inbox/rule；设置
+`BPI_PERSISTENCE_REPLAY_KEEP_MARKER=true` 才保留供浏览器继续确认。
 
 该 replay 证明 Kafka -> Flink -> Kafka 候选数据面。BPI 服务已经具备默认关闭的 candidate consumer
 和 PostgreSQL 幂等落库实现；只有在实机启用白名单后，继续验证 candidate offset、inbox/candidate marker、
