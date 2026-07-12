@@ -95,10 +95,26 @@ public class CandidateService {
         if (candidate.state() != CandidateState.PENDING) {
             throw new BpiConflictException("Candidate is already " + candidate.state() + ".", candidate.revision());
         }
-        if (candidate.boundaryType() != BoundaryType.START) {
-            throw new BpiValidationException("END candidate confirmation requires an existing active batch.");
-        }
+        repository.lockBatchLine(actor.tenantId(), candidate.lineId());
+        BatchInstance batch = candidate.boundaryType() == BoundaryType.START
+                ? confirmStart(actor, persisted, command, traceId, expectedRevision)
+                : confirmEnd(actor, candidate, command, traceId, expectedRevision);
+        CandidateConfirmation response = new CandidateConfirmation(
+                repository.findCandidate(actor, candidateId), batch);
+        repository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(response));
+        return new CommandResult<>(response, false);
+    }
 
+    private BatchInstance confirmStart(
+            ActorContext actor,
+            PersistedCandidate persisted,
+            ReasonCommand command,
+            String traceId,
+            long expectedRevision) {
+        BatchCandidate candidate = persisted.candidate();
+        if (repository.hasOpenBatch(actor.tenantId(), candidate.lineId())) {
+            throw new BpiConflictException("The production line already has an open batch.", null);
+        }
         UUID batchId = UuidV5.from(BATCH_NAMESPACE, actor.tenantId() + "|" + candidate.candidateKey());
         String suffix = candidate.candidateKey().toString().substring(0, 8).toUpperCase();
         String normalizedLine = candidate.lineId().replaceAll("[^A-Za-z0-9]", "").toUpperCase();
@@ -114,15 +130,45 @@ public class CandidateService {
         repository.insertStateEvent(
                 actor.tenantId(), batchId, 1, "SHADOW_BATCH_CREATED", null, BatchState.ACTIVE.name(),
                 command.reason(), actor.userId(), Instant.now(), traceId);
-        repository.confirmCandidate(candidateId, expectedRevision, batchId, actor.userId(), command.reason());
+        repository.confirmCandidate(candidate.id(), expectedRevision, batchId, actor.userId(), command.reason());
         repository.insertAudit(
                 actor, candidate, "CANDIDATE_CONFIRMED", expectedRevision, expectedRevision + 1,
-                command.reason(), traceId, Map.of("batchId", batchId, "shadow", true));
+                command.reason(), traceId,
+                Map.of("batchId", batchId, "shadow", true, "boundaryType", BoundaryType.START));
+        return repository.findBatch(actor, batchId);
+    }
 
-        CandidateConfirmation response = new CandidateConfirmation(
-                repository.findCandidate(actor, candidateId), repository.findBatch(actor, batchId));
-        repository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(response));
-        return new CommandResult<>(response, false);
+    private BatchInstance confirmEnd(
+            ActorContext actor,
+            BatchCandidate candidate,
+            ReasonCommand command,
+            String traceId,
+            long expectedRevision) {
+        BatchInstance batch = repository.lockActiveBatchForEnd(actor, candidate);
+        if (!candidate.boundaryTime().isAfter(batch.startTime())) {
+            throw new BpiValidationException("END boundary time must be after the batch start time.");
+        }
+
+        long nextBatchRevision = batch.revision() + 1;
+        repository.closeBatchRaw(actor.tenantId(), batch.id(), batch.revision(), candidate.boundaryTime());
+        repository.insertEvidence(actor.tenantId(), batch.id(), BoundaryType.END, candidate.evidence());
+        repository.insertStateEvent(
+                actor.tenantId(), batch.id(), nextBatchRevision, "END_BOUNDARY_CONFIRMED",
+                BatchState.ACTIVE.name(), BatchState.CLOSED_RAW.name(), command.reason(),
+                actor.userId(), Instant.now(), traceId);
+        repository.confirmCandidate(
+                candidate.id(), expectedRevision, batch.id(), actor.userId(), command.reason());
+        repository.insertAudit(
+                actor, candidate, "END_CANDIDATE_CONFIRMED", expectedRevision, expectedRevision + 1,
+                command.reason(), traceId,
+                Map.of("batchId", batch.id(), "boundaryType", BoundaryType.END,
+                        "endRuleVersion", candidate.ruleVersion()));
+        repository.insertBatchAudit(
+                actor, batch, "BATCH_CLOSED_RAW", batch.revision(), nextBatchRevision,
+                command.reason(), traceId,
+                Map.of("candidateId", candidate.id(), "candidateKey", candidate.candidateKey(),
+                        "boundaryTime", candidate.boundaryTime(), "endRuleVersion", candidate.ruleVersion()));
+        return repository.findBatch(actor, batch.id());
     }
 
     @Transactional(timeout = 15)

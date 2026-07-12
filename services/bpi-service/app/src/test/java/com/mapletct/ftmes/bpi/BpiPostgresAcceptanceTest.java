@@ -68,6 +68,7 @@ class BpiPostgresAcceptanceTest {
     private String tenantId;
     private UUID topologyId;
     private UUID ruleId;
+    private UUID endRuleId;
     private UUID candidateKey;
     private String ingestPayload;
 
@@ -76,6 +77,7 @@ class BpiPostgresAcceptanceTest {
         tenantId = "ADP_E2E_BPI_" + UUID.randomUUID().toString().replace("-", "");
         topologyId = UUID.randomUUID();
         ruleId = UUID.randomUUID();
+        endRuleId = UUID.randomUUID();
         candidateKey = UUID.randomUUID();
         jdbc.update("""
                 INSERT INTO bpi.bpi_topology_versions
@@ -87,6 +89,11 @@ class BpiPostgresAcceptanceTest {
                     (id, tenant_id, rule_code, version, topology_version_id, state, checksum, definition, created_by)
                 VALUES (?, ?, 'RULE-S07-START', '1.2.0', ?, 'PUBLISHED', 'rule-checksum', '{}'::jsonb, 'acceptance')
                 """, ruleId, tenantId, topologyId);
+        jdbc.update("""
+                INSERT INTO bpi.bpi_rule_versions
+                    (id, tenant_id, rule_code, version, topology_version_id, state, checksum, definition, created_by)
+                VALUES (?, ?, 'RULE-S07-END', '1.2.0', ?, 'PUBLISHED', 'end-rule-checksum', '{}'::jsonb, 'acceptance')
+                """, endRuleId, tenantId, topologyId);
         jdbc.update("""
                 INSERT INTO bpi.bpi_feature_flags
                     (id, tenant_id, scope_type, scope_key, flag_key, enabled, revision, updated_by)
@@ -535,6 +542,201 @@ class BpiPostgresAcceptanceTest {
     }
 
     @Test
+    void endCandidateClosesTheMatchingShadowBatchWithEndEvidenceAndRawClosureAudit() throws Exception {
+        String ingestToken = token(
+                tenantId, List.of("BPI_EVENT_INGEST"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult startIngested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingestPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID startCandidateId = UUID.fromString(objectMapper.readTree(
+                startIngested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String shiftToken = token(
+                tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult started = mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", startCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "end-flow-start-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("reason", "确认启动边界并建立待结束批次"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("ACTIVE"))
+                .andReturn();
+        UUID batchId = UUID.fromString(objectMapper.readTree(started.getResponse().getContentAsString())
+                .path("data").path("batch").path("id").asText());
+
+        UUID endCandidateKey = UUID.randomUUID();
+        Instant endBoundaryTime = Instant.parse("2026-07-12T08:29:40Z");
+        MvcResult endIngested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(endCandidatePayload(endCandidateKey, endBoundaryTime)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.boundaryType").value("END"))
+                .andExpect(jsonPath("$.data.state").value("PENDING"))
+                .andReturn();
+        UUID endCandidateId = UUID.fromString(objectMapper.readTree(
+                endIngested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String endBody = objectMapper.writeValueAsString(Map.of(
+                "reason", "流量归零且泵阀路径停止，确认结束边界"));
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", endCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(endBody))
+                .andExpect(status().is(428));
+
+        String endKey = "end-flow-confirm-" + endCandidateKey;
+        MvcResult closed = mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", endCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", endKey)
+                        .header("If-Match", "1")
+                        .header("X-Trace-Id", "TRACE-END-" + endCandidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(endBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.candidate.state").value("CONFIRMED"))
+                .andExpect(jsonPath("$.data.candidate.revision").value(2))
+                .andExpect(jsonPath("$.data.candidate.batchId").value(batchId.toString()))
+                .andExpect(jsonPath("$.data.batch.id").value(batchId.toString()))
+                .andExpect(jsonPath("$.data.batch.state").value("CLOSED_RAW"))
+                .andExpect(jsonPath("$.data.batch.revision").value(2))
+                .andExpect(jsonPath("$.data.batch.endTime").value(endBoundaryTime.toString()))
+                .andReturn();
+
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", endCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", endKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(endBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.batch.state").value("CLOSED_RAW"))
+                .andExpect(jsonPath("$.data.batch.revision").value(2));
+
+        mockMvc.perform(get("/bpi/v1/batches/{id}/evidence", batchId)
+                        .header("Authorization", "Bearer " + shiftToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.start.length()").value(1))
+                .andExpect(jsonPath("$.data.end.length()").value(1))
+                .andExpect(jsonPath("$.data.end[0].signal").value("instantFlowBelowStopThreshold"));
+        mockMvc.perform(get("/bpi/v1/batches/{id}/timeline", batchId)
+                        .header("Authorization", "Bearer " + shiftToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].action").value("SHADOW_BATCH_CREATED"))
+                .andExpect(jsonPath("$.data[1].action").value("END_BOUNDARY_CONFIRMED"));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
+                        .header("Authorization", "Bearer " + shiftToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("IDLE"))
+                .andExpect(jsonPath("$.data.currentBatchId").doesNotExist());
+
+        assertThat(objectMapper.readTree(closed.getResponse().getContentAsString())
+                .path("data").path("batch").path("endTime").asText()).isEqualTo(endBoundaryTime.toString());
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || to_char(end_time AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"')
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, batchId))
+                .isEqualTo("CLOSED_RAW|2|2026-07-12T08:29:40Z");
+        assertThat(jdbc.queryForList("""
+                SELECT revision || '|' || action || '|' || coalesce(from_state, '-') || '|' || to_state AS event
+                  FROM bpi.bpi_batch_state_events
+                 WHERE tenant_id = ? AND batch_id = ?
+                 ORDER BY revision
+                """, String.class, tenantId, batchId))
+                .containsExactly(
+                        "1|SHADOW_BATCH_CREATED|-|ACTIVE",
+                        "2|END_BOUNDARY_CONFIRMED|ACTIVE|CLOSED_RAW");
+        assertThat(jdbc.queryForList("""
+                SELECT action
+                 FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ?
+                 ORDER BY action
+                """, String.class, tenantId))
+                .containsExactly("BATCH_CLOSED_RAW", "CANDIDATE_CONFIRMED", "END_CANDIDATE_CONFIRMED");
+        assertThat(count("bpi_batch_candidates")).isEqualTo(2);
+        assertThat(count("bpi_inbox_events")).isEqualTo(2);
+        assertThat(count("bpi_batch_instances")).isEqualTo(1);
+        assertThat(count("bpi_batch_state_events")).isEqualTo(2);
+        assertThat(count("bpi_boundary_evidence")).isEqualTo(2);
+        assertThat(count("bpi_audit_events")).isEqualTo(3);
+        assertThat(count("bpi_api_idempotency")).isEqualTo(2);
+    }
+
+    @Test
+    void secondStartCandidateCannotCreateAnotherOpenBatchOnTheSameLine() throws Exception {
+        String ingestToken = token(
+                tenantId, List.of("BPI_EVENT_INGEST"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult firstIngested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingestPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID firstCandidateId = UUID.fromString(objectMapper.readTree(
+                firstIngested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String shiftToken = token(
+                tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", firstCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "single-open-first-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("reason", "确认首个启动边界"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("ACTIVE"));
+
+        UUID duplicateKey = UUID.randomUUID();
+        var duplicateStart = (com.fasterxml.jackson.databind.node.ObjectNode)
+                objectMapper.readTree(ingestPayload);
+        duplicateStart.put("eventId", "DUPLICATE-START-EVENT-" + duplicateKey);
+        duplicateStart.put("candidateKey", duplicateKey.toString());
+        duplicateStart.put("boundaryTime", "2026-07-12T08:00:40Z");
+        var duplicateEvidence = (com.fasterxml.jackson.databind.node.ObjectNode)
+                duplicateStart.withArray("evidence").get(0);
+        duplicateEvidence.put("eventId", "DUPLICATE-START-EVIDENCE-" + duplicateKey);
+        duplicateEvidence.put("eventTime", "2026-07-12T08:00:40Z");
+        MvcResult secondIngested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(duplicateStart)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID secondCandidateId = UUID.fromString(objectMapper.readTree(
+                secondIngested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", secondCandidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "single-open-second-" + duplicateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("reason", "尝试创建第二个开放批次"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("open batch")));
+
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = ? AND line_id = ? AND state IN ('ACTIVE', 'SUSPENDED')
+                """, Long.class, tenantId, "LINE-S07-01")).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("""
+                SELECT state
+                  FROM bpi.bpi_batch_candidates
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, secondCandidateId)).isEqualTo("PENDING");
+        assertThat(count("bpi_batch_instances")).isEqualTo(1);
+        assertThat(count("bpi_batch_state_events")).isEqualTo(1);
+        assertThat(count("bpi_audit_events")).isEqualTo(1);
+        assertThat(count("bpi_api_idempotency")).isEqualTo(1);
+    }
+
+    @Test
     void protobufCandidateEventPersistsRichEvidenceAndConfirmsShadowBatch() throws Exception {
         String evidenceEventId = "ADP_E2E_BPI_PROTO_FLOW_" + candidateKey;
         String orderId = "ADP_E2E_BPI_PROTO_ORDER_" + candidateKey;
@@ -681,6 +883,34 @@ class BpiPostgresAcceptanceTest {
                         .setEventTimeMs(boundaryTime.toEpochMilli())
                         .setSource("bpi-stream-engine"))
                 .build();
+    }
+
+    private String endCandidatePayload(UUID key, Instant boundaryTime) throws Exception {
+        Map<String, Object> evidence = Map.of(
+                "eventId", "EVT-END-FLOW-" + key,
+                "signal", "instantFlowBelowStopThreshold",
+                "classification", "QUORUM",
+                "satisfied", true,
+                "value", "0.2",
+                "unit", "t/h",
+                "quality", "GOOD",
+                "eventTime", boundaryTime.toString(),
+                "source", "approved-replay");
+        return objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("eventId", "END-CANDIDATE-EVENT-" + key),
+                Map.entry("candidateKey", key),
+                Map.entry("plantId", "PLANT-01"),
+                Map.entry("lineId", "LINE-S07-01"),
+                Map.entry("boundaryType", "END"),
+                Map.entry("orderId", "MO-20260712-001"),
+                Map.entry("boundaryTime", boundaryTime.toString()),
+                Map.entry("ruleCode", "RULE-S07-END"),
+                Map.entry("ruleVersion", "1.2.0"),
+                Map.entry("topologyCode", "TOPO-S07"),
+                Map.entry("topologyVersion", "3"),
+                Map.entry("confidence", 0.96),
+                Map.entry("evidence", List.of(evidence)),
+                Map.entry("missingSignals", List.of())));
     }
 
     private long count(String table) {

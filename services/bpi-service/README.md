@@ -8,9 +8,10 @@ Modules:
 - `batch-rule-runtime`: framework-free deterministic rule primitives shared by live and replay jobs.
 - `app`: REST, application services, PostgreSQL repositories and Flyway migrations.
 
-The Phase 1 service accepts shadow candidates through an internal replay/event-ingest boundary and
-persists candidate review, shadow batch, evidence, state history, inbox idempotency and audit in one
-PostgreSQL transaction.
+The Phase 1 service accepts boundary candidates through an internal replay/event-ingest boundary.
+START confirmation creates one `ACTIVE` shadow batch per tenant/line; END confirmation closes the
+matching batch as `CLOSED_RAW`. Candidate review, START/END evidence, state history, inbox/API
+idempotency and audit are persisted transactionally in PostgreSQL.
 
 The production candidate path is the disabled-by-default `bpi.batch.candidate.v1` Kafka consumer.
 It validates Protobuf, canonical key, required headers and explicit tenant/plant/line allowlists,

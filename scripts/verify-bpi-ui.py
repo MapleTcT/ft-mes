@@ -54,7 +54,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-end-boundary.png", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 
@@ -62,8 +62,8 @@ def main() -> int:
         if acceptance.get("scope") != "deterministic BPI simulator browser acceptance":
             failures.append("BPI UI acceptance must declare its deterministic simulator scope")
         summary = acceptance.get("summary", {})
-        if summary.get("browserTests") != 4 or summary.get("pass") != 4:
-            failures.append("BPI UI acceptance must record four passing browser tests")
+        if summary.get("browserTests") != 5 or summary.get("pass") != 5:
+            failures.append("BPI UI acceptance must record five passing browser tests")
         if any(summary.get(key) != 0 for key in ("consoleErrors", "pageErrors", "requestFailures")):
             failures.append("BPI UI acceptance contains browser errors")
         limitations = " ".join(acceptance.get("limitations", []))

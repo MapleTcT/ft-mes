@@ -65,7 +65,7 @@ MES 顶部标签
 | 待处理/进行中 | 蓝色 | CANDIDATE、后台任务运行中 |
 | 注意/降级 | 琥珀色 | 缺少非关键证据、局部曲线不可用 |
 | 阻断/失败 | 红色 | required 信号失效、质量门阻断、命令失败 |
-| 已停止/历史 | 灰色 | CLOSED、REJECTED、过期版本 |
+| 已停止/历史 | 灰色 | CLOSED_RAW、REJECTED、过期版本 |
 
 颜色不作为唯一信息载体，状态必须同时显示文字和图标。
 
@@ -123,7 +123,8 @@ required 信号异常或上下文过期的产线。没有生产时显示最后�
 - 规则版本、拓扑版本、第一法定 quorum 事件和确定性 candidate key；
 - WOM 上下文及其有效期。
 
-底部命令为“确认候选”“拒绝候选”“暂不处理”。确认前显示拟生成的批次号、起止时间和影响；
+底部命令为“确认候选”“拒绝候选”“暂不处理”。START 的确认框显示“确认并生成影子批次”；END 的
+确认框显示 `ACTIVE → CLOSED_RAW` 和“确认并关闭原始批次”。确认前显示拟生成或关闭的批次、边界时间和影响；
 拒绝必须选择原因。证据不足时确认按钮降级为“提交人工确认”，要求备注并进入审计。
 
 **冲突处理：** 第二位用户确认已处理候选时，不弹泛化错误，直接刷新为“已由某人确认”，
@@ -167,6 +168,11 @@ WMS 状态、规则版本和时间范围。列：批次号、物料、产线/工
 都要求原因、`Idempotency-Key` 和当前 `If-Match` revision；成功后批次 revision 加一，并追加
 `BATCH_SUSPENDED` 或 `BATCH_RESUMED` 状态事件和批次审计。暂停不会结束批次、修改累计量或向
 WOM/QCS/WMS 写数据；恢复也不会补造缺失事件，而是从已审计的同一批次继续自动处理。
+
+首期 END 边界关闭也已经实现，但它仍通过候选审核入口完成，不在批次详情增加一个无证据的“结束”按钮。
+END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同一 tenant/plant/line/order 的
+`ACTIVE` 批次。成功后同一批次进入 `CLOSED_RAW`、revision 加一、写入 endTime、END 证据、
+`END_BOUNDARY_CONFIRMED` 状态事件和候选/批次审计。详情页对 `CLOSED_RAW` 不再显示暂停或恢复命令。
 
 **主要 API：** `getBatch`、`getBatchEvidence`、`getBatchBalance`、`getBatchGenealogy`、
 `getBatchTimeline`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、`createBatchCorrection`。
@@ -297,6 +303,22 @@ sequenceDiagram
   DB-->>UI: ACTIVE revision=3
 ```
 
+### 6.4 END 边界关闭原始批次
+
+```mermaid
+sequenceDiagram
+  participant U as 班长
+  participant UI as BPI 候选页面
+  participant API as BPI API
+  participant DB as PostgreSQL
+  U->>UI: 打开 END 候选并核对流量/泵阀证据
+  UI->>API: POST confirm, Idempotency-Key, If-Match=1
+  API->>DB: tenant/line advisory lock + ACTIVE batch row lock
+  API->>DB: batch ACTIVE/r1 -> CLOSED_RAW/r2 + end evidence + events + audits
+  DB-->>UI: same batchId, CLOSED_RAW revision=2, endTime
+  UI->>UI: 打开批次详情，显示 START/END 证据与关闭时间线
+```
+
 ## 7. 异常与恢复
 
 | 场景 | 用户看到 | 可恢复动作 |
@@ -328,11 +350,13 @@ sequenceDiagram
 2. 读取候选证据并确认，生成唯一影子批次。
 3. 使用相同 `Idempotency-Key` 重试不重复生成批次。
 4. 使用旧 revision 再提交返回 `409` 和当前 revision。
-5. 从批次详情暂停 `ACTIVE` 批次，看到 `SUSPENDED/r2`、产线 `BLOCKED` 和追加事件。
-6. 从同一详情恢复批次，看到 `ACTIVE/r3`、产线 `RUNNING` 和追加事件。
-7. 查询批次详情、证据、平衡和谱系。
-8. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
-9. 查询数据质量事件并看到受影响的产线、规则和批次。
+5. START 后出现 END 候选；确认后同一批次进入 `CLOSED_RAW/r2`，显示 endTime、独立 END 证据和
+   `END_BOUNDARY_CONFIRMED`，且不再显示暂停/恢复按钮。
+6. 独立场景从批次详情暂停 `ACTIVE` 批次，看到 `SUSPENDED/r2`、产线 `BLOCKED` 和追加事件。
+7. 从同一详情恢复批次，看到 `ACTIVE/r3`、产线 `RUNNING` 和追加事件。
+8. 查询批次详情、START/END 证据、平衡和谱系。
+9. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
+10. 查询数据质量事件并看到受影响的产线、规则和批次。
 
 模拟验收不证明真实 JetLinks、Kafka、Flink 或 PostgreSQL 已接通；真实环境仍需执行
 浏览器、API、PostgreSQL marker 和回滚验收。

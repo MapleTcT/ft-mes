@@ -78,8 +78,53 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await page.getByRole('heading', { name: '批次档案' }).waitFor();
   await page.getByRole('heading', { name: 'S07-20260712-001' }).waitFor();
   await page.getByText('SHADOW', { exact: true }).last().waitFor();
-  assert.equal(await page.locator('#candidate-count').textContent(), '0');
+  assert.equal(await page.locator('#candidate-count').textContent(), '1');
   await page.screenshot({ path: '/tmp/bpi-console-desktop.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('shift lead confirms the END boundary and closes the raw batch', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/candidates`, { waitUntil: 'networkidle' });
+
+  await page.locator('[data-candidate-id]').click();
+  await page.getByRole('button', { name: '确认候选' }).click();
+  await page.locator('#confirm-reason').fill('班长确认启动边界并建立待结束批次');
+  await page.getByRole('button', { name: '确认并生成影子批次' }).click();
+  await page.getByRole('heading', { name: 'S07-20260712-001' }).waitFor();
+  assert.equal(await page.locator('#candidate-count').textContent(), '1');
+
+  await page.locator('[data-view="candidates"]').click();
+  await page.getByRole('heading', { name: '候选批次' }).waitFor();
+  assert.equal(await page.locator('[data-candidate-id]').count(), 1);
+  await page.locator('[data-candidate-id]').click();
+  await page.getByText('END 候选').waitFor();
+  await page.getByRole('button', { name: '确认候选' }).click();
+  await page.getByRole('heading', { name: '确认结束边界' }).waitFor();
+  await page.locator('#confirm-reason').fill('流量归零且泵阀路径停止，确认结束边界');
+  await page.getByRole('button', { name: '确认并关闭原始批次' }).click();
+
+  await page.getByText('已关闭为 CLOSED_RAW').waitFor();
+  await page.locator('.batch-state-band').getByText('CLOSED_RAW', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 2/);
+  await page.getByText('4 START / 3 END', { exact: true }).waitFor();
+  await page.getByText('END_BOUNDARY_CONFIRMED', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: '暂停自动处理' }).count(), 0);
+  assert.equal(await page.getByRole('button', { name: '恢复自动处理' }).count(), 0);
+  assert.equal(await page.locator('#candidate-count').textContent(), '0');
+
+  const batch = await fetch(`${simulatorUrl}/bpi/v1/batches/BATCH-S07-20260712-001`).then((response) => response.json());
+  const line = await fetch(`${simulatorUrl}/bpi/v1/lines/LINE-S07-01/current-state`).then((response) => response.json());
+  assert.equal(batch.data.state, 'CLOSED_RAW');
+  assert.equal(batch.data.revision, 2);
+  assert.equal(batch.data.endTime, '2026-07-12T08:29:40.000Z');
+  assert.equal(line.data.status, 'IDLE');
+  assert.equal(line.data.currentBatchId, null);
+  await page.screenshot({ path: '/tmp/bpi-console-end-boundary.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

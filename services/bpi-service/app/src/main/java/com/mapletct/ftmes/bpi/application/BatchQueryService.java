@@ -3,6 +3,7 @@ package com.mapletct.ftmes.bpi.application;
 import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
 import com.mapletct.ftmes.bpi.domain.BatchInstance;
 import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
+import com.mapletct.ftmes.bpi.domain.BoundaryType;
 import com.mapletct.ftmes.bpi.domain.EvidenceView;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import org.springframework.stereotype.Service;
@@ -35,8 +36,9 @@ public class BatchQueryService {
     @Transactional(readOnly = true)
     public Map<String, List<EvidenceView>> evidence(ActorContext actor, UUID batchId) {
         BatchInstance batch = get(actor, batchId);
-        List<EvidenceView> all = repository.findEvidence(actor, batch.id());
-        return Map.of("start", all, "end", List.of());
+        return Map.of(
+                "start", repository.findEvidence(actor, batch.id(), BoundaryType.START),
+                "end", repository.findEvidence(actor, batch.id(), BoundaryType.END));
     }
 
     @Transactional(readOnly = true)

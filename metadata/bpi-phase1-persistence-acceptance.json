@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-13T02:00:20+08:00",
-  "repoCommit": "ab1e506",
+  "generatedAt": "2026-07-13T02:35:06+08:00",
+  "repoCommit": "235f5617",
   "workingTree": "uncommitted",
   "database": {
     "engine": "PostgreSQL",
     "version": "16.13",
     "location": "isolated local Docker network",
-    "name": "bpi_acceptance",
+    "name": "bpi",
     "schema": "bpi",
-    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql + V3__bpi_telemetry_ingress.sql"
+    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql + V3__bpi_telemetry_ingress.sql + V4__bpi_end_boundary_lifecycle.sql"
   },
   "runtime": {
     "java": "17",
@@ -16,14 +16,14 @@
   },
   "scope": "BPI Phase 1 shadow-batch vertical slice only",
   "summary": {
-    "testedItems": 27,
-    "pass": 27,
+    "testedItems": 32,
+    "pass": 32,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 0,
     "postgresAcceptanceTests": {
-      "run": 5,
-      "passed": 5,
+      "run": 7,
+      "passed": 7,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -36,8 +36,8 @@
       "skipped": 0
     },
     "serviceTests": {
-      "run": 16,
-      "passed": 16,
+      "run": 18,
+      "passed": 18,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -376,6 +376,61 @@
       "tables": ["bpi.bpi_batch_instances", "bpi.bpi_batch_state_events", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
       "status": "PASS",
       "evidence": "Final state was ACTIVE|3; events were SHADOW_BATCH_CREATED, BATCH_SUSPENDED and BATCH_RESUMED at revisions 1, 2 and 3."
+    },
+    {
+      "id": "end-candidate-precondition",
+      "operation": "Confirm an END candidate without command preconditions",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 428,
+      "actualStatus": 428,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "The END command was rejected before persistence when Idempotency-Key and If-Match were absent."
+    },
+    {
+      "id": "end-candidate-confirmation",
+      "operation": "Confirm the END boundary and close the matching shadow batch",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": ["bpi.bpi_batch_candidates", "bpi.bpi_batch_instances", "bpi.bpi_batch_state_events", "bpi.bpi_boundary_evidence", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "status": "PASS",
+      "evidence": "The matching ACTIVE batch became CLOSED_RAW at revision 2 with endTime=2026-07-12T08:29:40Z and the END candidate linked to the same batch ID."
+    },
+    {
+      "id": "end-candidate-replay",
+      "operation": "Replay the successful END confirmation with the same idempotency key",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": ["bpi.bpi_api_idempotency"],
+      "status": "PASS",
+      "evidence": "Idempotent-Replay=true returned the original CLOSED_RAW revision 2 response without another state event or audit."
+    },
+    {
+      "id": "end-boundary-sql",
+      "operation": "Directly verify END evidence, raw closure, ordered events and audits",
+      "method": "SQL",
+      "api": "NOT_APPLICABLE",
+      "expectedStatus": 2,
+      "actualStatus": 2,
+      "tables": ["bpi.bpi_batch_instances", "bpi.bpi_batch_state_events", "bpi.bpi_boundary_evidence", "bpi.bpi_audit_events"],
+      "status": "PASS",
+      "evidence": "State was CLOSED_RAW|2; START and END evidence each persisted once; events were SHADOW_BATCH_CREATED then END_BOUNDARY_CONFIRMED; audits included BATCH_CLOSED_RAW."
+    },
+    {
+      "id": "single-open-batch-per-line",
+      "operation": "Confirm a second START candidate while the same line already has an open batch",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "tables": ["bpi.bpi_batch_instances", "bpi.bpi_batch_candidates", "bpi.bpi_api_idempotency"],
+      "status": "PASS",
+      "evidence": "The line-level advisory lock and V4 partial unique index kept exactly one ACTIVE/SUSPENDED batch; the second candidate remained PENDING and the failed command left no idempotency row."
     }
   ],
   "persistenceVerification": {
@@ -409,6 +464,23 @@
       "batchAudits": ["BATCH_SUSPENDED|1|2", "BATCH_RESUMED|2|3"],
       "successfulCommandIdempotencyRows": 3
     },
+    "endClosure": {
+      "finalBatchState": "CLOSED_RAW|2|2026-07-12T08:29:40Z",
+      "stateEvents": [
+        "1|SHADOW_BATCH_CREATED|-|ACTIVE",
+        "2|END_BOUNDARY_CONFIRMED|ACTIVE|CLOSED_RAW"
+      ],
+      "audits": ["BATCH_CLOSED_RAW", "CANDIDATE_CONFIRMED", "END_CANDIDATE_CONFIRMED"],
+      "startEvidenceRows": 1,
+      "endEvidenceRows": 1,
+      "successfulCommandIdempotencyRows": 2
+    },
+    "singleOpenBatchGuard": {
+      "openBatchRows": 1,
+      "secondCandidateState": "PENDING",
+      "failedCommandIdempotencyRows": 0,
+      "databaseConstraint": "uq_bpi_open_batch_per_line"
+    },
     "idempotencyCountNote": "The actual test assertion is 1, not 2. The successful command and same-key replay share one row; the stale-revision command uses a new key but its transaction rolls back on 409, so it leaves no persistent row.",
     "cleanup": "After each test, targeted DELETE statements remove only rows belonging to the dynamic tenant marker, including the seeded rule and topology versions."
   },
@@ -421,7 +493,7 @@
     "Kafka listener, duplicate delivery and DLQ were tested with a local embedded broker; the target three-broker cluster remains blocked by host disk capacity.",
     "Flink logic and deterministic replay are covered separately, but target-cluster event-time, checkpoint and recovery acceptance remains blocked by host disk capacity.",
     "The candidate payload came from an acceptance replay and not from a real IoT or JetLinks source.",
-    "Browser confirmation/rejection and batch suspend/resume were exercised against the deterministic simulator; browser-to-PostgreSQL target acceptance is still pending.",
+    "Browser START/END confirmation, rejection and batch suspend/resume were exercised against the deterministic simulator; browser-to-PostgreSQL target acceptance is still pending.",
     "No WOM, QCS or WMS write was executed; wmsStatus=NOT_REQUESTED is expected for this slice.",
     "Acceptance JWTs use a short-lived HS256 internal test secret; production JWKS/asymmetric signing and key rotation remain pending.",
     "Local PostgreSQL 16.13 ran in an isolated Docker network; this does not replace target-host Compose deployment acceptance.",

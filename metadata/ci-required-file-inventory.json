@@ -5085,6 +5085,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V4__bpi_end_boundary_lifecycle.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5759,7 +5765,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 94
+      "tracked": 95
     },
     "simulation": {
       "tracked": 4
@@ -5771,8 +5777,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 952,
-    "tracked": 952,
+    "totalFiles": 953,
+    "tracked": 953,
     "untracked": 0
   },
   "untrackedByDirectory": []

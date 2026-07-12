@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-13T02:00:20+08:00",
-  "repoCommit": "ab1e506",
+  "generatedAt": "2026-07-13T02:35:06+08:00",
+  "repoCommit": "235f5617",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 4,
-    "pass": 4,
+    "browserTests": 5,
+    "pass": 5,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -44,6 +44,33 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-desktop.png"
+    },
+    {
+      "id": "desktop-end-boundary-closure",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/candidates",
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "confirm START candidate and create shadow batch",
+        "open the generated END candidate",
+        "confirm END candidate with mandatory reason",
+        "verify CLOSED_RAW revision 2 and end time",
+        "verify separate START and END evidence groups",
+        "verify END_BOUNDARY_CONFIRMED timeline and no lifecycle command"
+      ],
+      "apis": [
+        "GET /bpi/v1/candidates",
+        "GET /bpi/v1/candidates/{id}",
+        "POST /bpi/v1/candidates/{id}/confirm",
+        "GET /bpi/v1/batches/{id}",
+        "GET /bpi/v1/batches/{id}/evidence",
+        "GET /bpi/v1/batches/{id}/timeline",
+        "GET /bpi/v1/lines/{lineId}/current-state"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-end-boundary.png"
     },
     {
       "id": "desktop-batch-lifecycle",
@@ -113,7 +140,7 @@
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
-    "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite.",
+    "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
     "The Java 8 authentication adapter route and JWT scope boundary are implemented and unit tested; target Keycloak/JWKS browser acceptance remains pending.",
     "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
     "No real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",

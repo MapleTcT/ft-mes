@@ -58,7 +58,7 @@ public class OverviewService {
     private LineState stateFor(
             String lineId, List<BatchCandidate> candidates, List<BatchInstance> batches) {
         BatchInstance active = batches.stream()
-                .filter(batch -> batch.lineId().equals(lineId) && !"CLOSED".equals(batch.state().name()))
+                .filter(batch -> batch.lineId().equals(lineId) && isOpen(batch))
                 .findFirst().orElse(null);
         List<BatchCandidate> lineCandidates = candidates.stream()
                 .filter(candidate -> candidate.lineId().equals(lineId)).toList();
@@ -83,5 +83,9 @@ public class OverviewService {
 
     private String lineStatus(BatchInstance batch) {
         return batch.state() == BatchState.SUSPENDED ? "BLOCKED" : "RUNNING";
+    }
+
+    private boolean isOpen(BatchInstance batch) {
+        return batch.state() == BatchState.ACTIVE || batch.state() == BatchState.SUSPENDED;
     }
 }

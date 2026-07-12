@@ -10,7 +10,8 @@
 - 浏览器只访问同源 `/bpi-api`；Java 8 适配器校验旧 Keycloak token 后，以短期内部 JWT 调用 Java 17 服务的 `/bpi/v1`。
 - 所有写操作必须携带 `Idempotency-Key`、`If-Match` 和业务原因；缺少前置条件返回 `428`。
 - revision 过期返回 `409 application/problem+json`，响应包含 `currentRevision`。
-- Phase 1 只创建 `shadow=true` 的 BPI 批次，不写 WOM、QCS、WMS，也不控制 PLC/DCS。
+- Phase 1 只在 BPI 内创建 `shadow=true` 批次；START 确认创建 `ACTIVE`，END 确认关闭同一批次为
+  `CLOSED_RAW`。它不写 WOM、QCS、WMS，也不控制 PLC/DCS。
 - 列表响应固定 `snapshotAt`，大数据列表使用 cursor，不用页码推断实时数据位置。
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
 - 事件状态 `JOB_WIRED` 表示 Kafka/Flink 作业图、Harness 和事务 sink 已接线，不表示真实 broker、Flink HA、
@@ -71,6 +72,12 @@
 | 审计记录 | GET | `/bpi/v1/audit/events` | `listAuditEvents` | CONTRACT_ONLY |
 | 审计记录 | GET | `/bpi/v1/audit/events/{auditId}` | `getAuditEvent` | CONTRACT_ONLY |
 
+`confirmBatchCandidate` 按候选 `boundaryType` 执行两个受控事务：
+
+- `START`：按 tenant/line 加事务锁，拒绝已有 `ACTIVE/SUSPENDED` 批次的重复启动，生成唯一影子批次；
+- `END`：锁定同 tenant/plant/line/order 的 `ACTIVE` 批次，要求结束时间晚于开始时间，写入 END 证据并
+  迁移到 `CLOSED_RAW`。两种路径都使用候选 revision、幂等键、功能开关和审计。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
@@ -114,11 +121,13 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 3. 使用 revision `3` 确认候选，生成唯一 `shadow=true` 批次。
 4. 使用同一幂等键重试，返回相同结果且不生成第二个批次。
 5. 使用旧 revision 和新幂等键重试，返回 `409` 和当前 revision `4`。
-6. 暂停 `ACTIVE` 批次并确认变为 `SUSPENDED/r2`，重复暂停和跨命令复用 key 返回 `409`。
-7. 恢复 `SUSPENDED` 批次并确认变为 `ACTIVE/r3`，时间线追加暂停和恢复事件。
-8. 查询批次头、证据、平衡、谱系和 append-only 时间线。
-9. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
-10. 查询数据质量影响和集成降级影响。
+6. START 确认后生成独立 END 候选；确认 END 后同一批次变为 `CLOSED_RAW/r2`，记录 endTime、END 证据和
+   `END_BOUNDARY_CONFIRMED`，相同 key 重放不重复关闭。
+7. 独立场景暂停 `ACTIVE` 批次并确认变为 `SUSPENDED/r2`，重复暂停和跨命令复用 key 返回 `409`。
+8. 恢复 `SUSPENDED` 批次并确认变为 `ACTIVE/r3`，时间线追加暂停和恢复事件。
+9. 查询批次头、START/END 证据、平衡、谱系和 append-only 时间线。
+10. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
+11. 查询数据质量影响和集成降级影响。
 
 运行命令：
 

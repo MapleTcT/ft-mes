@@ -93,6 +93,7 @@ function createScenario() {
   return {
     line,
     candidate,
+    endCandidate: null,
     batches: [],
     batchEvents: [],
     rule,

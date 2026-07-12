@@ -103,6 +103,44 @@ function batchFromCandidate(candidate) {
   };
 }
 
+function endCandidateFromStart(candidate) {
+  const boundaryTime = '2026-07-12T08:29:40.000Z';
+  return {
+    id: 'CAND-END-S07-001',
+    candidateKey: '93cdf206-4664-58bd-b7c9-cdbca49e74d4',
+    boundaryType: 'END',
+    lineId: candidate.lineId,
+    orderId: candidate.orderId,
+    batchId: null,
+    boundaryTime,
+    state: 'PENDING',
+    revision: 1,
+    confidence: 0.96,
+    ruleVersion: 'RULE-S07-END@1.2.0',
+    topologyVersion: candidate.topologyVersion,
+    missingSignals: [],
+    evidence: [
+      {
+        eventId: 'EVT-END-FLOW-001', signal: 'instantFlowBelowStopThreshold', classification: 'QUORUM',
+        satisfied: true, value: 0.2, unit: 't/h', quality: 'GOOD', eventTime: boundaryTime, source: 'JetLinks',
+      },
+      {
+        eventId: 'EVT-END-PUMP-001', signal: 'feedPumpStopped', classification: 'QUORUM',
+        satisfied: true, value: true, unit: null, quality: 'GOOD', eventTime: boundaryTime, source: 'JetLinks',
+      },
+      {
+        eventId: 'EVT-END-VALVE-001', signal: 'transferPathClosed', classification: 'QUORUM',
+        satisfied: true, value: true, unit: null, quality: 'GOOD', eventTime: boundaryTime, source: 'JetLinks',
+      },
+    ],
+    review: null,
+  };
+}
+
+function candidates(state) {
+  return [state.candidate, state.endCandidate].filter(Boolean);
+}
+
 function match(pathname, pattern) {
   const result = pathname.match(pattern);
   return result ? result.slice(1).map(decodeURIComponent) : null;
@@ -132,64 +170,101 @@ function createHandler(state) {
       }
       if (req.method === 'GET' && path === '/bpi/v1/candidates') {
         const requestedState = url.searchParams.get('state');
-        const candidates = !requestedState || state.candidate.state === requestedState ? [state.candidate] : [];
-        return send(res, 200, envelope('listBatchCandidates', candidates), 'listBatchCandidates');
+        const items = candidates(state).filter((candidate) => !requestedState || candidate.state === requestedState);
+        return send(res, 200, envelope('listBatchCandidates', items), 'listBatchCandidates');
       }
       ids = match(path, /^\/bpi\/v1\/candidates\/([^/]+)$/);
       if (req.method === 'GET' && ids) {
-        if (ids[0] !== state.candidate.id) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', 'getBatchCandidate'), 'getBatchCandidate');
-        return send(res, 200, envelope('getBatchCandidate', state.candidate), 'getBatchCandidate');
+        const candidate = candidates(state).find((item) => item.id === ids[0]);
+        if (!candidate) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', 'getBatchCandidate'), 'getBatchCandidate');
+        return send(res, 200, envelope('getBatchCandidate', candidate), 'getBatchCandidate');
       }
       ids = match(path, /^\/bpi\/v1\/candidates\/([^/]+)\/confirm$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'confirmBatchCandidate';
-        if (ids[0] !== state.candidate.id) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', operationId), operationId);
-        const context = commandContext(req, res, operationId, state.candidate.revision, state, path);
+        const candidate = candidates(state).find((item) => item.id === ids[0]);
+        if (!candidate) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, candidate.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
         if (!body.reason || String(body.reason).trim().length < 3) {
           const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
-        if (state.candidate.state !== 'PENDING') {
-          const response = problem(409, 'Candidate Already Processed', 'The candidate is no longer pending.', operationId, state.candidate.revision);
+        if (candidate.state !== 'PENDING') {
+          const response = problem(409, 'Candidate Already Processed', 'The candidate is no longer pending.', operationId, candidate.revision);
           return rememberAndSend(state, context, res, 409, response, operationId);
         }
-        const batch = batchFromCandidate(state.candidate);
-        state.batches.push(batch);
-        state.candidate.state = 'CONFIRMED';
-        state.candidate.revision += 1;
-        state.candidate.batchId = batch.id;
-        state.candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
-        state.line.currentBatchId = batch.id;
-        state.line.pendingCandidates = 0;
-        state.batchEvents = [
-          { revision: 1, action: 'SHADOW_BATCH_CREATED', at: FIXED_TIME, actor: 'simulated.shift.lead', reason: body.reason },
-        ];
-        const response = envelope(operationId, { candidate: state.candidate, batch });
+        let batch;
+        if (candidate.boundaryType === 'START') {
+          if (state.batches.some((item) => item.lineId === candidate.lineId && ['ACTIVE', 'SUSPENDED'].includes(item.state))) {
+            const response = problem(409, 'Open Batch Exists', 'The line already has an open batch.', operationId, candidate.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          batch = batchFromCandidate(candidate);
+          state.batches.push(batch);
+          state.endCandidate = endCandidateFromStart(candidate);
+          state.line.currentBatchId = batch.id;
+          state.line.pendingCandidates = 1;
+          state.batchEvents = [
+            { revision: 1, action: 'SHADOW_BATCH_CREATED', at: FIXED_TIME, actor: 'simulated.shift.lead', reason: body.reason, fromState: null, toState: 'ACTIVE' },
+          ];
+        } else {
+          batch = state.batches.find((item) => item.lineId === candidate.lineId
+            && item.orderId === candidate.orderId && item.state === 'ACTIVE');
+          if (!batch) {
+            const response = problem(409, 'Active Batch Not Found', 'No matching ACTIVE batch can be closed.', operationId, candidate.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          if (new Date(candidate.boundaryTime) <= new Date(batch.startTime)) {
+            const response = problem(409, 'Invalid End Boundary', 'END boundary must be after START boundary.', operationId, candidate.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          batch.state = 'CLOSED_RAW';
+          batch.revision += 1;
+          batch.endTime = candidate.boundaryTime;
+          state.line.currentBatchId = null;
+          state.line.status = 'IDLE';
+          state.line.pendingCandidates = 0;
+          state.batchEvents.push({
+            revision: batch.revision,
+            action: 'END_BOUNDARY_CONFIRMED',
+            at: FIXED_TIME,
+            actor: 'simulated.shift.lead',
+            reason: body.reason,
+            fromState: 'ACTIVE',
+            toState: 'CLOSED_RAW',
+          });
+        }
+        candidate.state = 'CONFIRMED';
+        candidate.revision += 1;
+        candidate.batchId = batch.id;
+        candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
+        const response = envelope(operationId, { candidate, batch });
         return rememberAndSend(state, context, res, 200, response, operationId);
       }
       ids = match(path, /^\/bpi\/v1\/candidates\/([^/]+)\/reject$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'rejectBatchCandidate';
-        if (ids[0] !== state.candidate.id) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', operationId), operationId);
-        const context = commandContext(req, res, operationId, state.candidate.revision, state, path);
+        const candidate = candidates(state).find((item) => item.id === ids[0]);
+        if (!candidate) return send(res, 404, problem(404, 'Not Found', 'Candidate not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, candidate.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
         if (!body.reason || String(body.reason).trim().length < 3) {
           const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
-        if (state.candidate.state !== 'PENDING') {
-          const response = problem(409, 'Candidate Already Processed', 'The candidate is no longer pending.', operationId, state.candidate.revision);
+        if (candidate.state !== 'PENDING') {
+          const response = problem(409, 'Candidate Already Processed', 'The candidate is no longer pending.', operationId, candidate.revision);
           return rememberAndSend(state, context, res, 409, response, operationId);
         }
-        state.candidate.state = 'REJECTED';
-        state.candidate.revision += 1;
-        state.candidate.batchId = null;
-        state.candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
+        candidate.state = 'REJECTED';
+        candidate.revision += 1;
+        candidate.batchId = null;
+        candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
         state.line.pendingCandidates = 0;
-        const response = envelope(operationId, state.candidate);
+        const response = envelope(operationId, candidate);
         return rememberAndSend(state, context, res, 200, response, operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/batches') {
@@ -248,7 +323,10 @@ function createHandler(state) {
         const operationId = operationIds[ids[1]];
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
         const data = {
-          evidence: { start: state.candidate.evidence, end: [] },
+          evidence: {
+            start: state.candidate.batchId === batch.id ? state.candidate.evidence : [],
+            end: state.endCandidate?.batchId === batch.id ? state.endCandidate.evidence : [],
+          },
           balance: { input: 12.4, output: 12.1, difference: 0.3, differencePercent: 2.42, status: 'WITHIN_TOLERANCE', allocations: [] },
           genealogy: { nodes: [{ id: batch.id, type: 'BATCH', label: batch.batchNo }], edges: [] },
           timeline: state.batchEvents,

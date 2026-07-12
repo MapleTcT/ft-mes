@@ -87,6 +87,11 @@ test('candidate confirmation creates exactly one idempotent shadow batch', async
 
   result = await request('GET', `/bpi/v1/batches/${batchId}/evidence`);
   assert.equal(result.json.data.start.length, 4);
+  assert.equal(result.json.data.end.length, 0);
+
+  result = await request('GET', '/bpi/v1/candidates?plantId=PLANT-01&state=PENDING');
+  assert.equal(result.json.data.length, 1);
+  assert.equal(result.json.data[0].boundaryType, 'END');
 
   result = await request('GET', `/bpi/v1/batches/${batchId}/balance`);
   assert.equal(result.json.data.status, 'WITHIN_TOLERANCE');
@@ -161,6 +166,64 @@ test('batch lifecycle suspends and resumes with revision and append-only events'
   ]);
   result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
   assert.equal(result.json.data.status, 'RUNNING');
+});
+
+test('end candidate closes the matching shadow batch as CLOSED_RAW', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/confirm', {
+    headers: commandHeaders('end-flow-start-0001', 3),
+    body: { reason: '确认启动边界并建立待结束批次' },
+  });
+  assert.equal(result.response.status, 200);
+  const batchId = result.json.data.batch.id;
+
+  result = await request('GET', '/bpi/v1/candidates?plantId=PLANT-01&state=PENDING');
+  assert.equal(result.json.data.length, 1);
+  assert.equal(result.json.data[0].id, 'CAND-END-S07-001');
+  assert.equal(result.json.data[0].boundaryType, 'END');
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-END-S07-001/confirm', {
+    body: { reason: '流量归零且泵阀路径停止，确认结束边界' },
+  });
+  assert.equal(result.response.status, 428);
+
+  const headers = commandHeaders('end-flow-confirm-0002', 1);
+  result = await request('POST', '/bpi/v1/candidates/CAND-END-S07-001/confirm', {
+    headers,
+    body: { reason: '流量归零且泵阀路径停止，确认结束边界' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.candidate.state, 'CONFIRMED');
+  assert.equal(result.json.data.candidate.batchId, batchId);
+  assert.equal(result.json.data.batch.state, 'CLOSED_RAW');
+  assert.equal(result.json.data.batch.revision, 2);
+  assert.equal(result.json.data.batch.endTime, '2026-07-12T08:29:40.000Z');
+  const firstResponse = result.json;
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-END-S07-001/confirm', {
+    headers,
+    body: { reason: '流量归零且泵阀路径停止，确认结束边界' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, firstResponse);
+
+  result = await request('GET', `/bpi/v1/batches/${batchId}/evidence`);
+  assert.equal(result.json.data.start.length, 4);
+  assert.equal(result.json.data.end.length, 3);
+  assert.equal(result.json.data.end[0].signal, 'instantFlowBelowStopThreshold');
+
+  result = await request('GET', `/bpi/v1/batches/${batchId}/timeline`);
+  assert.deepEqual(result.json.data.map((item) => `${item.revision}|${item.action}`), [
+    '1|SHADOW_BATCH_CREATED',
+    '2|END_BOUNDARY_CONFIRMED',
+  ]);
+
+  result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
+  assert.equal(result.json.data.status, 'IDLE');
+  assert.equal(result.json.data.currentBatchId, null);
+  assert.equal(result.json.data.pendingCandidates, 0);
 });
 
 test('candidate rejection is idempotent and never creates a shadow batch', async () => {

@@ -19,6 +19,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V3__bpi_telemetry_ingress.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V4__bpi_end_boundary_lifecycle.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
@@ -119,9 +120,19 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V4__bpi_end_boundary_lifecycle.sql",
+        [
+            "CLOSED_RAW",
+            "uq_bpi_open_batch_per_line",
+            "WHERE state IN ('ACTIVE', 'SUSPENDED')",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
-         "assertIdempotencyReplay", "CANDIDATE_REJECTED"],
+         "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
+         "END_BOUNDARY_CONFIRMED", "BATCH_CLOSED_RAW"],
         failures,
     )
     require_text(

@@ -299,16 +299,23 @@ function openCandidateCommandDialog(command: 'confirm' | 'reject'): void {
   state.candidateCommand = command;
   state.batchCommand = null;
   const isReject = command === 'reject';
+  const isEnd = candidate.boundaryType === 'END';
   document.querySelector('#command-kicker')!.textContent = '候选批次';
-  document.querySelector('#command-title')!.textContent = isReject ? '拒绝候选边界' : '确认启动边界';
+  document.querySelector('#command-title')!.textContent = isReject
+    ? '拒绝候选边界'
+    : isEnd ? '确认结束边界' : '确认启动边界';
   document.querySelector('#command-reason-label')!.textContent = isReject ? '拒绝原因' : '确认原因';
-  document.querySelector('#command-summary')!.innerHTML = `<div><span>产线</span><b>${escapeHtml(candidate.lineId)}</b></div><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>${isReject ? '处理结果' : '拟定批次'}</span><b>${isReject ? '不生成批次' : `BPI · ${formatTime(candidate.boundaryTime)}`}</b></div><div><span>版本</span><b>r${candidate.revision}</b></div>`;
+  const resultLabel = isReject ? '处理结果' : isEnd ? '批次状态' : '拟定批次';
+  const resultValue = isReject ? '不变更批次' : isEnd ? 'ACTIVE → CLOSED_RAW' : `BPI · ${formatTime(candidate.boundaryTime)}`;
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>产线</span><b>${escapeHtml(candidate.lineId)}</b></div><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>${resultLabel}</span><b>${resultValue}</b></div><div><span>版本</span><b>r${candidate.revision}</b></div>`;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
   reason.value = '';
-  reason.placeholder = isReject ? '填写误判、上下文错误或现场处置依据' : '填写现场确认依据';
+  reason.placeholder = isReject
+    ? '填写误判、上下文错误或现场处置依据'
+    : isEnd ? '填写流量、泵阀路径或现场停产依据' : '填写现场确认依据';
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.className = `button ${isReject ? 'button--danger' : 'button--primary'}`;
-  button.textContent = isReject ? '拒绝候选' : '确认并生成影子批次';
+  button.textContent = isReject ? '拒绝候选' : isEnd ? '确认并关闭原始批次' : '确认并生成影子批次';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
 }
@@ -350,9 +357,20 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
     }
     const response = await bpiApi.confirmCandidate(candidate, reason, crypto.randomUUID());
     applyCandidateReview(response.data.candidate);
+    try {
+      const pendingResponse = await bpiApi.candidates(state.plantId);
+      state.candidates = pendingResponse.data;
+      state.lines = state.lines.map((line) => line.lineId === candidate.lineId
+        ? { ...line, pendingCandidates: state.candidates.filter((item) => item.lineId === line.lineId).length }
+        : line);
+    } catch {
+      state.candidates = state.candidates.filter((item) => item.id !== candidate.id);
+    }
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
     closeDrawer();
-    showToast(`影子批次 ${response.data.batch.batchNo} 已生成`);
+    showToast(candidate.boundaryType === 'END'
+      ? `批次 ${response.data.batch.batchNo} 已关闭为 CLOSED_RAW`
+      : `影子批次 ${response.data.batch.batchNo} 已生成`);
     state.view = 'batches';
     state.selectedBatch = response.data.batch;
     await loadView();
@@ -365,7 +383,9 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   } finally {
     button.disabled = false;
     button.className = `button ${command === 'reject' ? 'button--danger' : 'button--primary'}`;
-    button.textContent = command === 'reject' ? '拒绝候选' : '确认并生成影子批次';
+    button.textContent = command === 'reject'
+      ? '拒绝候选'
+      : candidate.boundaryType === 'END' ? '确认并关闭原始批次' : '确认并生成影子批次';
   }
 }
 
@@ -394,7 +414,7 @@ async function openBatch(batchId: string): Promise<void> {
       : batch.state === 'SUSPENDED'
         ? '<button class="button button--primary" id="open-resume">恢复自动处理</button>'
         : '';
-    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div><div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`);
+    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div><div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`);
     document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
     document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }

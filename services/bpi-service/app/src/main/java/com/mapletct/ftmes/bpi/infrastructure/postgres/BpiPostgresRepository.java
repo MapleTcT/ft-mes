@@ -322,6 +322,65 @@ public class BpiPostgresRepository {
                 .addValue("actorId", actorId));
     }
 
+    public void lockBatchLine(String tenantId, String lineId) {
+        jdbc.queryForList(
+                "SELECT pg_advisory_xact_lock(hashtextextended(:lockKey, 0)) AS locked",
+                new MapSqlParameterSource().addValue("lockKey", tenantId + "|" + lineId));
+    }
+
+    public boolean hasOpenBatch(String tenantId, String lineId) {
+        Long count = jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = :tenantId
+                   AND line_id = :lineId
+                   AND state IN ('ACTIVE', 'SUSPENDED')
+                """, new MapSqlParameterSource().addValue("tenantId", tenantId).addValue("lineId", lineId),
+                Long.class);
+        return count != null && count > 0;
+    }
+
+    public BatchInstance lockActiveBatchForEnd(ActorContext actor, BatchCandidate candidate) {
+        StringBuilder sql = new StringBuilder(BATCH_SELECT)
+                .append(" WHERE b.tenant_id = :tenantId")
+                .append(" AND b.plant_id = :plantId")
+                .append(" AND b.line_id = :lineId")
+                .append(" AND b.state = 'ACTIVE'");
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("tenantId", actor.tenantId())
+                .addValue("plantId", candidate.plantId())
+                .addValue("lineId", candidate.lineId());
+        if (candidate.orderId() != null && !candidate.orderId().isBlank()) {
+            sql.append(" AND b.order_id = :orderId");
+            parameters.addValue("orderId", candidate.orderId());
+        }
+        sql.append(" ORDER BY b.start_time DESC, b.id LIMIT 1 FOR UPDATE OF b");
+        try {
+            return jdbc.queryForObject(sql.toString(), parameters, batchRowMapper());
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiConflictException(
+                    "No ACTIVE batch matches the END candidate line and production order.", null);
+        }
+    }
+
+    public void closeBatchRaw(
+            String tenantId, UUID batchId, long expectedRevision, Instant endTime) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_instances
+                   SET state = 'CLOSED_RAW', revision = revision + 1,
+                       end_time = :endTime, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :batchId
+                   AND revision = :expectedRevision
+                   AND state = 'ACTIVE'
+                """, new MapSqlParameterSource().addValue("tenantId", tenantId)
+                .addValue("batchId", batchId).addValue("expectedRevision", expectedRevision)
+                .addValue("endTime", Timestamp.from(endTime)));
+        if (updated != 1) {
+            throw new BpiConflictException("Batch was changed before END confirmation.", expectedRevision);
+        }
+    }
+
     public void confirmCandidate(UUID candidateId, long expectedRevision, UUID batchId, String actorId, String reason) {
         int updated = jdbc.update("""
                 UPDATE bpi.bpi_batch_candidates
@@ -474,15 +533,16 @@ public class BpiPostgresRepository {
         }
     }
 
-    public List<EvidenceView> findEvidence(ActorContext actor, UUID batchId) {
+    public List<EvidenceView> findEvidence(ActorContext actor, UUID batchId, BoundaryType boundaryType) {
         findBatch(actor, batchId);
         return jdbc.query("""
                 SELECT source_event_id, signal, classification, satisfied, value_text, unit,
                        quality, event_time, source
                   FROM bpi.bpi_boundary_evidence
-                 WHERE tenant_id = :tenantId AND batch_id = :batchId
+                 WHERE tenant_id = :tenantId AND batch_id = :batchId AND boundary_type = :boundaryType
                  ORDER BY event_time, id
-                """, new MapSqlParameterSource().addValue("tenantId", actor.tenantId()).addValue("batchId", batchId),
+                """, new MapSqlParameterSource().addValue("tenantId", actor.tenantId())
+                .addValue("batchId", batchId).addValue("boundaryType", boundaryType.name()),
                 (rs, rowNum) -> new EvidenceView(
                         rs.getString("source_event_id"), rs.getString("signal"), rs.getString("classification"),
                         rs.getBoolean("satisfied"), rs.getString("value_text"), rs.getString("unit"),
