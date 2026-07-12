@@ -40,6 +40,7 @@ def main() -> int:
         "flink-s3-fs-presto-2.2.1.jar",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaJob",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaAcceptanceReplay",
+        "BPI_CANDIDATE_DLQ_TOPIC",
         "127.0.0.1",
     ):
         if marker not in compose:
@@ -63,6 +64,10 @@ def main() -> int:
     for forbidden in ("docker system prune", "docker volume prune", "rm -rf"):
         if forbidden in preflight:
             failures.append(f"BPI preflight contains destructive command: {forbidden}")
+
+    topic_script = (ROOT / "deploy/bpi-streaming/scripts/create-topics.sh").read_text(encoding="utf-8")
+    if "bpi.batch.candidate.dlq.v1" not in topic_script:
+        failures.append("BPI topic initialization must create the candidate DLQ")
 
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")

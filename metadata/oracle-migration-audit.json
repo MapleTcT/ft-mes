@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T16:12:07+00:00",
-  "repoCommit": "0b9f0de01aef1b240ca92ae2197e40af112015b8",
+  "generatedAt": "2026-07-12T16:54:26+00:00",
+  "repoCommit": "2db310cae56522dcdfd12a47da7cdb70121c6c3e",
   "findingCount": 974,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -7021,7 +7021,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 168,
+      "line": 201,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

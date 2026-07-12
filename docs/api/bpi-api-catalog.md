@@ -80,8 +80,8 @@
 
 候选 Protobuf 入口消费 `BatchCandidateV1` wire bytes，并要求 v1 兼容新增的完整 `CandidateEvidenceV1`
 快照。它默认关闭，只有设置 `BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED=true` 才能用于 Flink 输出到
-PostgreSQL 的受控 marker 验收；生产 Kafka consumer 完成后应直接复用 `CandidateEventMapper` 和
-`CandidateIngestionService`，不把该 HTTP bridge 作为长期数据平面。
+PostgreSQL 的受控 marker 验收；生产 Kafka consumer 已直接复用 `CandidateEventMapper` 和
+`CandidateIngestionService`，HTTP bridge 不再承担长期数据平面职责。
 
 遥测入口使用 `(tenantId,eventId)` 作为全局重放身份，并使用
 `(tenantId,gatewayId,deviceId,sourceEpoch,sequence)` 约束源序列身份。一个 envelope 中的非法点只进入
@@ -98,7 +98,8 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `iot.telemetry.selected.v1` | `plantId+deviceId` | `TelemetryEnvelopeV1` | JetLinks/exporter -> BPI | JOB_WIRED |
 | `mes.production.context.v1` | `orderId+taskId` | `ProductionContextEventV1` | WOM adapter -> BPI | JOB_WIRED |
 | `bpi.boundary.rule-publication.v1` | `tenantId+lineId+ruleCode+ruleVersion` | `BoundaryRulePublicationV1` | BPI outbox -> Flink Broadcast State | JOB_WIRED |
-| `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI API | JOB_WIRED |
+| `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI Kafka consumer -> PostgreSQL | CONSUMER_WIRED_LIVE_BLOCKED |
+| `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.data-quality.v1` | `source+propertyId` | `DataQualityEventV1` | ingest/Flink -> BPI | JOB_WIRED |
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |

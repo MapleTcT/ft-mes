@@ -3333,6 +3333,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-candidate-kafka-ingress.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-candidate-protobuf-ingress.md",
       "state": "tracked",
       "tracked": true
@@ -3874,6 +3880,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-boundary-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-candidate-kafka-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4869,6 +4881,36 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaRecordProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -5019,6 +5061,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5032,6 +5080,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5657,13 +5717,13 @@
       "tracked": 467
     },
     "docs": {
-      "tracked": 76
+      "tracked": 77
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 89
+      "tracked": 90
     },
     "package.json": {
       "tracked": 1
@@ -5675,7 +5735,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 85
+      "tracked": 93
     },
     "simulation": {
       "tracked": 4
@@ -5687,8 +5747,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 938,
-    "tracked": 938,
+    "totalFiles": 948,
+    "tracked": 948,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -21,7 +21,7 @@
 ## 已准备的部署门禁
 
 - 独立 Compose project，不改动现有 ADP Compose project；
-- 三节点 Kafka 4.2.0 KRaft，topic 副本 3、`min.insync.replicas=2`；
+- 三节点 Kafka 4.2.0 KRaft，六个 topic（含 candidate DLQ）副本 3、`min.insync.replicas=2`；
 - Flink 2.2.1 Application Mode，Java 17，稳定 job JAR；
 - RocksDB + MinIO/S3 增量 checkpoint；
 - 只绑定 loopback 的默认诊断端口；
@@ -35,6 +35,6 @@
 2. 空闲空间达到 25 GiB 后执行 `make bpi-stream-deploy-preflight`；
 3. 启动集群并产生首个成功 checkpoint；
 4. 执行 `make bpi-stream-cluster-replay`，确认 IoT Protobuf、Kafka offset 和候选 key；
-5. 接通候选 consumer/受控桥，完成 BPI inbox 和 PostgreSQL marker 联合验收；
+5. 显式启用已实现的 candidate consumer 与 tenant/plant/line allowlist，完成 BPI inbox、candidate、DLQ 和 PostgreSQL marker 联合验收；
 6. 执行 savepoint 升级、TaskManager 重启、broker 故障和 rollback 演练；
 7. 开始 24 小时逐级负载/长稳测试。

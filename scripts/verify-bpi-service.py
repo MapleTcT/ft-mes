@@ -23,8 +23,15 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaProperties.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaRecordProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaListener.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateKafkaRecordProcessorTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
@@ -36,6 +43,8 @@ REQUIRED_FILES = [
     "metadata/bpi-telemetry-persistence-acceptance.json",
     "metadata/bpi-boundary-runtime-acceptance.json",
     "metadata/bpi-candidate-protobuf-persistence-acceptance.json",
+    "docs/backend-table-audit/bpi-candidate-kafka-ingress.md",
+    "metadata/bpi-candidate-kafka-persistence-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -128,12 +137,30 @@ def main() -> int:
         [
             "BPI_TELEMETRY_HTTP_INGRESS_ENABLED:false",
             "BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED:false",
+            "BPI_CANDIDATE_KAFKA_ENABLED:false",
+            "BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_",
         ],
         failures,
     )
     require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
         ["application/x-protobuf", "protobufHttpIngressEnabled", "BatchCandidateV1.parseFrom"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
+        [
+            "read_committed",
+            "MANUAL_IMMEDIATE",
+            "setCommitRecovered(true)",
+            "setFailIfSendResultIsError(true)",
+            "BpiConflictException.class",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaRecordProcessor.java",
+        ["candidate_key", "schema_version", "line_id|rule_code", "kafkaProperties.allows"],
         failures,
     )
     require_text(
@@ -149,6 +176,8 @@ def main() -> int:
             "BPI_FLYWAY_ENABLED: \"false\"",
             "BPI_TELEMETRY_HTTP_INGRESS_ENABLED",
             "BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED",
+            "BPI_CANDIDATE_KAFKA_ENABLED",
+            "BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS",
             "profiles: [\"bpi\"]",
         ],
         failures,
@@ -158,7 +187,11 @@ def main() -> int:
         ["COPY pom.xml pom.xml", "COPY contracts contracts", "bpi-service-*-exec.jar"],
         failures,
     )
-    require_text(SERVICE / "app/pom.xml", ["<classifier>exec</classifier>"], failures)
+    require_text(
+        SERVICE / "app/pom.xml",
+        ["<classifier>exec</classifier>", "<artifactId>spring-kafka</artifactId>"],
+        failures,
+    )
 
     runtime_files = list(SERVICE.rglob("*.java")) + list(SERVICE.rglob("*.sql")) + [
         SERVICE / "app/src/main/resources/application.yml",
@@ -184,6 +217,13 @@ def main() -> int:
         fail("BPI telemetry acceptance must identify PostgreSQL", failures)
     if telemetry_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI telemetry acceptance must not contain failed items", failures)
+    kafka_acceptance = json.loads(
+        (ROOT / "metadata/bpi-candidate-kafka-persistence-acceptance.json").read_text(encoding="utf-8")
+    )
+    if kafka_acceptance.get("database") != "PostgreSQL":
+        fail("BPI Kafka candidate acceptance must identify PostgreSQL", failures)
+    if kafka_acceptance.get("summary", {}).get("fail") != 0:
+        fail("BPI Kafka candidate acceptance must not contain failed items", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

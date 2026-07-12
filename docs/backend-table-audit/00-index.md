@@ -26,6 +26,7 @@
 | `bpi-phase1-persistence.md` | 已恢复并验收 | BPI 候选确认、影子批次、证据、状态和审计 PostgreSQL 事务链 |
 | `bpi-telemetry-ingress.md` | 已恢复并验收 | 遥测 replay 幂等、序列状态、点级拒绝和隔离；HTTP 默认关闭 |
 | `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库并确认影子批次；Kafka/浏览器远端验收待继续 |
+| `bpi-candidate-kafka-ingress.md` | 已恢复并验收 | 本地真实 listener、重复投递幂等和 candidate DLQ 已通过；三节点/Flink/浏览器联合 marker 受测试机磁盘门禁阻断 |
 | `bpi-iot-replay-runtime-acceptance.md` | 已恢复并验收 | IoT 信号经边界引擎、Protobuf、候选确认到 PostgreSQL 的跨模块闭环 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |
 

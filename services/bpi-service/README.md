@@ -12,6 +12,13 @@ The Phase 1 service accepts shadow candidates through an internal replay/event-i
 persists candidate review, shadow batch, evidence, state history, inbox idempotency and audit in one
 PostgreSQL transaction.
 
+The production candidate path is the disabled-by-default `bpi.batch.candidate.v1` Kafka consumer.
+It validates Protobuf, canonical key, required headers and explicit tenant/plant/line allowlists,
+then acknowledges only after the shared PostgreSQL transaction returns. Exact redelivery is safe
+through the inbox/candidate identities; poison records or exhausted retries are published to
+`bpi.batch.candidate.dlq.v1`. Enabling the listener without replacing the `_DENY_ALL_` allowlists
+cannot write business data.
+
 ```bash
 make bpi-service-test
 ```

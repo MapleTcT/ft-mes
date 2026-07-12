@@ -45,7 +45,7 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 五个 BPI topic 均为副本 3、最小同步副本 2；
+2. 六个 BPI topic（包含 candidate DLQ）均为副本 3、最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 
@@ -55,8 +55,9 @@ Smoke 必须同时满足：
 candidate key、Flink job ID 和 checkpoint ID 写入
 `${BPI_REPLAY_EVIDENCE_DIR}/bpi-kafka-replay.json`。
 
-该 replay 证明 Kafka -> Flink -> Kafka 候选数据面，不替代候选进入 BPI PostgreSQL、浏览器
-确认、WOM 写回和长稳压测验收。
+该 replay 证明 Kafka -> Flink -> Kafka 候选数据面。BPI 服务已经具备默认关闭的 candidate consumer
+和 PostgreSQL 幂等落库实现；只有在实机启用白名单后，继续验证 candidate offset、inbox/candidate marker、
+DLQ 为空和浏览器确认，才能形成完整验收。WOM 写回和长稳压测仍是后续门禁。
 
 ## 回滚
 

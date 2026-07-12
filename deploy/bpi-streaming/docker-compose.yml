@@ -138,6 +138,7 @@ services:
       BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
       BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
       BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
+      BPI_CANDIDATE_DLQ_TOPIC: ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
       BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
       BPI_DATA_PARTITIONS: ${BPI_DATA_PARTITIONS:-6}
       BPI_CONTROL_PARTITIONS: ${BPI_CONTROL_PARTITIONS:-3}

@@ -36,6 +36,20 @@ bpi:
   candidate-event:
     protobuf-http-ingress-enabled: ${BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED:false}
     max-payload-bytes: ${BPI_CANDIDATE_EVENT_MAX_PAYLOAD_BYTES:1048576}
+  candidate-kafka:
+    enabled: ${BPI_CANDIDATE_KAFKA_ENABLED:false}
+    bootstrap-servers: ${BPI_CANDIDATE_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_CANDIDATE_KAFKA_TOPIC:bpi.batch.candidate.v1}
+    dlq-topic: ${BPI_CANDIDATE_KAFKA_DLQ_TOPIC:bpi.batch.candidate.dlq.v1}
+    group-id: ${BPI_CANDIDATE_KAFKA_GROUP_ID:ft-mes-bpi-service-candidates-v1}
+    client-id: ${BPI_CANDIDATE_KAFKA_CLIENT_ID:ft-mes-bpi-service}
+    actor-id: ${BPI_CANDIDATE_KAFKA_ACTOR_ID:bpi-stream-engine}
+    allowed-tenant-ids: ${BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_}
+    allowed-plant-ids: ${BPI_CANDIDATE_KAFKA_ALLOWED_PLANT_IDS:_DENY_ALL_}
+    allowed-line-ids: ${BPI_CANDIDATE_KAFKA_ALLOWED_LINE_IDS:_DENY_ALL_}
+    concurrency: ${BPI_CANDIDATE_KAFKA_CONCURRENCY:3}
+    max-attempts: ${BPI_CANDIDATE_KAFKA_MAX_ATTEMPTS:4}
+    retry-backoff: ${BPI_CANDIDATE_KAFKA_RETRY_BACKOFF:2s}
   security:
     internal-jwt-secret: ${BPI_INTERNAL_JWT_SECRET:}
     issuer: ${BPI_INTERNAL_JWT_ISSUER:ft-mes-adapter}

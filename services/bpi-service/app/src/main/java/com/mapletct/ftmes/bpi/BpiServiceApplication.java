@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi;
 
 import com.mapletct.ftmes.bpi.infrastructure.security.BpiSecurityProperties;
 import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateEventProperties;
+import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.telemetry.BpiTelemetryProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +12,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties({
         BpiSecurityProperties.class,
         BpiTelemetryProperties.class,
-        BpiCandidateEventProperties.class
+        BpiCandidateEventProperties.class,
+        BpiCandidateKafkaProperties.class
 })
 public class BpiServiceApplication {
 

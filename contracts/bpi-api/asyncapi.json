@@ -26,6 +26,11 @@
       "messages": {"candidate": {"$ref": "#/components/messages/BatchCandidateV1"}},
       "description": "Deterministic START/END candidates keyed by lineId+ruleCode"
     },
+    "batchCandidateDlq": {
+      "address": "bpi.batch.candidate.dlq.v1",
+      "messages": {"candidate": {"$ref": "#/components/messages/BatchCandidateV1"}},
+      "description": "Rejected or retry-exhausted candidate records with Spring Kafka DLT headers"
+    },
     "batchFact": {
       "address": "bpi.batch.fact.v1",
       "messages": {"fact": {"$ref": "#/components/messages/BatchFactV1"}},
@@ -47,6 +52,7 @@
     "consumeProductionContext": {"action": "receive", "channel": {"$ref": "#/channels/productionContext"}, "messages": [{"$ref": "#/channels/productionContext/messages/context"}]},
     "consumeBoundaryRulePublication": {"action": "receive", "channel": {"$ref": "#/channels/boundaryRulePublication"}, "messages": [{"$ref": "#/channels/boundaryRulePublication/messages/rule"}]},
     "consumeBatchCandidate": {"action": "receive", "channel": {"$ref": "#/channels/batchCandidate"}, "messages": [{"$ref": "#/channels/batchCandidate/messages/candidate"}]},
+    "publishRejectedBatchCandidate": {"action": "send", "channel": {"$ref": "#/channels/batchCandidateDlq"}, "messages": [{"$ref": "#/channels/batchCandidateDlq/messages/candidate"}]},
     "publishBatchFact": {"action": "send", "channel": {"$ref": "#/channels/batchFact"}, "messages": [{"$ref": "#/channels/batchFact/messages/fact"}]},
     "consumeDataQuality": {"action": "receive", "channel": {"$ref": "#/channels/dataQuality"}, "messages": [{"$ref": "#/channels/dataQuality/messages/quality"}]},
     "publishTrainingSnapshot": {"action": "send", "channel": {"$ref": "#/channels/trainingSnapshot"}, "messages": [{"$ref": "#/channels/trainingSnapshot/messages/snapshot"}]}
@@ -56,13 +62,14 @@
       "TelemetryEnvelopeV1": {"name": "TelemetryEnvelopeV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.TelemetryEnvelopeV1"}}},
       "ProductionContextEventV1": {"name": "ProductionContextEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.ProductionContextEventV1"}}},
       "BoundaryRulePublicationV1": {"name": "BoundaryRulePublicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRulePublicationV1"}}},
-      "BatchCandidateV1": {"name": "BatchCandidateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BatchCandidateV1"}}},
+      "BatchCandidateV1": {"name": "BatchCandidateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/CandidateKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BatchCandidateV1"}}},
       "DataQualityEventV1": {"name": "DataQualityEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.DataQualityEventV1"}}},
       "BatchFactV1": {"name": "BatchFactV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "2", "x-status": "RESERVED_NOT_IMPLEMENTED"}}},
       "TrainingSnapshotV1": {"name": "TrainingSnapshotV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "3", "x-status": "RESERVED_NOT_IMPLEMENTED"}}}
     },
     "schemas": {
-      "EventHeaders": {"type": "object", "required": ["eventId", "tenantId", "traceId", "schemaVersion"], "properties": {"eventId": {"type": "string"}, "tenantId": {"type": "string"}, "traceId": {"type": "string"}, "schemaVersion": {"type": "string"}, "payloadChecksum": {"type": "string"}}}
+      "EventHeaders": {"type": "object", "required": ["eventId", "tenantId", "traceId", "schemaVersion"], "properties": {"eventId": {"type": "string"}, "tenantId": {"type": "string"}, "traceId": {"type": "string"}, "schemaVersion": {"type": "string"}, "payloadChecksum": {"type": "string"}}},
+      "CandidateKafkaHeaders": {"type": "object", "required": ["event_id", "candidate_key", "tenant_id", "schema_version"], "properties": {"event_id": {"type": "string"}, "candidate_key": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "schema_version": {"const": "v1"}}}
     }
   }
 }

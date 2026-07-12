@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-07-13T00:36:00+08:00",
+  "repoCommit": "2db310c",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "databaseVersion": "16.13",
+  "transport": "Spring Kafka read_committed manual-immediate",
+  "sourceTopic": "bpi.batch.candidate.v1",
+  "deadLetterTopic": "bpi.batch.candidate.dlq.v1",
+  "productionDefault": "DISABLED_DENY_ALL",
+  "summary": {
+    "testedFeatures": 6,
+    "pass": 5,
+    "fail": 0,
+    "blocked": 1,
+    "notApplicable": 0,
+    "serviceTestsRun": 14,
+    "serviceTestsPassed": 14
+  },
+  "items": [
+    {
+      "operation": "trusted Protobuf record validation",
+      "result": "topic, UTF-8 key, event/candidate/tenant/schema headers and explicit scope validated",
+      "status": "PASS"
+    },
+    {
+      "operation": "PostgreSQL candidate persistence",
+      "tables": ["bpi.bpi_inbox_events", "bpi.bpi_batch_candidates"],
+      "result": "one pending candidate with bpi-stream-engine evidence",
+      "status": "PASS"
+    },
+    {
+      "operation": "at-least-once redelivery",
+      "tables": ["bpi.bpi_inbox_events", "bpi.bpi_batch_candidates"],
+      "result": "two processor deliveries leave one inbox and one candidate row",
+      "status": "PASS"
+    },
+    {
+      "operation": "acknowledgment ordering and poison classification",
+      "result": "ACK occurs only after processor success; permanent envelope violations bypass retry",
+      "status": "PASS"
+    },
+    {
+      "operation": "real local Kafka listener and dead-letter routing",
+      "result": "embedded broker delivered a valid record to PostgreSQL and routed malformed Protobuf to the same-partition DLQ",
+      "status": "PASS"
+    },
+    {
+      "operation": "live Kafka/Flink/PostgreSQL marker and DLQ acceptance",
+      "result": "target host has less than the 25 GiB free-space deployment floor",
+      "status": "BLOCKED_DISK"
+    }
+  ],
+  "verificationSql": "SELECT count(*) FROM bpi.bpi_inbox_events WHERE tenant_id=:tenant_marker; SELECT count(*),min(evidence->0->>'source') FROM bpi.bpi_batch_candidates WHERE tenant_id=:tenant_marker;",
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiPostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiKafkaPostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.CandidateKafkaRecordProcessorTest.xml",
+    "docs/backend-table-audit/bpi-candidate-kafka-ingress.md"
+  ],
+  "limitations": [
+    "The local broker is single-process test infrastructure, not the target three-node KRaft cluster.",
+    "The remote streaming cluster remains blocked by the non-destructive disk-capacity gate.",
+    "Browser candidate confirmation is a separate pending end-to-end gate."
+  ]
+}

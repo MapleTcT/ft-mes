@@ -16,7 +16,7 @@
     {
       "method": "POST",
       "path": "/internal/bpi/v1/candidates",
-      "purpose": "Authenticated candidate ingestion from the future stream adapter"
+      "purpose": "Authenticated JSON candidate ingestion for controlled adapters and acceptance"
     },
     {
       "method": "POST",
@@ -26,7 +26,7 @@
     {
       "method": "POST",
       "path": "/internal/bpi/v1/candidate-events",
-      "purpose": "Feature-gated BatchCandidateV1 Protobuf bridge for stream-to-PostgreSQL acceptance; disabled by default until the Kafka consumer is wired"
+      "purpose": "Feature-gated BatchCandidateV1 Protobuf HTTP bridge for controlled acceptance; the production Kafka consumer is wired separately"
     }
   ],
   "internalEndpointModes": {

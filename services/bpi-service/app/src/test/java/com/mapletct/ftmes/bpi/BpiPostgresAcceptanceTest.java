@@ -11,6 +11,8 @@ import com.mapletct.ftmes.bpi.contract.identity.CandidateKeyFactory;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
+import com.mapletct.ftmes.bpi.infrastructure.candidate.CandidateKafkaRecordProcessor;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +55,15 @@ class BpiPostgresAcceptanceTest {
         registry.add("spring.datasource.password", () -> env("BPI_TEST_DATABASE_PASSWORD", ""));
         registry.add("bpi.security.internal-jwt-secret", () -> SECRET);
         registry.add("bpi.candidate-event.protobuf-http-ingress-enabled", () -> true);
+        registry.add("bpi.candidate-kafka.allowed-tenant-ids", () -> "*");
+        registry.add("bpi.candidate-kafka.allowed-plant-ids", () -> "*");
+        registry.add("bpi.candidate-kafka.allowed-line-ids", () -> "*");
     }
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired JdbcTemplate jdbc;
+    @Autowired CandidateKafkaRecordProcessor candidateKafkaRecordProcessor;
 
     private String tenantId;
     private UUID topologyId;
@@ -353,6 +360,73 @@ class BpiPostgresAcceptanceTest {
         assertThat(count("bpi_batch_candidates")).isEqualTo(1);
         assertThat(count("bpi_batch_instances")).isEqualTo(1);
         assertThat(count("bpi_boundary_evidence")).isEqualTo(1);
+    }
+
+    @Test
+    void kafkaCandidateRecordPersistsOnceAcrossAtLeastOnceRedelivery() {
+        String evidenceEventId = "ADP_E2E_BPI_KAFKA_FLOW_" + candidateKey;
+        String orderId = "ADP_E2E_BPI_KAFKA_ORDER_" + candidateKey;
+        Instant boundaryTime = Instant.parse("2026-07-12T08:30:00Z");
+        BatchCandidateV1 event = candidateEvent(evidenceEventId, orderId, boundaryTime);
+        ConsumerRecord<byte[], byte[]> record = new ConsumerRecord<>(
+                "bpi.batch.candidate.v1",
+                2,
+                42L,
+                (event.getLineId() + "|" + event.getRuleCode()).getBytes(StandardCharsets.UTF_8),
+                event.toByteArray());
+        record.headers()
+                .add("event_id", event.getEventId().getBytes(StandardCharsets.UTF_8))
+                .add("candidate_key", event.getCandidateKey().getBytes(StandardCharsets.UTF_8))
+                .add("tenant_id", event.getTenantId().getBytes(StandardCharsets.UTF_8))
+                .add("schema_version", "v1".getBytes(StandardCharsets.UTF_8));
+
+        candidateKafkaRecordProcessor.process(record);
+        candidateKafkaRecordProcessor.process(record);
+
+        assertThat(count("bpi_inbox_events")).isEqualTo(1);
+        assertThat(count("bpi_batch_candidates")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT evidence->0->>'source'
+                  FROM bpi.bpi_batch_candidates
+                 WHERE tenant_id = ? AND candidate_key = ?
+                """, String.class, tenantId, UUID.fromString(event.getCandidateKey())))
+                .isEqualTo("bpi-stream-engine");
+    }
+
+    private BatchCandidateV1 candidateEvent(
+            String evidenceEventId,
+            String orderId,
+            Instant boundaryTime) {
+        String stableKey = CandidateKeyFactory.startKey(
+                tenantId, "LINE-S07-01", "1.2.0", orderId, evidenceEventId);
+        return BatchCandidateV1.newBuilder()
+                .setEventId("ADP_E2E_BPI_KAFKA_CANDIDATE_" + candidateKey)
+                .setCandidateKey(stableKey)
+                .setTenantId(tenantId)
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-S07-01")
+                .setBoundaryType(BoundaryType.START)
+                .setRuleCode("RULE-S07-START")
+                .setRuleVersion("1.2.0")
+                .setTopologyVersion("3")
+                .setContextOrderId(orderId)
+                .setFirstQuorumEvidenceEventId(evidenceEventId)
+                .setBoundaryEventTimeMs(boundaryTime.toEpochMilli())
+                .setConfidence(0.94)
+                .addEvidenceEventIds(evidenceEventId)
+                .setEmittedAtMs(boundaryTime.plusSeconds(1).toEpochMilli())
+                .putHeaders("topology_code", "TOPO-S07")
+                .addEvidence(CandidateEvidenceV1.newBuilder()
+                        .setEventId(evidenceEventId)
+                        .setSignal("feed.flow")
+                        .setClassification("QUORUM")
+                        .setSatisfied(true)
+                        .setValue("18.6")
+                        .setUnit("t/h")
+                        .setQualityCode("GOOD")
+                        .setEventTimeMs(boundaryTime.toEpochMilli())
+                        .setSource("bpi-stream-engine"))
+                .build();
     }
 
     private long count(String table) {
