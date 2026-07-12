@@ -15,6 +15,24 @@
     },
     {
       "ignored": false,
+      "path": "acceptance/bpi-runtime/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "acceptance/bpi-runtime/test-suite/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "acceptance/bpi-runtime/test-suite/src/test/java/com/mapletct/ftmes/bpi/acceptance/IoTReplayPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/pom.xml",
       "state": "tracked",
       "tracked": true
@@ -3279,6 +3297,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-iot-replay-runtime-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-phase1-persistence.md",
       "state": "tracked",
       "tracked": true
@@ -3784,6 +3808,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-flink-operator-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-iot-replay-runtime-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5164,6 +5194,9 @@
     "Makefile": {
       "tracked": 1
     },
+    "acceptance": {
+      "tracked": 3
+    },
     "backend": {
       "tracked": 58
     },
@@ -5174,13 +5207,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 69
+      "tracked": 70
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 82
+      "tracked": 83
     },
     "package.json": {
       "tracked": 1
@@ -5204,8 +5237,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 858,
-    "tracked": 858,
+    "totalFiles": 863,
+    "tracked": 863,
     "untracked": 0
   },
   "untrackedByDirectory": []

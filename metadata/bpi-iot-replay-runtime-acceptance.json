@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-07-12T21:16:05+08:00",
+  "database": "PostgreSQL 16",
+  "java": "17",
+  "status": "PASS",
+  "test": "IoTReplayPostgresAcceptanceTest.iotSignalsProduceProtobufCandidateAndConfirmedPostgresShadowBatch",
+  "inputSignals": ["order.active", "feed.pump", "feed.flow"],
+  "missingSignals": ["column.level"],
+  "path": [
+    "BoundaryReplayEngine.replay",
+    "BatchCandidateV1",
+    "POST /internal/bpi/v1/candidate-events",
+    "POST /bpi/v1/candidates/{id}/confirm"
+  ],
+  "tables": {
+    "bpi_inbox_events": 1,
+    "bpi_batch_candidates": 1,
+    "bpi_batch_instances": 1,
+    "bpi_boundary_evidence": 3
+  },
+  "shadowOnly": true,
+  "markerPrefix": "ADP_E2E_IOT_REPLAY_",
+  "cleanupVerified": true
+}

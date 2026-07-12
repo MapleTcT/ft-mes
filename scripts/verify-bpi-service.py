@@ -153,7 +153,12 @@ def main() -> int:
         ],
         failures,
     )
-    require_text(SERVICE / "Dockerfile", ["COPY pom.xml pom.xml", "COPY contracts contracts"], failures)
+    require_text(
+        SERVICE / "Dockerfile",
+        ["COPY pom.xml pom.xml", "COPY contracts contracts", "bpi-service-*-exec.jar"],
+        failures,
+    )
+    require_text(SERVICE / "app/pom.xml", ["<classifier>exec</classifier>"], failures)
 
     runtime_files = list(SERVICE.rglob("*.java")) + list(SERVICE.rglob("*.sql")) + [
         SERVICE / "app/src/main/resources/application.yml",

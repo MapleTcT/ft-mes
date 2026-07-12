@@ -13,7 +13,7 @@ RUN groupadd --system --gid 10001 bpi \
     && useradd --system --uid 10001 --gid bpi --home-dir /opt/bpi bpi
 WORKDIR /opt/bpi
 COPY --from=build --chown=bpi:bpi \
-    /workspace/services/bpi-service/app/target/bpi-service-*.jar /opt/bpi/bpi-service.jar
+    /workspace/services/bpi-service/app/target/bpi-service-*-exec.jar /opt/bpi/bpi-service.jar
 USER 10001:10001
 EXPOSE 19091
 ENTRYPOINT ["java", "-jar", "/opt/bpi/bpi-service.jar"]
