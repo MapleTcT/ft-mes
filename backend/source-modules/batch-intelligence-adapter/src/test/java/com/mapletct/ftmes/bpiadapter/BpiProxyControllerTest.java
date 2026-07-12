@@ -83,6 +83,44 @@ public class BpiProxyControllerTest {
         upstream.verify();
     }
 
+    @Test
+    public void forwardsBatchSuspendAndResumeOnlyThroughTheFixedUpstream() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/batches/" + id + "/suspend"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "suspend-command-1"))
+                .andExpect(header("If-Match", "1"))
+                .andRespond(withSuccess("{\"code\":200,\"data\":{\"state\":\"SUSPENDED\"}}", MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/batches/" + id + "/resume"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "resume-command-1"))
+                .andExpect(header("If-Match", "2"))
+                .andRespond(withSuccess("{\"code\":200,\"data\":{\"state\":\"ACTIVE\"}}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest suspend = new MockHttpServletRequest(
+                "POST", "/bpi-api/batches/" + id + "/suspend");
+        suspend.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        suspend.addHeader("Idempotency-Key", "suspend-command-1");
+        suspend.addHeader("If-Match", "1");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), suspend,
+                "{\"reason\":\"context stale\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
+
+        MockHttpServletRequest resume = new MockHttpServletRequest(
+                "POST", "/bpi-api/batches/" + id + "/resume");
+        resume.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        resume.addHeader("Idempotency-Key", "resume-command-1");
+        resume.addHeader("If-Match", "2");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), resume,
+                "{\"reason\":\"context restored\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
+
+        upstream.verify();
+    }
+
     private BpiAdapterProperties properties() {
         BpiAdapterProperties properties = new BpiAdapterProperties();
         properties.setUpstreamBaseUrl("http://bpi-service:19091");

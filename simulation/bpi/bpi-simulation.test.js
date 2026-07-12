@@ -98,6 +98,71 @@ test('candidate confirmation creates exactly one idempotent shadow batch', async
   assert.equal(result.json.data[0].action, 'SHADOW_BATCH_CREATED');
 });
 
+test('batch lifecycle suspends and resumes with revision and append-only events', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/confirm', {
+    headers: commandHeaders('lifecycle-confirm-0001', 3),
+    body: { reason: '创建批次用于状态闭环验收' },
+  });
+  assert.equal(result.response.status, 200);
+  const batch = result.json.data.batch;
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/suspend`, {
+    body: { reason: '上游制造指令上下文已过期' },
+  });
+  assert.equal(result.response.status, 428);
+
+  const suspendHeaders = commandHeaders('lifecycle-suspend-0001', 1);
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/suspend`, {
+    headers: suspendHeaders,
+    body: { reason: '上游制造指令上下文已过期' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'SUSPENDED');
+  assert.equal(result.json.data.revision, 2);
+  const suspended = result.json;
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/suspend`, {
+    headers: suspendHeaders,
+    body: { reason: '上游制造指令上下文已过期' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, suspended);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/resume`, {
+    headers: suspendHeaders,
+    body: { reason: '错误复用暂停命令键' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.match(result.json.detail, /reused/);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/suspend`, {
+    headers: commandHeaders('lifecycle-repeat-suspend-0002', 2),
+    body: { reason: '重复暂停不应成功' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, 2);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/resume`, {
+    headers: commandHeaders('lifecycle-resume-0003', 2),
+    body: { reason: '上游制造指令上下文已经恢复' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'ACTIVE');
+  assert.equal(result.json.data.revision, 3);
+
+  result = await request('GET', `/bpi/v1/batches/${batch.id}/timeline`);
+  assert.deepEqual(result.json.data.map((item) => `${item.revision}|${item.action}`), [
+    '1|SHADOW_BATCH_CREATED',
+    '2|BATCH_SUSPENDED',
+    '3|BATCH_RESUMED',
+  ]);
+  result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
+  assert.equal(result.json.data.status, 'RUNNING');
+});
+
 test('candidate rejection is idempotent and never creates a shadow batch', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);

@@ -363,6 +363,178 @@ class BpiPostgresAcceptanceTest {
     }
 
     @Test
+    void batchLifecycleSuspendsAndResumesWithRevisionIdempotencyAndAuditEvidence() throws Exception {
+        String ingestToken = token(
+                tenantId, List.of("BPI_EVENT_INGEST"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult ingested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingestPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID candidateId = UUID.fromString(objectMapper.readTree(
+                ingested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String shiftToken = token(
+                tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult confirmed = mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", candidateId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "lifecycle-confirm-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of("reason", "创建批次用于状态闭环验收"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.batch.revision").value(1))
+                .andReturn();
+        UUID batchId = UUID.fromString(objectMapper.readTree(confirmed.getResponse().getContentAsString())
+                .path("data").path("batch").path("id").asText());
+
+        String suspendBody = objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("reason", "上游制造指令上下文已过期"),
+                Map.entry("comment", "UPSTREAM_CONTEXT_STALE")));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(suspendBody))
+                .andExpect(status().is(428));
+
+        String suspendKey = "lifecycle-suspend-" + candidateKey;
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", suspendKey)
+                        .header("If-Match", "1")
+                        .header("X-Trace-Id", "TRACE-SUSPEND-" + candidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(suspendBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("SUSPENDED"))
+                .andExpect(jsonPath("$.data.revision").value(2));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
+                        .header("Authorization", "Bearer " + shiftToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("BLOCKED"))
+                .andExpect(jsonPath("$.data.currentBatchId").value(batchId.toString()));
+        mockMvc.perform(get("/bpi/v1/overview")
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .param("plantId", "PLANT-01")
+                        .param("onlyAbnormal", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].status").value("BLOCKED"));
+
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", suspendKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(suspendBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.state").value("SUSPENDED"))
+                .andExpect(jsonPath("$.data.revision").value(2));
+
+        String resumeBody = objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("reason", "上游制造指令上下文已恢复"),
+                Map.entry("comment", "WOM_CONTEXT_RECOVERED")));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/resume", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", suspendKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(resumeBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("reused")));
+
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "repeat-suspend-" + candidateKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(suspendBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.currentRevision").value(2));
+
+        mockMvc.perform(post("/bpi/v1/batches/{id}/resume", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", "stale-resume-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(resumeBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.currentRevision").value(2));
+
+        String resumeKey = "lifecycle-resume-" + candidateKey;
+        mockMvc.perform(post("/bpi/v1/batches/{id}/resume", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", resumeKey)
+                        .header("If-Match", "2")
+                        .header("X-Trace-Id", "TRACE-RESUME-" + candidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(resumeBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.revision").value(3));
+
+        mockMvc.perform(post("/bpi/v1/batches/{id}/resume", batchId)
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .header("Idempotency-Key", resumeKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(resumeBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.state").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.revision").value(3));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
+                        .header("Authorization", "Bearer " + shiftToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("RUNNING"))
+                .andExpect(jsonPath("$.data.currentBatchId").value(batchId.toString()));
+        mockMvc.perform(get("/bpi/v1/overview")
+                        .header("Authorization", "Bearer " + shiftToken)
+                        .param("plantId", "PLANT-01")
+                        .param("onlyAbnormal", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(0));
+
+        String wrongLineToken = token(
+                tenantId, List.of("BPI_SHIFT_LEAD"), List.of("PLANT-01"), List.of("LINE-OTHER"));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + wrongLineToken)
+                        .header("Idempotency-Key", "wrong-scope-" + candidateKey)
+                        .header("If-Match", "3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(suspendBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("scope")));
+
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, batchId)).isEqualTo("ACTIVE|3");
+        assertThat(jdbc.queryForList("""
+                SELECT revision || '|' || action || '|' || coalesce(from_state, '-') || '|' || to_state AS event
+                  FROM bpi.bpi_batch_state_events
+                 WHERE tenant_id = ? AND batch_id = ?
+                 ORDER BY revision
+                """, String.class, tenantId, batchId))
+                .containsExactly(
+                        "1|SHADOW_BATCH_CREATED|-|ACTIVE",
+                        "2|BATCH_SUSPENDED|ACTIVE|SUSPENDED",
+                        "3|BATCH_RESUMED|SUSPENDED|ACTIVE");
+        assertThat(jdbc.queryForList("""
+                SELECT action || '|' || before_revision || '|' || after_revision AS audit
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_type = 'BATCH_INSTANCE' AND object_id = ?
+                 ORDER BY after_revision
+                """, String.class, tenantId, batchId))
+                .containsExactly("BATCH_SUSPENDED|1|2", "BATCH_RESUMED|2|3");
+        assertThat(count("bpi_api_idempotency")).isEqualTo(3);
+    }
+
+    @Test
     void protobufCandidateEventPersistsRichEvidenceAndConfirmsShadowBatch() throws Exception {
         String evidenceEventId = "ADP_E2E_BPI_PROTO_FLOW_" + candidateKey;
         String orderId = "ADP_E2E_BPI_PROTO_ORDER_" + candidateKey;

@@ -16,7 +16,7 @@
 - 事件状态 `JOB_WIRED` 表示 Kafka/Flink 作业图、Harness 和事务 sink 已接线，不表示真实 broker、Flink HA、
   checkpoint storage 或端到端 PostgreSQL 已验收；只有完成实机证据后才能标记 `CLUSTER_ACCEPTED`。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 10 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 12 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -25,7 +25,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；请求体上限为 64 KiB。
-- 当前允许 GET overview/line/candidate/batch 读取，以及 POST candidate confirm。未在白名单中的 Phase 2/3 契约即使存在于 OpenAPI 也返回 403。
+- 当前允许 GET overview/line/candidate/batch 读取，以及 POST candidate confirm/reject、batch suspend/resume。未在白名单中的 Phase 2/3 契约即使存在于 OpenAPI 也返回 403。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -44,8 +44,8 @@
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/balance` | `getBatchBalance` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/genealogy` | `getBatchGenealogy` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SERVICE_IMPLEMENTED |
-| 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | CONTRACT_ONLY |
-| 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | CONTRACT_ONLY |
+| 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | SERVICE_IMPLEMENTED |
+| 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
 | 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | CONTRACT_ONLY |
@@ -114,9 +114,11 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 3. 使用 revision `3` 确认候选，生成唯一 `shadow=true` 批次。
 4. 使用同一幂等键重试，返回相同结果且不生成第二个批次。
 5. 使用旧 revision 和新幂等键重试，返回 `409` 和当前 revision `4`。
-6. 查询批次头、证据、平衡、谱系和 append-only 时间线。
-7. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
-8. 查询数据质量影响和集成降级影响。
+6. 暂停 `ACTIVE` 批次并确认变为 `SUSPENDED/r2`，重复暂停和跨命令复用 key 返回 `409`。
+7. 恢复 `SUSPENDED` 批次并确认变为 `ACTIVE/r3`，时间线追加暂停和恢复事件。
+8. 查询批次头、证据、平衡、谱系和 append-only 时间线。
+9. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
+10. 查询数据质量影响和集成降级影响。
 
 运行命令：
 

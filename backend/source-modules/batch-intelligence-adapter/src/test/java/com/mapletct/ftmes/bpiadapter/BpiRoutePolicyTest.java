@@ -11,11 +11,14 @@ public class BpiRoutePolicyTest {
     private final BpiRoutePolicy policy = new BpiRoutePolicy();
 
     @Test
-    public void allowsOnlyPhaseOneReadAndCandidateCommandRoutes() {
+    public void allowsOnlyPhaseOneReadCandidateAndBatchLifecycleRoutes() {
         assertTrue(policy.allows(HttpMethod.GET, "/overview"));
         assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/timeline"));
         assertTrue(policy.allows(HttpMethod.POST, "/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/confirm"));
         assertTrue(policy.allows(HttpMethod.POST, "/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/reject"));
+        assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/suspend"));
+        assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/resume"));
+        assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));

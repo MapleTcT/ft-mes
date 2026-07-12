@@ -3,6 +3,7 @@ package com.mapletct.ftmes.bpi.application;
 import com.mapletct.ftmes.bpi.application.error.BpiNotFoundException;
 import com.mapletct.ftmes.bpi.domain.BatchCandidate;
 import com.mapletct.ftmes.bpi.domain.BatchInstance;
+import com.mapletct.ftmes.bpi.domain.BatchState;
 import com.mapletct.ftmes.bpi.domain.CandidateState;
 import com.mapletct.ftmes.bpi.domain.LineState;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
@@ -34,7 +35,10 @@ public class OverviewService {
         List<LineState> states = new ArrayList<>();
         for (String lineId : lineIds) {
             LineState state = stateFor(lineId, candidates, batches);
-            if (!onlyAbnormal || state.pendingCandidates() > 0 || !"GOOD".equals(state.dataHealth())) {
+            if (!onlyAbnormal
+                    || state.pendingCandidates() > 0
+                    || !"GOOD".equals(state.dataHealth())
+                    || "BLOCKED".equals(state.status())) {
                 states.add(state);
             }
         }
@@ -67,7 +71,7 @@ public class OverviewService {
                 active != null ? active.orderId() : latest != null ? latest.orderId() : null,
                 active == null ? null : active.id(),
                 active == null ? "UNASSIGNED" : active.stageCode(),
-                active == null ? "IDLE" : "RUNNING",
+                active == null ? "IDLE" : lineStatus(active),
                 latest == null ? null : latest.confidence(),
                 null,
                 active == null ? BigDecimal.ZERO : active.quantity(),
@@ -75,5 +79,9 @@ public class OverviewService {
                 pending,
                 pending > 0 ? 1 : 0,
                 last);
+    }
+
+    private String lineStatus(BatchInstance batch) {
+        return batch.state() == BatchState.SUSPENDED ? "BLOCKED" : "RUNNING";
     }
 }

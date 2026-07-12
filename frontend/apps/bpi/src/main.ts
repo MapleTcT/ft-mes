@@ -38,6 +38,7 @@ const state = {
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
+  batchCommand: null as 'suspend' | 'resume' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -67,7 +68,7 @@ function number(value: number | null | undefined, digits = 1): string {
 function statusTone(status: string): string {
   if (['RUNNING', 'ACTIVE', 'CONFIRMED', 'GOOD', 'RELEASED'].includes(status)) return 'ok';
   if (['PENDING', 'PARTIAL', 'WAIT_QA', 'DEGRADED'].includes(status)) return 'warn';
-  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED'].includes(status)) return 'danger';
+  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -106,7 +107,7 @@ function shell(): void {
       <aside id="detail-drawer" class="detail-drawer" aria-label="详情" aria-hidden="true"></aside>
       <dialog id="confirm-dialog" class="command-dialog">
         <form method="dialog" id="confirm-form">
-          <header><div><span>候选批次</span><h2 id="command-title">审核候选边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <header><div><span id="command-kicker">候选批次</span><h2 id="command-title">审核候选边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
           <div class="command-summary" id="command-summary"></div>
           <label><span id="command-reason-label">审核原因</span><textarea id="confirm-reason" minlength="3" maxlength="500" required placeholder="填写现场审核依据"></textarea></label>
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">提交</button></footer>
@@ -296,7 +297,9 @@ function openCandidateCommandDialog(command: 'confirm' | 'reject'): void {
   const candidate = state.selectedCandidate;
   if (!candidate) return;
   state.candidateCommand = command;
+  state.batchCommand = null;
   const isReject = command === 'reject';
+  document.querySelector('#command-kicker')!.textContent = '候选批次';
   document.querySelector('#command-title')!.textContent = isReject ? '拒绝候选边界' : '确认启动边界';
   document.querySelector('#command-reason-label')!.textContent = isReject ? '拒绝原因' : '确认原因';
   document.querySelector('#command-summary')!.innerHTML = `<div><span>产线</span><b>${escapeHtml(candidate.lineId)}</b></div><div><span>生产指令</span><b>${escapeHtml(candidate.orderId || '-')}</b></div><div><span>${isReject ? '处理结果' : '拟定批次'}</span><b>${isReject ? '不生成批次' : `BPI · ${formatTime(candidate.boundaryTime)}`}</b></div><div><span>版本</span><b>r${candidate.revision}</b></div>`;
@@ -322,6 +325,10 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   const submitter = event.submitter as HTMLButtonElement | null;
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
+  if (state.batchCommand) {
+    await handleBatchCommand();
+    return;
+  }
   const candidate = state.selectedCandidate;
   const command = state.candidateCommand;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
@@ -382,8 +389,68 @@ async function openBatch(batchId: string): Promise<void> {
     const batch = state.selectedBatch;
     const evidence = [...state.batchEvidence.start, ...state.batchEvidence.end].map((item) => `<li><span class="evidence-state evidence-state--${item.satisfied ? 'ok' : 'bad'}"></span><div><strong>${escapeHtml(item.signal)}</strong><small>${escapeHtml(item.source)} · ${formatTime(item.eventTime)}</small></div><b>${escapeHtml(item.value)}${item.unit ? ` ${escapeHtml(item.unit)}` : ''}</b></li>`).join('');
     const timeline = state.timeline.map((item) => `<li><i></i><div><strong>${escapeHtml(item.action)}</strong><span>${escapeHtml(item.reason || '-')}</span><small>${formatTime(item.at || item.eventTime)} · ${escapeHtml(item.actor || item.actorId || '-')}</small></div></li>`).join('');
-    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div><div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline}</ol></div>`);
+    const command = batch.state === 'ACTIVE'
+      ? '<button class="button button--danger" id="open-suspend">暂停自动处理</button>'
+      : batch.state === 'SUSPENDED'
+        ? '<button class="button button--primary" id="open-resume">恢复自动处理</button>'
+        : '';
+    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div><div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`);
+    document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
+    document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
+}
+
+function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
+  const batch = state.selectedBatch;
+  if (!batch) return;
+  const isSuspend = command === 'suspend';
+  state.candidateCommand = null;
+  state.batchCommand = command;
+  document.querySelector('#command-kicker')!.textContent = '批次运行控制';
+  document.querySelector('#command-title')!.textContent = isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
+  document.querySelector('#command-reason-label')!.textContent = isSuspend ? '暂停原因' : '恢复原因';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = `button ${isSuspend ? 'button--danger' : 'button--primary'}`;
+  button.textContent = isSuspend ? '确认暂停' : '确认恢复';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleBatchCommand(): Promise<void> {
+  const batch = state.selectedBatch;
+  const command = state.batchCommand;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (!batch || !command || reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.disabled = true;
+  button.textContent = command === 'suspend' ? '暂停中...' : '恢复中...';
+  try {
+    const response = command === 'suspend'
+      ? await bpiApi.suspendBatch(batch, reason, crypto.randomUUID())
+      : await bpiApi.resumeBatch(batch, reason, crypto.randomUUID());
+    state.selectedBatch = response.data;
+    state.batches = state.batches.map((item) => item.id === response.data.id ? response.data : item);
+    state.lines = state.lines.map((line) => line.lineId === response.data.lineId
+      ? { ...line, status: command === 'suspend' ? 'BLOCKED' : 'RUNNING' }
+      : line);
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    showToast(command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
+    await loadView(true);
+    await openBatch(response.data.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`批次已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openBatch(batch.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.className = `button ${command === 'suspend' ? 'button--danger' : 'button--primary'}`;
+    button.textContent = command === 'suspend' ? '确认暂停' : '确认恢复';
+  }
 }
 
 function openDrawer(html: string): void {

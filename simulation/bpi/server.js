@@ -77,7 +77,6 @@ function commandContext(req, res, operationId, entityRevision, state, pathname) 
   }
   if (revision !== entityRevision) {
     const body = problem(409, 'Revision Conflict', `Expected revision ${entityRevision}, received ${revision}.`, operationId, entityRevision);
-    state.idempotency.set(cacheKey, { method: req.method, pathname, status: 409, body });
     send(res, 409, body, operationId);
     return null;
   }
@@ -164,6 +163,9 @@ function createHandler(state) {
         state.candidate.review = { actor: 'simulated.shift.lead', reason: body.reason, at: FIXED_TIME };
         state.line.currentBatchId = batch.id;
         state.line.pendingCandidates = 0;
+        state.batchEvents = [
+          { revision: 1, action: 'SHADOW_BATCH_CREATED', at: FIXED_TIME, actor: 'simulated.shift.lead', reason: body.reason },
+        ];
         const response = envelope(operationId, { candidate: state.candidate, batch });
         return rememberAndSend(state, context, res, 200, response, operationId);
       }
@@ -199,6 +201,46 @@ function createHandler(state) {
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', 'getBatch'), 'getBatch');
         return send(res, 200, envelope('getBatch', batch), 'getBatch');
       }
+      ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/(suspend|resume)$/);
+      if (req.method === 'POST' && ids) {
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        const isSuspend = ids[1] === 'suspend';
+        const operationId = isSuspend ? 'suspendBatch' : 'resumeBatch';
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, batch.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const expectedState = isSuspend ? 'ACTIVE' : 'SUSPENDED';
+        const nextState = isSuspend ? 'SUSPENDED' : 'ACTIVE';
+        if (batch.state !== expectedState) {
+          const response = problem(
+            409,
+            'Invalid Batch State',
+            `Batch must be ${expectedState} before it can ${ids[1]}.`,
+            operationId,
+            batch.revision,
+          );
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const previousState = batch.state;
+        batch.state = nextState;
+        batch.revision += 1;
+        state.line.status = isSuspend ? 'BLOCKED' : 'RUNNING';
+        state.batchEvents.push({
+          revision: batch.revision,
+          action: isSuspend ? 'BATCH_SUSPENDED' : 'BATCH_RESUMED',
+          at: FIXED_TIME,
+          actor: 'simulated.shift.lead',
+          reason: body.reason,
+          fromState: previousState,
+          toState: nextState,
+        });
+        return rememberAndSend(state, context, res, 200, envelope(operationId, batch), operationId);
+      }
       ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/(evidence|balance|genealogy|timeline)$/);
       if (req.method === 'GET' && ids) {
         const batch = state.batches.find((item) => item.id === ids[0]);
@@ -209,9 +251,7 @@ function createHandler(state) {
           evidence: { start: state.candidate.evidence, end: [] },
           balance: { input: 12.4, output: 12.1, difference: 0.3, differencePercent: 2.42, status: 'WITHIN_TOLERANCE', allocations: [] },
           genealogy: { nodes: [{ id: batch.id, type: 'BATCH', label: batch.batchNo }], edges: [] },
-          timeline: [
-            { revision: 1, action: 'SHADOW_BATCH_CREATED', at: FIXED_TIME, actor: 'simulated.shift.lead', reason: state.candidate.review.reason },
-          ],
+          timeline: state.batchEvents,
         }[ids[1]];
         return send(res, 200, envelope(operationId, data), operationId);
       }

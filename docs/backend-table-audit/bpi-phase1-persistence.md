@@ -4,7 +4,7 @@
 
 当前验收结论为 **PASS（仅 Phase 1 影子批次纵切）**。
 
-本次在 Java 17、Spring Boot 3.4.7 和隔离 Docker 网络中的 PostgreSQL 16.13 数据库 `bpi_acceptance` 上，通过真实签名 JWT 调用 BPI HTTP API，并由 Flyway V1-V3 管理 `bpi` schema。验收证明候选接入、幂等重放、输入校验、功能开关、人工确认/拒绝、影子批次生成、证据/状态/审计持久化、乐观版本冲突和租户/产线隔离已形成最小闭环。
+本次在 Java 17、Spring Boot 3.4.7 和隔离 Docker 网络中的 PostgreSQL 16.13 数据库 `bpi_acceptance` 上，通过真实签名 JWT 调用 BPI HTTP API，并由 Flyway V1-V3 管理 `bpi` schema。验收证明候选接入、幂等重放、输入校验、功能开关、人工确认/拒绝、影子批次生成、批次暂停/恢复、证据/状态/审计持久化、乐观版本冲突和租户/产线隔离已形成最小闭环。
 
 这不是 BPI Phase 1 全量上线结论。本地嵌入式 Kafka 和模拟浏览器已有独立自动化证据，但测试机上的 Kafka/Flink/PostgreSQL/浏览器联合验收仍受磁盘门禁阻断；本阶段也不包含 WOM、QCS、WMS 的任何写入。
 
@@ -12,13 +12,13 @@
 
 | 项目 | 实际值 |
 |---|---|
-| 仓库提交 | `ab1e506`，本轮拒绝候选代码位于未提交工作树 |
+| 仓库提交 | `ab1e506`，本轮批次暂停/恢复代码位于未提交工作树 |
 | Java / 框架 | Java 17 / Spring Boot 3.4.7 |
 | 数据库 | 隔离 Docker 网络 PostgreSQL 16.13，数据库 `bpi_acceptance`，schema `bpi` |
 | 数据库迁移 | Flyway `V1__bpi_phase1_baseline.sql` + `V2__bpi_tenant_and_runtime_hardening.sql` + `V3__bpi_telemetry_ingress.sql` |
 | HTTP 验收 | `BpiPostgresAcceptanceTest`，真实 HMAC-SHA256 内部 JWT |
-| 自动化结果 | BPI service `15/15`、PostgreSQL 类 `4/4`、规则运行时 `9/9`、模拟 API `4/4`、Playwright `3/3` 通过 |
-| 验收时间 | 2026-07-13 01:31:36 +08:00 |
+| 自动化结果 | BPI service `16/16`、PostgreSQL 类 `5/5`、规则运行时 `9/9`、模拟 API `5/5`、Playwright `4/4`、Java 8 适配器 `8/8` 通过 |
+| 验收时间 | 2026-07-13 02:00:20 +08:00 |
 | 数据标识 | 每次测试使用动态租户 marker：`ADP_E2E_BPI_<UUID>` |
 
 测试证据位于：
@@ -45,6 +45,13 @@
 | 幂等回放权限复核 | `POST /bpi/v1/candidates/{id}/confirm` | 相同 tenant/key，但 token 不含目标 line | `403`；缓存响应返回前重新校验对象权限 | 无 | PASS |
 | 过期版本拒绝 | `POST /bpi/v1/candidates/{id}/confirm` | 新 idempotency key，但仍使用 `If-Match: 1` | `409`；响应 `currentRevision=2`；事务回滚，无额外幂等行 | `bpi_api_idempotency` | PASS |
 | 影子批次查询 | `GET /bpi/v1/batches/{id}`、`/evidence`、`/timeline` | viewer JWT，作用域包含目标 plant/line | `200`；批次为 shadow，起始证据 1 条，时间线动作为 `SHADOW_BATCH_CREATED` | `bpi_batch_instances`、`bpi_boundary_evidence`、`bpi_batch_state_events` | PASS |
+| 暂停命令前置条件 | `POST /bpi/v1/batches/{id}/suspend` | 缺少 `Idempotency-Key` 和 `If-Match` | `428`；批次仍为 `ACTIVE/r1` | 无 | PASS |
+| 暂停自动处理 | `POST /bpi/v1/batches/{id}/suspend` | shift-lead JWT、唯一 key、`If-Match: 1`、reason | `200`；批次为 `SUSPENDED/r2`，追加 `BATCH_SUSPENDED` 事件和批次审计，产线态势为 `BLOCKED` 且保留在“仅异常”视图 | `bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS |
+| 暂停命令幂等重放 | 同上 | 相同 path、payload、revision 和 key | `200`、`Idempotent-Replay: true`；不重复递增 revision | `bpi_api_idempotency` | PASS |
+| 非法重复暂停 | `POST /bpi/v1/batches/{id}/suspend` | 新 key、`If-Match: 2`，当前已是 `SUSPENDED` | `409`、`currentRevision=2`；事务回滚，不留幂等行 | 无新增 | PASS |
+| 跨批次命令复用 key | 先 suspend，后用同 key 调 resume | method 相同但 resource path 和 checksum 不同 | `409`；暂停响应不能经恢复端点重放 | `bpi_api_idempotency` 保持原行 | PASS |
+| 过期版本恢复 | `POST /bpi/v1/batches/{id}/resume` | 新 key、过期 `If-Match: 1` | `409`、`currentRevision=2`；事务回滚 | 无新增 | PASS |
+| 恢复自动处理 | `POST /bpi/v1/batches/{id}/resume` | 新 key、`If-Match: 2`、reason | `200`；批次回到 `ACTIVE/r3`，追加 `BATCH_RESUMED` 事件和批次审计，产线态势恢复 `RUNNING` | `bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS |
 | 产线隔离 | `GET /bpi/v1/candidates/{id}` | 同 tenant、错误 line claim | `403` | 无写入 | PASS |
 | 租户隔离 | `GET /bpi/v1/candidates/{id}` | 其他 tenant，plant/line 为通配符 | `404`，不泄露跨租户对象存在性 | 无写入 | PASS |
 | 命令开关 fail-closed | `POST /bpi/v1/candidates/{id}/confirm` | 删除测试租户 LINE 级 `bpi.commands=true` 覆盖 | 继承全局 `bpi.commands=false`，返回 `403` | 无写入 | PASS |
@@ -98,6 +105,14 @@ SELECT 'bpi_api_idempotency', count(*)
 `CANDIDATE_REJECTED|1|2`。清理前直接查库确认：候选、审计、幂等各 1 行；
 `bpi_batch_instances`、`bpi_batch_state_events`、`bpi_boundary_evidence` 均为 0 行。
 
+### 批次生命周期落表
+
+生命周期专项 marker 清理前直接回查：`bpi_batch_instances.state|revision = ACTIVE|3`；状态事件按 revision
+严格为 `1|SHADOW_BATCH_CREATED|-|ACTIVE`、`2|BATCH_SUSPENDED|ACTIVE|SUSPENDED`、
+`3|BATCH_RESUMED|SUSPENDED|ACTIVE`；批次审计为 `BATCH_SUSPENDED|1|2` 和
+`BATCH_RESUMED|2|3`。确认、暂停、恢复三个成功命令各占一个幂等行，非法状态和过期版本命令均随
+事务回滚，不留下半成品记录。
+
 ## 清理与可复验性
 
 测试结束后，`@AfterEach` 按动态 tenant marker 定向删除本次验收数据，范围包括 audit、state event、evidence、API idempotency、inbox、candidate、batch，以及测试播种的 rule/topology version。清理不使用全表删除、不删除 schema，也不影响其他租户数据。
@@ -107,7 +122,7 @@ SELECT 'bpi_api_idempotency', count(*)
 - Kafka listener、重复投递和 DLQ 已在本地嵌入式 broker 验证；目标三节点集群仍未联合验收。
 - Flink 逻辑与确定性回放已有独立测试；目标集群 event-time、checkpoint 和恢复仍未联合验收。
 - 候选输入来自验收回放 payload，不是真实 IoT/JetLinks 测点流。
-- 已通过模拟浏览器确认和拒绝候选；尚未完成目标环境浏览器到 PostgreSQL 的联合落库验收。
+- 已通过模拟浏览器确认/拒绝候选和暂停/恢复批次；尚未完成目标环境浏览器到 PostgreSQL 的联合落库验收。
 - 影子批次不写 WOM、QCS、WMS；`wmsStatus=NOT_REQUESTED` 是本阶段的预期行为。
 - 验收 JWT 使用短时 HS256 内部测试密钥；生产 JWKS/非对称签名和密钥轮换尚未完成。
 - 本地 Docker 已完成隔离 PostgreSQL 16.13 验收；目标机因根分区约 0.51 GiB 可用而未启动新容器。

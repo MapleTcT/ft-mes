@@ -194,7 +194,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .command-summary b { overflow-wrap: anywhere; font-size: 12px; }
 .command-dialog footer { display: flex; justify-content: flex-end; gap: 9px; padding: 13px 18px; background: #f6f8f9; border-top: 1px solid var(--line); }
 
-.toast { position: fixed; z-index: 80; right: 22px; bottom: 22px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(8px); transition: 150ms ease-out; font-size: 13px; }
+.toast { position: fixed; z-index: 80; right: 22px; bottom: 82px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(8px); transition: 150ms ease-out; font-size: 13px; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
 .toast.is-error { background: #502229; border-left-color: #ee7b84; }
 
@@ -230,6 +230,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .facts-grid { grid-template-columns: 1fr; }
   .candidate-hero { grid-template-columns: 1fr 100px; }
   .command-summary { grid-template-columns: 1fr; }
+  .toast { right: 12px; bottom: 74px; max-width: calc(100vw - 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

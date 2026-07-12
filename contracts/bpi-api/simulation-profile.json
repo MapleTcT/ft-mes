@@ -14,6 +14,8 @@
     "getBatchBalance",
     "getBatchGenealogy",
     "getBatchTimeline",
+    "suspendBatch",
+    "resumeBatch",
     "listRules",
     "getRuleVersion",
     "simulateRule",

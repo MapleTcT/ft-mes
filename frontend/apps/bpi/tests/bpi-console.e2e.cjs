@@ -84,6 +84,51 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   await page.close();
 });
 
+test('shift lead suspends and resumes a batch from the detail drawer', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/candidates`, { waitUntil: 'networkidle' });
+
+  await page.locator('[data-candidate-id]').click();
+  await page.getByRole('button', { name: '确认候选' }).click();
+  await page.locator('#confirm-reason').fill('班长确认边界并创建生命周期验收批次');
+  await page.getByRole('button', { name: '确认并生成影子批次' }).click();
+  await page.getByRole('heading', { name: 'S07-20260712-001' }).waitFor();
+
+  await page.getByRole('button', { name: '暂停自动处理' }).click();
+  await page.getByRole('heading', { name: '暂停批次自动处理' }).waitFor();
+  await page.locator('#confirm-reason').fill('上游制造指令上下文已过期');
+  await page.getByRole('button', { name: '确认暂停' }).click();
+  await page.getByText('批次自动处理已暂停').waitFor();
+  await page.locator('.batch-state-band').getByText('SUSPENDED', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 2/);
+  await page.getByText('BATCH_SUSPENDED', { exact: true }).waitFor();
+
+  await page.getByRole('button', { name: '恢复自动处理' }).click();
+  await page.getByRole('heading', { name: '恢复批次自动处理' }).waitFor();
+  await page.locator('#confirm-reason').fill('上游制造指令上下文已恢复并完成复核');
+  await page.getByRole('button', { name: '确认恢复' }).click();
+  await page.getByText('批次自动处理已恢复').waitFor();
+  await page.locator('.batch-state-band').getByText('ACTIVE', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 3/);
+  await page.getByText('BATCH_RESUMED', { exact: true }).waitFor();
+
+  const batch = await fetch(`${simulatorUrl}/bpi/v1/batches/BATCH-S07-20260712-001`).then((response) => response.json());
+  const timeline = await fetch(`${simulatorUrl}/bpi/v1/batches/BATCH-S07-20260712-001/timeline`).then((response) => response.json());
+  assert.equal(batch.data.state, 'ACTIVE');
+  assert.equal(batch.data.revision, 3);
+  assert.deepEqual(timeline.data.map((item) => item.action), [
+    'SHADOW_BATCH_CREATED',
+    'BATCH_SUSPENDED',
+    'BATCH_RESUMED',
+  ]);
+  await page.screenshot({ path: '/tmp/bpi-console-batch-lifecycle.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('mobile layout keeps navigation usable without page-level horizontal overflow', async () => {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const errors = observe(page);

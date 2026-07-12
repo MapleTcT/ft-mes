@@ -4731,6 +4731,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchCommandService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchQueryService.java",
       "state": "tracked",
       "tracked": true
@@ -5753,7 +5759,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 93
+      "tracked": 94
     },
     "simulation": {
       "tracked": 4
@@ -5765,8 +5771,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 951,
-    "tracked": 951,
+    "totalFiles": 952,
+    "tracked": 952,
     "untracked": 0
   },
   "untrackedByDirectory": []

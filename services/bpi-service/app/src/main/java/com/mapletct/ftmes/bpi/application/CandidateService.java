@@ -112,7 +112,7 @@ public class CandidateService {
         repository.insertBatch(batch, persisted, actor.userId());
         repository.insertEvidence(actor.tenantId(), batchId, candidate.boundaryType(), candidate.evidence());
         repository.insertStateEvent(
-                actor.tenantId(), batchId, "SHADOW_BATCH_CREATED", BatchState.ACTIVE.name(),
+                actor.tenantId(), batchId, 1, "SHADOW_BATCH_CREATED", null, BatchState.ACTIVE.name(),
                 command.reason(), actor.userId(), Instant.now(), traceId);
         repository.confirmCandidate(candidateId, expectedRevision, batchId, actor.userId(), command.reason());
         repository.insertAudit(

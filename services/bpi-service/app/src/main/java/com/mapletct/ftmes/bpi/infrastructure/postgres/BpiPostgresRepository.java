@@ -216,6 +216,14 @@ public class BpiPostgresRepository {
     }
 
     public boolean commandsEnabled(ActorContext actor, BatchCandidate candidate) {
+        return commandsEnabled(actor, candidate.plantId(), candidate.lineId());
+    }
+
+    public boolean commandsEnabled(ActorContext actor, BatchInstance batch) {
+        return commandsEnabled(actor, batch.plantId(), batch.lineId());
+    }
+
+    private boolean commandsEnabled(ActorContext actor, String plantId, String lineId) {
         List<Boolean> matches = jdbc.query("""
                 SELECT enabled
                   FROM bpi.bpi_feature_flags
@@ -238,8 +246,8 @@ public class BpiPostgresRepository {
                  LIMIT 1
                 """, new MapSqlParameterSource()
                 .addValue("tenantId", actor.tenantId())
-                .addValue("plantId", candidate.plantId())
-                .addValue("lineId", candidate.lineId()),
+                .addValue("plantId", plantId)
+                .addValue("lineId", lineId),
                 (rs, rowNum) -> rs.getBoolean("enabled"));
         return !matches.isEmpty() && matches.get(0);
     }
@@ -361,14 +369,17 @@ public class BpiPostgresRepository {
     }
 
     public void insertStateEvent(
-            String tenantId, UUID batchId, String action, String toState, String reason,
+            String tenantId, UUID batchId, long revision, String action, String fromState, String toState, String reason,
             String actorId, Instant eventTime, String traceId) {
         jdbc.update("""
                 INSERT INTO bpi.bpi_batch_state_events
-                    (id, tenant_id, batch_id, revision, action, to_state, reason, actor_id, event_time, trace_id)
-                VALUES (:id, :tenantId, :batchId, 1, :action, :toState, :reason, :actorId, :eventTime, :traceId)
+                    (id, tenant_id, batch_id, revision, action, from_state, to_state, reason,
+                     actor_id, event_time, trace_id)
+                VALUES (:id, :tenantId, :batchId, :revision, :action, :fromState, :toState, :reason,
+                        :actorId, :eventTime, :traceId)
                 """, new MapSqlParameterSource().addValue("id", UUID.randomUUID()).addValue("tenantId", tenantId)
-                .addValue("batchId", batchId).addValue("action", action).addValue("toState", toState)
+                .addValue("batchId", batchId).addValue("revision", revision).addValue("action", action)
+                .addValue("fromState", fromState).addValue("toState", toState)
                 .addValue("reason", reason).addValue("actorId", actorId)
                 .addValue("eventTime", Timestamp.from(eventTime)).addValue("traceId", traceId));
     }
@@ -385,6 +396,23 @@ public class BpiPostgresRepository {
                 """, new MapSqlParameterSource().addValue("id", UUID.randomUUID())
                 .addValue("tenantId", actor.tenantId()).addValue("plantId", candidate.plantId())
                 .addValue("lineId", candidate.lineId()).addValue("objectId", candidate.id())
+                .addValue("action", action).addValue("actorId", actor.userId())
+                .addValue("beforeRevision", beforeRevision).addValue("afterRevision", afterRevision)
+                .addValue("reason", reason).addValue("traceId", traceId).addValue("detail", writeJson(detail)));
+    }
+
+    public void insertBatchAudit(
+            ActorContext actor, BatchInstance batch, String action, long beforeRevision,
+            long afterRevision, String reason, String traceId, Map<String, Object> detail) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_audit_events
+                    (id, tenant_id, plant_id, line_id, object_type, object_id, action, actor_id,
+                     before_revision, after_revision, reason, trace_id, detail)
+                VALUES (:id, :tenantId, :plantId, :lineId, 'BATCH_INSTANCE', :objectId, :action, :actorId,
+                        :beforeRevision, :afterRevision, :reason, :traceId, CAST(:detail AS jsonb))
+                """, new MapSqlParameterSource().addValue("id", UUID.randomUUID())
+                .addValue("tenantId", actor.tenantId()).addValue("plantId", batch.plantId())
+                .addValue("lineId", batch.lineId()).addValue("objectId", batch.id())
                 .addValue("action", action).addValue("actorId", actor.userId())
                 .addValue("beforeRevision", beforeRevision).addValue("afterRevision", afterRevision)
                 .addValue("reason", reason).addValue("traceId", traceId).addValue("detail", writeJson(detail)));
@@ -410,12 +438,39 @@ public class BpiPostgresRepository {
     }
 
     public BatchInstance findBatch(ActorContext actor, UUID batchId) {
+        return findBatch(actor, batchId, false);
+    }
+
+    public BatchInstance lockBatch(ActorContext actor, UUID batchId) {
+        return findBatch(actor, batchId, true);
+    }
+
+    private BatchInstance findBatch(ActorContext actor, UUID batchId, boolean lock) {
         try {
-            return jdbc.queryForObject(BATCH_SELECT + " WHERE b.tenant_id = :tenantId AND b.id = :id",
+            String sql = BATCH_SELECT + " WHERE b.tenant_id = :tenantId AND b.id = :id"
+                    + (lock ? " FOR UPDATE OF b" : "");
+            return jdbc.queryForObject(sql,
                     new MapSqlParameterSource().addValue("tenantId", actor.tenantId()).addValue("id", batchId),
                     batchRowMapper());
         } catch (EmptyResultDataAccessException exception) {
             throw new BpiNotFoundException("Batch not found.");
+        }
+    }
+
+    public void transitionBatch(
+            String tenantId, UUID batchId, long expectedRevision, BatchState fromState, BatchState toState) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_instances
+                   SET state = :toState, revision = revision + 1, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :batchId
+                   AND revision = :expectedRevision
+                   AND state = :fromState
+                """, new MapSqlParameterSource().addValue("tenantId", tenantId)
+                .addValue("batchId", batchId).addValue("expectedRevision", expectedRevision)
+                .addValue("fromState", fromState.name()).addValue("toState", toState.name()));
+        if (updated != 1) {
+            throw new BpiConflictException("Batch was changed by another command.", expectedRevision);
         }
     }
 

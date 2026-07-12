@@ -162,6 +162,12 @@ WMS 状态、规则版本和时间范围。列：批次号、物料、产线/工
 允许命令根据状态显示：暂停、恢复、申请强制结束、提交修订。修订采用字段级表单，原值只读，
 新值、原因、证据和影响评估必填。不会直接覆盖原批次记录。
 
+首期已经实现的运行控制严格限定为 `ACTIVE -> SUSPENDED -> ACTIVE`。详情页在 `ACTIVE` 时只显示
+“暂停自动处理”，在 `SUSPENDED` 时只显示“恢复自动处理”，其他状态不显示这两个命令。暂停与恢复
+都要求原因、`Idempotency-Key` 和当前 `If-Match` revision；成功后批次 revision 加一，并追加
+`BATCH_SUSPENDED` 或 `BATCH_RESUMED` 状态事件和批次审计。暂停不会结束批次、修改累计量或向
+WOM/QCS/WMS 写数据；恢复也不会补造缺失事件，而是从已审计的同一批次继续自动处理。
+
 **主要 API：** `getBatch`、`getBatchEvidence`、`getBatchBalance`、`getBatchGenealogy`、
 `getBatchTimeline`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、`createBatchCorrection`。
 
@@ -273,6 +279,24 @@ stateDiagram-v2
   PENDING_APPROVAL --> DRAFT: 退回
 ```
 
+### 6.3 批次暂停与恢复
+
+```mermaid
+sequenceDiagram
+  participant U as 班长
+  participant UI as BPI 批次详情
+  participant API as BPI API
+  participant DB as PostgreSQL
+  U->>UI: 选择暂停并填写上下文过期原因
+  UI->>API: POST suspend, Idempotency-Key, If-Match=1
+  API->>DB: batch r1 ACTIVE -> r2 SUSPENDED + state event + audit
+  DB-->>UI: SUSPENDED revision=2
+  U->>UI: 上下文恢复后选择恢复并填写复核原因
+  UI->>API: POST resume, new Idempotency-Key, If-Match=2
+  API->>DB: batch r2 SUSPENDED -> r3 ACTIVE + state event + audit
+  DB-->>UI: ACTIVE revision=3
+```
+
 ## 7. 异常与恢复
 
 | 场景 | 用户看到 | 可恢复动作 |
@@ -304,9 +328,11 @@ stateDiagram-v2
 2. 读取候选证据并确认，生成唯一影子批次。
 3. 使用相同 `Idempotency-Key` 重试不重复生成批次。
 4. 使用旧 revision 再提交返回 `409` 和当前 revision。
-5. 查询批次详情、证据、平衡和谱系。
-6. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
-7. 查询数据质量事件并看到受影响的产线、规则和批次。
+5. 从批次详情暂停 `ACTIVE` 批次，看到 `SUSPENDED/r2`、产线 `BLOCKED` 和追加事件。
+6. 从同一详情恢复批次，看到 `ACTIVE/r3`、产线 `RUNNING` 和追加事件。
+7. 查询批次详情、证据、平衡和谱系。
+8. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
+9. 查询数据质量事件并看到受影响的产线、规则和批次。
 
 模拟验收不证明真实 JetLinks、Kafka、Flink 或 PostgreSQL 已接通；真实环境仍需执行
 浏览器、API、PostgreSQL marker 和回滚验收。

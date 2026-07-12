@@ -135,6 +135,17 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchCommandService.java",
+        ["commandsEnabled", "reserveIdempotency", "lockBatch", "transitionBatch",
+         "BATCH_SUSPENDED", "BATCH_RESUMED", "insertBatchAudit"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/BatchController.java",
+        ["/bpi/v1/batches/{batchId}/suspend", "/bpi/v1/batches/{batchId}/resume"],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
         [
             "BPI_EVENT_INGEST",

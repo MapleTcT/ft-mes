@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T01:23:29+08:00",
+  "generatedAt": "2026-07-13T02:00:20+08:00",
   "repoCommit": "ab1e506",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 3,
-    "pass": 3,
+    "browserTests": 4,
+    "pass": 4,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -44,6 +44,29 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-desktop.png"
+    },
+    {
+      "id": "desktop-batch-lifecycle",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/candidates",
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "confirm candidate and create shadow batch",
+        "suspend ACTIVE batch with mandatory reason",
+        "verify SUSPENDED revision 2 and timeline",
+        "resume SUSPENDED batch with mandatory reason",
+        "verify ACTIVE revision 3 and append-only timeline"
+      ],
+      "apis": [
+        "POST /bpi/v1/candidates/{id}/confirm",
+        "POST /bpi/v1/batches/{id}/suspend",
+        "POST /bpi/v1/batches/{id}/resume",
+        "GET /bpi/v1/batches/{id}/timeline"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-batch-lifecycle.png"
     },
     {
       "id": "mobile-navigation-and-overflow",

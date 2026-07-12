@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T01:23:37+08:00",
+  "generatedAt": "2026-07-13T02:00:20+08:00",
   "repoCommit": "ab1e506",
   "workingTree": "uncommitted",
   "scope": "Java 8 MES authentication adapter unit and proxy contract acceptance",
@@ -9,8 +9,8 @@
     "upstream": "Java 17 BPI service"
   },
   "summary": {
-    "tests": 7,
-    "pass": 7,
+    "tests": 8,
+    "pass": 8,
     "fail": 0,
     "errors": 0,
     "skipped": 0,
@@ -41,12 +41,12 @@
     {
       "id": "phase1-route-allowlist",
       "status": "PASS",
-      "evidence": "Only Phase 1 reads plus candidate confirmation/rejection were allowed; method changes and path traversal were denied."
+      "evidence": "Only Phase 1 reads, candidate confirmation/rejection and batch suspend/resume were allowed; force-close, method changes and path traversal were denied."
     },
     {
       "id": "fixed-upstream-proxy",
       "status": "PASS",
-      "evidence": "Confirmation and rejection proxy tests replaced the legacy bearer, kept the fixed BPI upstream, forwarded Idempotency-Key and If-Match, and ignored X-Tenant-Id."
+      "evidence": "Confirmation, rejection, suspension and resume proxy tests replaced the legacy bearer, kept the fixed BPI upstream, forwarded Idempotency-Key and If-Match, and ignored X-Tenant-Id."
     }
   ],
   "commands": [

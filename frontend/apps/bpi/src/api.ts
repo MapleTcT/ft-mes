@@ -69,6 +69,18 @@ export const bpiApi = {
   batches: (plantId: string) =>
     request<Batch[]>(`/batches?plantId=${encodeURIComponent(plantId)}&limit=100`),
   batch: (id: string) => request<Batch>(`/batches/${encodeURIComponent(id)}`),
+  suspendBatch: (batch: Batch, reason: string, key: string) =>
+    request<Batch>(`/batches/${encodeURIComponent(batch.id)}/suspend`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  resumeBatch: (batch: Batch, reason: string, key: string) =>
+    request<Batch>(`/batches/${encodeURIComponent(batch.id)}/resume`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
+      body: JSON.stringify({ reason }),
+    }),
   evidence: (id: string) => request<{ start: Evidence[]; end: Evidence[] }>(`/batches/${encodeURIComponent(id)}/evidence`),
   timeline: (id: string) => request<StateEvent[]>(`/batches/${encodeURIComponent(id)}/timeline`),
 };

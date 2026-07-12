@@ -94,6 +94,7 @@ function createScenario() {
     line,
     candidate,
     batches: [],
+    batchEvents: [],
     rule,
     simulations: new Map(),
     incident,

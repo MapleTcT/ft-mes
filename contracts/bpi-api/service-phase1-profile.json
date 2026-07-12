@@ -11,7 +11,9 @@
     "listBatches",
     "getBatch",
     "getBatchEvidence",
-    "getBatchTimeline"
+    "getBatchTimeline",
+    "suspendBatch",
+    "resumeBatch"
   ],
   "internalEndpoints": [
     {
