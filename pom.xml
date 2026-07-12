@@ -13,6 +13,7 @@
     <description>Sustainable development parent for the recovered ADP/MES codebase.</description>
 
     <modules>
+        <module>contracts</module>
         <module>backend</module>
         <module>deploy</module>
     </modules>

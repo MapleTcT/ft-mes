@@ -21,11 +21,19 @@ DIRECT_FILES = {
     "pom.xml",
     "backend/pom.xml",
     "backend/source-modules/pom.xml",
+    "contracts/pom.xml",
+    "contracts/bpi-events/pom.xml",
     "deploy/pom.xml",
 }
 
 SCAN_GLOBS = {
     ".github/workflows/*.yml",
+    "contracts/**/*.md",
+    "contracts/**/pom.xml",
+    "contracts/**/src/main/**/*.java",
+    "contracts/**/src/main/**/*.proto",
+    "contracts/**/src/test/**/*.fields",
+    "contracts/**/src/test/**/*.java",
     "deploy/business-smoke/production-migration/**/*.json",
     "deploy/business-smoke/production-migration/**/*.md",
     "deploy/business-smoke/production-migration/**/*.py",
@@ -91,7 +99,7 @@ EXCLUDED_INVENTORY_PARTS = {
 
 PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
-    r"((?:\.github|backend|deploy|docs|metadata|scripts)/"
+    r"((?:\.github|backend|contracts|deploy|docs|metadata|scripts)/"
     r"[A-Za-z0-9_./@+,-]+)"
 )
 

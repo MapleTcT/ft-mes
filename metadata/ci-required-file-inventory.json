@@ -27,6 +27,84 @@
     },
     {
       "ignored": false,
+      "path": "contracts/bpi-events/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/java/com/mapletct/ftmes/bpi/contract/identity/CandidateKeyFactory.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/java/com/mapletct/ftmes/bpi/contract/validation/BpiContractValidator.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/java/com/mapletct/ftmes/bpi/contract/validation/ContractViolation.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/java/com/mapletct/ftmes/bpi/contract/validation/PointRejection.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/java/com/mapletct/ftmes/bpi/contract/validation/TelemetryEnvelopeValidationResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/test/java/com/mapletct/ftmes/bpi/contract/compatibility/ProtobufCompatibilityTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/test/java/com/mapletct/ftmes/bpi/contract/identity/CandidateKeyFactoryTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/test/java/com/mapletct/ftmes/bpi/contract/validation/BpiContractValidatorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-events/src/test/resources/compatibility/bpi-events-v1.fields",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/business-smoke/production-migration/README.md",
       "state": "tracked",
       "tracked": true
@@ -3889,6 +3967,9 @@
     "backend": {
       "tracked": 2
     },
+    "contracts": {
+      "tracked": 13
+    },
     "deploy": {
       "tracked": 459
     },
@@ -3911,8 +3992,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 645,
-    "tracked": 645,
+    "totalFiles": 658,
+    "tracked": 658,
     "untracked": 0
   },
   "untrackedByDirectory": []
