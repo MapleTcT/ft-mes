@@ -7,13 +7,23 @@
 
 ## 1. 使用约定
 
-- 浏览器和 Java 8 适配器统一访问 `/bpi/v1`，生产服务由 Java 17 BPI 服务实现。
+- 浏览器只访问同源 `/bpi-api`；Java 8 适配器校验旧 Keycloak token 后，以短期内部 JWT 调用 Java 17 服务的 `/bpi/v1`。
 - 所有写操作必须携带 `Idempotency-Key`、`If-Match` 和业务原因；缺少前置条件返回 `428`。
 - revision 过期返回 `409 application/problem+json`，响应包含 `currentRevision`。
 - Phase 1 只创建 `shadow=true` 的 BPI 批次，不写 WOM、QCS、WMS，也不控制 PLC/DCS。
 - 列表响应固定 `snapshotAt`，大数据列表使用 cursor，不用页码推断实时数据位置。
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
 - Java 17 服务当前只实现 `service-phase1-profile.json` 中的 9 个公开操作和 1 个内部候选接入端点；其余模拟操作仍不能视为后端已实现。
+
+### 1.1 Java 8 适配器边界
+
+- 入口：`/bpi-api/**`，实现位于 `backend/source-modules/batch-intelligence-adapter`。
+- 旧 token 通过 Keycloak JWKS、issuer、audience 和时间声明校验；适配器不会把旧 Bearer 原样传给 Java 17 服务。
+- `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
+- 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
+- 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；请求体上限为 64 KiB。
+- 当前允许 GET overview/line/candidate/batch 读取，以及 POST candidate confirm。未在白名单中的 Phase 2/3 契约即使存在于 OpenAPI 也返回 403。
+- 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
 

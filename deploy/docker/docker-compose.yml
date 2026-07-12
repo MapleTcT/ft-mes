@@ -458,6 +458,44 @@ services:
       bpi-migrate:
         condition: service_completed_successfully
 
+  bpi-adapter:
+    image: ${BPI_ADAPTER_IMAGE:-ft-mes-bpi-adapter:local}
+    profiles: ["bpi"]
+    build:
+      context: ../..
+      dockerfile: backend/source-modules/batch-intelligence-adapter/Dockerfile
+      args:
+        MAVEN_IMAGE: ${BPI_ADAPTER_MAVEN_IMAGE:-maven:3.9.9-eclipse-temurin-8}
+        JAVA_IMAGE: ${BPI_ADAPTER_JAVA_IMAGE:-eclipse-temurin:8-jre-jammy}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_ADAPTER_SERVER_PORT: "19080"
+      BPI_ADAPTER_UPSTREAM_BASE_URL: http://bpi-service:19091
+      BPI_ADAPTER_KEYCLOAK_JWK_SET_URI: ${BPI_ADAPTER_KEYCLOAK_JWK_SET_URI:-http://keycloak:8080/auth/realms/dt/protocol/openid-connect/certs}
+      BPI_ADAPTER_KEYCLOAK_ISSUER: ${BPI_ADAPTER_KEYCLOAK_ISSUER:-}
+      BPI_ADAPTER_KEYCLOAK_AUDIENCE: ${BPI_ADAPTER_KEYCLOAK_AUDIENCE:-pc_dt}
+      BPI_ADAPTER_TENANT_CLAIM: ${BPI_ADAPTER_TENANT_CLAIM:-companyId}
+      BPI_ADAPTER_USERNAME_CLAIM: ${BPI_ADAPTER_USERNAME_CLAIM:-userName}
+      BPI_ADAPTER_INTERNAL_JWT_SECRET: ${BPI_INTERNAL_JWT_SECRET:-bpi-dev-secret-change-before-deploy-0001}
+      BPI_ADAPTER_INTERNAL_JWT_ISSUER: ${BPI_INTERNAL_JWT_ISSUER:-ft-mes-adapter}
+      BPI_ADAPTER_INTERNAL_JWT_AUDIENCE: ${BPI_INTERNAL_JWT_AUDIENCE:-bpi-service}
+      BPI_ADAPTER_INTERNAL_TOKEN_TTL: 10m
+      BPI_ADAPTER_ROLE_RULES: ${BPI_ADAPTER_ROLE_RULES:-admin=BPI_ADMIN|BPI_OPERATOR}
+      BPI_ADAPTER_SUBJECT_SCOPE_RULES: admin=${BPI_ADAPTER_SCOPE_TENANT_ID:-1000}|${BPI_ADAPTER_SCOPE_PLANT_ID:-PLANT-01}|${BPI_ADAPTER_SCOPE_LINE_ID:-LINE-S07-01}
+    ports:
+      - "${BPI_ADAPTER_HTTP_PORT:-19080}:19080"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/19080'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    depends_on:
+      bpi-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
   FoundationMs:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/FoundationMs/manual/FoundationMs-1.0.0.jar"]
@@ -511,6 +549,7 @@ services:
       - "${ADP_HTTP_PORT:-18080}:8080"
     volumes:
       - ../../runtime/bap-server/bap-workspace/bap-static:/usr/share/nginx/html:ro
+      - ../../frontend/apps/bpi/dist:/usr/share/nginx/bpi:ro
       - ./assets/module-static:/usr/share/nginx/module-static:ro
       - ./nginx/gzip.conf:/etc/nginx/conf.d/00-gzip.conf:ro
       - ./nginx/adp.conf:/etc/nginx/conf.d/default.conf:ro

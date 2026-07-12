@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-07-12T18:00:22+08:00",
+  "repoCommit": "27ddf94",
+  "workingTree": "uncommitted",
+  "scope": "Java 8 MES authentication adapter unit and proxy contract acceptance",
+  "runtime": {
+    "javaTarget": "1.8",
+    "springBoot": "2.1.5.RELEASE",
+    "upstream": "Java 17 BPI service"
+  },
+  "summary": {
+    "tests": 6,
+    "pass": 6,
+    "fail": 0,
+    "errors": 0,
+    "skipped": 0,
+    "runtimeSmokeChecks": 2,
+    "runtimeSmokePass": 2
+  },
+  "items": [
+    {
+      "id": "server-owned-scope",
+      "status": "PASS",
+      "evidence": "companyId, approved legacy role, plant and line were mapped into a bounded BPI actor."
+    },
+    {
+      "id": "missing-scope-fail-closed",
+      "status": "PASS",
+      "evidence": "An authenticated subject without an explicit server-side scope was denied."
+    },
+    {
+      "id": "environment-rule-binding",
+      "status": "PASS",
+      "evidence": "Java 8 compatible role-rules and subject-scope-rules were parsed into the approved role and line scope maps."
+    },
+    {
+      "id": "internal-jwt-signature-and-ttl",
+      "status": "PASS",
+      "evidence": "HS256 signature, issuer, audience, tenant claim and 10-minute expiry were verified with Nimbus."
+    },
+    {
+      "id": "phase1-route-allowlist",
+      "status": "PASS",
+      "evidence": "Only Phase 1 reads and candidate confirmation were allowed; method changes and path traversal were denied."
+    },
+    {
+      "id": "fixed-upstream-proxy",
+      "status": "PASS",
+      "evidence": "The proxy replaced the legacy bearer, kept the fixed BPI upstream, forwarded Idempotency-Key and If-Match, and ignored X-Tenant-Id."
+    }
+  ],
+  "commands": [
+    "make compose-config",
+    "make bpi-adapter-test",
+    "make bpi-ui-build",
+    "java -jar backend/source-modules/batch-intelligence-adapter/target/batch-intelligence-adapter-0.1.0-SNAPSHOT.jar",
+    "curl http://127.0.0.1:19082/actuator/health"
+  ],
+  "runtimeSmoke": {
+    "health": "HTTP 200 with status UP",
+    "unauthenticatedBpiApi": "HTTP 401 with WWW-Authenticate Bearer and no Set-Cookie/JSESSIONID",
+    "configuration": "Non-secret local acceptance values; the JWKS URL was intentionally unreachable and no authenticated request was claimed."
+  },
+  "limitations": [
+    "No live Keycloak JWKS request or real MES login token was used in this unit acceptance.",
+    "No browser-to-adapter-to-Java17-to-PostgreSQL end-to-end run was performed.",
+    "Docker Compose rendered successfully; the adapter container image and healthcheck were not runtime-tested.",
+    "The explicit admin/PLANT-01/LINE-S07-01 mapping is a test-environment default and must be replaced by reviewed production scope configuration.",
+    "The internal token still uses the Phase 1 shared HS256 key; asymmetric signing and rotation remain pending."
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T09:15:30+00:00",
-  "repoCommit": "65ee6e14894945b282cdd9caef0eb0b81ead8769",
+  "generatedAt": "2026-07-12T10:13:34+00:00",
+  "repoCommit": "27ddf945a3376aabdf2cd05558ee32a717ebe136",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -75,7 +75,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=972, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 972 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=973, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 973 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The additional classified reference is the BPI adapter verifier's explicit ojdbc prohibition, not a runtime dependency.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",

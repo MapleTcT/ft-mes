@@ -21,7 +21,343 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/basicmanagement-auditlog/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/basicmanagement-auditlog/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/basicmanagement-auditlog/src/main/java/com/supcon/supfusion/audit/AuditRegistryConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/Dockerfile",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/AdapterAccessDeniedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/AdapterConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/AdapterErrorHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiActor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiAdapterApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiAdapterProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiClaimsMapper.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiProxyController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/InternalJwtIssuer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/SecurityConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiClaimsMapperTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiProxyControllerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/InternalJwtIssuerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/MaterialWmsApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/MaterialWmsExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/StockDocumentLineRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/StockDocumentRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/DocumentType.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/MaterialWmsBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/QualityStatus.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/QualityUpdateResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/StockDocumentResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/repository/MaterialWmsRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/service/MaterialInventoryService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/support/TenantResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialWmsIntegrationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/test/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/api/ProcessAnalysisExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/ProcessAnalysisBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/domain/SnapshotType.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/repository/ProcessAnalysisRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/service/TraceabilityService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/java/com/mapletct/ftmes/processanalysis/support/TenantResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/test/java/com/mapletct/ftmes/processanalysis/ProcessAnalysisIntegrationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/process-analysis/src/test/resources/application.yml",
       "state": "tracked",
       "tracked": true
     },
@@ -3399,6 +3735,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-adapter-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -3928,6 +4270,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-basic-config-coverage.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-bpi-adapter.py",
       "state": "tracked",
       "tracked": true
     },
@@ -4469,7 +4817,7 @@
       "tracked": 1
     },
     "backend": {
-      "tracked": 2
+      "tracked": 58
     },
     "contracts": {
       "tracked": 18
@@ -4484,7 +4832,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 76
+      "tracked": 77
     },
     "package.json": {
       "tracked": 1
@@ -4493,7 +4841,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 48
+      "tracked": 49
     },
     "services": {
       "tracked": 55
@@ -4505,8 +4853,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 742,
-    "tracked": 742,
+    "totalFiles": 800,
+    "tracked": 800,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 57,
+    "composeServiceCount": 58,
     "composeServiceKindCounts": {
       "business-runtime": 16,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 2
+      "support-runtime": 3
     },
     "composeServices": [
       {
@@ -817,6 +817,11 @@
       },
       {
         "service": "bpi-service",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-adapter",
         "jarPath": "",
         "kind": "support-runtime"
       },

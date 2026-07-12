@@ -1,0 +1,28 @@
+server:
+  port: ${BPI_ADAPTER_SERVER_PORT:19080}
+  max-http-header-size: 16KB
+
+spring:
+  application:
+    name: batch-intelligence-adapter
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+bpi:
+  adapter:
+    upstream-base-url: ${BPI_ADAPTER_UPSTREAM_BASE_URL:http://bpi-service:19091}
+    keycloak-jwk-set-uri: ${BPI_ADAPTER_KEYCLOAK_JWK_SET_URI:}
+    keycloak-issuer: ${BPI_ADAPTER_KEYCLOAK_ISSUER:}
+    keycloak-audience: ${BPI_ADAPTER_KEYCLOAK_AUDIENCE:pc_dt}
+    tenant-claim: ${BPI_ADAPTER_TENANT_CLAIM:companyId}
+    username-claim: ${BPI_ADAPTER_USERNAME_CLAIM:userName}
+    internal-jwt-secret: ${BPI_ADAPTER_INTERNAL_JWT_SECRET:}
+    internal-jwt-issuer: ${BPI_ADAPTER_INTERNAL_JWT_ISSUER:ft-mes-adapter}
+    internal-jwt-audience: ${BPI_ADAPTER_INTERNAL_JWT_AUDIENCE:bpi-service}
+    internal-token-ttl: ${BPI_ADAPTER_INTERNAL_TOKEN_TTL:10m}
+    role-rules: ${BPI_ADAPTER_ROLE_RULES:}
+    subject-scope-rules: ${BPI_ADAPTER_SUBJECT_SCOPE_RULES:}
