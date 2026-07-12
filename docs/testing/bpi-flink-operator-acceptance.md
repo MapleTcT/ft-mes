@@ -6,8 +6,9 @@
 算子使用 `tenant + line + locality group + boundary kind` 作为 keyed state 分区，使用
 broadcast state 接收发布规则，并复用 `batch-rule-runtime` 完成 START/END 判断。
 
-流式模块自动测试为 **33/33 PASS**，其中 10 项使用 Flink 官方
-`KeyedBroadcastOperatorTestHarness`，不是自制上下文 mock。
+流式模块自动测试为 **41/41 PASS**，其中 10 项使用 Flink 官方
+`KeyedBroadcastOperatorTestHarness`，另有 6 项使用官方
+`KeyedTwoInputStreamOperatorTestHarness`，不是自制上下文 mock。
 
 ## 状态与恢复契约
 

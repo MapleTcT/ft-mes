@@ -10,11 +10,11 @@
     "broadcastRule": "BPIR/write-v2/read-v1-v2"
   },
   "summary": {
-    "testsRun": 33,
-    "pass": 33,
+    "testsRun": 41,
+    "pass": 41,
     "fail": 0,
     "blocked": 0,
-    "flinkHarnessTests": 10
+    "flinkHarnessTests": 16
   },
   "capabilities": [
     "keyed locality partitioning",

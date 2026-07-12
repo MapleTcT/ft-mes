@@ -8,7 +8,9 @@ The current milestone provides both a deterministic single-context replay
 engine and a Flink `KeyedBroadcastProcessFunction`. The Flink path stores
 versioned `byte[]` keyed/broadcast state, uses event-time timers, emits
 `BatchCandidateV1` wire bytes, and routes rejected inputs to a side output. It
-is not yet wired to the production Kafka source and sink.
+also provides a keyed, checkpointed event-time join for point telemetry and
+versioned production context. It is not yet wired to the production Kafka
+source and sink.
 
 Run the module with:
 

@@ -3657,6 +3657,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-production-context-join-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-rule-publication-routing-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -3832,6 +3838,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-production-context-join-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5211,6 +5223,48 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextJoinIssue.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPoint.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPointCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PendingContextPoint.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinState.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
       "state": "tracked",
       "tracked": true
@@ -5218,6 +5272,18 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PublishedBoundaryPlan.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryEnvelopeFlattener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryPointEvent.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5248,6 +5314,18 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouterTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinHarnessTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodecTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5291,13 +5369,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 72
+      "tracked": 73
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 85
+      "tracked": 86
     },
     "package.json": {
       "tracked": 1
@@ -5315,14 +5393,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 27
+      "tracked": 38
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 877,
-    "tracked": 877,
+    "totalFiles": 890,
+    "tracked": 890,
     "untracked": 0
   },
   "untrackedByDirectory": []

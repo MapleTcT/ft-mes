@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-07-12T22:45:00+08:00",
+  "repoCommit": "8643fe6",
+  "workingTree": "uncommitted",
+  "status": "PASS",
+  "runtime": "streaming/bpi-stream-engine",
+  "java": "17",
+  "flink": "2.2.1",
+  "stateCodec": "BPJS/v1",
+  "outputCodec": "BPCT/v1",
+  "summary": {
+    "streamTestsRun": 41,
+    "pass": 41,
+    "fail": 0,
+    "blocked": 0,
+    "contextJoinHarnessTests": 6,
+    "contextJoinCodecTests": 2
+  },
+  "capabilities": [
+    "point-level telemetry flattening",
+    "event-time point-in-time context resolution",
+    "bounded pending telemetry wait",
+    "dual-input watermark timeout",
+    "pending replay idempotency and conflict isolation",
+    "context revision conflict isolation",
+    "checkpoint restoration of pending telemetry",
+    "Kryo-free contextual telemetry output"
+  ],
+  "limitations": [
+    "The topology must reassign the decoded telemetry event timestamp after a late context flush.",
+    "Kafka source, sink and checkpoint infrastructure are not connected yet.",
+    "No real cluster, load or RocksDB endurance acceptance was performed."
+  ],
+  "evidence": [
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.ProductionContextJoinHarnessTest.xml",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.ProductionContextJoinStateCodecTest.xml",
+    "docs/testing/bpi-production-context-join-acceptance.md"
+  ]
+}

@@ -21,6 +21,9 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodec.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPointCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngine.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicy.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
@@ -28,10 +31,12 @@ REQUIRED_FILES = [
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
+    "docs/testing/bpi-production-context-join-acceptance.md",
     "docs/testing/bpi-stream-replay-acceptance.md",
     "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-rule-timing-acceptance.json",
     "metadata/bpi-rule-publication-routing-acceptance.json",
+    "metadata/bpi-production-context-join-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
 ]
 
@@ -101,6 +106,11 @@ def main() -> int:
     for marker in ("getContextRevision", "getEffectiveFromMs", "getEffectiveToMs", "getActive"):
         if marker not in timeline_source:
             failures.append(f"ProductionContextTimeline is missing point-in-time marker {marker!r}")
+
+    join_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java").read_text(encoding="utf-8")
+    for marker in ("KeyedCoProcessFunction", "CONTEXT_WAIT_EXPIRED", "registerEventTimeTimer", "ContextualTelemetryPointCodec.encode"):
+        if marker not in join_source:
+            failures.append(f"ProductionContextJoinFunction is missing join marker {marker!r}")
 
     forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
     for path in STREAMING.rglob("*"):
