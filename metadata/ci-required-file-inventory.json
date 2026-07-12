@@ -3279,6 +3279,72 @@
     },
     {
       "ignored": false,
+      "path": "frontend/apps/bpi/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/index.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/package-lock.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/package.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/src/api.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/src/main.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/src/styles.css",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/src/types.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/tsconfig.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "frontend/apps/bpi/vite.config.ts",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/adp-wom-toolbar-report-work-render.png",
       "state": "tracked",
       "tracked": true
@@ -3334,6 +3400,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-ui-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -3873,6 +3945,12 @@
     },
     {
       "ignored": false,
+      "path": "scripts/verify-bpi-ui.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "scripts/verify-business-dependency-contracts.py",
       "state": "tracked",
       "tracked": true
@@ -4402,8 +4480,11 @@
     "docs": {
       "tracked": 64
     },
+    "frontend": {
+      "tracked": 11
+    },
     "metadata": {
-      "tracked": 75
+      "tracked": 76
     },
     "package.json": {
       "tracked": 1
@@ -4412,7 +4493,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 47
+      "tracked": 48
     },
     "services": {
       "tracked": 55
@@ -4424,8 +4505,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 729,
-    "tracked": 729,
+    "totalFiles": 742,
+    "tracked": 742,
     "untracked": 0
   },
   "untrackedByDirectory": []

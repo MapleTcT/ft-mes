@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-07-12T17:38:24+08:00",
+  "repoCommit": "5143328",
+  "workingTree": "uncommitted",
+  "scope": "deterministic BPI simulator browser acceptance",
+  "application": {
+    "path": "frontend/apps/bpi",
+    "framework": "Vite 6.4.3 + TypeScript 5.7.2",
+    "apiBase": "/bpi-api",
+    "productionRewrite": "/bpi/v1"
+  },
+  "summary": {
+    "browserTests": 2,
+    "pass": 2,
+    "fail": 0,
+    "blocked": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0
+  },
+  "items": [
+    {
+      "id": "desktop-candidate-confirmation",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/overview",
+        "/bpi/#/candidates",
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "open overview",
+        "open pending candidate",
+        "confirm candidate with reason",
+        "open generated shadow batch"
+      ],
+      "apis": [
+        "GET /bpi/v1/overview",
+        "GET /bpi/v1/candidates",
+        "GET /bpi/v1/candidates/{id}",
+        "POST /bpi/v1/candidates/{id}/confirm",
+        "GET /bpi/v1/batches/{id}",
+        "GET /bpi/v1/batches/{id}/evidence",
+        "GET /bpi/v1/batches/{id}/timeline"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-desktop.png"
+    },
+    {
+      "id": "mobile-navigation-and-overflow",
+      "viewport": "390x844",
+      "routes": [
+        "/bpi/#/batches",
+        "/bpi/#/overview"
+      ],
+      "operations": [
+        "use fixed bottom navigation",
+        "switch from batches to overview",
+        "verify page-level horizontal overflow is absent"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-mobile.png"
+    }
+  ],
+  "persistence": {
+    "performed": false,
+    "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json"
+  },
+  "limitations": [
+    "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
+    "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite.",
+    "The Java 8 authentication adapter and production JWKS validation are not implemented.",
+    "The console is not yet mounted in the legacy MES shell or its menu and RBAC model.",
+    "No real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
+    "No real mobile device, weak-network or accessibility acceptance was performed."
+  ]
+}

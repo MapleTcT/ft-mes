@@ -22,10 +22,12 @@ __pycache__/
 /logs/
 /data/
 /dist/
+**/dist/
 /target/
 **/target/
 /deploy/docker/patches/*/build/
 /node_modules/
+**/node_modules/
 
 # Local Docker deployment overrides.
 /deploy/docker/.env

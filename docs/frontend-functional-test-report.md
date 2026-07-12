@@ -384,6 +384,19 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 - QCS 受控配置回滚后报告合格链路当前复验：`metadata/qcs-report-chain-qualified-current.json`；Marker `ADP_E2E_20260621065620_QCS_REPORT_QUAL`；API/DB/SSH base 为 `http://100.99.133.43:18080`，浏览器大静态资源入口为 `http://222.88.185.146:18080`；真实 WOM 前端先调用 `POST /msService/WOM/produceTask/produceTask/createManuInspect` 创建制造请检，再通过 QCS 请检列表和报告编辑页上下文调用 `/QCS/inspect/inspect/bulkSubmit` 与 `/QCS/inspectReport/inspectReport/batchDealReports`；报告保存返回 `HTTP 200`，最终报告 `status=99/check_result=合格`，WOM 任务/待入库/执行日志回写 `已检/合格`，批次回写 `BaseSet_checkResult/qualified`，前端无 blocking console/network/page error。
 - QCS 受控配置回滚后报告不合格链路当前复验：`metadata/qcs-report-chain-unqualified-current.json`；Marker `ADP_E2E_20260621070426_QCS_UNQLF`；同一真实浏览器/API/DB 组合创建制造请检、生成报告、保存 `checkResult=不合格` 并两段提交生效；最终报告 `status=99/check_result=不合格/un_qlf_deal_flag=true`，WOM 任务/待入库/执行日志回写 `Checked/Unqualified`，批次回写 `BaseSet_checkResult/unqualified/is_available=false/active_batch_state_id=11003`，并自动生成 `qcs_un_qlf_deals.id=757556916282624`。
 
+## BPI Phase 1 操作台浏览器验收（2026-07-12）
+
+本节只验收新 BPI 操作台的交互、API 契约调用和响应式布局。浏览器测试连接 `simulation/bpi` 确定性模拟器，不把模拟数据计作 PostgreSQL 真实落库；独立 Java 17 服务的 PostgreSQL 证据见 `metadata/bpi-phase1-persistence-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 实时生产态势 | `/bpi/#/overview` | 查看工厂产线状态并进入候选批次 | `GET /bpi/v1/overview` | 桌面端成功显示 `S07 制糖线` 和产线状态；无 console、page、network error | 确定性模拟器返回产线状态 | 不落库 | PASS | 尚未接入 MES 菜单壳和真实 IoT 事件流 |
+| BPI 候选批次 | `/bpi/#/candidates` | 打开候选详情，填写确认原因并确认 | `GET /bpi/v1/candidates`、`GET /bpi/v1/candidates/{id}`、`POST /bpi/v1/candidates/{id}/confirm` | 确认后自动进入批次档案并显示影子批次；命令携带 `Idempotency-Key` 和 `If-Match`；无浏览器错误 | 模拟器完成候选确认并返回 `S07-20260712-001` | 模拟器内存状态，不计真实落库 | PASS | 真实浏览器到 Java 17/PostgreSQL 的适配层链路待验收 |
+| BPI 批次档案 | `/bpi/#/batches` | 查看批次列表、边界证据和状态时间线 | `GET /bpi/v1/batches`、`GET /bpi/v1/batches/{id}`、`GET /evidence`、`GET /timeline` | 详情抽屉完整显示 `SHADOW`、证据和时间线；无浏览器错误 | 确定性模拟器返回批次聚合数据 | 不落库 | PASS | WOM/QCS/WMS 业务写入不在本次 UI 验收范围 |
+| BPI 移动端布局 | `/bpi/#/batches`、`/bpi/#/overview` | 390x844 视口切换底部导航和页面 | 同上 | 底部导航固定可用，页面级 `scrollWidth <= clientWidth`，无横向溢出和浏览器错误 | 确定性模拟器正常响应 | 不落库 | PASS | 未做真实移动设备和弱网验收 |
+
+证据：`metadata/bpi-ui-acceptance.json`、`/tmp/bpi-console-desktop.png`、`/tmp/bpi-console-mobile.png`。执行命令：`make bpi-ui-build bpi-ui-test`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
