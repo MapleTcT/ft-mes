@@ -587,11 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 55,
+    "composeServiceCount": 57,
     "composeServiceKindCounts": {
       "business-runtime": 16,
       "infrastructure": 11,
-      "platform-runtime": 28
+      "platform-runtime": 28,
+      "support-runtime": 2
     },
     "composeServices": [
       {
@@ -808,6 +809,16 @@
         "service": "ProcessAnalysis",
         "jarPath": "bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar",
         "kind": "business-runtime"
+      },
+      {
+        "service": "bpi-migrate",
+        "jarPath": "",
+        "kind": "support-runtime"
+      },
+      {
+        "service": "bpi-service",
+        "jarPath": "",
+        "kind": "support-runtime"
       },
       {
         "service": "FoundationMs",

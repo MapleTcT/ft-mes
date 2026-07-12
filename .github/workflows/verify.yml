@@ -34,9 +34,27 @@ jobs:
       - name: Run repository gate
         run: make ci
 
-  bpi-contracts-java17:
-    name: BPI contracts on Java 17
+  bpi-java17-postgres:
+    name: BPI Java 17 and PostgreSQL
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ft_mes_bpi
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: bpi-ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ft_mes_bpi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      BPI_TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/ft_mes_bpi
+      BPI_TEST_DATABASE_USER: postgres
+      BPI_TEST_DATABASE_PASSWORD: bpi-ci-password
 
     steps:
       - name: Checkout
@@ -49,5 +67,5 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Generate and test BPI contracts
-        run: make bpi-contracts-test
+      - name: Test BPI contracts and real PostgreSQL service slice
+        run: make bpi-contracts-test bpi-api-contract-check bpi-service-test

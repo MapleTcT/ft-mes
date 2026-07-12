@@ -1,0 +1,25 @@
+# BPI Service
+
+This is the independent Java 17/Spring Boot 3.4 authority for BPI production facts. It does not
+inherit the recovered Java 8 parent and it never reads or writes WOM, QCS or WMS internal tables.
+
+Modules:
+
+- `batch-rule-runtime`: framework-free deterministic rule primitives shared by live and replay jobs.
+- `app`: REST, application services, PostgreSQL repositories and Flyway migrations.
+
+The Phase 1 service accepts shadow candidates through an internal replay/event-ingest boundary and
+persists candidate review, shadow batch, evidence, state history, inbox idempotency and audit in one
+PostgreSQL transaction.
+
+```bash
+make bpi-service-test
+```
+
+Real PostgreSQL acceptance additionally requires `BPI_TEST_DATABASE_URL`,
+`BPI_TEST_DATABASE_USER`, and `BPI_TEST_DATABASE_PASSWORD`.
+
+The repository Docker topology keeps Java 8 and Java 17 separate. Start only the isolated BPI
+profile with `make up-bpi`. PostgreSQL initialization creates `ft_mes_bpi`, a DDL-owning
+`bpi_migrator` role and a DML-only `bpi_service` role; the Flyway one-shot container must complete
+before the runtime service starts. Replace every `*-dev-only-*` value in `.env` before deployment.

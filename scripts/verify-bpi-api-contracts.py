@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OPENAPI = ROOT / "contracts/bpi-api/openapi.json"
 ASYNCAPI = ROOT / "contracts/bpi-api/asyncapi.json"
 PROFILE = ROOT / "contracts/bpi-api/simulation-profile.json"
+SERVICE_PROFILE = ROOT / "contracts/bpi-api/service-phase1-profile.json"
 CATALOG = ROOT / "docs/api/bpi-api-catalog.md"
 INTERACTION = ROOT / "docs/designs/bpi-interaction-design.md"
 
@@ -45,6 +46,7 @@ def main() -> int:
         openapi = load_json(OPENAPI)
         asyncapi = load_json(ASYNCAPI)
         profile = load_json(PROFILE)
+        service_profile = load_json(SERVICE_PROFILE)
     except ValueError as exc:
         print(exc, file=sys.stderr)
         return 1
@@ -81,6 +83,20 @@ def main() -> int:
     unknown = sorted(set(simulated) - set(operations))
     if unknown:
         failures.append("simulation profile references unknown operations: " + ", ".join(unknown))
+
+    implemented = service_profile.get("operationIds", [])
+    if len(implemented) != len(set(implemented)):
+        failures.append("service-phase1-profile.json contains duplicate operationIds")
+    unknown_implemented = sorted(set(implemented) - set(operations))
+    if unknown_implemented:
+        failures.append(
+            "service Phase 1 profile references unknown operations: " + ", ".join(unknown_implemented)
+        )
+    if service_profile.get("mode") != "SHADOW_ONLY":
+        failures.append("service-phase1-profile.json must remain SHADOW_ONLY in Phase 1")
+    required_exclusions = {"WOM", "QCS", "WMS", "PLC", "DCS"}
+    if set(service_profile.get("excludedWrites", [])) != required_exclusions:
+        failures.append("service Phase 1 profile must exclude WOM/QCS/WMS/PLC/DCS writes")
 
     channels = asyncapi.get("channels", {})
     messages = asyncapi.get("components", {}).get("messages", {})
@@ -125,7 +141,8 @@ def main() -> int:
 
     print(
         "BPI API contract verification passed "
-        f"(operations={len(operations)}, simulated={len(simulated)}, topics={len(REQUIRED_TOPICS)})."
+        f"(operations={len(operations)}, simulated={len(simulated)}, "
+        f"implemented={len(implemented)}, topics={len(REQUIRED_TOPICS)})."
     )
     return 0
 

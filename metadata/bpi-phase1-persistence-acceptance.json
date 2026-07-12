@@ -1,0 +1,238 @@
+{
+  "generatedAt": "2026-07-12T17:01:20+08:00",
+  "repoCommit": "65ee6e1",
+  "workingTree": "uncommitted",
+  "database": {
+    "engine": "PostgreSQL",
+    "version": "16",
+    "location": "local",
+    "name": "ft_mes_bpi",
+    "schema": "bpi",
+    "migration": "Flyway V1__bpi_phase1_baseline.sql + V2__bpi_tenant_and_runtime_hardening.sql"
+  },
+  "runtime": {
+    "java": "17",
+    "springBoot": "3.4.7"
+  },
+  "scope": "BPI Phase 1 shadow-batch vertical slice only",
+  "summary": {
+    "testedItems": 13,
+    "pass": 13,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "postgresAcceptanceTests": {
+      "run": 1,
+      "passed": 1,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "ruleRuntimeTests": {
+      "run": 2,
+      "passed": 2,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "items": [
+    {
+      "id": "candidate-evidence-validation",
+      "operation": "Reject candidate evidence without eventTime before persistence",
+      "method": "POST",
+      "api": "/internal/bpi/v1/candidates",
+      "expectedStatus": 422,
+      "actualStatus": 422,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "Bean validation rejected the malformed evidence and the tenant inbox count remained zero."
+    },
+    {
+      "id": "candidate-ingest-jwt",
+      "operation": "Ingest a batch candidate with a real signed internal JWT",
+      "method": "POST",
+      "api": "/internal/bpi/v1/candidates",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "tables": [
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates"
+      ],
+      "status": "PASS",
+      "evidence": "Candidate persisted as PENDING at revision 1 under JWT tenant, plant and line claims."
+    },
+    {
+      "id": "candidate-replay",
+      "operation": "Replay the identical candidate event",
+      "method": "POST",
+      "api": "/internal/bpi/v1/candidates",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "tables": [
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates"
+      ],
+      "status": "PASS",
+      "evidence": "The replay returned the same candidate ID; candidate and inbox counts remained one."
+    },
+    {
+      "id": "event-identity-conflict",
+      "operation": "Reuse the eventId with a different candidateKey and changed payload checksum",
+      "method": "POST",
+      "api": "/internal/bpi/v1/candidates",
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "tables": [
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates"
+      ],
+      "status": "PASS",
+      "evidence": "application/problem+json conflict returned with a traceId; no additional inbox or candidate row persisted."
+    },
+    {
+      "id": "confirm-precondition",
+      "operation": "Confirm a candidate without Idempotency-Key and If-Match",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 428,
+      "actualStatus": 428,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "The command was rejected before persistence."
+    },
+    {
+      "id": "confirm-shadow-batch",
+      "operation": "Confirm a candidate and create an audited shadow batch",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": [
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "Candidate became CONFIRMED at revision 2; batch was shadow=true and wmsStatus=NOT_REQUESTED."
+    },
+    {
+      "id": "confirm-command-replay",
+      "operation": "Replay the confirmation command with the same idempotency key",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": [
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "Idempotent-Replay=true and the original batch ID were returned without duplicate persistence."
+    },
+    {
+      "id": "command-replay-line-scope",
+      "operation": "Replay a completed idempotent command with a token that no longer covers the candidate line",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "Object scope was rechecked before the cached idempotent response could be returned."
+    },
+    {
+      "id": "stale-revision",
+      "operation": "Confirm with a new idempotency key and stale If-Match revision",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 409,
+      "actualStatus": 409,
+      "tables": [
+        "bpi.bpi_api_idempotency"
+      ],
+      "status": "PASS",
+      "evidence": "currentRevision=2 was returned; the transaction rolled back and did not persist an additional idempotency row."
+    },
+    {
+      "id": "batch-query",
+      "operation": "Read the shadow batch, boundary evidence and state timeline",
+      "method": "GET",
+      "api": "/bpi/v1/batches/{id}, /bpi/v1/batches/{id}/evidence, /bpi/v1/batches/{id}/timeline",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_boundary_evidence",
+        "bpi.bpi_batch_state_events"
+      ],
+      "status": "PASS",
+      "evidence": "The response contained shadow=true, one start evidence item and SHADOW_BATCH_CREATED in the timeline."
+    },
+    {
+      "id": "line-scope-isolation",
+      "operation": "Read a candidate with the same tenant but an unauthorized line claim",
+      "method": "GET",
+      "api": "/bpi/v1/candidates/{id}",
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "Object-level line authorization denied access."
+    },
+    {
+      "id": "tenant-scope-isolation",
+      "operation": "Read a candidate with a different tenant claim",
+      "method": "GET",
+      "api": "/bpi/v1/candidates/{id}",
+      "expectedStatus": 404,
+      "actualStatus": 404,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "Cross-tenant access returned not found and did not disclose object existence."
+    },
+    {
+      "id": "commands-feature-flag-fail-closed",
+      "operation": "Run a command after removing the tenant line override for bpi.commands",
+      "method": "POST",
+      "api": "/bpi/v1/candidates/{id}/confirm",
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "tables": [],
+      "status": "PASS",
+      "evidence": "The request inherited the global bpi.commands=false flag and was denied before command persistence."
+    }
+  ],
+  "persistenceVerification": {
+    "tenantMarkerPattern": "ADP_E2E_BPI_<UUID>",
+    "timing": "Asserted before marker-scoped cleanup",
+    "counts": {
+      "bpi.bpi_batch_candidates": 1,
+      "bpi.bpi_inbox_events": 1,
+      "bpi.bpi_batch_instances": 1,
+      "bpi.bpi_batch_state_events": 1,
+      "bpi.bpi_boundary_evidence": 1,
+      "bpi.bpi_audit_events": 1,
+      "bpi.bpi_api_idempotency": 1
+    },
+    "idempotencyCountNote": "The actual test assertion is 1, not 2. The successful command and same-key replay share one row; the stale-revision command uses a new key but its transaction rolls back on 409, so it leaves no persistent row.",
+    "cleanup": "After each test, targeted DELETE statements remove only rows belonging to the dynamic tenant marker, including the seeded rule and topology versions."
+  },
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiPostgresAcceptanceTest.xml",
+    "services/bpi-service/batch-rule-runtime/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.rules.BoundaryRuleRuntimeTest.xml"
+  ],
+  "limitations": [
+    "This is only the BPI Phase 1 shadow-batch vertical slice and is not a full Phase 1 production acceptance.",
+    "Kafka transport, partitioning, backlog recovery and consumer replay were not tested.",
+    "Flink event-time processing, watermarks, late events and state recovery were not tested.",
+    "The candidate payload came from an acceptance replay and not from a real IoT or JetLinks source.",
+    "No browser UI flow was exercised.",
+    "No WOM, QCS or WMS write was executed; wmsStatus=NOT_REQUESTED is expected for this slice.",
+    "Acceptance JWTs use a short-lived HS256 internal test secret; production JWKS/asymmetric signing and key rotation remain pending.",
+    "Docker Compose rendered successfully, but the local Docker daemon was unavailable for container runtime acceptance.",
+    "Production deployment, concurrency load, fault injection, backup restore and soak testing remain out of scope."
+  ]
+}

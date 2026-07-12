@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SERVICE = ROOT / "services/bpi-service"
+NS = {"m": "http://maven.apache.org/POM/4.0.0"}
+
+REQUIRED_FILES = [
+    "services/bpi-service/pom.xml",
+    "services/bpi-service/Dockerfile",
+    "services/bpi-service/app/pom.xml",
+    "services/bpi-service/app/src/main/resources/application.yml",
+    "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+    "contracts/bpi-api/service-phase1-profile.json",
+    "docs/backend-table-audit/bpi-phase1-persistence.md",
+    "metadata/bpi-phase1-persistence-acceptance.json",
+    "deploy/docker/postgres/init/176-bpi-database-role.sh",
+]
+
+
+def fail(message: str, failures: list[str]) -> None:
+    failures.append(message)
+
+
+def require_text(path: Path, snippets: list[str], failures: list[str]) -> None:
+    text = path.read_text(encoding="utf-8")
+    for snippet in snippets:
+        if snippet not in text:
+            fail(f"{path.relative_to(ROOT)} is missing {snippet!r}", failures)
+
+
+def main() -> int:
+    failures: list[str] = []
+    for relative in REQUIRED_FILES:
+        if not (ROOT / relative).is_file():
+            fail(f"missing required BPI file: {relative}", failures)
+
+    if failures:
+        print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)
+        return 1
+
+    parent = ET.parse(SERVICE / "pom.xml").getroot()
+    java_version = parent.findtext("m:properties/m:java.version", namespaces=NS)
+    boot_version = parent.findtext("m:parent/m:version", namespaces=NS)
+    modules = {item.text for item in parent.findall("m:modules/m:module", NS)}
+    if java_version != "17":
+        fail(f"BPI Java version must remain 17, found {java_version!r}", failures)
+    if boot_version != "3.4.7":
+        fail(f"BPI Spring Boot baseline must remain 3.4.7, found {boot_version!r}", failures)
+    if modules != {"batch-rule-runtime", "app"}:
+        fail(f"unexpected BPI reactor modules: {sorted(modules)}", failures)
+
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
+        [
+            "bpi_batch_candidates",
+            "bpi_batch_instances",
+            "bpi_batch_state_events",
+            "bpi_boundary_evidence",
+            "bpi_audit_events",
+            "bpi_api_idempotency",
+            "'bpi.commands', false",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
+        [
+            "FOREIGN KEY (tenant_id, topology_version_id)",
+            "FOREIGN KEY (tenant_id, batch_id)",
+            "DROP CONSTRAINT IF EXISTS bpi_batch_state_events_tenant_id_trace_id_action_key",
+            "bpi_service",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
+        ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)"],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/docker-compose.yml",
+        ["bpi-migrate:", "bpi-service:", "BPI_FLYWAY_ENABLED: \"false\"", "profiles: [\"bpi\"]"],
+        failures,
+    )
+
+    runtime_files = list(SERVICE.rglob("*.java")) + list(SERVICE.rglob("*.sql")) + [
+        SERVICE / "app/src/main/resources/application.yml",
+        SERVICE / "pom.xml",
+        SERVICE / "app/pom.xml",
+    ]
+    forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
+    for path in runtime_files:
+        lowered = path.read_text(encoding="utf-8").lower()
+        for marker in forbidden:
+            if marker in lowered:
+                fail(f"{path.relative_to(ROOT)} contains forbidden legacy marker {marker!r}", failures)
+
+    acceptance = json.loads((ROOT / "metadata/bpi-phase1-persistence-acceptance.json").read_text(encoding="utf-8"))
+    database = acceptance.get("database")
+    database_engine = database.get("engine") if isinstance(database, dict) else database
+    if database_engine != "PostgreSQL":
+        fail("BPI persistence acceptance must identify PostgreSQL", failures)
+
+    if failures:
+        print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)
+        return 1
+    print("BPI service structure, PostgreSQL ownership, and shadow-only boundaries verified.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

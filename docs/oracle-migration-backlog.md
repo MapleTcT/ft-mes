@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-12T08:22:59+00:00`。
-- Repo Commit：`d6a3ab4755c95d7d3d5c439b41520917becdf528`。
-- 总引用数：`961`。
+- Generated At：`2026-07-12T09:13:06+00:00`。
+- Repo Commit：`65ee6e14894945b282cdd9caef0eb0b81ead8769`。
+- 总引用数：`972`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -21,13 +21,14 @@
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
 | documentation-or-workflow | 189 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
+| java-row-index-noise | 8 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 6 | PostgreSQL compatibility SQL may mention Oracle as source context. |
 | postgres-conversion-tooling | 35 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 264 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 267 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 
@@ -35,7 +36,7 @@
 | --- | --- |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/oracle/rbac_1.sql | 61 |
 | scripts/generate-oracle-replacement-status.py | 52 |
-| scripts/generate-oracle-migration-audit.py | 47 |
+| scripts/generate-oracle-migration-audit.py | 49 |
 | scripts/verify-project-goal-acceptance.py | 38 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mariadb/syscode_1.sql | 34 |
 | backend/modules/com/supcon/supfusion/systemcode-dao/1.0.0-SNAPSHOT/META-INF/mysql/syscode_1.sql | 34 |

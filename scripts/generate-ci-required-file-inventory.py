@@ -24,6 +24,8 @@ DIRECT_FILES = {
     "contracts/pom.xml",
     "contracts/bpi-events/pom.xml",
     "deploy/pom.xml",
+    "services/bpi-service/pom.xml",
+    "services/bpi-service/Dockerfile",
 }
 
 SCAN_GLOBS = {
@@ -46,6 +48,7 @@ SCAN_GLOBS = {
     "deploy/database/production-migration/**/*.tsv",
     "deploy/database/production-migration/**/*.txt",
     "deploy/docker/postgres/init/*.sql",
+    "deploy/docker/postgres/init/*.sh",
     "deploy/docker/assets/module-static/**/*",
     "deploy/docker/nginx/*.conf",
     "deploy/docker/patches/*/.gitignore",
@@ -82,6 +85,12 @@ SCAN_GLOBS = {
     "metadata/*.json",
     "metadata/*.png",
     "scripts/*.py",
+    "services/**/*.java",
+    "services/**/*.md",
+    "services/**/*.sql",
+    "services/**/*.xml",
+    "services/**/*.yml",
+    "services/**/Dockerfile",
     "simulation/**/*.js",
     "simulation/**/*.md",
 }
@@ -102,7 +111,7 @@ EXCLUDED_INVENTORY_PARTS = {
 
 PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
-    r"((?:\.github|backend|contracts|deploy|docs|metadata|scripts|simulation)/"
+    r"((?:\.github|backend|contracts|deploy|docs|metadata|scripts|services|simulation)/"
     r"[A-Za-z0-9_./@+,-]+)"
 )
 

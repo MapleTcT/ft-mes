@@ -121,6 +121,8 @@ def classify(relative: str, pattern: str, line: str) -> tuple[str, str]:
         return "documentation-or-workflow", "Documentation/template reference; keep wording aligned with PostgreSQL-first policy."
     if lower.startswith("frontend/") and pattern == "rownum":
         return "frontend-row-index-noise", "Frontend rowNum variable naming is not Oracle SQL ROWNUM."
+    if lower.startswith("services/") and lower.endswith(".java") and pattern == "rownum" and "rowNum" in line:
+        return "java-row-index-noise", "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM."
     if lower.startswith("scripts/"):
         return "tooling-or-audit-code", "Tooling may mention Oracle to detect or convert legacy references."
     if lower.startswith("deploy/docker/scripts/"):

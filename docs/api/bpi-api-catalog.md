@@ -3,6 +3,7 @@
 状态：Phase 0/1 合约基线
 权威合约：`contracts/bpi-api/openapi.json`、`contracts/bpi-api/asyncapi.json`
 首期模拟范围：`contracts/bpi-api/simulation-profile.json`
+真实服务范围：`contracts/bpi-api/service-phase1-profile.json`
 
 ## 1. 使用约定
 
@@ -12,6 +13,7 @@
 - Phase 1 只创建 `shadow=true` 的 BPI 批次，不写 WOM、QCS、WMS，也不控制 PLC/DCS。
 - 列表响应固定 `snapshotAt`，大数据列表使用 cursor，不用页码推断实时数据位置。
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
+- Java 17 服务当前只实现 `service-phase1-profile.json` 中的 9 个公开操作和 1 个内部候选接入端点；其余模拟操作仍不能视为后端已实现。
 
 ## 2. 同步 API
 
