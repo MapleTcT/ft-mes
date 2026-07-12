@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+OPENAPI = ROOT / "contracts/bpi-api/openapi.json"
+ASYNCAPI = ROOT / "contracts/bpi-api/asyncapi.json"
+PROFILE = ROOT / "contracts/bpi-api/simulation-profile.json"
+CATALOG = ROOT / "docs/api/bpi-api-catalog.md"
+INTERACTION = ROOT / "docs/designs/bpi-interaction-design.md"
+
+REQUIRED_TOPICS = {
+    "iot.telemetry.selected.v1": "TelemetryEnvelopeV1",
+    "mes.production.context.v1": "ProductionContextEventV1",
+    "bpi.batch.candidate.v1": "BatchCandidateV1",
+    "bpi.data-quality.v1": "DataQualityEventV1",
+    "bpi.batch.fact.v1": "BatchFactV1",
+    "bpi.training.snapshot.v1": "TrainingSnapshotV1",
+}
+RESERVED_MESSAGES = {"BatchFactV1": "2", "TrainingSnapshotV1": "3"}
+
+
+def load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot load {path.relative_to(ROOT)}: {exc}") from exc
+
+
+def parameter_refs(operation: dict) -> set[str]:
+    return {
+        item.get("$ref", "")
+        for item in operation.get("parameters", [])
+        if isinstance(item, dict)
+    }
+
+
+def main() -> int:
+    failures: list[str] = []
+    try:
+        openapi = load_json(OPENAPI)
+        asyncapi = load_json(ASYNCAPI)
+        profile = load_json(PROFILE)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+
+    if not str(openapi.get("openapi", "")).startswith("3.1"):
+        failures.append("openapi.json must use OpenAPI 3.1")
+    if asyncapi.get("asyncapi") != "3.0.0":
+        failures.append("asyncapi.json must use AsyncAPI 3.0.0")
+
+    operations: dict[str, tuple[str, str, dict]] = {}
+    for path, path_item in openapi.get("paths", {}).items():
+        for method, operation in path_item.items():
+            if not isinstance(operation, dict) or "operationId" not in operation:
+                continue
+            operation_id = operation["operationId"]
+            if operation_id in operations:
+                failures.append(f"duplicate operationId: {operation_id}")
+            operations[operation_id] = (method.upper(), path, operation)
+            if method.lower() == "post":
+                refs = parameter_refs(operation)
+                for required in (
+                    "#/components/parameters/IdempotencyKey",
+                    "#/components/parameters/IfMatch",
+                ):
+                    if required not in refs:
+                        failures.append(f"{operation_id} missing {required}")
+                responses = operation.get("responses", {})
+                if "428" not in responses:
+                    failures.append(f"{operation_id} missing 428 response")
+
+    simulated = profile.get("operationIds", [])
+    if len(simulated) != len(set(simulated)):
+        failures.append("simulation-profile.json contains duplicate operationIds")
+    unknown = sorted(set(simulated) - set(operations))
+    if unknown:
+        failures.append("simulation profile references unknown operations: " + ", ".join(unknown))
+
+    channels = asyncapi.get("channels", {})
+    messages = asyncapi.get("components", {}).get("messages", {})
+    address_to_message: dict[str, str] = {}
+    for channel in channels.values():
+        address = channel.get("address")
+        refs = channel.get("messages", {})
+        if address and refs:
+            ref = next(iter(refs.values())).get("$ref", "")
+            address_to_message[address] = ref.rsplit("/", 1)[-1]
+    for topic, message_name in REQUIRED_TOPICS.items():
+        if address_to_message.get(topic) != message_name:
+            failures.append(f"topic {topic} must reference {message_name}")
+
+    proto_text = (ROOT / "contracts/bpi-events/src/main/proto/bpi_events_v1.proto").read_text(
+        encoding="utf-8"
+    )
+    for message_name, message in messages.items():
+        schema = message.get("payload", {}).get("schema", {})
+        if message_name in RESERVED_MESSAGES:
+            if schema.get("x-phase") != RESERVED_MESSAGES[message_name]:
+                failures.append(f"{message_name} must remain explicitly phase-reserved")
+            if schema.get("x-status") != "RESERVED_NOT_IMPLEMENTED":
+                failures.append(f"{message_name} must remain RESERVED_NOT_IMPLEMENTED")
+        elif f"message {message_name} " not in proto_text:
+            failures.append(f"Protobuf message missing: {message_name}")
+
+    for doc in (CATALOG, INTERACTION):
+        if not doc.exists():
+            failures.append(f"required BPI document missing: {doc.relative_to(ROOT)}")
+            continue
+        text = doc.read_text(encoding="utf-8")
+        for operation_id in simulated:
+            if operation_id not in text:
+                failures.append(f"{doc.relative_to(ROOT)} missing simulated operation {operation_id}")
+
+    if failures:
+        for failure in failures:
+            print(f"BPI API contract error: {failure}", file=sys.stderr)
+        print(f"BPI API contract verification failed: {len(failures)} issue(s).", file=sys.stderr)
+        return 1
+
+    print(
+        "BPI API contract verification passed "
+        f"(operations={len(operations)}, simulated={len(simulated)}, topics={len(REQUIRED_TOPICS)})."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

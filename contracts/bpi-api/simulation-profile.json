@@ -1,0 +1,25 @@
+{
+  "profile": "phase-1-shadow",
+  "description": "Operations implemented and exercised by the deterministic local BPI simulator.",
+  "operationIds": [
+    "getBpiOverview",
+    "getCurrentLineState",
+    "listBatchCandidates",
+    "getBatchCandidate",
+    "confirmBatchCandidate",
+    "listBatches",
+    "getBatch",
+    "getBatchEvidence",
+    "getBatchBalance",
+    "getBatchGenealogy",
+    "getBatchTimeline",
+    "listRules",
+    "getRuleVersion",
+    "simulateRule",
+    "getRuleSimulation",
+    "publishRuleVersion",
+    "listDataQualityIncidents",
+    "getDataQualityIncident",
+    "getIntegrationHealth"
+  ]
+}

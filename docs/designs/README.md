@@ -6,3 +6,4 @@
 | 设计 | 状态 | 工程测试计划 |
 |---|---|---|
 | [智能批次与工艺数据中心（BPI）](batch-process-intelligence.md) | PROMOTED；Phase 0/1 待实施 | [BPI Engineering Test Plan](../testing/bpi-engineering-test-plan.md) |
+| [BPI 产品交互设计](bpi-interaction-design.md) | Phase 0/1 交互基线 | [BPI API 目录](../api/bpi-api-catalog.md) |

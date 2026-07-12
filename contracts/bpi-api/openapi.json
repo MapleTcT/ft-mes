@@ -1,0 +1,550 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FT MES BPI API",
+    "version": "1.0.0-shadow",
+    "description": "智能批次与工艺数据中心同步 API。Phase 1 仅允许影子批次，不触发 WOM/QCS/WMS 写操作。"
+  },
+  "servers": [
+    {"url": "/", "description": "MES gateway or local simulator"}
+  ],
+  "security": [{"bearerAuth": []}],
+  "tags": [
+    {"name": "Overview"},
+    {"name": "Candidates"},
+    {"name": "Batches"},
+    {"name": "Topologies"},
+    {"name": "Rules"},
+    {"name": "DataQuality"},
+    {"name": "Datasets"},
+    {"name": "Integrations"},
+    {"name": "Audit"}
+  ],
+  "paths": {
+    "/bpi/v1/overview": {
+      "get": {
+        "tags": ["Overview"],
+        "operationId": "getBpiOverview",
+        "summary": "查询工厂实时生产态势",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"name": "onlyAbnormal", "in": "query", "schema": {"type": "boolean", "default": false}}
+        ],
+        "responses": {"200": {"description": "实时态势", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/OverviewResponse"}}}}}
+      }
+    },
+    "/bpi/v1/lines/{lineId}/current-state": {
+      "get": {
+        "tags": ["Overview"],
+        "operationId": "getCurrentLineState",
+        "summary": "查询单条产线实时状态和规则影响",
+        "parameters": [{"$ref": "#/components/parameters/LineId"}],
+        "responses": {
+          "200": {"description": "产线状态", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/LineStateResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/candidates": {
+      "get": {
+        "tags": ["Candidates"],
+        "operationId": "listBatchCandidates",
+        "summary": "查询批次边界候选",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"$ref": "#/components/parameters/LineIdQuery"},
+          {"name": "state", "in": "query", "schema": {"type": "string", "enum": ["PENDING", "CONFIRMED", "REJECTED"]}},
+          {"name": "boundaryType", "in": "query", "schema": {"type": "string", "enum": ["START", "END"]}},
+          {"$ref": "#/components/parameters/Cursor"},
+          {"$ref": "#/components/parameters/Limit"}
+        ],
+        "responses": {"200": {"description": "候选列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CandidateListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/candidates/{candidateId}": {
+      "get": {
+        "tags": ["Candidates"],
+        "operationId": "getBatchCandidate",
+        "summary": "查询候选及完整证据",
+        "parameters": [{"$ref": "#/components/parameters/CandidateId"}],
+        "responses": {
+          "200": {"description": "候选详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CandidateResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/candidates/{candidateId}/confirm": {
+      "post": {
+        "tags": ["Candidates"],
+        "operationId": "confirmBatchCandidate",
+        "summary": "确认候选并创建唯一影子批次",
+        "parameters": [
+          {"$ref": "#/components/parameters/CandidateId"},
+          {"$ref": "#/components/parameters/IdempotencyKey"},
+          {"$ref": "#/components/parameters/IfMatch"}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReasonCommand"}}}},
+        "responses": {
+          "200": {"description": "确认结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CandidateCommandResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/candidates/{candidateId}/reject": {
+      "post": {
+        "tags": ["Candidates"],
+        "operationId": "rejectBatchCandidate",
+        "summary": "拒绝候选",
+        "parameters": [
+          {"$ref": "#/components/parameters/CandidateId"},
+          {"$ref": "#/components/parameters/IdempotencyKey"},
+          {"$ref": "#/components/parameters/IfMatch"}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReasonCommand"}}}},
+        "responses": {
+          "200": {"description": "拒绝结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CandidateResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/batches": {
+      "get": {
+        "tags": ["Batches"],
+        "operationId": "listBatches",
+        "summary": "按固定查询快照查询批次",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"$ref": "#/components/parameters/LineIdQuery"},
+          {"name": "state", "in": "query", "schema": {"type": "string"}},
+          {"name": "from", "in": "query", "schema": {"type": "string", "format": "date-time"}},
+          {"name": "to", "in": "query", "schema": {"type": "string", "format": "date-time"}},
+          {"$ref": "#/components/parameters/Cursor"},
+          {"$ref": "#/components/parameters/Limit"}
+        ],
+        "responses": {"200": {"description": "批次列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}": {
+      "get": {
+        "tags": ["Batches"],
+        "operationId": "getBatch",
+        "summary": "查询权威批次头",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}],
+        "responses": {
+          "200": {"description": "批次详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/batches/{batchId}/evidence": {
+      "get": {
+        "tags": ["Batches"], "operationId": "getBatchEvidence", "summary": "查询 START/END 证据",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}],
+        "responses": {"200": {"description": "边界证据", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/EvidenceResponse"}}}}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/balance": {
+      "get": {
+        "tags": ["Batches"], "operationId": "getBatchBalance", "summary": "查询物料/干物/能源平衡",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}],
+        "responses": {"200": {"description": "平衡结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BalanceResponse"}}}}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/genealogy": {
+      "get": {
+        "tags": ["Batches"], "operationId": "getBatchGenealogy", "summary": "查询批次分流/合流/回配谱系",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}],
+        "responses": {"200": {"description": "批次谱系", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenealogyResponse"}}}}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/timeline": {
+      "get": {
+        "tags": ["Batches"], "operationId": "getBatchTimeline", "summary": "查询 append-only 状态和审计时间线",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}],
+        "responses": {"200": {"description": "状态时间线", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TimelineResponse"}}}}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/suspend": {
+      "post": {
+        "tags": ["Batches"], "operationId": "suspendBatch", "summary": "暂停批次自动处理",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"$ref": "#/components/responses/BatchCommandSuccess"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/resume": {
+      "post": {
+        "tags": ["Batches"], "operationId": "resumeBatch", "summary": "恢复暂停批次",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"$ref": "#/components/responses/BatchCommandSuccess"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/force-close": {
+      "post": {
+        "tags": ["Batches"], "operationId": "forceCloseBatch", "summary": "申请或执行强制结束",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ForceCloseCommand"}}}},
+        "responses": {"202": {"$ref": "#/components/responses/TaskAccepted"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/batches/{batchId}/corrections": {
+      "post": {
+        "tags": ["Batches"], "operationId": "createBatchCorrection", "summary": "提交 append-only 批次修订",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CorrectionCommand"}}}},
+        "responses": {"202": {"$ref": "#/components/responses/TaskAccepted"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/topologies": {
+      "get": {
+        "tags": ["Topologies"], "operationId": "listTopologies", "summary": "查询工艺拓扑和版本",
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}],
+        "responses": {"200": {"description": "拓扑列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/topologies/{topologyId}": {
+      "get": {
+        "tags": ["Topologies"], "operationId": "getTopologyVersion", "summary": "查询拓扑节点、连接和测点绑定",
+        "parameters": [{"$ref": "#/components/parameters/TopologyId"}],
+        "responses": {"200": {"description": "拓扑版本", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}}, "404": {"$ref": "#/components/responses/NotFound"}}
+      }
+    },
+    "/bpi/v1/topologies/drafts": {
+      "post": {
+        "tags": ["Topologies"], "operationId": "createTopologyDraft", "summary": "从已发布版本创建拓扑草稿",
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["lineId"], "properties": {"lineId": {"type": "string"}, "baseVersionId": {"type": ["string", "null"]}}}}}},
+        "responses": {
+          "200": {"description": "拓扑草稿", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/topologies/{topologyId}/validate": {
+      "post": {
+        "tags": ["Topologies"], "operationId": "validateTopologyDraft", "summary": "校验拓扑和测点绑定",
+        "parameters": [{"$ref": "#/components/parameters/TopologyId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "200": {"description": "校验结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/topologies/{topologyId}/publish": {
+      "post": {
+        "tags": ["Topologies"], "operationId": "publishTopologyVersion", "summary": "审批并发布不可变拓扑版本",
+        "parameters": [{"$ref": "#/components/parameters/TopologyId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "200": {"description": "发布结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/rules": {
+      "get": {
+        "tags": ["Rules"], "operationId": "listRules", "summary": "查询边界规则和版本",
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}],
+        "responses": {"200": {"description": "规则列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/rules/{ruleId}": {
+      "get": {
+        "tags": ["Rules"], "operationId": "getRuleVersion", "summary": "查询规则 AST 和发布状态",
+        "parameters": [{"$ref": "#/components/parameters/RuleId"}],
+        "responses": {
+          "200": {"description": "规则版本", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/rules/drafts": {
+      "post": {
+        "tags": ["Rules"], "operationId": "createRuleDraft", "summary": "创建受控 DSL 规则草稿",
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleDraftCommand"}}}},
+        "responses": {
+          "200": {"description": "规则草稿", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/rules/{ruleId}/simulate": {
+      "post": {
+        "tags": ["Rules"], "operationId": "simulateRule", "summary": "使用同源规则运行时提交历史回放",
+        "parameters": [{"$ref": "#/components/parameters/RuleId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleSimulationCommand"}}}},
+        "responses": {
+          "202": {"description": "模拟任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SimulationResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/rule-simulations/{simulationId}": {
+      "get": {
+        "tags": ["Rules"], "operationId": "getRuleSimulation", "summary": "查询规则模拟进度、指标和 checksum",
+        "parameters": [{"$ref": "#/components/parameters/SimulationId"}],
+        "responses": {
+          "200": {"description": "模拟结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/SimulationResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/rules/{ruleId}/publish": {
+      "post": {
+        "tags": ["Rules"], "operationId": "publishRuleVersion", "summary": "使用已通过模拟的 checksum 发布规则",
+        "parameters": [{"$ref": "#/components/parameters/RuleId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RulePublishCommand"}}}},
+        "responses": {
+          "200": {"description": "发布结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/data-quality/incidents": {
+      "get": {
+        "tags": ["DataQuality"], "operationId": "listDataQualityIncidents", "summary": "按业务影响查询数据质量事件",
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}, {"name": "state", "in": "query", "schema": {"type": "string"}}, {"$ref": "#/components/parameters/Cursor"}, {"$ref": "#/components/parameters/Limit"}],
+        "responses": {"200": {"description": "事件列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/data-quality/incidents/{incidentId}": {
+      "get": {
+        "tags": ["DataQuality"], "operationId": "getDataQualityIncident", "summary": "查询数据质量事件详情和影响范围",
+        "parameters": [{"$ref": "#/components/parameters/IncidentId"}],
+        "responses": {
+          "200": {"description": "事件详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/data-quality/incidents/{incidentId}/acknowledge": {
+      "post": {
+        "tags": ["DataQuality"], "operationId": "acknowledgeDataQualityIncident", "summary": "确认并分派数据质量事件",
+        "parameters": [{"$ref": "#/components/parameters/IncidentId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "200": {"description": "确认结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/data-quality/incidents/{incidentId}/resolve": {
+      "post": {
+        "tags": ["DataQuality"], "operationId": "resolveDataQualityIncident", "summary": "解决数据质量事件但保留原始记录",
+        "parameters": [{"$ref": "#/components/parameters/IncidentId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "200": {"description": "解决结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/datasets": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "listDatasets", "summary": "查询训练数据集定义和最近快照",
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}],
+        "responses": {"200": {"description": "数据集列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/datasets/{datasetId}/snapshots": {
+      "post": {
+        "tags": ["Datasets"], "operationId": "createDatasetSnapshot", "summary": "创建不可变训练数据快照",
+        "parameters": [{"$ref": "#/components/parameters/DatasetId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetSnapshotCommand"}}}},
+        "responses": {
+          "202": {"description": "快照任务", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetSnapshotResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/dataset-snapshots/{snapshotId}": {
+      "get": {
+        "tags": ["Datasets"], "operationId": "getDatasetSnapshot", "summary": "查询快照任务、manifest 和 checksum",
+        "parameters": [{"$ref": "#/components/parameters/SnapshotId"}],
+        "responses": {
+          "200": {"description": "数据集快照", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DatasetSnapshotResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    },
+    "/bpi/v1/integrations/health": {
+      "get": {
+        "tags": ["Integrations"], "operationId": "getIntegrationHealth", "summary": "查询依赖健康和业务影响",
+        "responses": {"200": {"description": "集成健康", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IntegrationHealthResponse"}}}}}
+      }
+    },
+    "/bpi/v1/integrations/{integrationId}/checks": {
+      "post": {
+        "tags": ["Integrations"], "operationId": "runIntegrationCheck", "summary": "执行脱敏的集成连通性检查",
+        "parameters": [{"$ref": "#/components/parameters/IntegrationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"202": {"$ref": "#/components/responses/TaskAccepted"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/audit/events": {
+      "get": {
+        "tags": ["Audit"], "operationId": "listAuditEvents", "summary": "查询 BPI 操作和状态审计",
+        "parameters": [{"name": "batchId", "in": "query", "schema": {"type": "string"}}, {"name": "traceId", "in": "query", "schema": {"type": "string"}}, {"$ref": "#/components/parameters/Cursor"}, {"$ref": "#/components/parameters/Limit"}],
+        "responses": {"200": {"description": "审计列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/audit/events/{auditId}": {
+      "get": {
+        "tags": ["Audit"], "operationId": "getAuditEvent", "summary": "查询单条审计详情",
+        "parameters": [{"$ref": "#/components/parameters/AuditId"}],
+        "responses": {
+          "200": {"description": "审计详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "404": {"$ref": "#/components/responses/NotFound"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
+    },
+    "parameters": {
+      "PlantId": {"name": "plantId", "in": "query", "required": true, "schema": {"type": "string"}},
+      "LineId": {"name": "lineId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "LineIdQuery": {"name": "lineId", "in": "query", "schema": {"type": "string"}},
+      "CandidateId": {"name": "candidateId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "BatchId": {"name": "batchId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "TopologyId": {"name": "topologyId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "RuleId": {"name": "ruleId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "SimulationId": {"name": "simulationId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "IncidentId": {"name": "incidentId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "DatasetId": {"name": "datasetId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "SnapshotId": {"name": "snapshotId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "IntegrationId": {"name": "integrationId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "AuditId": {"name": "auditId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "Cursor": {"name": "cursor", "in": "query", "schema": {"type": "string"}},
+      "Limit": {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}},
+      "IdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 128}},
+      "IfMatch": {"name": "If-Match", "in": "header", "required": true, "description": "Current numeric entity revision", "schema": {"type": "string", "pattern": "^(W/)?\\\"?[0-9]+\\\"?$"}}
+    },
+    "requestBodies": {
+      "ReasonCommand": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReasonCommand"}}}}
+    },
+    "responses": {
+      "NotFound": {"description": "对象不存在或无权访问", "content": {"application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}}},
+      "Conflict": {"description": "revision 冲突或对象已处理", "content": {"application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}}},
+      "PreconditionRequired": {"description": "缺少 Idempotency-Key 或 If-Match", "content": {"application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}}},
+      "Unprocessable": {"description": "业务前置条件未满足", "content": {"application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}}},
+      "BatchCommandSuccess": {"description": "批次命令结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchResponse"}}}},
+      "TaskAccepted": {"description": "后台任务已受理", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TaskResponse"}}}}
+    },
+    "schemas": {
+      "ResponseMeta": {
+        "type": "object", "required": ["traceId", "generatedAt"],
+        "properties": {"traceId": {"type": "string"}, "generatedAt": {"type": "string", "format": "date-time"}, "snapshotAt": {"type": ["string", "null"], "format": "date-time"}, "nextCursor": {"type": ["string", "null"]}}
+      },
+      "Problem": {
+        "type": "object", "required": ["type", "title", "status", "detail", "traceId"],
+        "properties": {"type": {"type": "string", "format": "uri-reference"}, "title": {"type": "string"}, "status": {"type": "integer"}, "detail": {"type": "string"}, "traceId": {"type": "string"}, "currentRevision": {"type": ["integer", "null"]}, "errors": {"type": "array", "items": {"type": "object"}}}
+      },
+      "ReasonCommand": {"type": "object", "required": ["reason"], "properties": {"reason": {"type": "string", "minLength": 3, "maxLength": 500}, "comment": {"type": "string", "maxLength": 2000}}},
+      "ForceCloseCommand": {"allOf": [{"$ref": "#/components/schemas/ReasonCommand"}, {"type": "object", "required": ["boundaryTime"], "properties": {"boundaryTime": {"type": "string", "format": "date-time"}, "approvalMode": {"type": "string", "enum": ["REQUEST", "APPROVE"]}}}]},
+      "CorrectionCommand": {
+        "type": "object",
+        "required": ["reason", "changes"],
+        "properties": {
+          "reason": {"type": "string", "minLength": 3},
+          "evidenceRefs": {"type": "array", "items": {"type": "string"}},
+          "changes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["field", "newValue"],
+              "properties": {
+                "field": {"type": "string"},
+                "oldValue": {},
+                "newValue": {}
+              }
+            }
+          }
+        }
+      },
+      "LineState": {
+        "type": "object", "required": ["lineId", "lineName", "status", "stageCode", "lastEventTime", "dataHealth"],
+        "properties": {"lineId": {"type": "string"}, "lineName": {"type": "string"}, "orderId": {"type": ["string", "null"]}, "currentBatchId": {"type": ["string", "null"]}, "stageCode": {"type": "string"}, "status": {"type": "string", "enum": ["IDLE", "RUNNING", "DEGRADED", "BLOCKED"]}, "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "instantFlow": {"type": ["number", "null"]}, "totalizedQuantity": {"type": ["number", "null"]}, "dataHealth": {"type": "string", "enum": ["GOOD", "PARTIAL", "BAD"]}, "pendingCandidates": {"type": "integer", "minimum": 0}, "affectedRules": {"type": "integer", "minimum": 0}, "lastEventTime": {"type": "string", "format": "date-time"}}
+      },
+      "OverviewResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/LineState"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "LineStateResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/LineState"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "EvidenceItem": {
+        "type": "object", "required": ["eventId", "signal", "classification", "satisfied", "quality", "eventTime"],
+        "properties": {"eventId": {"type": "string"}, "signal": {"type": "string"}, "classification": {"type": "string", "enum": ["REQUIRED", "QUORUM", "OPTIONAL"]}, "satisfied": {"type": "boolean"}, "value": {}, "unit": {"type": ["string", "null"]}, "quality": {"type": "string"}, "eventTime": {"type": "string", "format": "date-time"}, "source": {"type": "string"}}
+      },
+      "BatchCandidate": {
+        "type": "object", "required": ["id", "candidateKey", "boundaryType", "lineId", "state", "revision", "confidence", "evidence"],
+        "properties": {"id": {"type": "string"}, "candidateKey": {"type": "string", "format": "uuid"}, "boundaryType": {"type": "string", "enum": ["START", "END"]}, "lineId": {"type": "string"}, "orderId": {"type": ["string", "null"]}, "batchId": {"type": ["string", "null"]}, "boundaryTime": {"type": "string", "format": "date-time"}, "state": {"type": "string", "enum": ["PENDING", "CONFIRMED", "REJECTED"]}, "revision": {"type": "integer", "minimum": 0}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}, "ruleVersion": {"type": "string"}, "topologyVersion": {"type": "string"}, "missingSignals": {"type": "array", "items": {"type": "string"}}, "evidence": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceItem"}}, "review": {"type": ["object", "null"]}}
+      },
+      "CandidateResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/BatchCandidate"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "CandidateListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/BatchCandidate"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "CandidateCommandResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["candidate", "batch"], "properties": {"candidate": {"$ref": "#/components/schemas/BatchCandidate"}, "batch": {"$ref": "#/components/schemas/Batch"}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "Batch": {
+        "type": "object", "required": ["id", "batchNo", "lineId", "stageCode", "state", "revision", "shadow", "startTime"],
+        "properties": {"id": {"type": "string"}, "batchNo": {"type": "string"}, "lineId": {"type": "string"}, "stageCode": {"type": "string"}, "orderId": {"type": ["string", "null"]}, "materialCode": {"type": "string"}, "state": {"type": "string"}, "revision": {"type": "integer"}, "shadow": {"type": "boolean", "const": true}, "startTime": {"type": "string", "format": "date-time"}, "endTime": {"type": ["string", "null"], "format": "date-time"}, "quantity": {"type": "number"}, "quantityUnit": {"type": "string"}, "dryMatter": {"type": ["number", "null"]}, "qualityGate": {"type": "string"}, "wmsStatus": {"type": "string"}, "ruleVersion": {"type": "string"}, "topologyVersion": {"type": "string"}}
+      },
+      "BatchResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Batch"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "BatchListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Batch"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "EvidenceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "properties": {"start": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceItem"}}, "end": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceItem"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "BalanceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["input", "output", "difference", "status"], "properties": {"input": {"type": "number"}, "output": {"type": "number"}, "difference": {"type": "number"}, "differencePercent": {"type": "number"}, "status": {"type": "string"}, "allocations": {"type": "array", "items": {"type": "object"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "GenealogyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["nodes", "edges"], "properties": {"nodes": {"type": "array", "items": {"type": "object"}}, "edges": {"type": "array", "items": {"type": "object"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "TimelineResponse": {
+        "type": "object",
+        "required": ["data", "meta"],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["revision", "action", "at"],
+              "properties": {
+                "revision": {"type": "integer"},
+                "action": {"type": "string"},
+                "at": {"type": "string", "format": "date-time"},
+                "actor": {"type": "string"},
+                "reason": {"type": ["string", "null"]}
+              }
+            }
+          },
+          "meta": {"$ref": "#/components/schemas/ResponseMeta"}
+        }
+      },
+      "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "checksum"], "properties": {"id": {"type": "string"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"]}}},
+      "RuleResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Rule"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "RuleListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Rule"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "RuleDraftCommand": {"type": "object", "required": ["code", "lineId", "topologyVersion", "ast"], "properties": {"code": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "ast": {"type": "object"}, "reason": {"type": "string"}}},
+      "RuleSimulationCommand": {"type": "object", "required": ["lineId", "from", "to", "topologyVersion", "calibrationVersion"], "properties": {"lineId": {"type": "string"}, "from": {"type": "string", "format": "date-time"}, "to": {"type": "string", "format": "date-time"}, "topologyVersion": {"type": "string"}, "calibrationVersion": {"type": "string"}, "goldenSetId": {"type": ["string", "null"]}}},
+      "RulePublishCommand": {"type": "object", "required": ["reason", "simulationId", "simulationChecksum"], "properties": {"reason": {"type": "string"}, "simulationId": {"type": "string"}, "simulationChecksum": {"type": "string"}}},
+      "Simulation": {"type": "object", "required": ["id", "ruleId", "state", "checksum", "metrics"], "properties": {"id": {"type": "string"}, "ruleId": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "metrics": {"type": "object", "properties": {"matched": {"type": "integer"}, "missed": {"type": "integer"}, "falsePositive": {"type": "integer"}, "meanBoundaryErrorSeconds": {"type": "number"}}}, "inputManifest": {"type": "object"}}},
+      "SimulationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Simulation"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "Incident": {"type": "object", "required": ["id", "issueCode", "severity", "state", "revision", "affectedLines", "affectedRules", "eventCount"], "properties": {"id": {"type": "string"}, "issueCode": {"type": "string"}, "severity": {"type": "string"}, "state": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}, "revision": {"type": "integer"}, "source": {"type": "string"}, "propertyId": {"type": "string"}, "affectedLines": {"type": "array", "items": {"type": "string"}}, "affectedRules": {"type": "array", "items": {"type": "string"}}, "affectedBatches": {"type": "array", "items": {"type": "string"}}, "eventCount": {"type": "integer"}, "firstSeen": {"type": "string", "format": "date-time"}, "lastSeen": {"type": "string", "format": "date-time"}}},
+      "IncidentResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Incident"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "IncidentListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Incident"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DatasetSnapshotCommand": {"type": "object", "required": ["freezeAt", "lineIds", "predictionTimePolicy"], "properties": {"freezeAt": {"type": "string", "format": "date-time"}, "lineIds": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "predictionTimePolicy": {"type": "string"}, "ruleVersions": {"type": "array", "items": {"type": "string"}}, "excludeLowConfidence": {"type": "boolean", "default": true}}},
+      "DatasetSnapshot": {"type": "object", "required": ["id", "datasetId", "state", "checksum"], "properties": {"id": {"type": "string"}, "datasetId": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "manifestUri": {"type": ["string", "null"]}, "excluded": {"type": "object"}, "createdAt": {"type": "string", "format": "date-time"}}},
+      "DatasetSnapshotResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetSnapshot"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "IntegrationHealthResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"type": "object", "required": ["id", "status", "businessImpact", "revision"], "properties": {"id": {"type": "string"}, "status": {"type": "string", "enum": ["UP", "DEGRADED", "DOWN"]}, "businessImpact": {"type": "string"}, "lastSuccessAt": {"type": ["string", "null"], "format": "date-time"}, "lag": {"type": ["number", "null"]}, "revision": {"type": "integer"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "TaskResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["taskId", "state"], "properties": {"taskId": {"type": "string"}, "state": {"type": "string"}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "GenericObjectResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "GenericListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"type": "object"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}}
+    }
+  }
+}

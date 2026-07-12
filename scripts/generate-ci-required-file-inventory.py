@@ -29,6 +29,7 @@ DIRECT_FILES = {
 SCAN_GLOBS = {
     ".github/workflows/*.yml",
     "contracts/**/*.md",
+    "contracts/**/*.json",
     "contracts/**/pom.xml",
     "contracts/**/src/main/**/*.java",
     "contracts/**/src/main/**/*.proto",
@@ -81,6 +82,8 @@ SCAN_GLOBS = {
     "metadata/*.json",
     "metadata/*.png",
     "scripts/*.py",
+    "simulation/**/*.js",
+    "simulation/**/*.md",
 }
 
 REFERENCE_SOURCE_GLOBS = {
@@ -99,7 +102,7 @@ EXCLUDED_INVENTORY_PARTS = {
 
 PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
-    r"((?:\.github|backend|contracts|deploy|docs|metadata|scripts)/"
+    r"((?:\.github|backend|contracts|deploy|docs|metadata|scripts|simulation)/"
     r"[A-Za-z0-9_./@+,-]+)"
 )
 

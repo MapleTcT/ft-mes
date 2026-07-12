@@ -27,6 +27,30 @@
     },
     {
       "ignored": false,
+      "path": "contracts/bpi-api/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-api/asyncapi.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-api/openapi.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "contracts/bpi-api/simulation-profile.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-events/README.md",
       "state": "tracked",
       "tracked": true
@@ -2865,6 +2889,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/api/bpi-api-catalog.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-module-dependency-inventory.md",
       "state": "tracked",
       "tracked": true
@@ -2986,6 +3016,12 @@
     {
       "ignored": false,
       "path": "docs/designs/batch-process-intelligence.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/designs/bpi-interaction-design.md",
       "state": "tracked",
       "tracked": true
     },
@@ -3801,6 +3837,12 @@
     },
     {
       "ignored": false,
+      "path": "scripts/verify-bpi-api-contracts.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "scripts/verify-business-dependency-contracts.py",
       "state": "tracked",
       "tracked": true
@@ -3948,6 +3990,30 @@
       "path": "scripts/verify-wom-toolbar-action-coverage.py",
       "state": "tracked",
       "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/bpi-simulation.test.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/scenario.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "simulation/bpi/server.js",
+      "state": "tracked",
+      "tracked": true
     }
   ],
   "missingReferences": [],
@@ -3968,13 +4034,13 @@
       "tracked": 2
     },
     "contracts": {
-      "tracked": 13
+      "tracked": 17
     },
     "deploy": {
       "tracked": 459
     },
     "docs": {
-      "tracked": 61
+      "tracked": 63
     },
     "metadata": {
       "tracked": 74
@@ -3986,14 +4052,17 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 45
+      "tracked": 46
+    },
+    "simulation": {
+      "tracked": 4
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 658,
-    "tracked": 658,
+    "totalFiles": 669,
+    "tracked": 669,
     "untracked": 0
   },
   "untrackedByDirectory": []
