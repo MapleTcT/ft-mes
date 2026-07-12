@@ -38,5 +38,5 @@ marker topology/rule fixture (PostgreSQL)
 | Candidate DLQ | 回放前后 end offset 不变 |
 | 清理 | 默认只删除本 marker 的 candidate/inbox/rule |
 
-当前 `ubuntu-test` 仅约 0.47 GiB 可用，低于 25 GiB 门槛。未执行 prune、删除容器、镜像、volume 或
+当前 `ubuntu-test` 仅 `538,288 KiB`（约 0.51 GiB）可用，低于 25 GiB 门槛。未执行 prune、删除容器、镜像、volume 或
 历史目录；需要用户先明确可清理对象或扩容，之后才能执行本联合回放。

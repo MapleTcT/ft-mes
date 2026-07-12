@@ -22,7 +22,7 @@
   "targetEvidence": {
     "host": "100.99.133.43",
     "minimumFreeDiskGiB": 25,
-    "observedFreeDiskGiB": 0.45,
+    "observedFreeDiskGiB": 0.51,
     "deploymentStarted": false,
     "destructiveActionsPerformed": false
   },

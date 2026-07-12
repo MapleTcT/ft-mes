@@ -2,7 +2,7 @@
 
 ## 结论
 
-2026-07-12 对 `ubuntu-test`（`100.99.133.43`）执行了只读容量检查。BPI Kafka/Flink
+2026-07-13 对 `ubuntu-test`（`100.99.133.43`）再次执行只读容量检查。BPI Kafka/Flink
 编排资产已准备，但实机部署状态为 **BLOCKED_DISK**，尚未启动任何新容器。
 
 ## 当前证据
@@ -10,10 +10,11 @@
 | 项目 | 实际值 | 门槛 | 状态 |
 |---|---:|---:|---|
 | 根文件系统 | 438 GiB | - | 100% used |
-| 可用空间 | 约 0.47 GiB | 25 GiB | BLOCKED |
-| Docker images | 134.6 GB | - | 63.61 GB reported reclaimable |
-| Docker volumes | 96.24 GB | - | 6.799 GB reported reclaimable |
+| 可用空间 | 538,288 KiB，约 0.51 GiB | 25 GiB | BLOCKED |
+| Docker images | 134.2 GB | - | 63.24 GB reported reclaimable |
+| Docker volumes | 96.36 GB | - | 6.799 GB reported reclaimable |
 | Docker containers | 158 / 108 active | - | 不允许无差别清理 |
+| Docker build cache | 727.9 MB | - | 727.9 MB reported reclaimable |
 
 `docker system df` 的 reclaimable 数字只是候选，不代表可以安全删除。当前没有执行
 `docker prune`、删目录、删镜像、删容器或删卷。

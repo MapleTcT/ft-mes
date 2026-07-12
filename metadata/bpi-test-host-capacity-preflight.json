@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-12T23:46:30+08:00",
-  "sourceRepoCommit": "c6c01ab",
+  "generatedAt": "2026-07-13T01:15:00+08:00",
+  "sourceRepoCommit": "03e3f56",
   "host": {
     "handle": "ubuntu-test",
     "address": "100.99.133.43",
@@ -15,17 +15,25 @@
   "observations": {
     "rootFilesystemSizeGiB": 438,
     "rootFilesystemUsedGiB": 415,
-    "rootFilesystemAvailableGiB": 0.47,
+    "rootFilesystemSizeKiB": 458761360,
+    "rootFilesystemUsedKiB": 434845820,
+    "rootFilesystemAvailableKiB": 538288,
+    "rootFilesystemAvailableGiB": 0.51,
     "rootFilesystemUsePercent": 100,
     "dockerImagesCount": 235,
-    "dockerImagesSizeGB": 134.6,
-    "dockerImagesReportedReclaimableGB": 63.62,
+    "dockerImagesSizeGB": 134.2,
+    "dockerImagesReportedReclaimableGB": 63.24,
     "dockerContainersCount": 158,
     "dockerContainersActive": 108,
+    "dockerContainersSizeGB": 14.83,
+    "dockerContainersReportedReclaimableGB": 1.281,
     "dockerVolumesCount": 38,
     "dockerVolumesActive": 30,
-    "dockerVolumesSizeGB": 96.29,
-    "dockerVolumesReportedReclaimableGB": 6.799
+    "dockerVolumesSizeGB": 96.36,
+    "dockerVolumesReportedReclaimableGB": 6.799,
+    "dockerBuildCacheCount": 466,
+    "dockerBuildCacheSizeGB": 0.728,
+    "dockerBuildCacheReportedReclaimableGB": 0.728
   },
   "largePathCandidates": [
     {
