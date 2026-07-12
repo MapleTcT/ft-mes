@@ -25,7 +25,8 @@ boundary evaluator:
 
 `BoundarySignalRouterTest` covers six publication/routing cases and
 `ProductionContextTimelineTest` covers four point-in-time context cases. Together they are
-**10/10 PASS** under the Java 17 streaming reactor.
+**10/10 PASS** for this milestone under the Java 17 streaming reactor. The current aggregate is
+recorded in `docs/testing/bpi-kafka-flink-topology-acceptance.md`.
 
 ```bash
 JAVA_HOME=<jdk17> mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
@@ -34,8 +35,8 @@ python3 scripts/verify-bpi-api-contracts.py
 
 ## Limits
 
-- KafkaSource/KafkaSink and checkpoint transactions are not wired by this milestone.
-- The Flink keyed two-stream context join and telemetry buffering policy are not implemented yet.
+- A later milestone now wires KafkaSource/KafkaSink, checkpoint transactions, the keyed context join
+  and bounded telemetry wait; real cluster acceptance remains open.
 - The publication checksum is required but is not yet recomputed against a canonical rule payload.
 - Schema Registry publication and compatibility checks have not run against a live registry.
 - This is deterministic simulation evidence, not a real broker, Flink cluster or production line acceptance.

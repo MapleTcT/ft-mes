@@ -28,8 +28,8 @@ class ProductionContextJoinHarnessTest {
             ProductionContextEventV1 context = context("CTX-1", 1, "MO-1", T0);
             TelemetryPointEvent telemetry = point("TEL-1", 3);
 
-            harness.processElement2(context, context.getEffectiveFromMs());
-            harness.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
+            harness.processElement2(context.toByteArray(), context.getEffectiveFromMs());
+            harness.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
 
             assertEquals(1, outputs(harness).size());
             assertEquals("MO-1", outputs(harness).get(0).context().getOrderId());
@@ -44,9 +44,9 @@ class ProductionContextJoinHarnessTest {
             TelemetryPointEvent telemetry = point("TEL-1", 3);
             ProductionContextEventV1 context = context("CTX-1", 1, "MO-1", T0);
 
-            harness.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
+            harness.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
             assertTrue(outputs(harness).isEmpty());
-            harness.processElement2(context, context.getEffectiveFromMs());
+            harness.processElement2(context.toByteArray(), context.getEffectiveFromMs());
 
             assertEquals(1, outputs(harness).size());
             assertEquals("TEL-1", outputs(harness).get(0).telemetry().envelope().getEventId());
@@ -59,7 +59,7 @@ class ProductionContextJoinHarnessTest {
         try (Harness harness = harness()) {
             harness.open();
             TelemetryPointEvent telemetry = point("TEL-1", 3);
-            harness.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
+            harness.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
 
             harness.processWatermark1(new Watermark(T0.plusSeconds(40).toEpochMilli()));
             assertTrue(issueCodes(harness).isEmpty());
@@ -77,9 +77,9 @@ class ProductionContextJoinHarnessTest {
             TelemetryPointEvent telemetry = point("TEL-1", 3);
             TelemetryPointEvent conflict = point("TEL-1", 4);
 
-            harness.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
-            harness.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
-            harness.processElement1(conflict, conflict.eventTime().toEpochMilli());
+            harness.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
+            harness.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
+            harness.processElement1(TelemetryPointEventCodec.encode(conflict), conflict.eventTime().toEpochMilli());
 
             assertEquals(List.of("EVENT_ID_CONFLICT"), issueCodes(harness));
             assertTrue(outputs(harness).isEmpty());
@@ -92,7 +92,7 @@ class ProductionContextJoinHarnessTest {
         TelemetryPointEvent telemetry = point("TEL-1", 3);
         try (Harness first = harness()) {
             first.open();
-            first.processElement1(telemetry, telemetry.eventTime().toEpochMilli());
+            first.processElement1(TelemetryPointEventCodec.encode(telemetry), telemetry.eventTime().toEpochMilli());
             snapshot = first.snapshot(1, T0.plusSeconds(11).toEpochMilli());
         }
 
@@ -100,7 +100,7 @@ class ProductionContextJoinHarnessTest {
             restored.initializeState(snapshot);
             restored.open();
             ProductionContextEventV1 context = context("CTX-1", 1, "MO-1", T0);
-            restored.processElement2(context, context.getEffectiveFromMs());
+            restored.processElement2(context.toByteArray(), context.getEffectiveFromMs());
 
             assertEquals(1, outputs(restored).size());
             assertTrue(issueCodes(restored).isEmpty());
@@ -114,8 +114,8 @@ class ProductionContextJoinHarnessTest {
             ProductionContextEventV1 first = context("CTX-1", 1, "MO-1", T0);
             ProductionContextEventV1 conflict = context("CTX-2", 1, "MO-2", T0.plusSeconds(1));
 
-            harness.processElement2(first, first.getEffectiveFromMs());
-            harness.processElement2(conflict, conflict.getEffectiveFromMs());
+            harness.processElement2(first.toByteArray(), first.getEffectiveFromMs());
+            harness.processElement2(conflict.toByteArray(), conflict.getEffectiveFromMs());
 
             assertEquals(List.of("CONTEXT_REJECTED"), issueCodes(harness));
         }
@@ -168,15 +168,15 @@ class ProductionContextJoinHarnessTest {
     }
 
     private static final class Harness extends KeyedTwoInputStreamOperatorTestHarness<
-            String, TelemetryPointEvent, ProductionContextEventV1, byte[]> {
+            String, byte[], byte[], byte[]> {
 
         private Harness(KeyedCoProcessOperator<
-                String, TelemetryPointEvent, ProductionContextEventV1, byte[]> operator)
+                String, byte[], byte[], byte[]> operator)
                 throws Exception {
             super(
                     operator,
-                    TelemetryPointEvent::scopeKey,
-                    TelemetryPointEvent::contextScopeKey,
+                    bytes -> TelemetryPointEventCodec.decode(bytes).scopeKey(),
+                    ProductionContextWire::scopeKey,
                     TypeInformation.of(String.class),
                     1,
                     1,

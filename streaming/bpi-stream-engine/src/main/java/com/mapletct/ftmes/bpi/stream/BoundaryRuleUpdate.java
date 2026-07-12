@@ -30,10 +30,33 @@ public record BoundaryRuleUpdate(
                 rule);
     }
 
+    public static BoundaryRuleUpdate upsert(
+            String tenantId,
+            String plantId,
+            String lineId,
+            BoundaryRuleDefinition rule) {
+        return new BoundaryRuleUpdate(
+                Operation.UPSERT,
+                new BoundaryRuleRef(tenantId, plantId, lineId, rule.ruleCode(), rule.ruleVersion()),
+                rule);
+    }
+
     public static BoundaryRuleUpdate delete(String ruleCode, String ruleVersion) {
         return new BoundaryRuleUpdate(
                 Operation.DELETE,
                 new BoundaryRuleRef(ruleCode, ruleVersion),
+                null);
+    }
+
+    public static BoundaryRuleUpdate delete(
+            String tenantId,
+            String plantId,
+            String lineId,
+            String ruleCode,
+            String ruleVersion) {
+        return new BoundaryRuleUpdate(
+                Operation.DELETE,
+                new BoundaryRuleRef(tenantId, plantId, lineId, ruleCode, ruleVersion),
                 null);
     }
 

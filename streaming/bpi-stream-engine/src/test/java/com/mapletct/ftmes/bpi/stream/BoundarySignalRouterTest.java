@@ -52,7 +52,9 @@ class BoundarySignalRouterTest {
                 .map(item -> item.observation().signal())
                 .toList());
         assertEquals(T0.plusSeconds(2), result.inputs().get(1).observation().eventTime());
-        assertEquals("TENANT-A|LINE-01|FEED|START", result.inputs().get(0).keyedLocality());
+        assertEquals(
+                "TENANT-A|PLANT-01|LINE-01|FEED|START|TENANT-A|PLANT-01|LINE-01|BOUNDARY-01|1",
+                result.inputs().get(0).keyedLocality());
     }
 
     @Test

@@ -132,6 +132,28 @@ class BoundaryCodecsTest {
         assertThrows(IllegalStateException.class, () -> BoundaryOperatorStateCodec.encode(oversized));
     }
 
+    @Test
+    void scopedRuleUpdateCodecRoundTripsUpsertAndDelete() {
+        BoundaryRuleUpdate upsert = BoundaryRuleUpdate.upsert(
+                "TENANT-A", "PLANT-01", "LINE-01", rule());
+        BoundaryRuleUpdate delete = BoundaryRuleUpdate.delete(
+                "TENANT-A", "PLANT-01", "LINE-01", rule().ruleCode(), rule().ruleVersion());
+
+        assertEquals(upsert, BoundaryRuleUpdateCodec.decode(BoundaryRuleUpdateCodec.encode(upsert)));
+        assertEquals(delete, BoundaryRuleUpdateCodec.decode(BoundaryRuleUpdateCodec.encode(delete)));
+    }
+
+    @Test
+    void ruleUpdateCodecRejectsUnknownVersionAndTrailingData() {
+        byte[] unknown = BoundaryRuleUpdateCodec.encode(BoundaryRuleUpdate.upsert(rule()));
+        unknown[7] = 99;
+        byte[] valid = BoundaryRuleUpdateCodec.encode(BoundaryRuleUpdate.upsert(rule()));
+        byte[] trailing = Arrays.copyOf(valid, valid.length + 1);
+
+        assertThrows(IllegalStateException.class, () -> BoundaryRuleUpdateCodec.decode(unknown));
+        assertThrows(IllegalStateException.class, () -> BoundaryRuleUpdateCodec.decode(trailing));
+    }
+
     private static BoundaryRuleDefinition rule() {
         return new BoundaryRuleDefinition(
                 "START-01", "1.2.3", BoundaryKind.START, 1, 0.75, 0.2,

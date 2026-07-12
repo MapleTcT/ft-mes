@@ -4,7 +4,8 @@
 
 `streaming/bpi-stream-engine` 已建立 Java 17/Flink 2.2.1 流式计算工程骨架，并复用
 `batch-rule-runtime` 的事件时间判定公式和 `bpi-events` 的 Protobuf 契约。当前里程碑实现的是
-单执行上下文确定性回放和 START/END 候选投影，不是生产 Kafka/Flink 作业。
+单执行上下文确定性回放和 START/END 候选投影；后续已组装生产 Kafka/Flink 作业图，见
+`docs/testing/bpi-kafka-flink-topology-acceptance.md`，但仍未完成真实集群验收。
 
 自动测试结果为 **3/3 PASS**；连同依赖模块，本次 Reactor 共验证事件契约 13 项、规则运行时
 8 项和流式回放 3 项。
@@ -31,7 +32,7 @@ JAVA_HOME=/path/to/jdk17 make bpi-stream-test
 该目标只在 Java 17 CI 作业中编译。仓库 Java 8 主门禁执行 `bpi-stream-static-check`，因此不会
 把 Flink 或 Java 17 字节码引入旧 MES Maven Reactor。
 
-## 尚未覆盖
+## 本里程碑当时尚未覆盖
 
 - Flink `KeyedBroadcastProcessFunction`、版本化 `ValueState<byte[]>` 和 event-time timer。
 - Kafka Protobuf source/sink、分区键、exactly-once checkpoint 与 savepoint 恢复。

@@ -22,8 +22,10 @@ public record BoundaryStreamInput(
         return String.join(
                 "|",
                 context.tenantId(),
+                context.plantId(),
                 context.lineId(),
                 context.localityGroup(),
-                boundaryKind.name());
+                boundaryKind.name(),
+                ruleRef.key());
     }
 }

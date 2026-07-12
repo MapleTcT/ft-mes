@@ -32,10 +32,10 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void broadcastRuleAndEventTimeTimerProduceOneCandidate() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(rule()), T0.toEpochMilli());
+            harness.processBroadcastElement(update(rule()), T0.toEpochMilli());
             BoundaryExecutionContext context = context();
             harness.processElement(input(
                     context,
@@ -63,10 +63,10 @@ class BoundaryKeyedBroadcastHarnessTest {
     void checkpointRestorePreservesWindowBroadcastRuleAndTimer() throws Exception {
         OperatorSubtaskState snapshot;
         BoundaryExecutionContext context = context();
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      first = harness()) {
             first.open();
-            first.processBroadcastElement(BoundaryRuleUpdate.upsert(rule()), T0.toEpochMilli());
+            first.processBroadcastElement(update(rule()), T0.toEpochMilli());
             first.processElement(input(
                     context,
                     SignalObservation.bool("ORDER", "order.active", true, SignalQuality.GOOD, T0)),
@@ -79,7 +79,7 @@ class BoundaryKeyedBroadcastHarnessTest {
             snapshot = first.snapshot(1, T0.plusSeconds(2).toEpochMilli());
         }
 
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      restored = harness()) {
             restored.initializeState(snapshot);
             restored.open();
@@ -91,7 +91,7 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void missingRuleGoesToIssueSideOutputWithoutCandidate() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
             BoundaryStreamInput input = input(
@@ -110,10 +110,10 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void missingStartOrderIdentityGoesToIssueStreamBeforeEvaluation() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(rule()), T0.toEpochMilli());
+            harness.processBroadcastElement(update(rule()), T0.toEpochMilli());
             BoundaryExecutionContext context = new BoundaryExecutionContext(
                     "TENANT-A", "PLANT-01", "LINE-01", "FEED", "TOPO-1", "7", null, null);
             BoundaryStreamInput input = input(
@@ -131,10 +131,10 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void sameRuleVersionCannotBeOverwrittenWithDifferentSemantics() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(rule()), T0.toEpochMilli());
+            harness.processBroadcastElement(update(rule()), T0.toEpochMilli());
             BoundaryRuleDefinition conflicting = new BoundaryRuleDefinition(
                     "START-01", "1", BoundaryKind.START, 1, 1.0, 0,
                     List.of(
@@ -146,7 +146,7 @@ class BoundaryKeyedBroadcastHarnessTest {
                                     Duration.ofSeconds(10), Duration.ofSeconds(30), EvidenceClass.QUORUM, 50)));
 
             harness.processBroadcastElement(
-                    BoundaryRuleUpdate.upsert(conflicting), T0.plusSeconds(1).toEpochMilli());
+                    update(conflicting), T0.plusSeconds(1).toEpochMilli());
 
             assertEquals(
                     "RULE_VERSION_CONFLICT",
@@ -160,11 +160,11 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void lateEventWithinAllowedLatenessRecomputesTheOpenWindowInEventTimeOrder() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
             BoundaryRuleDefinition timedRule = timedRule();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processBroadcastElement(update(timedRule), T0.toEpochMilli());
             harness.processElement(
                     input(timedRule, SignalObservation.bool(
                             "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
@@ -200,11 +200,11 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void lateEventBeyondAllowedLatenessRequiresRevision() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
             BoundaryRuleDefinition timedRule = timedRule();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processBroadcastElement(update(timedRule), T0.toEpochMilli());
             harness.watermark(T0.plusSeconds(60).toEpochMilli());
 
             harness.processElement(
@@ -219,11 +219,11 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void malformedLateObservationGoesToIssueStreamWithoutFailingTheOperator() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
             BoundaryRuleDefinition timedRule = timedRule();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processBroadcastElement(update(timedRule), T0.toEpochMilli());
             harness.watermark(T0.plusSeconds(5).toEpochMilli());
 
             harness.processElement(
@@ -238,11 +238,11 @@ class BoundaryKeyedBroadcastHarnessTest {
 
     @Test
     void emittedCandidateIsImmutableWhenMoreLateEvidenceArrives() throws Exception {
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {
             harness.open();
             BoundaryRuleDefinition timedRule = timedRule();
-            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.processBroadcastElement(update(timedRule), T0.toEpochMilli());
             harness.processElement(
                     input(timedRule, SignalObservation.bool(
                             "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
@@ -270,10 +270,10 @@ class BoundaryKeyedBroadcastHarnessTest {
     void checkpointRestorePreservesObservationHistoryForLateRecomputation() throws Exception {
         OperatorSubtaskState snapshot;
         BoundaryRuleDefinition timedRule = timedRule();
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      first = harness()) {
             first.open();
-            first.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            first.processBroadcastElement(update(timedRule), T0.toEpochMilli());
             first.processElement(
                     input(timedRule, SignalObservation.bool(
                             "ORDER", "order.active", true, SignalQuality.GOOD, T0)),
@@ -281,7 +281,7 @@ class BoundaryKeyedBroadcastHarnessTest {
             snapshot = first.snapshot(2, T0.plusSeconds(1).toEpochMilli());
         }
 
-        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      restored = harness()) {
             restored.initializeState(snapshot);
             restored.open();
@@ -300,9 +300,9 @@ class BoundaryKeyedBroadcastHarnessTest {
     private static KeyedBroadcastOperatorTestHarness<
             String,
             BoundaryStreamInput,
-            BoundaryRuleUpdate,
+            byte[],
             byte[]> harness() throws Exception {
-        CoBroadcastWithKeyedOperator<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]> operator =
+        CoBroadcastWithKeyedOperator<String, BoundaryStreamInput, byte[], byte[]> operator =
                 new CoBroadcastWithKeyedOperator<>(
                         new BoundaryKeyedBroadcastFunction(),
                         List.of(BoundaryKeyedBroadcastFunction.RULES));
@@ -361,7 +361,7 @@ class BoundaryKeyedBroadcastHarnessTest {
     }
 
     private static List<String> issueCodes(KeyedBroadcastOperatorTestHarness<
-            String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]> harness) {
+            String, BoundaryStreamInput, byte[], byte[]> harness) {
         ConcurrentLinkedQueue<StreamRecord<BoundaryProcessingIssue>> issues =
                 harness.getSideOutput(BoundaryKeyedBroadcastFunction.ISSUES);
         if (issues == null) {
@@ -371,6 +371,10 @@ class BoundaryKeyedBroadcastHarnessTest {
                 .map(StreamRecord::getValue)
                 .map(BoundaryProcessingIssue::code)
                 .toList();
+    }
+
+    private static byte[] update(BoundaryRuleDefinition rule) {
+        return BoundaryRuleUpdateCodec.encode(BoundaryRuleUpdate.upsert(rule));
     }
 
     private static List<BatchCandidateV1> candidates(ConcurrentLinkedQueue<Object> output) {

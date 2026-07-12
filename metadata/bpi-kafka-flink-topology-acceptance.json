@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-07-12T23:12:34+08:00",
+  "repoCommit": "1972998",
+  "workingTree": "uncommitted",
+  "status": "JOB_WIRED_HARNESS_PASS",
+  "runtime": "streaming/bpi-stream-engine",
+  "java": "17",
+  "flink": "2.2.1",
+  "kafkaConnector": "5.0.0-2.2",
+  "summary": {
+    "streamTestsRun": 71,
+    "streamPass": 71,
+    "streamFail": 0,
+    "contractTestsRun": 14,
+    "ruleRuntimeTestsRun": 9,
+    "reactorTestsRun": 94,
+    "reactorPass": 94,
+    "realClusterAccepted": false
+  },
+  "topics": {
+    "sources": [
+      "iot.telemetry.selected.v1",
+      "mes.production.context.v1",
+      "bpi.boundary.rule-publication.v1"
+    ],
+    "sinks": [
+      "bpi.batch.candidate.v1",
+      "bpi.data-quality.v1"
+    ]
+  },
+  "wireFormats": [
+    "BPKR/v1",
+    "BPTE/v1",
+    "BPCT/v1",
+    "BPRU/v1",
+    "BatchCandidateV1",
+    "DataQualityEventV1"
+  ],
+  "capabilities": [
+    "raw Kafka metadata preservation and tombstone isolation",
+    "point-level telemetry contract isolation",
+    "event-time production-context join with timestamp reassignment",
+    "checkpointed immutable rule lifecycle",
+    "tenant/plant/line scoped rule identity",
+    "indexed device/property broadcast routing",
+    "rule-isolated keyed boundary windows",
+    "source watermarks and idleness",
+    "bounded context and boundary keyed-state TTL",
+    "stable operator UIDs",
+    "exactly-once candidate and data-quality Kafka sinks"
+  ],
+  "limitations": [
+    "No real Kafka or Flink HA cluster acceptance was performed.",
+    "No RocksDB/MinIO checkpoint, savepoint upgrade, chaos, lag or backpressure acceptance was performed.",
+    "No 100k-point load benchmark was performed.",
+    "Schema Registry compatibility was not exercised against a live registry.",
+    "End-to-end business persistence still requires BPI inbox and PostgreSQL marker acceptance."
+  ],
+  "evidence": [
+    "docs/testing/bpi-kafka-flink-topology-acceptance.md",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BpiKafkaJobTopologyTest.xml",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRulePublicationLifecycleHarnessTest.xml",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRuleRoutingBroadcastHarnessTest.xml"
+  ]
+}

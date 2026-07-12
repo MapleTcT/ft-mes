@@ -60,6 +60,48 @@ public final class BoundarySignalRouter {
         return new BoundaryRoutingResult(inputs, issues);
     }
 
+    public static BoundaryRoutingResult route(
+            PublishedBoundaryPlan plan,
+            ContextualTelemetryPoint contextualPoint) {
+        TelemetryPointEvent telemetry = contextualPoint.telemetry();
+        TelemetryEnvelopeV1 envelope = telemetry.envelope();
+        ProductionContextEventV1 context = contextualPoint.context();
+        List<BoundaryRoutingIssue> issues = new ArrayList<>();
+        List<BoundaryStreamInput> inputs = new ArrayList<>();
+        if (!plan.publication().getActive()) {
+            return new BoundaryRoutingResult(inputs, issues);
+        }
+        if (!sameScope(plan, context, envelope)) {
+            issues.add(issue(envelope, "SCOPE_MISMATCH", telemetry.point().getPropertyId(),
+                    "rule, context and telemetry scope differ"));
+            return new BoundaryRoutingResult(inputs, issues);
+        }
+        PointValue point = telemetry.point();
+        BoundarySignalBindingV1 binding = plan.bindings().get(
+                PublishedBoundaryPlan.bindingKey(envelope.getDeviceId(), point.getPropertyId()));
+        if (binding == null) {
+            return new BoundaryRoutingResult(inputs, issues);
+        }
+        long eventTimeMs = telemetry.eventTime().toEpochMilli();
+        if (!contextApplies(context, eventTimeMs)) {
+            issues.add(issue(envelope, "CONTEXT_NOT_EFFECTIVE", point.getPropertyId(),
+                    "production context is inactive or outside the signal event time"));
+            return new BoundaryRoutingResult(inputs, issues);
+        }
+        if (!binding.getExpectedUnit().isBlank()
+                && !binding.getExpectedUnit().equals(point.getUnit())) {
+            issues.add(issue(envelope, "UNIT_MISMATCH", point.getPropertyId(),
+                    "point unit does not match the published binding"));
+            return new BoundaryRoutingResult(inputs, issues);
+        }
+        try {
+            inputs.add(input(plan, context, envelope, point, binding, eventTimeMs));
+        } catch (IllegalArgumentException error) {
+            issues.add(issue(envelope, "POINT_REJECTED", point.getPropertyId(), error.getMessage()));
+        }
+        return new BoundaryRoutingResult(inputs, issues);
+    }
+
     private static BoundaryStreamInput input(
             PublishedBoundaryPlan plan,
             ProductionContextEventV1 context,

@@ -21,7 +21,8 @@ The state and data-plane contracts are explicit:
 
 ## Automated evidence
 
-The Java 17 streaming reactor is **41/41 PASS**. Six tests use Flink's official
+At this milestone the Java 17 streaming reactor was **41/41 PASS**. The current aggregate is
+recorded in `docs/testing/bpi-kafka-flink-topology-acceptance.md`. Six tests use Flink's official
 `KeyedTwoInputStreamOperatorTestHarness`; two additional tests verify deterministic BPJS encoding
 and unknown-version rejection.
 
@@ -34,6 +35,7 @@ JAVA_HOME=<jdk17> mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
 - A late context flush inherits the context input record timestamp from `KeyedCoProcessFunction`.
   The assembled topology must reassign timestamp from the decoded BPCT telemetry event before the
   boundary evaluator; direct wiring without reassignment is forbidden.
-- KafkaSource/KafkaSink, source idleness, checkpoint storage and transactional sink are not wired yet.
+- A later milestone now wires KafkaSource/KafkaSink, source idleness and transactional sinks. Target
+  cluster checkpoint storage is still a deployment responsibility and has not been accepted live.
 - Pending-buffer load and long-running RocksDB behavior have not been benchmarked.
 - This is an official Flink Harness acceptance, not a real Kafka/Flink cluster acceptance.

@@ -4,6 +4,7 @@ import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
@@ -15,19 +16,19 @@ import java.util.List;
 
 public final class ProductionContextJoinFunction extends KeyedCoProcessFunction<
         String,
-        TelemetryPointEvent,
-        ProductionContextEventV1,
+        byte[],
+        byte[],
         byte[]> {
 
     public static final OutputTag<ContextJoinIssue> ISSUES =
             new OutputTag<>("bpi-production-context-join-issues") {
             };
-    private static final ValueStateDescriptor<byte[]> JOIN_STATE = new ValueStateDescriptor<>(
-            "bpi-production-context-join-v1", byte[].class);
+    private static final String JOIN_STATE_NAME = "bpi-production-context-join-v1";
     private static final int MAX_PENDING = 10_000;
 
     private final Duration contextWait;
     private final Duration contextRetention;
+    private final Duration stateTtl;
     private transient ValueState<byte[]> encodedState;
 
     public ProductionContextJoinFunction(Duration contextWait, Duration contextRetention) {
@@ -42,18 +43,36 @@ public final class ProductionContextJoinFunction extends KeyedCoProcessFunction<
         }
         this.contextWait = contextWait;
         this.contextRetention = contextRetention;
+        this.stateTtl = contextRetention.plus(contextWait);
     }
 
     @Override
     public void open(OpenContext openContext) {
-        encodedState = getRuntimeContext().getState(JOIN_STATE);
+        ValueStateDescriptor<byte[]> descriptor = new ValueStateDescriptor<>(
+                JOIN_STATE_NAME, byte[].class);
+        descriptor.enableTimeToLive(StateTtlConfig.newBuilder(stateTtl)
+                .updateTtlOnCreateAndWrite()
+                .neverReturnExpired()
+                .cleanupFullSnapshot()
+                .cleanupInRocksdbCompactFilter(1_000)
+                .build());
+        encodedState = getRuntimeContext().getState(descriptor);
     }
 
     @Override
     public void processElement1(
-            TelemetryPointEvent telemetry,
+            byte[] telemetryBytes,
             Context context,
             Collector<byte[]> output) throws Exception {
+        TelemetryPointEvent telemetry;
+        try {
+            telemetry = TelemetryPointEventCodec.decode(telemetryBytes);
+        } catch (IllegalStateException error) {
+            context.output(ISSUES, new ContextJoinIssue(
+                    "TELEMETRY_DECODE_REJECTED", context.getCurrentKey(), "", "",
+                    context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(), error.getMessage()));
+            return;
+        }
         if (!telemetry.scopeKey().equals(context.getCurrentKey())) {
             issue(context, telemetry, "KEY_MISMATCH", "telemetry scope does not match the keyed partition");
             return;
@@ -101,9 +120,18 @@ public final class ProductionContextJoinFunction extends KeyedCoProcessFunction<
 
     @Override
     public void processElement2(
-            ProductionContextEventV1 incoming,
+            byte[] contextBytes,
             Context context,
             Collector<byte[]> output) throws Exception {
+        ProductionContextEventV1 incoming;
+        try {
+            incoming = ProductionContextWire.decode(contextBytes);
+        } catch (IllegalStateException error) {
+            context.output(ISSUES, new ContextJoinIssue(
+                    "CONTEXT_DECODE_REJECTED", context.getCurrentKey(), "", "",
+                    context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(), error.getMessage()));
+            return;
+        }
         if (!TelemetryPointEvent.contextScopeKey(incoming).equals(context.getCurrentKey())) {
             context.output(ISSUES, new ContextJoinIssue(
                     "KEY_MISMATCH", context.getCurrentKey(), incoming.getEventId(), "",

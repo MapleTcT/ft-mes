@@ -12,6 +12,7 @@ import com.mapletct.ftmes.bpi.rules.SignalObservation;
 import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
+import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
@@ -27,7 +28,7 @@ import java.util.List;
 public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessFunction<
         String,
         BoundaryStreamInput,
-        BoundaryRuleUpdate,
+        byte[],
         byte[]> {
 
     public static final MapStateDescriptor<String, byte[]> RULES = new MapStateDescriptor<>(
@@ -36,15 +37,34 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
             new OutputTag<>("bpi-boundary-processing-issues") {
             };
 
-    private static final ValueStateDescriptor<byte[]> WINDOW_STATE = new ValueStateDescriptor<>(
-            "bpi-boundary-window-v1", byte[].class);
+    private static final String WINDOW_STATE_NAME = "bpi-boundary-window-v1";
     private static final int MAX_BUFFERED_OBSERVATIONS = 10_000;
 
+    private final java.time.Duration stateTtl;
     private transient ValueState<byte[]> encodedState;
+
+    public BoundaryKeyedBroadcastFunction() {
+        this(java.time.Duration.ofDays(30));
+    }
+
+    public BoundaryKeyedBroadcastFunction(java.time.Duration stateTtl) {
+        if (stateTtl == null || stateTtl.isZero() || stateTtl.isNegative()) {
+            throw new IllegalArgumentException("stateTtl must be positive");
+        }
+        this.stateTtl = stateTtl;
+    }
 
     @Override
     public void open(OpenContext openContext) {
-        encodedState = getRuntimeContext().getState(WINDOW_STATE);
+        ValueStateDescriptor<byte[]> descriptor = new ValueStateDescriptor<>(
+                WINDOW_STATE_NAME, byte[].class);
+        descriptor.enableTimeToLive(StateTtlConfig.newBuilder(stateTtl)
+                .updateTtlOnCreateAndWrite()
+                .neverReturnExpired()
+                .cleanupFullSnapshot()
+                .cleanupInRocksdbCompactFilter(1_000)
+                .build());
+        encodedState = getRuntimeContext().getState(descriptor);
     }
 
     @Override
@@ -157,9 +177,22 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
 
     @Override
     public void processBroadcastElement(
-            BoundaryRuleUpdate update,
+            byte[] updateBytes,
             Context context,
             Collector<byte[]> output) throws Exception {
+        BoundaryRuleUpdate update;
+        try {
+            update = BoundaryRuleUpdateCodec.decode(updateBytes);
+        } catch (IllegalStateException error) {
+            context.output(ISSUES, new BoundaryProcessingIssue(
+                    "RULE_UPDATE_DECODE_REJECTED",
+                    null,
+                    null,
+                    null,
+                    context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(),
+                    error.getMessage()));
+            return;
+        }
         if (update.operation() == BoundaryRuleUpdate.Operation.DELETE) {
             context.getBroadcastState(RULES).remove(update.ruleRef().key());
         } else {

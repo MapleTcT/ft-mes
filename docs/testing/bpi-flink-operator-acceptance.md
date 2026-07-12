@@ -3,10 +3,12 @@
 ## 结论
 
 `BoundaryKeyedBroadcastFunction` 已实现 Flink 2.2.1 单产线/局部组事件时间边界算子。
-算子使用 `tenant + line + locality group + boundary kind` 作为 keyed state 分区，使用
+算子现在使用 `tenant + plant + line + locality group + boundary kind + scoped rule identity` 作为
+keyed state 分区，避免同 locality 多规则共享窗口；使用
 broadcast state 接收发布规则，并复用 `batch-rule-runtime` 完成 START/END 判断。
 
-流式模块自动测试为 **41/41 PASS**，其中 10 项使用 Flink 官方
+该里程碑当时自动测试为 **41/41 PASS**；当前汇总见
+`docs/testing/bpi-kafka-flink-topology-acceptance.md`。其中 10 项使用 Flink 官方
 `KeyedBroadcastOperatorTestHarness`，另有 6 项使用官方
 `KeyedTwoInputStreamOperatorTestHarness`，不是自制上下文 mock。
 
@@ -46,8 +48,8 @@ descriptor/map 的复制失败，因此数据面改为稳定 Protobuf wire bytes
 
 ## 当前限制
 
-- Kafka Protobuf source/sink、topic、partition key 和 exactly-once transaction 尚未接线。
-- 规则中的 `watermarkDelay` 尚未接入 Kafka source 的 watermark strategy。
+- 后续里程碑已接入 Kafka Protobuf source/sink、topic、partition key、checkpoint transaction、
+  watermark strategy 和 idleness；真实集群验收仍未完成。
 - `LATE_EVENT_REVISION_REQUIRED` 尚未接入持久化修订队列和人工处置消费端。
 - BPIS/v1 到 BPIS/v2 的目标集群 savepoint 升级尚未实机演练。
-- 规则更新流目前是已解码的 `BoundaryRuleUpdate`，Kafka 规则命令格式和 schema registry 尚未接线。
+- 规则更新流已改为版本化 `BPRU/v1` bytes；live Schema Registry 验收仍未完成。

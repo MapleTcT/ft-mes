@@ -40,6 +40,21 @@ class ProductionContextJoinStateCodecTest {
         assertThrows(IllegalStateException.class, () -> ProductionContextJoinStateCodec.decode(encoded));
     }
 
+    @Test
+    void telemetryPointWireRoundTripsWithoutProtobufKryo() {
+        TelemetryPointEvent event = point();
+
+        assertEquals(event, TelemetryPointEventCodec.decode(TelemetryPointEventCodec.encode(event)));
+    }
+
+    @Test
+    void telemetryPointWireRejectsUnknownVersion() {
+        byte[] encoded = TelemetryPointEventCodec.encode(point());
+        encoded[7] = 99;
+
+        assertThrows(IllegalStateException.class, () -> TelemetryPointEventCodec.decode(encoded));
+    }
+
     static ProductionContextEventV1 context() {
         return ProductionContextEventV1.newBuilder()
                 .setEventId("CTX-1")

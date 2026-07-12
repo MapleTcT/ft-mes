@@ -24,6 +24,11 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPointCodec.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJobConfig.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationLifecycleFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleRoutingBroadcastFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleUpdateCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngine.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicy.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
@@ -33,11 +38,13 @@ REQUIRED_FILES = [
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
     "docs/testing/bpi-production-context-join-acceptance.md",
     "docs/testing/bpi-stream-replay-acceptance.md",
+    "docs/testing/bpi-kafka-flink-topology-acceptance.md",
     "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-rule-timing-acceptance.json",
     "metadata/bpi-rule-publication-routing-acceptance.json",
     "metadata/bpi-production-context-join-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
+    "metadata/bpi-kafka-flink-topology-acceptance.json",
 ]
 
 
@@ -54,6 +61,9 @@ def main() -> int:
     parent = ET.parse(STREAMING / "pom.xml").getroot()
     release = parent.findtext("m:properties/m:maven.compiler.release", namespaces=NS)
     flink_version = parent.findtext("m:properties/m:flink.version", namespaces=NS)
+    kafka_connector_version = parent.findtext(
+        "m:properties/m:flink.kafka.connector.version", namespaces=NS
+    )
     modules = {item.text for item in parent.findall("m:modules/m:module", NS)}
     expected_modules = {
         "../contracts/bpi-events",
@@ -64,6 +74,11 @@ def main() -> int:
         failures.append(f"BPI streaming Java release must remain 17, found {release!r}")
     if flink_version != "2.2.1":
         failures.append(f"BPI streaming Flink baseline must remain 2.2.1, found {flink_version!r}")
+    if kafka_connector_version != "5.0.0-2.2":
+        failures.append(
+            "BPI streaming Kafka connector baseline must remain 5.0.0-2.2, "
+            f"found {kafka_connector_version!r}"
+        )
     if modules != expected_modules:
         failures.append(f"unexpected BPI streaming reactor modules: {sorted(modules)}")
 
@@ -87,6 +102,7 @@ def main() -> int:
         "observationHistoryComplete",
         "withWindowAndObservations",
         "LATE_EVENT_REVISION_REQUIRED",
+        "StateTtlConfig",
         "toByteArray",
     ):
         if marker not in operator_source:
@@ -112,6 +128,21 @@ def main() -> int:
         if marker not in join_source:
             failures.append(f"ProductionContextJoinFunction is missing join marker {marker!r}")
 
+    job_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java").read_text(encoding="utf-8")
+    for marker in (
+        "CheckpointingMode.EXACTLY_ONCE",
+        "bpi-production-context-join-v1",
+        "bpi-rule-lifecycle-v1",
+        "bpi-boundary-indexed-routing-v1",
+        "BpiKafkaIO.candidateSink",
+        "BpiKafkaIO.dataQualitySink",
+        "ruleWatermarks",
+        "contextualWatermarks",
+        "boundaryStateTtl",
+    ):
+        if marker not in job_source:
+            failures.append(f"BpiKafkaJob is missing production topology marker {marker!r}")
+
     forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
     for path in STREAMING.rglob("*"):
         if path.is_file() and path.suffix in {".java", ".xml", ".md"} and "target" not in path.parts:
@@ -132,6 +163,15 @@ def main() -> int:
         failures.append("BPI Flink operator acceptance must identify Flink 2.2.1")
     if flink_acceptance.get("summary", {}).get("fail") != 0:
         failures.append("BPI Flink operator acceptance must not contain failed items")
+    topology_acceptance = json.loads(
+        (ROOT / "metadata/bpi-kafka-flink-topology-acceptance.json").read_text(encoding="utf-8")
+    )
+    if topology_acceptance.get("status") != "JOB_WIRED_HARNESS_PASS":
+        failures.append("BPI Kafka/Flink topology acceptance status must remain explicit")
+    if topology_acceptance.get("summary", {}).get("streamFail") != 0:
+        failures.append("BPI Kafka/Flink topology acceptance must not contain failed stream tests")
+    if topology_acceptance.get("summary", {}).get("realClusterAccepted") is not False:
+        failures.append("BPI Kafka/Flink topology acceptance must not claim live cluster acceptance")
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

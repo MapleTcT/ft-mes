@@ -17,4 +17,8 @@ public final class TelemetryEnvelopeFlattener {
         }
         return List.copyOf(points);
     }
+
+    public static List<byte[]> flattenToBytes(TelemetryEnvelopeV1 envelope) {
+        return flatten(envelope).stream().map(TelemetryPointEventCodec::encode).toList();
+    }
 }

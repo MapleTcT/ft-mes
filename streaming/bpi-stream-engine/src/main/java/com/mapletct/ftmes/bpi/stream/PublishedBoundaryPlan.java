@@ -20,13 +20,27 @@ public record PublishedBoundaryPlan(
     }
 
     public BoundaryRuleRef ruleRef() {
-        return new BoundaryRuleRef(rule.ruleCode(), rule.ruleVersion());
+        return new BoundaryRuleRef(
+                publication.getTenantId(),
+                publication.getPlantId(),
+                publication.getLineId(),
+                rule.ruleCode(),
+                rule.ruleVersion());
     }
 
     public BoundaryRuleUpdate ruleUpdate() {
         return publication.getActive()
-                ? BoundaryRuleUpdate.upsert(rule)
-                : BoundaryRuleUpdate.delete(rule.ruleCode(), rule.ruleVersion());
+                ? BoundaryRuleUpdate.upsert(
+                        publication.getTenantId(),
+                        publication.getPlantId(),
+                        publication.getLineId(),
+                        rule)
+                : BoundaryRuleUpdate.delete(
+                        publication.getTenantId(),
+                        publication.getPlantId(),
+                        publication.getLineId(),
+                        rule.ruleCode(),
+                        rule.ruleVersion());
     }
 
     static String bindingKey(String deviceId, String propertyId) {
