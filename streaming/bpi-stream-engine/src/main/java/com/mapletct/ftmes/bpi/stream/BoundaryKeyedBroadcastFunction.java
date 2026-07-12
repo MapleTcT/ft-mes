@@ -65,11 +65,6 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
             issue(context, input, "TIMESTAMP_MISMATCH", "Flink timestamp must equal observation event time");
             return;
         }
-        if (context.currentWatermark() != Long.MIN_VALUE && eventTime <= context.currentWatermark()) {
-            issue(context, input, "LATE_EVENT_UNSUPPORTED", "event is at or behind the current watermark");
-            return;
-        }
-
         ReadOnlyBroadcastState<String, byte[]> rules = context.getBroadcastState(RULES);
         byte[] encodedRule = rules.get(input.ruleRef().key());
         if (encodedRule == null) {
@@ -79,6 +74,23 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
         BoundaryRuleDefinition rule = BoundaryRuleCodec.decode(encodedRule);
         if (rule.boundaryKind() != input.boundaryKind()) {
             issue(context, input, "RULE_KIND_MISMATCH", "rule boundary kind does not match the input");
+            return;
+        }
+        if (context.currentWatermark() != Long.MIN_VALUE && eventTime <= context.currentWatermark()) {
+            long latenessMillis = context.currentWatermark() - eventTime;
+            if (latenessMillis <= rule.timing().allowedLateness().toMillis()) {
+                issue(
+                        context,
+                        input,
+                        "LATE_EVENT_REPLAY_REQUIRED",
+                        "event is within allowed lateness and must be replayed in event-time order");
+            } else {
+                issue(
+                        context,
+                        input,
+                        "LATE_EVENT_REVISION_REQUIRED",
+                        "event exceeds allowed lateness and requires a batch revision review");
+            }
             return;
         }
 

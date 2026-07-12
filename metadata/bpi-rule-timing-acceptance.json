@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-07-12T21:30:00+08:00",
+  "status": "PARTIAL_PASS",
+  "ruleCodecWriteVersion": 2,
+  "ruleCodecReadVersions": [1, 2],
+  "versionedFields": ["allowedLateness", "watermarkDelay", "evaluationTimeout"],
+  "lateEventRoutes": {
+    "withinAllowedLateness": "LATE_EVENT_REPLAY_REQUIRED",
+    "beyondAllowedLateness": "LATE_EVENT_REVISION_REQUIRED"
+  },
+  "candidateMutationOnLateEvent": false,
+  "remaining": [
+    "bounded event-time observation buffer",
+    "in-window deterministic recomputation",
+    "Kafka replay route wiring"
+  ]
+}

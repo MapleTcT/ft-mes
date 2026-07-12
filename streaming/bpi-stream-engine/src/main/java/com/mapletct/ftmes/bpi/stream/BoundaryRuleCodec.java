@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi.stream;
 
 import com.mapletct.ftmes.bpi.rules.BoundaryKind;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
+import com.mapletct.ftmes.bpi.rules.BoundaryTimingPolicy;
 import com.mapletct.ftmes.bpi.rules.ConditionOperator;
 import com.mapletct.ftmes.bpi.rules.EvidenceClass;
 import com.mapletct.ftmes.bpi.rules.EvidenceCondition;
@@ -19,7 +20,8 @@ import java.util.List;
 public final class BoundaryRuleCodec {
 
     private static final int MAGIC = 0x42504952;
-    private static final int VERSION = 1;
+    private static final int LEGACY_VERSION = 1;
+    private static final int VERSION = 2;
     private static final int MAX_CONDITIONS = 10_000;
 
     private BoundaryRuleCodec() {
@@ -37,6 +39,9 @@ public final class BoundaryRuleCodec {
                 output.writeInt(rule.quorumMinimum());
                 output.writeDouble(rule.minimumConfidence());
                 output.writeDouble(rule.maxCompositePenalty());
+                output.writeLong(rule.timing().allowedLateness().toMillis());
+                output.writeLong(rule.timing().watermarkDelay().toMillis());
+                output.writeLong(rule.timing().evaluationTimeout().toMillis());
                 output.writeInt(rule.conditions().size());
                 for (EvidenceCondition condition : rule.conditions()) {
                     output.writeUTF(condition.signal());
@@ -57,13 +62,25 @@ public final class BoundaryRuleCodec {
 
     public static BoundaryRuleDefinition decode(byte[] bytes) {
         try (DataInputStream input = new DataInputStream(new ByteArrayInputStream(bytes))) {
-            requireHeader(input, MAGIC, VERSION, "boundary rule");
+            if (input.readInt() != MAGIC) {
+                throw new IOException("invalid boundary rule magic");
+            }
+            int version = input.readInt();
+            if (version != LEGACY_VERSION && version != VERSION) {
+                throw new IOException("unsupported boundary rule version: " + version);
+            }
             String ruleCode = input.readUTF();
             String ruleVersion = input.readUTF();
             BoundaryKind boundaryKind = BoundaryKind.valueOf(input.readUTF());
             int quorumMinimum = input.readInt();
             double minimumConfidence = input.readDouble();
             double maxCompositePenalty = input.readDouble();
+            BoundaryTimingPolicy timing = version == LEGACY_VERSION
+                    ? BoundaryTimingPolicy.LEGACY_DEFAULTS
+                    : new BoundaryTimingPolicy(
+                            Duration.ofMillis(input.readLong()),
+                            Duration.ofMillis(input.readLong()),
+                            Duration.ofMillis(input.readLong()));
             int conditionCount = boundedCount(input.readInt(), MAX_CONDITIONS, "condition");
             List<EvidenceCondition> conditions = new ArrayList<>(conditionCount);
             for (int index = 0; index < conditionCount; index++) {
@@ -87,6 +104,7 @@ public final class BoundaryRuleCodec {
                     quorumMinimum,
                     minimumConfidence,
                     maxCompositePenalty,
+                    timing,
                     conditions);
         } catch (IOException | IllegalArgumentException error) {
             throw new IllegalStateException("cannot decode boundary rule", error);

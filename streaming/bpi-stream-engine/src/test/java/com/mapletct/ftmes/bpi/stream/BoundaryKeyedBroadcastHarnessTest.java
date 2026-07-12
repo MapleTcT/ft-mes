@@ -4,6 +4,7 @@ import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.rules.BoundaryKind;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
+import com.mapletct.ftmes.bpi.rules.BoundaryTimingPolicy;
 import com.mapletct.ftmes.bpi.rules.ConditionOperator;
 import com.mapletct.ftmes.bpi.rules.EvidenceClass;
 import com.mapletct.ftmes.bpi.rules.EvidenceCondition;
@@ -157,6 +158,39 @@ class BoundaryKeyedBroadcastHarnessTest {
         }
     }
 
+    @Test
+    void lateEventsAreClassifiedByTheVersionedAllowedLatenessWindow() throws Exception {
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, BoundaryRuleUpdate, byte[]>
+                     harness = harness()) {
+            harness.open();
+            BoundaryRuleDefinition timedRule = new BoundaryRuleDefinition(
+                    "START-01", "2", BoundaryKind.START, 1, 1.0, 0,
+                    new BoundaryTimingPolicy(
+                            Duration.ofSeconds(30), Duration.ofSeconds(5), Duration.ofMinutes(2)),
+                    rule().conditions());
+            harness.processBroadcastElement(BoundaryRuleUpdate.upsert(timedRule), T0.toEpochMilli());
+            harness.watermark(T0.plusSeconds(60).toEpochMilli());
+
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "LATE-WITHIN", "order.active", true, SignalQuality.GOOD, T0.plusSeconds(40))),
+                    T0.plusSeconds(40).toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "LATE-BEYOND", "order.active", true, SignalQuality.GOOD, T0.plusSeconds(20))),
+                    T0.plusSeconds(20).toEpochMilli());
+
+            List<String> codes = harness.getSideOutput(BoundaryKeyedBroadcastFunction.ISSUES).stream()
+                    .map(StreamRecord::getValue)
+                    .map(BoundaryProcessingIssue::code)
+                    .toList();
+            assertEquals(
+                    List.of("LATE_EVENT_REPLAY_REQUIRED", "LATE_EVENT_REVISION_REQUIRED"),
+                    codes);
+            assertTrue(candidates(harness.getOutput()).isEmpty());
+        }
+    }
+
     private static KeyedBroadcastOperatorTestHarness<
             String,
             BoundaryStreamInput,
@@ -187,6 +221,16 @@ class BoundaryKeyedBroadcastHarnessTest {
                 context,
                 new BoundaryRuleRef("START-01", "1"),
                 BoundaryKind.START,
+                observation);
+    }
+
+    private static BoundaryStreamInput input(
+            BoundaryRuleDefinition rule,
+            SignalObservation observation) {
+        return new BoundaryStreamInput(
+                context(),
+                new BoundaryRuleRef(rule.ruleCode(), rule.ruleVersion()),
+                rule.boundaryKind(),
                 observation);
     }
 

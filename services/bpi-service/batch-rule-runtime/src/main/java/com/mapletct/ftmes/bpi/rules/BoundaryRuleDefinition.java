@@ -12,12 +12,33 @@ public record BoundaryRuleDefinition(
         int quorumMinimum,
         double minimumConfidence,
         double maxCompositePenalty,
+        BoundaryTimingPolicy timing,
         List<EvidenceCondition> conditions) {
+
+    public BoundaryRuleDefinition(
+            String ruleCode,
+            String ruleVersion,
+            BoundaryKind boundaryKind,
+            int quorumMinimum,
+            double minimumConfidence,
+            double maxCompositePenalty,
+            List<EvidenceCondition> conditions) {
+        this(
+                ruleCode,
+                ruleVersion,
+                boundaryKind,
+                quorumMinimum,
+                minimumConfidence,
+                maxCompositePenalty,
+                BoundaryTimingPolicy.LEGACY_DEFAULTS,
+                conditions);
+    }
 
     public BoundaryRuleDefinition {
         Objects.requireNonNull(ruleCode, "ruleCode");
         Objects.requireNonNull(ruleVersion, "ruleVersion");
         Objects.requireNonNull(boundaryKind, "boundaryKind");
+        Objects.requireNonNull(timing, "timing");
         Objects.requireNonNull(conditions, "conditions");
         conditions = List.copyOf(conditions);
         if (ruleCode.isBlank() || ruleVersion.isBlank()) {

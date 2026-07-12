@@ -3657,6 +3657,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-rule-timing-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-stream-replay-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -3820,6 +3826,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-timing-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4953,6 +4965,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicy.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
       "state": "tracked",
       "tracked": true
@@ -5026,6 +5044,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryRuleRuntimeTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicyTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5207,13 +5231,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 70
+      "tracked": 71
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 83
+      "tracked": 84
     },
     "package.json": {
       "tracked": 1
@@ -5225,7 +5249,7 @@
       "tracked": 50
     },
     "services": {
-      "tracked": 83
+      "tracked": 85
     },
     "simulation": {
       "tracked": 4
@@ -5237,8 +5261,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 863,
-    "tracked": 863,
+    "totalFiles": 867,
+    "tracked": 867,
     "untracked": 0
   },
   "untrackedByDirectory": []
