@@ -61,6 +61,7 @@ message ProductionContextEventV1 {
   uint64 context_revision = 11;
   bool active = 12;
   map<string, string> attributes = 13;
+  string batch_id = 14;
 }
 
 enum BoundaryType {
@@ -125,4 +126,64 @@ message DataQualityEventV1 {
   string detail = 10;
   int64 detected_at_ms = 11;
   map<string, string> headers = 12;
+}
+
+// Immutable control-plane event emitted after a rule version, topology version and
+// signal bindings pass simulation and approval. Existing versions cannot be overwritten.
+message BoundaryRulePublicationV1 {
+  string event_id = 1;
+  string tenant_id = 2;
+  string plant_id = 3;
+  string line_id = 4;
+  string locality_group = 5;
+  string topology_code = 6;
+  string topology_version = 7;
+  string rule_code = 8;
+  string rule_version = 9;
+  BoundaryType boundary_type = 10;
+  int32 quorum_minimum = 11;
+  double minimum_confidence = 12;
+  double max_composite_penalty = 13;
+  int64 allowed_lateness_ms = 14;
+  int64 watermark_delay_ms = 15;
+  int64 evaluation_timeout_ms = 16;
+  repeated BoundaryEvidenceConditionV1 conditions = 17;
+  repeated BoundarySignalBindingV1 signal_bindings = 18;
+  bool active = 19;
+  int64 published_at_ms = 20;
+  string checksum = 21;
+  map<string, string> headers = 22;
+}
+
+message BoundaryEvidenceConditionV1 {
+  string signal = 1;
+  BoundaryConditionOperatorV1 operator = 2;
+  string threshold_decimal = 3;
+  int64 hold_for_ms = 4;
+  int64 max_silence_ms = 5;
+  BoundaryEvidenceClassV1 classification = 6;
+  int32 weight = 7;
+}
+
+message BoundarySignalBindingV1 {
+  string device_id = 1;
+  string property_id = 2;
+  string signal = 3;
+  string expected_unit = 4;
+}
+
+enum BoundaryConditionOperatorV1 {
+  BOUNDARY_CONDITION_OPERATOR_UNSPECIFIED = 0;
+  GREATER_THAN = 1;
+  LESS_THAN = 2;
+  EQUALS_TRUE = 3;
+  EQUALS_FALSE = 4;
+  RISING = 5;
+}
+
+enum BoundaryEvidenceClassV1 {
+  BOUNDARY_EVIDENCE_CLASS_UNSPECIFIED = 0;
+  REQUIRED = 1;
+  QUORUM = 2;
+  OPTIONAL = 3;
 }

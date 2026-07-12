@@ -16,6 +16,11 @@
       "messages": {"context": {"$ref": "#/components/messages/ProductionContextEventV1"}},
       "description": "WOM order/task context keyed by orderId+taskId"
     },
+    "boundaryRulePublication": {
+      "address": "bpi.boundary.rule-publication.v1",
+      "messages": {"rule": {"$ref": "#/components/messages/BoundaryRulePublicationV1"}},
+      "description": "Immutable approved rule/topology/binding publications keyed by tenantId+lineId+ruleCode+ruleVersion"
+    },
     "batchCandidate": {
       "address": "bpi.batch.candidate.v1",
       "messages": {"candidate": {"$ref": "#/components/messages/BatchCandidateV1"}},
@@ -40,6 +45,7 @@
   "operations": {
     "consumeSelectedTelemetry": {"action": "receive", "channel": {"$ref": "#/channels/selectedTelemetry"}, "messages": [{"$ref": "#/channels/selectedTelemetry/messages/telemetry"}]},
     "consumeProductionContext": {"action": "receive", "channel": {"$ref": "#/channels/productionContext"}, "messages": [{"$ref": "#/channels/productionContext/messages/context"}]},
+    "consumeBoundaryRulePublication": {"action": "receive", "channel": {"$ref": "#/channels/boundaryRulePublication"}, "messages": [{"$ref": "#/channels/boundaryRulePublication/messages/rule"}]},
     "consumeBatchCandidate": {"action": "receive", "channel": {"$ref": "#/channels/batchCandidate"}, "messages": [{"$ref": "#/channels/batchCandidate/messages/candidate"}]},
     "publishBatchFact": {"action": "send", "channel": {"$ref": "#/channels/batchFact"}, "messages": [{"$ref": "#/channels/batchFact/messages/fact"}]},
     "consumeDataQuality": {"action": "receive", "channel": {"$ref": "#/channels/dataQuality"}, "messages": [{"$ref": "#/channels/dataQuality/messages/quality"}]},
@@ -49,6 +55,7 @@
     "messages": {
       "TelemetryEnvelopeV1": {"name": "TelemetryEnvelopeV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.TelemetryEnvelopeV1"}}},
       "ProductionContextEventV1": {"name": "ProductionContextEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.ProductionContextEventV1"}}},
+      "BoundaryRulePublicationV1": {"name": "BoundaryRulePublicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRulePublicationV1"}}},
       "BatchCandidateV1": {"name": "BatchCandidateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BatchCandidateV1"}}},
       "DataQualityEventV1": {"name": "DataQualityEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.DataQualityEventV1"}}},
       "BatchFactV1": {"name": "BatchFactV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "2", "x-status": "RESERVED_NOT_IMPLEMENTED"}}},

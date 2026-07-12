@@ -3657,6 +3657,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-rule-publication-routing-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-rule-timing-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -3826,6 +3832,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-publication-routing-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5151,7 +5163,25 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingIssue.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5169,7 +5199,25 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryStreamInput.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PublishedBoundaryPlan.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5194,6 +5242,18 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouterTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimelineTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5231,13 +5291,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 71
+      "tracked": 72
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 84
+      "tracked": 85
     },
     "package.json": {
       "tracked": 1
@@ -5255,14 +5315,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 19
+      "tracked": 27
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 867,
-    "tracked": 867,
+    "totalFiles": 877,
+    "tracked": 877,
     "untracked": 0
   },
   "untrackedByDirectory": []

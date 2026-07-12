@@ -18,15 +18,20 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryCandidateProjector.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryOperatorStateCodec.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngine.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryTimingPolicy.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
+    "docs/testing/bpi-rule-publication-routing-acceptance.md",
     "docs/testing/bpi-stream-replay-acceptance.md",
     "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-rule-timing-acceptance.json",
+    "metadata/bpi-rule-publication-routing-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
 ]
 
@@ -81,6 +86,21 @@ def main() -> int:
     ):
         if marker not in operator_source:
             failures.append(f"BoundaryKeyedBroadcastFunction is missing runtime marker {marker!r}")
+
+    publication_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java").read_text(encoding="utf-8")
+    for marker in ("BoundaryRulePublicationV1", "BoundaryTimingPolicy", "duplicate device/property binding"):
+        if marker not in publication_source:
+            failures.append(f"BoundaryRulePublicationMapper is missing contract marker {marker!r}")
+
+    router_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java").read_text(encoding="utf-8")
+    for marker in ("UNIT_MISMATCH", "CONTEXT_NOT_EFFECTIVE", "getBatchId", "getSampleTimeMs"):
+        if marker not in router_source:
+            failures.append(f"BoundarySignalRouter is missing routing marker {marker!r}")
+
+    timeline_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java").read_text(encoding="utf-8")
+    for marker in ("getContextRevision", "getEffectiveFromMs", "getEffectiveToMs", "getActive"):
+        if marker not in timeline_source:
+            failures.append(f"ProductionContextTimeline is missing point-in-time marker {marker!r}")
 
     forbidden = ("jdbc:oracle", "oracle.jdbc", "com.supcon")
     for path in STREAMING.rglob("*"):

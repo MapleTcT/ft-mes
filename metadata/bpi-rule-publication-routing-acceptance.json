@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-07-12T22:15:00+08:00",
+  "repoCommit": "2a459cc",
+  "workingTree": "uncommitted",
+  "status": "PASS",
+  "contract": {
+    "ruleMessage": "BoundaryRulePublicationV1",
+    "contextMessage": "ProductionContextEventV1",
+    "ruleTopic": "bpi.boundary.rule-publication.v1",
+    "topicCount": 7
+  },
+  "summary": {
+    "testsRun": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0
+  },
+  "capabilities": [
+    "immutable rule publication mapping",
+    "versioned timing and evidence mapping",
+    "topology-local device/property signal binding",
+    "point-level unit and type isolation",
+    "typed START order and END batch context",
+    "event-time production context resolution",
+    "context replay idempotency and revision conflict rejection"
+  ],
+  "limitations": [
+    "Kafka source and sink are not connected yet.",
+    "The Flink keyed context join and pending telemetry buffer are not implemented yet.",
+    "Publication checksum canonical recomputation is not implemented yet.",
+    "No live Schema Registry or Kafka broker acceptance was performed."
+  ],
+  "evidence": [
+    "contracts/bpi-events/src/test/resources/compatibility/bpi-events-v1.fields",
+    "contracts/bpi-api/asyncapi.json",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundarySignalRouterTest.xml",
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.ProductionContextTimelineTest.xml",
+    "docs/testing/bpi-rule-publication-routing-acceptance.md"
+  ]
+}

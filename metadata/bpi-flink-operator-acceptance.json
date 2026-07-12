@@ -10,8 +10,8 @@
     "broadcastRule": "BPIR/write-v2/read-v1-v2"
   },
   "summary": {
-    "testsRun": 23,
-    "pass": 23,
+    "testsRun": 33,
+    "pass": 33,
     "fail": 0,
     "blocked": 0,
     "flinkHarnessTests": 10

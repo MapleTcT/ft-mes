@@ -300,6 +300,7 @@ JetLinks 原时序写入保持运行。恢复后按原 eventId/sequence 重放�
 | `iot.telemetry.selected.v1` | plant+device | 3-7d | exporter | Flink、cold sink |
 | `iot.equipment.state.v1` | plant+asset | 14d | Flink | batch engine |
 | `mes.production.context.v1` | order/task | 30d | MES outbox | Flink |
+| `bpi.boundary.rule-publication.v1` | tenant+line+rule+version | 180d compacted | BPI outbox | Flink broadcast state |
 | `bpi.batch.candidate.v1` | line+rule | 30d | Flink | BPI inbox |
 | `bpi.batch.fact.v1` | batchId | 180d | BPI outbox | trace/WMS/data lake |
 | `bpi.data-quality.v1` | source+point | 30d | exporter/Flink | BPI data quality |
