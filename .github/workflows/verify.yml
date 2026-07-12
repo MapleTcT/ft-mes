@@ -67,8 +67,8 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Test BPI contracts and real PostgreSQL service slice
-        run: make bpi-contracts-test bpi-api-contract-check bpi-service-test
+      - name: Test BPI contracts, streaming semantics and real PostgreSQL service slice
+        run: make bpi-contracts-test bpi-api-contract-check bpi-stream-test bpi-service-test
 
   bpi-ui-node20:
     name: BPI console and browser acceptance

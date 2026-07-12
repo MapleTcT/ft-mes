@@ -28,6 +28,8 @@ DIRECT_FILES = {
     "deploy/pom.xml",
     "services/bpi-service/pom.xml",
     "services/bpi-service/Dockerfile",
+    "streaming/pom.xml",
+    "streaming/bpi-stream-engine/pom.xml",
     "frontend/apps/bpi/package.json",
     "frontend/apps/bpi/package-lock.json",
 }
@@ -107,6 +109,9 @@ SCAN_GLOBS = {
     "services/**/*.xml",
     "services/**/*.yml",
     "services/**/Dockerfile",
+    "streaming/**/*.java",
+    "streaming/**/*.md",
+    "streaming/**/*.xml",
     "simulation/**/*.js",
     "simulation/**/*.md",
 }
@@ -127,7 +132,7 @@ EXCLUDED_INVENTORY_PARTS = {
 
 PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
-    r"((?:\.github|backend|contracts|deploy|docs|frontend|metadata|scripts|services|simulation)/"
+    r"((?:\.github|backend|contracts|deploy|docs|frontend|metadata|scripts|services|simulation|streaming)/"
     r"[A-Za-z0-9_./@+,-]+)"
 )
 

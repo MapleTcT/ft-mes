@@ -3621,6 +3621,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-stream-replay-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -3760,6 +3766,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-stream-replay-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4312,6 +4324,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-bpi-service.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-bpi-streaming.py",
       "state": "tracked",
       "tracked": true
     },
@@ -4968,6 +4986,54 @@
       "path": "simulation/bpi/server.js",
       "state": "tracked",
       "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryCandidateProjector.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryEngineInput.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryExecutionContext.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngine.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/pom.xml",
+      "state": "tracked",
+      "tracked": true
     }
   ],
   "missingReferences": [],
@@ -4994,13 +5060,13 @@
       "tracked": 460
     },
     "docs": {
-      "tracked": 66
+      "tracked": 67
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 79
+      "tracked": 80
     },
     "package.json": {
       "tracked": 1
@@ -5009,20 +5075,23 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 49
+      "tracked": 50
     },
     "services": {
       "tracked": 79
     },
     "simulation": {
       "tracked": 4
+    },
+    "streaming": {
+      "tracked": 8
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 828,
-    "tracked": 828,
+    "totalFiles": 839,
+    "tracked": 839,
     "untracked": 0
   },
   "untrackedByDirectory": []

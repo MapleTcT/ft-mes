@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-07-12T19:33:53+08:00",
+  "repoCommit": "08bd332",
+  "workingTree": "uncommitted",
+  "runtime": "streaming/bpi-stream-engine",
+  "java": "17",
+  "flink": "2.2.1",
+  "summary": {
+    "testsRun": 3,
+    "pass": 3,
+    "fail": 0,
+    "blocked": 0
+  },
+  "capabilities": [
+    "deterministic event-time replay ordering",
+    "START candidate projection",
+    "END candidate projection",
+    "stable candidate identity",
+    "true evidence sorting and deduplication",
+    "contract-valid BatchCandidateV1 output",
+    "watermark regression rejection"
+  ],
+  "evidence": [
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryReplayEngineTest.xml",
+    "docs/testing/bpi-stream-replay-acceptance.md"
+  ],
+  "limitations": [
+    "No production Flink operator is implemented by this milestone.",
+    "No Kafka source, sink, checkpoint or savepoint recovery is implemented by this milestone.",
+    "No live IoT to PostgreSQL marker acceptance is claimed by this milestone."
+  ]
+}

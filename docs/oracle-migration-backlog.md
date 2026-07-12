@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-12T11:23:12+00:00`。
-- Repo Commit：`2d0cae97254fa5e9d68c993d29da0bfcda12ac42`。
-- 总引用数：`973`。
+- Generated At：`2026-07-12T11:36:46+00:00`。
+- Repo Commit：`08bd33245b2466b8a1bcb72a8fdcd14b21e8bf6a`。
+- 总引用数：`974`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -28,7 +28,7 @@
 | postgres-conversion-tooling | 35 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
-| tooling-or-audit-code | 268 | Tooling may mention Oracle to generate or check migration audit outputs. |
+| tooling-or-audit-code | 269 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
 ## 高频文件
 
