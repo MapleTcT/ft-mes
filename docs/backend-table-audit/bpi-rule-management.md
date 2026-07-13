@@ -1,17 +1,18 @@
 # BPI 规则回放与发布落库验收
 
-状态：`PASS`（本地隔离 PostgreSQL 16.13）
+状态：`PASS`（本地隔离 PostgreSQL 16.14 + Spring Kafka 嵌入式 broker）
 
-范围：工艺拓扑只读、规则只读、真实遥测回放、金标准比对、模拟结果和 checksum 门控发布
+范围：工艺拓扑只读、规则只读、真实遥测回放、金标准比对、checksum 门控发布和事务 outbox
 
 验收类：`BpiRulePostgresAcceptanceTest`
 
 ## 验收边界
 
-- Flyway 从空库顺序应用 V1-V5，默认数据库仅为 PostgreSQL。
+- Flyway 从空库顺序应用 V1-V6，默认数据库仅为 PostgreSQL。
 - 规则回放读取 `bpi_telemetry_points`，不会使用 UI mock 或固定成功结果。
 - 回放调用与在线候选相同的 `batch-rule-runtime`，最多读取 100,001 行并在超过 100,000 个观测值时 fail closed。
 - 发布要求最近模拟属于当前规则、状态为 `PASSED`、checksum 完全一致且 revision 未过期。
+- 规则版本、发布审计、幂等结果和 `bpi_outbox_events` 在同一事务提交；Kafka 不可用时业务事实保留为 `PENDING`。
 - `bpi.rule-management` 默认 `false`；验收只为动态 tenant/line 打开。
 - 本阶段不实现规则草稿编辑和拓扑发布，也不向 WOM、QCS、WMS、PLC 或 DCS 写数据。
 
@@ -26,8 +27,11 @@
 | 历史回放 | 同上 | `bpi_rule_simulations`、`bpi_rule_versions`、`bpi_audit_events`、`bpi_api_idempotency` | 2 个校准观测值产生 1 个 START 边界，匹配 1 个人工金标准 | PASS |
 | 模拟幂等重放 | 同上 | `bpi_api_idempotency` | 返回相同 simulationId/checksum，不重复落表 | PASS |
 | 错误 checksum 发布 | `POST /bpi/v1/rules/{id}/publish` | 无新增 | `422`，规则保持 `SIMULATION_PASSED/r2` | PASS |
-| 正确 checksum 发布 | 同上 | `bpi_rule_versions`、`bpi_audit_events`、`bpi_api_idempotency` | 规则进入 `PUBLISHED/r3` | PASS |
+| 正确 checksum 发布 | 同上 | `bpi_rule_versions`、`bpi_outbox_events`、`bpi_audit_events`、`bpi_api_idempotency` | 规则进入 `PUBLISHED/r3`，发布事件为 `PENDING/0` | PASS |
 | 发布幂等重放 | 同上 | `bpi_api_idempotency` | 返回原发布结果，不重复 revision | PASS |
+| outbox 领取与恢复 | dispatcher | `bpi_outbox_events` | 并发排他、stale claim 恢复、有界重试和终态失败通过 | PASS |
+| Kafka 分发 | `bpi.boundary.rule-publication.v1` | `bpi_outbox_events` | marker 到达 broker，状态 `PUBLISHED/1`，重复轮询不重发 | PASS |
+| 发布状态查询 | `GET /bpi/v1/rules`、`/{id}` | `bpi_rule_versions`、`bpi_outbox_events` | 返回真实状态、尝试次数、确认时间和错误 | PASS |
 | 跨作用域读取 | `GET /bpi/v1/rules/{id}` | 无 | `404`，不泄露对象存在性 | PASS |
 
 ## 直接 SQL 复验
@@ -47,11 +51,18 @@ SELECT action, before_revision, after_revision
   FROM bpi.bpi_audit_events
  WHERE tenant_id = :tenant_marker AND object_id = :rule_id
  ORDER BY created_at;
+
+SELECT status, attempt_count, topic, partition_key, published_at, last_error
+  FROM bpi.bpi_outbox_events
+ WHERE tenant_id = :tenant_marker AND aggregate_id = :rule_id;
 ```
 
 模拟后断言为 `SIMULATION_PASSED|2`，指标为 `matched=1, missed=0, falsePositive=0`，
 `observationCount=2`，发射边界等于金标准时间。发布后断言为 `PUBLISHED|3`，审计顺序为
 `RULE_SIMULATED|1|2`、`RULE_PUBLISHED|2|3`。
+
+发布行同时为 `PENDING|0`。联合用例随后通过真实 Kafka broker 把独立 marker 行推进到
+`PUBLISHED|1`，并验证第二次 dispatcher 轮询没有产生重复 marker。
 
 第二个真实 PostgreSQL 用例把两个 quorum 条件的 `holdSeconds` 设为 15。观测时间为
 `2026-07-12T08:15:00Z`，窗口结束为 `08:15:30Z`；回放结果必须且实际在 `08:15:15Z` 发射，证明历史回放
@@ -63,3 +74,4 @@ SELECT action, before_revision, after_revision
 - 生产规则发布所需双人审批、规则草稿编辑、拓扑草稿/校验/发布尚未实现。
 - 100,000 观测值上限已有代码边界，尚未做上限附近的性能和内存压测。
 - 目标 Kafka/Flink 集群、真实 JetLinks 历史窗口和故障恢复仍待目标机容量释放后验收。
+- 当前 `publicationStatus=PUBLISHED` 只证明 Kafka broker 已确认；Flink Broadcast State 生效回执尚未实现，操作台不会显示“已生效”。

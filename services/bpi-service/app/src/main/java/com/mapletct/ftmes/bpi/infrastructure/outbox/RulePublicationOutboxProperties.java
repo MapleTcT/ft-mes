@@ -1,0 +1,36 @@
+package com.mapletct.ftmes.bpi.infrastructure.outbox;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.Duration;
+
+@Validated
+@ConfigurationProperties(prefix = "bpi.rule-publication-outbox")
+public record RulePublicationOutboxProperties(
+        boolean enabled,
+        @NotBlank String bootstrapServers,
+        @NotBlank String topic,
+        @NotBlank String clientId,
+        @Min(1) @Max(500) int batchSize,
+        @Min(1) @Max(100) int maxAttempts,
+        @NotNull Duration pollDelay,
+        @NotNull Duration claimTimeout,
+        @NotNull Duration retryBackoff) {
+
+    public RulePublicationOutboxProperties {
+        positive(pollDelay, "pollDelay");
+        positive(claimTimeout, "claimTimeout");
+        positive(retryBackoff, "retryBackoff");
+    }
+
+    private static void positive(Duration value, String field) {
+        if (value == null || value.isZero() || value.isNegative()) {
+            throw new IllegalArgumentException("Rule publication outbox " + field + " must be positive.");
+        }
+    }
+}

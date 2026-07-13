@@ -74,14 +74,15 @@ function createScenario() {
     state: 'PUBLISHED', revision: 1, plantId: 'PLANT-01', lineId: 'LINE-S07-01',
     checksum: sha256({ code: 'TOPO-S07', version: '3', lineId: 'LINE-S07-01' }),
     definition: {
+      localityGroup: 'LOCALITY-S07-EVAP',
       stages: [{ code: 'EVAPORATION', name: '蒸发浓缩' }],
       nodes: [
         { code: 'PUMP-S07-FEED', type: 'PUMP', name: 'S07 进料泵' },
         { code: 'TANK-S07-TARGET', type: 'TANK', name: 'S07 接收罐' },
       ],
       bindings: [
-        { signal: 'flow.instant', propertyId: 'flow.instant', unit: 't/h', calibrationVersion: 'CAL-1' },
-        { signal: 'pump.running', propertyId: 'pump.running', unit: 'bool', calibrationVersion: 'CAL-1' },
+        { signal: 'flow.instant', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', unit: 't/h', calibrationVersion: 'CAL-1' },
+        { signal: 'pump.running', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running', unit: 'bool', calibrationVersion: 'CAL-1' },
       ],
     },
   };
@@ -102,6 +103,8 @@ function createScenario() {
   const rule = {
     id: '78d57d90-fdc8-4a57-a660-a1ae73c2bc96', ...ruleBody, state: 'DRAFT', revision: 7,
     checksum: sha256(ruleBody), latestSimulationId: null,
+    publicationStatus: 'NOT_PUBLISHED', publicationAttemptCount: 0,
+    publicationPublishedAt: null, publicationLastError: null,
   };
 
   const incident = {

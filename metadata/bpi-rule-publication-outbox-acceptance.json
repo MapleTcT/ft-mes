@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-13T08:35:10+08:00",
+  "repoCommit": "9362be0a",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "databaseVersion": "16.14",
+  "transport": "Kafka",
+  "topic": "bpi.boundary.rule-publication.v1",
+  "productionDefault": "DISABLED",
+  "summary": {
+    "testedFeatures": 9,
+    "pass": 9,
+    "fail": 0,
+    "blocked": 1,
+    "notApplicable": 0,
+    "postgresRuleTests": 3,
+    "dispatcherUnitTests": 2,
+    "postgresKafkaTests": 1
+  },
+  "items": [
+    {"operation": "checksum-gated transactional enqueue", "tables": ["bpi.bpi_rule_versions", "bpi.bpi_outbox_events", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"], "result": "rule PUBLISHED/r3 and one PENDING/0 event committed together; invalid checksum left zero outbox rows", "status": "PASS"},
+    {"operation": "typed publication payload", "result": "BoundaryRulePublicationV1 carried scope, locality, topology, rule, timing, conditions, bindings and checksum", "status": "PASS"},
+    {"operation": "idempotent publish replay", "tables": ["bpi.bpi_outbox_events"], "result": "same command key returned original response and retained one event row", "status": "PASS"},
+    {"operation": "concurrent claim exclusion", "tables": ["bpi.bpi_outbox_events"], "result": "FOR UPDATE SKIP LOCKED and claim token prevented a second concurrent claim", "status": "PASS"},
+    {"operation": "stale claim recovery", "tables": ["bpi.bpi_outbox_events"], "result": "expired DISPATCHING claim returned to PENDING and was reclaimed with incremented attempt", "status": "PASS"},
+    {"operation": "bounded retry and terminal failure", "tables": ["bpi.bpi_outbox_events"], "result": "temporary failure retried; max attempt transitioned to FAILED and left the dispatch queue", "status": "PASS"},
+    {"operation": "real PostgreSQL to Kafka dispatch", "tables": ["bpi.bpi_outbox_events"], "result": "embedded broker received the marker Protobuf and PostgreSQL became PUBLISHED|1 with published_at", "status": "PASS"},
+    {"operation": "published event is not resent", "tables": ["bpi.bpi_outbox_events"], "result": "second dispatcher poll emitted no matching marker record", "status": "PASS"},
+    {"operation": "truthful API and UI status", "result": "API and console distinguish rule PUBLISHED from outbox PENDING/DISPATCHING/Kafka-confirmed/FAILED and do not claim Flink activation", "status": "PASS"},
+    {"operation": "target Kafka/Flink/PostgreSQL activation acceptance", "result": "target host remains below the required free-space floor", "status": "BLOCKED_DISK"}
+  ],
+  "marker": "ADP_E2E_BPI_OUTBOX_<UUID>",
+  "verificationSql": "SELECT status,attempt_count,published_at,last_error FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant_marker AND aggregate_id=:rule_version_id;",
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRulePostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxDispatcherTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRuleOutboxKafkaPostgresAcceptanceTest.xml",
+    "docs/backend-table-audit/bpi-rule-publication-outbox.md",
+    "/tmp/bpi-console-rule-published.png"
+  ],
+  "limitations": [
+    "The embedded broker is local single-process test infrastructure, not the target replicated Kafka cluster.",
+    "Kafka PUBLISHED does not prove that Flink Broadcast State applied the rule; runtime activation acknowledgment remains unimplemented.",
+    "Target deployment and recovery rehearsal remain blocked by target-host disk capacity."
+  ]
+}

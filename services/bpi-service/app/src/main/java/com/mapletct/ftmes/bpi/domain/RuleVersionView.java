@@ -1,5 +1,6 @@
 package com.mapletct.ftmes.bpi.domain;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,5 +15,9 @@ public record RuleVersionView(
         String topologyVersion,
         String checksum,
         Map<String, Object> ast,
-        UUID latestSimulationId) {
+        UUID latestSimulationId,
+        String publicationStatus,
+        int publicationAttemptCount,
+        Instant publicationPublishedAt,
+        String publicationLastError) {
 }

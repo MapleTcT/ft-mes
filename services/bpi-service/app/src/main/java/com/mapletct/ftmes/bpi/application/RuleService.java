@@ -14,6 +14,8 @@ import com.mapletct.ftmes.bpi.domain.TopologyVersionView;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.RulePostgresRepository;
+import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxProperties;
+import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import com.mapletct.ftmes.bpi.interfaces.rest.RulePublishCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.RuleSimulationCommand;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
@@ -48,16 +50,25 @@ public class RuleService {
     private final RulePostgresRepository repository;
     private final BpiPostgresRepository sharedRepository;
     private final RuleDefinitionParser definitionParser;
+    private final RulePublicationFactory publicationFactory;
+    private final RulePublicationOutboxRepository outboxRepository;
+    private final RulePublicationOutboxProperties outboxProperties;
     private final ObjectMapper objectMapper;
 
     public RuleService(
             RulePostgresRepository repository,
             BpiPostgresRepository sharedRepository,
             RuleDefinitionParser definitionParser,
+            RulePublicationFactory publicationFactory,
+            RulePublicationOutboxRepository outboxRepository,
+            RulePublicationOutboxProperties outboxProperties,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.sharedRepository = sharedRepository;
         this.definitionParser = definitionParser;
+        this.publicationFactory = publicationFactory;
+        this.outboxRepository = outboxRepository;
+        this.outboxProperties = outboxProperties;
         this.objectMapper = objectMapper;
     }
 
@@ -185,12 +196,20 @@ public class RuleService {
                 || !simulation.checksum().equals(command.simulationChecksum())) {
             throw new BpiValidationException("A PASSED simulation with the matching checksum is required.");
         }
+        BoundaryRuleDefinition definition = definitionParser.parse(rule);
+        TopologyVersionView topology = repository.findTopologyForRule(actor, rule.id());
+        UUID publicationEventId = UUID.randomUUID();
+        var publication = publicationFactory.create(
+                actor, rule, topology, definition, publicationEventId, Instant.now(),
+                outboxProperties.topic(), traceId);
         repository.publishRule(
                 actor.tenantId(), rule.id(), rule.revision(), simulation.id(), actor.userId());
+        outboxRepository.insertPublication(actor, rule, publication);
         repository.insertRuleAudit(
                 actor, rule, "RULE_PUBLISHED", rule.revision(), rule.revision() + 1,
                 command.reason(), traceId,
-                Map.of("simulationId", simulation.id(), "simulationChecksum", simulation.checksum()));
+                Map.of("simulationId", simulation.id(), "simulationChecksum", simulation.checksum(),
+                        "publicationEventId", publicationEventId));
         RuleVersionView published = repository.findRule(actor, rule.id());
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(published));
         return new CommandResult<>(published, false);

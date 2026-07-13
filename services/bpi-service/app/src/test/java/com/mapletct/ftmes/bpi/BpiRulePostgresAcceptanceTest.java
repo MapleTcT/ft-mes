@@ -7,6 +7,9 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
+import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +55,7 @@ class BpiRulePostgresAcceptanceTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired JdbcTemplate jdbc;
+    @Autowired RulePublicationOutboxRepository outboxRepository;
 
     private String tenantId;
     private UUID topologyId;
@@ -70,9 +75,9 @@ class BpiRulePostgresAcceptanceTest {
                 INSERT INTO bpi.bpi_topology_versions
                     (id, tenant_id, topology_code, version, state, checksum, definition,
                      plant_id, line_id, revision, created_by, updated_by)
-                VALUES (?, ?, 'TOPO-S07', '3', 'PUBLISHED', ?, '{}'::jsonb,
+                VALUES (?, ?, 'TOPO-S07', '3', 'PUBLISHED', ?, CAST(? AS jsonb),
                         'PLANT-01', 'LINE-S07-01', 1, 'acceptance', 'acceptance')
-                """, topologyId, tenantId, "t".repeat(64));
+                """, topologyId, tenantId, "t".repeat(64), topologyDefinition());
         jdbc.update("""
                 INSERT INTO bpi.bpi_rule_versions
                     (id, tenant_id, rule_code, version, topology_version_id, state, checksum, definition,
@@ -112,6 +117,7 @@ class BpiRulePostgresAcceptanceTest {
         if (tenantId == null) return;
         jdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_outbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("UPDATE bpi.bpi_rule_versions SET latest_simulation_id = NULL WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_simulations WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_golden_boundaries WHERE tenant_id = ?", tenantId);
@@ -145,7 +151,9 @@ class BpiRulePostgresAcceptanceTest {
                         .param("lineId", "LINE-S07-01"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].state").value("DRAFT"));
+                .andExpect(jsonPath("$.data[0].state").value("DRAFT"))
+                .andExpect(jsonPath("$.data[0].publicationStatus").value("NOT_PUBLISHED"))
+                .andExpect(jsonPath("$.data[0].publicationAttemptCount").value(0));
         mockMvc.perform(get("/bpi/v1/rules/{id}", ruleId)
                         .header("Authorization", "Bearer " + viewerToken))
                 .andExpect(status().isOk())
@@ -238,6 +246,7 @@ class BpiRulePostgresAcceptanceTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("matching checksum")));
         assertThat(count("bpi_api_idempotency")).isEqualTo(1);
+        assertThat(count("bpi_outbox_events")).isZero();
 
         byte[] publishBody = objectMapper.writeValueAsBytes(Map.of(
                 "reason", "审批发布规则版本",
@@ -253,7 +262,9 @@ class BpiRulePostgresAcceptanceTest {
                         .content(publishBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state").value("PUBLISHED"))
-                .andExpect(jsonPath("$.data.revision").value(3));
+                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.publicationStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.publicationAttemptCount").value(0));
         mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
                         .header("Authorization", "Bearer " + engineerToken)
                         .header("Idempotency-Key", publishKey)
@@ -268,6 +279,27 @@ class BpiRulePostgresAcceptanceTest {
                 SELECT state || '|' || revision FROM bpi.bpi_rule_versions
                  WHERE tenant_id = ? AND id = ?
                 """, String.class, tenantId, ruleId)).isEqualTo("PUBLISHED|3");
+        assertThat(count("bpi_outbox_events")).isOne();
+        Map<String, Object> outbox = jdbc.queryForMap("""
+                SELECT status, attempt_count, topic, partition_key, payload
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND aggregate_id = ?
+                """, tenantId, ruleId);
+        assertThat(outbox.get("status")).isEqualTo("PENDING");
+        assertThat(outbox.get("attempt_count")).isEqualTo(0);
+        assertThat(outbox.get("topic")).isEqualTo("bpi.boundary.rule-publication.v1");
+        assertThat(outbox.get("partition_key")).isEqualTo(
+                tenantId + ":LINE-S07-01:RULE-S07-START:1.2.0");
+        BoundaryRulePublicationV1 publication = BoundaryRulePublicationV1.parseFrom(
+                (byte[]) outbox.get("payload"));
+        assertThat(publication.getTenantId()).isEqualTo(tenantId);
+        assertThat(publication.getLocalityGroup()).isEqualTo("LOCALITY-S07-EVAP");
+        assertThat(publication.getRuleCode()).isEqualTo("RULE-S07-START");
+        assertThat(publication.getTopologyCode()).isEqualTo("TOPO-S07");
+        assertThat(publication.getConditionsCount()).isEqualTo(2);
+        assertThat(publication.getSignalBindingsCount()).isEqualTo(2);
+        assertThat(publication.getActive()).isTrue();
+        assertThat(publication.getChecksum()).isEqualTo("r".repeat(64));
         assertThat(jdbc.queryForList("""
                 SELECT action || '|' || before_revision || '|' || after_revision
                   FROM bpi.bpi_audit_events
@@ -276,6 +308,7 @@ class BpiRulePostgresAcceptanceTest {
                 """, String.class, tenantId, ruleId))
                 .containsExactly("RULE_SIMULATED|1|2", "RULE_PUBLISHED|2|3");
         assertThat(count("bpi_api_idempotency")).isEqualTo(2);
+        assertThat(count("bpi_outbox_events")).isOne();
 
         String wrongScopeToken = token(
                 tenantId, List.of("BPI_VIEWER"), List.of("PLANT-01"), List.of("LINE-OTHER"));
@@ -313,6 +346,67 @@ class BpiRulePostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.metrics.meanBoundaryErrorSeconds").value(0.0));
     }
 
+    @Test
+    void outboxClaimsRecoverAndReachPublishedOrFailedTerminalState() {
+        UUID publishId = insertOutbox("OUTBOX-PUBLISH", "PENDING", 0, null, null);
+        List<OutboxEventClaim> firstClaims = outboxRepository.claimPending(10, Duration.ofMinutes(2));
+        assertThat(firstClaims).hasSize(1);
+        OutboxEventClaim first = firstClaims.get(0);
+        assertThat(first.id()).isEqualTo(publishId);
+        assertThat(first.attemptCount()).isEqualTo(1);
+        assertThat(outboxRepository.claimPending(10, Duration.ofMinutes(2))).isEmpty();
+
+        assertThat(outboxRepository.markFailed(
+                first.id(), first.claimToken(), first.attemptCount(), 3,
+                Duration.ofMillis(1), "temporary broker failure")).isTrue();
+        jdbc.update("UPDATE bpi.bpi_outbox_events SET next_attempt_at = now() WHERE id = ?", publishId);
+        OutboxEventClaim retry = outboxRepository.claimPending(10, Duration.ofMinutes(2)).get(0);
+        assertThat(retry.attemptCount()).isEqualTo(2);
+        assertThat(outboxRepository.markPublished(retry.id(), retry.claimToken())).isTrue();
+        assertThat(outboxState(publishId)).isEqualTo("PUBLISHED|2|false");
+
+        UUID staleToken = UUID.randomUUID();
+        UUID failedId = insertOutbox(
+                "OUTBOX-STALE", "DISPATCHING", 1, staleToken,
+                java.sql.Timestamp.from(Instant.now().minusSeconds(600)));
+        OutboxEventClaim recovered = outboxRepository.claimPending(10, Duration.ofMinutes(2)).get(0);
+        assertThat(recovered.id()).isEqualTo(failedId);
+        assertThat(recovered.claimToken()).isNotEqualTo(staleToken);
+        assertThat(recovered.attemptCount()).isEqualTo(2);
+        assertThat(outboxRepository.markFailed(
+                recovered.id(), recovered.claimToken(), recovered.attemptCount(), 2,
+                Duration.ofSeconds(1), "permanent broker failure")).isTrue();
+        assertThat(outboxState(failedId)).isEqualTo("FAILED|2|false");
+        assertThat(outboxRepository.claimPending(10, Duration.ofMinutes(2))).isEmpty();
+    }
+
+    private UUID insertOutbox(
+            String eventType,
+            String state,
+            int attempts,
+            UUID claimToken,
+            java.sql.Timestamp claimedAt) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_outbox_events
+                    (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
+                     event_type, topic, partition_key, payload, status, attempt_count,
+                     claim_token, claimed_at)
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?, ?,
+                        'bpi.boundary.rule-publication.v1', ?, ?, ?, ?, ?, ?)
+                """, id, tenantId, ruleId, eventType,
+                tenantId + ":LINE-S07-01:" + eventType, new byte[] {1, 2, 3},
+                state, attempts, claimToken, claimedAt);
+        return id;
+    }
+
+    private String outboxState(UUID id) {
+        return jdbc.queryForObject("""
+                SELECT status || '|' || attempt_count || '|' || (claim_token IS NOT NULL)
+                  FROM bpi.bpi_outbox_events WHERE id = ?
+                """, String.class, id);
+    }
+
     private void insertPoint(
             String eventId,
             String propertyId,
@@ -331,6 +425,24 @@ class BpiRulePostgresAcceptanceTest {
 
     private String ruleDefinition() throws Exception {
         return ruleDefinition(0);
+    }
+
+    private String topologyDefinition() throws Exception {
+        return objectMapper.writeValueAsString(Map.of(
+                "localityGroup", "LOCALITY-S07-EVAP",
+                "bindings", List.of(
+                        Map.of(
+                                "signal", "flow.instant",
+                                "deviceId", "DEVICE-S07-01",
+                                "propertyId", "flow.instant",
+                                "expectedUnit", "t/h",
+                                "calibrationVersion", "CAL-1"),
+                        Map.of(
+                                "signal", "pump.running",
+                                "deviceId", "DEVICE-S07-01",
+                                "propertyId", "pump.running",
+                                "expectedUnit", "bool",
+                                "calibrationVersion", "CAL-1"))));
     }
 
     private String ruleDefinition(int holdSeconds) throws Exception {

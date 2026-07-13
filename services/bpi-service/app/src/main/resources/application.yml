@@ -50,6 +50,16 @@ bpi:
     concurrency: ${BPI_CANDIDATE_KAFKA_CONCURRENCY:3}
     max-attempts: ${BPI_CANDIDATE_KAFKA_MAX_ATTEMPTS:4}
     retry-backoff: ${BPI_CANDIDATE_KAFKA_RETRY_BACKOFF:2s}
+  rule-publication-outbox:
+    enabled: ${BPI_RULE_PUBLICATION_OUTBOX_ENABLED:false}
+    bootstrap-servers: ${BPI_RULE_PUBLICATION_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_RULE_PUBLICATION_TOPIC:bpi.boundary.rule-publication.v1}
+    client-id: ${BPI_RULE_PUBLICATION_CLIENT_ID:ft-mes-bpi-rule-outbox}
+    batch-size: ${BPI_RULE_PUBLICATION_BATCH_SIZE:50}
+    max-attempts: ${BPI_RULE_PUBLICATION_MAX_ATTEMPTS:20}
+    poll-delay: ${BPI_RULE_PUBLICATION_POLL_DELAY:1s}
+    claim-timeout: ${BPI_RULE_PUBLICATION_CLAIM_TIMEOUT:2m}
+    retry-backoff: ${BPI_RULE_PUBLICATION_RETRY_BACKOFF:2s}
   security:
     internal-jwt-secret: ${BPI_INTERNAL_JWT_SECRET:}
     issuer: ${BPI_INTERNAL_JWT_ISSUER:ft-mes-adapter}

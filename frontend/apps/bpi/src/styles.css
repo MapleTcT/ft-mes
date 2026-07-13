@@ -105,6 +105,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .status--warn { color: var(--amber); background: #fff6e4; border-color: #edd4a1; }
 .status--danger { color: var(--red); background: #fff0f1; border-color: #efb9bd; }
 .status--neutral { color: #56616c; background: #f1f3f5; border-color: #d6dbe0; }
+.status-stack { display: flex; flex-wrap: wrap; gap: 4px; min-width: 100px; }
 .revision { color: #596675; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; }
 .confidence { display: inline-grid; grid-template-columns: 66px auto; align-items: center; gap: 7px; }
 .confidence i { position: relative; width: 66px; height: 6px; background: #dde2e7; overflow: hidden; }

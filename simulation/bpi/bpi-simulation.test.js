@@ -313,6 +313,8 @@ test('rule simulation checksum gates publication', async () => {
   });
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.state, 'PUBLISHED');
+  assert.equal(result.json.data.publicationStatus, 'PENDING');
+  assert.equal(result.json.data.publicationAttemptCount, 0);
   assert.equal(result.json.data.revision, 9);
 });
 

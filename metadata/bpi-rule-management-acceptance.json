@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-07-13T03:08:00+08:00",
-  "repoCommit": "28a1beb1",
+  "generatedAt": "2026-07-13T08:35:10+08:00",
+  "repoCommit": "9362be0a",
   "workingTree": "uncommitted",
   "database": "PostgreSQL",
-  "databaseVersion": "16.13",
-  "migration": "Flyway V1-V5 from an empty isolated database",
-  "scope": "BPI topology read, controlled rule replay and checksum-gated publication",
+  "databaseVersion": "16.14",
+  "migration": "Flyway V1-V6 from an empty isolated database",
+  "scope": "BPI topology read, controlled rule replay, checksum-gated publication and transactional Kafka outbox",
   "summary": {
-    "testedItems": 10,
-    "pass": 10,
+    "testedItems": 14,
+    "pass": 14,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 0,
-    "postgresTests": 2,
-    "postgresPass": 2
+    "postgresTests": 3,
+    "postgresPass": 3
   },
   "items": [
     {"id": "scoped-topology-read", "api": "GET /bpi/v1/topologies, /bpi/v1/topologies/{id}", "tables": ["bpi.bpi_topology_versions"], "status": "PASS", "evidence": "Only the seeded tenant/plant/line topology and its revision were returned."},
@@ -24,7 +24,11 @@
     {"id": "simulation-idempotency", "api": "POST /bpi/v1/rules/{id}/simulate", "tables": ["bpi.bpi_api_idempotency"], "status": "PASS", "evidence": "Same-key replay returned the original simulation and checksum without another simulation row."},
     {"id": "simulation-sql", "api": "SQL", "tables": ["bpi.bpi_rule_simulations", "bpi.bpi_rule_versions"], "status": "PASS", "evidence": "Rule was SIMULATION_PASSED|2; metrics were 1 matched, 0 missed, 0 false positive; observationCount was 2."},
     {"id": "publish-checksum-rejection", "api": "POST /bpi/v1/rules/{id}/publish", "tables": [], "status": "PASS", "evidence": "A mismatched simulation checksum returned 422 and rolled back."},
-    {"id": "publish-and-audit", "api": "POST /bpi/v1/rules/{id}/publish", "tables": ["bpi.bpi_rule_versions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"], "status": "PASS", "evidence": "Rule became PUBLISHED|3 and audits were RULE_SIMULATED|1|2 then RULE_PUBLISHED|2|3."},
+    {"id": "publish-and-audit", "api": "POST /bpi/v1/rules/{id}/publish", "tables": ["bpi.bpi_rule_versions", "bpi.bpi_outbox_events", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"], "status": "PASS", "evidence": "Rule became PUBLISHED|3, one PENDING outbox event committed, and audits were RULE_SIMULATED|1|2 then RULE_PUBLISHED|2|3."},
+    {"id": "publication-protobuf", "api": "SQL / Protobuf", "tables": ["bpi.bpi_outbox_events"], "status": "PASS", "evidence": "The stored BoundaryRulePublicationV1 contained scope, locality group, topology/rule identity, two conditions, two bindings and the controlled checksum."},
+    {"id": "outbox-state-machine", "api": "NOT_APPLICABLE", "tables": ["bpi.bpi_outbox_events"], "status": "PASS", "evidence": "Concurrent claims, stale recovery, bounded retry, PUBLISHED completion and terminal FAILED state were verified directly against PostgreSQL."},
+    {"id": "postgres-kafka-publication", "api": "Kafka bpi.boundary.rule-publication.v1", "tables": ["bpi.bpi_outbox_events"], "status": "PASS", "evidence": "A marker event reached an embedded broker, the row became PUBLISHED|1, and a second poll emitted no duplicate marker."},
+    {"id": "publication-status-read", "api": "GET /bpi/v1/rules, /bpi/v1/rules/{id}", "tables": ["bpi.bpi_rule_versions", "bpi.bpi_outbox_events"], "status": "PASS", "evidence": "API distinguishes NOT_PUBLISHED, PENDING, DISPATCHING, Kafka-confirmed PUBLISHED and FAILED without claiming Flink activation."},
     {"id": "cross-scope-not-found", "api": "GET /bpi/v1/rules/{id}", "tables": [], "status": "PASS", "evidence": "A same-tenant token without the rule line scope received 404."}
   ],
   "eventTimeTimerAcceptance": {
@@ -36,10 +40,11 @@
     "status": "PASS"
   },
   "marker": "ADP_E2E_BPI_RULE_<UUID>",
-  "verificationSql": "SELECT state, revision, latest_simulation_id FROM bpi.bpi_rule_versions WHERE tenant_id=:tenant AND id=:rule; SELECT state, checksum, metrics, input_manifest, emitted_boundaries FROM bpi.bpi_rule_simulations WHERE tenant_id=:tenant AND rule_version_id=:rule;",
+  "verificationSql": "SELECT state, revision, latest_simulation_id FROM bpi.bpi_rule_versions WHERE tenant_id=:tenant AND id=:rule; SELECT state, checksum, metrics, input_manifest, emitted_boundaries FROM bpi.bpi_rule_simulations WHERE tenant_id=:tenant AND rule_version_id=:rule; SELECT status,attempt_count,published_at,last_error FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant AND aggregate_id=:rule;",
   "cleanup": "After each test, rows were deleted only for the dynamic tenant marker; the rule latest_simulation_id was cleared before deleting simulations.",
   "limitations": [
     "Browser-to-PostgreSQL target-host acceptance remains pending.",
+    "Kafka broker confirmation is visible, but a Flink Broadcast State activation acknowledgment is not implemented.",
     "Dual approval and rule/topology draft editing are not implemented.",
     "Replay safety is capped at 100000 observations but load and soak testing remain pending."
   ]

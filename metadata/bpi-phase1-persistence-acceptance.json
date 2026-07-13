@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-13T02:35:06+08:00",
-  "repoCommit": "235f5617",
+  "generatedAt": "2026-07-13T08:38:56+08:00",
+  "repoCommit": "9362be0a",
   "workingTree": "uncommitted",
   "database": {
     "engine": "PostgreSQL",
-    "version": "16.13",
+    "version": "16.14",
     "location": "isolated local Docker network",
     "name": "bpi",
     "schema": "bpi",
-    "migration": "Flyway V1__bpi_phase1_baseline.sql through V5__bpi_rule_simulation_and_topology_scope.sql"
+    "migration": "Flyway V1__bpi_phase1_baseline.sql through V6__bpi_rule_publication_outbox.sql"
   },
   "runtime": {
     "java": "17",
@@ -22,8 +22,8 @@
     "blocked": 0,
     "notApplicable": 0,
     "postgresAcceptanceTests": {
-      "run": 9,
-      "passed": 9,
+      "run": 14,
+      "passed": 14,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -36,8 +36,8 @@
       "skipped": 0
     },
     "serviceTests": {
-      "run": 20,
-      "passed": 20,
+      "run": 24,
+      "passed": 24,
       "failed": 0,
       "errors": 0,
       "skipped": 0
@@ -487,6 +487,8 @@
   "evidence": [
     "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiPostgresAcceptanceTest.xml",
     "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRulePostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRuleOutboxKafkaPostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxDispatcherTest.xml",
     "services/bpi-service/batch-rule-runtime/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.rules.BoundaryRuleRuntimeTest.xml"
   ],
   "limitations": [

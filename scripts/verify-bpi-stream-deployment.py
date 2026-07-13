@@ -37,6 +37,7 @@ def main() -> int:
         "apache/kafka:4.2.0",
         "flink:2.2.1-scala_2.12-java17",
         "KAFKA_PROCESS_ROLES: broker,controller",
+        "KAFKA_AUTO_CREATE_TOPICS_ENABLE: \"false\"",
         "KAFKA_MIN_INSYNC_REPLICAS: \"2\"",
         "state.backend.type: rocksdb",
         "execution.checkpointing.dir: s3://",

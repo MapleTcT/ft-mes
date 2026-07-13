@@ -129,6 +129,10 @@ export interface RuleVersion {
   checksum: string;
   ast: Record<string, unknown>;
   latestSimulationId?: string | null;
+  publicationStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED';
+  publicationAttemptCount: number;
+  publicationPublishedAt?: string | null;
+  publicationLastError?: string | null;
 }
 
 export interface RuleSimulationCommand {

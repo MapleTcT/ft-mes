@@ -3369,6 +3369,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-rule-publication-outbox.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-telemetry-ingress.md",
       "state": "tracked",
       "tracked": true
@@ -3958,6 +3964,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-management-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-publication-outbox-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -4797,6 +4809,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RulePublicationFactory.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
       "state": "tracked",
       "tracked": true
@@ -4911,7 +4929,19 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/OutboxEventClaim.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ReviewView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RulePublicationEnvelope.java",
       "state": "tracked",
       "tracked": true
     },
@@ -4984,6 +5014,30 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/CandidateKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxDispatcher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5175,6 +5229,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V6__bpi_rule_publication_outbox.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5182,6 +5242,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleOutboxKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5212,6 +5278,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxDispatcherTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5837,13 +5909,13 @@
       "tracked": 468
     },
     "docs": {
-      "tracked": 79
+      "tracked": 80
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 92
+      "tracked": 93
     },
     "package.json": {
       "tracked": 1
@@ -5855,7 +5927,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 108
+      "tracked": 118
     },
     "simulation": {
       "tracked": 4
@@ -5867,8 +5939,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 968,
-    "tracked": 968,
+    "totalFiles": 980,
+    "tracked": 980,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -28,10 +28,20 @@ public class RulePostgresRepository {
     private static final String RULE_SELECT = """
             SELECT r.id, r.rule_code, r.version, r.state, r.revision, r.plant_id, r.line_id,
                    r.checksum, r.definition::text AS definition, r.latest_simulation_id,
-                   t.topology_code || '@' || t.version AS topology_version
+                   t.topology_code || '@' || t.version AS topology_version,
+                   COALESCE(o.status, CASE WHEN r.state = 'PUBLISHED'
+                       THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS publication_status,
+                   COALESCE(o.attempt_count, 0) AS publication_attempt_count,
+                   o.published_at AS publication_published_at,
+                   o.last_error AS publication_last_error
               FROM bpi.bpi_rule_versions r
               JOIN bpi.bpi_topology_versions t
                 ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
+              LEFT JOIN bpi.bpi_outbox_events o
+                ON o.tenant_id = r.tenant_id
+               AND o.aggregate_type = 'RULE_VERSION'
+               AND o.aggregate_id = r.id
+               AND o.event_type = 'BOUNDARY_RULE_PUBLISHED'
             """;
     private static final String TOPOLOGY_SELECT = """
             SELECT id, topology_code, version, state, revision, plant_id, line_id,
@@ -70,6 +80,32 @@ public class RulePostgresRepository {
                             rs.getObject("id", UUID.class), rs.getString("topology_code"), rs.getString("version"),
                             rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
                             rs.getString("line_id"), rs.getString("checksum"), readMap(rs.getString("definition"))));
+            if (topology == null || topology.plantId() == null || topology.lineId() == null
+                    || !actor.canAccess(topology.plantId(), topology.lineId())) {
+                throw new BpiNotFoundException("Topology version not found.");
+            }
+            return topology;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Topology version not found.");
+        }
+    }
+
+    public TopologyVersionView findTopologyForRule(ActorContext actor, UUID ruleId) {
+        try {
+            TopologyVersionView topology = jdbc.queryForObject("""
+                    SELECT t.id, t.topology_code, t.version, t.state, t.revision,
+                           t.plant_id, t.line_id, t.checksum, t.definition::text AS definition
+                      FROM bpi.bpi_rule_versions r
+                      JOIN bpi.bpi_topology_versions t
+                        ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
+                     WHERE r.tenant_id = :tenantId AND r.id = :ruleId
+                    """, new MapSqlParameterSource().addValue("tenantId", actor.tenantId())
+                            .addValue("ruleId", ruleId),
+                    (rs, rowNum) -> new TopologyVersionView(
+                            rs.getObject("id", UUID.class), rs.getString("topology_code"),
+                            rs.getString("version"), rs.getString("state"), rs.getLong("revision"),
+                            rs.getString("plant_id"), rs.getString("line_id"), rs.getString("checksum"),
+                            readMap(rs.getString("definition"))));
             if (topology == null || topology.plantId() == null || topology.lineId() == null
                     || !actor.canAccess(topology.plantId(), topology.lineId())) {
                 throw new BpiNotFoundException("Topology version not found.");
@@ -282,11 +318,15 @@ public class RulePostgresRepository {
     }
 
     private RuleVersionView mapRule(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Timestamp publicationPublishedAt = rs.getTimestamp("publication_published_at");
         return new RuleVersionView(
                 rs.getObject("id", UUID.class), rs.getString("rule_code"), rs.getString("version"),
                 rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
                 rs.getString("line_id"), rs.getString("topology_version"), rs.getString("checksum"),
-                readMap(rs.getString("definition")), rs.getObject("latest_simulation_id", UUID.class));
+                readMap(rs.getString("definition")), rs.getObject("latest_simulation_id", UUID.class),
+                rs.getString("publication_status"), rs.getInt("publication_attempt_count"),
+                publicationPublishedAt == null ? null : publicationPublishedAt.toInstant(),
+                rs.getString("publication_last_error"));
     }
 
     private MapSqlParameterSource scope(ActorContext actor, StringBuilder sql) {

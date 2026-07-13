@@ -249,12 +249,17 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await page.getByRole('heading', { name: '发布边界规则' }).waitFor();
   await page.locator('#confirm-reason').fill('S07 历史批次回放通过并完成工艺工程师复核');
   await page.getByRole('button', { name: '确认发布' }).click();
-  await page.getByText('规则 RULE-S07-START@1.2.0 已发布').waitFor();
+  await page.getByText('规则 RULE-S07-START@1.2.0 已提交发布，当前待分发').waitFor();
   await page.locator('.batch-state-band').getByText('PUBLISHED', { exact: true }).waitFor();
+  await page.getByRole('heading', { name: '规则发布链路' }).waitFor();
+  await page.getByText('待分发', { exact: true }).last().waitFor();
+  await page.getByText('发布事件已与规则版本同事务落库，等待 Kafka 分发。').waitFor();
   assert.match(await page.locator('.batch-state-band').textContent(), /revision 9/);
 
   const rule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
   assert.equal(rule.data.state, 'PUBLISHED');
+  assert.equal(rule.data.publicationStatus, 'PENDING');
+  assert.equal(rule.data.publicationAttemptCount, 0);
   assert.equal(rule.data.revision, 9);
   assert.ok(rule.data.latestSimulationId);
   await page.screenshot({ path: '/tmp/bpi-console-rule-published.png', fullPage: true });

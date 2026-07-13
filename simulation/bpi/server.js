@@ -396,6 +396,10 @@ function createHandler(state) {
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
         state.rule.state = 'PUBLISHED';
+        state.rule.publicationStatus = 'PENDING';
+        state.rule.publicationAttemptCount = 0;
+        state.rule.publicationPublishedAt = null;
+        state.rule.publicationLastError = null;
         state.rule.revision += 1;
         const response = envelope(operationId, state.rule);
         return rememberAndSend(state, context, res, 200, response, operationId);
