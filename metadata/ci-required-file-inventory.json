@@ -3975,6 +3975,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-rule-publication-retry-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-rule-publication-routing-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -4947,6 +4953,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RulePublicationView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleSimulationView.java",
       "state": "tracked",
       "tracked": true
@@ -5230,6 +5242,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V6__bpi_rule_publication_outbox.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V7__bpi_rule_publication_operations.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5915,7 +5933,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 93
+      "tracked": 94
     },
     "package.json": {
       "tracked": 1
@@ -5927,7 +5945,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 118
+      "tracked": 120
     },
     "simulation": {
       "tracked": 4
@@ -5939,8 +5957,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 980,
-    "tracked": 980,
+    "totalFiles": 983,
+    "tracked": 983,
     "untracked": 0
   },
   "untrackedByDirectory": []

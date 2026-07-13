@@ -103,8 +103,10 @@ function createScenario() {
   const rule = {
     id: '78d57d90-fdc8-4a57-a660-a1ae73c2bc96', ...ruleBody, state: 'DRAFT', revision: 7,
     checksum: sha256(ruleBody), latestSimulationId: null,
-    publicationStatus: 'NOT_PUBLISHED', publicationAttemptCount: 0,
-    publicationPublishedAt: null, publicationLastError: null,
+    publicationStatus: 'NOT_PUBLISHED', publicationRevision: 0,
+    publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
+    publicationManualRetryCount: 0, publicationPublishedAt: null,
+    publicationLastRequeuedAt: null, publicationLastError: null,
   };
 
   const incident = {

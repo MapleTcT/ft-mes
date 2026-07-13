@@ -380,6 +380,98 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(outboxRepository.claimPending(10, Duration.ofMinutes(2))).isEmpty();
     }
 
+    @Test
+    void adminRequeuesOnlyFailedPublicationWithAuditIdempotencyAndOptimisticLocking() throws Exception {
+        jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'PUBLISHED', revision = 3
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, ruleId);
+        UUID publicationId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_outbox_events
+                    (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
+                     event_type, topic, partition_key, payload, status, revision,
+                     attempt_count, total_attempt_count, last_error)
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?,
+                        'BOUNDARY_RULE_PUBLISHED', 'bpi.boundary.rule-publication.v1', ?, ?,
+                        'FAILED', 7, 3, 3, 'Kafka unavailable after three attempts')
+                """, publicationId, tenantId, ruleId,
+                tenantId + ":LINE-S07-01:RULE-S07-START:1.2.0", new byte[] {1, 2, 3});
+        byte[] body = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "Kafka 集群恢复并完成 broker 连通性检查"));
+        String engineerToken = token(
+                tenantId, List.of("BPI_ENGINEER"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        String adminToken = token(
+                tenantId, List.of("BPI_ADMIN"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publication/retry", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "retry-denied-" + ruleId)
+                        .header("If-Match", "7")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publication/retry", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", "retry-stale-" + ruleId)
+                        .header("If-Match", "6")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.currentRevision").value(7));
+
+        String retryKey = "retry-publication-" + ruleId;
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publication/retry", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", "7")
+                        .header("X-Trace-Id", "TRACE-RETRY-" + ruleId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("PUBLISHED"))
+                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.publicationStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.publicationRevision").value(8))
+                .andExpect(jsonPath("$.data.publicationAttemptCount").value(0))
+                .andExpect(jsonPath("$.data.publicationTotalAttemptCount").value(3))
+                .andExpect(jsonPath("$.data.publicationManualRetryCount").value(1))
+                .andExpect(jsonPath("$.data.publicationLastRequeuedAt").isNotEmpty())
+                .andExpect(jsonPath("$.data.publicationLastError").doesNotExist());
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publication/retry", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", retryKey)
+                        .header("If-Match", "7")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.publicationRevision").value(8));
+
+        Map<String, Object> publication = jdbc.queryForMap("""
+                SELECT status, revision, attempt_count, total_attempt_count,
+                       manual_retry_count, last_error, last_requeued_at, last_requeued_by
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, publicationId);
+        assertThat(publication.get("status")).isEqualTo("PENDING");
+        assertThat(publication.get("revision")).isEqualTo(8L);
+        assertThat(publication.get("attempt_count")).isEqualTo(0);
+        assertThat(publication.get("total_attempt_count")).isEqualTo(3);
+        assertThat(publication.get("manual_retry_count")).isEqualTo(1);
+        assertThat(publication.get("last_error")).isNull();
+        assertThat(publication.get("last_requeued_at")).isNotNull();
+        assertThat(publication.get("last_requeued_by")).isEqualTo("rule-acceptance-user");
+        assertThat(jdbc.queryForObject("""
+                SELECT object_type || '|' || action || '|' || before_revision || '|' || after_revision
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                """, String.class, tenantId, publicationId))
+                .isEqualTo("RULE_PUBLICATION|RULE_PUBLICATION_REQUEUED|7|8");
+        assertThat(count("bpi_api_idempotency")).isOne();
+    }
+
     private UUID insertOutbox(
             String eventType,
             String state,
@@ -391,12 +483,13 @@ class BpiRulePostgresAcceptanceTest {
                 INSERT INTO bpi.bpi_outbox_events
                     (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
                      event_type, topic, partition_key, payload, status, attempt_count,
+                     total_attempt_count,
                      claim_token, claimed_at)
                 VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?, ?,
-                        'bpi.boundary.rule-publication.v1', ?, ?, ?, ?, ?, ?)
+                        'bpi.boundary.rule-publication.v1', ?, ?, ?, ?, ?, ?, ?)
                 """, id, tenantId, ruleId, eventType,
                 tenantId + ":LINE-S07-01:" + eventType, new byte[] {1, 2, 3},
-                state, attempts, claimToken, claimedAt);
+                state, attempts, attempts, claimToken, claimedAt);
         return id;
     }
 

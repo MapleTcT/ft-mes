@@ -23,6 +23,7 @@
     "simulateRule",
     "getRuleSimulation",
     "publishRuleVersion",
+    "retryRulePublication",
     "listDataQualityIncidents",
     "getDataQualityIncident",
     "getIntegrationHealth"

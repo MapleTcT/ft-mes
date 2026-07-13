@@ -20,7 +20,8 @@
     "getRuleVersion",
     "simulateRule",
     "getRuleSimulation",
-    "publishRuleVersion"
+    "publishRuleVersion",
+    "retryRulePublication"
   ],
   "internalEndpoints": [
     {

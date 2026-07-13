@@ -113,6 +113,23 @@ public class RuleController {
         return response.body(ApiResponse.of(result.data(), request));
     }
 
+    @PostMapping("/bpi/v1/rules/{ruleId}/publication/retry")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<RuleVersionView>> retryPublication(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID ruleId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        ActorContext actor = actorContextFactory.from(jwt);
+        CommandResult<RuleVersionView> result = ruleService.retryPublication(
+                actor, ruleId, idempotencyKey, ifMatch, command, traceId(request));
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) response.header("Idempotent-Replay", "true");
+        return response.body(ApiResponse.of(result.data(), request));
+    }
+
     private String traceId(HttpServletRequest request) {
         return String.valueOf(request.getAttribute(TraceIdFilter.ATTRIBUTE));
     }

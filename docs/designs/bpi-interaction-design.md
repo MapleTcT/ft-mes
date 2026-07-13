@@ -213,8 +213,12 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 当前 Phase 1 后端已实现 checksum/revision/幂等/作用域技术门和审计，但尚未实现双人审批工作流；因此它可用于
 测试环境规则治理，不应被描述为生产发布审批已经完成。规则草稿编辑、拓扑草稿/校验/发布也仍按设计保留为后续范围。
 
+规则详情把业务规则状态与发布链路状态分开显示，并展示本轮尝试、累计尝试、人工重试、发布修订、最近重新入队时间、
+Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示“管理员重新入队”；操作要求原因、幂等键和发布 revision，
+成功后回到 `PENDING`，不会改写规则业务 revision，也不会把 Kafka 确认误标为 Flink 已生效。
+
 **主要 API：** `listRules`、`getRuleVersion`、`createRuleDraft`、`simulateRule`、
-`getRuleSimulation`、`publishRuleVersion`。
+`getRuleSimulation`、`publishRuleVersion`、`retryRulePublication`。
 
 ### 5.7 数据质量 `/bpi/data-quality`
 

@@ -31,8 +31,12 @@ public class RulePostgresRepository {
                    t.topology_code || '@' || t.version AS topology_version,
                    COALESCE(o.status, CASE WHEN r.state = 'PUBLISHED'
                        THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS publication_status,
+                   COALESCE(o.revision, 0) AS publication_revision,
                    COALESCE(o.attempt_count, 0) AS publication_attempt_count,
+                   COALESCE(o.total_attempt_count, 0) AS publication_total_attempt_count,
+                   COALESCE(o.manual_retry_count, 0) AS publication_manual_retry_count,
                    o.published_at AS publication_published_at,
+                   o.last_requeued_at AS publication_last_requeued_at,
                    o.last_error AS publication_last_error
               FROM bpi.bpi_rule_versions r
               JOIN bpi.bpi_topology_versions t
@@ -319,13 +323,17 @@ public class RulePostgresRepository {
 
     private RuleVersionView mapRule(java.sql.ResultSet rs) throws java.sql.SQLException {
         Timestamp publicationPublishedAt = rs.getTimestamp("publication_published_at");
+        Timestamp publicationLastRequeuedAt = rs.getTimestamp("publication_last_requeued_at");
         return new RuleVersionView(
                 rs.getObject("id", UUID.class), rs.getString("rule_code"), rs.getString("version"),
                 rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
                 rs.getString("line_id"), rs.getString("topology_version"), rs.getString("checksum"),
                 readMap(rs.getString("definition")), rs.getObject("latest_simulation_id", UUID.class),
-                rs.getString("publication_status"), rs.getInt("publication_attempt_count"),
+                rs.getString("publication_status"), rs.getLong("publication_revision"),
+                rs.getInt("publication_attempt_count"), rs.getInt("publication_total_attempt_count"),
+                rs.getInt("publication_manual_retry_count"),
                 publicationPublishedAt == null ? null : publicationPublishedAt.toInstant(),
+                publicationLastRequeuedAt == null ? null : publicationLastRequeuedAt.toInstant(),
                 rs.getString("publication_last_error"));
     }
 

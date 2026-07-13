@@ -314,8 +314,24 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.state, 'PUBLISHED');
   assert.equal(result.json.data.publicationStatus, 'PENDING');
+  assert.equal(result.json.data.publicationRevision, 1);
   assert.equal(result.json.data.publicationAttemptCount, 0);
+  assert.equal(result.json.data.publicationTotalAttemptCount, 0);
   assert.equal(result.json.data.revision, 9);
+
+  result = await request('POST', '/__simulation/fail-rule-publication');
+  assert.equal(result.response.status, 200);
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/publication/retry`, {
+    headers: commandHeaders('retry-publication-0001', 11),
+    body: { reason: 'Kafka 集群恢复并完成连通性检查' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.publicationStatus, 'PENDING');
+  assert.equal(result.json.data.publicationRevision, 12);
+  assert.equal(result.json.data.publicationAttemptCount, 0);
+  assert.equal(result.json.data.publicationTotalAttemptCount, 5);
+  assert.equal(result.json.data.publicationManualRetryCount, 1);
+  assert.equal(result.json.data.publicationLastError, null);
 });
 
 test('data quality and integration impact remain visible', async () => {

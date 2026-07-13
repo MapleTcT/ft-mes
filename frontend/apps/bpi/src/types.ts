@@ -130,8 +130,12 @@ export interface RuleVersion {
   ast: Record<string, unknown>;
   latestSimulationId?: string | null;
   publicationStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED';
+  publicationRevision: number;
   publicationAttemptCount: number;
+  publicationTotalAttemptCount: number;
+  publicationManualRetryCount: number;
   publicationPublishedAt?: string | null;
+  publicationLastRequeuedAt?: string | null;
   publicationLastError?: string | null;
 }
 

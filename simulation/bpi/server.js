@@ -160,6 +160,17 @@ function createHandler(state) {
         Object.assign(state, createScenario());
         return send(res, 200, { status: 'RESET' }, 'simulationReset');
       }
+      if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
+        if (state.rule.state !== 'PUBLISHED') {
+          return send(res, 409, { status: 'NOT_PUBLISHED' }, 'simulationFailRulePublication');
+        }
+        state.rule.publicationStatus = 'FAILED';
+        state.rule.publicationRevision = 11;
+        state.rule.publicationAttemptCount = 5;
+        state.rule.publicationTotalAttemptCount = 5;
+        state.rule.publicationLastError = 'Simulated Kafka broker outage';
+        return send(res, 200, { status: 'FAILED' }, 'simulationFailRulePublication');
+      }
       if (req.method === 'GET' && path === '/bpi/v1/overview') {
         return send(res, 200, envelope('getBpiOverview', [state.line]), 'getBpiOverview');
       }
@@ -397,12 +408,39 @@ function createHandler(state) {
         }
         state.rule.state = 'PUBLISHED';
         state.rule.publicationStatus = 'PENDING';
+        state.rule.publicationRevision = 1;
         state.rule.publicationAttemptCount = 0;
+        state.rule.publicationTotalAttemptCount = 0;
+        state.rule.publicationManualRetryCount = 0;
         state.rule.publicationPublishedAt = null;
+        state.rule.publicationLastRequeuedAt = null;
         state.rule.publicationLastError = null;
         state.rule.revision += 1;
         const response = envelope(operationId, state.rule);
         return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/publication\/retry$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retryRulePublication';
+        if (ids[0] !== state.rule.id) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, state.rule.publicationRevision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (state.rule.publicationStatus !== 'FAILED') {
+          const response = problem(409, 'Invalid Publication State', 'Only a FAILED publication can be retried.', operationId, state.rule.publicationRevision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        state.rule.publicationStatus = 'PENDING';
+        state.rule.publicationRevision += 1;
+        state.rule.publicationAttemptCount = 0;
+        state.rule.publicationManualRetryCount += 1;
+        state.rule.publicationLastRequeuedAt = FIXED_TIME;
+        state.rule.publicationLastError = null;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, state.rule), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/data-quality/incidents') {
         return send(res, 200, envelope('listDataQualityIncidents', [state.incident]), 'listDataQualityIncidents');

@@ -313,6 +313,20 @@
         }
       }
     },
+    "/bpi/v1/rules/{ruleId}/publication/retry": {
+      "post": {
+        "tags": ["Rules"], "operationId": "retryRulePublication", "summary": "管理员将失败的规则发布事件重新入队",
+        "parameters": [{"$ref": "#/components/parameters/RuleId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {
+          "200": {"description": "重新入队后的规则发布状态", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/RuleResponse"}}}},
+          "403": {"$ref": "#/components/responses/Forbidden"},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
     "/bpi/v1/data-quality/incidents": {
       "get": {
         "tags": ["DataQuality"], "operationId": "listDataQualityIncidents", "summary": "按业务影响查询数据质量事件",
@@ -531,7 +545,7 @@
       "Topology": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "checksum", "definition"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string"}, "revision": {"type": "integer", "minimum": 0}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string"}, "definition": {"type": "object"}}},
       "TopologyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Topology"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "TopologyListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Topology"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
-      "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "topologyVersion", "checksum", "ast", "publicationStatus", "publicationAttemptCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"], "format": "uuid"}, "publicationStatus": {"type": "string", "enum": ["NOT_PUBLISHED", "NOT_TRACKED", "PENDING", "DISPATCHING", "PUBLISHED", "FAILED"]}, "publicationAttemptCount": {"type": "integer", "minimum": 0}, "publicationPublishedAt": {"type": ["string", "null"], "format": "date-time"}, "publicationLastError": {"type": ["string", "null"]}}},
+      "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "topologyVersion", "checksum", "ast", "publicationStatus", "publicationRevision", "publicationAttemptCount", "publicationTotalAttemptCount", "publicationManualRetryCount"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"], "format": "uuid"}, "publicationStatus": {"type": "string", "enum": ["NOT_PUBLISHED", "NOT_TRACKED", "PENDING", "DISPATCHING", "PUBLISHED", "FAILED"]}, "publicationRevision": {"type": "integer", "minimum": 0}, "publicationAttemptCount": {"type": "integer", "minimum": 0}, "publicationTotalAttemptCount": {"type": "integer", "minimum": 0}, "publicationManualRetryCount": {"type": "integer", "minimum": 0}, "publicationPublishedAt": {"type": ["string", "null"], "format": "date-time"}, "publicationLastRequeuedAt": {"type": ["string", "null"], "format": "date-time"}, "publicationLastError": {"type": ["string", "null"]}}},
       "RuleResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Rule"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "RuleListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Rule"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "RuleDraftCommand": {"type": "object", "required": ["code", "lineId", "topologyVersion", "ast"], "properties": {"code": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "ast": {"type": "object"}, "reason": {"type": "string"}}},

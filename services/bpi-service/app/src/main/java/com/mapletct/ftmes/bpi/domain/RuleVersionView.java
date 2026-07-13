@@ -17,7 +17,11 @@ public record RuleVersionView(
         Map<String, Object> ast,
         UUID latestSimulationId,
         String publicationStatus,
+        long publicationRevision,
         int publicationAttemptCount,
+        int publicationTotalAttemptCount,
+        int publicationManualRetryCount,
         Instant publicationPublishedAt,
+        Instant publicationLastRequeuedAt,
         String publicationLastError) {
 }

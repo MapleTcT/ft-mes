@@ -263,6 +263,23 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.equal(rule.data.revision, 9);
   assert.ok(rule.data.latestSimulationId);
   await page.screenshot({ path: '/tmp/bpi-console-rule-published.png', fullPage: true });
+
+  const failPublication = await fetch(`${simulatorUrl}/__simulation/fail-rule-publication`, { method: 'POST' });
+  assert.equal(failPublication.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('分发失败', { exact: true }).last().waitFor();
+  await page.getByText('Simulated Kafka broker outage', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '管理员重新入队' }).click();
+  await page.getByRole('heading', { name: '重新入队失败事件' }).waitFor();
+  await page.locator('#confirm-reason').fill('Kafka 集群恢复并完成连通性检查');
+  await page.getByRole('button', { name: '确认重新入队' }).click();
+  await page.getByText('规则 RULE-S07-START@1.2.0 的发布事件已重新入队').waitFor();
+  await page.getByText('待分发', { exact: true }).last().waitFor();
+  assert.match(await page.locator('#detail-drawer').textContent(), /累计尝试5/);
+  assert.match(await page.locator('#detail-drawer').textContent(), /人工重试1/);
+  assert.match(await page.locator('#detail-drawer').textContent(), /发布修订r12/);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-publication-retried.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

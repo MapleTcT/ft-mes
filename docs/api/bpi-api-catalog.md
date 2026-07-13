@@ -60,6 +60,7 @@
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/simulate` | `simulateRule` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rule-simulations/{simulationId}` | `getRuleSimulation` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publication/retry` | `retryRulePublication` | SERVICE_IMPLEMENTED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SIMULATED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SIMULATED |
 | 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | CONTRACT_ONLY |
@@ -84,8 +85,10 @@
 `SIMULATION_PASSED` 或退回 `DRAFT`。
 
 `publishRuleVersion` 只接受当前规则最近一次 `PASSED` 模拟的 simulationId 和 checksum；revision、checksum 或
-作用域不匹配均 fail closed。成功后规则进入 `PUBLISHED`，并写入 `RULE_PUBLISHED` 审计。该技术门已经实现，
-生产要求的双人审批工作流仍是未完成项。
+作用域不匹配均 fail closed。成功后规则、`RULE_PUBLISHED` 审计和 Kafka outbox 事件在同一事务提交。
+`retryRulePublication` 仅允许 `BPI_ADMIN` 把 `FAILED` 事件重新入队；它使用独立、单调递增的发布 revision
+执行并发控制，保留累计尝试/人工重试计数，并写入 `RULE_PUBLICATION_REQUEUED` 审计。生产要求的双人审批
+工作流仍是未完成项。
 
 ## 3. 内部受信接入 API
 

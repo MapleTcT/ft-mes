@@ -397,6 +397,14 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 证据：`metadata/bpi-ui-acceptance.json`、`/tmp/bpi-console-desktop.png`、`/tmp/bpi-console-mobile.png`。执行命令：`make bpi-ui-build bpi-ui-test`。
 
+### BPI 规则发布失败运维重试（2026-07-13）
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则与拓扑 | `/bpi/#/rules` | 打开 `FAILED` 发布事件，填写故障恢复依据并由管理员重新入队 | `GET /bpi/v1/rules/{id}`、`POST /bpi/v1/rules/{id}/publication/retry` | 抽屉显示最后错误、本轮/累计/人工重试和发布 revision；提交后显示 `PENDING`、累计 `5`、人工 `1`、发布 `r12`；console/page/request error 均为 0 | 模拟器验证完整页面动作；Java 17 服务另以 PostgreSQL 验收管理员权限、幂等和并发冲突 | `bpi_outbox_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 测试机实机部署仍受磁盘容量阻断；Flink 生效回执尚未接入 |
+
+证据：`metadata/bpi-rule-publication-retry-acceptance.json`、`/tmp/bpi-console-rule-publication-retried.png`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

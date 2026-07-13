@@ -7,6 +7,7 @@ import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
 import com.mapletct.ftmes.bpi.application.error.BpiPreconditionRequiredException;
 import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.domain.GoldenBoundary;
+import com.mapletct.ftmes.bpi.domain.RulePublicationView;
 import com.mapletct.ftmes.bpi.domain.RuleSimulationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
 import com.mapletct.ftmes.bpi.domain.TelemetryObservation;
@@ -18,6 +19,7 @@ import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxPropert
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import com.mapletct.ftmes.bpi.interfaces.rest.RulePublishCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.RuleSimulationCommand;
+import com.mapletct.ftmes.bpi.interfaces.rest.ReasonCommand;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
 import com.mapletct.ftmes.bpi.rules.BoundaryWindowEvaluator;
 import com.mapletct.ftmes.bpi.rules.BoundaryWindowResult;
@@ -213,6 +215,41 @@ public class RuleService {
         RuleVersionView published = repository.findRule(actor, rule.id());
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(published));
         return new CommandResult<>(published, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<RuleVersionView> retryPublication(
+            ActorContext actor,
+            UUID ruleId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        RuleVersionView visible = repository.findRule(actor, ruleId);
+        assertRuleManagementEnabled(actor, visible);
+        String path = "/bpi/v1/rules/" + ruleId + "/publication/retry";
+        String requestChecksum = Checksums.sha256(ruleId + "|" + expectedRevision + "|" + writeJson(command));
+        CommandResult<RuleVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<RuleVersionView>() {});
+        if (replay != null) return replay;
+
+        RuleVersionView rule = repository.lockRule(actor, ruleId);
+        RulePublicationView before = outboxRepository.lockPublication(actor, ruleId);
+        if (before.revision() != expectedRevision) {
+            throw new BpiConflictException("Rule publication revision is stale.", before.revision());
+        }
+        if (!"FAILED".equals(before.status())) {
+            throw new BpiConflictException(
+                    "Only a FAILED rule publication can be retried.", before.revision());
+        }
+        RulePublicationView after = outboxRepository.requeueFailed(actor, ruleId, before.revision());
+        outboxRepository.insertPublicationAudit(
+                actor, rule, before, after, command.reason(), traceId);
+        RuleVersionView requeued = repository.findRule(actor, ruleId);
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(requeued));
+        return new CommandResult<>(requeued, false);
     }
 
     private List<Instant> evaluate(

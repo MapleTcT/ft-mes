@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-07-13T09:05:00+08:00",
+  "repoBaseCommit": "c348aa86",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "databaseVersion": "16.13",
+  "operation": "POST /bpi/v1/rules/{ruleId}/publication/retry",
+  "authorization": "BPI_ADMIN",
+  "summary": {
+    "postgresAcceptanceTests": 4,
+    "outboxUnitTests": 2,
+    "simulatorTests": 6,
+    "browserTests": 6,
+    "pass": 18,
+    "fail": 0
+  },
+  "items": [
+    {"id": "flyway-v7", "status": "PASS", "evidence": "Flyway applied V1 through V7 to a clean PostgreSQL 16.13 database."},
+    {"id": "admin-only", "status": "PASS", "evidence": "BPI_ENGINEER received 403; BPI_ADMIN was accepted within tenant, plant and line scope."},
+    {"id": "optimistic-lock", "status": "PASS", "evidence": "Stale publication If-Match returned 409 with currentRevision=7."},
+    {"id": "failed-to-pending", "status": "PASS", "tables": ["bpi.bpi_outbox_events"], "evidence": "FAILED/r7/cycle=3/total=3 became PENDING/r8/cycle=0/total=3/manual=1."},
+    {"id": "idempotent-replay", "status": "PASS", "tables": ["bpi.bpi_api_idempotency"], "evidence": "The same command key replayed the original response and did not create another retry."},
+    {"id": "append-only-audit", "status": "PASS", "tables": ["bpi.bpi_audit_events"], "evidence": "RULE_PUBLICATION_REQUEUED recorded object type RULE_PUBLICATION and revision 7 to 8."},
+    {"id": "browser-interaction", "status": "PASS", "evidence": "The rules drawer displayed the failed broker error, accepted an operator reason and showed PENDING, total=5, manual=1 and publication r12 without console, page or request errors."}
+  ],
+  "marker": "ADP_E2E_BPI_RULE_<UUID>",
+  "verificationSql": "SELECT status,revision,attempt_count,total_attempt_count,manual_retry_count,last_error,last_requeued_at,last_requeued_by FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant AND aggregate_id=:rule; SELECT object_type,action,before_revision,after_revision,reason FROM bpi.bpi_audit_events WHERE tenant_id=:tenant AND object_id=:publication_event;",
+  "evidence": [
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.BpiRulePostgresAcceptanceTest.xml",
+    "services/bpi-service/app/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxDispatcherTest.xml",
+    "/tmp/bpi-console-rule-publication-retried.png"
+  ],
+  "limitations": [
+    "This acceptance used a local PostgreSQL container and deterministic browser simulator.",
+    "Flink application acknowledgment is the next milestone; PENDING or Kafka PUBLISHED is not online activation.",
+    "Target-host deployment remains blocked by insufficient disk capacity."
+  ]
+}

@@ -374,6 +374,16 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 - WOM PostgreSQL LOB 兼容风险：真实生产请检和检查活动报工链路先后暴露 `qcs_table_types`、`WOMWaitPutRecord.remark`、`WOMProduceTask.remark`、`WOMProdTaskExelog.remark` 和 `WOMProCheckDetail.remark` 的 `@javax.persistence.Lob` 字段在 PostgreSQL `text` 非空值下会被驱动按 OID/CLOB 读取并报 `Bad value for type long`；已新增并应用 `112-qcs-table-types-lob-oid-compat.sql`、`115-wom-wait-put-records-lob-oid-compat.sql`、`116-wom-produce-task-lob-oid-compat.sql`、`147-wom-pro-check-details-lob-oid-compat.sql`，验收脚本也改为避开或使用 `lo_from_bytea` 写 marker CLOB 值。后续仍应对业务 LOB 字段做统一 PostgreSQL 兼容审计。
 - WOM 生产动作源地图：`metadata/production-module-source-action-map.json`
 
+## BPI 规则发布失败重新入队验收（2026-07-13）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 管理员重新入队失败的规则发布事件 | `/bpi/#/rules` 规则详情 | `POST /bpi/v1/rules/{ruleId}/publication/retry` | `RuleController.retryPublication` → `RuleService.retryPublication` → `RulePublicationOutboxRepository.requeueFailed` | `bpi.bpi_outbox_events`、`bpi.bpi_audit_events`、`bpi.bpi_api_idempotency` | `SELECT status,revision,attempt_count,total_attempt_count,manual_retry_count,last_error,last_requeued_at,last_requeued_by FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant AND aggregate_id=:rule;` | 真实 PostgreSQL 16.13 中 `FAILED/r7/attempt=3/total=3` 原子迁移为 `PENDING/r8/attempt=0/total=3/manual=1`；错误清空、操作者和时间写入；同幂等键只产生一次变更 | PASS |
+| 发布运维审计 | 同上 | 同上 | `RulePublicationOutboxRepository.insertPublicationAudit` | `bpi.bpi_audit_events` | `SELECT object_type,action,before_revision,after_revision,reason FROM bpi.bpi_audit_events WHERE tenant_id=:tenant AND object_id=:publication;` | 写入 `RULE_PUBLICATION / RULE_PUBLICATION_REQUEUED / 7 / 8`，保留原失败状态、错误、累计尝试和人工重试详情 | PASS |
+| 非管理员和过期修订拒绝 | 同上 | 同上 | Spring Method Security + Outbox optimistic lock | 无业务写入 | 查询上述三表 marker 计数和 revision | `BPI_ENGINEER` 返回 `403`；旧 `If-Match=6` 返回 `409/currentRevision=7`，事务回滚且无额外幂等/审计行 | PASS |
+
+机器记录：`metadata/bpi-rule-publication-retry-acceptance.json`。本项证明本地真实落库，不代表测试机 Kafka/Flink 已部署，也不把 Kafka broker 确认视为 Flink 在线生效。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

@@ -57,7 +57,7 @@ const state = {
   selectedSimulation: null as RuleSimulation | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
-  ruleCommand: null as 'publish' | null,
+  ruleCommand: null as 'publish' | 'retry' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -401,7 +401,7 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
   if (state.ruleCommand) {
-    await handleRulePublish();
+    await handleRuleCommand();
     return;
   }
   if (state.batchCommand) {
@@ -508,11 +508,12 @@ async function openRule(ruleId: string): Promise<void> {
     const conditions = ruleConditions(rule).map((condition) => `<li><div><strong>${escapeHtml(condition.signal)}</strong><small>${escapeHtml(condition.classification)} · ${escapeHtml(condition.operator)}</small></div><b>${escapeHtml(condition.threshold)}</b><em>${escapeHtml(condition.holdSeconds)}s</em></li>`).join('');
     const simulation = state.selectedSimulation;
     const simulationHtml = simulation ? `<div class="simulation-result simulation-result--${simulation.state === 'PASSED' ? 'pass' : 'fail'}"><div class="section-title"><h3>最近回放</h3>${statusChip(simulation.state)}</div><div class="metric-grid"><div><span>命中</span><b>${simulation.metrics.matched}</b></div><div><span>漏检</span><b>${simulation.metrics.missed}</b></div><div><span>误报</span><b>${simulation.metrics.falsePositive}</b></div><div><span>平均偏差</span><b>${number(simulation.metrics.meanBoundaryErrorSeconds)}s</b></div></div><dl class="manifest"><div><dt>观测值</dt><dd>${simulation.inputManifest.observationCount ?? '-'}</dd></div><div><dt>金标准边界</dt><dd>${simulation.inputManifest.goldenBoundaryCount ?? '-'}</dd></div><div><dt>发射边界</dt><dd>${simulation.emittedBoundaries.map(formatTime).join('、') || '-'}</dd></div></dl><div class="checksum"><span>simulation checksum</span><code>${escapeHtml(simulation.checksum)}</code></div>${simulation.failureReason ? `<p>${escapeHtml(simulation.failureReason)}</p>` : ''}</div>` : `<div class="simulation-empty"><i data-lucide="flask-conical"></i><span>尚未使用 PostgreSQL 历史测点和人工金标准执行回放。</span></div>`;
-    const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>分发尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}`;
+    const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>本轮尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>人工重试</span><b>${rule.publicationManualRetryCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div><div><span>最近重新入队</span><b>${formatTime(rule.publicationLastRequeuedAt)}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}`;
     const canPublish = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
-    openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${canPublish ? '<button class="button button--primary" id="open-rule-publish">发布规则版本</button>' : ''}</footer>`);
+    openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${rule.publicationStatus === 'FAILED' ? '<button class="button button--danger" id="open-publication-retry">管理员重新入队</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-rule-publish">发布规则版本</button>' : ''}</footer>`);
     document.querySelector('#open-simulation')?.addEventListener('click', openRuleSimulationDialog);
     document.querySelector('#open-rule-publish')?.addEventListener('click', openRulePublishDialog);
+    document.querySelector('#open-publication-retry')?.addEventListener('click', openRuleRetryDialog);
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
 }
 
@@ -604,6 +605,57 @@ async function handleRulePublish(): Promise<void> {
   } finally {
     button.disabled = false;
     button.textContent = '确认发布';
+  }
+}
+
+function openRuleRetryDialog(): void {
+  const rule = state.selectedRule;
+  if (!rule || rule.publicationStatus !== 'FAILED') return;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.ruleCommand = 'retry';
+  document.querySelector('#command-kicker')!.textContent = '规则发布运维';
+  document.querySelector('#command-title')!.textContent = '重新入队失败事件';
+  document.querySelector('#command-reason-label')!.textContent = '重试依据';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>规则</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>作用域</span><b>${escapeHtml(rule.lineId)}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = '填写 Kafka 故障处置、恢复验证和重新入队依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = 'button button--danger';
+  button.textContent = '确认重新入队';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleRuleCommand(): Promise<void> {
+  if (state.ruleCommand === 'publish') {
+    await handleRulePublish();
+    return;
+  }
+  const rule = state.selectedRule;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (!rule || state.ruleCommand !== 'retry' || reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.disabled = true;
+  button.textContent = '重新入队中...';
+  try {
+    const response = await bpiApi.retryRulePublication(rule, reason, crypto.randomUUID());
+    state.selectedRule = response.data;
+    state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    state.ruleCommand = null;
+    showToast(`规则 ${response.data.code}@${response.data.version} 的发布事件已重新入队`);
+    renderRules();
+    await openRule(response.data.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`发布事件已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openRule(rule.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '确认重新入队';
   }
 }
 

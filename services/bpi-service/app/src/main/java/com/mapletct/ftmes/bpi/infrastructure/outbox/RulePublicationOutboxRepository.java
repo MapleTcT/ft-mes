@@ -3,15 +3,20 @@ package com.mapletct.ftmes.bpi.infrastructure.outbox;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapletct.ftmes.bpi.application.ActorContext;
+import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
+import com.mapletct.ftmes.bpi.application.error.BpiNotFoundException;
 import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
 import com.mapletct.ftmes.bpi.domain.RulePublicationEnvelope;
+import com.mapletct.ftmes.bpi.domain.RulePublicationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,7 +64,7 @@ public class RulePublicationOutboxRepository {
                 UPDATE bpi.bpi_outbox_events
                    SET status = 'PENDING', claim_token = NULL, claimed_at = NULL,
                        next_attempt_at = now(), updated_at = now(),
-                       last_error = 'Recovered stale dispatcher claim'
+                       last_error = 'Recovered stale dispatcher claim', revision = revision + 1
                  WHERE status = 'DISPATCHING'
                    AND (claimed_at IS NULL
                         OR claimed_at < now() - (:claimTimeoutMs * interval '1 millisecond'))
@@ -78,7 +83,8 @@ public class RulePublicationOutboxRepository {
                 UPDATE bpi.bpi_outbox_events event
                    SET status = 'DISPATCHING', claim_token = :claimToken,
                        claimed_at = now(), attempt_count = attempt_count + 1,
-                       updated_at = now()
+                       total_attempt_count = total_attempt_count + 1,
+                       revision = revision + 1, updated_at = now()
                   FROM selected
                  WHERE event.id = selected.id
                 RETURNING event.id, event.claim_token, event.topic, event.partition_key,
@@ -101,7 +107,7 @@ public class RulePublicationOutboxRepository {
                 UPDATE bpi.bpi_outbox_events
                    SET status = 'PUBLISHED', published_at = now(),
                        claim_token = NULL, claimed_at = NULL, last_error = NULL,
-                       updated_at = now()
+                       revision = revision + 1, updated_at = now()
                  WHERE id = :id AND claim_token = :claimToken AND status = 'DISPATCHING'
                 """, new MapSqlParameterSource().addValue("id", id)
                 .addValue("claimToken", claimToken)) == 1;
@@ -123,7 +129,7 @@ public class RulePublicationOutboxRepository {
                 UPDATE bpi.bpi_outbox_events
                    SET status = :status, claim_token = NULL, claimed_at = NULL,
                        next_attempt_at = now() + (:retryDelayMs * interval '1 millisecond'),
-                       last_error = :lastError, updated_at = now()
+                       last_error = :lastError, revision = revision + 1, updated_at = now()
                  WHERE id = :id AND claim_token = :claimToken AND status = 'DISPATCHING'
                 """, new MapSqlParameterSource()
                 .addValue("status", terminal ? "FAILED" : "PENDING")
@@ -131,6 +137,104 @@ public class RulePublicationOutboxRepository {
                 .addValue("lastError", truncate(error))
                 .addValue("id", id)
                 .addValue("claimToken", claimToken)) == 1;
+    }
+
+    public RulePublicationView lockPublication(ActorContext actor, UUID ruleId) {
+        try {
+            RulePublicationView publication = jdbc.queryForObject("""
+                    SELECT id, status, revision, attempt_count, total_attempt_count,
+                           manual_retry_count, published_at, last_requeued_at, last_error
+                      FROM bpi.bpi_outbox_events
+                     WHERE tenant_id = :tenantId
+                       AND aggregate_type = 'RULE_VERSION'
+                       AND aggregate_id = :ruleId
+                       AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                     FOR UPDATE
+                    """, new MapSqlParameterSource()
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("ruleId", ruleId),
+                    (rs, rowNum) -> mapPublication(rs));
+            if (publication == null) throw new BpiNotFoundException("Rule publication event not found.");
+            return publication;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Rule publication event not found.");
+        }
+    }
+
+    public RulePublicationView requeueFailed(
+            ActorContext actor,
+            UUID ruleId,
+            long expectedRevision) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_outbox_events
+                   SET status = 'PENDING', attempt_count = 0,
+                       manual_retry_count = manual_retry_count + 1,
+                       next_attempt_at = now(), claim_token = NULL, claimed_at = NULL,
+                       published_at = NULL, last_error = NULL,
+                       last_requeued_at = now(), last_requeued_by = :actorId,
+                       revision = revision + 1, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND aggregate_type = 'RULE_VERSION'
+                   AND aggregate_id = :ruleId
+                   AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                   AND status = 'FAILED'
+                   AND revision = :expectedRevision
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("ruleId", ruleId)
+                .addValue("expectedRevision", expectedRevision));
+        if (updated != 1) {
+            throw new BpiConflictException("Rule publication can no longer be retried.", expectedRevision);
+        }
+        return lockPublication(actor, ruleId);
+    }
+
+    public void insertPublicationAudit(
+            ActorContext actor,
+            RuleVersionView rule,
+            RulePublicationView before,
+            RulePublicationView after,
+            String reason,
+            String traceId) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_audit_events
+                    (id, tenant_id, plant_id, line_id, object_type, object_id, action, actor_id,
+                     before_revision, after_revision, reason, trace_id, detail)
+                VALUES (:id, :tenantId, :plantId, :lineId, 'RULE_PUBLICATION', :objectId,
+                        'RULE_PUBLICATION_REQUEUED', :actorId, :beforeRevision, :afterRevision,
+                        :reason, :traceId, CAST(:detail AS jsonb))
+                """, new MapSqlParameterSource()
+                .addValue("id", UUID.randomUUID())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("plantId", rule.plantId())
+                .addValue("lineId", rule.lineId())
+                .addValue("objectId", before.id())
+                .addValue("actorId", actor.userId())
+                .addValue("beforeRevision", before.revision())
+                .addValue("afterRevision", after.revision())
+                .addValue("reason", reason)
+                .addValue("traceId", traceId)
+                .addValue("detail", writeJson(Map.of(
+                        "ruleId", rule.id(),
+                        "previousStatus", before.status(),
+                        "nextStatus", after.status(),
+                        "previousLastError", before.lastError() == null ? "" : before.lastError(),
+                        "previousCycleAttemptCount", before.attemptCount(),
+                        "totalAttemptCount", before.totalAttemptCount(),
+                        "manualRetryCount", after.manualRetryCount()))));
+    }
+
+    private RulePublicationView mapPublication(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Timestamp publishedAt = rs.getTimestamp("published_at");
+        Timestamp lastRequeuedAt = rs.getTimestamp("last_requeued_at");
+        return new RulePublicationView(
+                rs.getObject("id", UUID.class), rs.getString("status"), rs.getLong("revision"),
+                rs.getInt("attempt_count"), rs.getInt("total_attempt_count"),
+                rs.getInt("manual_retry_count"),
+                publishedAt == null ? null : publishedAt.toInstant(),
+                lastRequeuedAt == null ? null : lastRequeuedAt.toInstant(),
+                rs.getString("last_error"));
     }
 
     private String writeJson(Object value) {

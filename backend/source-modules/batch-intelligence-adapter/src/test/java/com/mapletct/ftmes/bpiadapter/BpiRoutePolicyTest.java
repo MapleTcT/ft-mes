@@ -25,6 +25,7 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.GET, "/rule-simulations/SIM-S07-001"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/simulate"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publish"));
+        assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publication/retry"));
         assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
         assertFalse(policy.allows(HttpMethod.POST, "/rules/drafts"));
