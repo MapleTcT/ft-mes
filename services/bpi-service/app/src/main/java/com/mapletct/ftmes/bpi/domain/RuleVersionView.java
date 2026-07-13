@@ -23,5 +23,11 @@ public record RuleVersionView(
         int publicationManualRetryCount,
         Instant publicationPublishedAt,
         Instant publicationLastRequeuedAt,
-        String publicationLastError) {
+        String publicationLastError,
+        String applicationStatus,
+        String applicationDeploymentId,
+        Instant applicationObservedAt,
+        Instant applicationReceivedAt,
+        String applicationErrorCode,
+        String applicationErrorDetail) {
 }

@@ -60,6 +60,20 @@ bpi:
     poll-delay: ${BPI_RULE_PUBLICATION_POLL_DELAY:1s}
     claim-timeout: ${BPI_RULE_PUBLICATION_CLAIM_TIMEOUT:2m}
     retry-backoff: ${BPI_RULE_PUBLICATION_RETRY_BACKOFF:2s}
+  rule-application-kafka:
+    enabled: ${BPI_RULE_APPLICATION_KAFKA_ENABLED:false}
+    bootstrap-servers: ${BPI_RULE_APPLICATION_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_RULE_APPLICATION_KAFKA_TOPIC:bpi.boundary.rule-application.v1}
+    dlq-topic: ${BPI_RULE_APPLICATION_KAFKA_DLQ_TOPIC:bpi.boundary.rule-application.dlq.v1}
+    group-id: ${BPI_RULE_APPLICATION_KAFKA_GROUP_ID:ft-mes-bpi-service-rule-applications-v1}
+    client-id: ${BPI_RULE_APPLICATION_KAFKA_CLIENT_ID:ft-mes-bpi-rule-application}
+    allowed-tenant-ids: ${BPI_RULE_APPLICATION_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_}
+    allowed-plant-ids: ${BPI_RULE_APPLICATION_KAFKA_ALLOWED_PLANT_IDS:_DENY_ALL_}
+    allowed-line-ids: ${BPI_RULE_APPLICATION_KAFKA_ALLOWED_LINE_IDS:_DENY_ALL_}
+    concurrency: ${BPI_RULE_APPLICATION_KAFKA_CONCURRENCY:3}
+    max-attempts: ${BPI_RULE_APPLICATION_KAFKA_MAX_ATTEMPTS:4}
+    retry-backoff: ${BPI_RULE_APPLICATION_KAFKA_RETRY_BACKOFF:2s}
+    max-payload-bytes: ${BPI_RULE_APPLICATION_KAFKA_MAX_PAYLOAD_BYTES:65536}
   security:
     internal-jwt-secret: ${BPI_INTERNAL_JWT_SECRET:}
     issuer: ${BPI_INTERNAL_JWT_ISSUER:ft-mes-adapter}

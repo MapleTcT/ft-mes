@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-07-13T01:51:07Z",
+  "repoBaseline": "f4c73962",
+  "database": "PostgreSQL 16.13",
+  "status": "PASS_LOCAL_POSTGRES_ONLY",
+  "scope": "Flink rule application receipt PostgreSQL transition and idempotency acceptance",
+  "markerPattern": "ADP_E2E_BPI_RULE_<uuid>",
+  "test": "BpiRulePostgresAcceptanceTest.flinkRuleApplicationReceiptTransitionsRejectedToAppliedWithInboxAuditAndReplaySafety",
+  "result": {
+    "flywayVersion": 8,
+    "transition": [
+      "WAITING",
+      "REJECTED",
+      "APPLIED"
+    ],
+    "publicationRevision": 3,
+    "inboxRows": 2,
+    "auditActions": [
+      "RULE_PUBLICATION_REJECTED|1|2",
+      "RULE_PUBLICATION_APPLIED|2|3"
+    ],
+    "exactReplayCreatedAdditionalRevision": false,
+    "tests": 5,
+    "failures": 0,
+    "errors": 0
+  },
+  "verificationSql": [
+    "SELECT application_status, application_deployment_id, revision, application_received_at FROM bpi.bpi_outbox_events WHERE tenant_id = :tenant AND id = :publication_id;",
+    "SELECT count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant AND source = 'bpi.boundary.rule-application.v1';",
+    "SELECT action, before_revision, after_revision FROM bpi.bpi_audit_events WHERE tenant_id = :tenant AND object_id = :publication_id ORDER BY after_revision;"
+  ],
+  "limitations": [
+    "This evidence does not claim a live Kafka/Flink checkpoint round trip.",
+    "This evidence does not claim target test-environment deployment or browser acceptance.",
+    "Kafka retry/DLQ and checkpoint/restart acceptance remain required before G-021 can advance."
+  ]
+}

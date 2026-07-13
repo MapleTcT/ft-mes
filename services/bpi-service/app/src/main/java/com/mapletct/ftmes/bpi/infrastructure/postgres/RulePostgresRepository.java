@@ -37,7 +37,14 @@ public class RulePostgresRepository {
                    COALESCE(o.manual_retry_count, 0) AS publication_manual_retry_count,
                    o.published_at AS publication_published_at,
                    o.last_requeued_at AS publication_last_requeued_at,
-                   o.last_error AS publication_last_error
+                   o.last_error AS publication_last_error,
+                   COALESCE(o.application_status, CASE WHEN r.state = 'PUBLISHED'
+                       THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS application_status,
+                   o.application_deployment_id,
+                   o.application_observed_at,
+                   o.application_received_at,
+                   o.application_error_code,
+                   o.application_error_detail
               FROM bpi.bpi_rule_versions r
               JOIN bpi.bpi_topology_versions t
                 ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
@@ -324,6 +331,8 @@ public class RulePostgresRepository {
     private RuleVersionView mapRule(java.sql.ResultSet rs) throws java.sql.SQLException {
         Timestamp publicationPublishedAt = rs.getTimestamp("publication_published_at");
         Timestamp publicationLastRequeuedAt = rs.getTimestamp("publication_last_requeued_at");
+        Timestamp applicationObservedAt = rs.getTimestamp("application_observed_at");
+        Timestamp applicationReceivedAt = rs.getTimestamp("application_received_at");
         return new RuleVersionView(
                 rs.getObject("id", UUID.class), rs.getString("rule_code"), rs.getString("version"),
                 rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
@@ -334,7 +343,11 @@ public class RulePostgresRepository {
                 rs.getInt("publication_manual_retry_count"),
                 publicationPublishedAt == null ? null : publicationPublishedAt.toInstant(),
                 publicationLastRequeuedAt == null ? null : publicationLastRequeuedAt.toInstant(),
-                rs.getString("publication_last_error"));
+                rs.getString("publication_last_error"), rs.getString("application_status"),
+                rs.getString("application_deployment_id"),
+                applicationObservedAt == null ? null : applicationObservedAt.toInstant(),
+                applicationReceivedAt == null ? null : applicationReceivedAt.toInstant(),
+                rs.getString("application_error_code"), rs.getString("application_error_detail"));
     }
 
     private MapSqlParameterSource scope(ActorContext actor, StringBuilder sql) {

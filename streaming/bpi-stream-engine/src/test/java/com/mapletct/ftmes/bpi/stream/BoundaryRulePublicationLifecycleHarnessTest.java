@@ -1,6 +1,7 @@
 package com.mapletct.ftmes.bpi.stream;
 
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.runtime.checkpoint.OperatorSubtaskState;
 import org.apache.flink.streaming.api.operators.KeyedProcessOperator;
@@ -105,6 +106,28 @@ class BoundaryRulePublicationLifecycleHarnessTest {
         }
     }
 
+    @Test
+    void acceptedDuplicateAndRejectedConflictProduceCheckpointedApplicationOutcomes() throws Exception {
+        try (Harness harness = harness()) {
+            harness.open();
+            harness.setProcessingTime(T0.toEpochMilli());
+            BoundaryRulePublicationV1 active = publication(true, T0, "RULE-ON");
+            BoundaryRulePublicationV1 conflict = active.toBuilder()
+                    .setEventId("RULE-CONFLICT")
+                    .setChecksum("sha:changed")
+                    .setPublishedAtMs(T0.plusSeconds(1).toEpochMilli())
+                    .build();
+
+            harness.processElement(active.toByteArray(), active.getPublishedAtMs());
+            harness.processElement(active.toByteArray(), active.getPublishedAtMs());
+            harness.processElement(conflict.toByteArray(), conflict.getPublishedAtMs());
+
+            assertEquals(
+                    List.of("APPLIED:RULE-ON", "APPLIED:RULE-ON", "REJECTED:RULE-CONFLICT"),
+                    applications(harness));
+        }
+    }
+
     private static BoundaryRulePublicationV1 publication(
             boolean active,
             Instant publishedAt,
@@ -135,6 +158,22 @@ class BoundaryRulePublicationLifecycleHarnessTest {
                 .map(byte[].class::cast)
                 .map(BoundaryRulePublicationLifecycleHarnessTest::eventId)
                 .toList();
+    }
+
+    private static List<String> applications(Harness harness) {
+        return harness.getSideOutput(BoundaryRulePublicationLifecycleFunction.APPLICATIONS).stream()
+                .map(StreamRecord::getValue)
+                .map(BoundaryRulePublicationLifecycleHarnessTest::application)
+                .map(value -> value.getStatus().name() + ":" + value.getPublicationEventId())
+                .toList();
+    }
+
+    private static BoundaryRuleApplicationV1 application(byte[] bytes) {
+        try {
+            return BoundaryRuleApplicationV1.parseFrom(bytes);
+        } catch (com.google.protobuf.InvalidProtocolBufferException error) {
+            throw new IllegalStateException(error);
+        }
     }
 
     private static String eventId(byte[] bytes) {

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class BpiKafkaJobTopologyTest {
 
     @Test
-    void productionGraphHasStableStatefulOperatorsAndBothTransactionalSinks() {
+    void productionGraphHasStableStatefulOperatorsAndAllTransactionalSinks() {
         StreamExecutionEnvironment environment = StreamExecutionEnvironment.getExecutionEnvironment();
         BpiKafkaJobConfig config = BpiKafkaJobConfig.from(Map.of(
                 "bootstrap-servers", "kafka:9092",
@@ -42,8 +42,10 @@ class BpiKafkaJobTopologyTest {
         assertTrue(uids.contains("bpi-boundary-evaluator-v1"));
         assertTrue(uids.contains("bpi-kafka-candidate-sink-v1"));
         assertTrue(uids.contains("bpi-kafka-data-quality-sink-v1"));
+        assertTrue(uids.contains("bpi-kafka-rule-application-sink-v1"));
         assertTrue(names.stream().anyMatch(name -> name.contains("batch-candidate sink")));
         assertTrue(names.stream().anyMatch(name -> name.contains("data-quality sink")));
+        assertTrue(names.stream().anyMatch(name -> name.contains("rule-application sink")));
         assertEquals(3, environment.getParallelism());
     }
 }

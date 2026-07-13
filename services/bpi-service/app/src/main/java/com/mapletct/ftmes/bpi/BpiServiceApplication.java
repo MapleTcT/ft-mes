@@ -5,6 +5,7 @@ import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateEventProperti
 import com.mapletct.ftmes.bpi.infrastructure.candidate.BpiCandidateKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.telemetry.BpiTelemetryProperties;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxProperties;
+import com.mapletct.ftmes.bpi.infrastructure.application.BpiRuleApplicationKafkaProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,6 +16,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         BpiTelemetryProperties.class,
         BpiCandidateEventProperties.class,
         BpiCandidateKafkaProperties.class,
+        BpiRuleApplicationKafkaProperties.class,
         RulePublicationOutboxProperties.class
 })
 public class BpiServiceApplication {

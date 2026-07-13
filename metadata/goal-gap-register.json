@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T01:17:42+00:00",
-  "repoCommit": "c348aa8671ede7f5cdf2ea332435c7225792a0fd",
+  "generatedAt": "2026-07-13T02:05:32+00:00",
+  "repoCommit": "f4c73962e81421f29b0aa1a560b65f5c7809ece3",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -18,11 +18,11 @@
     "persistenceAcceptance": "metadata/persistence-acceptance.json"
   },
   "summary": {
-    "goalItems": 20,
+    "goalItems": 21,
     "readyGoals": 9,
-    "partialGoals": 9,
+    "partialGoals": 10,
     "blockedGoals": 2,
-    "goalGaps": 11,
+    "goalGaps": 12,
     "productionCasesByStatus": {
       "PASS": 39,
       "BLOCKED": 4
@@ -75,7 +75,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=984, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 984 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent additional classified references are explicit Oracle prohibitions in BPI verifiers, not runtime dependencies.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=982, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 982 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent count change comes from the README rewrite removing stale documentation-only references, not from runtime dependency changes.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -606,6 +606,49 @@
         "docs/production-module-backlog.md",
         "metadata/production-module-backlog.json",
         "scripts/verify-production-module-backlog.py"
+      ]
+    },
+    {
+      "id": "G-021",
+      "title": "智能批次与工艺数据中心（BPI）",
+      "status": "PARTIAL",
+      "scope": "把 JetLinks/IoT 测点、MES 生产上下文、Kafka/Flink 规则引擎、PostgreSQL 批次事实、人工审核以及后续 QCS/WMS 联动建设为独立可持续开发产品模块。",
+      "currentEvidence": [
+        "BPI 总设计、交互设计、API 目录和工程测试计划已进入仓库，Java 8 旧平台适配与 Java 17 BPI/Flink 边界明确。",
+        "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理 reactor 当前 78 项测试通过。",
+        "BPI PostgreSQL 服务已实现遥测入库、规则/拓扑、规则模拟、候选、影子批次、证据、幂等和审计。",
+        "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据；已提交基线为 f4c73962。",
+        "Flink 已具备事件时间、生产上下文 join、规则生命周期、Broadcast State、索引路由、边界计算、checkpoint 恢复、candidate/data-quality/rule-application exactly-once sink；本轮新增 APPLIED/REJECTED 回执契约和 BPI 消费入库链路，Java 17 服务 compile 已通过。",
+        "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。"
+      ],
+      "blockingIssues": [
+        "规则应用回执的本地真实 PostgreSQL 验收已完成；仍需 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 联合回路和浏览器状态验收。",
+        "BPI 全栈尚未部署到目标测试环境完成远端页面、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。",
+        "JetLinks/IoT exporter、MES 生产上下文 outbox 和真实产线点位/单位/质量码/sequence 尚未完成现场联调。",
+        "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
+        "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
+      ],
+      "nextActions": [
+        "完成 rule application receipt 的 PostgreSQL/Kafka 联合测试、重复/冲突/DLQ 测试、UI 状态和机器可读验收记录。",
+        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/PostgreSQL 验收。",
+        "接入 MapleTcT/iot exporter 和一条产线 MES production context，完成点位语义与规则 locality group 盘点。",
+        "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
+      ],
+      "artifacts": [
+        "docs/designs/batch-process-intelligence.md",
+        "docs/designs/bpi-interaction-design.md",
+        "docs/api/bpi-api-catalog.md",
+        "docs/testing/bpi-engineering-test-plan.md",
+        "contracts/bpi-api/openapi.json",
+        "contracts/bpi-events/src/main/proto/bpi_events_v1.proto",
+        "services/bpi-service/pom.xml",
+        "services/bpi-service/app/src/main/resources/db/migration/V8__bpi_rule_application_receipts.sql",
+        "streaming/bpi-stream-engine/pom.xml",
+        "deploy/bpi-streaming/docker-compose.yml",
+        "backend/source-modules/batch-intelligence-adapter/pom.xml",
+        "frontend/apps/bpi/package.json",
+        "metadata/bpi-rule-publication-retry-acceptance.json",
+        "metadata/bpi-rule-application-receipt-acceptance.json"
       ]
     }
   ],

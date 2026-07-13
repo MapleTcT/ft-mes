@@ -7,12 +7,12 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-13T01:17:42+00:00` |
-| Repo Commit | `c348aa8671ede7f5cdf2ea332435c7225792a0fd` |
+| Generated At | `2026-07-13T02:05:32+00:00` |
+| Repo Commit | `f4c73962e81421f29b0aa1a560b65f5c7809ece3` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
-| Goal Gaps | `11` |
-| Ready / Partial / Blocked Goals | `9 / 9 / 2` |
+| Goal Gaps | `12` |
+| Ready / Partial / Blocked Goals | `9 / 10 / 2` |
 | Production Blocked Cases | `4` |
 | Production Backlog Items | `7` |
 | Business Dependency Status | `READY` |
@@ -38,6 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 规则应用回执的本地真实 PostgreSQL 验收已完成；仍需 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 联合回路和浏览器状态验收。 | 完成 rule application receipt 的 PostgreSQL/Kafka 联合测试、重复/冲突/DLQ 测试、UI 状态和机器可读验收记录。 |
 
 ## Production Blockers
 

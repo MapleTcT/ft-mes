@@ -127,7 +127,7 @@ public class BpiPostgresRepository {
                 && payloadChecksum.equals(existing.get(0).get("payload_checksum"));
         if (!exactReplay) {
             throw new BpiConflictException(
-                    "Candidate key or event ID was replayed with different identity or payload.", null);
+                    "Inbox key or event ID was replayed with different identity or payload.", null);
         }
         return false;
     }

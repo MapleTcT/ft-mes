@@ -45,6 +45,13 @@ public final class BpiKafkaIO {
                 new DataQualityKafkaSerializationSchema(config.dataQualityTopic()));
     }
 
+    public static KafkaSink<byte[]> ruleApplicationSink(BpiKafkaJobConfig config) {
+        return exactlyOnceSink(
+                config,
+                "rule-application",
+                new RuleApplicationKafkaSerializationSchema(config.ruleApplicationTopic()));
+    }
+
     private static KafkaSink<byte[]> exactlyOnceSink(
             BpiKafkaJobConfig config,
             String lane,

@@ -26,6 +26,11 @@ create_topic "${BPI_CONTEXT_TOPIC:-mes.production.context.v1}" "$CONTROL_PARTITI
 create_topic "${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}" "$CONTROL_PARTITIONS" \
     --config cleanup.policy=compact \
     --config delete.retention.ms=86400000
+create_topic "${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}" "$CONTROL_PARTITIONS" \
+    --config cleanup.policy=compact \
+    --config delete.retention.ms=86400000
+create_topic "${BPI_RULE_APPLICATION_DLQ_TOPIC:-bpi.boundary.rule-application.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
 create_topic "${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}" "$DATA_PARTITIONS" \
     --config retention.ms=2592000000
 create_topic "${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}" "$DATA_PARTITIONS" \

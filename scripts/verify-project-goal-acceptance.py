@@ -129,6 +129,7 @@ REQUIRED_ITEM_IDS = {
     "G-018",
     "G-019",
     "G-020",
+    "G-021",
 }
 
 ALLOWED_STATUSES = {"READY", "PARTIAL", "BLOCKED", "FAIL", "NOT_STARTED"}
@@ -198,6 +199,7 @@ def check_doc(failures: list[str]) -> None:
         "Oracle 替换为 PostgreSQL 默认路径",
         "PostgreSQL 缺口进入幂等 SQL/backlog",
         "生产迁移前置项",
+        "智能批次与工艺数据中心",
         "make project-goal-acceptance-check",
         "跨账本一致性",
     ]

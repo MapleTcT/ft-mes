@@ -43,6 +43,8 @@ done
 TOPICS="${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
 ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
 ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
+${BPI_RULE_APPLICATION_DLQ_TOPIC:-bpi.boundary.rule-application.dlq.v1}
 ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
 ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
 ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}"
@@ -57,11 +59,11 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
         --topic "$topic"
 done >"$DESCRIBE"
 
-if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 6 ]; then
+if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 8 ]; then
     printf 'ERROR: one or more BPI topics do not have replication factor 3\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 6 ]; then
+if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 8 ]; then
     printf 'ERROR: one or more BPI topics do not have min.insync.replicas=2\n' >&2
     exit 1
 fi
@@ -123,7 +125,7 @@ report = {
     "status": "PASS",
     "kafka": {
         "brokers": 3,
-        "topics": 6,
+        "topics": 8,
         "replicationFactor": 3,
         "minInSyncReplicas": 2,
         "describeEvidence": Path(os.environ["DESCRIBE"]).read_text(encoding="utf-8"),

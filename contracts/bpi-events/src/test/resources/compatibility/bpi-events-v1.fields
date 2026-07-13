@@ -110,6 +110,20 @@ M|ftmes.bpi.contract.v1.BoundarySignalBindingV1|device_id|1|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.BoundarySignalBindingV1|property_id|2|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.BoundarySignalBindingV1|signal|3|STRING|SINGULAR|-
 M|ftmes.bpi.contract.v1.BoundarySignalBindingV1|expected_unit|4|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|event_id|1|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|publication_event_id|2|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|tenant_id|3|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|plant_id|4|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|line_id|5|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|rule_code|6|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|rule_version|7|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|checksum|8|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|deployment_id|9|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|status|10|ENUM:ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|error_code|11|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|detail|12|STRING|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|observed_at_ms|13|INT64|SINGULAR|-
+M|ftmes.bpi.contract.v1.BoundaryRuleApplicationV1|headers|14|MAP<STRING,STRING>|MAP|-
 E|ftmes.bpi.contract.v1.SequenceOrigin|SEQUENCE_ORIGIN_UNSPECIFIED|0
 E|ftmes.bpi.contract.v1.SequenceOrigin|DEVICE|1
 E|ftmes.bpi.contract.v1.SequenceOrigin|GATEWAY|2
@@ -132,3 +146,6 @@ E|ftmes.bpi.contract.v1.BoundaryEvidenceClassV1|BOUNDARY_EVIDENCE_CLASS_UNSPECIF
 E|ftmes.bpi.contract.v1.BoundaryEvidenceClassV1|REQUIRED|1
 E|ftmes.bpi.contract.v1.BoundaryEvidenceClassV1|QUORUM|2
 E|ftmes.bpi.contract.v1.BoundaryEvidenceClassV1|OPTIONAL|3
+E|ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1|BOUNDARY_RULE_APPLICATION_STATUS_UNSPECIFIED|0
+E|ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1|APPLIED|1
+E|ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1|REJECTED|2

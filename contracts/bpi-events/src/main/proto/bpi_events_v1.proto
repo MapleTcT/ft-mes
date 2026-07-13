@@ -187,3 +187,28 @@ enum BoundaryEvidenceClassV1 {
   QUORUM = 2;
   OPTIONAL = 3;
 }
+
+// Flink emits this control-plane receipt through an exactly-once sink. APPLIED is
+// visible only after the checkpoint containing the rule broadcast state commits.
+message BoundaryRuleApplicationV1 {
+  string event_id = 1;
+  string publication_event_id = 2;
+  string tenant_id = 3;
+  string plant_id = 4;
+  string line_id = 5;
+  string rule_code = 6;
+  string rule_version = 7;
+  string checksum = 8;
+  string deployment_id = 9;
+  BoundaryRuleApplicationStatusV1 status = 10;
+  string error_code = 11;
+  string detail = 12;
+  int64 observed_at_ms = 13;
+  map<string, string> headers = 14;
+}
+
+enum BoundaryRuleApplicationStatusV1 {
+  BOUNDARY_RULE_APPLICATION_STATUS_UNSPECIFIED = 0;
+  APPLIED = 1;
+  REJECTED = 2;
+}

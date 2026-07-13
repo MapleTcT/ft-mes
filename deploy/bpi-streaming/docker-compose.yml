@@ -45,6 +45,7 @@ x-flink-environment: &flink-environment
   BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
   BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
   BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+  BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
   BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
   BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
   BPI_CHECKPOINT_INTERVAL_MS: ${BPI_CHECKPOINT_INTERVAL_MS:-30000}
@@ -137,6 +138,8 @@ services:
       BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
       BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
       BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+      BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
+      BPI_RULE_APPLICATION_DLQ_TOPIC: ${BPI_RULE_APPLICATION_DLQ_TOPIC:-bpi.boundary.rule-application.dlq.v1}
       BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
       BPI_CANDIDATE_DLQ_TOPIC: ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
       BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
@@ -224,6 +227,7 @@ services:
       BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
       BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
       BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
+      BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
       BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
       BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
       BPI_REPLAY_MARKER: ${BPI_REPLAY_MARKER:-}

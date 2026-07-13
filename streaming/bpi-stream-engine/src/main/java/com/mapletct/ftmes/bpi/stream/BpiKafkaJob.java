@@ -77,9 +77,15 @@ public final class BpiKafkaJob {
                 .uid("bpi-rule-watermarks-v1");
         SingleOutputStreamOperator<byte[]> rules = timestampedRules
                 .keyBy(BpiKafkaJob::ruleScopeKey)
-                .process(new BoundaryRulePublicationLifecycleFunction(config.boundaryStateTtl()))
+                .process(new BoundaryRulePublicationLifecycleFunction(
+                        config.boundaryStateTtl(), config.deploymentId()))
                 .name("Enforce immutable rule-version lifecycle")
                 .uid("bpi-rule-lifecycle-v1");
+
+        rules.getSideOutput(BoundaryRulePublicationLifecycleFunction.APPLICATIONS)
+                .sinkTo(BpiKafkaIO.ruleApplicationSink(config))
+                .name("Kafka exactly-once rule-application sink")
+                .uid("bpi-kafka-rule-application-sink-v1");
 
         SingleOutputStreamOperator<byte[]> joinedContextual = telemetry
                 .keyBy(BpiKafkaJob::telemetryScopeKey)

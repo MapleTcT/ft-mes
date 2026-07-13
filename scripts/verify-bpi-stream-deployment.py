@@ -45,6 +45,8 @@ def main() -> int:
         "com.mapletct.ftmes.bpi.stream.BpiKafkaJob",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaAcceptanceReplay",
         "BPI_CANDIDATE_DLQ_TOPIC",
+        "BPI_RULE_APPLICATION_TOPIC",
+        "BPI_RULE_APPLICATION_DLQ_TOPIC",
         "127.0.0.1",
     ):
         if marker not in compose:
@@ -72,6 +74,10 @@ def main() -> int:
     topic_script = (ROOT / "deploy/bpi-streaming/scripts/create-topics.sh").read_text(encoding="utf-8")
     if "bpi.batch.candidate.dlq.v1" not in topic_script:
         failures.append("BPI topic initialization must create the candidate DLQ")
+    if "bpi.boundary.rule-application.v1" not in topic_script:
+        failures.append("BPI topic initialization must create the rule application topic")
+    if "bpi.boundary.rule-application.dlq.v1" not in topic_script:
+        failures.append("BPI topic initialization must create the rule application DLQ")
 
     postgres_replay = (
         ROOT / "deploy/bpi-streaming/scripts/run-postgres-replay.sh"

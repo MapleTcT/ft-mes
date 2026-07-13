@@ -22,6 +22,7 @@ class BpiKafkaJobConfigTest {
         assertEquals(Duration.ofSeconds(30), config.checkpointInterval());
         assertEquals(Duration.ofDays(30), config.boundaryStateTtl());
         assertEquals("iot.telemetry.selected.v1", config.telemetryTopic());
+        assertEquals("bpi.boundary.rule-application.v1", config.ruleApplicationTopic());
     }
 
     @Test
@@ -31,9 +32,12 @@ class BpiKafkaJobConfigTest {
         invalidTiming.put("checkpoint-interval-ms", "1000");
         Map<String, String> duplicateTopic = values();
         duplicateTopic.put("candidate-topic", "bpi.data-quality.v1");
+        Map<String, String> duplicateApplicationTopic = values();
+        duplicateApplicationTopic.put("rule-application-topic", "bpi.boundary.rule-publication.v1");
 
         assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(invalidTiming));
         assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(duplicateTopic));
+        assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(duplicateApplicationTopic));
     }
 
     @Test

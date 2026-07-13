@@ -301,6 +301,7 @@ JetLinks 原时序写入保持运行。恢复后按原 eventId/sequence 重放�
 | `iot.equipment.state.v1` | plant+asset | 14d | Flink | batch engine |
 | `mes.production.context.v1` | order/task | 30d | MES outbox | Flink |
 | `bpi.boundary.rule-publication.v1` | tenant+line+rule+version | 180d compacted | BPI outbox | Flink broadcast state |
+| `bpi.boundary.rule-application.v1` | publicationEventId | 180d compacted | Flink checkpoint sink | BPI inbox/audit |
 | `bpi.batch.candidate.v1` | line+rule | 30d | Flink | BPI inbox |
 | `bpi.batch.fact.v1` | batchId | 180d | BPI outbox | trace/WMS/data lake |
 | `bpi.data-quality.v1` | source+point | 30d | exporter/Flink | BPI data quality |
@@ -312,6 +313,8 @@ JetLinks 原时序写入保持运行。恢复后按原 eventId/sequence 重放�
 `plant+line+rule_locality_group` 再执行多信号规则。规则发布时校验它引用的信号属于同一
 locality group；超大产线按 asset group 切分，跨组规则通过低频 context stream 汇合。
 禁止按 pointId 造成热点，也禁止把整条超大产线强行压到一个 key。
+
+规则页面必须区分 Kafka 发布状态和 Flink 应用状态。`PUBLISHED` 只表示 BPI outbox 已经把规则交给 broker；Flink 生命周期校验后的 `APPLIED/REJECTED` 回执通过独立 exactly-once sink 提交，只有包含路由与规则 Broadcast State 的 checkpoint 成功后 `APPLIED` 才对 BPI 可见。BPI 按回执 eventId inbox 去重，并校验 publicationEventId、tenant、plant、line、rule version 和 checksum 后更新 PostgreSQL 与审计。
 
 候选事件使用确定性 `candidate_key`，不能依赖 Flink 重启后重新生成的 eventId。START key
 采用 UUIDv5(namespace, tenant|line|ruleVersion|contextOrderId|firstQuorumEvidenceEventId)；

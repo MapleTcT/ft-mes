@@ -85,7 +85,7 @@ JAVA_HOME=<jdk17> mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
 | scoped indexed route/fan-out/deactivate | `BoundaryRuleRoutingBroadcastHarnessTest` | PASS |
 | event-time evaluator/late replay/checkpoint | `BoundaryKeyedBroadcastHarnessTest` | PASS |
 | candidate/data-quality Kafka record | `CandidateKafkaSerializationSchemaTest`、`DataQualityKafkaSerializationSchemaTest` | PASS |
-| checkpoint、稳定 UID、双事务 sink 作业图 | `BpiKafkaJobTopologyTest` | PASS |
+| checkpoint、稳定 UID、candidate/data-quality/rule-application 三个事务 sink 作业图 | `BpiKafkaJobTopologyTest` | PASS |
 
 ## 尚未完成
 

@@ -8,6 +8,10 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
+import com.mapletct.ftmes.bpi.application.Checksums;
+import com.mapletct.ftmes.bpi.application.RuleApplicationReceiptService;
 import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +60,7 @@ class BpiRulePostgresAcceptanceTest {
     @Autowired ObjectMapper objectMapper;
     @Autowired JdbcTemplate jdbc;
     @Autowired RulePublicationOutboxRepository outboxRepository;
+    @Autowired RuleApplicationReceiptService receiptService;
 
     private String tenantId;
     private UUID topologyId;
@@ -117,6 +122,7 @@ class BpiRulePostgresAcceptanceTest {
         if (tenantId == null) return;
         jdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_inbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_outbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("UPDATE bpi.bpi_rule_versions SET latest_simulation_id = NULL WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_simulations WHERE tenant_id = ?", tenantId);
@@ -470,6 +476,92 @@ class BpiRulePostgresAcceptanceTest {
                 """, String.class, tenantId, publicationId))
                 .isEqualTo("RULE_PUBLICATION|RULE_PUBLICATION_REQUEUED|7|8");
         assertThat(count("bpi_api_idempotency")).isOne();
+    }
+
+    @Test
+    void flinkRuleApplicationReceiptTransitionsRejectedToAppliedWithInboxAuditAndReplaySafety() {
+        jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'PUBLISHED', revision = 3
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, ruleId);
+        UUID publicationId = insertOutbox(
+                "BOUNDARY_RULE_PUBLISHED", "PUBLISHED", 1, null, null);
+        BoundaryRuleApplicationV1 rejected = application(
+                publicationId,
+                "APPLICATION-REJECTED-" + publicationId,
+                BoundaryRuleApplicationStatusV1.REJECTED,
+                "RULE_WINDOW_EXCEEDS_STATE_TTL",
+                "rule window exceeds state TTL",
+                boundaryTime.plusSeconds(1));
+
+        var rejectedRule = receiptService.apply(rejected, Checksums.sha256(rejected.toByteArray()));
+
+        assertThat(rejectedRule.applicationStatus()).isEqualTo("REJECTED");
+        assertThat(rejectedRule.applicationDeploymentId()).isEqualTo("flink-acceptance-a");
+        assertThat(rejectedRule.applicationErrorCode()).isEqualTo("RULE_WINDOW_EXCEEDS_STATE_TTL");
+        assertThat(rejectedRule.publicationRevision()).isEqualTo(2);
+
+        BoundaryRuleApplicationV1 applied = application(
+                publicationId,
+                "APPLICATION-APPLIED-" + publicationId,
+                BoundaryRuleApplicationStatusV1.APPLIED,
+                "",
+                "",
+                boundaryTime.plusSeconds(2));
+        var appliedRule = receiptService.apply(applied, Checksums.sha256(applied.toByteArray()));
+        var replayedRule = receiptService.apply(applied, Checksums.sha256(applied.toByteArray()));
+
+        assertThat(appliedRule.applicationStatus()).isEqualTo("APPLIED");
+        assertThat(appliedRule.applicationErrorCode()).isNull();
+        assertThat(appliedRule.applicationErrorDetail()).isNull();
+        assertThat(appliedRule.publicationRevision()).isEqualTo(3);
+        assertThat(replayedRule.publicationRevision()).isEqualTo(3);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_inbox_events
+                 WHERE tenant_id = ? AND source = 'bpi.boundary.rule-application.v1'
+                """, Integer.class, tenantId)).isEqualTo(2);
+        assertThat(jdbc.queryForList("""
+                SELECT action || '|' || before_revision || '|' || after_revision
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                 ORDER BY after_revision
+                """, String.class, tenantId, publicationId))
+                .containsExactly(
+                        "RULE_PUBLICATION_REJECTED|1|2",
+                        "RULE_PUBLICATION_APPLIED|2|3");
+        assertThat(jdbc.queryForObject("""
+                SELECT application_status || '|' || application_deployment_id || '|'
+                       || revision || '|' || (application_received_at IS NOT NULL)
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, publicationId))
+                .isEqualTo("APPLIED|flink-acceptance-a|3|true");
+    }
+
+    private BoundaryRuleApplicationV1 application(
+            UUID publicationId,
+            String eventId,
+            BoundaryRuleApplicationStatusV1 status,
+            String errorCode,
+            String detail,
+            Instant observedAt) {
+        return BoundaryRuleApplicationV1.newBuilder()
+                .setEventId(eventId)
+                .setPublicationEventId(publicationId.toString())
+                .setTenantId(tenantId)
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-S07-01")
+                .setRuleCode("RULE-S07-START")
+                .setRuleVersion("1.2.0")
+                .setChecksum("r".repeat(64))
+                .setDeploymentId("flink-acceptance-a")
+                .setStatus(status)
+                .setErrorCode(errorCode)
+                .setDetail(detail)
+                .setObservedAtMs(observedAt.toEpochMilli())
+                .putHeaders("trace_id", "TRACE-APPLICATION-" + publicationId)
+                .build();
     }
 
     private UUID insertOutbox(

@@ -384,6 +384,14 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 
 机器记录：`metadata/bpi-rule-publication-retry-acceptance.json`。本项证明本地真实落库，不代表测试机 Kafka/Flink 已部署，也不把 Kafka broker 确认视为 Flink 在线生效。
 
+### BPI Flink 规则应用回执（本地 PostgreSQL）
+
+| 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| Flink 规则应用回执 `WAITING -> REJECTED -> APPLIED` | 规则抽屉状态待后续浏览器验收 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision、inbox source count、audit before/after revision | Flyway V1-V8 在全新 PostgreSQL 16.13 应用成功；`BpiRulePostgresAcceptanceTest` 5/5 通过；回执状态最终 `APPLIED`、revision `3`、两条唯一 inbox、`REJECTED 1->2` 和 `APPLIED 2->3` 两条审计，完全相同 APPLIED 回执重放未新增 revision | PASS_LOCAL_POSTGRES_ONLY |
+
+机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`。该证据只证明 BPI 事务入库、校验和幂等，不代表真实 Kafka/Flink checkpoint 回路、DLQ、目标测试环境或浏览器状态已经通过。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

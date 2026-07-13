@@ -25,7 +25,12 @@
 
 ## 当前项目定位
 
-当前仓库主体是 ADP/BAP 平台运行包，不是完整 MES 业务产品包。
+当前仓库不再只有单一的“运行包恢复”定位，而是包含两条受同一验收体系约束的产品线：
+
+1. **既有 ADP/MES 平台恢复线**：维护登录、组织、权限、菜单、配置、生产/质量等恢复资产，持续把可维护模块提升为源码模块并迁移到 PostgreSQL。
+2. **BPI 新产品线**：建设智能批次与工艺数据中心，连接 JetLinks/IoT、MES 生产上下文、Kafka/Flink、PostgreSQL、QCS 和 WMS，先完成影子批次，再进入生产闭环和训练数据产品。
+
+既有仓库主体仍来自 ADP/BAP 平台运行包，不等于原厂完整 MES 业务产品；BPI 则是本仓库中按可编译源码、版本化契约和真实验收新建的产品模块，不能与恢复代码的完整度混为一谈。
 
 已恢复内容主要包括：
 
@@ -37,6 +42,26 @@
 - 基础模块、质量/QCS、EAM、能源等部分运行包适配痕迹。
 
 业务层面的生产、质量、设备、能源、安环等完整产品形态，需要后续按模块继续接入、落表排查和业务 smoke。其中生产模块是当前目标的一部分，需要形成完整功能测试用例，覆盖主数据、指令/工单、备料/投料、作业许可、执行记录、报工、退料/尾料、状态流转、导入导出和落库证明。
+
+## BPI 产品目标
+
+BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可审计的生产事实：
+
+- 用生产指令、阀门路径、设备状态、流量、液位和物料/配方切换共同判断批次边界。
+- 以事件时间、checkpoint、幂等 inbox/outbox 和版本化规则保证可回放与可解释。
+- 自动形成批次、工艺参数、物料/能源耗用、质量证据和谱系，为后续 QCS/WMS 联动提供权威输入。
+- 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
+- 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
+
+当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执、真实 Kafka/PostgreSQL 联合验收和目标测试环境部署仍在推进，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
+
+权威设计和验收入口：
+
+- [BPI 总设计](designs/batch-process-intelligence.md)
+- [BPI 交互设计](designs/bpi-interaction-design.md)
+- [BPI API 目录](api/bpi-api-catalog.md)
+- [BPI 工程测试计划](testing/bpi-engineering-test-plan.md)
+- `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
 
@@ -205,19 +230,20 @@
 
 ## 当前下一步
 
-面向数采、批次、工艺、质量、物料、能源和训练数据的一体化新产品方向，已经形成
-[智能批次与工艺数据中心（BPI）设计](designs/batch-process-intelligence.md)及
-[工程测试计划](testing/bpi-engineering-test-plan.md)。该设计采用 JetLinks -> Kafka ->
-Flink -> BPI -> WOM/QCS/WMS 的分层路线；当前仅完成设计和工程审查，实施必须从 Phase 0
-契约/基准与 Phase 1 影子批次开始，不能把文档状态误记为功能已经交付。
+当前只保留两条有明确完成条件的执行主线：
 
-当前下一步不是继续补治理层，也不是只跑静态检查。必须先按 [功能验收与落库验收规则](functional-persistence-acceptance.md) 启动或访问真实系统，通过前端页面/E2E 操作验证当前功能，并对每个会改变业务数据的动作完成 PostgreSQL 落库验收。
+### 主线 A：BPI Phase 0/1
 
-优先顺序：
+1. 闭合规则发布 `Outbox -> Kafka -> Flink checkpoint -> application receipt -> BPI PostgreSQL/audit -> UI`，明确区分 broker 已投递和 Flink 已应用。
+2. 完成真实 PostgreSQL、Kafka/Flink checkpoint/restart 和重复回执验收，禁止用 mock 代替状态落库。
+3. 部署到目标测试环境，通过真实浏览器、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。
+4. 接入 JetLinks/IoT fork 的 exporter 和一条产线生产上下文，盘点真实点位、单位、质量码、sequence 和规则 locality group。
+5. 连续运行 7-14 天影子批次，达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
 
-1. 真实前端测试登录、首页、菜单、列表、查询、新增、编辑、删除/禁用、详情、导入导出、上传、配置页和业务主流程。
-2. 对写动作使用唯一 marker，记录 HTTP 请求、后端 Controller/Service/Mapper/DAO 链路、目标表和 PostgreSQL 查询结果。
-3. 同步更新 [前端功能测试报告](frontend-functional-test-report.md)、[后端落库验收报告](backend-table-audit/persistence-acceptance.md) 和 `metadata/persistence-acceptance.json`。
-4. 对启动失败、页面空白、权限不足、接口 500、SQL 异常、接口成功但未落库等问题，先作为阻断或失败项入账，再按影响面修复。
+### 主线 B：既有生产/质量核心链
 
-后端落表业务排查仍然是持续线程，但它必须服务于真实功能验收和落库证明，不能替代真实页面测试。
+1. 继续按 [功能验收与落库验收规则](functional-persistence-acceptance.md) 对真实页面执行唯一 marker 测试。
+2. 闭合制造指令、投料/报工、请检、合格/不合格处置、完工入库和批次追溯，而不是扩散到低优先级模块。
+3. 同步更新前端报告、后端落库报告和机器可读账本；接口 `200` 但未落库必须记为 `FAIL`。
+
+后端落表业务排查和仓库治理继续作为两条主线的支撑，不再替代产品功能开发、真实运行和落库证明。

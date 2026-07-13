@@ -22,7 +22,7 @@
 ## 已准备的部署门禁
 
 - 独立 Compose project，不改动现有 ADP Compose project；
-- 三节点 Kafka 4.2.0 KRaft，六个 topic（含 candidate DLQ）副本 3、`min.insync.replicas=2`；
+- 三节点 Kafka 4.2.0 KRaft，八个 topic（含 rule application 回执、回执 DLQ 和 candidate DLQ）副本 3、`min.insync.replicas=2`；
 - Flink 2.2.1 Application Mode，Java 17，稳定 job JAR；
 - RocksDB + MinIO/S3 增量 checkpoint；
 - 只绑定 loopback 的默认诊断端口；
