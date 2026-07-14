@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class RuleDefinitionParser {
@@ -26,8 +27,12 @@ public class RuleDefinitionParser {
     }
 
     public BoundaryRuleDefinition parse(RuleVersionView rule) {
+        return parse(rule.code(), rule.version(), rule.ast());
+    }
+
+    public BoundaryRuleDefinition parse(String code, String version, Map<String, Object> definition) {
         try {
-            JsonNode ast = objectMapper.valueToTree(rule.ast());
+            JsonNode ast = objectMapper.valueToTree(definition);
             List<EvidenceCondition> conditions = new ArrayList<>();
             JsonNode conditionNodes = ast.path("conditions");
             if (!conditionNodes.isArray() || conditionNodes.isEmpty()) {
@@ -51,8 +56,8 @@ public class RuleDefinitionParser {
                     Duration.ofSeconds(timing.path("watermarkDelaySeconds").asLong(0)),
                     Duration.ofSeconds(timing.path("evaluationTimeoutSeconds").asLong(300)));
             return new BoundaryRuleDefinition(
-                    rule.code(),
-                    rule.version(),
+                    code,
+                    version,
                     BoundaryKind.valueOf(required(ast, "boundaryType")),
                     ast.path("quorumMinimum").asInt(),
                     ast.path("minimumConfidence").asDouble(0.60),

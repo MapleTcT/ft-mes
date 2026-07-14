@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 19 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 24 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +28,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；请求体上限为 64 KiB。
-- 当前允许 GET overview/line/candidate/batch/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、rule simulate/publish。规则/拓扑草稿和拓扑发布仍返回 403。
+- 当前允许 GET overview/line/candidate/batch/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、topology draft/validate/publish、rule draft/simulate/publish/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -53,12 +53,12 @@
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
 | 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | SERVICE_IMPLEMENTED |
-| 工艺拓扑 | POST | `/bpi/v1/topologies/drafts` | `createTopologyDraft` | CONTRACT_ONLY |
-| 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/validate` | `validateTopologyDraft` | CONTRACT_ONLY |
-| 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/publish` | `publishTopologyVersion` | CONTRACT_ONLY |
+| 工艺拓扑 | POST | `/bpi/v1/topologies/drafts` | `createTopologyDraft` | SERVICE_IMPLEMENTED |
+| 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/validate` | `validateTopologyDraft` | SERVICE_IMPLEMENTED |
+| 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/publish` | `publishTopologyVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rules` | `listRules` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rules/{ruleId}` | `getRuleVersion` | SERVICE_IMPLEMENTED |
-| 边界规则 | POST | `/bpi/v1/rules/drafts` | `createRuleDraft` | CONTRACT_ONLY |
+| 边界规则 | POST | `/bpi/v1/rules/drafts` | `createRuleDraft` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/simulate` | `simulateRule` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rule-simulations/{simulationId}` | `getRuleSimulation` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
@@ -80,6 +80,12 @@
 - `START`：按 tenant/line 加事务锁，拒绝已有 `ACTIVE/SUSPENDED` 批次的重复启动，生成唯一影子批次；
 - `END`：锁定同 tenant/plant/line/order 的 `ACTIVE` 批次，要求结束时间晚于开始时间，写入 END 证据并
   迁移到 `CLOSED_RAW`。两种路径都使用候选 revision、幂等键、功能开关和审计。
+
+`createTopologyDraft` 支持全新版本和从已发布版本复制，拓扑定义包含节点、方向路径、JetLinks
+`productId/deviceId/propertyId` 绑定、单位、校准版本和必需语义信号。`validateTopologyDraft` 在发布前校验悬空路径、
+有向环、共享测点分配、重复信号和未绑定必需信号，并把结构化错误、校验 checksum、操作者和 revision 写入
+PostgreSQL。`publishTopologyVersion` 只允许独立于创建人的 `BPI_ADMIN` 发布校验通过且 checksum 未变化的草稿；
+发布后版本不可变。`createRuleDraft` 只引用已发布拓扑，并拒绝 AST 中未绑定的语义信号。
 
 `simulateRule` 不是固定成功桩。它按规则作用域读取 PostgreSQL `bpi_telemetry_points` 的校准测点，调用与在线
 候选相同的 `batch-rule-runtime`，再与 `bpi_rule_golden_boundaries` 的人工边界按容差匹配。空窗口、空金标准集

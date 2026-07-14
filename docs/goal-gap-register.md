@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-14T15:14:52+00:00` |
-| Repo Commit | `ca19a5788397b088c0b8cb60be66355ebebadf87` |
+| Generated At | `2026-07-14T16:19:20+00:00` |
+| Repo Commit | `d3a543789b52fb7feafb43c224acbbb0a60e73f0` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | BPI PostgreSQL 尚无可供日常页面维护的产线 topology/rule 产品数据，仍需可审计创建/导入入口；验收 fixture 不能冒充产品配置能力。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化已在本地真实 PostgreSQL 和确定性浏览器通过，但 Flyway V9、新 API、adapter 路由和前端尚需部署到目标测试环境，以真实 ADP 会话和目标 PostgreSQL marker 复验。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
 
 ## Production Blockers
 

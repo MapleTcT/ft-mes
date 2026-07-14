@@ -146,6 +146,28 @@ function match(pathname, pattern) {
   return result ? result.slice(1).map(decodeURIComponent) : null;
 }
 
+function stableUuid(value) {
+  const digest = sha256(value);
+  return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
+}
+
+function topologyValidation(definition) {
+  const errors = [];
+  const bindings = Array.isArray(definition?.bindings) ? definition.bindings : [];
+  if (!bindings.length) {
+    errors.push({ code: 'BINDINGS_REQUIRED', path: '/bindings', severity: 'ERROR', message: 'At least one JetLinks point binding is required.' });
+  }
+  bindings.forEach((binding, index) => {
+    ['signal', 'productId', 'deviceId', 'propertyId', 'calibrationVersion'].forEach((field) => {
+      if (!binding[field]) errors.push({ code: 'FIELD_REQUIRED', path: `/bindings/${index}/${field}`, severity: 'ERROR', message: `${field} is required.` });
+    });
+    if (!binding.expectedUnit && !binding.unit) {
+      errors.push({ code: 'BINDING_UNIT_REQUIRED', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'A binding must declare expectedUnit or unit.' });
+    }
+  });
+  return { errors, warnings: [] };
+}
+
 function createHandler(state) {
   return async (req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
@@ -386,26 +408,118 @@ function createHandler(state) {
         return send(res, 200, envelope(operationId, data), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/topologies') {
-        return send(res, 200, envelope('listTopologies', [state.topology]), 'listTopologies');
+        return send(res, 200, envelope('listTopologies', state.topologies), 'listTopologies');
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/topologies/drafts') {
+        const operationId = 'createTopologyDraft';
+        const body = await readJson(req);
+        const base = body.baseVersionId ? state.topologies.find((item) => item.id === body.baseVersionId) : null;
+        const context = commandContext(req, res, operationId, base?.revision || 0, state, path);
+        if (!context) return;
+        const required = ['code', 'version', 'plantId', 'lineId', 'definition', 'reason'];
+        const missing = required.filter((key) => body[key] === undefined || body[key] === '');
+        if (missing.length) return send(res, 422, problem(422, 'Validation Failed', `Missing fields: ${missing.join(', ')}.`, operationId), operationId);
+        if (state.topologies.some((item) => item.code === body.code && item.version === body.version)) {
+          return send(res, 409, problem(409, 'Version Conflict', 'Topology code and version already exist.', operationId), operationId);
+        }
+        const topology = {
+          id: stableUuid({ type: 'topology', code: body.code, version: body.version }),
+          code: body.code, version: body.version, state: 'DRAFT', revision: 1,
+          plantId: body.plantId, lineId: body.lineId, checksum: sha256(body.definition),
+          definition: clone(body.definition), validationStatus: 'NOT_VALIDATED',
+          validationErrors: [], validationWarnings: [], validatedBy: null, validatedAt: null,
+          publishedBy: null, publishedAt: null,
+        };
+        state.topologies.unshift(topology);
+        const response = envelope(operationId, topology);
+        return rememberAndSend(state, context, res, 200, response, operationId);
       }
       ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)$/);
       if (req.method === 'GET' && ids) {
-        if (ids[0] !== state.topology.id) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', 'getTopologyVersion'), 'getTopologyVersion');
-        return send(res, 200, envelope('getTopologyVersion', state.topology), 'getTopologyVersion');
+        const topology = state.topologies.find((item) => item.id === ids[0]);
+        if (!topology) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', 'getTopologyVersion'), 'getTopologyVersion');
+        return send(res, 200, envelope('getTopologyVersion', topology), 'getTopologyVersion');
+      }
+      ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)\/validate$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'validateTopologyDraft';
+        const topology = state.topologies.find((item) => item.id === ids[0]);
+        if (!topology) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, topology.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || topology.state !== 'DRAFT') return send(res, 409, problem(409, 'Invalid Topology State', 'Only a draft topology can be validated.', operationId, topology.revision), operationId);
+        const result = topologyValidation(topology.definition);
+        topology.validationErrors = result.errors;
+        topology.validationWarnings = result.warnings;
+        topology.validationStatus = result.errors.length ? 'FAILED' : 'PASSED';
+        topology.validatedBy = 'simulated.process.engineer';
+        topology.validatedAt = FIXED_TIME;
+        topology.revision += 1;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, topology), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)\/publish$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'publishTopologyVersion';
+        const topology = state.topologies.find((item) => item.id === ids[0]);
+        if (!topology) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, topology.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || topology.state !== 'DRAFT' || topology.validationStatus !== 'PASSED') {
+          return send(res, 409, problem(409, 'Invalid Topology State', 'Topology must pass validation before publication.', operationId, topology.revision), operationId);
+        }
+        topology.state = 'PUBLISHED';
+        topology.publishedBy = 'simulated.bpi.admin';
+        topology.publishedAt = FIXED_TIME;
+        topology.revision += 1;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, topology), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/rules') {
-        return send(res, 200, envelope('listRules', [state.rule]), 'listRules');
+        return send(res, 200, envelope('listRules', state.rules), 'listRules');
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/rules/drafts') {
+        const operationId = 'createRuleDraft';
+        const body = await readJson(req);
+        const base = body.baseVersionId ? state.rules.find((item) => item.id === body.baseVersionId) : null;
+        const context = commandContext(req, res, operationId, base?.revision || 0, state, path);
+        if (!context) return;
+        const topology = state.topologies.find((item) => `${item.code}@${item.version}` === body.topologyVersion && item.state === 'PUBLISHED');
+        const missing = ['code', 'version', 'lineId', 'topologyVersion', 'ast', 'reason'].filter((key) => body[key] === undefined || body[key] === '');
+        if (missing.length || !topology) return send(res, 422, problem(422, 'Validation Failed', missing.length ? `Missing fields: ${missing.join(', ')}.` : 'Published topology not found.', operationId), operationId);
+        const boundSignals = new Set((topology.definition.bindings || []).map((binding) => binding.signal));
+        const unbound = (body.ast.conditions || []).map((condition) => condition.signal).filter((signal) => !boundSignals.has(signal));
+        if (unbound.length) return send(res, 422, problem(422, 'Validation Failed', `Rule conditions reference signals not bound by the topology: ${unbound.join(', ')}.`, operationId), operationId);
+        if (state.rules.some((item) => item.code === body.code && item.version === body.version)) {
+          return send(res, 409, problem(409, 'Version Conflict', 'Rule code and version already exist.', operationId), operationId);
+        }
+        const rule = {
+          id: stableUuid({ type: 'rule', code: body.code, version: body.version }), code: body.code,
+          version: body.version, plantId: topology.plantId, lineId: body.lineId,
+          topologyVersion: body.topologyVersion, ast: clone(body.ast), state: 'DRAFT', revision: 1,
+          checksum: sha256(body.ast), latestSimulationId: null, publicationStatus: 'NOT_PUBLISHED',
+          publicationRevision: 0, publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
+          publicationManualRetryCount: 0, publicationPublishedAt: null,
+          publicationLastRequeuedAt: null, publicationLastError: null,
+          applicationStatus: 'NOT_PUBLISHED', applicationDeploymentId: null,
+          applicationObservedAt: null, applicationReceivedAt: null,
+          applicationErrorCode: null, applicationErrorDetail: null,
+        };
+        state.rules.unshift(rule);
+        return rememberAndSend(state, context, res, 200, envelope(operationId, rule), operationId);
       }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)$/);
       if (req.method === 'GET' && ids) {
-        if (ids[0] !== state.rule.id) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', 'getRuleVersion'), 'getRuleVersion');
-        return send(res, 200, envelope('getRuleVersion', state.rule), 'getRuleVersion');
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', 'getRuleVersion'), 'getRuleVersion');
+        return send(res, 200, envelope('getRuleVersion', rule), 'getRuleVersion');
       }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/simulate$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'simulateRule';
-        if (ids[0] !== state.rule.id) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
-        const context = commandContext(req, res, operationId, state.rule.revision, state, path);
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, rule.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
         const required = ['lineId', 'from', 'to', 'topologyVersion', 'calibrationVersion', 'goldenSetId'];
@@ -415,17 +529,17 @@ function createHandler(state) {
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
         const simulation = {
-          id: '5b0c7926-eeac-42f0-a4ce-5d32a5cc51bb', ruleId: state.rule.id, state: 'PASSED',
-          checksum: sha256({ ruleChecksum: state.rule.checksum, input: body }),
+          id: stableUuid({ type: 'simulation', ruleId: rule.id }), ruleId: rule.id, state: 'PASSED',
+          checksum: sha256({ ruleChecksum: rule.checksum, input: body }),
           metrics: { matched: 42, missed: 0, falsePositive: 0, meanBoundaryErrorSeconds: 2.4 },
           inputManifest: { ...clone(body), observationCount: 18640, goldenBoundaryCount: 42 },
           emittedBoundaries: ['2026-07-12T07:59:40.000Z'],
           failureReason: null,
         };
         state.simulations.set(simulation.id, simulation);
-        state.rule.latestSimulationId = simulation.id;
-        state.rule.state = 'SIMULATION_PASSED';
-        state.rule.revision += 1;
+        rule.latestSimulationId = simulation.id;
+        rule.state = 'SIMULATION_PASSED';
+        rule.revision += 1;
         const response = envelope(operationId, simulation);
         return rememberAndSend(state, context, res, 202, response, operationId);
       }
@@ -438,8 +552,9 @@ function createHandler(state) {
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/publish$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'publishRuleVersion';
-        if (ids[0] !== state.rule.id) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
-        const context = commandContext(req, res, operationId, state.rule.revision, state, path);
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, rule.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
         const simulation = state.simulations.get(body.simulationId);
@@ -447,23 +562,23 @@ function createHandler(state) {
           const response = problem(422, 'Simulation Proof Required', 'A passed simulation and matching checksum are required.', operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
-        state.rule.state = 'PUBLISHED';
-        state.rule.publicationStatus = 'PENDING';
-        state.rule.publicationRevision = 1;
-        state.rule.publicationAttemptCount = 0;
-        state.rule.publicationTotalAttemptCount = 0;
-        state.rule.publicationManualRetryCount = 0;
-        state.rule.publicationPublishedAt = null;
-        state.rule.publicationLastRequeuedAt = null;
-        state.rule.publicationLastError = null;
-        state.rule.applicationStatus = 'WAITING';
-        state.rule.applicationDeploymentId = null;
-        state.rule.applicationObservedAt = null;
-        state.rule.applicationReceivedAt = null;
-        state.rule.applicationErrorCode = null;
-        state.rule.applicationErrorDetail = null;
-        state.rule.revision += 1;
-        const response = envelope(operationId, state.rule);
+        rule.state = 'PUBLISHED';
+        rule.publicationStatus = 'PENDING';
+        rule.publicationRevision = 1;
+        rule.publicationAttemptCount = 0;
+        rule.publicationTotalAttemptCount = 0;
+        rule.publicationManualRetryCount = 0;
+        rule.publicationPublishedAt = null;
+        rule.publicationLastRequeuedAt = null;
+        rule.publicationLastError = null;
+        rule.applicationStatus = 'WAITING';
+        rule.applicationDeploymentId = null;
+        rule.applicationObservedAt = null;
+        rule.applicationReceivedAt = null;
+        rule.applicationErrorCode = null;
+        rule.applicationErrorDetail = null;
+        rule.revision += 1;
+        const response = envelope(operationId, rule);
         return rememberAndSend(state, context, res, 200, response, operationId);
       }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/publication\/retry$/);

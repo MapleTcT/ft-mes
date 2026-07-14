@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-14T23:42:39+08:00",
+  "repoCommit": "d3a543789b52fb7feafb43c224acbbb0a60e73f0",
+  "workingTree": "uncommitted",
+  "status": "PASS_LOCAL_PRODUCTIZATION",
+  "database": "PostgreSQL 16.13",
+  "flywayVersion": "9",
+  "summary": {
+    "postgresAcceptanceTests": 1,
+    "browserE2eTests": 7,
+    "pass": 8,
+    "fail": 0,
+    "browserErrors": 0
+  },
+  "operations": [
+    "createTopologyDraft",
+    "validateTopologyDraft",
+    "publishTopologyVersion",
+    "createRuleDraft"
+  ],
+  "tables": [
+    "bpi.bpi_topology_versions",
+    "bpi.bpi_rule_versions",
+    "bpi.bpi_audit_events",
+    "bpi.bpi_api_idempotency",
+    "bpi.bpi_feature_flags"
+  ],
+  "evidence": {
+    "postgresTest": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTopologyRuleProductizationPostgresAcceptanceTest.java",
+    "browserTest": "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "migration": "services/bpi-service/app/src/main/resources/db/migration/V9__bpi_topology_productization.sql",
+    "report": "docs/testing/bpi-topology-rule-productization-acceptance.md"
+  },
+  "cleanup": {
+    "strategy": "tenant marker scoped DELETE in foreign-key order",
+    "markerPattern": "ADP_E2E_BPI_PRODUCT_*",
+    "completed": true
+  },
+  "limitations": [
+    "Local PostgreSQL and deterministic browser acceptance do not prove target-environment deployment.",
+    "Real gateway and protocol device points are not connected.",
+    "IoT and MES context have not produced candidate and batch with one marker.",
+    "Seven-to-fourteen-day shadow operation is not complete.",
+    "QCS and WMS writes remain disabled."
+  ]
+}

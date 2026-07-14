@@ -15,6 +15,7 @@ public class BpiRoutePolicy {
                     + "topologies(?:/" + ID + ")?|rules(?:/" + ID + ")?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
+                    + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|rules/drafts|"
                     + "rules/" + ID + "/(?:simulate|publish|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {

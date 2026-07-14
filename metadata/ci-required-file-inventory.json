@@ -3999,6 +3999,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-topology-rule-productization-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -4270,6 +4276,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-test-host-capacity-preflight.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-topology-rule-productization-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5055,6 +5067,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CanonicalJson.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/Checksums.java",
       "state": "tracked",
       "tracked": true
@@ -5098,6 +5116,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TopologyDefinitionValidator.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5260,6 +5284,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TelemetryValue.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TopologyValidationIssue.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5487,6 +5517,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleDraftCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RulePublishCommand.java",
       "state": "tracked",
       "tracked": true
@@ -5506,6 +5542,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TelemetryPointRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TopologyDraftCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5571,6 +5613,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V9__bpi_topology_productization.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5607,6 +5655,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTopologyRuleProductizationPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
       "state": "tracked",
       "tracked": true
@@ -5620,6 +5674,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/RuleApplicationKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/CanonicalJsonTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/TopologyDefinitionValidatorTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6323,13 +6389,13 @@
       "tracked": 481
     },
     "docs": {
-      "tracked": 82
+      "tracked": 83
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 100
+      "tracked": 101
     },
     "package.json": {
       "tracked": 1
@@ -6341,7 +6407,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 132
+      "tracked": 141
     },
     "simulation": {
       "tracked": 4
@@ -6353,8 +6419,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1049,
-    "tracked": 1049,
+    "totalFiles": 1060,
+    "tracked": 1060,
     "untracked": 0
   },
   "untrackedByDirectory": []

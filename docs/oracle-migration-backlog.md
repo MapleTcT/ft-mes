@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-14T11:46:22+00:00`。
-- Repo Commit：`1bf7429c2f486a6d973937dd81785243dbfbcb00`。
-- 总引用数：`981`。
+- Generated At：`2026-07-14T16:17:19+00:00`。
+- Repo Commit：`d3a543789b52fb7feafb43c224acbbb0a60e73f0`。
+- 总引用数：`982`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -21,7 +21,7 @@
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
 | documentation-or-workflow | 185 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
-| java-row-index-noise | 19 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
+| java-row-index-noise | 20 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 6 | PostgreSQL compatibility SQL may mention Oracle as source context. |
@@ -61,9 +61,9 @@
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mysql/rbac_1.sql | 9 |
 | deploy/docker/scripts/patch-postgres-runtime.py | 9 |
 | docs/backend-module-dependency-inventory.md | 9 |
+| services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java | 9 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml | 8 |
 | backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java | 8 |
-| deploy/docker/scripts/adp-nacos-config-drift-smoke.js | 8 |
 
 ## 优先 Backlog 样例
 

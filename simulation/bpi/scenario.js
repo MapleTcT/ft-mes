@@ -73,6 +73,9 @@ function createScenario() {
     id: '9f73950f-5bc3-4d95-a504-90557905d17b', code: 'TOPO-S07', version: '3',
     state: 'PUBLISHED', revision: 1, plantId: 'PLANT-01', lineId: 'LINE-S07-01',
     checksum: sha256({ code: 'TOPO-S07', version: '3', lineId: 'LINE-S07-01' }),
+    validationStatus: 'PASSED', validationErrors: [], validationWarnings: [],
+    validatedBy: 'process.engineer', validatedAt: '2026-07-12T07:50:00.000Z',
+    publishedBy: 'bpi.admin', publishedAt: '2026-07-12T07:55:00.000Z',
     definition: {
       localityGroup: 'LOCALITY-S07-EVAP',
       stages: [{ code: 'EVAPORATION', name: '蒸发浓缩' }],
@@ -80,10 +83,12 @@ function createScenario() {
         { code: 'PUMP-S07-FEED', type: 'PUMP', name: 'S07 进料泵' },
         { code: 'TANK-S07-TARGET', type: 'TANK', name: 'S07 接收罐' },
       ],
+      edges: [{ from: 'PUMP-S07-FEED', to: 'TANK-S07-TARGET' }],
       bindings: [
-        { signal: 'flow.instant', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', unit: 't/h', calibrationVersion: 'CAL-1' },
-        { signal: 'pump.running', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running', unit: 'bool', calibrationVersion: 'CAL-1' },
+        { signal: 'flow.instant', productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', unit: 't/h', calibrationVersion: 'CAL-1' },
+        { signal: 'pump.running', productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running', unit: 'bool', calibrationVersion: 'CAL-1' },
       ],
+      requiredSignals: ['flow.instant', 'pump.running'],
     },
   };
 
@@ -126,7 +131,9 @@ function createScenario() {
     batches: [],
     batchEvents: [],
     topology,
+    topologies: [topology],
     rule,
+    rules: [rule],
     simulations: new Map(),
     incident,
     integrations: [

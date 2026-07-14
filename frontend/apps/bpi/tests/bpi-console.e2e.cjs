@@ -236,6 +236,59 @@ test('shift lead rejects a false candidate without creating a batch', async () =
   await page.close();
 });
 
+test('process engineer creates validates and publishes topology before creating a rule draft', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/rules`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('button', { name: '新建拓扑' }).click();
+  await page.getByRole('heading', { name: '新建拓扑版本' }).waitFor();
+  await page.locator('#topology-code').fill('ADP_E2E_TOPOLOGY');
+  await page.locator('#topology-version').fill('1.0.0');
+  await page.locator('#topology-reason').fill('建立 S07 批次边界测点拓扑');
+  await page.getByRole('button', { name: '创建草稿' }).click();
+  await page.getByText('拓扑草稿 ADP_E2E_TOPOLOGY@1.0.0 已创建').waitFor();
+  await page.getByRole('heading', { name: 'ADP_E2E_TOPOLOGY@1.0.0' }).waitFor();
+
+  await page.getByRole('button', { name: '校验拓扑' }).click();
+  await page.getByRole('heading', { name: '校验拓扑与测点绑定' }).waitFor();
+  await page.locator('#confirm-reason').fill('核对节点路径、单位和 JetLinks 点位绑定');
+  await page.getByRole('button', { name: '开始校验' }).click();
+  await page.getByText('拓扑校验通过，可提交独立管理员发布').waitFor();
+  await page.getByRole('button', { name: '发布拓扑' }).click();
+  await page.getByRole('heading', { name: '发布不可变拓扑版本' }).waitFor();
+  await page.locator('#confirm-reason').fill('独立管理员复核通过并批准上线');
+  await page.getByRole('button', { name: '确认发布' }).click();
+  await page.getByText('拓扑 ADP_E2E_TOPOLOGY@1.0.0 已发布').waitFor();
+  await page.locator('#detail-drawer [data-close-drawer]').first().click();
+
+  await page.getByRole('button', { name: '新建规则' }).click();
+  await page.getByRole('heading', { name: '新建规则版本' }).waitFor();
+  await page.locator('#rule-code').fill('ADP_E2E_BATCH_START');
+  await page.locator('#rule-version').fill('1.0.0');
+  await page.locator('#rule-reason').fill('建立进料流量启动边界规则');
+  await page.getByRole('button', { name: '创建草稿' }).click();
+  await page.getByText('规则草稿 ADP_E2E_BATCH_START@1.0.0 已创建').waitFor();
+  await page.getByRole('heading', { name: 'ADP_E2E_BATCH_START@1.0.0' }).waitFor();
+
+  const topologies = await fetch(`${simulatorUrl}/bpi/v1/topologies?plantId=PLANT-01`).then((response) => response.json());
+  const rules = await fetch(`${simulatorUrl}/bpi/v1/rules?plantId=PLANT-01`).then((response) => response.json());
+  const createdTopology = topologies.data.find((item) => item.code === 'ADP_E2E_TOPOLOGY');
+  const createdRule = rules.data.find((item) => item.code === 'ADP_E2E_BATCH_START');
+  assert.equal(createdTopology.state, 'PUBLISHED');
+  assert.equal(createdTopology.validationStatus, 'PASSED');
+  assert.equal(createdTopology.revision, 3);
+  assert.equal(createdRule.state, 'DRAFT');
+  assert.equal(createdRule.topologyVersion, 'ADP_E2E_TOPOLOGY@1.0.0');
+  assert.equal(createdRule.revision, 1);
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-topology-rule-productization.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('process engineer replays PostgreSQL evidence and publishes a checksum-gated rule', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-14T00:34:41Z",
-  "repoCommit": "0279e279",
+  "generatedAt": "2026-07-14T16:00:00Z",
+  "repoCommit": "d3a543789b52fb7feafb43c224acbbb0a60e73f0",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 6,
-    "pass": 6,
+    "browserTests": 7,
+    "pass": 7,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -134,6 +134,30 @@
       "evidence": "/tmp/bpi-console-candidate-rejected.png"
     },
     {
+      "id": "desktop-topology-rule-productization",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/rules"
+      ],
+      "operations": [
+        "create a topology draft with a versioned JetLinks binding definition",
+        "validate nodes, paths, units, calibration and required signals",
+        "publish the validated immutable topology",
+        "create a rule draft bound to the published topology",
+        "verify topology PUBLISHED/PASSED revision 3 and rule DRAFT revision 1"
+      ],
+      "apis": [
+        "POST /bpi/v1/topologies/drafts",
+        "POST /bpi/v1/topologies/{id}/validate",
+        "POST /bpi/v1/topologies/{id}/publish",
+        "POST /bpi/v1/rules/drafts",
+        "GET /bpi/v1/topologies",
+        "GET /bpi/v1/rules"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-topology-rule-productization.png"
+    },
+    {
       "id": "desktop-rule-replay-and-publication",
       "viewport": "1440x900",
       "routes": [
@@ -172,12 +196,12 @@
   "persistence": {
     "performed": false,
     "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
-    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json and metadata/bpi-rule-management-acceptance.json"
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json and metadata/bpi-topology-rule-productization-acceptance.json"
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
-    "The Java 8 authentication adapter route and JWT scope boundary are implemented and unit tested; target Keycloak/JWKS browser acceptance remains pending.",
+    "The Java 8 authentication adapter and ADP session bridge have prior target evidence; the new topology and rule write routes still require target-environment browser acceptance.",
     "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
     "Flink application state was exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
     "No real mobile device, weak-network or accessibility acceptance was performed."

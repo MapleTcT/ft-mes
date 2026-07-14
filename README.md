@@ -21,7 +21,7 @@
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
-| BPI 产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka/Flink、`MapleTcT/iot@357a285b` 受控 EventBus source、真实 WOM production context 和影子批次确认均有可复验证据 | 真实设备点位的 IoT/MES 同 marker 候选/批次、连续影子运行、END 边界和 QCS/WMS 写回仍未完成 |
+| BPI 产品链 | `PARTIAL` | 契约、可审计拓扑/规则产品化、操作台、真实 PostgreSQL、Kafka/Flink、`MapleTcT/iot@357a285b` 受控 EventBus source、真实 WOM production context 和影子批次确认均有可复验证据 | 目标环境 V9 复验、真实设备点位的 IoT/MES 同 marker 候选/批次、连续影子运行、END 边界和 QCS/WMS 写回仍未完成 |
 | 目标测试环境 | `PASS_PHASE1_MES_CONTEXT` | BPI 页面与真实 ADP 会话桥接、三 broker Kafka、Flink/MinIO、真实 WOM outbox/context join、受控遥测候选落库及独立 JetLinks EventBus source marker 均已实测 | 该状态仍不是现场或生产 READY |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
@@ -78,6 +78,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - `MapleTcT/iot@357a285b` 已实现 JetLinks 解码后属性事件的显式设备/测点映射、稳定身份、来源序列、Redis 周期、持久化磁盘缓冲、Kafka 幂等发送、Micrometer 指标和失败关闭；14 个 Java 测试、7 个部署脚本测试及 40 模块 standalone 打包通过。目标机受控 marker `ADP_BPI_E2E_20260714_145738_757314` 已通过 JetLinks EventBus、exporter、Kafka partition 4 offset `3 -> 4` 和 Flink source lag `0`，测试入口随后恢复为关闭。
 - MES production context outbox 已实现 `176` 同事务捕获和 `177` 版本时钟下限、显式产线/状态映射、`BLOCKED_*` 失败关闭、Java 8 `SKIP LOCKED` 抢占、Kafka 幂等发送、重试/毒消息终止和 Micrometer 指标；目标机已通过真实 WOM `start/hold`、3 条 `SENT|1` 上下文、Flink join 和影子批次确认。
 - PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认、影子批次、证据和审计。
+- 拓扑/规则产品化：页面可新建或复制版本，拓扑发布前校验路径、环、JetLinks 产品/设备/属性、单位、校准和必需信号；独立管理员发布后版本不可变，规则草稿只能引用已发布拓扑及其绑定信号。Flyway V1-V9、真实 PostgreSQL marker 和 7 条浏览器 E2E 已通过。
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和规则应用回执。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
 - BPI 操作台、确定性模拟服务和浏览器 E2E。
@@ -249,6 +250,7 @@ Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`�
 
 | 验收面 | 当前证据 | 结论边界 |
 |---|---|---|
+| 拓扑/规则产品化 | [拓扑与规则产品化验收](metadata/bpi-topology-rule-productization-acceptance.json) | Flyway V1-V9、真实本地 PostgreSQL marker 和确定性浏览器通过；尚需目标环境 V9 复验 |
 | BPI 浏览器状态交互 | [BPI UI 验收](metadata/bpi-ui-acceptance.json) | 确定性模拟浏览器，不代表真实 Java/Kafka/Flink |
 | 回执 PostgreSQL 状态迁移 | [回执落库验收](metadata/bpi-rule-application-receipt-acceptance.json) | 真实 PostgreSQL，不含真实 broker |
 | Kafka 消费重启、幂等与 DLQ | [Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json) | 本地 Embedded Kafka + PostgreSQL，不含 Flink job |
@@ -323,7 +325,7 @@ scripts/                       构建、恢复、审计和门禁脚本
 ## 当前未闭合事项
 
 - 保持已完成的目标环境同一 marker 浏览器发布、outbox、Kafka、Flink 应用回执、PostgreSQL、候选确认、批次/证据/审计联合验收为发布回归基线。
-- 为产品补齐可审计的拓扑/规则创建或导入入口，避免依赖手工数据库 fixture 作为日常配置方式。
+- 将拓扑/规则产品化版本部署到目标测试环境，执行真实 ADP 会话、API、PostgreSQL marker 和回滚复验。
 - 完成 Kafka broker 故障、savepoint 升级和整套 BPI 回滚演练；当前只完成带负载 TaskManager 重启恢复。
 - [MapleTcT/iot](https://github.com/MapleTcT/iot) exporter 的真实网关/协议设备点位、单位、质量码、sequence 和 locality group 映射。
 - 把 `MapleTcT/iot@357a285b` exporter 与 WOM context 配到同一试点 scope，以真实设备事件替换受控 EventBus marker，并用同一 marker 闭合 candidate/batch 后连续运行 7-14 天影子批次。

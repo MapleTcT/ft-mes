@@ -214,11 +214,11 @@
     },
     "/bpi/v1/topologies/drafts": {
       "post": {
-        "tags": ["Topologies"], "operationId": "createTopologyDraft", "summary": "从已发布版本创建拓扑草稿",
+        "tags": ["Topologies"], "operationId": "createTopologyDraft", "summary": "创建新拓扑草稿或复制已发布版本",
         "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
-        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["lineId"], "properties": {"lineId": {"type": "string"}, "baseVersionId": {"type": ["string", "null"]}}}}}},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyDraftCommand"}}}},
         "responses": {
-          "200": {"description": "拓扑草稿", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "200": {"description": "拓扑草稿", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
           "428": {"$ref": "#/components/responses/PreconditionRequired"}
         }
@@ -230,7 +230,7 @@
         "parameters": [{"$ref": "#/components/parameters/TopologyId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
         "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
         "responses": {
-          "200": {"description": "校验结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "200": {"description": "校验结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
           "428": {"$ref": "#/components/responses/PreconditionRequired"}
         }
@@ -242,7 +242,7 @@
         "parameters": [{"$ref": "#/components/parameters/TopologyId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
         "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
         "responses": {
-          "200": {"description": "发布结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/GenericObjectResponse"}}}},
+          "200": {"description": "发布结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
           "428": {"$ref": "#/components/responses/PreconditionRequired"}
         }
@@ -542,13 +542,15 @@
           "meta": {"$ref": "#/components/schemas/ResponseMeta"}
         }
       },
-      "Topology": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "checksum", "definition"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string"}, "revision": {"type": "integer", "minimum": 0}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string"}, "definition": {"type": "object"}}},
+      "TopologyValidationIssue": {"type": "object", "required": ["code", "path", "severity", "message"], "properties": {"code": {"type": "string"}, "path": {"type": "string"}, "severity": {"type": "string", "enum": ["ERROR", "WARNING"]}, "message": {"type": "string"}}},
+      "TopologyDraftCommand": {"type": "object", "required": ["code", "version", "plantId", "lineId", "definition", "reason"], "properties": {"code": {"type": "string", "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"}, "version": {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}, "plantId": {"type": "string", "maxLength": 64}, "lineId": {"type": "string", "maxLength": 128}, "baseVersionId": {"type": ["string", "null"], "format": "uuid"}, "definition": {"type": "object", "minProperties": 1}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
+      "Topology": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "checksum", "definition", "validationStatus", "validationErrors", "validationWarnings"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "PUBLISHED"]}, "revision": {"type": "integer", "minimum": 0}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string"}, "definition": {"type": "object"}, "validationStatus": {"type": "string", "enum": ["NOT_VALIDATED", "PASSED", "FAILED"]}, "validationErrors": {"type": "array", "items": {"$ref": "#/components/schemas/TopologyValidationIssue"}}, "validationWarnings": {"type": "array", "items": {"$ref": "#/components/schemas/TopologyValidationIssue"}}, "validatedBy": {"type": ["string", "null"]}, "validatedAt": {"type": ["string", "null"], "format": "date-time"}, "publishedBy": {"type": ["string", "null"]}, "publishedAt": {"type": ["string", "null"], "format": "date-time"}}},
       "TopologyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Topology"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "TopologyListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Topology"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "Rule": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "topologyVersion", "checksum", "ast", "publicationStatus", "publicationRevision", "publicationAttemptCount", "publicationTotalAttemptCount", "publicationManualRetryCount", "applicationStatus"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "VALIDATED", "SIMULATION_PASSED", "PENDING_APPROVAL", "PUBLISHED"]}, "revision": {"type": "integer"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "checksum": {"type": "string"}, "ast": {"type": "object"}, "latestSimulationId": {"type": ["string", "null"], "format": "uuid"}, "publicationStatus": {"type": "string", "enum": ["NOT_PUBLISHED", "NOT_TRACKED", "PENDING", "DISPATCHING", "PUBLISHED", "FAILED"]}, "publicationRevision": {"type": "integer", "minimum": 0}, "publicationAttemptCount": {"type": "integer", "minimum": 0}, "publicationTotalAttemptCount": {"type": "integer", "minimum": 0}, "publicationManualRetryCount": {"type": "integer", "minimum": 0}, "publicationPublishedAt": {"type": ["string", "null"], "format": "date-time"}, "publicationLastRequeuedAt": {"type": ["string", "null"], "format": "date-time"}, "publicationLastError": {"type": ["string", "null"]}, "applicationStatus": {"type": "string", "enum": ["NOT_PUBLISHED", "NOT_TRACKED", "WAITING", "REJECTED", "APPLIED"]}, "applicationDeploymentId": {"type": ["string", "null"]}, "applicationObservedAt": {"type": ["string", "null"], "format": "date-time"}, "applicationReceivedAt": {"type": ["string", "null"], "format": "date-time"}, "applicationErrorCode": {"type": ["string", "null"]}, "applicationErrorDetail": {"type": ["string", "null"]}}},
       "RuleResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Rule"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "RuleListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Rule"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
-      "RuleDraftCommand": {"type": "object", "required": ["code", "lineId", "topologyVersion", "ast"], "properties": {"code": {"type": "string"}, "lineId": {"type": "string"}, "topologyVersion": {"type": "string"}, "ast": {"type": "object"}, "reason": {"type": "string"}}},
+      "RuleDraftCommand": {"type": "object", "required": ["code", "version", "lineId", "topologyVersion", "ast", "reason"], "properties": {"code": {"type": "string", "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"}, "version": {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}, "lineId": {"type": "string", "maxLength": 128}, "topologyVersion": {"type": "string", "maxLength": 193}, "baseVersionId": {"type": ["string", "null"], "format": "uuid"}, "ast": {"type": "object", "minProperties": 1}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
       "RuleSimulationCommand": {"type": "object", "required": ["lineId", "from", "to", "topologyVersion", "calibrationVersion", "goldenSetId"], "properties": {"lineId": {"type": "string"}, "from": {"type": "string", "format": "date-time"}, "to": {"type": "string", "format": "date-time"}, "topologyVersion": {"type": "string"}, "calibrationVersion": {"type": "string"}, "goldenSetId": {"type": "string"}}},
       "RulePublishCommand": {"type": "object", "required": ["reason", "simulationId", "simulationChecksum"], "properties": {"reason": {"type": "string"}, "simulationId": {"type": "string"}, "simulationChecksum": {"type": "string"}}},
       "Simulation": {"type": "object", "required": ["id", "ruleId", "state", "checksum", "metrics", "inputManifest", "emittedBoundaries"], "properties": {"id": {"type": "string", "format": "uuid"}, "ruleId": {"type": "string", "format": "uuid"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "metrics": {"type": "object", "properties": {"matched": {"type": "integer"}, "missed": {"type": "integer"}, "falsePositive": {"type": "integer"}, "meanBoundaryErrorSeconds": {"type": "number"}}}, "inputManifest": {"type": "object"}, "emittedBoundaries": {"type": "array", "items": {"type": "string", "format": "date-time"}}, "failureReason": {"type": ["string", "null"]}}},

@@ -18,8 +18,10 @@ import com.mapletct.ftmes.bpi.infrastructure.postgres.RulePostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxProperties;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import com.mapletct.ftmes.bpi.interfaces.rest.RulePublishCommand;
+import com.mapletct.ftmes.bpi.interfaces.rest.RuleDraftCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.RuleSimulationCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.ReasonCommand;
+import com.mapletct.ftmes.bpi.interfaces.rest.TopologyDraftCommand;
 import com.mapletct.ftmes.bpi.rules.BoundaryRuleDefinition;
 import com.mapletct.ftmes.bpi.rules.BoundaryWindowEvaluator;
 import com.mapletct.ftmes.bpi.rules.BoundaryWindowResult;
@@ -55,6 +57,8 @@ public class RuleService {
     private final RulePublicationFactory publicationFactory;
     private final RulePublicationOutboxRepository outboxRepository;
     private final RulePublicationOutboxProperties outboxProperties;
+    private final TopologyDefinitionValidator topologyValidator;
+    private final CanonicalJson canonicalJson;
     private final ObjectMapper objectMapper;
 
     public RuleService(
@@ -64,6 +68,8 @@ public class RuleService {
             RulePublicationFactory publicationFactory,
             RulePublicationOutboxRepository outboxRepository,
             RulePublicationOutboxProperties outboxProperties,
+            TopologyDefinitionValidator topologyValidator,
+            CanonicalJson canonicalJson,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.sharedRepository = sharedRepository;
@@ -71,6 +77,8 @@ public class RuleService {
         this.publicationFactory = publicationFactory;
         this.outboxRepository = outboxRepository;
         this.outboxProperties = outboxProperties;
+        this.topologyValidator = topologyValidator;
+        this.canonicalJson = canonicalJson;
         this.objectMapper = objectMapper;
     }
 
@@ -86,6 +94,138 @@ public class RuleService {
         return repository.findTopology(actor, topologyId);
     }
 
+    @Transactional(timeout = 15)
+    public CommandResult<TopologyVersionView> createTopologyDraft(
+            ActorContext actor,
+            String idempotencyKey,
+            String ifMatch,
+            TopologyDraftCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        assertRequestedScope(actor, command.plantId(), command.lineId());
+        assertRuleManagementEnabled(actor, command.plantId(), command.lineId());
+        String path = "/bpi/v1/topologies/drafts";
+        String requestChecksum = Checksums.sha256(canonicalJson.write(command));
+        CommandResult<TopologyVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<TopologyVersionView>() {});
+        if (replay != null) return replay;
+
+        if (command.baseVersionId() == null) {
+            if (expectedRevision != 0) {
+                throw new BpiConflictException("A new topology must use If-Match 0.", 0L);
+            }
+        } else {
+            TopologyVersionView base = repository.lockTopology(actor, command.baseVersionId());
+            if (base.revision() != expectedRevision) {
+                throw new BpiConflictException("Base topology revision is stale.", base.revision());
+            }
+            if (!"PUBLISHED".equals(base.state())) {
+                throw new BpiConflictException("Only a published topology can be copied.", base.revision());
+            }
+            if (!base.code().equals(command.code()) || !base.plantId().equals(command.plantId())
+                    || !base.lineId().equals(command.lineId())) {
+                throw new BpiValidationException("A copied topology must keep its code and scope.");
+            }
+        }
+
+        UUID topologyId = UUID.randomUUID();
+        String checksum = Checksums.sha256(canonicalJson.write(command.definition()));
+        repository.insertTopologyDraft(
+                actor, topologyId, command.code(), command.version(), command.plantId(),
+                command.lineId(), checksum, command.definition());
+        TopologyVersionView draft = repository.findTopology(actor, topologyId);
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("checksum", checksum);
+        detail.put("baseVersionId", command.baseVersionId());
+        repository.insertTopologyAudit(
+                actor, draft, "TOPOLOGY_DRAFT_CREATED", 0, 1,
+                command.reason(), traceId, detail);
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(draft));
+        return new CommandResult<>(draft, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<TopologyVersionView> validateTopology(
+            ActorContext actor,
+            UUID topologyId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        TopologyVersionView visible = repository.findTopology(actor, topologyId);
+        assertRuleManagementEnabled(actor, visible.plantId(), visible.lineId());
+        String path = "/bpi/v1/topologies/" + topologyId + "/validate";
+        String requestChecksum = Checksums.sha256(
+                topologyId + "|" + expectedRevision + "|" + canonicalJson.write(command));
+        CommandResult<TopologyVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<TopologyVersionView>() {});
+        if (replay != null) return replay;
+
+        TopologyVersionView topology = repository.lockTopology(actor, topologyId);
+        if (topology.revision() != expectedRevision) {
+            throw new BpiConflictException("Topology revision is stale.", topology.revision());
+        }
+        if (!"DRAFT".equals(topology.state())) {
+            throw new BpiConflictException("Published topology versions are immutable.", topology.revision());
+        }
+        String checksum = Checksums.sha256(canonicalJson.write(topology.definition()));
+        if (!checksum.equals(topology.checksum())) {
+            throw new BpiConflictException("Topology definition checksum no longer matches the draft.", topology.revision());
+        }
+        TopologyDefinitionValidator.ValidationResult validation = topologyValidator.validate(topology.definition());
+        repository.recordTopologyValidation(
+                actor, topology.id(), topology.revision(), checksum,
+                validation.errors(), validation.warnings());
+        repository.insertTopologyAudit(
+                actor, topology,
+                validation.valid() ? "TOPOLOGY_VALIDATION_PASSED" : "TOPOLOGY_VALIDATION_FAILED",
+                topology.revision(), topology.revision() + 1, command.reason(), traceId,
+                Map.of("errorCount", validation.errors().size(),
+                        "warningCount", validation.warnings().size(), "checksum", checksum));
+        TopologyVersionView validated = repository.findTopology(actor, topology.id());
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(validated));
+        return new CommandResult<>(validated, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<TopologyVersionView> publishTopology(
+            ActorContext actor,
+            UUID topologyId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        TopologyVersionView visible = repository.findTopology(actor, topologyId);
+        assertRuleManagementEnabled(actor, visible.plantId(), visible.lineId());
+        String path = "/bpi/v1/topologies/" + topologyId + "/publish";
+        String requestChecksum = Checksums.sha256(
+                topologyId + "|" + expectedRevision + "|" + canonicalJson.write(command));
+        CommandResult<TopologyVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<TopologyVersionView>() {});
+        if (replay != null) return replay;
+
+        TopologyVersionView topology = repository.lockTopology(actor, topologyId);
+        if (topology.revision() != expectedRevision) {
+            throw new BpiConflictException("Topology revision is stale.", topology.revision());
+        }
+        String creator = repository.findTopologyCreator(actor.tenantId(), topology.id());
+        if (actor.userId().equals(creator)) {
+            throw new BpiValidationException("Topology publication requires an administrator other than the creator.");
+        }
+        repository.publishTopology(actor, topology.id(), topology.revision(), topology.checksum());
+        repository.insertTopologyAudit(
+                actor, topology, "TOPOLOGY_PUBLISHED", topology.revision(), topology.revision() + 1,
+                command.reason(), traceId, Map.of("checksum", topology.checksum(), "creator", creator));
+        TopologyVersionView published = repository.findTopology(actor, topology.id());
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(published));
+        return new CommandResult<>(published, false);
+    }
+
     @Transactional(readOnly = true)
     public List<RuleVersionView> listRules(ActorContext actor, String plantId, String lineId) {
         assertRequestedScope(actor, plantId, lineId);
@@ -95,6 +235,59 @@ public class RuleService {
     @Transactional(readOnly = true)
     public RuleVersionView getRule(ActorContext actor, UUID ruleId) {
         return repository.findRule(actor, ruleId);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<RuleVersionView> createRuleDraft(
+            ActorContext actor,
+            String idempotencyKey,
+            String ifMatch,
+            RuleDraftCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        TopologyVersionView topology = repository.findPublishedTopologyByRef(
+                actor, command.lineId(), command.topologyVersion());
+        assertRuleManagementEnabled(actor, topology.plantId(), topology.lineId());
+        String path = "/bpi/v1/rules/drafts";
+        String requestChecksum = Checksums.sha256(canonicalJson.write(command));
+        CommandResult<RuleVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<RuleVersionView>() {});
+        if (replay != null) return replay;
+
+        if (command.baseVersionId() == null) {
+            if (expectedRevision != 0) {
+                throw new BpiConflictException("A new rule must use If-Match 0.", 0L);
+            }
+        } else {
+            RuleVersionView base = repository.lockRule(actor, command.baseVersionId());
+            if (base.revision() != expectedRevision) {
+                throw new BpiConflictException("Base rule revision is stale.", base.revision());
+            }
+            if (!"PUBLISHED".equals(base.state())) {
+                throw new BpiConflictException("Only a published rule can be copied.", base.revision());
+            }
+            if (!base.code().equals(command.code()) || !base.lineId().equals(command.lineId())) {
+                throw new BpiValidationException("A copied rule must keep its code and line scope.");
+            }
+        }
+
+        BoundaryRuleDefinition definition = definitionParser.parse(
+                command.code(), command.version(), command.ast());
+        assertRuleSignalsBound(definition, topology);
+        UUID ruleId = UUID.randomUUID();
+        String checksum = Checksums.sha256(canonicalJson.write(command.ast()));
+        repository.insertRuleDraft(
+                actor, ruleId, command.code(), command.version(), topology, checksum, command.ast());
+        RuleVersionView draft = repository.findRule(actor, ruleId);
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("checksum", checksum);
+        detail.put("baseVersionId", command.baseVersionId());
+        detail.put("topologyVersion", command.topologyVersion());
+        repository.insertRuleAudit(
+                actor, draft, "RULE_DRAFT_CREATED", 0, 1, command.reason(), traceId, detail);
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(draft));
+        return new CommandResult<>(draft, false);
     }
 
     @Transactional(readOnly = true)
@@ -377,9 +570,38 @@ public class RuleService {
     }
 
     private void assertRuleManagementEnabled(ActorContext actor, RuleVersionView rule) {
+        assertRuleManagementEnabled(actor, rule.plantId(), rule.lineId());
+    }
+
+    private void assertRuleManagementEnabled(ActorContext actor, String plantId, String lineId) {
         if (!sharedRepository.featureEnabled(
-                actor, rule.plantId(), rule.lineId(), "bpi.rule-management")) {
+                actor, plantId, lineId, "bpi.rule-management")) {
             throw new BpiForbiddenException("BPI rule management is disabled for this scope.");
+        }
+    }
+
+    private void assertRuleSignalsBound(
+            BoundaryRuleDefinition definition, TopologyVersionView topology) {
+        Object rawBindings = topology.definition().get("bindings");
+        if (!(rawBindings instanceof List<?> bindings)) {
+            throw new BpiValidationException("Published topology has no point bindings.");
+        }
+        Set<String> boundSignals = new LinkedHashSet<>();
+        for (Object rawBinding : bindings) {
+            if (rawBinding instanceof Map<?, ?> binding) {
+                Object signal = binding.get("signal");
+                if (signal instanceof String value && !value.isBlank()) boundSignals.add(value);
+            }
+        }
+        List<String> missing = definition.conditions().stream()
+                .map(item -> item.signal())
+                .filter(signal -> !boundSignals.contains(signal))
+                .distinct()
+                .sorted()
+                .toList();
+        if (!missing.isEmpty()) {
+            throw new BpiValidationException(
+                    "Rule conditions reference signals not bound by the topology: " + String.join(", ", missing));
         }
     }
 

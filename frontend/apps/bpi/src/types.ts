@@ -110,11 +110,47 @@ export interface TopologyVersion {
   plantId: string;
   lineId: string;
   checksum: string;
+  validationStatus: 'NOT_VALIDATED' | 'PASSED' | 'FAILED';
+  validationErrors: TopologyValidationIssue[];
+  validationWarnings: TopologyValidationIssue[];
+  validatedBy?: string | null;
+  validatedAt?: string | null;
+  publishedBy?: string | null;
+  publishedAt?: string | null;
   definition: {
+    localityGroup?: string;
     stages?: Array<{ code: string; name: string }>;
-    nodes?: Array<{ code: string; type: string; name: string }>;
-    bindings?: Array<{ signal: string; propertyId: string; unit: string; calibrationVersion: string }>;
+    nodes?: Array<{ code: string; type: string; name?: string }>;
+    edges?: Array<{ from: string; to: string }>;
+    bindings?: Array<{
+      signal: string;
+      productId: string;
+      deviceId: string;
+      propertyId: string;
+      expectedUnit?: string;
+      unit?: string;
+      calibrationVersion: string;
+      allocationKey?: string;
+    }>;
+    requiredSignals?: string[];
   };
+}
+
+export interface TopologyValidationIssue {
+  code: string;
+  path: string;
+  severity: 'ERROR' | 'WARNING';
+  message: string;
+}
+
+export interface TopologyDraftCommand {
+  code: string;
+  version: string;
+  plantId: string;
+  lineId: string;
+  baseVersionId?: string | null;
+  definition: TopologyVersion['definition'];
+  reason: string;
 }
 
 export interface RuleVersion {
@@ -143,6 +179,16 @@ export interface RuleVersion {
   applicationReceivedAt?: string | null;
   applicationErrorCode?: string | null;
   applicationErrorDetail?: string | null;
+}
+
+export interface RuleDraftCommand {
+  code: string;
+  version: string;
+  lineId: string;
+  topologyVersion: string;
+  baseVersionId?: string | null;
+  ast: Record<string, unknown>;
+  reason: string;
 }
 
 export interface RuleSimulationCommand {

@@ -8,9 +8,11 @@ import type {
   ProblemDetail,
   RuleSimulation,
   RuleSimulationCommand,
+  RuleDraftCommand,
   RuleVersion,
   StateEvent,
   TopologyVersion,
+  TopologyDraftCommand,
 } from './types';
 
 const API_ROOT = '/bpi-api';
@@ -90,8 +92,32 @@ export const bpiApi = {
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
   topology: (id: string) => request<TopologyVersion>(`/topologies/${encodeURIComponent(id)}`),
+  createTopologyDraft: (command: TopologyDraftCommand, key: string, revision = 0) =>
+    request<TopologyVersion>('/topologies/drafts', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(revision) },
+      body: JSON.stringify(command),
+    }),
+  validateTopology: (topology: TopologyVersion, reason: string, key: string) =>
+    request<TopologyVersion>(`/topologies/${encodeURIComponent(topology.id)}/validate`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(topology.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  publishTopology: (topology: TopologyVersion, reason: string, key: string) =>
+    request<TopologyVersion>(`/topologies/${encodeURIComponent(topology.id)}/publish`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(topology.revision) },
+      body: JSON.stringify({ reason }),
+    }),
   rules: (plantId: string) => request<RuleVersion[]>(`/rules?plantId=${encodeURIComponent(plantId)}`),
   rule: (id: string) => request<RuleVersion>(`/rules/${encodeURIComponent(id)}`),
+  createRuleDraft: (command: RuleDraftCommand, key: string, revision = 0) =>
+    request<RuleVersion>('/rules/drafts', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(revision) },
+      body: JSON.stringify(command),
+    }),
   simulation: (id: string) => request<RuleSimulation>(`/rule-simulations/${encodeURIComponent(id)}`),
   simulateRule: (rule: RuleVersion, command: RuleSimulationCommand, key: string) =>
     request<RuleSimulation>(`/rules/${encodeURIComponent(rule.id)}/simulate`, {

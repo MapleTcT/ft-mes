@@ -9,7 +9,9 @@ import com.mapletct.ftmes.bpi.domain.GoldenBoundary;
 import com.mapletct.ftmes.bpi.domain.RuleSimulationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
 import com.mapletct.ftmes.bpi.domain.TelemetryObservation;
+import com.mapletct.ftmes.bpi.domain.TopologyValidationIssue;
 import com.mapletct.ftmes.bpi.domain.TopologyVersionView;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -56,7 +58,10 @@ public class RulePostgresRepository {
             """;
     private static final String TOPOLOGY_SELECT = """
             SELECT id, topology_code, version, state, revision, plant_id, line_id,
-                   checksum, definition::text AS definition
+                   checksum, definition::text AS definition, validation_status,
+                   validation_errors::text AS validation_errors,
+                   validation_warnings::text AS validation_warnings,
+                   validated_by, validated_at, published_by, published_at
               FROM bpi.bpi_topology_versions
             """;
 
@@ -76,21 +81,24 @@ public class RulePostgresRepository {
                 .addValue("tenantId", actor.tenantId());
         addRequestedScope(sql, parameters, plantId, lineId);
         sql.append(" ORDER BY created_at DESC, id");
-        return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> new TopologyVersionView(
-                rs.getObject("id", UUID.class), rs.getString("topology_code"), rs.getString("version"),
-                rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
-                rs.getString("line_id"), rs.getString("checksum"), readMap(rs.getString("definition"))));
+        return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> mapTopology(rs));
     }
 
     public TopologyVersionView findTopology(ActorContext actor, UUID topologyId) {
+        return findTopology(actor, topologyId, false);
+    }
+
+    public TopologyVersionView lockTopology(ActorContext actor, UUID topologyId) {
+        return findTopology(actor, topologyId, true);
+    }
+
+    private TopologyVersionView findTopology(ActorContext actor, UUID topologyId, boolean lock) {
         try {
             TopologyVersionView topology = jdbc.queryForObject(
-                    TOPOLOGY_SELECT + " WHERE tenant_id = :tenantId AND id = :id",
+                    TOPOLOGY_SELECT + " WHERE tenant_id = :tenantId AND id = :id"
+                            + (lock ? " FOR UPDATE" : ""),
                     new MapSqlParameterSource().addValue("tenantId", actor.tenantId()).addValue("id", topologyId),
-                    (rs, rowNum) -> new TopologyVersionView(
-                            rs.getObject("id", UUID.class), rs.getString("topology_code"), rs.getString("version"),
-                            rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
-                            rs.getString("line_id"), rs.getString("checksum"), readMap(rs.getString("definition"))));
+                    (rs, rowNum) -> mapTopology(rs));
             if (topology == null || topology.plantId() == null || topology.lineId() == null
                     || !actor.canAccess(topology.plantId(), topology.lineId())) {
                 throw new BpiNotFoundException("Topology version not found.");
@@ -101,22 +109,161 @@ public class RulePostgresRepository {
         }
     }
 
+    public TopologyVersionView findPublishedTopologyByRef(
+            ActorContext actor, String lineId, String topologyVersion) {
+        int separator = topologyVersion.lastIndexOf('@');
+        if (separator <= 0 || separator == topologyVersion.length() - 1) {
+            throw new BpiNotFoundException("Published topology version not found.");
+        }
+        try {
+            TopologyVersionView topology = jdbc.queryForObject(
+                    TOPOLOGY_SELECT + """
+                             WHERE tenant_id = :tenantId
+                               AND topology_code = :code
+                               AND version = :version
+                               AND line_id = :lineId
+                               AND state = 'PUBLISHED'
+                            """, new MapSqlParameterSource().addValue("tenantId", actor.tenantId())
+                            .addValue("code", topologyVersion.substring(0, separator))
+                            .addValue("version", topologyVersion.substring(separator + 1))
+                            .addValue("lineId", lineId),
+                    (rs, rowNum) -> mapTopology(rs));
+            if (topology == null || !actor.canAccess(topology.plantId(), topology.lineId())) {
+                throw new BpiNotFoundException("Published topology version not found.");
+            }
+            return topology;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Published topology version not found.");
+        }
+    }
+
+    public void insertTopologyDraft(
+            ActorContext actor,
+            UUID id,
+            String code,
+            String version,
+            String plantId,
+            String lineId,
+            String checksum,
+            Map<String, Object> definition) {
+        try {
+            jdbc.update("""
+                    INSERT INTO bpi.bpi_topology_versions
+                        (id, tenant_id, topology_code, version, state, checksum, definition,
+                         plant_id, line_id, revision, created_by, updated_by)
+                    VALUES (:id, :tenantId, :code, :version, 'DRAFT', :checksum,
+                            CAST(:definition AS jsonb), :plantId, :lineId, 1, :actorId, :actorId)
+                    """, new MapSqlParameterSource().addValue("id", id)
+                    .addValue("tenantId", actor.tenantId()).addValue("code", code)
+                    .addValue("version", version).addValue("checksum", checksum)
+                    .addValue("definition", writeJson(definition)).addValue("plantId", plantId)
+                    .addValue("lineId", lineId).addValue("actorId", actor.userId()));
+        } catch (DataIntegrityViolationException exception) {
+            throw new BpiConflictException("Topology code and version already exist.", null);
+        }
+    }
+
+    public void recordTopologyValidation(
+            ActorContext actor,
+            UUID topologyId,
+            long expectedRevision,
+            String checksum,
+            List<TopologyValidationIssue> errors,
+            List<TopologyValidationIssue> warnings) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_topology_versions
+                   SET validation_status = :status,
+                       validation_errors = CAST(:errors AS jsonb),
+                       validation_warnings = CAST(:warnings AS jsonb),
+                       validated_checksum = :checksum,
+                       validated_by = :actorId,
+                       validated_at = now(),
+                       revision = revision + 1,
+                       updated_by = :actorId,
+                       updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :id
+                   AND revision = :expectedRevision
+                   AND state = 'DRAFT'
+                """, new MapSqlParameterSource().addValue("status", errors.isEmpty() ? "PASSED" : "FAILED")
+                .addValue("errors", writeJson(errors)).addValue("warnings", writeJson(warnings))
+                .addValue("checksum", checksum).addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId()).addValue("id", topologyId)
+                .addValue("expectedRevision", expectedRevision));
+        if (updated != 1) {
+            throw new BpiConflictException("Topology was changed before validation completed.", expectedRevision);
+        }
+    }
+
+    public String findTopologyCreator(String tenantId, UUID topologyId) {
+        return jdbc.queryForObject("""
+                SELECT created_by
+                  FROM bpi.bpi_topology_versions
+                 WHERE tenant_id = :tenantId AND id = :id
+                """, new MapSqlParameterSource().addValue("tenantId", tenantId).addValue("id", topologyId),
+                String.class);
+    }
+
+    public void publishTopology(
+            ActorContext actor, UUID topologyId, long expectedRevision, String checksum) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_topology_versions
+                   SET state = 'PUBLISHED', revision = revision + 1,
+                       published_by = :actorId, published_at = now(),
+                       updated_by = :actorId, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :id
+                   AND revision = :expectedRevision
+                   AND state = 'DRAFT'
+                   AND validation_status = 'PASSED'
+                   AND validated_checksum = :checksum
+                """, new MapSqlParameterSource().addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId()).addValue("id", topologyId)
+                .addValue("expectedRevision", expectedRevision).addValue("checksum", checksum));
+        if (updated != 1) {
+            throw new BpiConflictException("Topology is not validated for publication.", expectedRevision);
+        }
+    }
+
+    public void insertTopologyAudit(
+            ActorContext actor,
+            TopologyVersionView topology,
+            String action,
+            long beforeRevision,
+            long afterRevision,
+            String reason,
+            String traceId,
+            Map<String, Object> detail) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_audit_events
+                    (id, tenant_id, plant_id, line_id, object_type, object_id, action, actor_id,
+                     before_revision, after_revision, reason, trace_id, detail)
+                VALUES (:id, :tenantId, :plantId, :lineId, 'TOPOLOGY_VERSION', :objectId, :action, :actorId,
+                        :beforeRevision, :afterRevision, :reason, :traceId, CAST(:detail AS jsonb))
+                """, new MapSqlParameterSource().addValue("id", UUID.randomUUID())
+                .addValue("tenantId", actor.tenantId()).addValue("plantId", topology.plantId())
+                .addValue("lineId", topology.lineId()).addValue("objectId", topology.id())
+                .addValue("action", action).addValue("actorId", actor.userId())
+                .addValue("beforeRevision", beforeRevision).addValue("afterRevision", afterRevision)
+                .addValue("reason", reason).addValue("traceId", traceId)
+                .addValue("detail", writeJson(detail)));
+    }
+
     public TopologyVersionView findTopologyForRule(ActorContext actor, UUID ruleId) {
         try {
             TopologyVersionView topology = jdbc.queryForObject("""
                     SELECT t.id, t.topology_code, t.version, t.state, t.revision,
-                           t.plant_id, t.line_id, t.checksum, t.definition::text AS definition
+                           t.plant_id, t.line_id, t.checksum, t.definition::text AS definition,
+                           t.validation_status, t.validation_errors::text AS validation_errors,
+                           t.validation_warnings::text AS validation_warnings,
+                           t.validated_by, t.validated_at, t.published_by, t.published_at
                       FROM bpi.bpi_rule_versions r
                       JOIN bpi.bpi_topology_versions t
                         ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
                      WHERE r.tenant_id = :tenantId AND r.id = :ruleId
                     """, new MapSqlParameterSource().addValue("tenantId", actor.tenantId())
                             .addValue("ruleId", ruleId),
-                    (rs, rowNum) -> new TopologyVersionView(
-                            rs.getObject("id", UUID.class), rs.getString("topology_code"),
-                            rs.getString("version"), rs.getString("state"), rs.getLong("revision"),
-                            rs.getString("plant_id"), rs.getString("line_id"), rs.getString("checksum"),
-                            readMap(rs.getString("definition"))));
+                    (rs, rowNum) -> mapTopology(rs));
             if (topology == null || topology.plantId() == null || topology.lineId() == null
                     || !actor.canAccess(topology.plantId(), topology.lineId())) {
                 throw new BpiNotFoundException("Topology version not found.");
@@ -143,6 +290,32 @@ public class RulePostgresRepository {
 
     public RuleVersionView lockRule(ActorContext actor, UUID ruleId) {
         return findRule(actor, ruleId, true);
+    }
+
+    public void insertRuleDraft(
+            ActorContext actor,
+            UUID id,
+            String code,
+            String version,
+            TopologyVersionView topology,
+            String checksum,
+            Map<String, Object> ast) {
+        try {
+            jdbc.update("""
+                    INSERT INTO bpi.bpi_rule_versions
+                        (id, tenant_id, rule_code, version, topology_version_id, state,
+                         checksum, definition, revision, plant_id, line_id, created_by, updated_by)
+                    VALUES (:id, :tenantId, :code, :version, :topologyId, 'DRAFT',
+                            :checksum, CAST(:definition AS jsonb), 1, :plantId, :lineId, :actorId, :actorId)
+                    """, new MapSqlParameterSource().addValue("id", id)
+                    .addValue("tenantId", actor.tenantId()).addValue("code", code)
+                    .addValue("version", version).addValue("topologyId", topology.id())
+                    .addValue("checksum", checksum).addValue("definition", writeJson(ast))
+                    .addValue("plantId", topology.plantId()).addValue("lineId", topology.lineId())
+                    .addValue("actorId", actor.userId()));
+        } catch (DataIntegrityViolationException exception) {
+            throw new BpiConflictException("Rule code and version already exist.", null);
+        }
     }
 
     private RuleVersionView findRule(ActorContext actor, UUID ruleId, boolean lock) {
@@ -328,6 +501,19 @@ public class RulePostgresRepository {
                 .addValue("detail", writeJson(detail)));
     }
 
+    private TopologyVersionView mapTopology(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Timestamp validatedAt = rs.getTimestamp("validated_at");
+        Timestamp publishedAt = rs.getTimestamp("published_at");
+        return new TopologyVersionView(
+                rs.getObject("id", UUID.class), rs.getString("topology_code"), rs.getString("version"),
+                rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
+                rs.getString("line_id"), rs.getString("checksum"), readMap(rs.getString("definition")),
+                rs.getString("validation_status"), readIssues(rs.getString("validation_errors")),
+                readIssues(rs.getString("validation_warnings")), rs.getString("validated_by"),
+                validatedAt == null ? null : validatedAt.toInstant(), rs.getString("published_by"),
+                publishedAt == null ? null : publishedAt.toInstant());
+    }
+
     private RuleVersionView mapRule(java.sql.ResultSet rs) throws java.sql.SQLException {
         Timestamp publicationPublishedAt = rs.getTimestamp("publication_published_at");
         Timestamp publicationLastRequeuedAt = rs.getTimestamp("publication_last_requeued_at");
@@ -401,6 +587,14 @@ public class RulePostgresRepository {
             return objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
         } catch (Exception exception) {
             throw new IllegalStateException("Could not read BPI rule JSON", exception);
+        }
+    }
+
+    private List<TopologyValidationIssue> readIssues(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<TopologyValidationIssue>>() {});
+        } catch (Exception exception) {
+            throw new IllegalStateException("Could not read BPI topology validation JSON", exception);
         }
     }
 

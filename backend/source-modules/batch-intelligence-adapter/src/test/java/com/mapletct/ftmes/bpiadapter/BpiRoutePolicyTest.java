@@ -26,10 +26,13 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/simulate"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publish"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publication/retry"));
+        assertTrue(policy.allows(HttpMethod.POST, "/rules/drafts"));
+        assertTrue(policy.allows(HttpMethod.POST, "/topologies/drafts"));
+        assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/validate"));
+        assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/publish"));
         assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
-        assertFalse(policy.allows(HttpMethod.POST, "/rules/drafts"));
-        assertFalse(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/publish"));
+        assertFalse(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/update"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));
         assertFalse(policy.allows(HttpMethod.GET, "/../actuator/env"));

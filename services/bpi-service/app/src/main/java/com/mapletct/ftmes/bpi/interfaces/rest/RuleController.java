@@ -53,6 +53,47 @@ public class RuleController {
         return ApiResponse.of(ruleService.getTopology(actorContextFactory.from(jwt), topologyId), request);
     }
 
+    @PostMapping("/bpi/v1/topologies/drafts")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<TopologyVersionView>> createTopologyDraft(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody TopologyDraftCommand command,
+            HttpServletRequest request) {
+        CommandResult<TopologyVersionView> result = ruleService.createTopologyDraft(
+                actorContextFactory.from(jwt), idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
+    }
+
+    @PostMapping("/bpi/v1/topologies/{topologyId}/validate")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<TopologyVersionView>> validateTopology(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID topologyId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        CommandResult<TopologyVersionView> result = ruleService.validateTopology(
+                actorContextFactory.from(jwt), topologyId, idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
+    }
+
+    @PostMapping("/bpi/v1/topologies/{topologyId}/publish")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<TopologyVersionView>> publishTopology(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID topologyId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        CommandResult<TopologyVersionView> result = ruleService.publishTopology(
+                actorContextFactory.from(jwt), topologyId, idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
+    }
+
     @GetMapping("/bpi/v1/rules")
     public ApiResponse<List<RuleVersionView>> listRules(
             @AuthenticationPrincipal Jwt jwt,
@@ -68,6 +109,19 @@ public class RuleController {
             @PathVariable UUID ruleId,
             HttpServletRequest request) {
         return ApiResponse.of(ruleService.getRule(actorContextFactory.from(jwt), ruleId), request);
+    }
+
+    @PostMapping("/bpi/v1/rules/drafts")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<RuleVersionView>> createRuleDraft(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody RuleDraftCommand command,
+            HttpServletRequest request) {
+        CommandResult<RuleVersionView> result = ruleService.createRuleDraft(
+                actorContextFactory.from(jwt), idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
     }
 
     @GetMapping("/bpi/v1/rule-simulations/{simulationId}")
@@ -132,5 +186,12 @@ public class RuleController {
 
     private String traceId(HttpServletRequest request) {
         return String.valueOf(request.getAttribute(TraceIdFilter.ATTRIBUTE));
+    }
+
+    private <T> ResponseEntity<ApiResponse<T>> ok(
+            CommandResult<T> result, HttpServletRequest request) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) response.header("Idempotent-Replay", "true");
+        return response.body(ApiResponse.of(result.data(), request));
     }
 }
