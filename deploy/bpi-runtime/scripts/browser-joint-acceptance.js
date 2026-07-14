@@ -14,6 +14,7 @@ const password = required("ADP_PASSWORD");
 const ruleCode = process.env.BPI_ACCEPTANCE_RULE_CODE || "";
 const goldenSetId = process.env.BPI_ACCEPTANCE_GOLDEN_SET_ID || "";
 const boundaryTime = process.env.BPI_ACCEPTANCE_BOUNDARY_TIME || "";
+const orderId = process.env.BPI_ACCEPTANCE_ORDER_ID || `MO-${marker}`;
 const outputPath = path.resolve(process.env.BPI_BROWSER_REPORT || `/tmp/bpi-joint-browser-${action}.json`);
 const screenshotPath = path.resolve(process.env.BPI_BROWSER_SCREENSHOT || `/tmp/bpi-joint-browser-${action}.png`);
 const headless = process.env.BPI_HEADLESS !== "false";
@@ -128,7 +129,6 @@ async function publishRule(page, evidence) {
 }
 
 async function confirmCandidate(page, evidence) {
-  const orderId = `MO-${marker}`;
   await page.goto(`${bpiBaseUrl}/#/candidates`, { waitUntil: "networkidle", timeout: timeoutMs });
   await page.getByRole("heading", { name: "候选批次" }).waitFor({ timeout: timeoutMs });
   const row = page.locator("[data-candidate-id]").filter({ hasText: orderId });
@@ -169,6 +169,7 @@ async function main() {
     status: "FAIL",
     action,
     marker,
+    orderId,
     adpBaseUrl,
     bpiBaseUrl,
     loginStatus: null,

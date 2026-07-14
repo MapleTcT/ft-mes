@@ -1,0 +1,152 @@
+{
+  "generatedAt": "2026-07-14T13:27:13Z",
+  "repoBaseline": "4969d343b7946e696eab9f5a0b630fb812b83e0c",
+  "database": "PostgreSQL",
+  "target": {
+    "host": "ubuntu-test",
+    "address": "100.99.133.43",
+    "adpUrl": "http://100.99.133.43:18080",
+    "bpiUrl": "http://100.99.133.43:18091",
+    "flinkUrl": "http://100.99.133.43:18081"
+  },
+  "summary": {
+    "status": "PASS_CONTROLLED_TELEMETRY",
+    "realWomContext": true,
+    "realPostgresOutbox": true,
+    "realKafkaFlinkJoin": true,
+    "realBrowserConfirmation": true,
+    "realJetLinksTelemetry": false,
+    "productionReady": false
+  },
+  "markers": {
+    "ruleFixture": "ADP_E2E_20260714_202100_MESCTX",
+    "wom": "ADP_E2E_20260714_203900_WOM_CTX_REVFIX",
+    "replay": "ADP_E2E_20260714_204100_MESCTX_REAL",
+    "deactivation": "ADP_E2E_20260714_204500_MESCTX_DEACTIVATE",
+    "inactiveGate": "ADP_E2E_20260714_212600_MESCTX_INACTIVE_FINAL",
+    "orderId": "ADP_E2E_20260714_203900_WOM_CTX_REVFIX_TASK_TN"
+  },
+  "initialFailure": {
+    "status": "FAIL",
+    "reason": "A still-active synthetic context with an epoch-second revision shadowed the lower WOM revisions on the same scope.",
+    "observedWrongOrderId": "MO-ADP_E2E_20260714_091536_BPI_JOINT",
+    "expectedOrderId": "ADP_E2E_20260714200756_WOM_REAL_CONTEXT_TASK_TN",
+    "candidateForExpectedOrder": 0
+  },
+  "fixes": [
+    "177-wom-bpi-context-revision-clock-floor.sql makes WOM line revisions clock-floored and monotonic.",
+    "Synthetic joint replay emits an inactive closing context on success and failure.",
+    "MES_OUTBOX replay requires and matches an explicit real WOM order ID.",
+    "MES_OUTBOX replay selects the latest exact-order context and fails closed when it is inactive.",
+    "Browser confirmation and SQL verify/cleanup accept an explicit order ID.",
+    "Enabled-mode Spring context test covers the Java 8 dispatcher constructor.",
+    "Joint acceptance uses Compose --no-deps so alternate replay artifacts cannot recreate the resident JobManager."
+  ],
+  "acceptance": {
+    "womBrowser": {
+      "status": "PASS",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+      "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+      "httpStatus": 200,
+      "taskId": "9007190327104029",
+      "womLineId": "8388157374858567",
+      "startState": "WOM_runState/runing",
+      "holdState": "WOM_runState/iskeep"
+    },
+    "outbox": {
+      "status": "PASS",
+      "table": "public.wom_bpi_production_context_outbox",
+      "events": [
+        {"revision": 1784032711352, "active": false, "sourceState": "wom_runstate/waitforrun", "publicationState": "SENT", "attemptCount": 1},
+        {"revision": 1784032725227, "active": true, "sourceState": "wom_runstate/runing", "publicationState": "SENT", "attemptCount": 1},
+        {"revision": 1784033048507, "active": false, "sourceState": "wom_runstate/iskeep", "publicationState": "SENT", "attemptCount": 1}
+      ]
+    },
+    "stream": {
+      "status": "PASS",
+      "contextInput": {"topic": "mes.production.context.v1", "partition": 1, "offset": 4},
+      "candidateOutput": {"topic": "bpi.batch.candidate.v1", "partition": 5, "offset": 2},
+      "candidateKey": "88db971a-dceb-570e-8b84-968ec8e145e4",
+      "matchingCandidateCount": 1,
+      "matchingDataQualityIssueCount": 0,
+      "flinkJobId": "1f55da2611f488cce0de0638d8f20b6f",
+      "completedCheckpointId": 673,
+      "runningTasks": 30,
+      "totalTasks": 30
+    },
+    "browserConfirmation": {
+      "status": "PASS",
+      "api": "POST /bpi-api/candidates/6f3638ed-5d59-5568-acba-caf13c07e3b9/confirm",
+      "httpStatus": 200,
+      "candidateState": "CONFIRMED",
+      "candidateRevision": 2,
+      "batchId": "813f74e8-dbe9-5cb1-a07b-74b0ea08d815",
+      "batchState": "ACTIVE",
+      "batchRevision": 1,
+      "shadow": true,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    },
+    "persistence": {
+      "status": "PASS",
+      "boundaryEvidenceCount": 2,
+      "stateEventCount": 1,
+      "relatedAuditEventCount": 3
+    },
+    "inactiveContextGate": {
+      "status": "PASS_FAIL_CLOSED",
+      "reportStatus": "FAIL_EXPECTED",
+      "error": "latest MES outbox context is inactive for order ADP_E2E_20260714_203900_WOM_CTX_REVFIX_TASK_TN",
+      "telemetryOffsetsUnchanged": true,
+      "jobManagerUnchanged": true,
+      "telemetryOffsets": {
+        "0": 0,
+        "1": 6,
+        "2": 0,
+        "3": 3,
+        "4": 3,
+        "5": 6
+      }
+    },
+    "runtimeRecovery": {
+      "status": "PASS",
+      "trigger": "The first alternate-artifact acceptance run exposed a Compose dependency recreation side effect.",
+      "restoredOriginalEnvironment": true,
+      "flinkJobId": "8b55f27300e328fe31733ce24b75c8bc",
+      "jobState": "RUNNING",
+      "runningTasks": 30,
+      "totalTasks": 30,
+      "latestCompletedCheckpointId": 53,
+      "prevention": "run-joint-replay.sh now uses --no-deps."
+    },
+    "teardown": {
+      "status": "PASS",
+      "typedInactiveApplied": true,
+      "remainingRuleFixtures": 0,
+      "remainingCandidatesForRule": 0,
+      "remainingBatchesForOrder": 0,
+      "remainingWomFixtureTasks": 0,
+      "preservedOutboxAuditRows": 3,
+      "acceptanceConsumersEnabled": false,
+      "acceptanceAllowlist": "_DENY_ALL_|_DENY_ALL_|_DENY_ALL_",
+      "contextPublisherEnabled": true,
+      "contextPublisherHealthy": true
+    }
+  },
+  "verification": {
+    "streamTests": {"run": 93, "failures": 0, "errors": 0, "skipped": 1},
+    "postgresOutboxAcceptance": "PASS",
+    "inactiveContextFailClosed": "PASS",
+    "telemetryOffsetsUnchanged": "PASS",
+    "deploymentAssetVerification": "PASS",
+    "javascriptSyntax": "PASS",
+    "shellSyntax": "PASS",
+    "diffCheck": "PASS"
+  },
+  "remainingRisks": [
+    "Telemetry was controlled replay, not a real MapleTcT/iot JetLinks event.",
+    "The pilot has not completed 7-14 days of continuous shadow operation.",
+    "END boundary and QCS/WMS production write-back remain disabled."
+  ]
+}

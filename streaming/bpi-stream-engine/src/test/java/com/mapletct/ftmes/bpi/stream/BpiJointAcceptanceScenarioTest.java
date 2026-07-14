@@ -6,11 +6,13 @@ import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
+import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,6 +81,59 @@ class BpiJointAcceptanceScenarioTest {
     }
 
     @Test
+    void mesOutboxModeRequiresAndMatchesTheRealWomOrder() {
+        Map<String, String> environment = new HashMap<>(environment(tempDir.resolve("mes-outbox.json")));
+        environment.put("BPI_JOINT_CONTEXT_SOURCE", "MES_OUTBOX");
+        environment.put("BPI_JOINT_ORDER_ID", "ADP_E2E_WOM_REAL_CONTEXT_TASK_TN");
+        BpiJointAcceptanceReplayConfig config = BpiJointAcceptanceReplayConfig.fromEnvironment(environment);
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(config, T0);
+
+        assertTrue(config.usesMesOutboxContext());
+        assertEquals("ADP_E2E_WOM_REAL_CONTEXT_TASK_TN", scenario.orderId());
+        assertTrue(BpiJointAcceptanceReplay.matchesContext(scenario.context(), scenario));
+        assertFalse(BpiJointAcceptanceReplay.matchesContext(
+                scenario.context().toBuilder().setOrderId("OTHER").build(), scenario));
+        assertFalse(BpiJointAcceptanceReplay.matchesContext(
+                scenario.context().toBuilder().setActive(false).build(), scenario));
+    }
+
+    @Test
+    void mesOutboxModeRejectsAnImplicitSyntheticOrderId() {
+        Map<String, String> environment = new HashMap<>(environment(tempDir.resolve("missing-order.json")));
+        environment.put("BPI_JOINT_CONTEXT_SOURCE", "MES_OUTBOX");
+
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> BpiJointAcceptanceReplayConfig.fromEnvironment(environment));
+
+        assertTrue(error.getMessage().contains("BPI_JOINT_ORDER_ID"));
+    }
+
+    @Test
+    void latestInactiveContextSupersedesAnEarlierActiveRevision() {
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(
+                config(tempDir.resolve("latest-context.json")), T0);
+        ProductionContextEventV1 inactive = scenario.closingContext();
+
+        assertTrue(BpiJointAcceptanceReplay.isNewerContext(inactive, scenario.context()));
+        assertFalse(BpiJointAcceptanceReplay.isNewerContext(scenario.context(), inactive));
+    }
+
+    @Test
+    void syntheticScenarioProvidesAnInactiveClosingRevisionAfterTelemetry() {
+        BpiJointAcceptanceReplayConfig config = config(tempDir.resolve("closed.json"));
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(config, T0);
+
+        ProductionContextEventV1 closing = scenario.closingContext();
+
+        assertFalse(closing.getActive());
+        assertEquals(scenario.context().getContextRevision() + 1, closing.getContextRevision());
+        assertTrue(closing.getEffectiveFromMs()
+                > scenario.telemetry().get(scenario.telemetry().size() - 1).getEventTimeMs());
+        assertEquals("true", closing.getAttributesOrThrow("acceptance_cleanup"));
+    }
+
+    @Test
     void reportStatesThatTheRuleCameFromTheBrowserPublicationOutbox() throws Exception {
         Path report = tempDir.resolve("joint.json").toAbsolutePath();
         BpiJointAcceptanceReplayConfig config = config(report);
@@ -101,13 +156,18 @@ class BpiJointAcceptanceScenarioTest {
         JsonNode json = new ObjectMapper().readTree(report.toFile());
         assertEquals("PASS", json.path("status").asText());
         assertEquals("BPI_BROWSER_PUBLICATION_OUTBOX", json.path("ruleSource").asText());
+        assertEquals("SYNTHETIC_REPLAY", json.path("contextSource").asText());
         assertEquals("RULE-S07-START@1.2.0", json.path("scope").path("rule").asText());
         assertEquals(84, json.path("candidate").path("offset").asLong());
         assertTrue(json.path("error").isNull());
     }
 
     private BpiJointAcceptanceReplayConfig config(Path report) {
-        return BpiJointAcceptanceReplayConfig.fromEnvironment(Map.ofEntries(
+        return BpiJointAcceptanceReplayConfig.fromEnvironment(environment(report));
+    }
+
+    private Map<String, String> environment(Path report) {
+        return Map.ofEntries(
                 Map.entry("BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092"),
                 Map.entry("BPI_JOINT_MARKER", MARKER),
                 Map.entry("BPI_JOINT_TENANT_ID", "1000"),
@@ -118,6 +178,6 @@ class BpiJointAcceptanceScenarioTest {
                 Map.entry("BPI_JOINT_RULE_CODE", "RULE-S07-START"),
                 Map.entry("BPI_JOINT_RULE_VERSION", "1.2.0"),
                 Map.entry("BPI_JOINT_DEVICE_ID", "DEVICE-S07-01"),
-                Map.entry("BPI_JOINT_REPORT", report.toAbsolutePath().toString())));
+                Map.entry("BPI_JOINT_REPORT", report.toAbsolutePath().toString()));
     }
 }

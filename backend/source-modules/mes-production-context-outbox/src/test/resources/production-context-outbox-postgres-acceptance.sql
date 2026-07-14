@@ -52,8 +52,8 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'missing READY production context';
     END IF;
-    IF v_row.event_id <> 'wom-context:1000:PLANT-ADP-E2E:LINE-ADP-E2E:1'
-       OR v_row.context_revision <> 1
+    IF v_row.event_id <> 'wom-context:1000:PLANT-ADP-E2E:LINE-ADP-E2E:' || v_row.context_revision::text
+       OR v_row.context_revision < 1000000000000
        OR v_row.active IS DISTINCT FROM TRUE
        OR v_row.order_id <> 'MO-ADP-E2E-CONTEXT'
        OR v_row.batch_id <> 'BATCH-ADP-E2E-CONTEXT'
@@ -72,7 +72,17 @@ UPDATE public.wom_produce_tasks
 DO $$
 DECLARE
     v_row public.wom_bpi_production_context_outbox%ROWTYPE;
+    v_previous_revision BIGINT;
 BEGIN
+    SELECT context_revision
+      INTO v_previous_revision
+      FROM public.wom_bpi_production_context_outbox
+     WHERE wom_task_id = 701
+       AND publication_state = 'READY'
+       AND active IS TRUE
+     ORDER BY id DESC
+     LIMIT 1;
+
     SELECT *
       INTO v_row
       FROM public.wom_bpi_production_context_outbox
@@ -81,7 +91,8 @@ BEGIN
      ORDER BY id DESC
      LIMIT 1;
 
-    IF v_row.context_revision <> 2 OR v_row.active IS DISTINCT FROM FALSE THEN
+    IF v_row.context_revision <= v_previous_revision
+       OR v_row.active IS DISTINCT FROM FALSE THEN
         RAISE EXCEPTION 'inactive context did not advance line revision: %', row_to_json(v_row);
     END IF;
 END;

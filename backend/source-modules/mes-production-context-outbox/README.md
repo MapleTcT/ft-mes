@@ -6,7 +6,8 @@
 ## 数据链路
 
 1. WOM 在 PostgreSQL 中新增或更新 `wom_produce_tasks`。
-2. `176-wom-bpi-production-context-outbox.sql` 的触发器在同一事务内捕获完整业务快照。
+2. `176-wom-bpi-production-context-outbox.sql` 的触发器在同一事务内捕获完整业务快照；
+   `177-wom-bpi-context-revision-clock-floor.sql` 防止适配器重建或共享 Topic 验收造成低版本复用。
 3. 没有产线绑定、任务状态语义或关键字段时，快照进入 `BLOCKED_MAPPING`、
    `BLOCKED_STATE` 或 `BLOCKED_DATA`，不会被发布。
 4. Java 8 发布器使用 `FOR UPDATE SKIP LOCKED` 抢占 `READY/RETRY` 行，构造并校验
@@ -21,6 +22,8 @@
 ```bash
 psql "$ADP_DATABASE_URL" -v ON_ERROR_STOP=1 \
   -f deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql
+psql "$ADP_DATABASE_URL" -v ON_ERROR_STOP=1 \
+  -f deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql
 ```
 
 确认现场 `cid`、WOM `line_id` 和 BPI scope 后再插入绑定。下面仅为格式示例，不是生产默认值：

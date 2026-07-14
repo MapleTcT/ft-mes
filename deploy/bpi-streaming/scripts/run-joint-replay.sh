@@ -68,7 +68,7 @@ export BPI_JOINT_MARKER=$MARKER
 sh "$SCRIPT_DIR/smoke-cluster.sh" "$ENV_FILE"
 
 docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" \
-    --profile acceptance run --rm -T \
+    --profile acceptance run --rm -T --no-deps \
     -e "BPI_JOINT_MARKER=$MARKER" \
     bpi-joint-replay
 

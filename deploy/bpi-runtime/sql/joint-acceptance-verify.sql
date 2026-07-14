@@ -1,4 +1,8 @@
 \set ON_ERROR_STOP on
+\if :{?order_id}
+\else
+\set order_id 'MO-' :marker
+\endif
 
 WITH scoped AS (
     SELECT r.id AS rule_id,
@@ -25,7 +29,7 @@ WITH scoped AS (
            c.order_id
       FROM bpi.bpi_batch_candidates c
      WHERE c.tenant_id = :'tenant_id'
-       AND c.order_id = 'MO-' || :'marker'
+       AND c.order_id = :'order_id'
 ), batch AS (
     SELECT b.id,
            b.batch_no,
@@ -34,7 +38,7 @@ WITH scoped AS (
            b.is_shadow
       FROM bpi.bpi_batch_instances b
      WHERE b.tenant_id = :'tenant_id'
-       AND b.order_id = 'MO-' || :'marker'
+       AND b.order_id = :'order_id'
 )
 SELECT json_build_object(
     'marker', :'marker',

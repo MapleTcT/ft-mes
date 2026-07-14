@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -29,6 +30,8 @@ record BpiJointAcceptanceReplayConfig(
         String pumpPropertyId,
         String pumpUnit,
         String calibrationVersion,
+        String contextSource,
+        String orderId,
         Duration timeout,
         Duration telemetrySpacing,
         Duration resultGrace,
@@ -38,6 +41,7 @@ record BpiJointAcceptanceReplayConfig(
     private static final Pattern SAFE_TOKEN = Pattern.compile("[A-Za-z0-9._-]{1,128}");
     private static final Pattern SAFE_UNIT = Pattern.compile("[A-Za-z0-9._/%-]{1,32}");
     private static final Pattern SAFE_MARKER = Pattern.compile("[A-Za-z0-9._-]{8,80}");
+    private static final Pattern SAFE_ORDER_ID = Pattern.compile("[A-Za-z0-9._:/-]{1,255}");
     private static final DateTimeFormatter MARKER_TIME = DateTimeFormatter
             .ofPattern("yyyyMMdd_HHmmss")
             .withZone(ZoneOffset.UTC);
@@ -64,6 +68,13 @@ record BpiJointAcceptanceReplayConfig(
         token(pumpPropertyId, "pumpPropertyId");
         unit(pumpUnit, "pumpUnit");
         token(calibrationVersion, "calibrationVersion");
+        contextSource = contextSource.trim().toUpperCase(Locale.ROOT);
+        if (!contextSource.equals("SYNTHETIC_REPLAY") && !contextSource.equals("MES_OUTBOX")) {
+            throw new IllegalArgumentException("contextSource must be SYNTHETIC_REPLAY or MES_OUTBOX");
+        }
+        if (!SAFE_ORDER_ID.matcher(orderId).matches() || orderId.indexOf('|') >= 0) {
+            throw new IllegalArgumentException("orderId contains unsupported characters");
+        }
         positive(timeout, "timeout");
         nonNegative(telemetrySpacing, "telemetrySpacing");
         nonNegative(resultGrace, "resultGrace");
@@ -73,13 +84,21 @@ record BpiJointAcceptanceReplayConfig(
     }
 
     static BpiJointAcceptanceReplayConfig fromEnvironment(Map<String, String> environment) {
+        String marker = marker(environment.get("BPI_JOINT_MARKER"));
+        String contextSource = optional(environment, "BPI_JOINT_CONTEXT_SOURCE", "SYNTHETIC_REPLAY")
+                .toUpperCase(Locale.ROOT);
+        String configuredOrderId = environment.get("BPI_JOINT_ORDER_ID");
+        if (contextSource.equals("MES_OUTBOX")
+                && (configuredOrderId == null || configuredOrderId.isBlank())) {
+            throw new IllegalArgumentException("BPI_JOINT_ORDER_ID is required for MES_OUTBOX context");
+        }
         return new BpiJointAcceptanceReplayConfig(
                 value(environment, "BPI_KAFKA_BOOTSTRAP_SERVERS", null),
                 value(environment, "BPI_TELEMETRY_TOPIC", "iot.telemetry.selected.v1"),
                 value(environment, "BPI_CONTEXT_TOPIC", "mes.production.context.v1"),
                 value(environment, "BPI_CANDIDATE_TOPIC", "bpi.batch.candidate.v1"),
                 value(environment, "BPI_DATA_QUALITY_TOPIC", "bpi.data-quality.v1"),
-                marker(environment.get("BPI_JOINT_MARKER")),
+                marker,
                 value(environment, "BPI_JOINT_TENANT_ID", null),
                 value(environment, "BPI_JOINT_PLANT_ID", null),
                 value(environment, "BPI_JOINT_LINE_ID", null),
@@ -93,6 +112,8 @@ record BpiJointAcceptanceReplayConfig(
                 value(environment, "BPI_JOINT_PUMP_PROPERTY_ID", "pump.running"),
                 value(environment, "BPI_JOINT_PUMP_UNIT", "bool"),
                 value(environment, "BPI_JOINT_CALIBRATION_VERSION", "CAL-1"),
+                contextSource,
+                optional(environment, "BPI_JOINT_ORDER_ID", "MO-" + marker),
                 seconds(environment, "BPI_JOINT_TIMEOUT_SECONDS", 180),
                 millis(environment, "BPI_JOINT_TELEMETRY_SPACING_MS", 2_000),
                 millis(environment, "BPI_JOINT_RESULT_GRACE_MS", 5_000),
@@ -103,8 +124,8 @@ record BpiJointAcceptanceReplayConfig(
         return "ft-mes-bpi-joint-acceptance-" + marker;
     }
 
-    String orderId() {
-        return "MO-" + marker;
+    boolean usesMesOutboxContext() {
+        return contextSource.equals("MES_OUTBOX");
     }
 
     private static String marker(String configured) {
@@ -135,6 +156,11 @@ record BpiJointAcceptanceReplayConfig(
         String result = values.getOrDefault(key, defaultValue);
         required(result, key);
         return result.trim();
+    }
+
+    private static String optional(Map<String, String> values, String key, String defaultValue) {
+        String result = values.get(key);
+        return result == null || result.isBlank() ? defaultValue : result.trim();
     }
 
     private static void topic(String value, String field) {

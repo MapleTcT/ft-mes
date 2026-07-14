@@ -31,6 +31,7 @@ REQUIRED_FILES = [
     "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
     "backend/source-modules/mes-production-context-outbox/README.md",
     "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
+    "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
 ]
 
 
@@ -158,7 +159,8 @@ def main() -> int:
     for marker in (
         "BEGIN;",
         "created_by = :'marker'",
-        "order_id = 'MO-' || :'marker'",
+        "\\set order_id 'MO-' :marker",
+        "order_id = :'order_id'",
         "remaining",
         "COMMIT;",
     ):

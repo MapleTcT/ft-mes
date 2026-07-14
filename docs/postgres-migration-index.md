@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`176`。
-- 编号范围：`001` 到 `176`。
+- 脚本数量：`177`。
+- 编号范围：`001` 到 `177`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`63`。
+- 需关注语句：`64`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 73 |
 | configuration | 41 |
-| general | 26 |
+| general | 27 |
 | notification | 9 |
 | platform | 49 |
 | workflow | 20 |
@@ -34,20 +34,20 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 9326 |
-| create-function | 69 |
+| create-function | 70 |
 | create-index | 870 |
 | create-table | 534 |
 | create-view | 107 |
 | insert | 3879 |
-| update | 3941 |
+| update | 3943 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 173 |
+| create-or-replace | 174 |
 | do-block | 274 |
-| if-exists | 91 |
+| if-exists | 92 |
 | if-not-exists | 11289 |
 | on-conflict | 3841 |
 | to-regclass | 152 |
@@ -233,6 +233,7 @@
 | 174 | 174-material-wms-completion-inbound.sql | general | 145 | create-table:5, create-index:12 | 17 | - |
 | 175 | 175-process-analysis-traceability.sql | general | 98 | create-table:1, create-index:10, insert:2, update:2 | 13 | - |
 | 176 | 176-wom-bpi-production-context-outbox.sql | general | 234 | create-table:4, create-function:1, create-index:4, insert:2, update:2 | 11 | watch:1 |
+| 177 | 177-wom-bpi-context-revision-clock-floor.sql | general | 33 | create-function:1, update:2 | 2 | watch:1 |
 
 ## 规则
 

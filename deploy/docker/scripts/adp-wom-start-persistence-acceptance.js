@@ -19,6 +19,13 @@ const dbUser = process.env.ADP_DB_USER || "adp";
 const pageTimeoutMs = Number(process.env.ADP_PAGE_TIMEOUT_MS || 180000);
 const gridTimeoutMs = Number(process.env.ADP_GRID_TIMEOUT_MS || pageTimeoutMs);
 const keepFixtureForDownstreamSmoke = process.env.ADP_WOM_KEEP_FIXTURE === "true";
+const womLineId = (process.env.ADP_WOM_LINE_ID || "").trim();
+if (womLineId) {
+  if (!/^[1-9][0-9]{0,18}$/.test(womLineId) || BigInt(womLineId) > 9223372036854775807n) {
+    throw new Error("ADP_WOM_LINE_ID must be a positive PostgreSQL bigint");
+  }
+}
+const womLineIdSql = womLineId || "NULL";
 const nowToken = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const transitionConfigs = {
   start: {
@@ -257,12 +264,12 @@ INSERT INTO public.rm_formulas (
 INSERT INTO public.wom_produce_tasks (
   id, ${commonCols}, status, table_no, table_info_id, batch_contral, finish_num,
   formula_id, plan_num, plan_start_time, plan_end_time, produce_batch_num,
-  product_id, task_run_state, task_type, need_pack, is_analy, is_abnormal,
+  product_id, line_id, task_run_state, task_type, need_pack, is_analy, is_abnormal,
   is_prepared, advance_charge, is_advanced, feed_condition, act_start_time, remark
 ) VALUES (
   ${ids.task}, ${commonVals}, 99, ${sqlLiteral(tableNo)}, ${ids.task}, false, 0,
   ${ids.formula}, 1, now() - interval '1 day', now() - interval '23 hours', ${sqlLiteral(batchNo)},
-  ${ids.material}, ${sqlLiteral(initialTaskRunState)}, 'WOM_taskType/manufacture', false, false, false,
+  ${ids.material}, ${womLineIdSql}, ${sqlLiteral(initialTaskRunState)}, 'WOM_taskType/manufacture', false, false, false,
   false, ${initialAdvanceChargeSql}, false, ${initialFeedConditionSql}, ${initialActStartTimeSql}, NULL
 ) ON CONFLICT (id) DO NOTHING;
 
@@ -299,7 +306,7 @@ SELECT 'seed', ${sqlLiteral(marker)}, ${ids.task}, ${ids.wait}, ${ids.pending}, 
 
 function verificationSql() {
   return `
-SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, ''), coalesce(advance_charge::text, ''), coalesce(is_advanced::text, ''), coalesce(feed_condition, '')
+SELECT 'task', id, table_no, task_run_state, coalesce(act_start_time::text, ''), coalesce(act_end_time::text, ''), coalesce(finish_num::text, ''), coalesce(version::text, ''), coalesce(advance_charge::text, ''), coalesce(is_advanced::text, ''), coalesce(feed_condition, ''), coalesce(line_id::text, '')
 FROM public.wom_produce_tasks
 WHERE id = ${ids.task};
 
@@ -426,6 +433,9 @@ function assertPersistence(rawRows, expectedState, options = {}) {
   if (!task || task[3] !== expectedState || !task[4] || Number(task[7]) < 1) {
     failures.push(`wom_produce_tasks not in expected state ${expectedState}: ${JSON.stringify(task)}`);
   }
+  if (womLineId && (!task || task[11] !== womLineId)) {
+    failures.push(`wom_produce_tasks line_id is not ${womLineId}: ${JSON.stringify(task)}`);
+  }
   if (isFinished && (!task[5] || Number(task[6] || 0) !== expectedFinishNum)) {
     failures.push(`wom_produce_tasks finish fields are not set for stop path: ${JSON.stringify(task)}`);
   }
@@ -479,6 +489,9 @@ function assertAdvanceReleasePersistence(rawRows) {
 
   if (!task || task[3] !== "WOM_runState/runing" || !task[4]) {
     failures.push(`wom_produce_tasks is not running for advance release: ${JSON.stringify(task)}`);
+  }
+  if (womLineId && (!task || task[11] !== womLineId)) {
+    failures.push(`wom_produce_tasks line_id is not ${womLineId}: ${JSON.stringify(task)}`);
   }
   if (!task || task[8] !== "true" || task[9] !== "true" || !String(task[10] || "").includes(marker)) {
     failures.push(`wom_produce_tasks advance fields not persisted: ${JSON.stringify(task)}`);
@@ -1204,6 +1217,7 @@ async function main() {
     baseUrl,
     browserBaseUrl,
 	    marker,
+	    womLineId: womLineId || null,
 	    transitions,
 	    ids: Object.fromEntries(Object.entries(ids).map(([key, value]) => [key, value.toString()])),
     route,
@@ -1272,6 +1286,7 @@ async function main() {
       {
 	        status: evidence.status,
 	        marker,
+	        womLineId: womLineId || null,
 	        transitions,
 	        outputPath,
 	        updateTaskStateByTransition: evidence.updateTaskStateByTransition,

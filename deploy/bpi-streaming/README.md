@@ -111,6 +111,11 @@ make bpi-stream-joint-replay
 真实页面确认候选，并用 `deploy/bpi-runtime/sql/joint-acceptance-verify.sql` 查询候选、批次、证据、
 状态事件、审计和幂等行。
 
+当 `BPI_JOINT_CONTEXT_SOURCE=MES_OUTBOX` 时，还必须设置
+`BPI_JOINT_ORDER_ID`。回放器会从 `mes.production.context.v1` 定位并校验该 WOM order 的 active
+上下文，记录其 partition/offset，只发送遥测，不再生成合成上下文；候选也必须携带同一个 WOM
+order ID。该模式用于验收真实 MES outbox 到 Flink 的关联链路。
+
 验收退场顺序不可颠倒：
 
 ```bash

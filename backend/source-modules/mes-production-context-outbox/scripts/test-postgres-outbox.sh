@@ -32,4 +32,6 @@ docker exec -i "$CONTAINER" psql -v ON_ERROR_STOP=1 -U adp_test -d adp_test \
 docker exec -i "$CONTAINER" psql -v ON_ERROR_STOP=1 -U adp_test -d adp_test \
     < "$ROOT_DIR/deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql"
 docker exec -i "$CONTAINER" psql -v ON_ERROR_STOP=1 -U adp_test -d adp_test \
+    < "$ROOT_DIR/deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql"
+docker exec -i "$CONTAINER" psql -v ON_ERROR_STOP=1 -U adp_test -d adp_test \
     < "$MODULE_DIR/src/test/resources/production-context-outbox-postgres-acceptance.sql"

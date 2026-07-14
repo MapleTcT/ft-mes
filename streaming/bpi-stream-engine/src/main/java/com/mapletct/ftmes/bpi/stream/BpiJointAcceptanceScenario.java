@@ -114,5 +114,16 @@ final class BpiJointAcceptanceScenario {
         String contextKey() {
             return tenantId() + "|" + plantId() + "|" + lineId();
         }
+
+        ProductionContextEventV1 closingContext() {
+            long closedAt = telemetry.get(telemetry.size() - 1).getEventTimeMs() + 1;
+            return context.toBuilder()
+                    .setEventId(marker() + "-CONTEXT-CLOSED")
+                    .setEffectiveFromMs(closedAt)
+                    .setContextRevision(context.getContextRevision() + 1)
+                    .setActive(false)
+                    .putAttributes("acceptance_cleanup", "true")
+                    .build();
+        }
     }
 }

@@ -417,6 +417,12 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/test/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxEnabledApplicationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/mes-production-context-outbox/src/test/java/com/mapletct/ftmes/contextoutbox/ProductionContextProjectorTest.java",
       "state": "tracked",
       "tracked": true
@@ -681,6 +687,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/install-mes-context-outbox-disabled.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/preflight.sh",
       "state": "tracked",
       "tracked": true
@@ -712,6 +724,12 @@
     {
       "ignored": false,
       "path": "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/set-mes-context-outbox-enabled.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -2457,6 +2475,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3939,6 +3963,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-mes-production-context-runtime-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-production-context-join-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -4150,6 +4180,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-kafka-postgres-replay-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-mes-production-context-runtime-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6278,22 +6314,22 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 80
+      "tracked": 81
     },
     "contracts": {
       "tracked": 18
     },
     "deploy": {
-      "tracked": 478
+      "tracked": 481
     },
     "docs": {
-      "tracked": 81
+      "tracked": 82
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 99
+      "tracked": 100
     },
     "package.json": {
       "tracked": 1
@@ -6317,8 +6353,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1043,
-    "tracked": 1043,
+    "totalFiles": 1049,
+    "tracked": 1049,
     "untracked": 0
   },
   "untrackedByDirectory": []

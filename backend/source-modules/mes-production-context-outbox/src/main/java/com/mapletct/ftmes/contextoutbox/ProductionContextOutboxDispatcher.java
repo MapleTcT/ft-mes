@@ -3,6 +3,7 @@ package com.mapletct.ftmes.contextoutbox;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ public class ProductionContextOutboxDispatcher {
     private final Counter retried;
     private final Counter dead;
 
+    @Autowired
     public ProductionContextOutboxDispatcher(
         ProductionContextOutboxRepository repository,
         ProductionContextProjector projector,

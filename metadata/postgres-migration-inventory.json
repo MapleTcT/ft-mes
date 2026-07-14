@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 176,
+  "migrationCount": 177,
   "firstNumber": 1,
-  "lastNumber": 176,
+  "lastNumber": 177,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 63,
+  "watchStatementCount": 64,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 9326,
-    "create-function": 69,
+    "create-function": 70,
     "create-index": 870,
     "create-table": 534,
     "create-view": 107,
     "insert": 3879,
-    "update": 3941
+    "update": 3943
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 173,
+    "create-or-replace": 174,
     "do-block": 274,
-    "if-exists": 91,
+    "if-exists": 92,
     "if-not-exists": 11289,
     "on-conflict": 3841,
     "to-regclass": 152,
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 73,
     "configuration": 41,
-    "general": 26,
+    "general": 27,
     "notification": 9,
     "platform": 49,
     "workflow": 20
@@ -6607,6 +6607,50 @@
           "pattern": "drop-trigger",
           "excerpt": "DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks;",
           "statement": "DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
+      "name": "177-wom-bpi-context-revision-clock-floor.sql",
+      "number": 177,
+      "slug": "wom-bpi-context-revision-clock-floor",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 33,
+      "sha256": "b68b9950eb1c8fbe8e9f71bc73eed42d127b7d555d7fda466e760964f9cb4b0b",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 17,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_wom_bpi_context_revision_clock_floor",
+          "statement": "DROP TRIGGER IF EXISTS trg_wom_bpi_context_revision_clock_floor ON public.wom_bpi_context_revisions;",
           "safe": true,
           "safety": "guarded-if-exists",
           "issue": "",

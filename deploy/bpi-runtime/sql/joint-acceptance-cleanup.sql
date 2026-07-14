@@ -1,4 +1,8 @@
 \set ON_ERROR_STOP on
+\if :{?order_id}
+\else
+\set order_id 'MO-' :marker
+\endif
 
 BEGIN;
 
@@ -18,15 +22,25 @@ SELECT r.id AS rule_id,
 
 CREATE TEMP TABLE bpi_joint_candidate_ids ON COMMIT DROP AS
 SELECT id, candidate_key, batch_id
-  FROM bpi.bpi_batch_candidates
+ FROM bpi.bpi_batch_candidates
  WHERE tenant_id = :'tenant_id'
-   AND order_id = 'MO-' || :'marker';
+   AND (
+        order_id = :'order_id'
+        OR rule_version_id IN (SELECT rule_id FROM bpi_joint_acceptance_ids)
+   );
 
 CREATE TEMP TABLE bpi_joint_batch_ids ON COMMIT DROP AS
 SELECT id
-  FROM bpi.bpi_batch_instances
+ FROM bpi.bpi_batch_instances
  WHERE tenant_id = :'tenant_id'
-   AND order_id = 'MO-' || :'marker';
+   AND (
+        order_id = :'order_id'
+        OR id IN (
+             SELECT batch_id
+               FROM bpi_joint_candidate_ids
+              WHERE batch_id IS NOT NULL
+        )
+   );
 
 DELETE FROM bpi.bpi_audit_events
  WHERE tenant_id = :'tenant_id'
@@ -127,8 +141,8 @@ SELECT json_build_object(
     'remaining', json_build_object(
         'topologies', (SELECT count(*) FROM bpi.bpi_topology_versions WHERE tenant_id = :'tenant_id' AND created_by = :'marker'),
         'rules', (SELECT count(*) FROM bpi.bpi_rule_versions WHERE tenant_id = :'tenant_id' AND created_by = :'marker'),
-        'candidates', (SELECT count(*) FROM bpi.bpi_batch_candidates WHERE tenant_id = :'tenant_id' AND order_id = 'MO-' || :'marker'),
-        'batches', (SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id = :'tenant_id' AND order_id = 'MO-' || :'marker')
+        'candidates', (SELECT count(*) FROM bpi.bpi_batch_candidates WHERE tenant_id = :'tenant_id' AND order_id = :'order_id'),
+        'batches', (SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id = :'tenant_id' AND order_id = :'order_id')
     )
 );
 
