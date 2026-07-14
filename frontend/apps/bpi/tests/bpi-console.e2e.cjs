@@ -236,6 +236,51 @@ test('shift lead rejects a false candidate without creating a batch', async () =
   await page.close();
 });
 
+test('administrator imports a point catalog snapshot and sees readiness blockers', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/points`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('heading', { name: '点位目录' }).waitFor();
+  await page.getByText('2', { exact: true }).last().waitFor();
+  assert.equal(await page.locator('[data-point-id]').count(), 2);
+  await page.getByRole('button', { name: '导入快照' }).click();
+  await page.getByRole('heading', { name: '导入点位目录快照' }).waitFor();
+  await page.locator('#point-source-instance').fill('jetlinks-e2e');
+  await page.locator('#point-source-revision').fill('ADP_E2E_POINT_CATALOG_0001');
+  await page.locator('#point-import-json').fill(JSON.stringify([{
+    localityGroup: 'LOCALITY-S07-EVAP',
+    productId: 'PRODUCT-SUGAR',
+    deviceId: 'DEVICE-S07-INACTIVE',
+    propertyId: 'tank.level',
+    sourcePropertyId: 'tankLevel',
+    pointName: '未就绪液位点',
+    unit: null,
+    dataType: null,
+    deviceState: 'INACTIVE',
+    registered: false,
+    propertyPresent: false,
+    calibrationVersion: null,
+    calibrationStatus: 'MISSING',
+    sourceSequenceEnabled: false,
+  }], null, 2));
+  await page.locator('#point-import-reason').fill('验收未激活设备和缺失属性的准入阻断');
+  await page.getByRole('button', { name: '导入快照', exact: true }).last().click();
+
+  await page.getByText('点位快照已导入：0/1 就绪').waitFor();
+  await page.getByText('未就绪液位点', { exact: true }).waitFor();
+  await page.getByText('BLOCKED', { exact: true }).waitFor();
+  await page.getByText('设备未注册、设备未激活、属性不存在、单位缺失、标定未验证', { exact: true }).waitFor();
+  const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
+  assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
+  assert.equal(current.data.snapshot.readyPointCount, 0);
+  await page.screenshot({ path: '/tmp/bpi-console-point-catalog.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('process engineer creates validates and publishes topology before creating a rule draft', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);

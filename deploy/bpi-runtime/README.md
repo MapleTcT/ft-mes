@@ -25,7 +25,7 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 with the DML-only `bpi_service` account.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`9`). Set it explicitly in the target `.env` when preparing a release;
+latest repository migration (`12`). Set it explicitly in the target `.env` when preparing a release;
 the smoke check fails if the database is behind or unexpectedly ahead of that version.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
@@ -82,3 +82,13 @@ marker topology and prove that its creator cannot publish it. Publish revision 2
 bound rule draft. A final `read` phase is suitable for post-restart verification. Every phase records
 page/API evidence, console errors, request failures, and a screenshot without storing the ticket or
 password.
+
+## Point catalog readiness acceptance
+
+`scripts/browser-point-catalog-acceptance.js` exercises the deployed `点位目录` page and the
+topology publication hard gate. Its default `write` phase imports one marker-scoped JetLinks status
+snapshot through the real UI, verifies idempotent replay, creates a topology bound to that point and
+requires an unready point to produce explicit validation errors with no publish action. After a
+service restart, run with `BPI_BROWSER_ACTION=read` to prove the same point and blocked topology are
+still visible. Source device state must be queried independently; the script must not be used to
+label an inactive or uncalibrated device as ready.

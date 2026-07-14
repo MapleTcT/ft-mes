@@ -633,6 +633,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3975,6 +3981,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-point-catalog-readiness-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-production-context-join-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -4210,6 +4222,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-catalog-readiness-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5109,6 +5127,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleApplicationReceiptService.java",
       "state": "tracked",
       "tracked": true
@@ -5248,6 +5272,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/OutboxEventClaim.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogPointView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogSnapshotView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5433,6 +5475,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -5517,6 +5565,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogPointCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogSnapshotCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ReasonCommand.java",
       "state": "tracked",
       "tracked": true
@@ -5583,6 +5649,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V10__bpi_point_catalog_readiness.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V11__bpi_point_catalog_least_privilege.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V12__bpi_point_catalog_source_property.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -5638,6 +5722,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6404,16 +6494,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 482
+      "tracked": 483
     },
     "docs": {
-      "tracked": 84
+      "tracked": 85
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 102
+      "tracked": 103
     },
     "package.json": {
       "tracked": 1
@@ -6425,7 +6515,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 141
+      "tracked": 153
     },
     "simulation": {
       "tracked": 4
@@ -6437,8 +6527,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1063,
-    "tracked": 1063,
+    "totalFiles": 1078,
+    "tracked": 1078,
     "untracked": 0
   },
   "untrackedByDirectory": []

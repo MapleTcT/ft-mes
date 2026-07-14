@@ -346,6 +346,7 @@ runtime-script-check:
 	sh -n deploy/bpi-runtime/scripts/smoke.sh
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-joint-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js
+	$(NODE) --check deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh

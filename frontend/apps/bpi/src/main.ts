@@ -6,6 +6,7 @@ import {
   ChevronRight,
   CircleAlert,
   Clock3,
+  Database,
   Factory,
   Filter,
   FlaskConical,
@@ -17,6 +18,7 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Upload,
   X,
   createIcons,
 } from 'lucide';
@@ -26,6 +28,9 @@ import type {
   Candidate,
   Evidence,
   LineState,
+  PointCatalogPointCommand,
+  PointCatalogSnapshotCommand,
+  PointCatalogView,
   ResponseMeta,
   RuleSimulation,
   RuleSimulationCommand,
@@ -37,7 +42,7 @@ import type {
 } from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches' | 'rules';
+type View = 'overview' | 'candidates' | 'batches' | 'points' | 'rules';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) throw new Error('BPI app root is missing');
@@ -46,6 +51,7 @@ const app: HTMLDivElement = appRoot;
 const state = {
   view: 'overview' as View,
   plantId: localStorage.getItem('bpi.plantId') || 'PLANT-01',
+  pointLineId: localStorage.getItem('bpi.lineId') || 'LINE-S07-01',
   onlyAbnormal: localStorage.getItem('bpi.onlyAbnormal') === 'true',
   loading: false,
   meta: null as ResponseMeta | null,
@@ -54,6 +60,7 @@ const state = {
   batches: [] as Batch[],
   rules: [] as RuleVersion[],
   topologies: [] as TopologyVersion[],
+  pointCatalog: null as PointCatalogView | null,
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
   selectedRule: null as RuleVersion | null,
@@ -90,7 +97,7 @@ function number(value: number | null | undefined, digits = 1): string {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED'].includes(status)) return 'ok';
+  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED'].includes(status)) return 'ok';
   if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED'].includes(status)) return 'warn';
   if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED'].includes(status)) return 'danger';
   return 'neutral';
@@ -163,6 +170,7 @@ function shell(): void {
           <button class="nav-item" data-view="overview">${icon('activity', '实时生产态势')}</button>
           <button class="nav-item" data-view="candidates">${icon('list-checks', '候选批次')}<b id="candidate-count">0</b></button>
           <button class="nav-item" data-view="batches">${icon('archive', '批次档案')}</button>
+          <button class="nav-item" data-view="points">${icon('database', '点位准入')}</button>
           <button class="nav-item" data-view="rules">${icon('network', '规则与拓扑')}</button>
         </nav>
         <div class="mode-flag"><i data-lucide="shield-check"></i><div><strong>SHADOW</strong><span>外部写入关闭</span></div></div>
@@ -230,6 +238,21 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="rule-editor-submit" value="default" class="button button--primary">创建草稿</button></footer>
         </form>
       </dialog>
+      <dialog id="point-catalog-dialog" class="command-dialog editor-dialog">
+        <form method="dialog" id="point-catalog-form">
+          <header><div><span>数据准入</span><h2>导入点位目录快照</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="editor-fields">
+            <label><span>来源</span><input id="point-source" value="JETLINKS" required maxlength="64" /></label>
+            <label><span>来源实例</span><input id="point-source-instance" required maxlength="128" /></label>
+            <label><span>来源修订</span><input id="point-source-revision" required maxlength="128" /></label>
+            <label><span>产线</span><input id="point-import-line" required maxlength="128" /></label>
+            <label class="editor-field--wide"><span>观测时间</span><input id="point-observed-at" type="datetime-local" step="1" required /></label>
+            <label class="editor-field--wide"><span>点位 JSON</span><textarea id="point-import-json" required spellcheck="false">[]</textarea></label>
+            <label class="editor-field--wide"><span>导入原因</span><textarea id="point-import-reason" required minlength="3" maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="point-catalog-submit" value="default" class="button button--primary">导入快照</button></footer>
+        </form>
+      </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>`;
   document.querySelector<HTMLSelectElement>('#plant-id')!.value = state.plantId;
@@ -238,7 +261,7 @@ function shell(): void {
 }
 
 function refreshIcons(): void {
-  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, Plus, RefreshCw, Search, ShieldCheck, X } });
+  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, Plus, RefreshCw, Search, ShieldCheck, Upload, X } });
 }
 
 function commandId(): string {
@@ -264,6 +287,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#simulation-form')?.addEventListener('submit', handleRuleSimulation);
   document.querySelector<HTMLFormElement>('#topology-editor-form')?.addEventListener('submit', handleTopologyDraft);
   document.querySelector<HTMLFormElement>('#rule-editor-form')?.addEventListener('submit', handleRuleDraft);
+  document.querySelector<HTMLFormElement>('#point-catalog-form')?.addEventListener('submit', handlePointCatalogImport);
   document.querySelector<HTMLSelectElement>('#topology-base')?.addEventListener('change', applyTopologyBase);
   document.querySelector<HTMLSelectElement>('#rule-base')?.addEventListener('change', applyRuleBase);
 }
@@ -294,6 +318,10 @@ async function loadView(silent = false): Promise<void> {
       const response = await bpiApi.batches(state.plantId);
       state.batches = response.data;
       state.meta = response.meta;
+    } else if (state.view === 'points') {
+      const response = await bpiApi.currentPointCatalog(state.plantId, state.pointLineId);
+      state.pointCatalog = response.data;
+      state.meta = response.meta;
     } else {
       const [rules, topologies] = await Promise.all([
         bpiApi.rules(state.plantId),
@@ -302,6 +330,7 @@ async function loadView(silent = false): Promise<void> {
       state.rules = rules.data;
       state.topologies = topologies.data;
       state.meta = rules.meta;
+      state.pointCatalog = (await bpiApi.currentPointCatalog(state.plantId, state.pointLineId)).data;
     }
   } catch (error) {
     state.error = error instanceof Error ? error : new Error(String(error));
@@ -322,6 +351,7 @@ function renderView(): void {
     overview: ['生产运行', '实时生产态势'],
     candidates: ['边界审核', '候选批次'],
     batches: ['生产事实', '批次档案'],
+    points: ['数据准入', '点位目录'],
     rules: ['边界治理', '规则与拓扑'],
   };
   document.querySelector('#view-kicker')!.textContent = titles[state.view][0];
@@ -335,6 +365,7 @@ function renderView(): void {
   else if (state.view === 'overview') renderOverview();
   else if (state.view === 'candidates') renderCandidates();
   else if (state.view === 'batches') renderBatches();
+  else if (state.view === 'points') renderPoints();
   else renderRules();
   refreshIcons();
 }
@@ -545,6 +576,133 @@ function ruleConditions(rule: RuleVersion): Array<Record<string, unknown>> {
   return Array.isArray(conditions) ? conditions.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object') : [];
 }
 
+function pointIssueLabel(code: string): string {
+  const labels: Record<string, string> = {
+    DEVICE_NOT_REGISTERED: '设备未注册',
+    DEVICE_NOT_ACTIVE: '设备未激活',
+    PROPERTY_NOT_AVAILABLE: '属性不存在',
+    UNIT_MISSING: '单位缺失',
+    CALIBRATION_NOT_VERIFIED: '标定未验证',
+  };
+  return labels[code] || code;
+}
+
+function renderPoints(): void {
+  const content = document.querySelector<HTMLElement>('#content')!;
+  const catalog = state.pointCatalog;
+  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" placeholder="产品、设备、属性" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
+  if (!catalog) {
+    content.innerHTML = `${toolbar}<div class="empty-state"><i data-lucide="database"></i><strong>该产线没有点位目录快照</strong><span>${escapeHtml(state.plantId)} / ${escapeHtml(state.pointLineId)}</span></div>`;
+    bindPointPageEvents(content);
+    return;
+  }
+  const { snapshot, points } = catalog;
+  const rows = points.map((point) => `
+    <tr data-point-id="${escapeHtml(point.id)}">
+      <td><strong>${escapeHtml(point.pointName || point.propertyId)}</strong><small>${escapeHtml(point.sourcePropertyId ? `${point.sourcePropertyId} → ${point.propertyId}` : point.propertyId)}</small></td>
+      <td>${escapeHtml(point.productId)}</td><td>${escapeHtml(point.deviceId)}</td>
+      <td>${statusChip(point.deviceState)}<small>${point.registered ? '已注册' : '未注册'}</small></td>
+      <td>${point.propertyPresent ? '已发现' : '缺失'}</td><td>${escapeHtml(point.unit || '-')}</td>
+      <td>${escapeHtml(point.calibrationVersion || '-')}<small>${escapeHtml(point.calibrationStatus)}</small></td>
+      <td>${point.sourceSequenceEnabled ? '已启用' : '未启用'}</td>
+      <td>${statusChip(point.ready ? 'READY' : 'BLOCKED')}<small>${escapeHtml(point.readinessIssues.map(pointIssueLabel).join('、') || '准入通过')}</small></td>
+    </tr>`).join('');
+  content.innerHTML = `${toolbar}
+    <div class="point-summary">
+      <div><span>来源实例</span><b>${escapeHtml(snapshot.source)} / ${escapeHtml(snapshot.sourceInstance)}</b></div>
+      <div><span>来源修订</span><b>${escapeHtml(snapshot.sourceRevision)}</b></div>
+      <div><span>目录点位</span><b>${snapshot.pointCount}</b></div>
+      <div><span>就绪点位</span><b>${snapshot.readyPointCount}</b></div>
+      <div><span>观测时间</span><b>${formatTime(snapshot.observedAt)}</b></div>
+      <div><span>快照校验和</span><b class="mono-value">${escapeHtml(snapshot.checksum)}</b></div>
+    </div>
+    ${rows ? `<div class="table-frame"><table class="point-table"><thead><tr><th>点位</th><th>产品</th><th>设备</th><th>设备状态</th><th>属性</th><th>单位</th><th>标定</th><th>源序列</th><th>准入状态</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="database"></i><strong>快照中没有可用点位</strong><span>${escapeHtml(snapshot.sourceRevision)}</span></div>`}`;
+  bindPointPageEvents(content);
+}
+
+function bindPointPageEvents(content: HTMLElement): void {
+  content.querySelector('#import-point-catalog')?.addEventListener('click', openPointCatalogImport);
+  const load = (): void => {
+    const value = content.querySelector<HTMLInputElement>('#point-line')?.value.trim();
+    if (!value) return;
+    state.pointLineId = value;
+    localStorage.setItem('bpi.lineId', value);
+    void loadView();
+  };
+  content.querySelector('#load-point-line')?.addEventListener('click', load);
+  content.querySelector<HTMLInputElement>('#point-line')?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') load();
+  });
+  content.querySelector<HTMLInputElement>('#point-search')?.addEventListener('input', (event) => {
+    const keyword = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    content.querySelectorAll<HTMLTableRowElement>('[data-point-id]').forEach((row) => {
+      row.hidden = !row.textContent!.toLowerCase().includes(keyword);
+    });
+  });
+}
+
+function openPointCatalogImport(): void {
+  document.querySelector<HTMLInputElement>('#point-source')!.value = state.pointCatalog?.snapshot.source || 'JETLINKS';
+  document.querySelector<HTMLInputElement>('#point-source-instance')!.value = state.pointCatalog?.snapshot.sourceInstance || '';
+  document.querySelector<HTMLInputElement>('#point-source-revision')!.value = `JETLINKS_${Date.now()}`;
+  document.querySelector<HTMLInputElement>('#point-import-line')!.value = state.pointLineId;
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.querySelector<HTMLInputElement>('#point-observed-at')!.value = now.toISOString().slice(0, 19);
+  document.querySelector<HTMLTextAreaElement>('#point-import-json')!.value = '[]';
+  document.querySelector<HTMLTextAreaElement>('#point-import-reason')!.value = '';
+  document.querySelector<HTMLDialogElement>('#point-catalog-dialog')!.showModal();
+}
+
+async function handlePointCatalogImport(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  let points: PointCatalogPointCommand[];
+  try {
+    const parsed = JSON.parse(document.querySelector<HTMLTextAreaElement>('#point-import-json')!.value) as unknown;
+    if (!Array.isArray(parsed)) throw new Error('点位 JSON 必须是数组');
+    points = parsed as PointCatalogPointCommand[];
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : '点位 JSON 无效', true);
+    return;
+  }
+  const observedValue = document.querySelector<HTMLInputElement>('#point-observed-at')!.value;
+  const observedAt = new Date(observedValue);
+  if (Number.isNaN(observedAt.getTime())) {
+    showToast('观测时间无效', true);
+    return;
+  }
+  const command: PointCatalogSnapshotCommand = {
+    source: document.querySelector<HTMLInputElement>('#point-source')!.value.trim(),
+    sourceInstance: document.querySelector<HTMLInputElement>('#point-source-instance')!.value.trim(),
+    sourceRevision: document.querySelector<HTMLInputElement>('#point-source-revision')!.value.trim(),
+    plantId: state.plantId,
+    lineId: document.querySelector<HTMLInputElement>('#point-import-line')!.value.trim(),
+    observedAt: observedAt.toISOString(),
+    points,
+    reason: document.querySelector<HTMLTextAreaElement>('#point-import-reason')!.value.trim(),
+  };
+  const button = document.querySelector<HTMLButtonElement>('#point-catalog-submit')!;
+  button.disabled = true;
+  button.textContent = '导入中...';
+  try {
+    const response = await bpiApi.importPointCatalog(command, commandId());
+    state.pointLineId = command.lineId;
+    localStorage.setItem('bpi.lineId', command.lineId);
+    state.pointCatalog = response.data;
+    state.meta = response.meta;
+    document.querySelector<HTMLDialogElement>('#point-catalog-dialog')!.close();
+    showToast(`点位快照已导入：${response.data.snapshot.readyPointCount}/${response.data.snapshot.pointCount} 就绪`);
+    renderView();
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '导入快照';
+  }
+}
+
 function renderRules(): void {
   const content = document.querySelector('#content')!;
   const topology = state.topologies.find((item) => item.state === 'PUBLISHED') || state.topologies[0];
@@ -596,7 +754,7 @@ async function openTopology(topologyId: string): Promise<void> {
     const bindingRows = (topology.definition.bindings || []).map((binding) => `<li><span class="evidence-state evidence-state--ok"></span><div><strong>${escapeHtml(binding.signal)}</strong><small>${escapeHtml(binding.productId || '-')} / ${escapeHtml(binding.deviceId || '-')}</small></div><b>${escapeHtml(binding.propertyId)}</b></li>`).join('');
     const canValidate = topology.state === 'DRAFT';
     const canPublish = topology.state === 'DRAFT' && topology.validationStatus === 'PASSED';
-    openDrawer(`<header><div><span>版本化工艺拓扑</span><h2>${escapeHtml(topology.code)}@${escapeHtml(topology.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(topology.state)}${statusChip(topology.validationStatus || 'NOT_VALIDATED')}</div><span>revision ${topology.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(topology.plantId)} / ${escapeHtml(topology.lineId)}</b></div><div><span>本地性组</span><b>${escapeHtml(topology.definition.localityGroup || '-')}</b></div><div><span>校验人 / 时间</span><b>${escapeHtml(topology.validatedBy || '-')} · ${formatTime(topology.validatedAt)}</b></div><div><span>发布人 / 时间</span><b>${escapeHtml(topology.publishedBy || '-')} · ${formatTime(topology.publishedAt)}</b></div><div><span>拓扑 checksum</span><b class="mono-value">${escapeHtml(topology.checksum)}</b></div><div><span>节点 / 路径</span><b>${topology.definition.nodes?.length || 0} / ${topology.definition.edges?.length || 0}</b></div></div><div class="drawer-section"><div class="section-title"><h3>JetLinks 测点绑定</h3><span>${topology.definition.bindings?.length || 0} 条</span></div>${bindingRows ? `<ul class="evidence-list evidence-list--compact">${bindingRows}</ul>` : '<div class="simulation-empty">暂无测点绑定</div>'}</div><div class="drawer-section"><div class="section-title"><h3>校验结果</h3><span>${issues.length} 项</span></div>${issueRows ? `<ul class="evidence-list topology-issue-list">${issueRows}</ul>` : '<div class="simulation-empty">暂无校验问题</div>'}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${canValidate ? '<button class="button button--secondary" id="open-topology-validate">校验拓扑</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-topology-publish">发布拓扑</button>' : ''}</footer>`);
+    openDrawer(`<header><div><span>版本化工艺拓扑</span><h2>${escapeHtml(topology.code)}@${escapeHtml(topology.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(topology.state)}${statusChip(topology.validationStatus || 'NOT_VALIDATED')}</div><span>revision ${topology.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(topology.plantId)} / ${escapeHtml(topology.lineId)}</b></div><div><span>本地性组</span><b>${escapeHtml(topology.definition.localityGroup || '-')}</b></div><div><span>校验人 / 时间</span><b>${escapeHtml(topology.validatedBy || '-')} · ${formatTime(topology.validatedAt)}</b></div><div><span>发布人 / 时间</span><b>${escapeHtml(topology.publishedBy || '-')} · ${formatTime(topology.publishedAt)}</b></div><div><span>拓扑 checksum</span><b class="mono-value">${escapeHtml(topology.checksum)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogSnapshotId || '-')}</b></div><div><span>目录 checksum</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogChecksum || '-')}</b></div><div><span>节点 / 路径</span><b>${topology.definition.nodes?.length || 0} / ${topology.definition.edges?.length || 0}</b></div></div><div class="drawer-section"><div class="section-title"><h3>JetLinks 测点绑定</h3><span>${topology.definition.bindings?.length || 0} 条</span></div>${bindingRows ? `<ul class="evidence-list evidence-list--compact">${bindingRows}</ul>` : '<div class="simulation-empty">暂无测点绑定</div>'}</div><div class="drawer-section"><div class="section-title"><h3>校验结果</h3><span>${issues.length} 项</span></div>${issueRows ? `<ul class="evidence-list topology-issue-list">${issueRows}</ul>` : '<div class="simulation-empty">暂无校验问题</div>'}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${canValidate ? '<button class="button button--secondary" id="open-topology-validate">校验拓扑</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-topology-publish">发布拓扑</button>' : ''}</footer>`);
     document.querySelector('#open-topology-validate')?.addEventListener('click', () => openTopologyCommandDialog('validate'));
     document.querySelector('#open-topology-publish')?.addEventListener('click', () => openTopologyCommandDialog('publish'));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
@@ -795,8 +953,9 @@ function topologyLineFallback(): string {
 }
 
 function defaultTopologyDefinition(): TopologyDraftCommand['definition'] {
+  const point = state.pointCatalog?.points.find((item) => item.ready);
   return {
-    localityGroup: topologyLineFallback(),
+    localityGroup: point?.localityGroup || topologyLineFallback(),
     nodes: [
       { code: 'FEED-TANK', type: 'TANK', name: '进料罐' },
       { code: 'FLOW-METER', type: 'METER', name: '进料流量计' },
@@ -806,8 +965,15 @@ function defaultTopologyDefinition(): TopologyDraftCommand['definition'] {
       { from: 'FEED-TANK', to: 'FLOW-METER' },
       { from: 'FLOW-METER', to: 'RECEIVE-TANK' },
     ],
-    bindings: [{ signal: 'feed.flow', productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-01', propertyId: 'flow.instant', expectedUnit: 't/h', calibrationVersion: 'CAL-1' }],
-    requiredSignals: ['feed.flow'],
+    bindings: point ? [{
+      signal: 'feed.flow',
+      productId: point.productId,
+      deviceId: point.deviceId,
+      propertyId: point.propertyId,
+      expectedUnit: point.unit || '',
+      calibrationVersion: point.calibrationVersion || '',
+    }] : [],
+    requiredSignals: point ? ['feed.flow'] : [],
   };
 }
 
@@ -1100,6 +1266,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'rules'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'points', 'rules'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

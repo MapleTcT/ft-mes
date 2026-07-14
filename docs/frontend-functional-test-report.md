@@ -1,5 +1,20 @@
 # 前端功能测试报告
 
+## 2026-07-15 BPI 点位目录与拓扑准入门禁
+
+本轮在 `http://100.99.133.43:18091` 使用真实 ADP 会话执行页面、API、PostgreSQL
+和服务重启验收。marker 为 `ADP_E2E_20260715_POINTCAT_02`，机器记录见
+`metadata/bpi-point-catalog-readiness-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 点位目录 | `/#/points` | 导入目标 JetLinks 状态快照并使用同一幂等键重放 | `GET /bpi-api/point-catalog/current`、`POST /bpi-api/point-catalog/snapshots` | 页面显示 `0/1 就绪`、`instantFlow -> flow.instant`、设备未注册/未激活/属性不存在/标定未验证；console/page/request error 均为 0 | 首次 `200`，重放 `200 + Idempotent-Replay:true`，source revision 仅 1 条 | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS | 准入功能通过；目标点位本身仍 BLOCKED |
+| BPI 拓扑硬门禁 | `/#/rules` | 创建绑定试点点位的拓扑并校验 | `POST /bpi-api/topologies/drafts`、`POST /bpi-api/topologies/{id}/validate` | 抽屉显示 `DRAFT/FAILED`、4 项错误和 1 项警告，不显示发布按钮 | topology `r1 -> r2`，固定本次点位 snapshot；审计写入 `TOPOLOGY_VALIDATION_FAILED` | `bpi_topology_versions`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 设备、属性、标定恢复后必须导入新快照并重新校验 |
+| BPI 重启读取 | `/#/points`、`/#/rules` | force-recreate Java 服务后只读既有 marker | GET current catalog/topologies/topology | 点位和失败拓扑仍唯一可见，无 console/page/network error | 服务健康 `UP`，Flyway V12，数据未丢失 | 上述五张表 | PASS | 不包含 7-14 天影子运行 |
+
+控制面验收为 PASS，但不能把数据源状态升级为 READY。目标 JetLinks 当前产品 metadata
+为空，设备为 `notActive`、`registry_time=NULL`，标定未验证。
+
 ## 2026-07-12 核心主线当前运行时回归
 
 本轮在 `http://100.99.133.43:18080` 重新执行真实页面、API 和 PostgreSQL

@@ -5,6 +5,8 @@ import type {
   CandidateConfirmation,
   Evidence,
   LineState,
+  PointCatalogSnapshotCommand,
+  PointCatalogView,
   ProblemDetail,
   RuleSimulation,
   RuleSimulationCommand,
@@ -91,6 +93,14 @@ export const bpiApi = {
   timeline: (id: string) => request<StateEvent[]>(`/batches/${encodeURIComponent(id)}/timeline`),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
+  currentPointCatalog: (plantId: string, lineId: string) =>
+    request<PointCatalogView | null>(`/point-catalog/current?plantId=${encodeURIComponent(plantId)}&lineId=${encodeURIComponent(lineId)}`),
+  importPointCatalog: (command: PointCatalogSnapshotCommand, key: string) =>
+    request<PointCatalogView>('/point-catalog/snapshots', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': '0' },
+      body: JSON.stringify(command),
+    }),
   topology: (id: string) => request<TopologyVersion>(`/topologies/${encodeURIComponent(id)}`),
   createTopologyDraft: (command: TopologyDraftCommand, key: string, revision = 0) =>
     request<TopologyVersion>('/topologies/drafts', {

@@ -266,6 +266,32 @@ test('candidate rejection is idempotent and never creates a shadow batch', async
 });
 
 test('rule simulation checksum gates publication', async () => {
+  let pointResult = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(pointResult.response.status, 200);
+  assert.equal(pointResult.json.data.snapshot.readyPointCount, 2);
+  pointResult = await request('GET', '/bpi/v1/point-catalog/snapshots?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(pointResult.json.data.length, 1);
+
+  const pointSnapshot = {
+    source: 'JETLINKS', sourceInstance: 'simulation-import', sourceRevision: 'SIM-POINTS-0001',
+    plantId: 'PLANT-01', lineId: 'LINE-S07-01', observedAt: '2026-07-12T07:58:00.000Z',
+    reason: '导入模拟点位目录',
+    points: [{
+      localityGroup: 'LOCALITY-S07-EVAP', productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01',
+      propertyId: 'flow.instant', sourcePropertyId: 'instantFlow', pointName: '进料瞬时流量', unit: 't/h', dataType: 'double',
+      deviceState: 'ACTIVE', registered: true, propertyPresent: true,
+      calibrationVersion: 'CAL-1', calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true,
+    }],
+  };
+  const pointHeaders = commandHeaders('import-point-catalog-0001', 0);
+  pointResult = await request('POST', '/bpi/v1/point-catalog/snapshots', { headers: pointHeaders, body: pointSnapshot });
+  assert.equal(pointResult.response.status, 200);
+  assert.equal(pointResult.json.data.snapshot.readyPointCount, 1);
+  const firstPointImport = pointResult.json;
+  pointResult = await request('POST', '/bpi/v1/point-catalog/snapshots', { headers: pointHeaders, body: pointSnapshot });
+  assert.equal(pointResult.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(pointResult.json, firstPointImport);
+
   let topologyResult = await request('GET', '/bpi/v1/topologies?plantId=PLANT-01&lineId=LINE-S07-01');
   assert.equal(topologyResult.json.data.length, 1);
   assert.equal(topologyResult.json.data[0].code, 'TOPO-S07');

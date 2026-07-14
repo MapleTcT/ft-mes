@@ -20,6 +20,8 @@ public record TopologyVersionView(
         List<TopologyValidationIssue> validationWarnings,
         String validatedBy,
         Instant validatedAt,
+        UUID validatedPointCatalogSnapshotId,
+        String validatedPointCatalogChecksum,
         String publishedBy,
         Instant publishedAt) {
 }

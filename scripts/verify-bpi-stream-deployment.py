@@ -20,6 +20,7 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
     "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
     "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
+    "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
     "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
@@ -27,11 +28,13 @@ REQUIRED_FILES = [
     "docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md",
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
     "docs/testing/bpi-target-topology-rule-acceptance.md",
+    "docs/testing/bpi-point-catalog-readiness-acceptance.md",
     "metadata/bpi-test-host-capacity-preflight.json",
     "metadata/bpi-kafka-postgres-replay-acceptance.json",
     "metadata/bpi-test-environment-acceptance.json",
     "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
     "metadata/bpi-target-topology-rule-acceptance.json",
+    "metadata/bpi-point-catalog-readiness-acceptance.json",
     "backend/source-modules/mes-production-context-outbox/README.md",
     "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
     "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
@@ -186,6 +189,24 @@ def main() -> int:
         if marker not in productization_browser:
             failures.append(f"BPI topology/rule browser acceptance is missing marker: {marker}")
 
+    point_catalog_browser = (
+        ROOT / "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        'new Set(["write", "read"])',
+        "Idempotent-Replay",
+        "POINT_DEVICE_NOT_REGISTERED",
+        "POINT_DEVICE_NOT_ACTIVE",
+        "POINT_PROPERTY_NOT_AVAILABLE",
+        "POINT_CALIBRATION_NOT_VERIFIED",
+        "POINT_SOURCE_SEQUENCE_DISABLED",
+        "publishAllowed = false",
+        "readPersistedAcceptance",
+        "ADP_PASSWORD",
+    ):
+        if marker not in point_catalog_browser:
+            failures.append(f"BPI point-catalog browser acceptance is missing marker: {marker}")
+
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")
     )
@@ -247,6 +268,44 @@ def main() -> int:
             failures.append(
                 f"target BPI topology/rule acceptance leaks a secret marker: {forbidden}"
             )
+
+    point_catalog_target = json.loads(
+        (ROOT / "metadata/bpi-point-catalog-readiness-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if point_catalog_target.get("status") != "PASS_CONTROL_WITH_BLOCKED_SOURCE":
+        failures.append("target BPI point-catalog acceptance must preserve the split control/source status")
+    environment = point_catalog_target.get("environment", {})
+    if environment.get("flywayVersion") != 12 or environment.get("schemaTableCount") != 21:
+        failures.append("target BPI point-catalog acceptance must retain Flyway V12 and 21 tables")
+    if point_catalog_target.get("marker") != "ADP_E2E_20260715_POINTCAT_02":
+        failures.append("target BPI point-catalog acceptance must retain the verified marker")
+    persistence = point_catalog_target.get("persistence", {})
+    snapshot = persistence.get("snapshot", {})
+    if snapshot.get("pointCount") != 1 or snapshot.get("readyPointCount") != 0:
+        failures.append("target BPI point-catalog evidence must retain one blocked source point")
+    if snapshot.get("duplicateCountAfterReplay") != 1:
+        failures.append("target BPI point-catalog replay must not duplicate its snapshot")
+    topology = persistence.get("topology", {})
+    if topology.get("validationStatus") != "FAILED" or topology.get("publishAllowed") is not False:
+        failures.append("target BPI blocked topology must remain failed and unpublishable")
+    if set(topology.get("errors", [])) != {
+        "POINT_DEVICE_NOT_REGISTERED",
+        "POINT_DEVICE_NOT_ACTIVE",
+        "POINT_PROPERTY_NOT_AVAILABLE",
+        "POINT_CALIBRATION_NOT_VERIFIED",
+    }:
+        failures.append("target BPI blocked topology must retain all four readiness errors")
+    if topology.get("warnings") != ["POINT_SOURCE_SEQUENCE_DISABLED"]:
+        failures.append("target BPI blocked topology must retain the source-sequence warning")
+    conclusion = point_catalog_target.get("conclusion", {})
+    if conclusion.get("control") != "PASS" or conclusion.get("sourceReadiness") != "BLOCKED":
+        failures.append("target BPI point-catalog conclusion must not promote the blocked source")
+    point_catalog_serialized = json.dumps(point_catalog_target).lower()
+    for forbidden in ('"password"', '"token"', '"cookie"', "begin private key"):
+        if forbidden in point_catalog_serialized:
+            failures.append(f"target BPI point-catalog acceptance leaks a secret marker: {forbidden}")
 
     joint_acceptance = json.loads(
         (ROOT / "metadata/bpi-browser-kafka-postgres-joint-acceptance.json").read_text(

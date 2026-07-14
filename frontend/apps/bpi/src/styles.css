@@ -70,6 +70,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .toolbar-note { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
 .toolbar-note svg { width: 15px; color: var(--green); }
 .toolbar-actions { display: flex; align-items: center; gap: 8px; }
+.line-field { height: 36px; display: grid; grid-template-columns: auto minmax(90px, 150px); align-items: center; gap: 7px; padding: 0 9px; background: #fff; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: 10px; }
+.line-field input { min-width: 0; border: 0; outline: 0; color: #34414d; font-size: 12px; }
 .segmented { display: inline-grid; grid-auto-flow: column; border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; }
 .segmented button { height: 34px; min-width: 88px; border: 0; border-right: 1px solid var(--line-strong); background: #fff; color: #4e5b68; font-size: 13px; }
 .segmented button:last-child { border-right: 0; }
@@ -171,6 +173,12 @@ td > svg { width: 16px; color: #8b96a1; }
 .rule-table { min-width: 980px; }
 .topology-table { min-width: 880px; }
 .binding-table { min-width: 680px; }
+.point-table { min-width: 1180px; }
+.point-summary { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 12px; background: #fff; border: 1px solid var(--line); }
+.point-summary > div { min-width: 0; display: grid; gap: 5px; padding: 12px; border-right: 1px solid var(--line); }
+.point-summary > div:last-child { border-right: 0; }
+.point-summary span { color: var(--muted); font-size: 10px; }
+.point-summary b { overflow-wrap: anywhere; font-size: 12px; }
 .topology-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
 .topology-summary > div { min-width: 0; display: grid; gap: 5px; padding: 14px; border-right: 1px solid var(--line); }
 .topology-summary > div:last-child { border-right: 0; }
@@ -248,7 +256,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .editor-fields input:focus, .editor-fields select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(23, 105, 170, 0.12); }
 .editor-fields .editor-field--wide { grid-column: 1 / -1; padding: 0; }
 .editor-fields .editor-field--wide textarea { min-height: 82px; }
-.editor-fields .editor-field--wide textarea[id$="definition"], .editor-fields #rule-ast { min-height: 210px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; line-height: 1.5; }
+.editor-fields .editor-field--wide textarea[id$="definition"], .editor-fields #rule-ast, .editor-fields #point-import-json { min-height: 210px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; line-height: 1.5; }
 
 .toast { position: fixed; z-index: 80; top: 86px; right: 22px; max-width: min(460px, calc(100vw - 44px)); padding: 12px 16px; background: #183d2c; color: #fff; border-left: 4px solid #59b987; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(-8px); transition: 150ms ease-out; font-size: 13px; }
 .toast.is-visible { opacity: 1; transform: translateY(0); }
@@ -270,7 +278,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .console-shell { display: block; }
   .side-nav { position: fixed; z-index: 30; top: auto; bottom: 0; width: 100%; height: 58px; display: block; border-top: 1px solid #0d141c; }
   .brand-mark, .mode-flag { display: none; }
-  .side-nav nav { height: 58px; grid-template-columns: repeat(4, 1fr); padding: 4px 4px; }
+  .side-nav nav { height: 58px; grid-template-columns: repeat(5, 1fr); padding: 4px 4px; }
   .nav-item { height: 48px; grid-template-columns: 18px auto; justify-content: center; gap: 6px; }
   .nav-item span { display: inline; font-size: 11px; }
   .nav-item.is-active::before { left: 25%; bottom: -4px; width: 50%; height: 2px; }
@@ -290,7 +298,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .command-summary { grid-template-columns: 1fr; }
   .editor-fields { grid-template-columns: 1fr; }
   .editor-fields .editor-field--wide { grid-column: auto; }
-  .topology-summary, .metric-grid, .simulation-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .topology-summary, .point-summary, .metric-grid, .simulation-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .toast { top: 74px; right: 12px; max-width: calc(100vw - 24px); }
 }
 

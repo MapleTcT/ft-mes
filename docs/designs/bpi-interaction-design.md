@@ -27,6 +27,7 @@ MES 顶部标签
    ├─ 实时生产态势       /bpi/overview
    ├─ 候选批次           /bpi/candidates
    ├─ 批次档案           /bpi/batches
+   ├─ 点位准入           /bpi/points
    ├─ 工艺拓扑           /bpi/topologies
    ├─ 边界规则           /bpi/rules
    ├─ 数据质量           /bpi/data-quality
@@ -44,12 +45,12 @@ MES 顶部标签
 | 角色 | 默认首页 | 可执行命令 | 明确禁止 |
 |---|---|---|---|
 | 调度/班长 | 实时生产态势 | 确认/拒绝候选、暂停、恢复、申请强制结束 | 修改或发布规则 |
-| 工艺工程师 | 边界规则 | 拓扑草拟、测点绑定、规则草拟、模拟 | 单人发布规则、修改原始事件 |
+| 工艺工程师 | 边界规则 | 拓扑草拟、已准入测点绑定、规则草拟、模拟 | 导入点位快照、单人发布规则、修改原始事件 |
 | 质量人员 | 批次档案 | 关联样品、复核质量门、提交处置意见 | 改批次边界和规则 |
 | 仓储人员 | 批次档案 | 复核 WMS 回执、重查幂等单据 | 直接改 BPI 累计量 |
 | 数据工程师 | 数据质量 | 数据质量处置、生成数据集快照 | 修改生产事实和质量结果 |
 | 审批人 | 待审批规则/修订 | 发布规则、批准重大修订/强制结束 | 草拟后自行审批 |
-| 系统管理员 | 集成运行 | 集成配置、服务诊断、权限配置 | 自动获得工艺审批权 |
+| 系统管理员 | 集成运行 | 导入点位快照、集成配置、服务诊断、权限配置 | 自动获得工艺审批权 |
 | 审计人员 | 审计记录 | 查询、导出审计链 | 任何业务写操作 |
 
 权限判断同时校验 tenant、plant、line 和对象状态。页面隐藏无权限按钮只是体验处理，
@@ -177,7 +178,25 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 **主要 API：** `getBatch`、`getBatchEvidence`、`getBatchBalance`、`getBatchGenealogy`、
 `getBatchTimeline`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、`createBatchCorrection`。
 
-### 5.5 工艺拓扑 `/bpi/topologies`
+### 5.5 点位准入 `/bpi/points`
+
+**用户目标：** 在拓扑绑定前确认 JetLinks 点位身份和运行准备度，阻止伪点位或失效点位进入规则链。
+
+页面按工厂和产线读取当前不可变快照，顶部显示快照 ID、来源 revision、采集时间、checksum，以及
+ready/blocked 数量。点位表固定展示 product、device、JetLinks 原属性、exporter 规范化属性、单位、设备状态、注册状态、属性存在性、
+校准版本/状态、源序列能力和阻断原因。未取得快照时显示“尚未导入点位目录”，不生成默认绑定。
+
+只有 `BPI_ADMIN` 可打开导入对话框。首期对话框接收 exporter 生成的 JSON 快照，要求来源实例、来源 revision、
+工厂、产线、采集时间、点位清单和导入原因；提交时携带 `Idempotency-Key` 和 `If-Match: 0`。页面不允许直接
+编辑快照条目，也不连接 JetLinks 数据库。现场点位变化必须由 exporter 生成新快照，旧拓扑继续保留已钉扎的
+快照 ID/checksum 作为审计证据。
+
+ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、单位与绑定一致、校准状态为 `VERIFIED`，且
+product/device/property 与拓扑绑定完全一致。任何一项不满足都显示明确 blocker，并使拓扑校验 fail closed。
+
+**主要 API：** `listPointCatalogSnapshots`、`getCurrentPointCatalog`、`importPointCatalogSnapshot`。
+
+### 5.6 工艺拓扑 `/bpi/topologies`
 
 **用户目标：** 版本化维护工段、设备路径和测点语义。
 
@@ -185,14 +204,16 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 泵、阀、meter 和逻辑边界。工具栏提供选择、连接、校验、版本对比、保存草稿、提交审批。
 
 测点绑定表列出 JetLinks product/device/property、语义、单位、优先级、校准版本和 locality group。
-发布前校验 required 信号缺失、单位不兼容、路径悬空、共享 meter 未分配和循环批次谱系风险。
+发布前校验 required 信号缺失、路径悬空、共享 meter 未分配和循环批次谱系风险，并逐项与当前点位准入快照
+核对设备激活/注册、属性存在、单位和校准状态。校验通过后拓扑记录快照 ID/checksum；没有快照或点位不 ready
+时禁止发布，不允许用前端默认值绕过。
 
 拓扑发布后不可修改；从已发布版本复制新草稿。正在运行的批次继续固定引用旧版本。
 
 **主要 API：** `listTopologies`、`getTopologyVersion`、`createTopologyDraft`、
 `validateTopologyDraft`、`publishTopologyVersion`。
 
-### 5.6 边界规则 `/bpi/rules`
+### 5.7 边界规则 `/bpi/rules`
 
 **用户目标：** 使用受控 DSL 配置多信号批次边界并通过回放后发布。
 
@@ -225,7 +246,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 **主要 API：** `listRules`、`getRuleVersion`、`createRuleDraft`、`simulateRule`、
 `getRuleSimulation`、`publishRuleVersion`、`retryRulePublication`。
 
-### 5.7 数据质量 `/bpi/data-quality`
+### 5.8 数据质量 `/bpi/data-quality`
 
 按“影响批次优先”而非按原始事件数量排序。顶部汇总 required 信号不可用、时钟漂移、单位未知、
 序列断点、共享 meter 未分配和缓冲区告警。列表按 source+point+issue 聚合，显示持续时间、
@@ -237,7 +258,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 **主要 API：** `listDataQualityIncidents`、`getDataQualityIncident`、
 `acknowledgeDataQualityIncident`、`resolveDataQualityIncident`。
 
-### 5.8 训练数据集 `/bpi/datasets`
+### 5.9 训练数据集 `/bpi/datasets`
 
 数据集定义列表显示特征版本、标签版本、prediction time、允许批次状态、排除规则和最近快照。
 创建快照时选择冻结时间、工厂/产线/工段、规则版本和数据范围。预检必须显示：低置信度批次数、
@@ -248,7 +269,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 
 **主要 API：** `listDatasets`、`createDatasetSnapshot`、`getDatasetSnapshot`。
 
-### 5.9 集成运行 `/bpi/integrations`
+### 5.10 集成运行 `/bpi/integrations`
 
 展示 JetLinks exporter、Kafka、Flink、WOM、QCS、WMS、TimescaleDB、PostgreSQL 和 MinIO 的健康、
 最后成功时间、lag、spool 使用率和降级影响。健康值与业务影响分开：例如 TimescaleDB 曲线不可用
@@ -258,7 +279,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 
 **主要 API：** `getIntegrationHealth`、`runIntegrationCheck`。
 
-### 5.10 审计记录 `/bpi/audit`
+### 5.11 审计记录 `/bpi/audit`
 
 按 batchId、candidateKey、ruleVersion、user、action、traceId 和时间查询。记录显示命令输入摘要、
 前后 revision、审批链、API 状态和关联 outbox/inbox。原始敏感 payload 默认折叠并按权限脱敏。
@@ -371,8 +392,10 @@ sequenceDiagram
 6. 独立场景从批次详情暂停 `ACTIVE` 批次，看到 `SUSPENDED/r2`、产线 `BLOCKED` 和追加事件。
 7. 从同一详情恢复批次，看到 `ACTIVE/r3`、产线 `RUNNING` 和追加事件。
 8. 查询批次详情、START/END 证据、平衡和谱系。
-9. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
-10. 查询数据质量事件并看到受影响的产线、规则和批次。
+9. 查询无点位快照状态；导入并重放不可变点位目录快照，页面展示 ready/blocker。
+10. 绑定 ready 点位后校验拓扑，展示并持久化点位快照 ID/checksum；缺失或不合格点位必须阻断发布。
+11. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
+12. 查询数据质量事件并看到受影响的产线、规则和批次。
 
 模拟验收不证明真实 JetLinks、Kafka、Flink 或 PostgreSQL 已接通；真实环境仍需执行
 浏览器、API、PostgreSQL marker 和回滚验收。

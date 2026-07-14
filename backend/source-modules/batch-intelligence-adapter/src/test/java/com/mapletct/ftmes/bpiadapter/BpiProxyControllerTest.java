@@ -21,6 +21,8 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -119,6 +121,64 @@ public class BpiProxyControllerTest {
                 "{\"reason\":\"context restored\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
 
         upstream.verify();
+    }
+
+    @Test
+    public void rejectsOrdinaryRequestBodyAbove64KiB() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/confirm");
+
+        try {
+            controller.proxy(jwt(), request, new byte[65_537]);
+            fail("Expected the ordinary request body limit to reject the request");
+        } catch (AdapterAccessDeniedException error) {
+            assertTrue(error.getMessage().contains("64 KiB"));
+        }
+    }
+
+    @Test
+    public void acceptsPointCatalogSnapshotAboveOrdinaryLimit() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/point-catalog/snapshots"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "catalog-import-1"))
+                .andExpect(header("If-Match", "0"))
+                .andRespond(withSuccess("{\"code\":201}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/point-catalog/snapshots");
+        request.addHeader("Idempotency-Key", "catalog-import-1");
+        request.addHeader("If-Match", "0");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request, new byte[65_537]);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
+    public void rejectsPointCatalogSnapshotAbove5MiB() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/point-catalog/snapshots");
+
+        try {
+            controller.proxy(jwt(), request, new byte[(5 * 1024 * 1024) + 1]);
+            fail("Expected the point catalog request body limit to reject the request");
+        } catch (AdapterAccessDeniedException error) {
+            assertTrue(error.getMessage().contains("5 MiB"));
+        }
     }
 
     private BpiAdapterProperties properties() {

@@ -151,8 +151,9 @@ function stableUuid(value) {
   return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
 }
 
-function topologyValidation(definition) {
+function topologyValidation(definition, pointCatalog) {
   const errors = [];
+  const warnings = [];
   const bindings = Array.isArray(definition?.bindings) ? definition.bindings : [];
   if (!bindings.length) {
     errors.push({ code: 'BINDINGS_REQUIRED', path: '/bindings', severity: 'ERROR', message: 'At least one JetLinks point binding is required.' });
@@ -164,8 +165,24 @@ function topologyValidation(definition) {
     if (!binding.expectedUnit && !binding.unit) {
       errors.push({ code: 'BINDING_UNIT_REQUIRED', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'A binding must declare expectedUnit or unit.' });
     }
+    if (!pointCatalog) return;
+    const point = pointCatalog?.points.find((item) => item.productId === binding.productId
+      && item.deviceId === binding.deviceId && item.propertyId === binding.propertyId);
+    if (!point) {
+      errors.push({ code: 'POINT_CATALOG_BINDING_NOT_FOUND', path: `/bindings/${index}`, severity: 'ERROR', message: 'The binding does not exist in the current point catalog snapshot.' });
+      return;
+    }
+    if (!point.registered) errors.push({ code: 'POINT_DEVICE_NOT_REGISTERED', path: `/bindings/${index}/deviceId`, severity: 'ERROR', message: 'The bound device is not registered.' });
+    if (point.deviceState !== 'ACTIVE') errors.push({ code: 'POINT_DEVICE_NOT_ACTIVE', path: `/bindings/${index}/deviceId`, severity: 'ERROR', message: `The bound device state is ${point.deviceState}.` });
+    if (!point.propertyPresent) errors.push({ code: 'POINT_PROPERTY_NOT_AVAILABLE', path: `/bindings/${index}/propertyId`, severity: 'ERROR', message: 'The bound property is absent from product metadata.' });
+    const expectedUnit = binding.expectedUnit || binding.unit;
+    if (!point.unit) errors.push({ code: 'POINT_UNIT_MISSING', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'The catalog point has no source unit.' });
+    else if (expectedUnit && point.unit.toLowerCase() !== String(expectedUnit).toLowerCase()) errors.push({ code: 'POINT_UNIT_MISMATCH', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'Expected and source units do not match.' });
+    if (point.calibrationStatus !== 'VERIFIED' || point.calibrationVersion !== binding.calibrationVersion) errors.push({ code: 'POINT_CALIBRATION_NOT_VERIFIED', path: `/bindings/${index}/calibrationVersion`, severity: 'ERROR', message: 'The requested calibration version is not verified.' });
+    if (!point.sourceSequenceEnabled) warnings.push({ code: 'POINT_SOURCE_SEQUENCE_DISABLED', path: `/bindings/${index}`, severity: 'WARNING', message: 'Replay deduplication depends on stable event IDs.' });
   });
-  return { errors, warnings: [] };
+  if (!pointCatalog) errors.push({ code: 'POINT_CATALOG_SNAPSHOT_MISSING', path: '/bindings', severity: 'ERROR', message: 'No point catalog snapshot exists for this scope.' });
+  return { errors, warnings };
 }
 
 function createHandler(state) {
@@ -410,6 +427,50 @@ function createHandler(state) {
       if (req.method === 'GET' && path === '/bpi/v1/topologies') {
         return send(res, 200, envelope('listTopologies', state.topologies), 'listTopologies');
       }
+      if (req.method === 'GET' && path === '/bpi/v1/point-catalog/current') {
+        const matchesScope = state.pointCatalog
+          && state.pointCatalog.snapshot.plantId === url.searchParams.get('plantId')
+          && state.pointCatalog.snapshot.lineId === url.searchParams.get('lineId');
+        return send(res, 200, envelope('getCurrentPointCatalog', matchesScope ? state.pointCatalog : null), 'getCurrentPointCatalog');
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/point-catalog/snapshots') {
+        return send(res, 200, envelope('listPointCatalogSnapshots', state.pointCatalog ? [state.pointCatalog.snapshot] : []), 'listPointCatalogSnapshots');
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/point-catalog/snapshots') {
+        const operationId = 'importPointCatalogSnapshot';
+        const context = commandContext(req, res, operationId, 0, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const missing = ['source', 'sourceInstance', 'sourceRevision', 'plantId', 'lineId', 'observedAt', 'points', 'reason']
+          .filter((key) => body[key] === undefined || body[key] === '');
+        if (missing.length || !Array.isArray(body.points)) {
+          return send(res, 422, problem(422, 'Validation Failed', `Missing or invalid fields: ${missing.join(', ')}.`, operationId), operationId);
+        }
+        const snapshotId = stableUuid({ type: 'point-catalog', source: body.source, sourceRevision: body.sourceRevision });
+        const points = body.points.map((point) => {
+          const readinessIssues = [];
+          if (!point.registered) readinessIssues.push('DEVICE_NOT_REGISTERED');
+          if (point.deviceState !== 'ACTIVE') readinessIssues.push('DEVICE_NOT_ACTIVE');
+          if (!point.propertyPresent) readinessIssues.push('PROPERTY_NOT_AVAILABLE');
+          if (!point.unit) readinessIssues.push('UNIT_MISSING');
+          if (!point.calibrationVersion || point.calibrationStatus !== 'VERIFIED') readinessIssues.push('CALIBRATION_NOT_VERIFIED');
+          return {
+            id: stableUuid({ type: 'point', snapshotId, productId: point.productId, deviceId: point.deviceId, propertyId: point.propertyId }),
+            snapshotId, plantId: body.plantId, lineId: body.lineId, ...clone(point),
+            ready: readinessIssues.length === 0, readinessIssues,
+          };
+        });
+        const { reason: ignoredReason, ...catalogPayload } = body;
+        const snapshot = {
+          id: snapshotId, source: body.source, sourceInstance: body.sourceInstance,
+          sourceRevision: body.sourceRevision, plantId: body.plantId, lineId: body.lineId,
+          checksum: sha256(catalogPayload), observedAt: body.observedAt,
+          pointCount: points.length, readyPointCount: points.filter((point) => point.ready).length,
+          importedBy: 'simulated.bpi.admin', importedAt: FIXED_TIME,
+        };
+        state.pointCatalog = { snapshot, points };
+        return rememberAndSend(state, context, res, 200, envelope(operationId, state.pointCatalog), operationId);
+      }
       if (req.method === 'POST' && path === '/bpi/v1/topologies/drafts') {
         const operationId = 'createTopologyDraft';
         const body = await readJson(req);
@@ -428,6 +489,7 @@ function createHandler(state) {
           plantId: body.plantId, lineId: body.lineId, checksum: sha256(body.definition),
           definition: clone(body.definition), validationStatus: 'NOT_VALIDATED',
           validationErrors: [], validationWarnings: [], validatedBy: null, validatedAt: null,
+          validatedPointCatalogSnapshotId: null, validatedPointCatalogChecksum: null,
           publishedBy: null, publishedAt: null,
         };
         state.topologies.unshift(topology);
@@ -449,12 +511,14 @@ function createHandler(state) {
         if (!context) return;
         const body = await readJson(req);
         if (!body.reason || topology.state !== 'DRAFT') return send(res, 409, problem(409, 'Invalid Topology State', 'Only a draft topology can be validated.', operationId, topology.revision), operationId);
-        const result = topologyValidation(topology.definition);
+        const result = topologyValidation(topology.definition, state.pointCatalog);
         topology.validationErrors = result.errors;
         topology.validationWarnings = result.warnings;
         topology.validationStatus = result.errors.length ? 'FAILED' : 'PASSED';
         topology.validatedBy = 'simulated.process.engineer';
         topology.validatedAt = FIXED_TIME;
+        topology.validatedPointCatalogSnapshotId = state.pointCatalog?.snapshot.id || null;
+        topology.validatedPointCatalogChecksum = state.pointCatalog?.snapshot.checksum || null;
         topology.revision += 1;
         return rememberAndSend(state, context, res, 200, envelope(operationId, topology), operationId);
       }
@@ -466,8 +530,11 @@ function createHandler(state) {
         const context = commandContext(req, res, operationId, topology.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
-        if (!body.reason || topology.state !== 'DRAFT' || topology.validationStatus !== 'PASSED') {
-          return send(res, 409, problem(409, 'Invalid Topology State', 'Topology must pass validation before publication.', operationId, topology.revision), operationId);
+        if (!body.reason || topology.state !== 'DRAFT' || topology.validationStatus !== 'PASSED'
+            || !topology.validatedPointCatalogSnapshotId || !topology.validatedPointCatalogChecksum
+            || topology.validatedPointCatalogSnapshotId !== state.pointCatalog?.snapshot.id
+            || topology.validatedPointCatalogChecksum !== state.pointCatalog?.snapshot.checksum) {
+          return send(res, 409, problem(409, 'Invalid Topology State', 'Topology must pass validation against the current point catalog snapshot.', operationId, topology.revision), operationId);
         }
         topology.state = 'PUBLISHED';
         topology.publishedBy = 'simulated.bpi.admin';

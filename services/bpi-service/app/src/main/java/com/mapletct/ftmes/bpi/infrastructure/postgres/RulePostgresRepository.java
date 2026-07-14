@@ -61,7 +61,8 @@ public class RulePostgresRepository {
                    checksum, definition::text AS definition, validation_status,
                    validation_errors::text AS validation_errors,
                    validation_warnings::text AS validation_warnings,
-                   validated_by, validated_at, published_by, published_at
+                   validated_by, validated_at, validated_point_catalog_snapshot_id,
+                   validated_point_catalog_checksum, published_by, published_at
               FROM bpi.bpi_topology_versions
             """;
 
@@ -168,6 +169,8 @@ public class RulePostgresRepository {
             UUID topologyId,
             long expectedRevision,
             String checksum,
+            UUID pointCatalogSnapshotId,
+            String pointCatalogChecksum,
             List<TopologyValidationIssue> errors,
             List<TopologyValidationIssue> warnings) {
         int updated = jdbc.update("""
@@ -176,6 +179,8 @@ public class RulePostgresRepository {
                        validation_errors = CAST(:errors AS jsonb),
                        validation_warnings = CAST(:warnings AS jsonb),
                        validated_checksum = :checksum,
+                       validated_point_catalog_snapshot_id = :pointCatalogSnapshotId,
+                       validated_point_catalog_checksum = :pointCatalogChecksum,
                        validated_by = :actorId,
                        validated_at = now(),
                        revision = revision + 1,
@@ -188,6 +193,8 @@ public class RulePostgresRepository {
                 """, new MapSqlParameterSource().addValue("status", errors.isEmpty() ? "PASSED" : "FAILED")
                 .addValue("errors", writeJson(errors)).addValue("warnings", writeJson(warnings))
                 .addValue("checksum", checksum).addValue("actorId", actor.userId())
+                .addValue("pointCatalogSnapshotId", pointCatalogSnapshotId)
+                .addValue("pointCatalogChecksum", pointCatalogChecksum)
                 .addValue("tenantId", actor.tenantId()).addValue("id", topologyId)
                 .addValue("expectedRevision", expectedRevision));
         if (updated != 1) {
@@ -207,7 +214,7 @@ public class RulePostgresRepository {
     public void publishTopology(
             ActorContext actor, UUID topologyId, long expectedRevision, String checksum) {
         int updated = jdbc.update("""
-                UPDATE bpi.bpi_topology_versions
+                UPDATE bpi.bpi_topology_versions AS topology
                    SET state = 'PUBLISHED', revision = revision + 1,
                        published_by = :actorId, published_at = now(),
                        updated_by = :actorId, updated_at = now()
@@ -217,11 +224,34 @@ public class RulePostgresRepository {
                    AND state = 'DRAFT'
                    AND validation_status = 'PASSED'
                    AND validated_checksum = :checksum
+                   AND validated_point_catalog_snapshot_id IS NOT NULL
+                   AND validated_point_catalog_checksum IS NOT NULL
+                   AND EXISTS (
+                       SELECT 1
+                         FROM bpi.bpi_point_catalog_snapshots pinned
+                        WHERE pinned.tenant_id = topology.tenant_id
+                          AND pinned.plant_id = topology.plant_id
+                          AND pinned.line_id = topology.line_id
+                          AND pinned.id = topology.validated_point_catalog_snapshot_id
+                          AND pinned.checksum = topology.validated_point_catalog_checksum
+                          AND pinned.id = (
+                              SELECT current_snapshot.id
+                                FROM bpi.bpi_point_catalog_snapshots current_snapshot
+                               WHERE current_snapshot.tenant_id = topology.tenant_id
+                                 AND current_snapshot.plant_id = topology.plant_id
+                                 AND current_snapshot.line_id = topology.line_id
+                               ORDER BY current_snapshot.observed_at DESC,
+                                        current_snapshot.imported_at DESC,
+                                        current_snapshot.id
+                               LIMIT 1
+                          )
+                   )
                 """, new MapSqlParameterSource().addValue("actorId", actor.userId())
                 .addValue("tenantId", actor.tenantId()).addValue("id", topologyId)
                 .addValue("expectedRevision", expectedRevision).addValue("checksum", checksum));
         if (updated != 1) {
-            throw new BpiConflictException("Topology is not validated for publication.", expectedRevision);
+            throw new BpiConflictException(
+                    "Topology is not validated against the current point catalog snapshot.", expectedRevision);
         }
     }
 
@@ -256,7 +286,8 @@ public class RulePostgresRepository {
                            t.plant_id, t.line_id, t.checksum, t.definition::text AS definition,
                            t.validation_status, t.validation_errors::text AS validation_errors,
                            t.validation_warnings::text AS validation_warnings,
-                           t.validated_by, t.validated_at, t.published_by, t.published_at
+                           t.validated_by, t.validated_at, t.validated_point_catalog_snapshot_id,
+                           t.validated_point_catalog_checksum, t.published_by, t.published_at
                       FROM bpi.bpi_rule_versions r
                       JOIN bpi.bpi_topology_versions t
                         ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
@@ -510,7 +541,9 @@ public class RulePostgresRepository {
                 rs.getString("line_id"), rs.getString("checksum"), readMap(rs.getString("definition")),
                 rs.getString("validation_status"), readIssues(rs.getString("validation_errors")),
                 readIssues(rs.getString("validation_warnings")), rs.getString("validated_by"),
-                validatedAt == null ? null : validatedAt.toInstant(), rs.getString("published_by"),
+                validatedAt == null ? null : validatedAt.toInstant(),
+                rs.getObject("validated_point_catalog_snapshot_id", UUID.class),
+                rs.getString("validated_point_catalog_checksum"), rs.getString("published_by"),
                 publishedAt == null ? null : publishedAt.toInstant());
     }
 

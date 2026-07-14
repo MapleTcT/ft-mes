@@ -23,7 +23,7 @@ web_bind_address=$(env_value BPI_WEB_BIND_ADDRESS 127.0.0.1)
 web_port=$(env_value BPI_WEB_PORT 18090)
 database_name=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 postgres_user=$(env_value POSTGRES_USER bpi_admin)
-expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 9)
+expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 12)
 
 health=$(curl -fsS "http://${bind_address}:${http_port}/actuator/health")
 printf '%s' "$health" | grep -q '"status":"UP"' || {
@@ -55,7 +55,7 @@ test "$migration" = "$expected_flyway" || {
 table_count=$(compose exec -T bpi-postgres \
     psql -At -U "$postgres_user" -d "$database_name" \
     -c "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'bpi'")
-test "$table_count" -ge 16 || {
+test "$table_count" -ge 21 || {
     printf 'ERROR: BPI schema table count is incomplete: %s\n' "$table_count" >&2
     exit 1
 }

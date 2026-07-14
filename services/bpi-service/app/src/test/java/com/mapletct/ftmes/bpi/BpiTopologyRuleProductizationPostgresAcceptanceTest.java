@@ -65,6 +65,23 @@ class BpiTopologyRuleProductizationPostgresAcceptanceTest {
                     (id, tenant_id, scope_type, scope_key, flag_key, enabled, revision, updated_by)
                 VALUES (?, ?, 'LINE', ?, 'bpi.rule-management', true, 1, 'acceptance')
                 """, UUID.randomUUID(), tenantId, LINE_ID);
+        UUID snapshotId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_catalog_snapshots
+                    (id, tenant_id, source, source_instance, source_revision, plant_id, line_id,
+                     checksum, observed_at, point_count, ready_point_count, imported_by)
+                VALUES (?, ?, 'JETLINKS', 'acceptance', ?, ?, ?, ?, now(), 1, 1, 'acceptance')
+                """, snapshotId, tenantId, marker, PLANT_ID, LINE_ID, "a".repeat(64));
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_catalog_entries
+                    (id, tenant_id, snapshot_id, plant_id, line_id, locality_group,
+                     product_id, device_id, property_id, point_name, unit, data_type,
+                     device_state, registered, property_present, calibration_version,
+                     calibration_status, source_sequence_enabled)
+                VALUES (?, ?, ?, ?, ?, 'LOCALITY-S07-EVAP', 'PRODUCT-SUGAR', 'DEVICE-S07-01',
+                        'flow.instant', '进料瞬时流量', 't/h', 'double', 'ACTIVE', true, true,
+                        'CAL-1', 'VERIFIED', true)
+                """, UUID.randomUUID(), tenantId, snapshotId, PLANT_ID, LINE_ID);
     }
 
     @AfterEach
@@ -74,6 +91,8 @@ class BpiTopologyRuleProductizationPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_feature_flags WHERE tenant_id = ?", tenantId);
     }
 

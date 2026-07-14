@@ -13,6 +13,14 @@ START confirmation creates one `ACTIVE` shadow batch per tenant/line; END confir
 matching batch as `CLOSED_RAW`. Candidate review, START/END evidence, state history, inbox/API
 idempotency and audit are persisted transactionally in PostgreSQL.
 
+Flyway V10-V12 add the versioned point-catalog readiness boundary. `BPI_ADMIN` imports immutable
+source snapshots, while all BPI readers consume only the latest snapshot for their tenant/plant/line
+scope. A topology validation pins the snapshot ID and checksum and fails closed when a bound device
+is unregistered or inactive, its property/unit is unavailable, or its calibration is not verified.
+Publication atomically checks that the pinned snapshot is still current, so a newer source import
+cannot race a previously validated topology into production. The runtime `bpi_service` role has only
+`SELECT` and `INSERT` on the two point-catalog tables.
+
 The production candidate path is the disabled-by-default `bpi.batch.candidate.v1` Kafka consumer.
 It validates Protobuf, canonical key, required headers and explicit tenant/plant/line allowlists,
 then acknowledges only after the shared PostgreSQL transaction returns. Exact redelivery is safe

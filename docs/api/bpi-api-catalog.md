@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 24 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 27 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -27,8 +27,8 @@
 - 旧 token 通过 Keycloak JWKS、issuer、audience 和时间声明校验；适配器不会把旧 Bearer 原样传给 Java 17 服务。
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
-- 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；请求体上限为 64 KiB。
-- 当前允许 GET overview/line/candidate/batch/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、topology draft/validate/publish、rule draft/simulate/publish/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、topology draft/validate/publish、rule draft/simulate/publish/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -51,6 +51,9 @@
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
+| 点位准入 | GET | `/bpi/v1/point-catalog/snapshots` | `listPointCatalogSnapshots` | SERVICE_IMPLEMENTED |
+| 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED |
+| 点位准入 | POST | `/bpi/v1/point-catalog/snapshots` | `importPointCatalogSnapshot` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/drafts` | `createTopologyDraft` | SERVICE_IMPLEMENTED |
@@ -81,11 +84,18 @@
 - `END`：锁定同 tenant/plant/line/order 的 `ACTIVE` 批次，要求结束时间晚于开始时间，写入 END 证据并
   迁移到 `CLOSED_RAW`。两种路径都使用候选 revision、幂等键、功能开关和审计。
 
+`importPointCatalogSnapshot` 只允许 `BPI_ADMIN` 通过受控 API 导入来自 JetLinks/exporter 的不可变状态快照，
+不得由 BPI 直连或修改 JetLinks 数据库。每个点记录 product/device、JetLinks 原 `sourcePropertyId`、exporter
+规范化 `propertyId`、设备激活与注册状态、属性存在性、
+单位、校准版本/状态和源序列能力；同一请求可按幂等键安全重放。`getCurrentPointCatalog` 用于页面和拓扑校验读取
+当前作用域快照，没有快照时明确返回空数据，不能生成伪点位。
+
 `createTopologyDraft` 支持全新版本和从已发布版本复制，拓扑定义包含节点、方向路径、JetLinks
-`productId/deviceId/propertyId` 绑定、单位、校准版本和必需语义信号。`validateTopologyDraft` 在发布前校验悬空路径、
-有向环、共享测点分配、重复信号和未绑定必需信号，并把结构化错误、校验 checksum、操作者和 revision 写入
-PostgreSQL。`publishTopologyVersion` 只允许独立于创建人的 `BPI_ADMIN` 发布校验通过且 checksum 未变化的草稿；
-发布后版本不可变。`createRuleDraft` 只引用已发布拓扑，并拒绝 AST 中未绑定的语义信号。
+`productId/deviceId/propertyId` 绑定、单位、校准版本和必需语义信号。`validateTopologyDraft` 在发布前同时校验悬空路径、
+有向环、共享测点分配、重复信号、未绑定必需信号，以及当前点位快照中的 product/device/property、设备激活/注册、
+单位和校准状态。通过后把结构化结果、拓扑 checksum、点位快照 ID/checksum、操作者和 revision 写入 PostgreSQL。
+`publishTopologyVersion` 只允许独立于创建人的 `BPI_ADMIN` 发布校验通过、拓扑 checksum 未变化且仍钉扎同一
+点位快照的草稿；发布后版本不可变。`createRuleDraft` 只引用已发布拓扑，并拒绝 AST 中未绑定的语义信号。
 
 `simulateRule` 不是固定成功桩。它按规则作用域读取 PostgreSQL `bpi_telemetry_points` 的校准测点，调用与在线
 候选相同的 `batch-rule-runtime`，再与 `bpi_rule_golden_boundaries` 的人工边界按容差匹配。空窗口、空金标准集
@@ -153,9 +163,11 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 7. 独立场景暂停 `ACTIVE` 批次并确认变为 `SUSPENDED/r2`，重复暂停和跨命令复用 key 返回 `409`。
 8. 恢复 `SUSPENDED` 批次并确认变为 `ACTIVE/r3`，时间线追加暂停和恢复事件。
 9. 查询批次头、START/END 证据、平衡、谱系和 append-only 时间线。
-10. 查询作用域拓扑和测点绑定。
-11. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
-12. 查询数据质量影响和集成降级影响。
+10. 查询无点位快照时的 fail-closed 状态；导入点位目录快照并按相同幂等键重放，快照不能重复生成。
+11. 查询点位快照列表和当前作用域点位，验证 ready/blocker 结果。
+12. 查询作用域拓扑和测点绑定；只有绑定存在且 ready 的点位时校验通过，并记录快照 ID/checksum。
+13. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
+14. 查询数据质量影响和集成降级影响。
 
 运行命令：
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T09:47:29Z",
+  "generatedAt": "2026-07-14T18:34:00Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -28,11 +28,16 @@
       "status": "PASS",
       "marker": "ADP_E2E_20260712020150_PROCESS_ANALYSIS",
       "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "bpiPointCatalogReadiness": {
+      "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
+      "marker": "ADP_E2E_20260715_POINTCAT_02",
+      "evidence": "metadata/bpi-point-catalog-readiness-acceptance.json"
     }
   },
   "summary": {
-    "testedFeatures": 132,
-    "pass": 127,
+    "testedFeatures": 135,
+    "pass": 130,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -2876,6 +2881,64 @@
       "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql returned remaining topologies=0, rules=0, candidates=0, batches=0",
       "status": "PASS",
       "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json, /tmp/bpi-streaming-evidence/bpi-rule-deactivation.json and /tmp/bpi-joint-browser-read-after-cleanup.json. Flink acknowledged inactive, consumers returned to disabled/deny-all, overview returned 200 and browser errors were zero.",
+      "issues": []
+    },
+    {
+      "module": "BPI点位目录",
+      "route": "http://100.99.133.43:18091/#/points",
+      "operation": "真实页面导入JetLinks状态快照并以同一幂等键重放",
+      "api": "POST /bpi-api/point-catalog/snapshots",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository/BpiPostgresRepository",
+      "tables": [
+        "bpi_point_catalog_snapshots",
+        "bpi_point_catalog_entries",
+        "bpi_api_idempotency",
+        "bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260715_POINTCAT_02",
+      "verificationSql": "Query source_revision ADP_E2E_20260715_POINTCAT_02_JETLINKS_STATUS and snapshot 14ceaa1e-01e6-45fd-a8d4-b90ce33e7312; verify point_count=1, ready_point_count=0, duplicate count=1, idempotency COMPLETED/POST/200.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-point-catalog-readiness-acceptance.json and /tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02.json. The page showed 0/1 ready, the canonical mapping and four blockers; replay returned Idempotent-Replay:true; browser errors were zero.",
+      "issues": [
+        "The control passed, but the source point remains BLOCKED because the device is inactive/unregistered, product metadata is absent and calibration is unverified."
+      ]
+    },
+    {
+      "module": "BPI拓扑点位准入门禁",
+      "route": "http://100.99.133.43:18091/#/rules",
+      "operation": "创建绑定未就绪点位的拓扑并验证失败关闭",
+      "api": "POST /bpi-api/topologies/drafts; POST /bpi-api/topologies/ea986cdf-92c2-4f77-8cca-7cd4e7faebde/validate",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController -> RuleService -> PointCatalogService -> RulePostgresRepository",
+      "tables": [
+        "bpi_topology_versions",
+        "bpi_api_idempotency",
+        "bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260715_POINTCAT_02",
+      "verificationSql": "Query topology ea986cdf-92c2-4f77-8cca-7cd4e7faebde and expand validation_errors/warnings; verify DRAFT/FAILED/r2, snapshot pin 14ceaa1e-01e6-45fd-a8d4-b90ce33e7312, four errors and one warning.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-point-catalog-readiness-acceptance.json. The real page showed DRAFT/FAILED and no publication action; PostgreSQL retained TOPOLOGY_VALIDATION_FAILED audit.",
+      "issues": [
+        "A newer READY snapshot and a fresh successful validation are required before publication."
+      ]
+    },
+    {
+      "module": "BPI点位与拓扑重启读取",
+      "route": "http://100.99.133.43:18091/#/points and /#/rules",
+      "operation": "force-recreate BPI service and read the persisted point/topology marker",
+      "api": "GET /bpi-api/point-catalog/current; GET /bpi-api/topologies; GET /bpi-api/topologies/ea986cdf-92c2-4f77-8cca-7cd4e7faebde",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "PointCatalogController/RuleController read paths",
+      "tables": [],
+      "marker": "ADP_E2E_20260715_POINTCAT_02",
+      "verificationSql": "Read-only browser acceptance after service restart; target health UP and Flyway V12.",
+      "status": "PASS",
+      "evidence": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02-read.json. The point and failed topology remained uniquely visible; console/page/request errors were zero.",
       "issues": []
     }
   ],

@@ -1,5 +1,18 @@
 # 后端落库验收报告
 
+## 2026-07-15 BPI 点位目录与拓扑准入门禁
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 导入 JetLinks 点位快照 | `http://100.99.133.43:18091/#/points` | `POST /bpi-api/point-catalog/snapshots` | `PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | 按 `source_revision='ADP_E2E_20260715_POINTCAT_02_JETLINKS_STATUS'` 查询；snapshot `14ceaa1e-...`，`point_count=1/ready=0`；`instantFlow -> flow.instant`，`INACTIVE/false/false/UNVERIFIED` | PASS |
+| 幂等重放 | 同上 | 同上，同一 payload/Idempotency-Key | `PointCatalogService.replay -> BpiPostgresRepository` | `bpi_api_idempotency`、`bpi_point_catalog_snapshots` | 同 source revision 仍为 1 条；幂等行为 `COMPLETED/POST//bpi/v1/point-catalog/snapshots/200`，响应头 `Idempotent-Replay:true` | PASS |
+| 未就绪点位拓扑校验 | `http://100.99.133.43:18091/#/rules` | `POST /bpi-api/topologies/drafts`、`POST /bpi-api/topologies/ea986cdf-92c2-4f77-8cca-7cd4e7faebde/validate` | `RuleController -> RuleService -> PointCatalogService -> RulePostgresRepository` | `bpi_topology_versions`、`bpi_audit_events`、`bpi_api_idempotency` | topology `DRAFT/FAILED/r2`，固定 snapshot `14ceaa1e-...`；展开 JSON 得到 4 个 ERROR、1 个 WARNING，发布入口关闭 | PASS |
+| 服务重启后读取 | `/#/points`、`/#/rules` | GET current catalog/topologies/topology | `PointCatalogController`、`RuleController` | 上述五张表 | force-recreate 后服务 `UP`，既有点位/拓扑仍唯一可见，浏览器错误 0 | PASS |
+
+本项 `PASS` 表示失败关闭和落库链正确，不表示试点数据源已通过生产准入。应用角色
+`bpi_service` 对两张点位目录表只有 `INSERT/SELECT`；设备激活、metadata、标定和来源
+序列治理完成前，拓扑必须保持不可发布。
+
 ## 2026-07-14 BPI 目标环境同一 marker 联合验收
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |

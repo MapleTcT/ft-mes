@@ -1,0 +1,149 @@
+{
+  "generatedAt": "2026-07-14T18:34:00Z",
+  "repoBaselineCommit": "2a471e592485334080bc8d8d6f0c58f9a7d2cdc1",
+  "testedWorktree": true,
+  "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
+  "database": "PostgreSQL",
+  "environment": {
+    "host": "100.99.133.43",
+    "adpBaseUrl": "http://100.99.133.43:18080",
+    "bpiBaseUrl": "http://100.99.133.43:18091",
+    "composeProject": "ft-mes-bpi-runtime",
+    "flywayVersion": 12,
+    "schemaTableCount": 21,
+    "serviceHealth": "UP",
+    "frontendAsset": "index-DYf0v87v.js"
+  },
+  "marker": "ADP_E2E_20260715_POINTCAT_02",
+  "scope": {
+    "tenantId": "legacy-ticket",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "sourceEvidence": {
+    "source": "JETLINKS",
+    "sourceInstance": "ft-mes-iot-pilot",
+    "productId": "bpi-pilot-product-01",
+    "productName": "BPI影子试点流量计",
+    "productState": "0",
+    "productMetadata": null,
+    "deviceId": "bpi-pilot-device-01",
+    "deviceName": "BPI影子试点流量计01",
+    "deviceState": "notActive",
+    "registryTime": null,
+    "sourcePropertyId": "instantFlow",
+    "canonicalPropertyId": "flow.instant",
+    "unit": "m3/h",
+    "calibrationVersion": "pilot-unverified-20260714",
+    "calibrationStatus": "UNVERIFIED"
+  },
+  "browserAcceptance": {
+    "writeReport": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02.json",
+    "writeScreenshot": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02.png",
+    "readAfterRestartReport": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02-read.json",
+    "readAfterRestartScreenshot": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02-read.png",
+    "loginStatus": 200,
+    "writeStatus": "PASS",
+    "readAfterRestartStatus": "PASS",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "requests": [
+      "GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01",
+      "POST /bpi-api/point-catalog/snapshots",
+      "POST /bpi-api/topologies/drafts",
+      "POST /bpi-api/topologies/ea986cdf-92c2-4f77-8cca-7cd4e7faebde/validate",
+      "GET /bpi-api/topologies/ea986cdf-92c2-4f77-8cca-7cd4e7faebde"
+    ]
+  },
+  "persistence": {
+    "snapshot": {
+      "id": "14ceaa1e-01e6-45fd-a8d4-b90ce33e7312",
+      "sourceRevision": "ADP_E2E_20260715_POINTCAT_02_JETLINKS_STATUS",
+      "checksum": "32a659c8d5ff0fd68c78d318d6569bae9f1ff93f467bc38c7f604bcfda39d1bb",
+      "pointCount": 1,
+      "readyPointCount": 0,
+      "duplicateCountAfterReplay": 1
+    },
+    "point": {
+      "id": "ff9a054a-16c5-4efd-94ad-29bde1b26882",
+      "deviceState": "INACTIVE",
+      "registered": false,
+      "propertyPresent": false,
+      "calibrationStatus": "UNVERIFIED",
+      "sourceSequenceEnabled": false,
+      "readiness": "BLOCKED",
+      "readinessIssues": [
+        "DEVICE_NOT_REGISTERED",
+        "DEVICE_NOT_ACTIVE",
+        "PROPERTY_NOT_AVAILABLE",
+        "CALIBRATION_NOT_VERIFIED"
+      ]
+    },
+    "topology": {
+      "id": "ea986cdf-92c2-4f77-8cca-7cd4e7faebde",
+      "code": "ADP_E2E_20260715_POINTCAT_02_BLOCKED_TOPOLOGY",
+      "state": "DRAFT",
+      "validationStatus": "FAILED",
+      "revision": 2,
+      "validatedPointCatalogSnapshotId": "14ceaa1e-01e6-45fd-a8d4-b90ce33e7312",
+      "publishAllowed": false,
+      "errors": [
+        "POINT_DEVICE_NOT_REGISTERED",
+        "POINT_DEVICE_NOT_ACTIVE",
+        "POINT_PROPERTY_NOT_AVAILABLE",
+        "POINT_CALIBRATION_NOT_VERIFIED"
+      ],
+      "warnings": [
+        "POINT_SOURCE_SEQUENCE_DISABLED"
+      ]
+    },
+    "idempotency": {
+      "state": "COMPLETED",
+      "method": "POST",
+      "resourcePath": "/bpi/v1/point-catalog/snapshots",
+      "responseStatus": 200,
+      "replayHeader": "true"
+    },
+    "auditActions": [
+      "POINT_CATALOG_SNAPSHOT_IMPORTED",
+      "TOPOLOGY_DRAFT_CREATED",
+      "TOPOLOGY_VALIDATION_FAILED"
+    ],
+    "tables": [
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_api_idempotency",
+      "bpi.bpi_audit_events"
+    ]
+  },
+  "leastPrivilege": {
+    "role": "bpi_service",
+    "bpi_point_catalog_snapshots": ["INSERT", "SELECT"],
+    "bpi_point_catalog_entries": ["INSERT", "SELECT"]
+  },
+  "verification": {
+    "openApiOperations": 42,
+    "simulatedOperations": 28,
+    "implementedOperations": 27,
+    "simulationTests": "6/6 PASS",
+    "frontendE2e": "8/8 PASS",
+    "adapterTests": "PASS",
+    "servicePostgresKafkaTests": "PASS",
+    "flywayMigrationsValidated": 13
+  },
+  "conclusion": {
+    "control": "PASS",
+    "sourceReadiness": "BLOCKED",
+    "productionReady": false,
+    "nextActions": [
+      "Register and activate bpi-pilot-device-01 in JetLinks.",
+      "Publish product metadata containing instantFlow and verify canonical mapping to flow.instant.",
+      "Verify unit and calibration version through the source governance process.",
+      "Enable a stable source sequence or retain deterministic event identity with documented replay guarantees.",
+      "Import a newer snapshot and require the topology to validate again before publication.",
+      "After readiness passes, join real IoT events and WOM context in the same scope for 7-14 day shadow operation."
+    ]
+  }
+}

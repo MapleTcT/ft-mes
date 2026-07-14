@@ -75,6 +75,8 @@ function createScenario() {
     checksum: sha256({ code: 'TOPO-S07', version: '3', lineId: 'LINE-S07-01' }),
     validationStatus: 'PASSED', validationErrors: [], validationWarnings: [],
     validatedBy: 'process.engineer', validatedAt: '2026-07-12T07:50:00.000Z',
+    validatedPointCatalogSnapshotId: '4d9c5df8-7ee0-58e2-a143-9ca5d37a7b21',
+    validatedPointCatalogChecksum: sha256({ sourceRevision: 'JETLINKS-S07-20260712T075000Z' }),
     publishedBy: 'bpi.admin', publishedAt: '2026-07-12T07:55:00.000Z',
     definition: {
       localityGroup: 'LOCALITY-S07-EVAP',
@@ -90,6 +92,36 @@ function createScenario() {
       ],
       requiredSignals: ['flow.instant', 'pump.running'],
     },
+  };
+
+  const pointCatalogSnapshot = {
+    id: '4d9c5df8-7ee0-58e2-a143-9ca5d37a7b21', source: 'JETLINKS',
+    sourceInstance: 'jetlinks-simulator', sourceRevision: 'JETLINKS-S07-20260712T075000Z',
+    plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+    checksum: sha256({ sourceRevision: 'JETLINKS-S07-20260712T075000Z' }),
+    observedAt: '2026-07-12T07:50:00.000Z', pointCount: 2, readyPointCount: 2,
+    importedBy: 'bpi.admin', importedAt: '2026-07-12T07:51:00.000Z',
+  };
+  const pointCatalog = {
+    snapshot: pointCatalogSnapshot,
+    points: [
+      {
+        id: '39b0cd61-e506-507c-a107-4133517ab2e9', snapshotId: pointCatalogSnapshot.id,
+        plantId: 'PLANT-01', lineId: 'LINE-S07-01', localityGroup: 'LOCALITY-S07-EVAP',
+        productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', sourcePropertyId: 'instantFlow',
+        pointName: '进料瞬时流量', unit: 't/h', dataType: 'double', deviceState: 'ACTIVE',
+        registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
+        calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+      },
+      {
+        id: '27315888-e7ca-56da-a24c-f54e65a9ad91', snapshotId: pointCatalogSnapshot.id,
+        plantId: 'PLANT-01', lineId: 'LINE-S07-01', localityGroup: 'LOCALITY-S07-EVAP',
+        productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running', sourcePropertyId: 'pumpRunning',
+        pointName: '进料泵运行', unit: 'bool', dataType: 'boolean', deviceState: 'ACTIVE',
+        registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
+        calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+      },
+    ],
   };
 
   const ruleBody = {
@@ -132,6 +164,7 @@ function createScenario() {
     batchEvents: [],
     topology,
     topologies: [topology],
+    pointCatalog,
     rule,
     rules: [rule],
     simulations: new Map(),

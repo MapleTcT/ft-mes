@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 public class BpiProxyController {
 
     private static final String PREFIX = "/bpi-api";
+    private static final int DEFAULT_BODY_LIMIT = 65_536;
+    private static final int POINT_CATALOG_BODY_LIMIT = 5 * 1024 * 1024;
     private static final Pattern TRACE = Pattern.compile("[A-Za-z0-9._-]{1,64}");
     private static final List<String> FORWARDED_REQUEST_HEADERS = Arrays.asList(
             HttpHeaders.ACCEPT, HttpHeaders.CONTENT_TYPE, "Idempotency-Key", "If-Match", "X-Trace-Id");
@@ -66,8 +68,13 @@ public class BpiProxyController {
         if (traceId == null || !TRACE.matcher(traceId).matches()) traceId = UUID.randomUUID().toString();
         upstreamHeaders.set("X-Trace-Id", traceId);
         upstreamHeaders.setBearerAuth(jwtIssuer.issue(actor));
-        if (body != null && body.length > 65_536) {
-            throw new AdapterAccessDeniedException("BPI request body exceeds 64 KiB");
+        int bodyLimit = "/point-catalog/snapshots".equals(path)
+                ? POINT_CATALOG_BODY_LIMIT : DEFAULT_BODY_LIMIT;
+        if (body != null && body.length > bodyLimit) {
+            throw new AdapterAccessDeniedException(
+                    "/point-catalog/snapshots".equals(path)
+                            ? "BPI point catalog request body exceeds 5 MiB"
+                            : "BPI request body exceeds 64 KiB");
         }
 
         UriComponentsBuilder uri = UriComponentsBuilder.fromHttpUrl(trimSlash(properties.getUpstreamBaseUrl()))

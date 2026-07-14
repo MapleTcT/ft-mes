@@ -58,6 +58,7 @@ public class RuleService {
     private final RulePublicationOutboxRepository outboxRepository;
     private final RulePublicationOutboxProperties outboxProperties;
     private final TopologyDefinitionValidator topologyValidator;
+    private final PointCatalogService pointCatalogService;
     private final CanonicalJson canonicalJson;
     private final ObjectMapper objectMapper;
 
@@ -69,6 +70,7 @@ public class RuleService {
             RulePublicationOutboxRepository outboxRepository,
             RulePublicationOutboxProperties outboxProperties,
             TopologyDefinitionValidator topologyValidator,
+            PointCatalogService pointCatalogService,
             CanonicalJson canonicalJson,
             ObjectMapper objectMapper) {
         this.repository = repository;
@@ -78,6 +80,7 @@ public class RuleService {
         this.outboxRepository = outboxRepository;
         this.outboxProperties = outboxProperties;
         this.topologyValidator = topologyValidator;
+        this.pointCatalogService = pointCatalogService;
         this.canonicalJson = canonicalJson;
         this.objectMapper = objectMapper;
     }
@@ -175,16 +178,24 @@ public class RuleService {
         if (!checksum.equals(topology.checksum())) {
             throw new BpiConflictException("Topology definition checksum no longer matches the draft.", topology.revision());
         }
-        TopologyDefinitionValidator.ValidationResult validation = topologyValidator.validate(topology.definition());
+        TopologyDefinitionValidator.ValidationResult structural = topologyValidator.validate(topology.definition());
+        PointCatalogService.BindingValidationResult catalog = pointCatalogService.validateBindings(
+                actor, topology.plantId(), topology.lineId(), topology.definition());
+        List<com.mapletct.ftmes.bpi.domain.TopologyValidationIssue> errors = new ArrayList<>(structural.errors());
+        errors.addAll(catalog.errors());
+        List<com.mapletct.ftmes.bpi.domain.TopologyValidationIssue> warnings = new ArrayList<>(structural.warnings());
+        warnings.addAll(catalog.warnings());
         repository.recordTopologyValidation(
                 actor, topology.id(), topology.revision(), checksum,
-                validation.errors(), validation.warnings());
+                catalog.snapshotId(), catalog.snapshotChecksum(), errors, warnings);
         repository.insertTopologyAudit(
                 actor, topology,
-                validation.valid() ? "TOPOLOGY_VALIDATION_PASSED" : "TOPOLOGY_VALIDATION_FAILED",
+                errors.isEmpty() ? "TOPOLOGY_VALIDATION_PASSED" : "TOPOLOGY_VALIDATION_FAILED",
                 topology.revision(), topology.revision() + 1, command.reason(), traceId,
-                Map.of("errorCount", validation.errors().size(),
-                        "warningCount", validation.warnings().size(), "checksum", checksum));
+                Map.of("errorCount", errors.size(),
+                        "warningCount", warnings.size(), "checksum", checksum,
+                        "pointCatalogSnapshotId", catalog.snapshotId() == null ? "" : catalog.snapshotId().toString(),
+                        "pointCatalogChecksum", catalog.snapshotChecksum() == null ? "" : catalog.snapshotChecksum()));
         TopologyVersionView validated = repository.findTopology(actor, topology.id());
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(validated));
         return new CommandResult<>(validated, false);

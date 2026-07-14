@@ -115,6 +115,8 @@ export interface TopologyVersion {
   validationWarnings: TopologyValidationIssue[];
   validatedBy?: string | null;
   validatedAt?: string | null;
+  validatedPointCatalogSnapshotId?: string | null;
+  validatedPointCatalogChecksum?: string | null;
   publishedBy?: string | null;
   publishedAt?: string | null;
   definition: {
@@ -134,6 +136,77 @@ export interface TopologyVersion {
     }>;
     requiredSignals?: string[];
   };
+}
+
+export interface PointCatalogSnapshot {
+  id: string;
+  source: string;
+  sourceInstance: string;
+  sourceRevision: string;
+  plantId: string;
+  lineId: string;
+  checksum: string;
+  observedAt: string;
+  pointCount: number;
+  readyPointCount: number;
+  importedBy: string;
+  importedAt: string;
+}
+
+export interface PointCatalogPoint {
+  id: string;
+  snapshotId: string;
+  plantId: string;
+  lineId: string;
+  localityGroup?: string | null;
+  productId: string;
+  deviceId: string;
+  propertyId: string;
+  sourcePropertyId?: string | null;
+  pointName?: string | null;
+  unit?: string | null;
+  dataType?: string | null;
+  deviceState: 'ACTIVE' | 'INACTIVE' | 'UNKNOWN';
+  registered: boolean;
+  propertyPresent: boolean;
+  calibrationVersion?: string | null;
+  calibrationStatus: 'VERIFIED' | 'UNVERIFIED' | 'MISSING';
+  sourceSequenceEnabled: boolean;
+  ready: boolean;
+  readinessIssues: string[];
+}
+
+export interface PointCatalogView {
+  snapshot: PointCatalogSnapshot;
+  points: PointCatalogPoint[];
+}
+
+export interface PointCatalogPointCommand {
+  localityGroup?: string | null;
+  productId: string;
+  deviceId: string;
+  propertyId: string;
+  sourcePropertyId?: string | null;
+  pointName?: string | null;
+  unit?: string | null;
+  dataType?: string | null;
+  deviceState: 'ACTIVE' | 'INACTIVE' | 'UNKNOWN';
+  registered: boolean;
+  propertyPresent: boolean;
+  calibrationVersion?: string | null;
+  calibrationStatus: 'VERIFIED' | 'UNVERIFIED' | 'MISSING';
+  sourceSequenceEnabled: boolean;
+}
+
+export interface PointCatalogSnapshotCommand {
+  source: string;
+  sourceInstance: string;
+  sourceRevision: string;
+  plantId: string;
+  lineId: string;
+  observedAt: string;
+  points: PointCatalogPointCommand[];
+  reason: string;
 }
 
 export interface TopologyValidationIssue {
