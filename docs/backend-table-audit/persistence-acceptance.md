@@ -444,6 +444,16 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目录。该项真实执行 Flink job，
 但不包含目标三 broker/MinIO、PostgreSQL 消费或浏览器，因此目标环境联合链路仍为 `BLOCKED`。
 
+### BPI JetLinks 点位目录自动同步（目标环境）
+
+| 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| JetLinks 权威目录自动发布、消费并在页面读取 | `http://100.99.133.43:18091/#/points` | `iot.point-catalog.snapshot.v1`；`GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | `JetLinksPointCatalogSource -> PointCatalogSnapshotMapper -> KafkaPointCatalogPublisher -> PointCatalogKafkaListener -> PointCatalogKafkaRecordProcessor -> PointCatalogService -> PointCatalogPostgresRepository/BpiPostgresRepository` | `bpi.bpi_point_catalog_snapshots`、`bpi.bpi_point_catalog_entries`、`bpi.bpi_api_idempotency`、`bpi.bpi_audit_events` | 按 `tenant_id=1000`、`plant_id=PLANT-01`、`line_id=LINE-S07-01` 和 `source_revision=sha256:2a218d12...151ce5` 查询 snapshot/entry，并核对幂等状态和导入审计 | 自动 revision 仅有 1 个 snapshot、1 个 entry、1 个 `COMPLETED/200` 幂等记录和 1 个导入审计；相同消息和 IoT 重启均未增行；毒消息进入 DLT 且未写业务快照；真实页面读取 HTTP 200 且浏览器错误为 0 | PASS_CONTROL_WITH_BLOCKED_SOURCE |
+
+机器记录：`metadata/bpi-point-catalog-kafka-sync-acceptance.json`；详细报告：
+`docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`。该状态只证明自动同步控制链和真实落库通过；
+目录内 1 个点仍为 0 READY，设备注册/激活、属性 metadata、标定和来源序列属于未完成的现场数据源条件。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

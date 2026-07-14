@@ -63,9 +63,12 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 八个 BPI topic（包含 rule application 回执、回执 DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
+2. 十个 BPI topic（包含点位目录 source/DLT、rule application 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
+
+点位目录消息上限为 5 MiB，broker/topic 信封为 6 MiB；修改该信封必须同时更新 producer、consumer、
+broker、topic 和部署检查，不能只放宽单侧限制。
 
 `bpi-stream-cluster-replay` 在 smoke 通过后生成唯一 `ADP_E2E_*` marker，向 Kafka 发布规则、
 生产上下文和三条遥测，等待 read-committed 候选，验证候选只出现一次且没有 marker 关联的

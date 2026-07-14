@@ -450,6 +450,22 @@ UUID v4 fallback，候选确认 E2E 显式移除 `randomUUID` 后仍通过；规
 `/tmp/bpi-joint-browser-read-after-cleanup.json`。完整 Kafka offset、Flink 回执、目标表和
 清理边界见 `docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md`。
 
+### BPI 点位目录自动同步浏览器验收（2026-07-15）
+
+本节使用真实 JetLinks 权威设备/产品 metadata 生成目录，经 Kafka 和 BPI Java 服务落入
+PostgreSQL，再由真实 ADP 会话访问目标 BPI 页面读取。同步链通过不等于点位已具备批次规则准入条件。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 点位目录 | `http://100.99.133.43:18091/#/points` | 等待 JetLinks 自动发布目录快照并读取当前 scope | `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | 页面显示来源 `JETLINKS`、自动 revision、1 个点和 0 个 READY；HTTP `200`，console/page/request failure 均为 0 | `iot.point-catalog.snapshot.v1` 经消费者校验后保存 snapshot、entry、幂等和审计；重复不增行，毒消息进入 DLT 且不落业务表 | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_CONTROL_WITH_BLOCKED_SOURCE | 设备仍为 `notActive`，产品属性 metadata、标定和来源序列未就绪，禁止用于发布拓扑 |
+
+首次读取隔离验收 scope 返回 `403`，真实页面由此暴露运行 scope 与消费者 allowlist 偏差；两者收紧到
+实际 ADP scope `1000 / PLANT-01 / LINE-S07-01` 后复验通过。证据：
+`metadata/bpi-point-catalog-kafka-sync-acceptance.json`、
+`/tmp/bpi-point-catalog-sync-scope-20260715.json`、
+`/tmp/bpi-point-catalog-sync-scope-20260715.png`；完整事件、PostgreSQL、重启幂等和回滚证据见
+`docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

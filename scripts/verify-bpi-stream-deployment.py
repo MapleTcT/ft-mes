@@ -29,12 +29,14 @@ REQUIRED_FILES = [
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
     "docs/testing/bpi-target-topology-rule-acceptance.md",
     "docs/testing/bpi-point-catalog-readiness-acceptance.md",
+    "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
     "metadata/bpi-test-host-capacity-preflight.json",
     "metadata/bpi-kafka-postgres-replay-acceptance.json",
     "metadata/bpi-test-environment-acceptance.json",
     "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
     "metadata/bpi-target-topology-rule-acceptance.json",
     "metadata/bpi-point-catalog-readiness-acceptance.json",
+    "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
     "backend/source-modules/mes-production-context-outbox/README.md",
     "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
     "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
@@ -122,6 +124,15 @@ def main() -> int:
         )
     if '"topics": 10' not in smoke_script:
         failures.append("BPI cluster smoke must report all ten configured topics")
+    for marker in (
+        "kafka-configs.sh",
+        "POINT_CATALOG_CONFIGS",
+        "pointCatalogConfigEvidence",
+    ):
+        if marker not in smoke_script:
+            failures.append(
+                f"BPI cluster smoke must verify point catalog topic config directly: {marker}"
+            )
 
     postgres_replay = (
         ROOT / "deploy/bpi-streaming/scripts/run-postgres-replay.sh"
@@ -316,6 +327,42 @@ def main() -> int:
     for forbidden in ('"password"', '"token"', '"cookie"', "begin private key"):
         if forbidden in point_catalog_serialized:
             failures.append(f"target BPI point-catalog acceptance leaks a secret marker: {forbidden}")
+
+    point_catalog_sync = json.loads(
+        (ROOT / "metadata/bpi-point-catalog-kafka-sync-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if point_catalog_sync.get("status") != "PASS_CONTROL_WITH_BLOCKED_SOURCE":
+        failures.append("automatic point-catalog sync must preserve the split control/source status")
+    if point_catalog_sync.get("summary") != {
+        "checks": 9,
+        "pass": 8,
+        "fail": 0,
+        "blocked": 1,
+    }:
+        failures.append("automatic point-catalog sync must retain 8 PASS and 1 BLOCKED check")
+    sync_environment = point_catalog_sync.get("environment", {})
+    if sync_environment.get("configuredTopics") != 10:
+        failures.append("automatic point-catalog sync must retain all ten configured topics")
+    sync_scope = point_catalog_sync.get("scope", {})
+    if sync_scope.get("tenantId") != "1000" or sync_scope.get("plantId") != "PLANT-01":
+        failures.append("automatic point-catalog sync must retain the verified ADP scope")
+    if sync_scope.get("lineId") != "LINE-S07-01":
+        failures.append("automatic point-catalog sync must retain the verified production line")
+    if sync_scope.get("sourceRevision") != (
+        "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5"
+    ):
+        failures.append("automatic point-catalog sync must retain the verified source revision")
+    sync_persistence = point_catalog_sync.get("persistence", {})
+    if sync_persistence.get("snapshotCount") != 1 or sync_persistence.get("entryCount") != 1:
+        failures.append("automatic point-catalog sync must retain exact snapshot and entry counts")
+    if sync_persistence.get("readyPointCount") != 0:
+        failures.append("automatic point-catalog sync cannot promote the blocked source point")
+    sync_serialized = json.dumps(point_catalog_sync).lower()
+    for forbidden in ('"password"', '"token"', '"cookie"', "begin private key"):
+        if forbidden in sync_serialized:
+            failures.append(f"automatic point-catalog sync acceptance leaks a secret marker: {forbidden}")
 
     joint_acceptance = json.loads(
         (ROOT / "metadata/bpi-browser-kafka-postgres-joint-acceptance.json").read_text(

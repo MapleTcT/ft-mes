@@ -52,7 +52,8 @@ ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
 ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}"
 
 DESCRIBE=/tmp/bpi-streaming-topics.$$.txt
-trap 'rm -f "$DESCRIBE"' EXIT HUP INT TERM
+POINT_CATALOG_CONFIGS=/tmp/bpi-point-catalog-topic-configs.$$.txt
+trap 'rm -f "$DESCRIBE" "$POINT_CATALOG_CONFIGS"' EXIT HUP INT TERM
 
 printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
     compose exec -T kafka-1 /opt/kafka/bin/kafka-topics.sh \
@@ -74,7 +75,17 @@ if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 2 ]; then
     exit 1
 fi
 POINT_CATALOG_MAX_MESSAGE_BYTES=${BPI_POINT_CATALOG_MAX_MESSAGE_BYTES:-6291456}
-if [ "$(grep -c "max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES" "$DESCRIBE")" -ne 2 ]; then
+for topic in \
+    "${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}" \
+    "${BPI_POINT_CATALOG_DLQ_TOPIC:-iot.point-catalog.snapshot.dlq.v1}"
+do
+    compose exec -T kafka-1 /opt/kafka/bin/kafka-configs.sh \
+        --bootstrap-server kafka-1:19092 \
+        --entity-type topics \
+        --entity-name "$topic" \
+        --describe </dev/null
+done >"$POINT_CATALOG_CONFIGS"
+if [ "$(grep -Ec "^[[:space:]]+max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES[[:space:]]" "$POINT_CATALOG_CONFIGS")" -ne 2 ]; then
     printf 'ERROR: point catalog source and DLQ topics must use max.message.bytes=%s\n' \
         "$POINT_CATALOG_MAX_MESSAGE_BYTES" >&2
     exit 1
@@ -121,7 +132,7 @@ fi
 
 TASKMANAGERS=$(compose ps -q bpi-taskmanager | wc -l | tr -d ' ')
 REPORT=${REPORT_OVERRIDE:-${BPI_SMOKE_REPORT:-/tmp/bpi-streaming-cluster-smoke.json}}
-export REPORT JOB_ID CHECKPOINT_ID TASKMANAGERS REST_URL DESCRIBE
+export REPORT JOB_ID CHECKPOINT_ID TASKMANAGERS REST_URL DESCRIBE POINT_CATALOG_CONFIGS
 python3 <<'PY'
 import datetime
 import json
@@ -138,6 +149,7 @@ report = {
         "minInSyncReplicas": 2,
         "pointCatalogMaxMessageBytes": int(os.environ.get("BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "6291456")),
         "describeEvidence": Path(os.environ["DESCRIBE"]).read_text(encoding="utf-8"),
+        "pointCatalogConfigEvidence": Path(os.environ["POINT_CATALOG_CONFIGS"]).read_text(encoding="utf-8"),
     },
     "flink": {
         "restUrl": os.environ["REST_URL"],

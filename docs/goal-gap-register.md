@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-14T18:59:10+00:00` |
-| Repo Commit | `2a471e592485334080bc8d8d6f0c58f9a7d2cdc1` |
+| Generated At | `2026-07-14T21:06:41+00:00` |
+| Repo Commit | `79ee289d922f578aa25ef48778c18362141dad38` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -30,15 +30,15 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-002` | `PARTIAL` | 当前内容迁移 | 业务动作级源码、页面、表关系仍需继续排查，不能视为完整 MES 产品形态已迁移。 | 后续业务包进入时先跑 module-intake-check，再补 smoke 和落库验收。 |
 | `G-003` | `PARTIAL` | Oracle 替换为 PostgreSQL 默认路径 | Oracle backlog still contains tracked references and recovered modules with direct Oracle dependencies. | 逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。 |
 | `G-012` | `PARTIAL` | 基础配置 | QCS reportShowIndexRange、RM.MQ brokerUrl、BaseSet.isEnable、customProperty 模型映射和实体/模型元数据 CRUD 已分别完成 marker/typed mutation 保存、回读、PostgreSQL before/after 和回滚/清理；对应 QCS/RM/BaseSet 代表性业务回归已复跑 PASS。身份、授权、密钥、密码类配置仍禁止通用 smoke 改值；其他 BaseSet/RM/QCS 配置项、PostgreSQL 物理模型表自动创建能力、Nacos/Keycloak 生产 export/diff、realm 迁移、secret 轮换和回退演练仍需继续验收。 | 继续把 QCS/RM/BaseSet 当前地址报告链路证据纳入后续生产或 rehearsal 业务 smoke 签字，但不要把测试环境证据直接冒充生产签字。 |
-| `G-013` | `BLOCKED` | 生产模块完整功能 | 剩余 5 条生产用例仍 BLOCKED：RM 外部 Batch 客户端、ProcessAnalysis 追溯、独立不良数量范围、生产列表导出和其他明确产品范围/运行端点项。material/WMS 完工入库已 PASS。 | 保持制造-质量-material/WMS marker 回归，优先接入 ProcessAnalysis；并完成独立不良数量范围、外部 Batch 客户端、二维码端点和生产导出。 |
+| `G-013` | `BLOCKED` | 生产模块完整功能 | 剩余 4 条生产用例仍 BLOCKED：RM 外部 Batch 客户端、PROD-019/PROD-021 独立不良数量范围确认和生产列表导出。material/WMS 完工入库与 ProcessAnalysis 追溯均已 PASS；WOM printManage 二维码接口仍是独立运行端点 backlog。 | 保持制造-质量-material/WMS-ProcessAnalysis marker 回归；完成独立不良数量范围产品决定、外部 Batch 客户端、二维码端点和生产导出。 |
 | `G-014` | `PARTIAL` | Nacos 配置链路 | 测试环境漂移 smoke 已完成，但生产 Nacos export/diff、漂移人工审阅、签名 patch 包和回退演练未完成。 | 导出生产 Nacos 配置，和 rendered 配置做差异账本。 |
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |
 | `G-016` | `PARTIAL` | PostgreSQL 运行与迁移治理 | 生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。 | 用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。 |
 | `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退和 material/WMS 部署回退手册已完成；生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
-| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
+| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；ProcessAnalysis 已闭合。 | 保持 material/WMS 与 ProcessAnalysis 回归，继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化和 Flyway V12 点位准入门禁已在目标环境通过，但版本比较、业务审批流、受控退休和产品级回退尚未实现。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过，但版本比较、业务审批流、受控退休和产品级回退尚未实现。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
 
 ## Production Blockers
 

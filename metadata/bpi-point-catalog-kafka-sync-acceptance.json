@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T21:00:39Z",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
+  "repoCommit": "79ee289d922f578aa25ef48778c18362141dad38",
+  "iotRepoCommit": "786d153aed0866c8c659330f3f1692d73f0d97c2",
+  "environment": {
+    "host": "ubuntu-test",
+    "address": "100.99.133.43",
+    "bpiUrl": "http://100.99.133.43:18091",
+    "flywayVersion": 12,
+    "schemaTableCount": 21,
+    "kafkaBrokers": 3,
+    "configuredTopics": 10,
+    "kafkaPartitions": 42,
+    "underReplicatedPartitions": 0,
+    "flinkParallelism": 30,
+    "latestCompletedCheckpointId": 955
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "source": "JETLINKS",
+    "sourceInstance": "jetlinks-pilot-node-01",
+    "sourceRevision": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5"
+  },
+  "contract": {
+    "message": "PointCatalogSnapshotV1",
+    "topic": "iot.point-catalog.snapshot.v1",
+    "dlqTopic": "iot.point-catalog.snapshot.dlq.v1",
+    "key": "tenant_id|plant_id|line_id|source_instance",
+    "headers": ["event_id", "tenant_id", "source_revision", "schema_version"],
+    "schemaVersion": "v1",
+    "maxPointsPerScope": 10000,
+    "maxPayloadBytes": 5242880,
+    "kafkaEnvelopeBytes": 6291456
+  },
+  "summary": {
+    "checks": 9,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 1
+  },
+  "checks": [
+    {"id": "protobuf-contract", "status": "PASS", "evidence": "PointCatalogSnapshotV1 compatibility baseline and AsyncAPI verification passed."},
+    {"id": "iot-authoritative-mapping", "status": "PASS", "evidence": "JetLinks device registry and product metadata are mapped without promoting missing registration, metadata, calibration or sequence."},
+    {"id": "kafka-topics-and-size-envelope", "status": "PASS", "evidence": "All three brokers were recreated one at a time and returned healthy. Ten topics retain RF=3/min ISR=2; source and DLT have explicit 6 MiB dynamic topic config, 42 partitions have zero under-replicated partitions, Flink remains 30/30 RUNNING and checkpoint reached 955. Report: /tmp/bpi-streaming-cluster-smoke-point-catalog-envelope-20260715.json."},
+    {"id": "source-to-postgres", "status": "PASS", "evidence": "Automatic revision persisted one snapshot, one entry, one idempotency row and one audit row."},
+    {"id": "duplicate-idempotency", "status": "PASS", "evidence": "Same deterministic event and revision replay kept snapshot, entry, idempotency and audit counts at one."},
+    {"id": "poison-dlt", "status": "PASS", "evidence": "Invalid payload reached iot.point-catalog.snapshot.dlq.v1 and did not create a business snapshot."},
+    {"id": "restart-idempotency", "status": "PASS", "evidence": "JetLinks restart republished the same content identity without duplicate PostgreSQL rows."},
+    {"id": "browser-read", "status": "PASS", "evidence": "/tmp/bpi-point-catalog-sync-scope-20260715.json: HTTP 200 and zero console/page/request failures."},
+    {"id": "source-readiness", "status": "BLOCKED", "evidence": "One source point remains inactive/unregistered with missing property metadata, unverified calibration and no source sequence."}
+  ],
+  "persistence": {
+    "tables": [
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_api_idempotency",
+      "bpi.bpi_audit_events"
+    ],
+    "snapshotCount": 1,
+    "entryCount": 1,
+    "readyPointCount": 0,
+    "idempotencyState": "COMPLETED",
+    "auditAction": "POINT_CATALOG_SNAPSHOT_IMPORTED",
+    "importedBy": "jetlinks-point-catalog-sync"
+  },
+  "browserEvidence": {
+    "route": "/#/points",
+    "api": "GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01",
+    "report": "/tmp/bpi-point-catalog-sync-scope-20260715.json",
+    "screenshot": "/tmp/bpi-point-catalog-sync-scope-20260715.png",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0
+  },
+  "issuesFoundAndFixed": [
+    "The first browser read used an isolated acceptance scope and returned 403; deployment scope and exact consumer allowlist were corrected to the ADP scope before rerun.",
+    "A local ignored .env was included during sync; preflight stopped before the IoT restart, all remote environment files were restored from backup, and only required non-secret keys were upserted.",
+    "The first post-restart smoke counted inherited broker max.message.bytes across every topic and falsely rejected the correct source/DLT config. The smoke now reads each point-catalog topic's dynamic config directly with kafka-configs.sh and stores that evidence."
+  ],
+  "rollback": {
+    "backupDirectory": "/home/v6/bpi-deploy-backups/20260715040853",
+    "images": [
+      "ft-mes-bpi-service:rollback-20260715-pointcatalog-pre",
+      "mapletct/jetlinks-bpi-pilot:rollback-20260715-pointcatalog-pre"
+    ]
+  },
+  "boundaries": [
+    "This acceptance proves automatic control-plane synchronization, not live telemetry readiness.",
+    "The point remains BLOCKED and cannot be promoted to a published batch rule input.",
+    "No WOM, QCS, WMS or PLC/DCS production state was changed."
+  ]
+}

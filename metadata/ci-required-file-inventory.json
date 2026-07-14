@@ -597,6 +597,12 @@
     },
     {
       "ignored": false,
+      "path": "contracts/bpi-events/src/test/java/com/mapletct/ftmes/bpi/contract/compatibility/PointCatalogSnapshotV1Test.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-events/src/test/java/com/mapletct/ftmes/bpi/contract/compatibility/ProtobufCompatibilityTest.java",
       "state": "tracked",
       "tracked": true
@@ -3981,6 +3987,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-point-catalog-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -4222,6 +4234,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5457,6 +5475,36 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/BpiPointCatalogKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/BpiPointCatalogKafkaProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/PointCatalogKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/PointCatalogKafkaRecordProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/PointCatalogKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -5727,6 +5775,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -5776,6 +5830,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/PointCatalogKafkaRecordProcessorTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6491,19 +6551,19 @@
       "tracked": 81
     },
     "contracts": {
-      "tracked": 18
+      "tracked": 19
     },
     "deploy": {
       "tracked": 483
     },
     "docs": {
-      "tracked": 85
+      "tracked": 86
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 103
+      "tracked": 104
     },
     "package.json": {
       "tracked": 1
@@ -6515,7 +6575,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 153
+      "tracked": 160
     },
     "simulation": {
       "tracked": 4
@@ -6527,8 +6587,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1078,
-    "tracked": 1078,
+    "totalFiles": 1088,
+    "tracked": 1088,
     "untracked": 0
   },
   "untrackedByDirectory": []

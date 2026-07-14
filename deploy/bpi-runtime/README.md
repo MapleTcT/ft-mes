@@ -46,9 +46,12 @@ URL that happens to reach Keycloak. `BPI_ADAPTER_ROLE_RULES` and
 mapped. The legacy gateway URL must be an internal service address; never point ticket verification
 at a caller-controlled host.
 
-Candidate, rule-publication, and rule-application Kafka consumers are disabled by default. Enable
-them only after setting explicit tenant, plant, and line allowlists. `_DENY_ALL_` is the fail-closed
-default; `*` should be used only for a documented test marker scope.
+Candidate, point-catalog, rule-publication, and rule-application Kafka consumers are disabled by
+default. Enable them only after setting explicit tenant, plant, and line allowlists. `_DENY_ALL_` is
+the fail-closed default; `*` should be used only for a documented test marker scope. The point-catalog
+consumer additionally validates Kafka key, required single-value headers, Protobuf schema version,
+content-addressed revision, 5 MiB payload limit and source identity before persistence; failed records
+use bounded retry and `iot.point-catalog.snapshot.dlq.v1`.
 
 ## Controlled joint acceptance
 
@@ -92,3 +95,8 @@ requires an unready point to produce explicit validation errors with no publish 
 service restart, run with `BPI_BROWSER_ACTION=read` to prove the same point and blocked topology are
 still visible. Source device state must be queried independently; the script must not be used to
 label an inactive or uncalibrated device as ready.
+
+For the automatic JetLinks path, run with `BPI_BROWSER_ACTION=sync-read`. This mode performs no
+fixture write: it waits for the Kafka-imported source revision in the configured ADP scope and proves
+that the real page reads the same PostgreSQL snapshot. The accepted target evidence is documented in
+`docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`.

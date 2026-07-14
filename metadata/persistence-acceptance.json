@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T18:34:00Z",
+  "generatedAt": "2026-07-15T05:20:00Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -33,11 +33,16 @@
       "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
       "marker": "ADP_E2E_20260715_POINTCAT_02",
       "evidence": "metadata/bpi-point-catalog-readiness-acceptance.json"
+    },
+    "bpiPointCatalogKafkaSync": {
+      "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
+      "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
+      "evidence": "metadata/bpi-point-catalog-kafka-sync-acceptance.json"
     }
   },
   "summary": {
-    "testedFeatures": 135,
-    "pass": 130,
+    "testedFeatures": 136,
+    "pass": 131,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -2940,9 +2945,36 @@
       "status": "PASS",
       "evidence": "/tmp/bpi-point-catalog-ADP_E2E_20260715_POINTCAT_02-read.json. The point and failed topology remained uniquely visible; console/page/request errors were zero.",
       "issues": []
+    },
+    {
+      "module": "BPI点位目录自动同步",
+      "route": "http://100.99.133.43:18091/#/points",
+      "operation": "JetLinks权威设备/产品metadata自动生成目录，经Kafka消费落库并由真实页面读取",
+      "api": "iot.point-catalog.snapshot.v1; GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01",
+      "method": "KAFKA_EVENT/GET",
+      "requiresPersistence": true,
+      "backendEntry": "JetLinksPointCatalogSource -> PointCatalogSnapshotMapper -> KafkaPointCatalogPublisher -> PointCatalogKafkaListener -> PointCatalogKafkaRecordProcessor -> PointCatalogService -> PointCatalogPostgresRepository/BpiPostgresRepository",
+      "tables": [
+        "bpi_point_catalog_snapshots",
+        "bpi_point_catalog_entries",
+        "bpi_api_idempotency",
+        "bpi_audit_events"
+      ],
+      "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
+      "verificationSql": "Query bpi_point_catalog_snapshots by tenant_id=1000, plant_id=PLANT-01, line_id=LINE-S07-01 and source_revision; join bpi_point_catalog_entries and verify snapshot=1, entry=1, ready=0; verify point-catalog-2a218d...151ce5 is COMPLETED/200 and audit action is POINT_CATALOG_SNAPSHOT_IMPORTED.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-point-catalog-kafka-sync-acceptance.json, docs/testing/bpi-point-catalog-kafka-sync-acceptance.md, /tmp/bpi-point-catalog-sync-scope-20260715.json and /tmp/bpi-point-catalog-sync-scope-20260715.png. Duplicate delivery and IoT restart added no rows; poison payload reached DLT without business persistence; GET returned 200 with zero console/page/request failures.",
+      "issues": [
+        "The automatic synchronization control passed, but the only source point remains BLOCKED because the device is not active/registered and metadata, calibration and source sequence are not ready."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
+      "artifact": "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
+      "summary": "Target JetLinks to Kafka to BPI PostgreSQL to browser point catalog synchronization passed with one snapshot and one entry, exact duplicate and restart idempotency, poison DLT isolation and zero browser errors; source readiness remains blocked."
+    },
     {
       "marker": "ADP_E2E_20260621101926_WOMSTART_HOLD_RESTART",
       "artifact": "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
