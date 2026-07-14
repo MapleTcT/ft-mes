@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`62`。
+- Watch 语句：`63`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -80,3 +80,4 @@
 | 137-wom-reject-material-workflow-config.sql | 152 | delete | scoped-delete | Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup. | DELETE FROM public.wfm_task_pending pending USING public.wom_reject_materials reject_material WHERE pending.process_key IN ('batchRejectFlow', 'materiaReject', 'prePareRejectFlow') AND coalesce(reject_material.valid, fal |
 | 173-wom-make-task-flow-runtime-metadata-sync.sql | 66 | delete | scoped-delete | Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup. | DELETE FROM public.wf_transition transition USING current_flow WHERE transition.deployment_id = current_flow.deployment_id AND transition.code IN ( 'SequenceFlow_00a9xaa', 'SequenceFlow_0vcn8hp', 'SequenceFlow_0libf0v' ) |
 | 173-wom-make-task-flow-runtime-metadata-sync.sql | 88 | delete | scoped-delete | Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup. | DELETE FROM public.wf_task task USING current_flow WHERE task.deployment_id = current_flow.deployment_id AND task.code = 'TaskEvent_023irnk'; |
+| 176-wom-bpi-production-context-outbox.sql | 220 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks; |

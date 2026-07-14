@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`175`。
-- 编号范围：`001` 到 `175`。
+- 脚本数量：`176`。
+- 编号范围：`001` 到 `176`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`62`。
+- 需关注语句：`63`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 73 |
 | configuration | 41 |
-| general | 25 |
+| general | 26 |
 | notification | 9 |
 | platform | 49 |
 | workflow | 20 |
@@ -34,22 +34,22 @@
 | Statement | Count |
 | --- | --- |
 | alter-table | 9326 |
-| create-function | 68 |
-| create-index | 866 |
-| create-table | 530 |
+| create-function | 69 |
+| create-index | 870 |
+| create-table | 534 |
 | create-view | 107 |
-| insert | 3877 |
-| update | 3939 |
+| insert | 3879 |
+| update | 3941 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 172 |
+| create-or-replace | 173 |
 | do-block | 274 |
-| if-exists | 90 |
-| if-not-exists | 11281 |
-| on-conflict | 3840 |
+| if-exists | 91 |
+| if-not-exists | 11289 |
+| on-conflict | 3841 |
 | to-regclass | 152 |
 | where-not-exists | 27 |
 
@@ -232,6 +232,7 @@
 | 173 | 173-wom-make-task-flow-runtime-metadata-sync.sql | platform, workflow | 205 | insert:1, update:1 | 2 | watch:2 |
 | 174 | 174-material-wms-completion-inbound.sql | general | 145 | create-table:5, create-index:12 | 17 | - |
 | 175 | 175-process-analysis-traceability.sql | general | 98 | create-table:1, create-index:10, insert:2, update:2 | 13 | - |
+| 176 | 176-wom-bpi-production-context-outbox.sql | general | 234 | create-table:4, create-function:1, create-index:4, insert:2, update:2 | 11 | watch:1 |
 
 ## 规则
 

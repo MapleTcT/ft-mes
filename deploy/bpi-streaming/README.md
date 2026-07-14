@@ -9,6 +9,8 @@
 - Flink 2.2.1 / Java 17：Application Mode，1 个 JobManager、默认 2 个 TaskManager。
 - RocksDB：Flink keyed state backend，增量 checkpoint 写入独立 MinIO bucket。
 - BPI 作业：挂载 `bpi-stream-engine-0.1.0-SNAPSHOT-job.jar`，不改变 ADP Java 8 服务。
+- MES 上下文发布器：Java 8 独立进程，从 ADP PostgreSQL 事务 outbox 发布
+  `mes.production.context.v1`，不修改反编译 WOM 服务。
 - 网络：Kafka 外部端口和 Flink REST 默认仅绑定 `127.0.0.1`。
 
 这是单机测试拓扑，不是生产高可用拓扑。生产环境仍需独立 KRaft controller、Flink HA、
@@ -25,6 +27,11 @@ make bpi-stream-deploy-preflight
 必须修改 `.env` 中的 MinIO 密码。若需要从 Tailscale 网络访问 Kafka，将
 `BPI_BIND_ADDRESS` 和 `BPI_KAFKA_ADVERTISED_HOST` 同时改为测试机 Tailscale 地址；不要把
 明文 Kafka 监听器绑定到公网地址。
+
+`MES_CONTEXT_OUTBOX_ENABLED` 默认是 `false`。启用前必须完成
+[`mes-production-context-outbox/README.md`](../../backend/source-modules/mes-production-context-outbox/README.md)
+中的迁移、产线绑定、状态语义和 marker 验收。未配置映射的 WOM 变化只会生成 `BLOCKED_*`
+审计行，不会发布到 Kafka。
 
 预检是只读操作，会验证 Docker/Compose、空闲磁盘、端口、Compose 渲染和作业 JAR，生成
 `/tmp/bpi-streaming-preflight.json`。低于 25 GiB 可用空间时会拒绝启动。

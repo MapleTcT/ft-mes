@@ -5,6 +5,7 @@ import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
+import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 import org.junit.Test;
@@ -16,6 +17,45 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class BpiContractValidatorTest {
+
+    @Test
+    public void acceptsCompleteActiveProductionContext() {
+        ProductionContextEventV1 context = ProductionContextEventV1.newBuilder()
+            .setEventId("wom-context:1000:PLANT-01:LINE-01:7")
+            .setTenantId("1000")
+            .setPlantId("PLANT-01")
+            .setLineId("LINE-01")
+            .setOrderId("MO-001")
+            .setTaskId("42")
+            .setMaterialCode("MAT-001")
+            .setRecipeVersion("FORMULA-01:V2")
+            .setEffectiveFromMs(1_725_000_000_000L)
+            .setContextRevision(7L)
+            .setActive(true)
+            .build();
+
+        assertTrue(BpiContractValidator.validate(context).isEmpty());
+    }
+
+    @Test
+    public void rejectsActiveProductionContextWithoutBusinessIdentity() {
+        ProductionContextEventV1 context = ProductionContextEventV1.newBuilder()
+            .setEventId("event-1")
+            .setTenantId("1000")
+            .setPlantId("PLANT-01")
+            .setLineId("LINE-01")
+            .setEffectiveFromMs(1_725_000_000_000L)
+            .setContextRevision(1L)
+            .setActive(true)
+            .build();
+
+        List<ContractViolation> violations = BpiContractValidator.validate(context);
+
+        assertTrue(containsPath(violations, "order_id"));
+        assertTrue(containsPath(violations, "task_id"));
+        assertTrue(containsPath(violations, "material_code"));
+        assertTrue(containsPath(violations, "recipe_version"));
+    }
 
     @Test
     public void oneBadPointDoesNotSuppressValidPoints() throws Exception {
@@ -215,6 +255,15 @@ public class BpiContractValidatorTest {
     private static boolean containsCode(List<ContractViolation> violations, String code) {
         for (ContractViolation violation : violations) {
             if (code.equals(violation.getCode())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsPath(List<ContractViolation> violations, String path) {
+        for (ContractViolation violation : violations) {
+            if (path.equals(violation.getPath())) {
                 return true;
             }
         }

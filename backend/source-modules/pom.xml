@@ -21,6 +21,7 @@
         <module>basicmanagement-auditlog</module>
         <module>batch-intelligence-adapter</module>
         <module>material-wms</module>
+        <module>mes-production-context-outbox</module>
         <module>process-analysis</module>
     </modules>
 </project>

@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 175,
+  "migrationCount": 176,
   "firstNumber": 1,
-  "lastNumber": 175,
+  "lastNumber": 176,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 62,
+  "watchStatementCount": 63,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 9326,
-    "create-function": 68,
-    "create-index": 866,
-    "create-table": 530,
+    "create-function": 69,
+    "create-index": 870,
+    "create-table": 534,
     "create-view": 107,
-    "insert": 3877,
-    "update": 3939
+    "insert": 3879,
+    "update": 3941
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 172,
+    "create-or-replace": 173,
     "do-block": 274,
-    "if-exists": 90,
-    "if-not-exists": 11281,
-    "on-conflict": 3840,
+    "if-exists": 91,
+    "if-not-exists": 11289,
+    "on-conflict": 3841,
     "to-regclass": 152,
     "where-not-exists": 27
   },
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 73,
     "configuration": 41,
-    "general": 25,
+    "general": 26,
     "notification": 9,
     "platform": 49,
     "workflow": 20
@@ -6569,6 +6569,50 @@
       },
       "highRiskStatements": [],
       "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
+      "name": "176-wom-bpi-production-context-outbox.sql",
+      "number": 176,
+      "slug": "wom-bpi-production-context-outbox",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 234,
+      "sha256": "a18b597385ac4c2944deba642dd7e5fd7167d27b02f853b6880ff29ca950d16a",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 4,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 8,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 220,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks;",
+          "statement": "DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
       "unguardedStructuralStatements": []
     }
   ]

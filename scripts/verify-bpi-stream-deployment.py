@@ -29,6 +29,8 @@ REQUIRED_FILES = [
     "metadata/bpi-kafka-postgres-replay-acceptance.json",
     "metadata/bpi-test-environment-acceptance.json",
     "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
+    "backend/source-modules/mes-production-context-outbox/README.md",
+    "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
 ]
 
 
@@ -57,6 +59,9 @@ def main() -> int:
         "BPI_CANDIDATE_DLQ_TOPIC",
         "BPI_RULE_APPLICATION_TOPIC",
         "BPI_RULE_APPLICATION_DLQ_TOPIC",
+        "mes-production-context-outbox",
+        "MES_CONTEXT_OUTBOX_ENABLED",
+        "ADP_RUNTIME_NETWORK_NAME",
         "127.0.0.1",
     ):
         if marker not in compose:
@@ -64,6 +69,10 @@ def main() -> int:
 
     if "deploy/docker/docker-compose.yml" in compose:
         failures.append("BPI streaming Compose must not include the legacy ADP Compose file")
+    if "profiles: [mes-context]" not in compose:
+        failures.append("MES context publisher must remain behind the explicit mes-context profile")
+    if "MES_CONTEXT_OUTBOX_ENABLED: ${MES_CONTEXT_OUTBOX_ENABLED:-false}" not in compose:
+        failures.append("MES context publisher must remain disabled by default")
     if "docker.sock" in compose or "privileged: true" in compose:
         failures.append("BPI streaming Compose must not mount Docker or use privileged containers")
 

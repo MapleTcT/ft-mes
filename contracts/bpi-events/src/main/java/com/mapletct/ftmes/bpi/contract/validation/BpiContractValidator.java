@@ -5,6 +5,7 @@ import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.CandidateEvidenceV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
+import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 
@@ -108,6 +109,42 @@ public final class BpiContractValidator {
         validateCandidateEvidence(candidate, violations);
 
         validateCandidateIdentity(candidate, violations);
+        return Collections.unmodifiableList(violations);
+    }
+
+    public static List<ContractViolation> validate(ProductionContextEventV1 context) {
+        List<ContractViolation> violations = new ArrayList<ContractViolation>();
+        if (context == null) {
+            violations.add(violation("production_context", "REQUIRED", "production context is required"));
+            return Collections.unmodifiableList(violations);
+        }
+
+        required(context.getEventId(), "event_id", violations);
+        required(context.getTenantId(), "tenant_id", violations);
+        required(context.getPlantId(), "plant_id", violations);
+        required(context.getLineId(), "line_id", violations);
+        positive(context.getEffectiveFromMs(), "effective_from_ms", violations);
+        positive(context.getContextRevision(), "context_revision", violations);
+        if (context.getEffectiveToMs() != 0L
+            && context.getEffectiveToMs() <= context.getEffectiveFromMs()) {
+            violations.add(violation(
+                "effective_to_ms",
+                "INVALID_RANGE",
+                "effective_to_ms must be zero or later than effective_from_ms"
+            ));
+        }
+        if (context.getActive()) {
+            if (isBlank(context.getOrderId()) && isBlank(context.getBatchId())) {
+                violations.add(violation(
+                    "order_id",
+                    "ACTIVE_IDENTITY_REQUIRED",
+                    "active context requires an order_id or batch_id"
+                ));
+            }
+            required(context.getTaskId(), "task_id", violations);
+            required(context.getMaterialCode(), "material_code", violations);
+            required(context.getRecipeVersion(), "recipe_version", violations);
+        }
         return Collections.unmodifiableList(violations);
     }
 

@@ -327,6 +327,102 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/scripts/test-postgres-outbox.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/KafkaProductionContextPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxDispatcher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxRecord.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextProjector.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/java/com/mapletct/ftmes/contextoutbox/ProductionContextPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/test/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxApplicationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/test/java/com/mapletct/ftmes/contextoutbox/ProductionContextOutboxDispatcherTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/mes-production-context-outbox/src/test/java/com/mapletct/ftmes/contextoutbox/ProductionContextProjectorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/pom.xml",
       "state": "tracked",
       "tracked": true
@@ -2350,6 +2446,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/postgres/init/176-bpi-database-role.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -6176,13 +6278,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 64
+      "tracked": 80
     },
     "contracts": {
       "tracked": 18
     },
     "deploy": {
-      "tracked": 477
+      "tracked": 478
     },
     "docs": {
       "tracked": 81
@@ -6215,8 +6317,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1026,
-    "tracked": 1026,
+    "totalFiles": 1043,
+    "tracked": 1043,
     "untracked": 0
   },
   "untrackedByDirectory": []

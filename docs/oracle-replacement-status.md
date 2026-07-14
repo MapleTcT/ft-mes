@@ -4,17 +4,17 @@
 
 ## 摘要
 
-- Generated At：`2026-07-14T10:10:49+00:00`。
-- Repo Commit：`ed5eb92e4cf5edc87a2e7a51a0aaf513826f231f`。
+- Generated At：`2026-07-14T11:46:28+00:00`。
+- Repo Commit：`1bf7429c2f486a6d973937dd81785243dbfbcb00`。
 - CI 阻断问题：`0`。
 - 迁移缺口：`1`。
 - 关注项：`2`。
 - 计划项：`1`。
-- 已提升源码模块：`4`。
+- 已提升源码模块：`5`。
 - 源码模块 Oracle 禁入：`pass`。
-- Oracle backlog 引用：`980`。
+- Oracle backlog 引用：`981`。
 - 直接 Oracle 依赖：`2`。
-- PostgreSQL migration 脚本：`175`。
+- PostgreSQL migration 脚本：`176`。
 - PostgreSQL mapper audit：`0` error / `0` warning。
 - 运行配置 active Oracle-like 默认行：`0`。
 - Oracle audit 未分类引用：`0`。
@@ -28,14 +28,14 @@
 | runtime-default-postgresql | pass | no | content inventory default=postgresql, compose postgres default=True, env example postgres=True | 保持 `.env.example` 和 Compose 默认值指向 PostgreSQL。 |
 | parent-pom-oracle-legacy-profile | pass | no | defaultOracleDeps=0, legacyProfile=True, legacyOracleDeps=1 | Oracle JDBC 只能放在 `oracle-legacy` profile；默认父 POM 只管理 PostgreSQL/JDK 基线。 |
 | runtime-config-no-oracle-defaults | pass | no | activeOracle=0, source=0, rendered=0, files=88 | Nacos source templates and rendered configs must default to PostgreSQL; Oracle-like defaults can only remain in comments, backlog, or explicit legacy templates. |
-| oracle-legacy-only | watch | no | Oracle migration backlog has 980 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
-| oracle-audit-current-and-classified | pass | no | generatedAt=2026-07-14T10:10:43+00:00, repoCommit=ed5eb92e4cf5edc87a2e7a51a0aaf513826f231f, unclassified=0, findingCount=980, categoryTotal=980 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
+| oracle-legacy-only | watch | no | Oracle migration backlog has 981 tracked references. | 逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。 |
+| oracle-audit-current-and-classified | pass | no | generatedAt=2026-07-14T11:46:22+00:00, repoCommit=1bf7429c2f486a6d973937dd81785243dbfbcb00, unclassified=0, findingCount=981, categoryTotal=981 | 先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。 |
 | backend-direct-oracle-deps | gap | no | 250 recovered modules, 2 direct Oracle dependencies, 4 JDBC dependencies. | 模块提升时优先处理直接 Oracle JDBC 依赖，默认路径只保留 PostgreSQL。 |
 | mapper-postgres-audit | pass | no | errors=0, warnings=0, findings=0 | 任何 error 级方言必须先迁移；warning 级 `to_char` 保留人工确认记录。 |
-| postgres-migration-governance | pass | no | 175 scripts, range=001-175, highRisk=0, watch=62 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
+| postgres-migration-governance | pass | no | 176 scripts, range=001-176, highRisk=0, watch=63 | 新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。 |
 | recovered-source-inventory | pass | no | 250 source jars, 991 frontend files, 58 compose services. | 新增包、服务或 source map 后运行 `make inventory`。 |
-| source-module-promotion | watch | no | `backend/source-modules` currently declares 4 buildable modules. | 按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。 |
-| source-module-oracle-policy | pass | no | Source module verification passed. Modules: 4. | 修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。 |
+| source-module-promotion | watch | no | `backend/source-modules` currently declares 5 buildable modules. | 按 auth/rbac/organization/configuration/workflow 顺序提升高频维护模块。 |
+| source-module-oracle-policy | pass | no | Source module verification passed. Modules: 5. | 修复 `backend/source-modules` 中的 Oracle JDBC、Oracle 默认配置、Oracle dialect 或 mapper/oracle 资源后重新运行 `make source-module-check`。 |
 | backend-table-audit | planned | no | `docs/backend-table-audit-handoff.md` and issue template exist; detailed table maps remain future work. | 专门线程输出页面/API/服务/Mapper/表/字段映射，避免混进平台工程化任务。 |
 
 ## 恢复资产计数
@@ -57,7 +57,7 @@
 | --- | --- |
 | allowed-legacy-contract | 6 |
 | decompiled-runtime-backlog | 16 |
-| documentation-or-workflow | 184 |
+| documentation-or-workflow | 185 |
 | frontend-row-index-noise | 4 |
 | java-row-index-noise | 19 |
 | legacy-ojdbc-dependency | 6 |

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T10:10:43+00:00",
-  "repoCommit": "ed5eb92e4cf5edc87a2e7a51a0aaf513826f231f",
-  "findingCount": 980,
+  "generatedAt": "2026-07-14T11:46:22+00:00",
+  "repoCommit": "1bf7429c2f486a6d973937dd81785243dbfbcb00",
+  "findingCount": 981,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 184,
+    "documentation-or-workflow": 185,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 19,
     "legacy-ojdbc-dependency": 6,
@@ -20,7 +20,7 @@
   "patternCounts": {
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 629,
+    "oracle-keyword": 630,
     "rownum": 61,
     "sysdate": 135
   },
@@ -245,7 +245,7 @@
     },
     {
       "file": "Makefile",
-      "line": 226,
+      "line": 228,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -253,7 +253,7 @@
     },
     {
       "file": "Makefile",
-      "line": 227,
+      "line": 229,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -261,7 +261,7 @@
     },
     {
       "file": "Makefile",
-      "line": 230,
+      "line": 232,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -269,7 +269,7 @@
     },
     {
       "file": "Makefile",
-      "line": 231,
+      "line": 233,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -277,15 +277,15 @@
     },
     {
       "file": "Makefile",
-      "line": 324,
+      "line": 326,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
-      "excerpt": "ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-runtime-replay-test bpi-adapter-static-check bpi-ui-static-check r"
+      "excerpt": "ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test bpi-runtime-replay-test bpi-adapter-static"
     },
     {
       "file": "Makefile",
-      "line": 713,
+      "line": 721,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -293,7 +293,7 @@
     },
     {
       "file": "Makefile",
-      "line": 714,
+      "line": 722,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -301,7 +301,7 @@
     },
     {
       "file": "Makefile",
-      "line": 716,
+      "line": 724,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -309,7 +309,7 @@
     },
     {
       "file": "Makefile",
-      "line": 717,
+      "line": 725,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -317,7 +317,7 @@
     },
     {
       "file": "Makefile",
-      "line": 725,
+      "line": 733,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -325,7 +325,7 @@
     },
     {
       "file": "Makefile",
-      "line": 726,
+      "line": 734,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -333,7 +333,7 @@
     },
     {
       "file": "Makefile",
-      "line": 728,
+      "line": 736,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -341,7 +341,7 @@
     },
     {
       "file": "Makefile",
-      "line": 729,
+      "line": 737,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -3994,6 +3994,14 @@
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
       "excerpt": "- No Oracle or JDBC dependency is declared in this promoted module."
+    },
+    {
+      "file": "backend/source-modules/mes-production-context-outbox/README.md",
+      "line": 4,
+      "pattern": "oracle-keyword",
+      "category": "documentation-or-workflow",
+      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
+      "excerpt": "`mes.production.context.v1`。它运行在 Java 8，不侵入现有反编译服务，也不把 Oracle 恢复为默认路径。"
     },
     {
       "file": "deploy/README.md",
