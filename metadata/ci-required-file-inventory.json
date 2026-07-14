@@ -117,7 +117,19 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiBearerAuthenticationFilter.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiClaimsMapper.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiCredentialAuthenticator.java",
       "state": "tracked",
       "tracked": true
     },
@@ -141,6 +153,12 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/LegacyTicketVerifier.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/SecurityConfiguration.java",
       "state": "tracked",
       "tracked": true
@@ -148,6 +166,18 @@
     {
       "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiAdapterApplicationContextTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiBearerAuthenticationFilterTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -172,6 +202,12 @@
     {
       "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/InternalJwtIssuerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/LegacyTicketVerifierTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -484,6 +520,18 @@
     {
       "ignored": false,
       "path": "contracts/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/preflight.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/smoke.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -4029,6 +4077,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-test-environment-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-test-host-capacity-preflight.json",
       "state": "tracked",
       "tracked": true
@@ -5397,6 +5451,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/security/SecurityConfigurationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/batch-rule-runtime/pom.xml",
       "state": "tracked",
       "tracked": true
@@ -6032,13 +6092,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 58
+      "tracked": 64
     },
     "contracts": {
       "tracked": 18
     },
     "deploy": {
-      "tracked": 469
+      "tracked": 471
     },
     "docs": {
       "tracked": 80
@@ -6047,7 +6107,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 97
+      "tracked": 98
     },
     "package.json": {
       "tracked": 1
@@ -6059,7 +6119,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 131
+      "tracked": 132
     },
     "simulation": {
       "tracked": 4
@@ -6071,8 +6131,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1002,
-    "tracked": 1002,
+    "totalFiles": 1012,
+    "tracked": 1012,
     "untracked": 0
   },
   "untrackedByDirectory": []

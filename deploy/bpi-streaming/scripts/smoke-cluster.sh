@@ -56,7 +56,7 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
     compose exec -T kafka-1 /opt/kafka/bin/kafka-topics.sh \
         --bootstrap-server kafka-1:19092 \
         --describe \
-        --topic "$topic"
+        --topic "$topic" </dev/null
 done >"$DESCRIBE"
 
 if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 8 ]; then

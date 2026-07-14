@@ -18,6 +18,8 @@ public class BpiAdapterProperties implements InitializingBean {
     private String keycloakJwkSetUri;
     private String keycloakIssuer;
     private String keycloakAudience = "pc_dt";
+    private boolean legacyTicketEnabled = true;
+    private String legacyGatewayBaseUrl;
     private String tenantClaim = "companyId";
     private String usernameClaim = "userName";
     private String internalJwtSecret;
@@ -35,6 +37,7 @@ public class BpiAdapterProperties implements InitializingBean {
         requireHttpUri("keycloak-jwk-set-uri", keycloakJwkSetUri);
         requireText("keycloak-issuer", keycloakIssuer);
         requireText("keycloak-audience", keycloakAudience);
+        if (legacyTicketEnabled) requireHttpUri("legacy-gateway-base-url", legacyGatewayBaseUrl);
         requireText("internal-jwt-issuer", internalJwtIssuer);
         requireText("internal-jwt-audience", internalJwtAudience);
         if (internalJwtSecret == null || internalJwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
@@ -122,6 +125,10 @@ public class BpiAdapterProperties implements InitializingBean {
     public void setKeycloakIssuer(String keycloakIssuer) { this.keycloakIssuer = keycloakIssuer; }
     public String getKeycloakAudience() { return keycloakAudience; }
     public void setKeycloakAudience(String keycloakAudience) { this.keycloakAudience = keycloakAudience; }
+    public boolean isLegacyTicketEnabled() { return legacyTicketEnabled; }
+    public void setLegacyTicketEnabled(boolean legacyTicketEnabled) { this.legacyTicketEnabled = legacyTicketEnabled; }
+    public String getLegacyGatewayBaseUrl() { return legacyGatewayBaseUrl; }
+    public void setLegacyGatewayBaseUrl(String legacyGatewayBaseUrl) { this.legacyGatewayBaseUrl = legacyGatewayBaseUrl; }
     public String getTenantClaim() { return tenantClaim; }
     public void setTenantClaim(String tenantClaim) { this.tenantClaim = tenantClaim; }
     public String getUsernameClaim() { return usernameClaim; }

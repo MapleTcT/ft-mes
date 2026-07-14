@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T08:17:11Z",
+  "baseCommitAtTest": "9a4a81213ebfbf3a2e8ea087915a177e28ba565e",
+  "status": "PARTIAL",
+  "environment": {
+    "name": "ubuntu-test",
+    "host": "100.99.133.43",
+    "network": "Tailscale private",
+    "legacyMesBaseUrl": "http://100.99.133.43:18080",
+    "bpiBaseUrl": "http://100.99.133.43:18091",
+    "flinkRestUrl": "http://100.99.133.43:18081",
+    "database": "PostgreSQL",
+    "databaseName": "ft_mes_bpi"
+  },
+  "summary": {
+    "checks": 8,
+    "pass": 7,
+    "blocked": 1,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "id": "runtime-compose",
+      "status": "PASS",
+      "evidence": "ft-mes-bpi-runtime web, adapter, service and PostgreSQL are healthy; Flyway version 8; schemaTableCount=19"
+    },
+    {
+      "id": "browser-authenticated-read",
+      "status": "PASS",
+      "evidence": "ADP loginStatus=200; suposTicket cookie present; BPI navigationStatus=200; overview API=200; consoleErrors=0; pageErrors=0; requestFailures=0"
+    },
+    {
+      "id": "legacy-auth-bridge",
+      "status": "PASS",
+      "evidence": "Opaque ADP session is verified by the trusted gateway, then mapped to server-owned BPI roles and scopes before a short-lived internal JWT is issued"
+    },
+    {
+      "id": "kafka-cluster",
+      "status": "PASS",
+      "evidence": "3 brokers; 8 BPI topics; replicationFactor=3; minInSyncReplicas=2"
+    },
+    {
+      "id": "flink-job-and-checkpoints",
+      "status": "PASS",
+      "evidence": "jobId=1f55da2611f488cce0de0638d8f20b6f; state=RUNNING; tasks=30/30; completedCheckpoints=144; failedCheckpoints=0 at 2026-07-14T08:17:11Z"
+    },
+    {
+      "id": "fixed-marker-replay",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260714_071034_1503790",
+      "evidence": "One committed candidate at bpi.batch.candidate.v1 partition 0 offset 6; matchingRecordCount=1; matchingDataQualityIssues=0"
+    },
+    {
+      "id": "loaded-taskmanager-recovery",
+      "status": "PASS",
+      "evidence": "Restarted ft-mes-bpi-streaming-bpi-taskmanager-2; tasks recovered 30/30; attempt 0->1; completed checkpoints 13->14"
+    },
+    {
+      "id": "browser-to-batch-persistence-write-chain",
+      "status": "BLOCKED",
+      "evidence": "No controlled topology/rule product data is available yet; the same-marker UI publication, outbox, Kafka, Flink application receipt, candidate confirmation and batch/evidence/audit PostgreSQL chain has not been executed"
+    }
+  ],
+  "rawEvidence": {
+    "localBrowserReport": "/tmp/bpi-target-browser-smoke.json",
+    "targetRuntimeSmoke": "/tmp/bpi-runtime-smoke.json",
+    "targetClusterSmoke": "/tmp/bpi-streaming-cluster-smoke.json",
+    "targetReplay": "/tmp/bpi-streaming-evidence/bpi-kafka-replay.json",
+    "targetTaskManagerRecovery": "/tmp/bpi-streaming-loaded-taskmanager-recovery.json"
+  },
+  "boundaries": [
+    "This report proves the target runtime read path and streaming data plane separately; it does not claim an unexecuted end-to-end write chain.",
+    "No credential, token, cookie value, private key, database password or environment file is stored in this report.",
+    "Production migration, real IoT/MES integration, 7-14 day shadow operation and QCS/WMS writeback remain outside the passed scope."
+  ]
+}

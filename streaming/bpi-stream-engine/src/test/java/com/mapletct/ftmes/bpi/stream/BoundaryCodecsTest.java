@@ -26,6 +26,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BoundaryCodecsTest {
 
@@ -52,7 +53,8 @@ class BoundaryCodecsTest {
                 null, null, true, SignalQuality.GOOD);
         BoundaryOperatorState state = new BoundaryOperatorState(
                 context,
-                new BoundaryRuleRef("START-01", "1.2.3"),
+                new BoundaryRuleRef(
+                        "TENANT-A", "PLANT-01", "LINE-01", "START-01", "1.2.3"),
                 new BoundaryWindowState(Map.of(numeric.signal(), numeric, bool.signal(), bool), false, null),
                 List.of(
                         SignalObservation.numeric(
@@ -115,6 +117,15 @@ class BoundaryCodecsTest {
         assertFalse(restored.observationHistoryComplete());
         assertEquals(List.of(), restored.observations());
         assertEquals(BoundaryOperatorState.NO_TIMER, restored.nextTimerEpochMs());
+    }
+
+    @Test
+    void operatorStateCodecReadsVersionTwoWithUnscopedRuleAndObservationHistory() throws Exception {
+        BoundaryOperatorState restored = BoundaryOperatorStateCodec.decode(legacyVersionTwoState());
+
+        assertEquals(new BoundaryRuleRef("START-V2", "2"), restored.ruleRef());
+        assertTrue(restored.observationHistoryComplete());
+        assertEquals(List.of(), restored.observations());
     }
 
     @Test
@@ -210,6 +221,31 @@ class BoundaryCodecsTest {
             output.writeLong(BoundaryOperatorState.NO_TIMER);
             output.writeBoolean(false);
             BoundaryRuleCodec.writeNullable(output, null);
+            output.writeInt(0);
+        }
+        return bytes.toByteArray();
+    }
+
+    private static byte[] legacyVersionTwoState() throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(0x42504953);
+            output.writeInt(2);
+            output.writeUTF("TENANT-V2");
+            output.writeUTF("PLANT-01");
+            output.writeUTF("LINE-01");
+            output.writeUTF("FEED");
+            output.writeUTF("TOPO-1");
+            output.writeUTF("2");
+            BoundaryRuleCodec.writeNullable(output, "MO-V2");
+            BoundaryRuleCodec.writeNullable(output, null);
+            output.writeUTF("START-V2");
+            output.writeUTF("2");
+            output.writeLong(BoundaryOperatorState.NO_TIMER);
+            output.writeBoolean(false);
+            BoundaryRuleCodec.writeNullable(output, null);
+            output.writeInt(0);
+            output.writeBoolean(true);
             output.writeInt(0);
         }
         return bytes.toByteArray();

@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 多项本地能力已经通过真实运行验收，但既有 MES 全业务闭环、BPI 目标环境全链路、现场影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化、BPI 目标集群流处理和目标环境浏览器只读链路已经通过真实运行验收；既有 MES 全业务闭环、BPI 浏览器写操作到批次事实的完整 marker 回路、现场影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
 
 ## 项目定位
 
@@ -21,8 +21,8 @@
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
-| BPI 本地产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka 消费重启/DLQ，以及真实 Flink MiniCluster checkpoint/TaskManager 重启验收 | 浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路和目标集群验收 |
-| 目标测试环境 | `BLOCKED` | 既有 ADP/MES 测试栈有历史验收 | BPI 尚未在目标机完成远端页面、API、Kafka offset、Flink checkpoint 和 PostgreSQL marker 复验 |
+| BPI 产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka 消费重启/DLQ、本地 MiniCluster 和目标 Flink 集群恢复验收 | 浏览器规则发布、应用回执、候选确认、批次/证据/审计必须用同一 marker 闭合 |
+| 目标测试环境 | `PARTIAL` | BPI 页面与真实 ADP 会话桥接、Java 8 适配器、Java 17 服务、PostgreSQL、三 broker Kafka、Flink/MinIO checkpoint 和 TaskManager 重启均已实测 | 规则/拓扑受控数据、消费者白名单、完整写链和现场数据尚未验收 |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
 权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。README 是接手入口，不替代验收证据。
@@ -61,6 +61,16 @@ MES 目标业务链保持为：
 
 BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工认同率、累计量偏差和数据质量门槛后，才允许进入 QCS/WMS 生产写回阶段。
 
+当前最短交付主线只有一条：
+
+```text
+浏览器发布规则 -> PostgreSQL outbox -> Kafka -> Flink checkpoint
+-> application receipt -> PostgreSQL APPLIED/audit -> IoT/MES context
+-> candidate -> 浏览器确认 -> batch/evidence/audit
+```
+
+这条链必须使用同一个唯一 `ADP_E2E_*` marker 验证。任何分段测试、接口 `200` 或页面可见都不能替代完整闭环。
+
 ## 已实现的 BPI 能力
 
 - Java 8 旧平台认证适配器与 Java 17 BPI 服务边界。
@@ -71,8 +81,27 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - BPI 操作台、确定性模拟服务和浏览器 E2E。
 - Kafka + PostgreSQL 回执消费验收：`read_committed`、回滚不可见、重启重放、精确幂等、终态防回退和 DLQ。
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后回执可见、未完成事务不可见、TaskManager 重启恢复规则终态、同版本规则禁止重新启用。
+- 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
+- 目标测试环境独立流处理栈：三 broker Kafka、八个 BPI topic、Flink 2.2.1、两个 TaskManager、MinIO checkpoint、唯一 marker 回放和带负载 TaskManager 重启恢复。
 
-最新本地 Flink 验收不是目标集群验收：默认使用一次性单进程 Kafka KRaft 和本地 checkpoint 目录，不包含 MinIO、三 broker、浏览器或 PostgreSQL 消费端。
+本地 MiniCluster、目标流处理集群和目标浏览器只读链路是三份不同证据。它们已经分别通过，但仍不能拼接成尚未执行的浏览器写入全链路。
+
+## 目标测试环境（2026-07-14）
+
+目标机使用 Tailscale 私网地址 `100.99.133.43`。既有 ADP/MES Compose 保持原样，BPI 使用两个独立 Compose project，避免覆盖旧服务：
+
+| 入口/运行面 | 地址或项目 | 当前结果 |
+|---|---|---|
+| 既有 ADP/MES | `http://100.99.133.43:18080` | 登录和会话来源；未因 BPI 部署被替换 |
+| BPI 操作台 | `http://100.99.133.43:18091` | 真实浏览器加载、概览 API `200`、无 console/page/network error |
+| BPI Java/PostgreSQL | `ft-mes-bpi-runtime` | Web、adapter、service、PostgreSQL 全部 healthy；Flyway V8、19 张 BPI 表 |
+| Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | 3 broker、8 topic、Flink job `RUNNING`、30/30 task、持续成功 checkpoint |
+| 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |
+| TaskManager 恢复 | 带负载重启 1 个 TaskManager | 30/30 task 恢复，重启后继续完成 checkpoint |
+
+访问 BPI 前需要先在同一浏览器完成 ADP 登录，BPI 不保存或复制旧平台密码。适配器接受真实旧平台不透明会话票据，也保留严格 issuer/audience 校验的 JWT 路径；角色和租户/工厂/产线范围均由服务端映射，未配置映射时默认拒绝。
+
+详细证据和结论边界见 [BPI 目标环境部署验收](docs/testing/bpi-test-environment-deployment-readiness.md) 与 [机器可读报告](metadata/bpi-test-environment-acceptance.json)。当前尚未通过的是同一 marker 的“浏览器规则发布到批次确认落库”完整写链，因此目标环境状态仍是 `PARTIAL`。
 
 ## 第一次接手
 
@@ -81,11 +110,22 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 | 区域 | 基线 |
 |---|---|
 | 既有 ADP/MES reactor | Java 8、Maven 3.6+ |
-| BPI service / Flink | Java 17、Maven 3.9+ |
+| BPI service / Flink | Java 17、Maven 3.6.3+（推荐 Maven 3.9.x） |
 | BPI 操作台 | Node.js、npm、Vite |
 | 部署和真实落库验收 | Docker Compose、PostgreSQL、Python 3 |
 
 不要用 Java 8 运行 BPI reactor，也不要为了兼容旧 JAR 把 Java 17 模块降级或并入旧服务进程。两侧只通过版本化 HTTP 或事件契约交互。
+
+执行 `make` 前先确认实际命中的工具链，避免 shell 中的旧 Maven 覆盖已安装版本：
+
+```bash
+java -version
+mvn -version
+command -v java
+command -v mvn
+```
+
+`mvn -version` 必须同时显示 Maven `3.6.3+` 和 Java `17`。本仓库建议固定 Maven `3.9.x`；如果 `make bpi-stream-test` 报插件要求 Maven `3.6.3`，说明当前 `PATH` 仍命中旧 Maven，不是业务代码编译失败。
 
 ### 最短可信验证
 
@@ -162,6 +202,24 @@ make bpi-stream-cluster-smoke
 
 需要停止时执行 `make down-bpi-stream`；该命令保留 Kafka 和 MinIO named volumes，便于做重启与 checkpoint 恢复验证。详细变量、容量预检和 marker 回放见 [BPI 流处理部署说明](deploy/bpi-streaming/README.md)。
 
+### BPI Java/PostgreSQL 运行栈
+
+Java 17 服务与其 PostgreSQL 数据库使用独立 Compose 项目，不覆盖既有 ADP/MES 编排：
+
+```bash
+make bpi-service-package
+make bpi-adapter-package
+make bpi-ui-build
+cp deploy/bpi-runtime/.env.example deploy/bpi-runtime/.env
+# 修改所有 change-me 值和私网 Kafka 地址
+sh deploy/bpi-runtime/scripts/preflight.sh deploy/bpi-runtime/.env
+docker compose --env-file deploy/bpi-runtime/.env \
+  -f deploy/bpi-runtime/docker-compose.yml up -d --build
+sh deploy/bpi-runtime/scripts/smoke.sh deploy/bpi-runtime/.env
+```
+
+Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`，测试机可显式把 Web 改为 Tailscale 地址。Kafka 候选、规则发布和规则应用消费者默认全部关闭，必须先设置租户/工厂/产线 allowlist 才能打开。详见 [BPI 运行栈部署说明](deploy/bpi-runtime/README.md)。
+
 不要提交 `.env`、真实密码、token、证书私钥、数据库 dump、运行日志或现场数据。
 
 ## 验收证据
@@ -172,7 +230,8 @@ make bpi-stream-cluster-smoke
 | 回执 PostgreSQL 状态迁移 | [回执落库验收](metadata/bpi-rule-application-receipt-acceptance.json) | 真实 PostgreSQL，不含真实 broker |
 | Kafka 消费重启、幂等与 DLQ | [Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json) | 本地 Embedded Kafka + PostgreSQL，不含 Flink job |
 | Flink checkpoint、事务可见性与恢复 | [Flink/Kafka 验收](metadata/bpi-rule-application-flink-kafka-acceptance.json) | 真实 Flink MiniCluster + Kafka 4.2，本地文件 checkpoint，不含 PostgreSQL/MinIO |
-| 目标环境全链路 | [项目总目标验收总账](docs/project-goal-acceptance.md) | 尚未完成，保持 `BLOCKED` |
+| 目标环境运行与分段链路 | [目标环境验收](metadata/bpi-test-environment-acceptance.json) | 浏览器只读链和 Kafka/Flink 数据面分别通过；完整写链仍 `BLOCKED` |
+| 目标环境全链路 | [项目总目标验收总账](docs/project-goal-acceptance.md) | 尚未完成，BPI 总目标保持 `PARTIAL` |
 
 证据等级从低到高为：静态/单元测试、模拟浏览器、真实 PostgreSQL、本地 Kafka + PostgreSQL、本地 Flink + Kafka、目标集群全链路、现场影子运行。每一级只证明自己实际执行的边界，不能用两份分离测试冒充一条没有跑过的联合链路。
 
@@ -209,6 +268,7 @@ contracts/bpi-api/             BPI OpenAPI 与实施/模拟能力清单
 contracts/bpi-events/          Protobuf 事件契约与兼容性基线
 simulation/bpi/                无外部依赖的交互/API 模拟器
 deploy/docker/                 ADP/MES PostgreSQL-first 测试编排
+deploy/bpi-runtime/            BPI Java 17 服务与独立 PostgreSQL 编排
 deploy/bpi-streaming/          Kafka/Flink/MinIO 流处理编排
 deploy/database/               PostgreSQL 迁移与生产迁移证据工具
 docs/                          目标、设计、测试、落库和交接文档
@@ -228,7 +288,7 @@ scripts/                       构建、恢复、审计和门禁脚本
 
 ## 接手顺序
 
-1. 阅读 [项目工作指令](AGENTS.md) 和 [项目目标](docs/project-objectives.md)。
+1. 阅读 [项目工作指令](AGENTS.md)、[项目目标](docs/project-objectives.md) 和本 README 的状态边界。
 2. 查看 [项目总目标验收总账](docs/project-goal-acceptance.md) 与 [目标缺口总账](docs/goal-gap-register.md)。
 3. BPI 开发先读 [BPI 总设计](docs/designs/batch-process-intelligence.md)、[交互设计](docs/designs/bpi-interaction-design.md) 和 [API 目录](docs/api/bpi-api-catalog.md)。
 4. 既有业务修复先读 [后端落表排查交接](docs/backend-table-audit-handoff.md) 和对应模块审计。
@@ -236,8 +296,9 @@ scripts/                       构建、恢复、审计和门禁脚本
 
 ## 当前未闭合事项
 
-- BPI 全栈部署到目标测试服务器，并完成远端浏览器/API/Kafka/Flink/PostgreSQL 联合 marker 验收。
-- 目标三 broker Kafka、Flink 集群、MinIO checkpoint storage 的 broker/TaskManager 重启与恢复演练。
+- 为目标环境导入或创建受控拓扑/规则，完成同一 marker 的浏览器发布、outbox、Kafka、Flink 应用回执、PostgreSQL、候选确认、批次/证据/审计联合验收。
+- 为产品补齐可审计的拓扑/规则创建或导入入口，避免依赖手工数据库 fixture 作为日常配置方式。
+- 完成 Kafka broker 故障、savepoint 升级和整套 BPI 回滚演练；当前只完成带负载 TaskManager 重启恢复。
 - [MapleTcT/iot](https://github.com/MapleTcT/iot) exporter 的真实点位、单位、质量码、sequence 和 locality group 映射。
 - MES production context outbox 与真实产线联调。
 - 选定产线 7-14 天影子运行、人工边界认同率和累计量偏差验收。

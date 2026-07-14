@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-14T03:49:16+00:00` |
-| Repo Commit | `44df18fd9e73c211f382fb9b51391696f84e424a` |
+| Generated At | `2026-07-14T08:39:37+00:00` |
+| Repo Commit | `9a4a81213ebfbf3a2e8ea087915a177e28ba565e` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ、模拟浏览器以及真实本地 Flink MiniCluster checkpoint/TaskManager 重启验收已分别完成；仍需目标三 broker Kafka/Flink/MinIO 集群恢复和浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路。 | 在目标三 broker Kafka、Flink 和 MinIO checkpoint storage 上复验 rule application receipt、broker/TaskManager 重启、offset 和 checkpoint 恢复。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 目标浏览器只读链和 Kafka/Flink 数据面已经分别通过，但同一 marker 的 UI 规则发布、outbox、Flink application receipt、PostgreSQL APPLIED/audit、candidate confirm 和 batch/evidence/audit 完整写链尚未闭合。 | 在已部署的目标环境导入受控 topology/rule fixture，执行同一 marker 的真实浏览器/API/Kafka/Flink/PostgreSQL 完整写链验收并在结束后恢复 consumer 默认关闭状态。 |
 
 ## Production Blockers
 

@@ -336,6 +336,8 @@ runtime-script-check:
 	sh -n deploy/bpi-streaming/scripts/run-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-postgres-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh
+	sh -n deploy/bpi-runtime/scripts/preflight.sh
+	sh -n deploy/bpi-runtime/scripts/smoke.sh
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh

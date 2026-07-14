@@ -60,6 +60,46 @@ class BoundaryKeyedBroadcastHarnessTest {
     }
 
     @Test
+    void scopedRuleStateProducesOnlyOneCandidateAcrossRepeatedEligibleObservations() throws Exception {
+        BoundaryRuleDefinition scopedRule = new BoundaryRuleDefinition(
+                "START-SCOPED", "1", BoundaryKind.START, 1, 1.0, 0,
+                List.of(new EvidenceCondition(
+                        "feed.flow", ConditionOperator.GREATER_THAN, new BigDecimal("2"),
+                        Duration.ZERO, Duration.ofSeconds(30), EvidenceClass.QUORUM, 100)));
+        BoundaryRuleRef scopedRef = new BoundaryRuleRef(
+                "TENANT-A", "PLANT-01", "LINE-01", scopedRule.ruleCode(), scopedRule.ruleVersion());
+        BoundaryExecutionContext executionContext = context();
+
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
+                     harness = harness()) {
+            harness.open();
+            harness.processBroadcastElement(
+                    BoundaryRuleUpdateCodec.encode(BoundaryRuleUpdate.upsert(
+                            "TENANT-A", "PLANT-01", "LINE-01", scopedRule)),
+                    T0.toEpochMilli());
+            for (int index = 1; index <= 3; index++) {
+                Instant eventTime = T0.plusSeconds(index);
+                harness.processElement(
+                        new BoundaryStreamInput(
+                                executionContext,
+                                scopedRef,
+                                BoundaryKind.START,
+                                SignalObservation.numeric(
+                                        "FLOW-" + index,
+                                        "feed.flow",
+                                        new BigDecimal("3"),
+                                        SignalQuality.GOOD,
+                                        eventTime)),
+                        eventTime.toEpochMilli());
+            }
+
+            List<BatchCandidateV1> candidates = candidates(harness.getOutput());
+            assertEquals(1, candidates.size());
+            assertEquals("FLOW-1", candidates.get(0).getFirstQuorumEvidenceEventId());
+        }
+    }
+
+    @Test
     void checkpointRestorePreservesWindowBroadcastRuleAndTimer() throws Exception {
         OperatorSubtaskState snapshot;
         BoundaryExecutionContext context = context();

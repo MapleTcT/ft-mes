@@ -79,6 +79,14 @@ def main() -> int:
     if "bpi.boundary.rule-application.dlq.v1" not in topic_script:
         failures.append("BPI topic initialization must create the rule application DLQ")
 
+    smoke_script = (ROOT / "deploy/bpi-streaming/scripts/smoke-cluster.sh").read_text(
+        encoding="utf-8"
+    )
+    if '--topic "$topic" </dev/null' not in smoke_script:
+        failures.append(
+            "BPI cluster smoke must isolate kafka-topics stdin so every configured topic is checked"
+        )
+
     postgres_replay = (
         ROOT / "deploy/bpi-streaming/scripts/run-postgres-replay.sh"
     ).read_text(encoding="utf-8")

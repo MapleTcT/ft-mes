@@ -18,6 +18,8 @@ bpi:
     keycloak-jwk-set-uri: ${BPI_ADAPTER_KEYCLOAK_JWK_SET_URI:}
     keycloak-issuer: ${BPI_ADAPTER_KEYCLOAK_ISSUER:}
     keycloak-audience: ${BPI_ADAPTER_KEYCLOAK_AUDIENCE:pc_dt}
+    legacy-ticket-enabled: ${BPI_ADAPTER_LEGACY_TICKET_ENABLED:true}
+    legacy-gateway-base-url: ${BPI_ADAPTER_LEGACY_GATEWAY_BASE_URL:}
     tenant-claim: ${BPI_ADAPTER_TENANT_CLAIM:companyId}
     username-claim: ${BPI_ADAPTER_USERNAME_CLAIM:userName}
     internal-jwt-secret: ${BPI_ADAPTER_INTERNAL_JWT_SECRET:}

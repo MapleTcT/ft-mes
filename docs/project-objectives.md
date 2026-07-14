@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已分别完成真实 PostgreSQL 状态迁移、Embedded Kafka `read_committed`/消费端重启/DLQ，以及 Kafka 4.2 + Flink 2.2.1 MiniCluster checkpoint 事务可见性和 TaskManager 重启恢复验收。三份证据仍是分离边界，本地 MiniCluster 使用单进程 broker 和本地文件 checkpoint，不代表目标三节点 Kafka/Flink/MinIO、浏览器到 Java/PostgreSQL 联合链路或现场影子运行已完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
+当前 BPI 已从设计进入目标环境实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。目标测试环境已运行独立 Java/PostgreSQL 与 Kafka/Flink/MinIO Compose，真实 ADP 会话到 BPI 概览的浏览器只读链路通过，三 broker Kafka、Flink job、MinIO checkpoint、唯一 marker 候选回放和带负载 TaskManager 重启恢复也已通过。浏览器只读链和流处理数据面仍是分段证据；同一 marker 的规则发布、应用回执、候选确认、批次/证据/审计写链尚未闭合，真实 IoT/MES 上下文和 7-14 天影子运行也未开始，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
 
 权威设计和验收入口：
 
@@ -234,9 +234,9 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 
 ### 主线 A：BPI Phase 0/1
 
-1. 闭合规则发布 `Outbox -> Kafka -> Flink checkpoint -> application receipt -> BPI PostgreSQL/audit -> UI`，明确区分 broker 已投递和 Flink 已应用；其中 Kafka 消费、PostgreSQL 状态迁移、restart/replay 和 DLQ 已有本地联合证据。
-2. 让真实 Flink job 的 checkpoint exactly-once sink 产生应用回执，验证失败 checkpoint 不可见、成功 checkpoint 可见和 job restart 恢复，禁止用事务生产者模拟结果冒充 Flink 集群证据。
-3. 部署到目标测试环境，通过真实浏览器、Java API、Kafka offset、Flink checkpoint 和 PostgreSQL marker 验收。
+1. 在已部署的目标环境导入受控拓扑/规则，闭合同一 marker 的 `UI -> Outbox -> Kafka -> Flink checkpoint -> application receipt -> PostgreSQL/audit -> UI`，明确区分 broker 已投递和 Flink 已应用。
+2. 继续闭合 `IoT/MES context -> candidate -> UI confirm -> batch/evidence/audit`，直接查询 PostgreSQL 验证候选、批次、证据、审计和幂等状态。
+3. 为拓扑/规则补产品化创建或导入入口，并完成 broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复。
 4. 接入 JetLinks/IoT fork 的 exporter 和一条产线生产上下文，盘点真实点位、单位、质量码、sequence 和规则 locality group。
 5. 连续运行 7-14 天影子批次，达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
 

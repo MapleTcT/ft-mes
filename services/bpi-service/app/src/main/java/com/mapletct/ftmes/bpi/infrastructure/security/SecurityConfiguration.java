@@ -1,5 +1,6 @@
 package com.mapletct.ftmes.bpi.infrastructure.security;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -27,6 +28,7 @@ import java.time.Duration;
 
 @Configuration
 @EnableMethodSecurity
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SecurityConfiguration {
 
     @Bean

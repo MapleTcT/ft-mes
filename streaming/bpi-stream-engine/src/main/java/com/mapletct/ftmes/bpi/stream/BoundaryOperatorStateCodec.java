@@ -22,7 +22,8 @@ public final class BoundaryOperatorStateCodec {
 
     private static final int MAGIC = 0x42504953;
     private static final int LEGACY_VERSION = 1;
-    private static final int VERSION = 2;
+    private static final int OBSERVATION_HISTORY_VERSION = 2;
+    private static final int VERSION = 3;
     private static final int MAX_SIGNALS = 100_000;
     private static final int MAX_OBSERVATIONS = 10_000;
 
@@ -40,8 +41,7 @@ public final class BoundaryOperatorStateCodec {
                 output.writeInt(MAGIC);
                 output.writeInt(VERSION);
                 writeContext(output, state.context());
-                output.writeUTF(state.ruleRef().ruleCode());
-                output.writeUTF(state.ruleRef().ruleVersion());
+                writeRuleRef(output, state.ruleRef());
                 output.writeLong(state.nextTimerEpochMs());
                 BoundaryWindowState window = state.windowState();
                 output.writeBoolean(window.candidateEmitted());
@@ -75,11 +75,15 @@ public final class BoundaryOperatorStateCodec {
                 throw new IOException("invalid boundary operator state magic");
             }
             int version = input.readInt();
-            if (version != LEGACY_VERSION && version != VERSION) {
+            if (version != LEGACY_VERSION
+                    && version != OBSERVATION_HISTORY_VERSION
+                    && version != VERSION) {
                 throw new IOException("unsupported boundary operator state version: " + version);
             }
             BoundaryExecutionContext context = readContext(input);
-            BoundaryRuleRef ruleRef = new BoundaryRuleRef(input.readUTF(), input.readUTF());
+            BoundaryRuleRef ruleRef = version >= VERSION
+                    ? readRuleRef(input)
+                    : new BoundaryRuleRef(input.readUTF(), input.readUTF());
             long nextTimer = input.readLong();
             boolean candidateEmitted = input.readBoolean();
             String firstQuorumEvent = BoundaryRuleCodec.readNullable(input);
@@ -93,7 +97,7 @@ public final class BoundaryOperatorStateCodec {
             }
             List<SignalObservation> observations = new ArrayList<>();
             boolean observationHistoryComplete = false;
-            if (version == VERSION) {
+            if (version >= OBSERVATION_HISTORY_VERSION) {
                 observationHistoryComplete = input.readBoolean();
                 int observationCount = BoundaryRuleCodec.boundedCount(
                         input.readInt(), MAX_OBSERVATIONS, "observation");
@@ -135,6 +139,23 @@ public final class BoundaryOperatorStateCodec {
                 input.readUTF(),
                 BoundaryRuleCodec.readNullable(input),
                 BoundaryRuleCodec.readNullable(input));
+    }
+
+    private static void writeRuleRef(DataOutputStream output, BoundaryRuleRef ruleRef) throws IOException {
+        output.writeUTF(ruleRef.tenantId());
+        output.writeUTF(ruleRef.plantId());
+        output.writeUTF(ruleRef.lineId());
+        output.writeUTF(ruleRef.ruleCode());
+        output.writeUTF(ruleRef.ruleVersion());
+    }
+
+    private static BoundaryRuleRef readRuleRef(DataInputStream input) throws IOException {
+        return new BoundaryRuleRef(
+                input.readUTF(),
+                input.readUTF(),
+                input.readUTF(),
+                input.readUTF(),
+                input.readUTF());
     }
 
     private static void writeSignal(DataOutputStream output, EvidenceSignalState state) throws IOException {

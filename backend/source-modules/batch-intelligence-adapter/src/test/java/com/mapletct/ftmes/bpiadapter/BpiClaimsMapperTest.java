@@ -37,6 +37,7 @@ public class BpiClaimsMapperTest {
         properties.setUpstreamBaseUrl("http://bpi-service:19091");
         properties.setKeycloakJwkSetUri("http://keycloak:8080/jwks");
         properties.setKeycloakIssuer("https://issuer.example/realms/dt");
+        properties.setLegacyGatewayBaseUrl("http://gateway:8008");
         properties.setInternalJwtSecret("0123456789abcdef0123456789abcdef");
         properties.setRoleRules("admin=BPI_ADMIN|BPI_OPERATOR");
         properties.setSubjectScopeRules("admin=1000|PLANT-01|LINE-S07-01");

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T03:49:16+00:00",
-  "repoCommit": "44df18fd9e73c211f382fb9b51391696f84e424a",
+  "generatedAt": "2026-07-14T08:39:37+00:00",
+  "repoCommit": "9a4a81213ebfbf3a2e8ea087915a177e28ba565e",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -622,18 +622,20 @@
         "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。",
         "2026-07-14 BPI 操作台已明确分离 Kafka 分发与 Flink 应用状态；确定性浏览器测试覆盖 WAITING -> REJECTED -> APPLIED、拒绝详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。",
         "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。",
-        "2026-07-14 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED、TaskManager 重启从 checkpoint 恢复终态、同版本重新启用提交 REJECTED 以及无重复回执；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。"
+        "2026-07-14 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED、TaskManager 重启从 checkpoint 恢复终态、同版本重新启用提交 REJECTED 以及无重复回执；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。",
+        "2026-07-14 目标测试环境已部署 ft-mes-bpi-runtime：Web、Java 8 adapter、Java 17 service、PostgreSQL healthy，Flyway V8 和 19 张 BPI schema 表通过 runtime smoke；真实 ADP suposTicket 经可信 gateway 验证后访问 BPI 概览 API 200，浏览器 console/page/request error 均为 0。",
+        "2026-07-14 目标 ft-mes-bpi-streaming 已通过三 broker Kafka、8 topic、副本 3、min.insync.replicas=2、Flink 30/30 task、MinIO checkpoint、固定 marker 单候选回放和带负载 TaskManager 重启恢复；复查时累计 144 个完成 checkpoint、0 失败；证据记录在 metadata/bpi-test-environment-acceptance.json。"
       ],
       "blockingIssues": [
-        "规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ、模拟浏览器以及真实本地 Flink MiniCluster checkpoint/TaskManager 重启验收已分别完成；仍需目标三 broker Kafka/Flink/MinIO 集群恢复和浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路。",
-        "BPI 全栈尚未部署到目标测试环境完成远端页面、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。",
+        "目标浏览器只读链和 Kafka/Flink 数据面已经分别通过，但同一 marker 的 UI 规则发布、outbox、Flink application receipt、PostgreSQL APPLIED/audit、candidate confirm 和 batch/evidence/audit 完整写链尚未闭合。",
+        "BPI PostgreSQL 尚无可供日常页面维护的产线 topology/rule 产品数据，仍需可审计创建/导入入口；验收 fixture 不能冒充产品配置能力。",
         "JetLinks/IoT exporter、MES 生产上下文 outbox 和真实产线点位/单位/质量码/sequence 尚未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
-        "在目标三 broker Kafka、Flink 和 MinIO checkpoint storage 上复验 rule application receipt、broker/TaskManager 重启、offset 和 checkpoint 恢复。",
-        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/Kafka/Flink/PostgreSQL 联合 marker 验收。",
+        "在已部署的目标环境导入受控 topology/rule fixture，执行同一 marker 的真实浏览器/API/Kafka/Flink/PostgreSQL 完整写链验收并在结束后恢复 consumer 默认关闭状态。",
+        "补拓扑/规则可审计创建或导入入口，以及 broker 故障、savepoint 升级和 BPI 整体回滚演练。",
         "接入 MapleTcT/iot exporter 和一条产线 MES production context，完成点位语义与规则 locality group 盘点。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ],
@@ -651,13 +653,16 @@
         "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
         "deploy/bpi-streaming/docker-compose.yml",
         "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
+        "deploy/bpi-runtime/docker-compose.yml",
         "backend/source-modules/batch-intelligence-adapter/pom.xml",
         "frontend/apps/bpi/package.json",
+        "docs/testing/bpi-test-environment-deployment-readiness.md",
         "metadata/bpi-rule-publication-retry-acceptance.json",
         "metadata/bpi-rule-application-receipt-acceptance.json",
         "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
         "metadata/bpi-rule-application-flink-kafka-acceptance.json",
-        "metadata/bpi-ui-acceptance.json"
+        "metadata/bpi-ui-acceptance.json",
+        "metadata/bpi-test-environment-acceptance.json"
       ]
     }
   ],
