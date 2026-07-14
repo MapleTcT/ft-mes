@@ -630,13 +630,13 @@
         "2026-07-15 marker ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE 以本地 PostgreSQL 16.13 证明仅缺设备/网关来源序列的点位保持 BLOCKED、拓扑返回唯一 POINT_SOURCE_SEQUENCE_DISABLED ERROR；8 条浏览器 E2E 通过。部署到目标后，真实 ADP 页面 GET 200，PostgreSQL 15.18 同一自动 revision 为 1 点/0 READY、source_sequence_enabled=false、五项阻断且浏览器错误为 0；回滚镜像和旧静态目录已保留。证据记录在 metadata/bpi-source-sequence-readiness-acceptance.json。",
         "2026-07-15 目标 ft-mes-bpi-streaming 已扩展为三 broker Kafka、10 topic；新增 point-catalog source/DLT topic 并保持副本 3、min.insync.replicas=2，Flink 30/30 task、MinIO checkpoint、固定 marker 单候选回放和带负载 TaskManager 重启恢复证据继续有效。",
         "2026-07-14 使用同一 marker ADP_E2E_20260714_091536_BPI_JOINT 闭合真实浏览器规则模拟/发布、PostgreSQL outbox、Kafka/Flink APPLIED 回执、受控上下文/遥测、唯一候选、浏览器确认、影子批次/边界证据/状态事件/审计；随后完成 typed inactive、单事务 marker 清理、消费者默认关闭和清理后浏览器只读复验，证据记录在 metadata/bpi-browser-kafka-postgres-joint-acceptance.json。",
-        "2026-07-15 MapleTcT/iot 提交 a6b381ac80825ec2d60b8711b32ef98bf808c03c 已进入 main：JetLinks 解码后遥测 exporter 继续具备显式映射、稳定身份、持久化缓冲和 Kafka 幂等生产，权威点位目录 publisher 保留内容 SHA-256 revision、10,000 点/5 MiB 门禁、Micrometer/health 和默认关闭开关，并修复为只有 requireSourceSequence=true、成对 header 且来源为 DEVICE/GATEWAY 时才发布来源序列 READY；21 个 exporter Java 测试、7 个部署脚本测试、19 模块 reactor 测试及 40 模块完整打包通过。新镜像已只重建目标 JetLinks，overall/exporter health 为 UP、严重日志 0、其他容器 ID 未变化，BPI PostgreSQL 保持 1 点/0 READY。",
+        "2026-07-15 MapleTcT/iot 提交 41239b4e4f2fdb431f1ec3765e7321b5fdfd0f19 已进入 main：JetLinks 解码后遥测 exporter 继续具备显式映射、稳定身份、持久化缓冲和 Kafka 幂等生产，权威点位目录 publisher 保留内容 SHA-256 revision、10,000 点/5 MiB 门禁、Micrometer/health 和默认关闭开关；来源序列 READY 现在同时要求 requireSourceSequence=true、成对 header、DEVICE/GATEWAY 来源，以及最近真实格式遥测已进入 spool、30m Redis 配置指纹证据未过期。26 个 exporter Java 测试、7 个部署脚本测试、19 模块 reactor 测试及 40 模块完整打包通过。新镜像已只重建目标 JetLinks，真实页面/API/PostgreSQL、overall/exporter health、严重日志、容器隔离和旧镜像回滚往返通过；当前无真实来源流量，证据键为 0，BPI PostgreSQL 保持 1 点/0 READY。",
         "2026-07-14 目标 JetLinks 使用受控 marker ADP_BPI_E2E_20260714_145738_757314 验证 EventBus subscriber、exporter received/enqueued/published 增量 1、Kafka partition 4 offset 3 -> 4、Flink source offset 4/4 和 lag 0；试点入口验收后恢复关闭。该证据只到 Flink source，不声明真实网关/协议设备点位、MES context join、candidate 或 batch。",
         "2026-07-14 MES production context transactional outbox 工程链完成：177 号 PostgreSQL 迁移在 WOM 同事务触发捕获，显式 scope/state 映射和 BLOCKED_* 状态默认拒绝未知语义，Java 8 发布器使用 SKIP LOCKED、稳定 event_id、Kafka 幂等生产、指数重试和 DEAD 终态；合同/模块 23 项测试通过，独立 PostgreSQL 验收确认 BLOCKED_MAPPING、活动/结束 READY、scope revision 1->2 以及 WOM 回滚不残留 outbox。"
       ],
       "blockingIssues": [
         "拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过，但版本比较、业务审批流、受控退休和产品级回退尚未实现。",
-        "JetLinks 自动点位目录已经真实落库并可由页面读取，但试点设备仍未注册/激活，产品 metadata、标定和 source sequence 未就绪；实时 IoT 遥测与 MES production context 的同一试点 scope marker candidate/batch 仍未完成现场联调。",
+        "JetLinks 自动点位目录已经真实落库并可由页面读取，但试点设备仍未注册/激活，产品 metadata、标定和连续单调 source sequence 未就绪；实时 IoT 遥测与 MES production context 的同一试点 scope marker candidate/batch 仍未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
