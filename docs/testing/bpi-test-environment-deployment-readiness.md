@@ -4,7 +4,7 @@
 
 2026-07-14 已在 `ubuntu-test`（Tailscale `100.99.133.43`）完成 BPI 独立运行栈和流处理栈部署。此前的磁盘阻断已经解除，既有 `adp-mes-newbase` Compose 未被替换或停止。
 
-当前环境结论为 **PASS_PHASE1_CONTROLLED**：目标环境运行健康，真实浏览器、Kafka/Flink、PostgreSQL 和带负载 TaskManager 恢复均已通过；同一 marker 的规则发布、应用回执、候选确认和影子批次落库链已经闭合。该结论只覆盖受控 Phase 1 技术链，不代表拓扑/规则产品化、真实现场接入、连续影子运行或生产投用完成。
+当前环境结论为 **PASS_PHASE1_CONTROLLED**：目标环境运行健康，真实浏览器、Kafka/Flink、PostgreSQL 和带负载 TaskManager 恢复均已通过；同一 marker 的规则发布、应用回执、候选确认和影子批次落库链已经闭合。`MapleTcT/iot@357a285b` 还以独立受控 marker 跑通了目标 JetLinks EventBus、exporter、Kafka 到 Flink source。该结论只覆盖受控 Phase 1 技术链，不代表拓扑/规则产品化、真实网关/协议设备点位接入、IoT + MES context 同 marker 候选/批次、连续影子运行或生产投用完成。
 
 机器可读证据见 [`metadata/bpi-test-environment-acceptance.json`](../../metadata/bpi-test-environment-acceptance.json)。
 
@@ -31,6 +31,7 @@ Java 17 BPI 服务端口、Java 8 adapter、PostgreSQL 和内部 JWT 均不直�
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` 输入规则、上下文和 3 条遥测，只产生 1 个 committed candidate，数据质量错误 0 | PASS |
 | TaskManager 恢复 | 带负载重启 `bpi-taskmanager-2` 后 30/30 task 恢复，attempt `0 -> 1`，checkpoint `13 -> 14` | PASS |
 | 同一 marker 联合写链 | `ADP_E2E_20260714_091536_BPI_JOINT` 完成真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、唯一候选、浏览器确认和影子批次/证据/审计落库 | PASS |
+| JetLinks EventBus source | `ADP_BPI_E2E_20260714_145738_757314` 触发 exporter received/enqueued/published 增量 `1`，Kafka partition 4 offset `3 -> 4`，Flink consumer offset `4/4`、lag `0`；试点入口恢复关闭 | PASS_SOURCE_ONLY |
 | 验收退场与恢复 | 发布 typed inactive 并获 Flink `APPLIED`；单事务清理后 topology/rule/candidate/batch 均为 0；消费者默认关闭，浏览器概览再次 `200` 且错误为 0 | PASS |
 
 ## 产品级剩余缺口
@@ -38,7 +39,7 @@ Java 17 BPI 服务端口、Java 8 adapter、PostgreSQL 和内部 JWT 均不直�
 | 阻断项 | 原因 | 完成条件 |
 |---|---|---|
 | 规则/拓扑产品数据 | 本次已用受控 fixture 通过联合验收，但日常页面仍缺可审计创建/导入入口 | 建立产品化创建/导入、版本比较、审批和回滚路径；验收 fixture 不进入日常配置 |
-| 现场数据 | 尚未接入 `MapleTcT/iot` exporter 和真实 MES production context | 完成点位、单位、质量码、sequence、生产指令和 locality group 对账 |
+| 现场数据 | exporter 与 WOM context 已分别在目标机通过，但 EventBus marker 不是现场网关/协议设备点位，且两端没有用同一 marker 形成 candidate/batch | 完成真实点位、单位、质量码、sequence、生产指令和 locality group 对账，并闭合 IoT + MES context 联合链 |
 | 影子运行 | 尚未连续运行 7-14 天 | 达到边界人工认同率、累计量偏差和数据质量门槛 |
 | 生产写回 | Phase 1 不允许直接写 WOM/QCS/WMS | 影子运行门槛通过后，再设计幂等写回、补偿和回滚验收 |
 
@@ -47,9 +48,10 @@ Java 17 BPI 服务端口、Java 8 adapter、PostgreSQL 和内部 JWT 均不直�
 1. 把本次同一 marker 联合验收固化为每次 BPI 发布前的目标环境回归基线。
 2. 补 topology/rule 产品化创建或导入入口，不把受控 fixture 当成用户功能。
 3. 补 broker 故障、savepoint 升级和整体回滚演练。
-4. 接入真实 `MapleTcT/iot` exporter 和 MES production context，进入单线影子运行。
-5. 连续运行 7-14 天并达到边界认同率、累计量偏差和数据质量门槛。
-6. 门槛通过后再设计 QCS/WMS 幂等写回、补偿和回滚，禁止提前改写生产状态。
+4. 把 `MapleTcT/iot@357a285b` 接到真实网关/协议设备点位，并与已通过的 MES production context 配置到同一试点 scope。
+5. 用同一 marker 闭合真实设备 EventBus、exporter、Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链。
+6. 连续运行 7-14 天并达到边界认同率、累计量偏差和数据质量门槛。
+7. 门槛通过后再设计 QCS/WMS 幂等写回、补偿和回滚，禁止提前改写生产状态。
 
 ## 原始报告位置
 

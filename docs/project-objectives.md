@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入目标环境实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备可复验证据。目标测试环境已运行独立 Java/PostgreSQL 与 Kafka/Flink/MinIO Compose；真实 ADP 会话、三 broker Kafka、Flink job、MinIO checkpoint、固定 marker 回放和带负载 TaskManager 恢复均已通过。2026-07-14 先以 marker `ADP_E2E_20260714_091536_BPI_JOINT` 闭合真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、候选入库、浏览器确认和影子批次；随后又以真实 WOM marker `ADP_E2E_20260714_203900_WOM_CTX_REVFIX` 和 replay marker `ADP_E2E_20260714_204100_MESCTX_REAL` 闭合页面 `start/hold`、PostgreSQL context outbox、Kafka offset、Flink join、唯一候选、浏览器确认及影子批次落库，并完成 typed inactive、定向清理和消费者默认关闭恢复。该验收同时修复了合成上下文残留与 WOM 版本域冲突，新增 `177` 版本时钟下限。`MapleTcT/iot@be89aecf` 的受控 exporter 工程实现已经进入 `main`，但本次遥测仍来自受控回放而非真实 JetLinks 设备。因此 BPI 总目标保持 `PARTIAL`：下一门槛是同 scope 的真实设备事件、7-14 天影子运行和 QCS/WMS 写回，而不是继续扩大静态页面。
+当前 BPI 已从设计进入目标环境实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备可复验证据。目标测试环境已运行独立 Java/PostgreSQL 与 Kafka/Flink/MinIO Compose；真实 ADP 会话、三 broker Kafka、Flink job、MinIO checkpoint、固定 marker 回放和带负载 TaskManager 恢复均已通过。2026-07-14 先以 marker `ADP_E2E_20260714_091536_BPI_JOINT` 闭合真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、候选入库、浏览器确认和影子批次；随后又以真实 WOM marker `ADP_E2E_20260714_203900_WOM_CTX_REVFIX` 和 replay marker `ADP_E2E_20260714_204100_MESCTX_REAL` 闭合页面 `start/hold`、PostgreSQL context outbox、Kafka offset、Flink join、唯一候选、浏览器确认及影子批次落库，并完成 typed inactive、定向清理和消费者默认关闭恢复。该验收同时修复了合成上下文残留与 WOM 版本域冲突，新增 `177` 版本时钟下限。`MapleTcT/iot@357a285b` 进一步补齐可观测 exporter 和受控试点编排，并在目标 JetLinks EventBus 使用 marker `ADP_BPI_E2E_20260714_145738_757314` 证明 exporter、Kafka partition 4 offset `3 -> 4`、Flink source offset `4/4` 与 lag `0`；14 个 Java 测试、7 个部署脚本测试和 40 模块打包通过，测试入口随后恢复关闭。该证明只到 Flink source，未使用真实网关/协议设备点位，也没有与 WOM context 用同一 marker 形成 candidate/batch。因此 BPI 总目标保持 `PARTIAL`：下一门槛是同 scope 的真实设备事件、IoT + MES context 联合候选/批次、7-14 天影子运行和 QCS/WMS 写回，而不是继续扩大静态页面。
 
 权威设计和验收入口：
 
@@ -237,8 +237,8 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
 2. 为拓扑/规则补产品化创建或导入入口；当前受控 SQL fixture 只用于验收，不能作为日常配置方式。
 3. 完成 broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复和单 marker 清理恢复。
-4. 以 `MapleTcT/iot@be89aecf` 和已实现的 `mes-production-context-outbox` 为基线配置并部署一条试点产线，盘点真实点位、单位、质量码、source epoch/sequence、WOM scope/state 映射和规则 locality group。
-5. MES 上下文真实链已通过；下一步用真实 JetLinks 事件替换受控遥测，完成 EventBus、磁盘缓冲、Kafka、Flink、BPI PostgreSQL 和浏览器同 marker 证据链后，连续运行 7-14 天影子批次。
+4. 以 `MapleTcT/iot@357a285b` 和已实现的 `mes-production-context-outbox` 为基线配置一条试点产线；EventBus 到 Flink source 的目标机受控 marker 已通过，下一步盘点真实网关/协议点位、单位、质量码、source epoch/sequence、WOM scope/state 映射和规则 locality group。
+5. MES 上下文真实链和 IoT source 分段链均已通过；下一步用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链后，连续运行 7-14 天影子批次。
 6. 达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
 
 ### 主线 B：既有生产/质量核心链
