@@ -24,6 +24,10 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 `bpi_migrator` account and exits after Flyway completes. The long-running service starts afterward
 with the DML-only `bpi_service` account.
 
+`BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
+latest repository migration (`9`). Set it explicitly in the target `.env` when preparing a release;
+the smoke check fails if the database is behind or unexpectedly ahead of that version.
+
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
 the Java 8 adapter. A three-segment access token is validated by Keycloak JWKS. The legacy ADP login
 instead returns an opaque `suposTicket`; for that credential the adapter calls only the trusted
@@ -68,3 +72,13 @@ path. See `docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md` for the 
 The `bpi-postgres-data` named volume is intentionally retained by `docker compose down`. Removing
 that volume, dropping `ft_mes_bpi`, or rolling back Flyway is destructive and requires an explicit
 backup and approval.
+
+## Topology and rule target acceptance
+
+`scripts/browser-topology-rule-acceptance.js` exercises the deployed authoring surface with a real
+ADP login while keeping credentials only in process memory. Run `author` to create and validate a
+marker topology and prove that its creator cannot publish it. Publish revision 2 with a separate
+`BPI_ADMIN` identity, then run `finalize` to verify the immutable published version and create the
+bound rule draft. A final `read` phase is suitable for post-restart verification. Every phase records
+page/API evidence, console errors, request failures, and a screenshot without storing the ticket or
+password.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T16:17:19+00:00",
-  "repoCommit": "d3a543789b52fb7feafb43c224acbbb0a60e73f0",
+  "generatedAt": "2026-07-14T17:03:20+00:00",
+  "repoCommit": "128e63c2e0ed860038b138e0a92ef9b908c49b51",
   "findingCount": 982,
   "categoryCounts": {
     "allowed-legacy-contract": 6,

@@ -59,5 +59,14 @@ test -n "$bootstrap" || {
     exit 1
 }
 
+expected_flyway=$(sed -n 's/^BPI_EXPECTED_FLYWAY_VERSION=//p' "$ENV_FILE" | tail -1)
+expected_flyway=${expected_flyway:-9}
+case "$expected_flyway" in
+    ''|0|0[0-9]*|*[!0-9]*)
+        printf 'ERROR: BPI_EXPECTED_FLYWAY_VERSION must be a positive integer\n' >&2
+        exit 1
+        ;;
+esac
+
 docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" config >/dev/null
 printf 'BPI runtime preflight: PASS\n'

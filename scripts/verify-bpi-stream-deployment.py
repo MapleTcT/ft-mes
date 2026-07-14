@@ -19,16 +19,19 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
     "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
     "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
+    "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
     "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
     "docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md",
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
+    "docs/testing/bpi-target-topology-rule-acceptance.md",
     "metadata/bpi-test-host-capacity-preflight.json",
     "metadata/bpi-kafka-postgres-replay-acceptance.json",
     "metadata/bpi-test-environment-acceptance.json",
     "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
+    "metadata/bpi-target-topology-rule-acceptance.json",
     "backend/source-modules/mes-production-context-outbox/README.md",
     "deploy/docker/postgres/init/176-wom-bpi-production-context-outbox.sql",
     "deploy/docker/postgres/init/177-wom-bpi-context-revision-clock-floor.sql",
@@ -167,6 +170,22 @@ def main() -> int:
         if marker not in cleanup:
             failures.append(f"BPI joint cleanup is missing scope marker: {marker}")
 
+    productization_browser = (
+        ROOT / "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        'new Set(["author", "finalize", "read"])',
+        "creator publication must return 422",
+        "expectedConsoleErrors",
+        "location.url.includes",
+        "createRuleResponse.status() !== 200",
+        "consoleErrors",
+        "requestFailures",
+        "ADP_PASSWORD",
+    ):
+        if marker not in productization_browser:
+            failures.append(f"BPI topology/rule browser acceptance is missing marker: {marker}")
+
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")
     )
@@ -199,6 +218,35 @@ def main() -> int:
     }
     if target_checks.get("browser-to-batch-persistence-write-chain") != "PASS":
         failures.append("target BPI acceptance must pass the browser-to-batch write chain")
+    if target_checks.get("topology-rule-productization-target") != "PASS":
+        failures.append("target BPI acceptance must pass topology/rule productization on V9")
+
+    productization_target = json.loads(
+        (ROOT / "metadata/bpi-target-topology-rule-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if productization_target.get("status") != "PASS":
+        failures.append("target BPI topology/rule productization acceptance must be PASS")
+    if productization_target.get("summary") != {
+        "checks": 10,
+        "pass": 10,
+        "fail": 0,
+        "blocked": 0,
+    }:
+        failures.append("target BPI topology/rule productization must remain 10/10 PASS")
+    if productization_target.get("environment", {}).get("flywayVersion") != 9:
+        failures.append("target BPI topology/rule productization must retain Flyway V9 evidence")
+    if productization_target.get("scope", {}).get("marker") != (
+        "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET"
+    ):
+        failures.append("target BPI topology/rule productization must retain the verified marker")
+    productization_boundaries = " ".join(productization_target.get("boundaries", []))
+    for forbidden in ("password=", "token=", "cookie=", "BEGIN PRIVATE KEY"):
+        if forbidden.lower() in productization_boundaries.lower():
+            failures.append(
+                f"target BPI topology/rule acceptance leaks a secret marker: {forbidden}"
+            )
 
     joint_acceptance = json.loads(
         (ROOT / "metadata/bpi-browser-kafka-postgres-joint-acceptance.json").read_text(

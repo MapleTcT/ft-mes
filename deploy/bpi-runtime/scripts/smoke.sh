@@ -23,6 +23,7 @@ web_bind_address=$(env_value BPI_WEB_BIND_ADDRESS 127.0.0.1)
 web_port=$(env_value BPI_WEB_PORT 18090)
 database_name=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 postgres_user=$(env_value POSTGRES_USER bpi_admin)
+expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 9)
 
 health=$(curl -fsS "http://${bind_address}:${http_port}/actuator/health")
 printf '%s' "$health" | grep -q '"status":"UP"' || {
@@ -45,9 +46,9 @@ printf '%s' "$adapter_health" | grep -q '"status":"UP"' || {
 
 migration=$(compose exec -T bpi-postgres \
     psql -At -U "$postgres_user" -d "$database_name" \
-    -c "SELECT max(version) FROM bpi.flyway_schema_history WHERE success")
-test "$migration" = "8" || {
-    printf 'ERROR: expected Flyway version 8, found %s\n' "$migration" >&2
+    -c "SELECT max(version::integer)::text FROM bpi.flyway_schema_history WHERE success")
+test "$migration" = "$expected_flyway" || {
+    printf 'ERROR: expected Flyway version %s, found %s\n' "$expected_flyway" "$migration" >&2
     exit 1
 }
 
@@ -59,7 +60,7 @@ test "$table_count" -ge 16 || {
     exit 1
 }
 
-python3 - "$REPORT" "$bind_address" "$http_port" "$web_bind_address" "$web_port" "$migration" "$table_count" <<'PY'
+python3 - "$REPORT" "$bind_address" "$http_port" "$web_bind_address" "$web_port" "$database_name" "$migration" "$table_count" "$expected_flyway" <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
@@ -72,7 +73,12 @@ report = {
     "service": {"bindAddress": sys.argv[2], "port": int(sys.argv[3]), "health": "UP"},
     "web": {"bindAddress": sys.argv[4], "port": int(sys.argv[5]), "health": "UP"},
     "adapter": {"health": "UP"},
-    "postgres": {"database": "ft_mes_bpi", "flywayVersion": sys.argv[6], "schemaTableCount": int(sys.argv[7])},
+    "postgres": {
+        "database": sys.argv[6],
+        "flywayVersion": sys.argv[7],
+        "expectedFlywayVersion": sys.argv[9],
+        "schemaTableCount": int(sys.argv[8]),
+    },
 }
 path.write_text(json.dumps(report, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 print(f"BPI runtime smoke: PASS ({path})")

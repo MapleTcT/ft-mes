@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T17:15:13Z",
+  "baseCommitAtDeployment": "128e63c2e0ed860038b138e0a92ef9b908c49b51",
+  "status": "PASS",
+  "environment": {
+    "name": "ubuntu-test",
+    "host": "100.99.133.43",
+    "network": "Tailscale private",
+    "adpBaseUrl": "http://100.99.133.43:18080",
+    "bpiBaseUrl": "http://100.99.133.43:18091",
+    "database": "PostgreSQL",
+    "databaseName": "ft_mes_bpi",
+    "flywayVersion": 9,
+    "schemaTableCount": 19
+  },
+  "scope": {
+    "marker": "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "topologyId": "b3f1bf60-5680-4da9-b7c2-ed7696f839c7",
+    "topologyCode": "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET_TOPOLOGY",
+    "topologyVersion": "1.0.0",
+    "ruleId": "f9288dbe-1b40-465e-a32d-0697c1f3c301",
+    "ruleCode": "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET_START",
+    "ruleVersion": "1.0.0"
+  },
+  "summary": {
+    "checks": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0
+  },
+  "checks": [
+    {
+      "id": "runtime-v9-migration",
+      "status": "PASS",
+      "evidence": "One-shot bpi-migrate applied V9; runtime smoke reported service/web/adapter UP, PostgreSQL ft_mes_bpi, Flyway version 9 and 19 schema tables"
+    },
+    {
+      "id": "authenticated-browser-entry",
+      "status": "PASS",
+      "evidence": "Real ADP login returned 200 and the browser opened http://100.99.133.43:18091/#/rules with title 智能批次"
+    },
+    {
+      "id": "topology-draft",
+      "status": "PASS",
+      "api": "POST /bpi-api/topologies/drafts",
+      "httpStatus": 200,
+      "tables": ["bpi.bpi_topology_versions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "evidence": "Topology draft b3f1bf60-5680-4da9-b7c2-ed7696f839c7 persisted at revision 1"
+    },
+    {
+      "id": "topology-validation",
+      "status": "PASS",
+      "api": "POST /bpi-api/topologies/b3f1bf60-5680-4da9-b7c2-ed7696f839c7/validate",
+      "httpStatus": 200,
+      "tables": ["bpi.bpi_topology_versions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "evidence": "validationStatus=PASSED, validationErrors=0, validated checksum matches checksum and revision=2"
+    },
+    {
+      "id": "creator-publication-separation",
+      "status": "PASS",
+      "api": "POST /bpi-api/topologies/b3f1bf60-5680-4da9-b7c2-ed7696f839c7/publish",
+      "httpStatus": 422,
+      "evidence": "The creator was rejected with the required other-than-creator rule; the expected 422 resource message was separated from unexpected console errors"
+    },
+    {
+      "id": "independent-administrator-publication",
+      "status": "PASS",
+      "api": "POST /bpi/v1/topologies/b3f1bf60-5680-4da9-b7c2-ed7696f839c7/publish",
+      "httpStatus": 200,
+      "tables": ["bpi.bpi_topology_versions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "evidence": "Separate BPI_ADMIN subject target-topology-approver published the validated topology at PUBLISHED revision 3"
+    },
+    {
+      "id": "topology-bound-rule-draft",
+      "status": "PASS",
+      "api": "POST /bpi-api/rules/drafts",
+      "httpStatus": 200,
+      "tables": ["bpi.bpi_rule_versions", "bpi.bpi_audit_events", "bpi.bpi_api_idempotency"],
+      "evidence": "Rule f9288dbe-1b40-465e-a32d-0697c1f3c301 persisted at DRAFT revision 1 and inherited LINE-S07-01 plus feed.flow from the published topology"
+    },
+    {
+      "id": "postgres-persistence-audit-idempotency",
+      "status": "PASS",
+      "tables": [
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_feature_flags"
+      ],
+      "evidence": "Direct PostgreSQL query returned one topology, one rule, 4 ordered audit rows, 4 COMPLETED/200 idempotency rows and the enabled tenant-line rule-management feature flag"
+    },
+    {
+      "id": "service-restart-recovery",
+      "status": "PASS",
+      "evidence": "Only bpi-service was restarted; it returned healthy on poll attempt 6 without recreating PostgreSQL"
+    },
+    {
+      "id": "browser-read-after-restart",
+      "status": "PASS",
+      "evidence": "A new authenticated browser session uniquely displayed the PUBLISHED/PASSED/r3 topology and DRAFT/r1 rule; unexpected consoleErrors=0, pageErrors=0 and requestFailures=0"
+    }
+  ],
+  "databaseVerification": {
+    "topology": {
+      "state": "PUBLISHED",
+      "revision": 3,
+      "validationStatus": "PASSED",
+      "validationErrorCount": 0,
+      "validatedChecksumMatches": true,
+      "validatedBy": "legacy-ticket:admin",
+      "publishedBy": "target-topology-approver"
+    },
+    "rule": {
+      "state": "DRAFT",
+      "revision": 1,
+      "plantId": "PLANT-01",
+      "lineId": "LINE-S07-01",
+      "topologyVersion": "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET_TOPOLOGY@1.0.0"
+    },
+    "auditActions": [
+      "TOPOLOGY_DRAFT_CREATED",
+      "TOPOLOGY_VALIDATION_PASSED",
+      "TOPOLOGY_PUBLISHED",
+      "RULE_DRAFT_CREATED"
+    ],
+    "completedIdempotencyRows": 4
+  },
+  "rawEvidence": {
+    "targetRuntimeSmoke": "/tmp/bpi-runtime-v9-smoke-final.json",
+    "browserAuthor": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-author.json",
+    "independentPublication": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-publish.json",
+    "browserFinalize": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-finalize.json",
+    "browserReadAfterRestart": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-read.json"
+  },
+  "rollbackReadiness": {
+    "runtimeBackup": "/home/v6/adp-backups/ft-mes-bpi-runtime-pre-v9-20260715003157.tgz",
+    "runtimeBackupSha256": "8a036748d30a0b045dee1d44127115717870b9fb525230e2322ebf4877502776",
+    "schemaBackup": "/home/v6/adp-backups/ft-mes-bpi-schema-pre-v9-20260715003157.dump",
+    "schemaBackupSha256": "cb188a66cb0ebf2f5312ccea7c8d18ca8f0dfd4cece9ef547f69ae66071fc867",
+    "schemaBackupCatalogVerified": true,
+    "preV9ImageTagsRetained": true,
+    "rollbackPerformed": false
+  },
+  "boundaries": [
+    "This report proves productized topology and rule authoring on the target environment; it does not prove production readiness.",
+    "The topology used controlled test bindings rather than real gateway or protocol device points.",
+    "IoT telemetry and MES production context were not combined under this marker to create a candidate or batch.",
+    "The acceptance marker is intentionally retained in the test database for independent re-verification and is not production master data.",
+    "No credential, token, cookie value, private key, database password or environment file is stored in this report."
+  ]
+}

@@ -633,6 +633,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-runtime/scripts/preflight.sh",
       "state": "tracked",
       "tracked": true
@@ -3993,6 +3999,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-target-topology-rule-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-test-environment-deployment-readiness.md",
       "state": "tracked",
       "tracked": true
@@ -4258,6 +4270,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-stream-replay-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-target-topology-rule-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6386,16 +6404,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 481
+      "tracked": 482
     },
     "docs": {
-      "tracked": 83
+      "tracked": 84
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 101
+      "tracked": 102
     },
     "package.json": {
       "tracked": 1
@@ -6419,8 +6437,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1060,
-    "tracked": 1060,
+    "totalFiles": 1063,
+    "tracked": 1063,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -25,7 +25,7 @@
 
 ## 固定仓库上下文
 
-- 仓库路径：`/Users/zhangchu/Documents/ADP/adp-source-repo`
+- 仓库路径：`/Users/zhangchu/Documents/ADP/adp-core-flow-fix`
 - 本轮任务声明的 `main` 同步基线：`b6b5ecd5cd0dbb5c425a4e79fee110b9158ce854`
 - 默认数据库：PostgreSQL。
 - Oracle 只允许作为 `legacy-template-only` 或显式 `oracle-legacy` 路径存在，不允许重新变成默认运行路径。
@@ -140,3 +140,13 @@ make sustainable-check
 `PASS` 只允许用于真实页面操作、接口记录、后端链路追踪和 PostgreSQL 查询证明都齐全的项目。未执行、被阻断或不落库的功能必须分别标记为 `BLOCKED` 或 `NOT_APPLICABLE`。
 
 报告不是收尾动作，而是证据账本。启动失败、页面空白、权限不足、接口 500、SQL 异常、接口 200 但未落库，都必须进入验收资产，不能因为问题未修复就跳过记录。
+
+## 代码同步与 main 合并
+
+每个通过验证的开发批次都必须完成同一套发布动作：
+
+1. 先提交并推送当前开发分支 `codex/core-flow-fix`。
+2. 再把完全相同的提交以非强制快进方式推送到 `origin/main`。
+3. 拉取远端引用并确认本地 HEAD、`origin/codex/core-flow-fix`、`origin/main` 三个 SHA 完全一致。
+
+测试失败或证据不完整时不得推送。禁止 force push；如果 `origin/main` 已前进或发生分叉，必须先获取、审阅和整合远端变更，重新执行受影响验证后再同步，不得覆盖其他人的提交。

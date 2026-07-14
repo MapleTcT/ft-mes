@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T09:47:29Z",
-  "baseCommitAtTest": "9a4a81213ebfbf3a2e8ea087915a177e28ba565e",
+  "generatedAt": "2026-07-14T17:15:13Z",
+  "baseCommitAtTest": "128e63c2e0ed860038b138e0a92ef9b908c49b51",
   "status": "PASS_PHASE1_CONTROLLED",
   "environment": {
     "name": "ubuntu-test",
@@ -14,8 +14,8 @@
     "databaseName": "ft_mes_bpi"
   },
   "summary": {
-    "checks": 8,
-    "pass": 8,
+    "checks": 9,
+    "pass": 9,
     "blocked": 0,
     "fail": 0
   },
@@ -23,7 +23,7 @@
     {
       "id": "runtime-compose",
       "status": "PASS",
-      "evidence": "ft-mes-bpi-runtime web, adapter, service and PostgreSQL are healthy; Flyway version 8; schemaTableCount=19"
+      "evidence": "ft-mes-bpi-runtime web, adapter, service and PostgreSQL are healthy; Flyway version 9; schemaTableCount=19"
     },
     {
       "id": "browser-authenticated-read",
@@ -61,11 +61,17 @@
       "status": "PASS",
       "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
       "evidence": "Real browser simulation/publication, PostgreSQL outbox, Kafka/Flink APPLIED receipt, scoped context/telemetry, exactly one persisted candidate, real browser confirmation, shadow batch, 2 evidence rows, state event and audit rows passed; typed inactive, marker cleanup, consumer disable and post-cleanup browser read also passed"
+    },
+    {
+      "id": "topology-rule-productization-target",
+      "status": "PASS",
+      "marker": "ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET",
+      "evidence": "Flyway V9 target migration, real ADP browser topology draft/validation, creator publication rejection, separate administrator publication, topology-bound rule draft, direct PostgreSQL audit/idempotency verification, bpi-service restart and browser read-after-restart all passed"
     }
   ],
   "rawEvidence": {
     "localBrowserReport": "/tmp/bpi-target-browser-smoke.json",
-    "targetRuntimeSmoke": "/tmp/bpi-runtime-smoke.json",
+    "targetRuntimeSmoke": "/tmp/bpi-runtime-v9-smoke-final.json",
     "targetClusterSmoke": "/tmp/bpi-streaming-cluster-smoke.json",
     "targetReplay": "/tmp/bpi-streaming-evidence/bpi-kafka-replay.json",
     "targetTaskManagerRecovery": "/tmp/bpi-streaming-loaded-taskmanager-recovery.json",
@@ -73,10 +79,14 @@
     "targetJointReplay": "/tmp/bpi-streaming-evidence/bpi-joint-replay.json",
     "browserCandidateConfirm": "/tmp/bpi-joint-browser-confirm.json",
     "targetRuleDeactivation": "/tmp/bpi-streaming-evidence/bpi-rule-deactivation.json",
-    "postCleanupBrowserRead": "/tmp/bpi-joint-browser-read-after-cleanup.json"
+    "postCleanupBrowserRead": "/tmp/bpi-joint-browser-read-after-cleanup.json",
+    "topologyRuleBrowserAuthor": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-author.json",
+    "topologyRuleIndependentPublication": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-publish.json",
+    "topologyRuleBrowserFinalize": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-finalize.json",
+    "topologyRuleBrowserReadAfterRestart": "/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-read.json"
   },
   "boundaries": [
-    "This report proves one controlled Phase 1 same-marker write chain; it does not prove productized topology/rule authoring or production readiness.",
+    "This report proves one controlled Phase 1 same-marker write chain plus productized topology/rule authoring on Flyway V9; it does not prove production readiness.",
     "Acceptance fixtures and deterministic context/telemetry do not replace real MapleTcT/iot and MES integration.",
     "No credential, token, cookie value, private key, database password or environment file is stored in this report.",
     "Production migration, real IoT/MES integration, 7-14 day shadow operation and QCS/WMS writeback remain outside the passed scope."
