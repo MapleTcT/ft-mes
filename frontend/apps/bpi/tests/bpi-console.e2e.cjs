@@ -38,6 +38,17 @@ function observe(page) {
   return errors;
 }
 
+async function assertDrawerSettled(page) {
+  const drawer = page.locator('#detail-drawer');
+  await drawer.waitFor({ state: 'visible' });
+  await page.waitForTimeout(250);
+  const box = await drawer.boundingBox();
+  const viewport = page.viewportSize();
+  assert.ok(box && viewport, 'detail drawer and viewport geometry must be available');
+  assert.ok(box.x >= 0, `detail drawer starts outside viewport: ${JSON.stringify(box)}`);
+  assert.ok(box.x + box.width <= viewport.width + 1, `detail drawer ends outside viewport: ${JSON.stringify({ box, viewport })}`);
+}
+
 before(async () => {
   ({ server: simulator } = createBpiSimulator());
   const address = await listen(simulator);
@@ -254,6 +265,9 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await page.getByRole('heading', { name: '规则发布链路' }).waitFor();
   await page.getByText('待分发', { exact: true }).last().waitFor();
   await page.getByText('发布事件已与规则版本同事务落库，等待 Kafka 分发。').waitFor();
+  await page.getByRole('heading', { name: 'Flink 应用确认' }).waitFor();
+  await page.getByText('等待 Flink', { exact: true }).last().waitFor();
+  await page.getByText('尚未收到 Flink 应用回执；即使 Kafka 已确认，也不能将该规则标记为在线生效。').waitFor();
   assert.match(await page.locator('.batch-state-band').textContent(), /revision 9/);
 
   const rule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
@@ -262,6 +276,7 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.equal(rule.data.publicationAttemptCount, 0);
   assert.equal(rule.data.revision, 9);
   assert.ok(rule.data.latestSimulationId);
+  await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-published.png', fullPage: true });
 
   const failPublication = await fetch(`${simulatorUrl}/__simulation/fail-rule-publication`, { method: 'POST' });
@@ -279,7 +294,57 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.match(await page.locator('#detail-drawer').textContent(), /累计尝试5/);
   assert.match(await page.locator('#detail-drawer').textContent(), /人工重试1/);
   assert.match(await page.locator('#detail-drawer').textContent(), /发布修订r12/);
+  await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-publication-retried.png', fullPage: true });
+
+  const completePublication = await fetch(`${simulatorUrl}/__simulation/complete-rule-publication`, { method: 'POST' });
+  assert.equal(completePublication.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('Kafka 已确认', { exact: true }).last().waitFor();
+  await page.getByText('等待 Flink', { exact: true }).last().waitFor();
+  await page.getByText('发布事件已获 Kafka broker 确认；是否进入运行态仍以 Flink 应用回执为准。').waitFor();
+
+  const rejectApplication = await fetch(`${simulatorUrl}/__simulation/rule-application`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      status: 'REJECTED',
+      deploymentId: 'flink-simulator-a',
+      errorCode: 'RULE_WINDOW_EXCEEDS_STATE_TTL',
+      errorDetail: 'rule window exceeds state TTL',
+    }),
+  });
+  assert.equal(rejectApplication.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('Flink 已拒绝', { exact: true }).last().waitFor();
+  await page.getByText('RULE_WINDOW_EXCEEDS_STATE_TTL', { exact: true }).waitFor();
+  await page.getByText('rule window exceeds state TTL', { exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Flink 应用确认' }).scrollIntoViewIfNeeded();
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-application-rejected.png', fullPage: true });
+
+  const applyApplication = await fetch(`${simulatorUrl}/__simulation/rule-application`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'APPLIED', deploymentId: 'flink-simulator-b' }),
+  });
+  assert.equal(applyApplication.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('Flink 已应用', { exact: true }).last().waitFor();
+  await page.getByText('flink-simulator-b', { exact: true }).waitFor();
+  assert.equal(await page.getByText('RULE_WINDOW_EXCEEDS_STATE_TTL', { exact: true }).count(), 0);
+  const appliedRule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
+  assert.equal(appliedRule.data.publicationStatus, 'PUBLISHED');
+  assert.equal(appliedRule.data.applicationStatus, 'APPLIED');
+  assert.equal(appliedRule.data.applicationDeploymentId, 'flink-simulator-b');
+  assert.equal(appliedRule.data.applicationErrorCode, null);
+  assert.equal(appliedRule.data.publicationRevision, 15);
+  await page.getByRole('heading', { name: 'Flink 应用确认' }).scrollIntoViewIfNeeded();
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-application-applied.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

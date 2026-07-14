@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-13T02:35:06+08:00",
-  "repoCommit": "235f5617",
+  "generatedAt": "2026-07-14T00:34:41Z",
+  "repoCommit": "0279e279",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -145,7 +145,12 @@
         "submit a historical replay with calibration and golden set",
         "verify matched, missed, false positive, observation count and checksum",
         "publish the rule with reason, simulation proof and current revision",
-        "verify PUBLISHED revision 9 through the API"
+        "verify business PUBLISHED remains distinct from Kafka delivery and Flink application",
+        "retry a simulated FAILED publication with reason and publication revision",
+        "verify WAITING before broker acknowledgement",
+        "verify REJECTED deployment, timestamps, code and detail",
+        "verify APPLIED clears stale rejection details and advances only the publication receipt revision",
+        "verify the settled detail drawer remains inside the desktop viewport"
       ],
       "apis": [
         "GET /bpi/v1/topologies",
@@ -156,7 +161,12 @@
         "POST /bpi/v1/rules/{id}/publish"
       ],
       "status": "PASS",
-      "evidence": "/tmp/bpi-console-rule-published.png"
+      "evidence": "/tmp/bpi-console-rule-application-applied.png",
+      "additionalEvidence": [
+        "/tmp/bpi-console-rule-published.png",
+        "/tmp/bpi-console-rule-publication-retried.png",
+        "/tmp/bpi-console-rule-application-rejected.png"
+      ]
     }
   ],
   "persistence": {
@@ -169,7 +179,7 @@
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
     "The Java 8 authentication adapter route and JWT scope boundary are implemented and unit tested; target Keycloak/JWKS browser acceptance remains pending.",
     "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
-    "No real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
+    "Flink application state was exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]
 }

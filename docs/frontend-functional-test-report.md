@@ -401,9 +401,17 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 规则与拓扑 | `/bpi/#/rules` | 打开 `FAILED` 发布事件，填写故障恢复依据并由管理员重新入队 | `GET /bpi/v1/rules/{id}`、`POST /bpi/v1/rules/{id}/publication/retry` | 抽屉显示最后错误、本轮/累计/人工重试和发布 revision；提交后显示 `PENDING`、累计 `5`、人工 `1`、发布 `r12`；console/page/request error 均为 0 | 模拟器验证完整页面动作；Java 17 服务另以 PostgreSQL 验收管理员权限、幂等和并发冲突 | `bpi_outbox_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 测试机实机部署仍受磁盘容量阻断；Flink 生效回执尚未接入 |
+| BPI 规则与拓扑 | `/bpi/#/rules` | 打开 `FAILED` 发布事件，填写故障恢复依据并由管理员重新入队 | `GET /bpi/v1/rules/{id}`、`POST /bpi/v1/rules/{id}/publication/retry` | 抽屉显示最后错误、本轮/累计/人工重试和发布 revision；提交后显示 `PENDING`、累计 `5`、人工 `1`、发布 `r12`；console/page/request error 均为 0 | 模拟器验证完整页面动作；Java 17 服务另以 PostgreSQL 验收管理员权限、幂等和并发冲突 | `bpi_outbox_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 测试机实机部署仍受磁盘容量阻断；真实 Kafka/Flink 联合回路尚未验收 |
 
 证据：`metadata/bpi-rule-publication-retry-acceptance.json`、`/tmp/bpi-console-rule-publication-retried.png`。
+
+### BPI Flink 规则应用状态浏览器验收（2026-07-14）
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则与拓扑 | `/bpi/#/rules` | 规则发布后依次模拟 broker 确认、Flink 拒绝和后续应用成功 | `GET /bpi/v1/rules/{id}`；`POST /__simulation/complete-rule-publication`、`POST /__simulation/rule-application` 仅为测试控制面 | 页面明确区分 `PENDING/等待 Flink`、`Kafka 已确认/等待 Flink`、`Flink 已拒绝` 和 `Flink 已应用`；拒绝态显示 deployment、观察/接收时间、错误码和原因，应用成功后旧错误消失；抽屉完成动画后完整位于 1440x900 视口内；console/page/request error 均为 0 | 确定性模拟器验证 UI 状态机；独立真实 PostgreSQL 16.13 验收已证明 `WAITING -> REJECTED -> APPLIED`、inbox 幂等、revision 和审计落库 | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS_WITH_SPLIT_EVIDENCE | 尚未证明浏览器 -> Java 服务 -> Kafka -> Flink checkpoint -> Kafka -> Java 服务的真实联合回路 |
+
+证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-application-receipt-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。模拟器测试 6/6、浏览器测试 6/6、错误 0；本结论不把模拟端点当成真实落库。
 
 ## 未完成范围
 

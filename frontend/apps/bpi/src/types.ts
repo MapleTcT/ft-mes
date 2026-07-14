@@ -137,6 +137,12 @@ export interface RuleVersion {
   publicationPublishedAt?: string | null;
   publicationLastRequeuedAt?: string | null;
   publicationLastError?: string | null;
+  applicationStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'WAITING' | 'REJECTED' | 'APPLIED';
+  applicationDeploymentId?: string | null;
+  applicationObservedAt?: string | null;
+  applicationReceivedAt?: string | null;
+  applicationErrorCode?: string | null;
+  applicationErrorDetail?: string | null;
 }
 
 export interface RuleSimulationCommand {

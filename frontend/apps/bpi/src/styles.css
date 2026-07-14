@@ -175,6 +175,9 @@ td > svg { width: 16px; color: #8b96a1; }
 .topology-summary span { color: var(--muted); font-size: 10px; }
 .topology-summary b { overflow-wrap: anywhere; font-size: 13px; }
 .rule-condition-list li { grid-template-columns: minmax(0, 1fr) auto auto; }
+.application-trace { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.application-trace .error-callout { display: grid; gap: 4px; }
+.application-trace .error-callout span { overflow-wrap: anywhere; }
 .mono-value, .checksum code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; overflow-wrap: anywhere; }
 .simulation-result { padding: 14px; border: 1px solid var(--line); border-left-width: 4px; }
 .simulation-result--pass { border-left-color: var(--green); background: #f5fbf8; }

@@ -388,9 +388,9 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 
 | 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
-| Flink 规则应用回执 `WAITING -> REJECTED -> APPLIED` | 规则抽屉状态待后续浏览器验收 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision、inbox source count、audit before/after revision | Flyway V1-V8 在全新 PostgreSQL 16.13 应用成功；`BpiRulePostgresAcceptanceTest` 5/5 通过；回执状态最终 `APPLIED`、revision `3`、两条唯一 inbox、`REJECTED 1->2` 和 `APPLIED 2->3` 两条审计，完全相同 APPLIED 回执重放未新增 revision | PASS_LOCAL_POSTGRES_ONLY |
+| Flink 规则应用回执 `WAITING -> REJECTED -> APPLIED` | `/bpi/#/rules` 规则抽屉；浏览器状态使用确定性模拟器单独验收 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision、inbox source count、audit before/after revision | Flyway V1-V8 在全新 PostgreSQL 16.13 应用成功；`BpiRulePostgresAcceptanceTest` 5/5 通过；回执状态最终 `APPLIED`、revision `3`、两条唯一 inbox、`REJECTED 1->2` 和 `APPLIED 2->3` 两条审计，完全相同 APPLIED 回执重放未新增 revision；浏览器另以模拟器验证相同状态可见且错误 0 | PASS_LOCAL_POSTGRES_PLUS_SIMULATED_UI |
 
-机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`。该证据只证明 BPI 事务入库、校验和幂等，不代表真实 Kafka/Flink checkpoint 回路、DLQ、目标测试环境或浏览器状态已经通过。
+机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`、`metadata/bpi-ui-acceptance.json`。两份分离证据分别证明 BPI 事务入库和 UI 状态呈现；仍不代表真实 Kafka/Flink checkpoint 回路、DLQ、浏览器到 Java 服务联合链路或目标测试环境已经通过。
 
 ## 证据要求
 

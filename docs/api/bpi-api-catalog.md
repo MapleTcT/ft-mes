@@ -90,6 +90,11 @@
 执行并发控制，保留累计尝试/人工重试计数，并写入 `RULE_PUBLICATION_REQUEUED` 审计。生产要求的双人审批
 工作流仍是未完成项。
 
+规则响应同时返回 `publicationStatus` 与 `applicationStatus`。前者只证明 transactional outbox 到 Kafka broker 的
+分发状态；后者由 `bpi.boundary.rule-application.v1` 回执驱动，包含 Flink deployment、观察/接收时间和拒绝错误。
+只有 `applicationStatus=APPLIED` 才能被操作台解释为运行态已应用；`WAITING`、`REJECTED` 和 `NOT_TRACKED` 均不得
+冒充在线生效。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
@@ -118,7 +123,7 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `iot.telemetry.selected.v1` | `plantId+deviceId` | `TelemetryEnvelopeV1` | JetLinks/exporter -> BPI | JOB_WIRED |
 | `mes.production.context.v1` | `orderId+taskId` | `ProductionContextEventV1` | WOM adapter -> BPI | JOB_WIRED |
 | `bpi.boundary.rule-publication.v1` | `tenantId+lineId+ruleCode+ruleVersion` | `BoundaryRulePublicationV1` | BPI outbox -> Flink Broadcast State | JOB_WIRED |
-| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | CONSUMER_WIRED_ACCEPTANCE_PENDING |
+| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | LOCAL_POSTGRES_AND_SIMULATED_UI_ACCEPTED_LIVE_PENDING |
 | `bpi.boundary.rule-application.dlq.v1` | 原 publication key | 原 `BoundaryRuleApplicationV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_ACCEPTANCE_PENDING |
 | `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI Kafka consumer -> PostgreSQL | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |

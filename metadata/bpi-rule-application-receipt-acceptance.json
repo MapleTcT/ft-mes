@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-13T01:51:07Z",
-  "repoBaseline": "f4c73962",
+  "generatedAt": "2026-07-14T00:34:41Z",
+  "repoBaseline": "0279e279",
   "database": "PostgreSQL 16.13",
   "status": "PASS_LOCAL_POSTGRES_ONLY",
   "scope": "Flink rule application receipt PostgreSQL transition and idempotency acceptance",
@@ -29,9 +29,29 @@
     "SELECT count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant AND source = 'bpi.boundary.rule-application.v1';",
     "SELECT action, before_revision, after_revision FROM bpi.bpi_audit_events WHERE tenant_id = :tenant AND object_id = :publication_id ORDER BY after_revision;"
   ],
+  "uiAcceptance": {
+    "status": "PASS_SIMULATED_BROWSER_ONLY",
+    "test": "frontend/apps/bpi/tests/bpi-console.e2e.cjs: process engineer replays PostgreSQL evidence and publishes a checksum-gated rule",
+    "states": [
+      "WAITING",
+      "REJECTED",
+      "APPLIED"
+    ],
+    "assertions": [
+      "Kafka PUBLISHED and Flink APPLIED are rendered as separate states.",
+      "REJECTED shows deployment, observed/received timestamps, error code and detail.",
+      "APPLIED clears stale rejection details and keeps the drawer inside the viewport.",
+      "Browser console, page and request errors are zero."
+    ],
+    "evidence": [
+      "/tmp/bpi-console-rule-application-rejected.png",
+      "/tmp/bpi-console-rule-application-applied.png"
+    ]
+  },
   "limitations": [
     "This evidence does not claim a live Kafka/Flink checkpoint round trip.",
-    "This evidence does not claim target test-environment deployment or browser acceptance.",
+    "Browser status acceptance uses the deterministic simulator and does not claim a browser-to-Java-to-Kafka/Flink round trip.",
+    "This evidence does not claim target test-environment deployment.",
     "Kafka retry/DLQ and checkpoint/restart acceptance remain required before G-021 can advance."
   ]
 }

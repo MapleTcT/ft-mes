@@ -161,8 +161,9 @@ function createHandler(state) {
         return send(res, 200, { status: 'RESET' }, 'simulationReset');
       }
       if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
-        if (state.rule.state !== 'PUBLISHED') {
-          return send(res, 409, { status: 'NOT_PUBLISHED' }, 'simulationFailRulePublication');
+        if (state.rule.state !== 'PUBLISHED'
+            || !['PENDING', 'DISPATCHING'].includes(state.rule.publicationStatus)) {
+          return send(res, 409, { status: 'NOT_DISPATCHING' }, 'simulationFailRulePublication');
         }
         state.rule.publicationStatus = 'FAILED';
         state.rule.publicationRevision = 11;
@@ -170,6 +171,46 @@ function createHandler(state) {
         state.rule.publicationTotalAttemptCount = 5;
         state.rule.publicationLastError = 'Simulated Kafka broker outage';
         return send(res, 200, { status: 'FAILED' }, 'simulationFailRulePublication');
+      }
+      if (req.method === 'POST' && path === '/__simulation/complete-rule-publication') {
+        if (state.rule.publicationStatus === 'PUBLISHED') {
+          return send(res, 200, envelope('simulationCompleteRulePublication', state.rule), 'simulationCompleteRulePublication');
+        }
+        if (state.rule.state !== 'PUBLISHED' || state.rule.publicationStatus === 'FAILED') {
+          return send(res, 409, { status: 'NOT_DISPATCHABLE' }, 'simulationCompleteRulePublication');
+        }
+        state.rule.publicationStatus = 'PUBLISHED';
+        state.rule.publicationRevision += 1;
+        state.rule.publicationAttemptCount = 1;
+        state.rule.publicationTotalAttemptCount += 1;
+        state.rule.publicationPublishedAt = '2026-07-12T08:00:01.000Z';
+        state.rule.publicationLastError = null;
+        return send(res, 200, envelope('simulationCompleteRulePublication', state.rule), 'simulationCompleteRulePublication');
+      }
+      if (req.method === 'POST' && path === '/__simulation/rule-application') {
+        if (state.rule.publicationStatus !== 'PUBLISHED') {
+          return send(res, 409, { status: 'PUBLICATION_NOT_CONFIRMED' }, 'simulationRuleApplication');
+        }
+        const body = await readJson(req);
+        if (!['APPLIED', 'REJECTED'].includes(body.status)) {
+          return send(res, 422, { status: 'INVALID_APPLICATION_STATUS' }, 'simulationRuleApplication');
+        }
+        if (state.rule.applicationStatus === 'APPLIED'
+            || (state.rule.applicationStatus === 'REJECTED' && body.status === 'REJECTED')) {
+          return send(res, 200, envelope('simulationRuleApplication', state.rule), 'simulationRuleApplication');
+        }
+        state.rule.applicationStatus = body.status;
+        state.rule.applicationDeploymentId = body.deploymentId || 'flink-simulator-a';
+        state.rule.applicationObservedAt = body.observedAt || '2026-07-12T08:00:02.000Z';
+        state.rule.applicationReceivedAt = '2026-07-12T08:00:03.000Z';
+        state.rule.applicationErrorCode = body.status === 'REJECTED'
+          ? body.errorCode || 'RULE_APPLICATION_REJECTED'
+          : null;
+        state.rule.applicationErrorDetail = body.status === 'REJECTED'
+          ? body.errorDetail || 'Flink rejected the simulated rule update.'
+          : null;
+        state.rule.publicationRevision += 1;
+        return send(res, 200, envelope('simulationRuleApplication', state.rule), 'simulationRuleApplication');
       }
       if (req.method === 'GET' && path === '/bpi/v1/overview') {
         return send(res, 200, envelope('getBpiOverview', [state.line]), 'getBpiOverview');
@@ -415,6 +456,12 @@ function createHandler(state) {
         state.rule.publicationPublishedAt = null;
         state.rule.publicationLastRequeuedAt = null;
         state.rule.publicationLastError = null;
+        state.rule.applicationStatus = 'WAITING';
+        state.rule.applicationDeploymentId = null;
+        state.rule.applicationObservedAt = null;
+        state.rule.applicationReceivedAt = null;
+        state.rule.applicationErrorCode = null;
+        state.rule.applicationErrorDetail = null;
         state.rule.revision += 1;
         const response = envelope(operationId, state.rule);
         return rememberAndSend(state, context, res, 200, response, operationId);

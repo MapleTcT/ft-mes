@@ -332,6 +332,47 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.json.data.publicationTotalAttemptCount, 5);
   assert.equal(result.json.data.publicationManualRetryCount, 1);
   assert.equal(result.json.data.publicationLastError, null);
+  assert.equal(result.json.data.applicationStatus, 'WAITING');
+
+  result = await request('POST', '/__simulation/complete-rule-publication');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.publicationStatus, 'PUBLISHED');
+  assert.equal(result.json.data.publicationRevision, 13);
+  assert.equal(result.json.data.applicationStatus, 'WAITING');
+
+  result = await request('POST', '/__simulation/rule-application', {
+    body: {
+      status: 'REJECTED',
+      deploymentId: 'flink-simulator-a',
+      errorCode: 'RULE_WINDOW_EXCEEDS_STATE_TTL',
+      errorDetail: 'rule window exceeds state TTL',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'REJECTED');
+  assert.equal(result.json.data.applicationErrorCode, 'RULE_WINDOW_EXCEEDS_STATE_TTL');
+  assert.equal(result.json.data.publicationRevision, 14);
+
+  result = await request('POST', '/__simulation/rule-application', {
+    body: { status: 'APPLIED', deploymentId: 'flink-simulator-b' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.applicationDeploymentId, 'flink-simulator-b');
+  assert.equal(result.json.data.applicationErrorCode, null);
+  assert.equal(result.json.data.applicationErrorDetail, null);
+  assert.equal(result.json.data.publicationRevision, 15);
+
+  result = await request('POST', '/__simulation/rule-application', {
+    body: { status: 'REJECTED', errorCode: 'STALE_REPLAY' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.publicationRevision, 15);
+
+  result = await request('POST', '/__simulation/fail-rule-publication');
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.status, 'NOT_DISPATCHING');
 });
 
 test('data quality and integration impact remain visible', async () => {

@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执、真实 Kafka/PostgreSQL 联合验收和目标测试环境部署仍在推进，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
+当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已完成本地 PostgreSQL 状态迁移和模拟浏览器可见性验收；真实 Kafka/Flink checkpoint/restart/DLQ 联合验收和目标测试环境部署仍在推进，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
 
 权威设计和验收入口：
 

@@ -812,25 +812,27 @@
         "backend/source-modules/batch-intelligence-adapter/pom.xml",
         "frontend/apps/bpi/package.json",
         "metadata/bpi-rule-publication-retry-acceptance.json",
-        "metadata/bpi-rule-application-receipt-acceptance.json"
+        "metadata/bpi-rule-application-receipt-acceptance.json",
+        "metadata/bpi-ui-acceptance.json"
       ],
       "currentEvidence": [
         "BPI 总设计、交互设计、API 目录和工程测试计划已进入仓库，Java 8 旧平台适配与 Java 17 BPI/Flink 边界明确。",
         "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理 reactor 当前 78 项测试通过。",
         "BPI PostgreSQL 服务已实现遥测入库、规则/拓扑、规则模拟、候选、影子批次、证据、幂等和审计。",
-        "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据；已提交基线为 f4c73962。",
+        "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据；当前已提交基线为 0279e279。",
         "Flink 已具备事件时间、生产上下文 join、规则生命周期、Broadcast State、索引路由、边界计算、checkpoint 恢复、candidate/data-quality/rule-application exactly-once sink；本轮新增 APPLIED/REJECTED 回执契约和 BPI 消费入库链路，Java 17 服务 compile 已通过。",
-        "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。"
+        "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。",
+        "2026-07-14 BPI 操作台已明确分离 Kafka 分发与 Flink 应用状态；确定性浏览器测试覆盖 WAITING -> REJECTED -> APPLIED、拒绝详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。"
       ],
       "blockingIssues": [
-        "规则应用回执的本地真实 PostgreSQL 验收已完成；仍需 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 联合回路和浏览器状态验收。",
+        "规则应用回执的本地真实 PostgreSQL 和模拟浏览器验收已完成；仍需真实 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 和浏览器到 Java 服务联合回路。",
         "BPI 全栈尚未部署到目标测试环境完成远端页面、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。",
         "JetLinks/IoT exporter、MES 生产上下文 outbox 和真实产线点位/单位/质量码/sequence 尚未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
-        "完成 rule application receipt 的 PostgreSQL/Kafka 联合测试、重复/冲突/DLQ 测试、UI 状态和机器可读验收记录。",
+        "完成 rule application receipt 的真实 PostgreSQL/Kafka/Flink checkpoint 联合测试、restart/replay 和冲突/DLQ 测试。",
         "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/PostgreSQL 验收。",
         "接入 MapleTcT/iot exporter 和一条产线 MES production context，完成点位语义与规则 locality group 盘点。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"

@@ -217,6 +217,11 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示“管理员重新入队”；操作要求原因、幂等键和发布 revision，
 成功后回到 `PENDING`，不会改写规则业务 revision，也不会把 Kafka 确认误标为 Flink 已生效。
 
+规则列表和详情进一步把 Kafka 分发与 Flink 运行态应用拆开：`WAITING` 表示仍无应用回执，`REJECTED` 展示 deployment、
+观察/接收时间、错误码和原因，`APPLIED` 才显示为在线已应用。完全相同或终态后的回执不重复推进 revision；页面不得以
+规则业务 `PUBLISHED` 或 Kafka `PUBLISHED` 代替 Flink `APPLIED`。确定性浏览器测试已覆盖
+`WAITING -> REJECTED -> APPLIED`，但该模拟证据不替代真实 Kafka/Flink checkpoint/restart 验收。
+
 **主要 API：** `listRules`、`getRuleVersion`、`createRuleDraft`、`simulateRule`、
 `getRuleSimulation`、`publishRuleVersion`、`retryRulePublication`。
 

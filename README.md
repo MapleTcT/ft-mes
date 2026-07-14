@@ -32,7 +32,7 @@ JetLinks/IoT 测点
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和审计。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算、checkpoint 恢复和 exactly-once sink。
 - BPI 操作台、模拟服务和浏览器 E2E。
-- Flink 规则应用回执契约与消费入库正在本轮闭合；在真实 Kafka/PostgreSQL 联合验收完成前仍按 `PARTIAL` 管理。
+- Flink 规则应用回执契约、消费入库和操作台状态展示已完成本地 PostgreSQL/模拟浏览器验收；在真实 Kafka/Flink checkpoint/restart/DLQ 联合验收完成前仍按 `PARTIAL` 管理。
 
 尚未完成的关键边界：
 

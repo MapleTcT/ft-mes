@@ -107,6 +107,9 @@ function createScenario() {
     publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
     publicationManualRetryCount: 0, publicationPublishedAt: null,
     publicationLastRequeuedAt: null, publicationLastError: null,
+    applicationStatus: 'NOT_PUBLISHED', applicationDeploymentId: null,
+    applicationObservedAt: null, applicationReceivedAt: null,
+    applicationErrorCode: null, applicationErrorDetail: null,
   };
 
   const incident = {

@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-13T02:05:32+00:00` |
-| Repo Commit | `f4c73962e81421f29b0aa1a560b65f5c7809ece3` |
+| Generated At | `2026-07-14T00:38:44+00:00` |
+| Repo Commit | `0279e27922fa9f3489ff3d154ffe112c955a6685` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 5 条生产用例、独立不良数量等产品范围项、ProcessAnalysis、二维码/导出和业务负责人签字未完成。 | 保持 material/WMS 回归，继续 ProcessAnalysis、产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 规则应用回执的本地真实 PostgreSQL 验收已完成；仍需 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 联合回路和浏览器状态验收。 | 完成 rule application receipt 的 PostgreSQL/Kafka 联合测试、重复/冲突/DLQ 测试、UI 状态和机器可读验收记录。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 规则应用回执的本地真实 PostgreSQL 和模拟浏览器验收已完成；仍需真实 Kafka/Flink checkpoint/restart、重复/冲突/DLQ 和浏览器到 Java 服务联合回路。 | 完成 rule application receipt 的真实 PostgreSQL/Kafka/Flink checkpoint 联合测试、restart/replay 和冲突/DLQ 测试。 |
 
 ## Production Blockers
 
