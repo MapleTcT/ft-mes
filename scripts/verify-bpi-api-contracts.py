@@ -16,6 +16,7 @@ INTERACTION = ROOT / "docs/designs/bpi-interaction-design.md"
 
 REQUIRED_TOPICS = {
     "iot.telemetry.selected.v1": "TelemetryEnvelopeV1",
+    "iot.point-catalog.snapshot.v1": "PointCatalogSnapshotV1",
     "mes.production.context.v1": "ProductionContextEventV1",
     "bpi.boundary.rule-publication.v1": "BoundaryRulePublicationV1",
     "bpi.boundary.rule-application.v1": "BoundaryRuleApplicationV1",

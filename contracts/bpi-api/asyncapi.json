@@ -11,6 +11,16 @@
       "messages": {"telemetry": {"$ref": "#/components/messages/TelemetryEnvelopeV1"}},
       "description": "Selected P1/P2/P3 telemetry keyed by plantId+deviceId"
     },
+    "pointCatalogSnapshot": {
+      "address": "iot.point-catalog.snapshot.v1",
+      "messages": {"snapshot": {"$ref": "#/components/messages/PointCatalogSnapshotV1"}},
+      "description": "Immutable JetLinks point catalog snapshots keyed by tenantId+plantId+lineId+sourceInstance"
+    },
+    "pointCatalogSnapshotDlq": {
+      "address": "iot.point-catalog.snapshot.dlq.v1",
+      "messages": {"snapshot": {"$ref": "#/components/messages/PointCatalogSnapshotV1"}},
+      "description": "Rejected or retry-exhausted point catalog snapshots with Spring Kafka DLT headers"
+    },
     "productionContext": {
       "address": "mes.production.context.v1",
       "messages": {"context": {"$ref": "#/components/messages/ProductionContextEventV1"}},
@@ -59,6 +69,8 @@
   },
   "operations": {
     "consumeSelectedTelemetry": {"action": "receive", "channel": {"$ref": "#/channels/selectedTelemetry"}, "messages": [{"$ref": "#/channels/selectedTelemetry/messages/telemetry"}]},
+    "consumePointCatalogSnapshot": {"action": "receive", "channel": {"$ref": "#/channels/pointCatalogSnapshot"}, "messages": [{"$ref": "#/channels/pointCatalogSnapshot/messages/snapshot"}]},
+    "publishRejectedPointCatalogSnapshot": {"action": "send", "channel": {"$ref": "#/channels/pointCatalogSnapshotDlq"}, "messages": [{"$ref": "#/channels/pointCatalogSnapshotDlq/messages/snapshot"}]},
     "consumeProductionContext": {"action": "receive", "channel": {"$ref": "#/channels/productionContext"}, "messages": [{"$ref": "#/channels/productionContext/messages/context"}]},
     "consumeBoundaryRulePublication": {"action": "receive", "channel": {"$ref": "#/channels/boundaryRulePublication"}, "messages": [{"$ref": "#/channels/boundaryRulePublication/messages/rule"}]},
     "publishBoundaryRuleApplication": {"action": "send", "channel": {"$ref": "#/channels/boundaryRuleApplication"}, "messages": [{"$ref": "#/channels/boundaryRuleApplication/messages/application"}]},
@@ -73,6 +85,7 @@
   "components": {
     "messages": {
       "TelemetryEnvelopeV1": {"name": "TelemetryEnvelopeV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.TelemetryEnvelopeV1"}}},
+      "PointCatalogSnapshotV1": {"name": "PointCatalogSnapshotV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/PointCatalogKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.PointCatalogSnapshotV1"}}},
       "ProductionContextEventV1": {"name": "ProductionContextEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.ProductionContextEventV1"}}},
       "BoundaryRulePublicationV1": {"name": "BoundaryRulePublicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRulePublicationV1"}}},
       "BoundaryRuleApplicationV1": {"name": "BoundaryRuleApplicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/RuleApplicationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRuleApplicationV1"}}},
@@ -84,6 +97,7 @@
     "schemas": {
       "EventHeaders": {"type": "object", "required": ["eventId", "tenantId", "traceId", "schemaVersion"], "properties": {"eventId": {"type": "string"}, "tenantId": {"type": "string"}, "traceId": {"type": "string"}, "schemaVersion": {"type": "string"}, "payloadChecksum": {"type": "string"}}},
       "CandidateKafkaHeaders": {"type": "object", "required": ["event_id", "candidate_key", "tenant_id", "schema_version"], "properties": {"event_id": {"type": "string"}, "candidate_key": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "schema_version": {"const": "v1"}}},
+      "PointCatalogKafkaHeaders": {"type": "object", "required": ["event_id", "tenant_id", "source_revision", "schema_version"], "properties": {"event_id": {"type": "string"}, "tenant_id": {"type": "string"}, "source_revision": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "schema_version": {"const": "v1"}}},
       "RuleApplicationKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["APPLIED", "REJECTED"]}, "schema_version": {"const": "v1"}}}
     }
   }

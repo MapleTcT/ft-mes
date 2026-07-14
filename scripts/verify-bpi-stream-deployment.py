@@ -104,6 +104,14 @@ def main() -> int:
         failures.append("BPI topic initialization must create the rule application topic")
     if "bpi.boundary.rule-application.dlq.v1" not in topic_script:
         failures.append("BPI topic initialization must create the rule application DLQ")
+    for marker in (
+        "iot.point-catalog.snapshot.v1",
+        "iot.point-catalog.snapshot.dlq.v1",
+        "KAFKA_CONFIGS_COMMAND",
+        "max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES",
+    ):
+        if marker not in topic_script:
+            failures.append(f"BPI topic initialization is missing point catalog marker: {marker}")
 
     smoke_script = (ROOT / "deploy/bpi-streaming/scripts/smoke-cluster.sh").read_text(
         encoding="utf-8"
@@ -112,6 +120,8 @@ def main() -> int:
         failures.append(
             "BPI cluster smoke must isolate kafka-topics stdin so every configured topic is checked"
         )
+    if '"topics": 10' not in smoke_script:
+        failures.append("BPI cluster smoke must report all ten configured topics")
 
     postgres_replay = (
         ROOT / "deploy/bpi-streaming/scripts/run-postgres-replay.sh"
@@ -193,7 +203,7 @@ def main() -> int:
         ROOT / "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js"
     ).read_text(encoding="utf-8")
     for marker in (
-        'new Set(["write", "read"])',
+        'new Set(["write", "read", "sync-read"])',
         "Idempotent-Replay",
         "POINT_DEVICE_NOT_REGISTERED",
         "POINT_DEVICE_NOT_ACTIVE",

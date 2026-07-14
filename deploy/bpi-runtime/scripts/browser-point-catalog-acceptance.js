@@ -25,7 +25,9 @@ const productId = process.env.BPI_JETLINKS_PRODUCT_ID || "bpi-pilot-product-01";
 const deviceId = process.env.BPI_JETLINKS_DEVICE_ID || "bpi-pilot-device-01";
 const sourcePropertyId = process.env.BPI_JETLINKS_SOURCE_PROPERTY_ID || "instantFlow";
 const propertyId = process.env.BPI_CANONICAL_PROPERTY_ID || "flow.instant";
-const sourceRevision = `${marker}_JETLINKS_STATUS`;
+const sourceRevision = action === "sync-read"
+  ? required("BPI_EXPECTED_POINT_CATALOG_REVISION")
+  : `${marker}_JETLINKS_STATUS`;
 const topologyCode = `${marker}_BLOCKED_TOPOLOGY`;
 const expectedPointIssues = [
   "DEVICE_NOT_REGISTERED",
@@ -43,8 +45,8 @@ const expectedTopologyErrors = [
 if (!/^[A-Za-z0-9_-]{8,80}$/.test(marker)) {
   throw new Error("BPI_ACCEPTANCE_MARKER must use 8-80 letters, digits, underscores or hyphens");
 }
-if (!new Set(["write", "read"]).has(action)) {
-  throw new Error("BPI_BROWSER_ACTION must be write or read");
+if (!new Set(["write", "read", "sync-read"]).has(action)) {
+  throw new Error("BPI_BROWSER_ACTION must be write, read or sync-read");
 }
 
 function required(key) {
@@ -321,6 +323,25 @@ async function readPersistedAcceptance(page, evidence) {
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
 
+async function readAutomaticSnapshot(page, evidence) {
+  await page.goto(`${bpiBaseUrl}/#/points`, { waitUntil: "networkidle", timeout: timeoutMs });
+  await page.getByRole("heading", { name: "点位目录" }).waitFor({ timeout: timeoutMs });
+  await page.getByText(sourceRevision, { exact: true }).waitFor();
+  const pointRow = page.locator("[data-point-id]").filter({ hasText: deviceId });
+  if (await pointRow.count() !== 1) {
+    throw new Error("automatically synchronized point is not uniquely visible");
+  }
+  await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
+  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证"]) {
+    await pointRow.getByText(new RegExp(label)).waitFor();
+  }
+  evidence.readiness = "BLOCKED";
+  evidence.automaticSnapshotVisible = true;
+  evidence.sourceRevision = sourceRevision;
+  evidence.pointIssues = expectedPointIssues;
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+}
+
 async function main() {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.mkdirSync(path.dirname(screenshotPath), { recursive: true });
@@ -408,6 +429,8 @@ async function main() {
     if (action === "write") {
       await importBlockedPointCatalog(page, report.evidence);
       await validateBlockedTopology(page, report.evidence);
+    } else if (action === "sync-read") {
+      await readAutomaticSnapshot(page, report.evidence);
     } else {
       await readPersistedAcceptance(page, report.evidence);
     }

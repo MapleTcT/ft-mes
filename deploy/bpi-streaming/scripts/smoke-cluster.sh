@@ -41,6 +41,8 @@ for service in kafka-1 kafka-2 kafka-3 bpi-minio bpi-jobmanager; do
 done
 
 TOPICS="${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}
+${BPI_POINT_CATALOG_DLQ_TOPIC:-iot.point-catalog.snapshot.dlq.v1}
 ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
 ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
 ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
@@ -59,16 +61,22 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
         --topic "$topic" </dev/null
 done >"$DESCRIBE"
 
-if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 8 ]; then
+if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 10 ]; then
     printf 'ERROR: one or more BPI topics do not have replication factor 3\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 8 ]; then
+if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 10 ]; then
     printf 'ERROR: one or more BPI topics do not have min.insync.replicas=2\n' >&2
     exit 1
 fi
 if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 2 ]; then
     printf 'ERROR: candidate source and DLQ topics must retain records for 30 days\n' >&2
+    exit 1
+fi
+POINT_CATALOG_MAX_MESSAGE_BYTES=${BPI_POINT_CATALOG_MAX_MESSAGE_BYTES:-6291456}
+if [ "$(grep -c "max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES" "$DESCRIBE")" -ne 2 ]; then
+    printf 'ERROR: point catalog source and DLQ topics must use max.message.bytes=%s\n' \
+        "$POINT_CATALOG_MAX_MESSAGE_BYTES" >&2
     exit 1
 fi
 
@@ -125,9 +133,10 @@ report = {
     "status": "PASS",
     "kafka": {
         "brokers": 3,
-        "topics": 8,
+        "topics": 10,
         "replicationFactor": 3,
         "minInSyncReplicas": 2,
+        "pointCatalogMaxMessageBytes": int(os.environ.get("BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "6291456")),
         "describeEvidence": Path(os.environ["DESCRIBE"]).read_text(encoding="utf-8"),
     },
     "flink": {

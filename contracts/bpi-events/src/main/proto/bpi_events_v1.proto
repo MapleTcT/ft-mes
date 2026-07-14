@@ -46,6 +46,56 @@ enum SequenceOrigin {
   EXPORTER = 3;
 }
 
+// Low-frequency control-plane snapshot emitted by JetLinks after resolving the
+// configured MES bindings against the authoritative device registry and metadata.
+// A source_revision identifies immutable catalog content; observed_at_ms is not
+// part of that revision and only records when the source was inspected.
+message PointCatalogSnapshotV1 {
+  string event_id = 1;
+  string source = 2;
+  string source_instance = 3;
+  // SHA-256 of the deterministic protobuf containing source, source_instance,
+  // tenant_id, plant_id, line_id and the canonically sorted points only.
+  string source_revision = 4;
+  string tenant_id = 5;
+  string plant_id = 6;
+  string line_id = 7;
+  int64 observed_at_ms = 8;
+  repeated PointCatalogPointV1 points = 9;
+  string reason = 10;
+}
+
+message PointCatalogPointV1 {
+  string locality_group = 1;
+  string product_id = 2;
+  string device_id = 3;
+  string property_id = 4;
+  string source_property_id = 5;
+  string point_name = 6;
+  string unit = 7;
+  string data_type = 8;
+  PointDeviceStateV1 device_state = 9;
+  bool registered = 10;
+  bool property_present = 11;
+  string calibration_version = 12;
+  PointCalibrationStatusV1 calibration_status = 13;
+  bool source_sequence_enabled = 14;
+}
+
+enum PointDeviceStateV1 {
+  POINT_DEVICE_STATE_UNSPECIFIED = 0;
+  POINT_DEVICE_ACTIVE = 1;
+  POINT_DEVICE_INACTIVE = 2;
+  POINT_DEVICE_UNKNOWN = 3;
+}
+
+enum PointCalibrationStatusV1 {
+  POINT_CALIBRATION_STATUS_UNSPECIFIED = 0;
+  POINT_CALIBRATION_VERIFIED = 1;
+  POINT_CALIBRATION_UNVERIFIED = 2;
+  POINT_CALIBRATION_MISSING = 3;
+}
+
 // Production context is emitted from the MES outbox and joined to telemetry by event time.
 message ProductionContextEventV1 {
   string event_id = 1;
