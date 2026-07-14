@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T21:06:41+00:00",
-  "repoCommit": "79ee289d922f578aa25ef48778c18362141dad38",
+  "generatedAt": "2026-07-14T21:49:56+00:00",
+  "repoCommit": "583dde37af792efb5b1f7ab03bb331842ccb1718",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -627,6 +627,7 @@
         "2026-07-15 目标测试环境 ft-mes-bpi-runtime 已升级到 Flyway V9：Web、Java 8 adapter、Java 17 service、PostgreSQL healthy，19 张 BPI schema 表通过 runtime smoke；真实 ADP suposTicket 经可信 gateway 验证后访问 BPI 页面和 API，浏览器无非预期 console/page/request error。",
         "2026-07-15 使用目标 marker ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET 完成真实页面拓扑草稿、PASSED/r2 校验、创建人发布 422 拒绝、独立管理员 PUBLISHED/r3 发布、拓扑绑定 DRAFT/r1 规则；直接 PostgreSQL 查询确认 4 条动作审计和 4 条 COMPLETED/200 幂等记录，bpi-service 重启后页面仍唯一显示同一拓扑和规则，证据记录在 metadata/bpi-target-topology-rule-acceptance.json。",
         "2026-07-15 目标 ft-mes-bpi-runtime 已升级到 Flyway V12 和 21 张 BPI 基表；marker ADP_E2E_20260715_POINTCAT_02 通过真实页面点位快照导入、幂等重放、拓扑快照绑定、四项失败关闭、PostgreSQL 审计和服务重启读取。随后自动 revision sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5 又闭合 JetLinks -> Kafka -> BPI service -> PostgreSQL -> 浏览器：1 个 snapshot/entry/idempotency/audit、重复不增行、毒消息 DLT、重启幂等和零浏览器错误均通过；目标产品 metadata 为空、设备 notActive/未注册、标定和来源序列未验证，因此同步控制 PASS 但试点点位保持 BLOCKED。证据记录在 metadata/bpi-point-catalog-kafka-sync-acceptance.json。",
+        "2026-07-15 marker ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE 以本地 PostgreSQL 16.13 证明仅缺设备/网关来源序列的点位保持 BLOCKED、拓扑返回唯一 POINT_SOURCE_SEQUENCE_DISABLED ERROR；8 条浏览器 E2E 通过。部署到目标后，真实 ADP 页面 GET 200，PostgreSQL 15.18 同一自动 revision 为 1 点/0 READY、source_sequence_enabled=false、五项阻断且浏览器错误为 0；回滚镜像和旧静态目录已保留。证据记录在 metadata/bpi-source-sequence-readiness-acceptance.json。",
         "2026-07-15 目标 ft-mes-bpi-streaming 已扩展为三 broker Kafka、10 topic；新增 point-catalog source/DLT topic 并保持副本 3、min.insync.replicas=2，Flink 30/30 task、MinIO checkpoint、固定 marker 单候选回放和带负载 TaskManager 重启恢复证据继续有效。",
         "2026-07-14 使用同一 marker ADP_E2E_20260714_091536_BPI_JOINT 闭合真实浏览器规则模拟/发布、PostgreSQL outbox、Kafka/Flink APPLIED 回执、受控上下文/遥测、唯一候选、浏览器确认、影子批次/边界证据/状态事件/审计；随后完成 typed inactive、单事务 marker 清理、消费者默认关闭和清理后浏览器只读复验，证据记录在 metadata/bpi-browser-kafka-postgres-joint-acceptance.json。",
         "2026-07-15 MapleTcT/iot 提交 786d153aed0866c8c659330f3f1692d73f0d97c2 已进入 main：JetLinks 解码后遥测 exporter 继续具备显式映射、稳定身份、来源序列、持久化缓冲和 Kafka 幂等生产，并新增从权威设备注册/产品 metadata 生成 PointCatalogSnapshotV1 的低频 publisher、内容 SHA-256 revision、10,000 点/5 MiB 门禁、Micrometer/health 和默认关闭开关；19 个 exporter Java 测试、7 个部署脚本测试及 19 模块 reactor 编译通过。",
@@ -696,7 +697,9 @@
         "metadata/bpi-point-catalog-readiness-acceptance.json",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogKafkaPostgresAcceptanceTest.java",
         "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
-        "metadata/bpi-point-catalog-kafka-sync-acceptance.json"
+        "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
+        "docs/testing/bpi-source-sequence-readiness-acceptance.md",
+        "metadata/bpi-source-sequence-readiness-acceptance.json"
       ]
     }
   ],

@@ -4017,6 +4017,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-source-sequence-readiness-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-stream-replay-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -4300,6 +4306,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-timing-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-source-sequence-readiness-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6557,13 +6569,13 @@
       "tracked": 483
     },
     "docs": {
-      "tracked": 86
+      "tracked": 87
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 104
+      "tracked": 105
     },
     "package.json": {
       "tracked": 1
@@ -6587,8 +6599,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1088,
-    "tracked": 1088,
+    "totalFiles": 1090,
+    "tracked": 1090,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -57,7 +57,9 @@
 - `POINT_PROPERTY_NOT_AVAILABLE`
 - `POINT_CALIBRATION_NOT_VERIFIED`
 
-警告码为 `POINT_SOURCE_SEQUENCE_DISABLED`。应用角色 `bpi_service` 对两张点位目录表仅有
+本次历史验收中来源序列仍记录为 warning `POINT_SOURCE_SEQUENCE_DISABLED`。该口径已由
+`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE` 后续验收替代：当前实现把它提升为 ERROR 和 READY 硬门槛，
+详见 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。应用角色 `bpi_service` 对两张点位目录表仅有
 `INSERT/SELECT`，无 `UPDATE/DELETE`。
 
 ## 回归结果

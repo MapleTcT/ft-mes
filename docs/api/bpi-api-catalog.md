@@ -87,8 +87,10 @@
 `importPointCatalogSnapshot` 只允许 `BPI_ADMIN` 通过受控 API 导入来自 JetLinks/exporter 的不可变状态快照，
 不得由 BPI 直连或修改 JetLinks 数据库。每个点记录 product/device、JetLinks 原 `sourcePropertyId`、exporter
 规范化 `propertyId`、设备激活与注册状态、属性存在性、
-单位、校准版本/状态和源序列能力；同一请求可按幂等键安全重放。`getCurrentPointCatalog` 用于页面和拓扑校验读取
-当前作用域快照，没有快照时明确返回空数据，不能生成伪点位。
+单位、校准版本/状态和源序列能力；同一请求可按幂等键安全重放。设备或网关级 source epoch/sequence 是
+P1 批次信号的硬准入条件，缺失时 `ready=false` 且拓扑校验返回 `POINT_SOURCE_SEQUENCE_DISABLED` error，
+不能降级成 warning。`getCurrentPointCatalog` 用于页面和拓扑校验读取当前作用域快照，没有快照时明确返回空数据，
+不能生成伪点位。
 
 `createTopologyDraft` 支持全新版本和从已发布版本复制，拓扑定义包含节点、方向路径、JetLinks
 `productId/deviceId/propertyId` 绑定、单位、校准版本和必需语义信号。`validateTopologyDraft` 在发布前同时校验悬空路径、

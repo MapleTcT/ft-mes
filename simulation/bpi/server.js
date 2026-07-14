@@ -179,7 +179,7 @@ function topologyValidation(definition, pointCatalog) {
     if (!point.unit) errors.push({ code: 'POINT_UNIT_MISSING', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'The catalog point has no source unit.' });
     else if (expectedUnit && point.unit.toLowerCase() !== String(expectedUnit).toLowerCase()) errors.push({ code: 'POINT_UNIT_MISMATCH', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'Expected and source units do not match.' });
     if (point.calibrationStatus !== 'VERIFIED' || point.calibrationVersion !== binding.calibrationVersion) errors.push({ code: 'POINT_CALIBRATION_NOT_VERIFIED', path: `/bindings/${index}/calibrationVersion`, severity: 'ERROR', message: 'The requested calibration version is not verified.' });
-    if (!point.sourceSequenceEnabled) warnings.push({ code: 'POINT_SOURCE_SEQUENCE_DISABLED', path: `/bindings/${index}`, severity: 'WARNING', message: 'Replay deduplication depends on stable event IDs.' });
+    if (!point.sourceSequenceEnabled) errors.push({ code: 'POINT_SOURCE_SEQUENCE_DISABLED', path: `/bindings/${index}`, severity: 'ERROR', message: 'A device or gateway source epoch and sequence are required for replay-safe topology binding.' });
   });
   if (!pointCatalog) errors.push({ code: 'POINT_CATALOG_SNAPSHOT_MISSING', path: '/bindings', severity: 'ERROR', message: 'No point catalog snapshot exists for this scope.' });
   return { errors, warnings };
@@ -454,6 +454,7 @@ function createHandler(state) {
           if (!point.propertyPresent) readinessIssues.push('PROPERTY_NOT_AVAILABLE');
           if (!point.unit) readinessIssues.push('UNIT_MISSING');
           if (!point.calibrationVersion || point.calibrationStatus !== 'VERIFIED') readinessIssues.push('CALIBRATION_NOT_VERIFIED');
+          if (!point.sourceSequenceEnabled) readinessIssues.push('SOURCE_SEQUENCE_DISABLED');
           return {
             id: stableUuid({ type: 'point', snapshotId, productId: point.productId, deviceId: point.deviceId, propertyId: point.propertyId }),
             snapshotId, plantId: body.plantId, lineId: body.lineId, ...clone(point),

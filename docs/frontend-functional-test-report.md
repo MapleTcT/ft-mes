@@ -466,6 +466,17 @@ PostgreSQL，再由真实 ADP 会话访问目标 BPI 页面读取。同步链通
 `/tmp/bpi-point-catalog-sync-scope-20260715.png`；完整事件、PostgreSQL、重启幂等和回滚证据见
 `docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`。
 
+### BPI 来源序列硬准入浏览器验收（2026-07-15）
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 点位准入 | `http://100.99.133.43:18091/#/points` | 本地导入仅缺来源序列的快照；目标环境用真实 ADP 会话读取自动目录 revision | `POST /bpi/v1/point-catalog/snapshots`；`GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | 本地 Playwright `8/8 PASS`；目标页面显示来源序列“未启用”、`BLOCKED` 和五项阻断，GET `200`，console/page/request failure 均为 0 | 模拟器与 Java 服务均把 `SOURCE_SEQUENCE_DISABLED` 纳入 readiness；本地 PostgreSQL 证明仅缺序列不会 READY；目标 PostgreSQL 15.18 为 1 点/0 READY 且 `source_sequence_enabled=false` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_TARGET_GATE_WITH_BLOCKED_SOURCE | 目标试点设备仍未提供设备/网关原生序列，目标数据源继续 BLOCKED |
+| BPI 拓扑准入 | `/bpi/#/rules` | 绑定其余条件均通过、仅缺来源序列的点位并执行校验 | `POST /bpi/v1/topologies/drafts`；`POST /bpi/v1/topologies/{id}/validate` | 页面使用同一错误模型显示校验失败；前端构建和规则工作台 E2E 通过 | PostgreSQL 验收返回唯一 `POINT_SOURCE_SEQUENCE_DISABLED / ERROR`，不可发布 | `bpi_topology_versions`、`bpi_api_idempotency`、`bpi_audit_events` | PASS | 只有自动目录出现新 READY revision 后才能重新验证 |
+
+marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：
+`metadata/bpi-source-sequence-readiness-acceptance.json`、
+`docs/testing/bpi-source-sequence-readiness-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

@@ -34,12 +34,14 @@ const expectedPointIssues = [
   "DEVICE_NOT_ACTIVE",
   "PROPERTY_NOT_AVAILABLE",
   "CALIBRATION_NOT_VERIFIED",
+  "SOURCE_SEQUENCE_DISABLED",
 ];
 const expectedTopologyErrors = [
   "POINT_DEVICE_NOT_REGISTERED",
   "POINT_DEVICE_NOT_ACTIVE",
   "POINT_PROPERTY_NOT_AVAILABLE",
   "POINT_CALIBRATION_NOT_VERIFIED",
+  "POINT_SOURCE_SEQUENCE_DISABLED",
 ];
 
 if (!/^[A-Za-z0-9_-]{8,80}$/.test(marker)) {
@@ -197,7 +199,7 @@ async function importBlockedPointCatalog(page, evidence) {
   await page.getByText("点位快照已导入：0/1 就绪").waitFor();
   const pointRow = page.locator(`[data-point-id="${evidence.pointId}"]`);
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证"]) {
+  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
 
@@ -259,7 +261,7 @@ async function validateBlockedTopology(page, evidence) {
   evidence.topologyCreatedRevision = created.revision;
 
   await page.getByRole("button", { name: "校验拓扑" }).click();
-  await page.locator("#confirm-reason").fill("确认设备、属性和标定未就绪时必须拒绝发布");
+  await page.locator("#confirm-reason").fill("确认设备、属性、标定和来源序列未就绪时必须拒绝发布");
   const validateResponsePromise = page.waitForResponse(
     (response) => response.url().includes(`/bpi-api/topologies/${created.id}/validate`),
   );
@@ -272,7 +274,7 @@ async function validateBlockedTopology(page, evidence) {
   const errorCodes = validated.validationErrors.map((issue) => issue.code);
   const warningCodes = validated.validationWarnings.map((issue) => issue.code);
   assertExactMembers(errorCodes, expectedTopologyErrors, "topology validation errors");
-  assertExactMembers(warningCodes, ["POINT_SOURCE_SEQUENCE_DISABLED"], "topology validation warnings");
+  assertExactMembers(warningCodes, [], "topology validation warnings");
   if (validated.validatedPointCatalogSnapshotId !== evidence.snapshotId) {
     throw new Error("topology validation did not pin the imported point catalog snapshot");
   }
@@ -282,8 +284,8 @@ async function validateBlockedTopology(page, evidence) {
   evidence.topologyWarnings = warningCodes;
   evidence.validatedPointCatalogSnapshotId = validated.validatedPointCatalogSnapshotId;
   evidence.publishAllowed = false;
-  await page.getByText("拓扑校验失败：4 项错误").waitFor();
-  for (const code of [...expectedTopologyErrors, "POINT_SOURCE_SEQUENCE_DISABLED"]) {
+  await page.getByText("拓扑校验失败：5 项错误").waitFor();
+  for (const code of expectedTopologyErrors) {
     await page.getByText(code, { exact: true }).waitFor();
   }
   if (await page.getByRole("button", { name: "发布拓扑" }).count()) {
@@ -299,7 +301,7 @@ async function readPersistedAcceptance(page, evidence) {
   const pointRow = page.locator("[data-point-id]").filter({ hasText: deviceId });
   if (await pointRow.count() !== 1) throw new Error("persisted point is not uniquely visible after restart");
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证"]) {
+  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
   evidence.readiness = "BLOCKED";
@@ -311,7 +313,7 @@ async function readPersistedAcceptance(page, evidence) {
   if (await topologyRow.count() !== 1) throw new Error("persisted blocked topology is not uniquely visible after restart");
   await topologyRow.click();
   await page.getByRole("heading", { name: `${topologyCode}@1.0.0` }).waitFor();
-  for (const code of [...expectedTopologyErrors, "POINT_SOURCE_SEQUENCE_DISABLED"]) {
+  for (const code of expectedTopologyErrors) {
     await page.getByText(code, { exact: true }).waitFor();
   }
   if (await page.getByRole("button", { name: "发布拓扑" }).count()) {
@@ -332,7 +334,7 @@ async function readAutomaticSnapshot(page, evidence) {
     throw new Error("automatically synchronized point is not uniquely visible");
   }
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证"]) {
+  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
   evidence.readiness = "BLOCKED";

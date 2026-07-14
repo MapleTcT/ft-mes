@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；当前目标数据库已到 Flyway V12，JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。试点设备仍未注册/激活，产品 metadata、标定和来源序列未就绪，因此本轮结论仍是“同步控制链 PASS、数据源 BLOCKED”，不能发布为批次规则点位。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；当前目标数据库已到 Flyway V12，JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。来源序列现已成为 READY 和拓扑发布的硬门槛，目标环境页面/API/PostgreSQL 已复验当前点位保持 0 READY。试点设备仍未注册/激活，产品 metadata、标定和来源序列未就绪，因此本轮结论仍是“同步控制链 PASS、数据源 BLOCKED”，不能发布为批次规则点位。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
 
 ## 项目定位
 
@@ -79,7 +79,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - MES production context outbox 已实现 `176` 同事务捕获和 `177` 版本时钟下限、显式产线/状态映射、`BLOCKED_*` 失败关闭、Java 8 `SKIP LOCKED` 抢占、Kafka 幂等发送、重试/毒消息终止和 Micrometer 指标；目标机已通过真实 WOM `start/hold`、3 条 `SENT|1` 上下文、Flink join 和影子批次确认。
 - PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认、影子批次、证据和审计。
 - 拓扑/规则产品化：页面可新建或复制版本，拓扑发布前校验路径、环、JetLinks 产品/设备/属性、单位、校准和必需信号；独立管理员发布后版本不可变，规则草稿只能引用已发布拓扑及其绑定信号。Flyway V1-V9、真实 PostgreSQL marker 和 7 条浏览器 E2E 已通过；目标环境 marker `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` 又验证了真实 ADP 会话、V9 落库、创建人发布拒绝、独立发布和服务重启后读取。
-- 点位目录准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；拓扑校验固定快照 ID/checksum，设备注册/激活、属性、单位、标定不满足时失败关闭，发布时再次原子检查快照仍为当前版本。手工 marker `ADP_E2E_20260715_POINTCAT_02` 已验证页面写链；自动链又以 revision `sha256:2a218d...151ce5` 通过 JetLinks、Kafka、MES 消费、PostgreSQL 幂等/DLT/审计、重启和真实页面读取。当前试点点位保持 `BLOCKED`。
+- 点位目录准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；拓扑校验固定快照 ID/checksum，设备注册/激活、属性、单位、标定或设备/网关级来源序列不满足时失败关闭，发布时再次原子检查快照仍为当前版本。Exporter 自增序列只允许影子观测，不能把点位提升为 `READY`。手工 marker `ADP_E2E_20260715_POINTCAT_02` 已验证页面写链；自动链又以 revision `sha256:2a218d...151ce5` 通过 JetLinks、Kafka、MES 消费、PostgreSQL 幂等/DLT/审计、重启和真实页面读取。marker `ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE` 进一步通过本地 PostgreSQL 16.13、8 条浏览器 E2E、目标 PostgreSQL 15.18 和真实 ADP 页面证明来源序列硬门槛已生效；当前试点点位保持 `BLOCKED`。
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和规则应用回执。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
 - BPI 操作台、确定性模拟服务和浏览器 E2E。

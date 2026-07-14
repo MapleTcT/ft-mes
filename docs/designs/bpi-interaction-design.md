@@ -191,8 +191,9 @@ ready/blocked 数量。点位表固定展示 product、device、JetLinks 原属�
 编辑快照条目，也不连接 JetLinks 数据库。现场点位变化必须由 exporter 生成新快照，旧拓扑继续保留已钉扎的
 快照 ID/checksum 作为审计证据。
 
-ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、单位与绑定一致、校准状态为 `VERIFIED`，且
-product/device/property 与拓扑绑定完全一致。任何一项不满足都显示明确 blocker，并使拓扑校验 fail closed。
+ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、单位与绑定一致、校准状态为 `VERIFIED`、
+设备或网关级来源 epoch/sequence 已启用，且 product/device/property 与拓扑绑定完全一致。Exporter 自增序列
+只允许影子观测，不能把点位提升为 ready。任何一项不满足都显示明确 blocker，并使拓扑校验 fail closed。
 
 **主要 API：** `listPointCatalogSnapshots`、`getCurrentPointCatalog`、`importPointCatalogSnapshot`。
 

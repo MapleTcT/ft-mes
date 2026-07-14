@@ -170,8 +170,8 @@ public class PointCatalogService {
                             "The requested calibration version is not verified in the point catalog."));
                 }
                 if (!point.sourceSequenceEnabled()) {
-                    warnings.add(issue("POINT_SOURCE_SEQUENCE_DISABLED", path, "WARNING",
-                            "Source sequence is disabled; replay deduplication depends on stable event IDs."));
+                    errors.add(issue("POINT_SOURCE_SEQUENCE_DISABLED", path, "ERROR",
+                            "A device or gateway source epoch and sequence are required for replay-safe topology binding."));
                 }
             }
         }

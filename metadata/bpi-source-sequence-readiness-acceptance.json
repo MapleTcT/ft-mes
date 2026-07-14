@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-07-14T21:42:00Z",
+  "baseCommit": "583dde37af792efb5b1f7ab03bb331842ccb1718",
+  "database": "PostgreSQL 16.13 local acceptance; PostgreSQL 15.18 target",
+  "marker": "ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE",
+  "status": "PASS_TARGET_GATE_WITH_BLOCKED_SOURCE",
+  "contract": {
+    "readyRequiresSourceSequence": true,
+    "acceptedOrigin": "DEVICE_OR_GATEWAY",
+    "exporterFallbackQualification": "SHADOW_ONLY",
+    "readinessIssue": "SOURCE_SEQUENCE_DISABLED",
+    "topologyError": "POINT_SOURCE_SEQUENCE_DISABLED"
+  },
+  "persistence": {
+    "test": "BpiPointCatalogPostgresAcceptanceTest",
+    "flywayVersion": 12,
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "snapshotPointCount": 3,
+    "snapshotReadyPointCount": 1,
+    "snapshotsAfterRefresh": 2,
+    "entriesAfterRefresh": 6,
+    "idempotencyRecords": 13,
+    "sequenceOnlyBlockedPoint": "DEVICE-S07-03/flow.sequence-missing",
+    "sequenceOnlyValidationErrors": [
+      "POINT_SOURCE_SEQUENCE_DISABLED"
+    ]
+  },
+  "browser": {
+    "route": "/bpi/#/points",
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "visibleLabel": "来源序列缺失"
+  },
+  "target": {
+    "host": "100.99.133.43",
+    "route": "http://100.99.133.43:18091/#/points",
+    "composeProject": "ft-mes-bpi-runtime",
+    "serviceImage": "sha256:1cdbbf814a20615307ab4a3adcfe38977a260865d85ef8a3f645be361670345c",
+    "rollbackImage": "sha256:6b336517e2e14711519cc3d6bd786135eb1cf6de1168752c017497e4113160c6",
+    "rollbackPath": "/home/v6/bpi-deploy-backups/20260715-source-sequence-0532",
+    "runtimeSmoke": "PASS",
+    "loginStatus": 200,
+    "pointCatalogStatus": 200,
+    "sourceRevision": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
+    "snapshotPointCount": 1,
+    "snapshotReadyPointCount": 0,
+    "databaseEvidence": {
+      "registered": false,
+      "deviceState": "INACTIVE",
+      "propertyPresent": false,
+      "calibrationStatus": "UNVERIFIED",
+      "sourceSequenceEnabled": false
+    },
+    "readinessIssues": [
+      "DEVICE_NOT_REGISTERED",
+      "DEVICE_NOT_ACTIVE",
+      "PROPERTY_NOT_AVAILABLE",
+      "CALIBRATION_NOT_VERIFIED",
+      "SOURCE_SEQUENCE_DISABLED"
+    ],
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "browserReport": "/tmp/bpi-source-sequence-target-browser.json",
+    "screenshot": "/tmp/bpi-source-sequence-target-browser.png"
+  },
+  "regression": {
+    "apiContract": "PASS_42_OPERATIONS",
+    "simulator": "PASS_6_OF_6",
+    "service": "PASS_41_ZERO_FAILURES_20_ENV_SKIPPED",
+    "uiBuild": "PASS",
+    "browserE2e": "PASS_8_OF_8"
+  },
+  "remainingBlockers": [
+    "Target pilot device is still inactive and unregistered.",
+    "Target product property metadata, unit and reviewed calibration are missing.",
+    "Target device or gateway source epoch and sequence are not yet available.",
+    "A real IoT and MES production-context marker has not yet formed a candidate and batch."
+  ]
+}

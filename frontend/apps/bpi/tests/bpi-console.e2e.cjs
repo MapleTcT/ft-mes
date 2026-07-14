@@ -272,7 +272,7 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   await page.getByText('点位快照已导入：0/1 就绪').waitFor();
   await page.getByText('未就绪液位点', { exact: true }).waitFor();
   await page.getByText('BLOCKED', { exact: true }).waitFor();
-  await page.getByText('设备未注册、设备未激活、属性不存在、单位缺失、标定未验证', { exact: true }).waitFor();
+  await page.getByText('设备未注册、设备未激活、属性不存在、单位缺失、标定未验证、来源序列缺失', { exact: true }).waitFor();
   const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
   assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
   assert.equal(current.data.snapshot.readyPointCount, 0);

@@ -583,6 +583,7 @@ function pointIssueLabel(code: string): string {
     PROPERTY_NOT_AVAILABLE: '属性不存在',
     UNIT_MISSING: '单位缺失',
     CALIBRATION_NOT_VERIFIED: '标定未验证',
+    SOURCE_SEQUENCE_DISABLED: '来源序列缺失',
   };
   return labels[code] || code;
 }

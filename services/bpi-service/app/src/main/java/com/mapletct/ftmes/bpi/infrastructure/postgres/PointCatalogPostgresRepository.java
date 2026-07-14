@@ -206,8 +206,10 @@ public class PointCatalogPostgresRepository {
         String unit = rs.getString("unit");
         String calibrationVersion = rs.getString("calibration_version");
         String calibrationStatus = rs.getString("calibration_status");
+        boolean sourceSequenceEnabled = rs.getBoolean("source_sequence_enabled");
         List<String> issues = readinessIssues(
-                registered, propertyPresent, deviceState, unit, calibrationVersion, calibrationStatus);
+                registered, propertyPresent, deviceState, unit, calibrationVersion, calibrationStatus,
+                sourceSequenceEnabled);
         return new PointCatalogPointView(
                 rs.getObject("id", UUID.class), rs.getObject("snapshot_id", UUID.class),
                 rs.getString("plant_id"), rs.getString("line_id"), rs.getString("locality_group"),
@@ -215,13 +217,13 @@ public class PointCatalogPostgresRepository {
                 rs.getString("source_property_id"), rs.getString("point_name"), unit,
                 rs.getString("data_type"), deviceState,
                 registered, propertyPresent, calibrationVersion, calibrationStatus,
-                rs.getBoolean("source_sequence_enabled"), issues.isEmpty(), issues);
+                sourceSequenceEnabled, issues.isEmpty(), issues);
     }
 
     public static boolean isReady(PointCatalogPointCommand point) {
         return readinessIssues(
                 point.registered(), point.propertyPresent(), point.deviceState(), point.unit(),
-                point.calibrationVersion(), point.calibrationStatus()).isEmpty();
+                point.calibrationVersion(), point.calibrationStatus(), point.sourceSequenceEnabled()).isEmpty();
     }
 
     private static List<String> readinessIssues(
@@ -230,7 +232,8 @@ public class PointCatalogPostgresRepository {
             String deviceState,
             String unit,
             String calibrationVersion,
-            String calibrationStatus) {
+            String calibrationStatus,
+            boolean sourceSequenceEnabled) {
         List<String> issues = new ArrayList<>();
         if (!registered) issues.add("DEVICE_NOT_REGISTERED");
         if (!"ACTIVE".equals(deviceState)) issues.add("DEVICE_NOT_ACTIVE");
@@ -240,6 +243,7 @@ public class PointCatalogPostgresRepository {
                 || !"VERIFIED".equals(calibrationStatus)) {
             issues.add("CALIBRATION_NOT_VERIFIED");
         }
+        if (!sourceSequenceEnabled) issues.add("SOURCE_SEQUENCE_DISABLED");
         return List.copyOf(issues);
     }
 

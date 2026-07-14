@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-15T05:20:00Z",
+  "generatedAt": "2026-07-14T21:42:00Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -41,8 +41,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 136,
-    "pass": 131,
+    "testedFeatures": 137,
+    "pass": 132,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -2966,6 +2966,29 @@
       "evidence": "metadata/bpi-point-catalog-kafka-sync-acceptance.json, docs/testing/bpi-point-catalog-kafka-sync-acceptance.md, /tmp/bpi-point-catalog-sync-scope-20260715.json and /tmp/bpi-point-catalog-sync-scope-20260715.png. Duplicate delivery and IoT restart added no rows; poison payload reached DLT without business persistence; GET returned 200 with zero console/page/request failures.",
       "issues": [
         "The automatic synchronization control passed, but the only source point remains BLOCKED because the device is not active/registered and metadata, calibration and source sequence are not ready."
+      ]
+    },
+    {
+      "module": "BPI来源序列硬准入",
+      "route": "/bpi/#/points and /bpi/#/rules",
+      "operation": "导入仅缺设备或网关来源序列的点位并验证拓扑失败关闭",
+      "api": "POST /bpi/v1/point-catalog/snapshots; POST /bpi/v1/topologies/drafts; POST /bpi/v1/topologies/{id}/validate",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository; RuleController -> RuleService -> RulePostgresRepository",
+      "tables": [
+        "bpi_point_catalog_snapshots",
+        "bpi_point_catalog_entries",
+        "bpi_topology_versions",
+        "bpi_api_idempotency",
+        "bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE",
+      "verificationSql": "Query point_count and ready_point_count for the marker snapshot; query topology validation_status and validation_errors for the sequence-only blocked binding.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-source-sequence-readiness-acceptance.json and docs/testing/bpi-source-sequence-readiness-acceptance.md. PostgreSQL 16.13/Flyway V12 stored 3 points with only 1 READY; DEVICE-S07-03/flow.sequence-missing remained blocked and topology validation returned the single POINT_SOURCE_SEQUENCE_DISABLED ERROR. Browser E2E was 8/8 with zero console/page/request failures. Target PostgreSQL 15.18 and http://100.99.133.43:18091/#/points then verified automatic revision sha256:2a218d12...151ce5 remains 1 point/0 READY with source_sequence_enabled=false and all five blockers visible; GET returned 200 with zero browser errors.",
+      "issues": [
+        "The target pilot device still has no reviewed device or gateway source epoch and sequence, so target source readiness remains BLOCKED."
       ]
     }
   ],

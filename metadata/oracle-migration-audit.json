@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T21:09:02+00:00",
-  "repoCommit": "79ee289d922f578aa25ef48778c18362141dad38",
+  "generatedAt": "2026-07-14T21:52:19+00:00",
+  "repoCommit": "583dde37af792efb5b1f7ab03bb331842ccb1718",
   "findingCount": 986,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -5421,7 +5421,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 72,
+      "line": 77,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5429,7 +5429,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 94,
+      "line": 99,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5437,7 +5437,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 97,
+      "line": 102,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5445,7 +5445,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 99,
+      "line": 104,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5453,7 +5453,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 106,
+      "line": 111,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5461,7 +5461,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 109,
+      "line": 114,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5469,7 +5469,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 111,
+      "line": 116,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5477,7 +5477,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 116,
+      "line": 121,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5485,7 +5485,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 117,
+      "line": 122,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5493,7 +5493,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 119,
+      "line": 124,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5501,7 +5501,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 121,
+      "line": 126,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5509,7 +5509,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 185,
+      "line": 190,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5517,7 +5517,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 189,
+      "line": 194,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5525,7 +5525,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 191,
+      "line": 196,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5533,7 +5533,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 195,
+      "line": 200,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -5541,7 +5541,7 @@
     },
     {
       "file": "docs/project-objectives.md",
-      "line": 196,
+      "line": 201,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

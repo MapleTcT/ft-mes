@@ -63,7 +63,9 @@ class BpiPointCatalogPostgresAcceptanceTest {
 
     @BeforeEach
     void setUpTenant() throws Exception {
-        marker = "ADP_E2E_BPI_POINTS_" + UUID.randomUUID().toString().replace("-", "");
+        marker = env(
+                "BPI_TEST_MARKER",
+                "ADP_E2E_BPI_POINTS_" + UUID.randomUUID().toString().replace("-", ""));
         tenantId = marker;
         engineerToken = token("point-engineer", List.of("BPI_ENGINEER"));
         adminToken = token("point-admin", List.of("BPI_ADMIN"));
@@ -126,11 +128,14 @@ class BpiPointCatalogPostgresAcceptanceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(snapshotBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.snapshot.pointCount").value(2))
+                .andExpect(jsonPath("$.data.snapshot.pointCount").value(3))
                 .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
-                .andExpect(jsonPath("$.data.points.length()").value(2))
+                .andExpect(jsonPath("$.data.points.length()").value(3))
                 .andExpect(jsonPath("$.data.points[0].ready").value(true))
                 .andExpect(jsonPath("$.data.points[1].ready").value(false))
+                .andExpect(jsonPath("$.data.points[2].ready").value(false))
+                .andExpect(jsonPath("$.data.points[2].readinessIssues[*]")
+                        .value(hasItem("SOURCE_SEQUENCE_DISABLED")))
                 .andReturn();
         UUID snapshotId = UUID.fromString(response(imported).path("data").path("snapshot").path("id").asText());
         String snapshotChecksum = response(imported).path("data").path("snapshot").path("checksum").asText();
@@ -172,7 +177,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(pointCatalogBody(marker + "_REFRESHED", Instant.now().minusSeconds(1))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.snapshot.pointCount").value(2))
+                .andExpect(jsonPath("$.data.snapshot.pointCount").value(3))
                 .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
                 .andReturn();
         UUID currentSnapshotId = UUID.fromString(
@@ -229,13 +234,30 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.validationErrors[*].code")
                         .value(hasItem("POINT_UNIT_MISSING")))
                 .andExpect(jsonPath("$.data.validationErrors[*].code")
-                        .value(hasItem("POINT_CALIBRATION_NOT_VERIFIED")));
+                        .value(hasItem("POINT_CALIBRATION_NOT_VERIFIED")))
+                .andExpect(jsonPath("$.data.validationErrors[*].code")
+                        .value(hasItem("POINT_SOURCE_SEQUENCE_DISABLED")));
+
+        UUID sequenceBlockedTopology = createTopology(
+                marker + "_SEQUENCE_BLOCKED", sequenceBlockedDefinition(), "sequence-create-" + marker);
+        mockMvc.perform(post("/bpi/v1/topologies/{id}/validate", sequenceBlockedTopology)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "sequence-validate-" + marker)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reason("验证仅缺来源序列的点位必须阻断")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.validationStatus").value("FAILED"))
+                .andExpect(jsonPath("$.data.validationErrors.length()").value(1))
+                .andExpect(jsonPath("$.data.validationErrors[0].code")
+                        .value("POINT_SOURCE_SEQUENCE_DISABLED"))
+                .andExpect(jsonPath("$.data.validationErrors[0].severity").value("ERROR"));
 
         assertThat(jdbc.queryForObject("""
                 SELECT point_count || '|' || ready_point_count || '|' || checksum
                   FROM bpi.bpi_point_catalog_snapshots
                  WHERE tenant_id = ? AND id = ?
-                """, String.class, tenantId, currentSnapshotId)).isEqualTo("2|1|" + currentSnapshotChecksum);
+                """, String.class, tenantId, currentSnapshotId)).isEqualTo("3|1|" + currentSnapshotChecksum);
         assertThat(jdbc.queryForObject("""
                 SELECT validated_point_catalog_snapshot_id::text || '|' || validated_point_catalog_checksum
                   FROM bpi.bpi_topology_versions
@@ -254,8 +276,8 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 """, String.class, tenantId, snapshotId))
                 .isEqualTo("POINT_CATALOG_SNAPSHOT_IMPORTED|POINT_CATALOG_SNAPSHOT|" + marker + "_IMPORT");
         assertThat(count("bpi_point_catalog_snapshots")).isEqualTo(2);
-        assertThat(count("bpi_point_catalog_entries")).isEqualTo(4);
-        assertThat(count("bpi_api_idempotency")).isEqualTo(11);
+        assertThat(count("bpi_point_catalog_entries")).isEqualTo(6);
+        assertThat(count("bpi_api_idempotency")).isEqualTo(13);
     }
 
     private UUID createTopology(String code, Map<String, Object> definition, String key) throws Exception {
@@ -316,6 +338,21 @@ class BpiPointCatalogPostgresAcceptanceTest {
                                 Map.entry("registered", false),
                                 Map.entry("propertyPresent", false),
                                 Map.entry("calibrationStatus", "MISSING"),
+                                Map.entry("sourceSequenceEnabled", false)),
+                        Map.ofEntries(
+                                Map.entry("localityGroup", "LOCALITY-S07-EVAP"),
+                                Map.entry("productId", "PRODUCT-SUGAR"),
+                                Map.entry("deviceId", "DEVICE-S07-03"),
+                                Map.entry("propertyId", "flow.sequence-missing"),
+                                Map.entry("sourcePropertyId", "sequenceMissingFlow"),
+                                Map.entry("pointName", "缺来源序列流量"),
+                                Map.entry("unit", "m3/h"),
+                                Map.entry("dataType", "double"),
+                                Map.entry("deviceState", "ACTIVE"),
+                                Map.entry("registered", true),
+                                Map.entry("propertyPresent", true),
+                                Map.entry("calibrationVersion", "CAL-2026-01"),
+                                Map.entry("calibrationStatus", "VERIFIED"),
                                 Map.entry("sourceSequenceEnabled", false)))));
     }
 
@@ -325,6 +362,10 @@ class BpiPointCatalogPostgresAcceptanceTest {
 
     private Map<String, Object> blockedDefinition() {
         return definition("DEVICE-S07-02", "tank.level", "m", "CAL-MISSING");
+    }
+
+    private Map<String, Object> sequenceBlockedDefinition() {
+        return definition("DEVICE-S07-03", "flow.sequence-missing", "m3/h", "CAL-2026-01");
     }
 
     private Map<String, Object> definition(

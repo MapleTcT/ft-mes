@@ -454,6 +454,18 @@ KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目�
 `docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`。该状态只证明自动同步控制链和真实落库通过；
 目录内 1 个点仍为 0 READY，设备注册/激活、属性 metadata、标定和来源序列属于未完成的现场数据源条件。
 
+### BPI 来源序列硬准入（本地与目标真实 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 导入仅缺设备/网关来源序列的点位 | `/bpi/#/points` | `POST /bpi/v1/point-catalog/snapshots` | `PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | `SELECT point_count,ready_point_count FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id=:marker AND id=:snapshot;`；查询 `flow.sequence-missing` 的 `ready/readinessIssues` API 结果 | marker `ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE` 在 PostgreSQL 16.13/Flyway V12 中导入 3 点、仅 1 点 READY；`DEVICE-S07-03/flow.sequence-missing` 其余条件均通过但保持 `ready=false/SOURCE_SEQUENCE_DISABLED` | PASS |
+| 校验绑定仅缺来源序列点位的拓扑 | `/bpi/#/rules` | `POST /bpi/v1/topologies/drafts`；`POST /bpi/v1/topologies/{id}/validate` | `RuleController -> RuleService -> PointCatalogService -> RulePostgresRepository` | `bpi_topology_versions`、`bpi_api_idempotency`、`bpi_audit_events` | 查询 `validation_status`、`validation_errors`、`validated_point_catalog_snapshot_id/checksum` | 校验状态 `FAILED`，唯一错误 `POINT_SOURCE_SEQUENCE_DISABLED`、severity `ERROR`；未降级为 warning，也没有发布 | PASS |
+| 目标自动目录读取与硬门禁复验 | `http://100.99.133.43:18091/#/points` | `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | `BPI Web -> Java 8 Adapter -> PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries` | 查询最新 scope snapshot 并关联 entry 的 `registered/device_state/property_present/calibration_status/source_sequence_enabled` | PostgreSQL 15.18 返回 revision `sha256:2a218d12...151ce5`、1 点/0 READY、`false/INACTIVE/false/UNVERIFIED/false`；真实页面 GET 200 并显示五项阻断，浏览器错误为 0 | PASS_TARGET_GATE_WITH_BLOCKED_SOURCE |
+
+机器记录：`metadata/bpi-source-sequence-readiness-acceptance.json`；详细报告：
+`docs/testing/bpi-source-sequence-readiness-acceptance.md`。该项不把 exporter 自增回退序列解释为现场来源序列，
+也不改变目标试点设备仍为 `BLOCKED` 的结论。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。
