@@ -84,8 +84,38 @@ offset 前后不变。默认退出时只清理本 marker 的 candidate/inbox/rul
 `BPI_PERSISTENCE_REPLAY_KEEP_MARKER=true` 才保留供浏览器继续确认。
 
 该 replay 证明 Kafka -> Flink -> Kafka 候选数据面。BPI 服务已经具备默认关闭的 candidate consumer
-和 PostgreSQL 幂等落库实现；只有在实机启用白名单后，继续验证 candidate offset、inbox/candidate marker、
-DLQ 为空和浏览器确认，才能形成完整验收。WOM 写回和长稳压测仍是后续门禁。
+和 PostgreSQL 幂等落库实现；它仍是独立数据面测试，不等于浏览器联合链路。
+
+## 浏览器联合验收
+
+需要复验“浏览器规则发布到影子批次落库”时，使用唯一 marker，并先通过
+`deploy/bpi-runtime/sql/joint-acceptance-seed.sql` 准备 topology/rule/golden/history fixture。
+fixture 只用于验收，不是产品配置接口。runtime 的 candidate、rule publication 和 rule application
+消费者只能对白名单 tenant/plant/line 临时启用。
+
+在真实 BPI 页面完成规则模拟和发布、并确认页面显示“Flink 已应用”后执行：
+
+```bash
+make bpi-stream-joint-replay
+```
+
+该命令不再自行发布规则，而是要求 Flink 已应用的规则来自浏览器触发的 PostgreSQL outbox，
+只发送受控 MES context 和遥测，并要求一个且仅一个候选、零 marker 相关数据质量问题。随后在
+真实页面确认候选，并用 `deploy/bpi-runtime/sql/joint-acceptance-verify.sql` 查询候选、批次、证据、
+状态事件、审计和幂等行。
+
+验收退场顺序不可颠倒：
+
+```bash
+make bpi-stream-rule-deactivate
+# 随后执行 joint-acceptance-cleanup.sql，恢复 runtime consumers 默认关闭，再跑浏览器只读 smoke
+```
+
+`bpi-stream-rule-deactivate` 从真实 rule topic 读取本次已发布版本，发布 typed `active=false`，并等待
+Flink 返回新的 `APPLIED`，避免只删 PostgreSQL 后 Broadcast State 仍保留规则。完整操作、offset、
+目标表和清理边界见
+[`docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md`](../../docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md)。
+WOM/QCS/WMS 写回和 7-14 天影子运行仍是后续门禁。
 
 ## 回滚
 
@@ -94,4 +124,5 @@ make down-bpi-stream
 ```
 
 若新作业版本失败，先保留 volumes 和 MinIO checkpoint，恢复上一版 job JAR，然后重新执行
-预检、启动和 smoke。升级前的 savepoint/restore 演练将在实机集群可启动后记录到验收报告。
+预检、启动和 smoke。带负载 TaskManager 恢复已经通过；broker 故障、savepoint 升级和整体
+回滚演练仍需补齐。

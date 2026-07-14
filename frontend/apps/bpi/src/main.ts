@@ -207,6 +207,15 @@ function refreshIcons(): void {
   createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, RefreshCw, Search, ShieldCheck, X } });
 }
 
+function commandId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6]! & 0x0f) | 0x40;
+  bytes[8] = (bytes[8]! & 0x3f) | 0x80;
+  const value = Array.from(bytes, (item) => item.toString(16).padStart(2, '0')).join('');
+  return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`;
+}
+
 function bindShellEvents(): void {
   document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => navigate(button.dataset.view as View));
@@ -444,7 +453,7 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   button.textContent = command === 'reject' ? '拒绝中...' : '确认中...';
   try {
     if (command === 'reject') {
-      const response = await bpiApi.rejectCandidate(candidate, reason, crypto.randomUUID());
+      const response = await bpiApi.rejectCandidate(candidate, reason, commandId());
       applyCandidateReview(response.data);
       document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
       closeDrawer();
@@ -454,7 +463,7 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
       await loadView();
       return;
     }
-    const response = await bpiApi.confirmCandidate(candidate, reason, crypto.randomUUID());
+    const response = await bpiApi.confirmCandidate(candidate, reason, commandId());
     applyCandidateReview(response.data.candidate);
     try {
       const pendingResponse = await bpiApi.candidates(state.plantId);
@@ -573,7 +582,7 @@ async function handleRuleSimulation(event: SubmitEvent): Promise<void> {
   button.disabled = true;
   button.textContent = '回放中...';
   try {
-    const response = await bpiApi.simulateRule(rule, command, crypto.randomUUID());
+    const response = await bpiApi.simulateRule(rule, command, commandId());
     state.selectedSimulation = response.data;
     state.selectedRule = (await bpiApi.rule(rule.id)).data;
     state.rules = state.rules.map((item) => item.id === rule.id ? state.selectedRule! : item);
@@ -619,7 +628,7 @@ async function handleRulePublish(): Promise<void> {
   button.disabled = true;
   button.textContent = '发布中...';
   try {
-    const response = await bpiApi.publishRule(rule, simulation, reason, crypto.randomUUID());
+    const response = await bpiApi.publishRule(rule, simulation, reason, commandId());
     state.selectedRule = response.data;
     state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
@@ -670,7 +679,7 @@ async function handleRuleCommand(): Promise<void> {
   button.disabled = true;
   button.textContent = '重新入队中...';
   try {
-    const response = await bpiApi.retryRulePublication(rule, reason, crypto.randomUUID());
+    const response = await bpiApi.retryRulePublication(rule, reason, commandId());
     state.selectedRule = response.data;
     state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
@@ -751,8 +760,8 @@ async function handleBatchCommand(): Promise<void> {
   button.textContent = command === 'suspend' ? '暂停中...' : '恢复中...';
   try {
     const response = command === 'suspend'
-      ? await bpiApi.suspendBatch(batch, reason, crypto.randomUUID())
-      : await bpiApi.resumeBatch(batch, reason, crypto.randomUUID());
+      ? await bpiApi.suspendBatch(batch, reason, commandId())
+      : await bpiApi.resumeBatch(batch, reason, commandId());
     state.selectedBatch = response.data;
     state.batches = state.batches.map((item) => item.id === response.data.id ? response.data : item);
     state.lines = state.lines.map((line) => line.lineId === response.data.lineId

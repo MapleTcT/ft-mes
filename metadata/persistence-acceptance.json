@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T03:03:06.045Z",
+  "generatedAt": "2026-07-14T09:47:29Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -31,8 +31,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 128,
-    "pass": 123,
+    "testedFeatures": 132,
+    "pass": 127,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -2792,8 +2792,91 @@
       "status": "NOT_APPLICABLE",
       "evidence": "metadata/bpi-rule-application-flink-kafka-acceptance.json records Kafka 4.2 + Flink 2.2.1 MiniCluster execution with 3 completed checkpoints, 1 restored checkpoint, read_committed invisibility before checkpoint, canceled transaction rollback, APPLIED/INACTIVE commit, restored terminal state and REJECTED same-version reactivation. This data-plane test intentionally does not write PostgreSQL.",
       "issues": [
-        "Target three-broker Kafka/Flink/MinIO and browser-to-Java/PostgreSQL joint acceptance remain blocked."
+        "This item remains data-plane-only; target joint browser/PostgreSQL proof is recorded separately in metadata/bpi-browser-kafka-postgres-joint-acceptance.json."
       ]
+    },
+    {
+      "module": "BPI规则模拟与发布",
+      "route": "http://100.99.133.43:18091/#/rules",
+      "operation": "真实浏览器执行历史回放模拟、发布规则并等待Flink应用",
+      "api": "POST /bpi-api/rules/1fa266e3-1f11-2a82-b36e-43feb7017948/simulate; POST /bpi-api/rules/1fa266e3-1f11-2a82-b36e-43feb7017948/publish; GET /bpi-api/rules/1fa266e3-1f11-2a82-b36e-43feb7017948",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController -> RuleService -> BpiPostgresRepository -> RulePublicationOutboxRepository/Dispatcher -> BpiKafkaJob -> RuleApplicationKafkaListener/ReceiptService",
+      "tables": [
+        "bpi_rule_versions",
+        "bpi_rule_simulations",
+        "bpi_outbox_events",
+        "bpi_inbox_events",
+        "bpi_audit_events",
+        "bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql: verify rule_state=PUBLISHED, rule_revision=3, simulations=1, publication_status=PUBLISHED, application_status=APPLIED and audit rows",
+      "status": "PASS",
+      "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json and /tmp/bpi-joint-browser-publish.json. Simulation returned 202 with matched=1/missed=0/falsePositive=0/meanBoundaryError=0; publication returned 200; browser displayed Flink applied; console/page/request errors were zero.",
+      "issues": [
+        "Topology and rule were marker-scoped acceptance fixtures, not a product authoring flow."
+      ]
+    },
+    {
+      "module": "BPI上下文遥测与候选生成",
+      "route": "http://100.99.133.43:18091/#/candidates",
+      "operation": "使用浏览器已发布规则发送受控MES上下文与三条遥测并持久化唯一候选",
+      "api": "mes.production.context.v1 + iot.telemetry.selected.v1 -> bpi.batch.candidate.v1",
+      "method": "KAFKA_EVENT",
+      "requiresPersistence": true,
+      "backendEntry": "BpiJointAcceptanceReplay -> BpiKafkaJob event-time/context join and Broadcast State -> CandidateKafkaListener -> CandidateIngestionService -> BpiPostgresRepository",
+      "tables": [
+        "bpi_inbox_events",
+        "bpi_batch_candidates"
+      ],
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql: verify candidates=1 and candidate state=PENDING before browser confirmation",
+      "status": "PASS",
+      "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json and /tmp/bpi-streaming-evidence/bpi-joint-replay.json. Context partition=1 offset=0, telemetry partition=5 offsets=3/4/5, candidate partition=2 offset=0, exactly one matching candidate and zero matching data-quality issues.",
+      "issues": [
+        "Inputs were deterministic acceptance events, not real MapleTcT/iot or MES outbox traffic."
+      ]
+    },
+    {
+      "module": "BPI候选确认与影子批次",
+      "route": "http://100.99.133.43:18091/#/candidates",
+      "operation": "真实浏览器确认候选并生成影子批次、边界证据、状态事件和审计",
+      "api": "POST /bpi-api/candidates/a388ebc3-5b8f-50ff-afec-8407e1cab209/confirm",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "CandidateController -> CandidateService -> BpiPostgresRepository",
+      "tables": [
+        "bpi_batch_candidates",
+        "bpi_batch_instances",
+        "bpi_boundary_evidence",
+        "bpi_batch_state_events",
+        "bpi_audit_events",
+        "bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql: verify candidate=CONFIRMED revision 2, batch=ACTIVE revision 1 is_shadow=true, boundaryEvidence=2, stateEvents=1, auditEvents=3",
+      "status": "PASS",
+      "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json and /tmp/bpi-joint-browser-confirm.json. Confirm returned 200; flow.instant=19.0 GOOD and pump.running=true GOOD were persisted as evidence; console/page/request errors were zero.",
+      "issues": [
+        "The result is a shadow batch and intentionally does not change WOM, QCS or WMS production state."
+      ]
+    },
+    {
+      "module": "BPI联合验收退场恢复",
+      "route": "http://100.99.133.43:18091/#/overview",
+      "operation": "发布typed inactive、定向清理marker、恢复消费者默认关闭并复验概览",
+      "api": "bpi.boundary.rule-publication.v1 -> bpi.boundary.rule-application.v1; GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false",
+      "method": "KAFKA_EVENT/GET",
+      "requiresPersistence": false,
+      "backendEntry": "BpiRuleDeactivationReplay -> BpiKafkaJob -> rule application receipt; joint-acceptance-cleanup.sql; OverviewController",
+      "tables": [],
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql returned remaining topologies=0, rules=0, candidates=0, batches=0",
+      "status": "PASS",
+      "evidence": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json, /tmp/bpi-streaming-evidence/bpi-rule-deactivation.json and /tmp/bpi-joint-browser-read-after-cleanup.json. Flink acknowledged inactive, consumers returned to disabled/deny-all, overview returned 200 and browser errors were zero.",
+      "issues": []
     }
   ],
   "evidence": [

@@ -1,0 +1,123 @@
+package com.mapletct.ftmes.bpi.stream;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
+import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class BpiJointAcceptanceScenarioTest {
+
+    private static final String MARKER = "ADP_E2E_20260714_001";
+    private static final Instant T0 = Instant.parse("2026-07-14T08:00:00Z");
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void scenarioProducesOnlyContextAndTelemetryForAnExistingPublishedRule() {
+        BpiJointAcceptanceReplayConfig config = config(tempDir.resolve("joint.json"));
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(config, T0);
+
+        assertEquals("1000|PLANT-01|LINE-S07-01", scenario.contextKey());
+        assertEquals("MO-" + MARKER, scenario.context().getOrderId());
+        assertEquals(T0.getEpochSecond(), scenario.context().getContextRevision());
+        assertEquals(3, scenario.telemetry().size());
+        scenario.telemetry().forEach(envelope -> {
+            var validation = BpiContractValidator.validate(envelope);
+            assertTrue(validation.isEnvelopeAccepted());
+            assertEquals(2, validation.getAcceptedPointIndexes().size());
+            assertTrue(validation.getPointRejections().isEmpty());
+        });
+    }
+
+    @Test
+    void candidateAndIssueFiltersRequireTheConfiguredBrowserPublishedRuleScope() {
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(
+                config(tempDir.resolve("joint.json")), T0);
+        BatchCandidateV1 candidate = BatchCandidateV1.newBuilder()
+                .setTenantId(scenario.tenantId())
+                .setPlantId(scenario.plantId())
+                .setLineId(scenario.lineId())
+                .setRuleCode(scenario.ruleCode())
+                .setContextOrderId(scenario.orderId())
+                .setBoundaryType(BoundaryType.START)
+                .build();
+        assertTrue(BpiJointAcceptanceReplay.matchesCandidate(candidate, scenario));
+        assertFalse(BpiJointAcceptanceReplay.matchesCandidate(
+                candidate.toBuilder().setRuleCode("OTHER").build(), scenario));
+
+        DataQualityEventV1 issue = DataQualityEventV1.newBuilder()
+                .setSourceEventId(MARKER + "-TELEMETRY-1")
+                .build();
+        assertTrue(BpiJointAcceptanceReplay.matchesIssue(issue, scenario));
+        assertFalse(BpiJointAcceptanceReplay.matchesIssue(
+                issue.toBuilder().setSourceEventId("OTHER").build(), scenario));
+    }
+
+    @Test
+    void configurationFailsClosedWithoutExplicitScopeAndRuleIdentity() {
+        BpiJointAcceptanceReplayConfig config = config(tempDir.resolve("joint.json"));
+        assertEquals("ft-mes-bpi-joint-acceptance-" + MARKER, config.consumerGroup());
+        assertThrows(IllegalArgumentException.class, () ->
+                BpiJointAcceptanceReplayConfig.fromEnvironment(Map.of(
+                        "BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092",
+                        "BPI_JOINT_MARKER", MARKER,
+                        "BPI_JOINT_REPORT", "/tmp/joint.json")));
+    }
+
+    @Test
+    void reportStatesThatTheRuleCameFromTheBrowserPublicationOutbox() throws Exception {
+        Path report = tempDir.resolve("joint.json").toAbsolutePath();
+        BpiJointAcceptanceReplayConfig config = config(report);
+        BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(config, T0);
+        BatchCandidateV1 candidate = BatchCandidateV1.newBuilder()
+                .setEventId("CANDIDATE-1")
+                .setCandidateKey("00000000-0000-5000-8000-000000000001")
+                .addEvidenceEventIds(MARKER + "-TELEMETRY-1")
+                .build();
+        BpiJointAcceptanceReplay.ReplayResult result = new BpiJointAcceptanceReplay.ReplayResult(
+                java.util.List.of(new BpiJointAcceptanceReplay.InputOffset(
+                        config.telemetryTopic(), 1, 42, MARKER + "-TELEMETRY-1")),
+                candidate,
+                new BpiJointAcceptanceReplay.OutputOffset(config.candidateTopic(), 2, 84),
+                1,
+                java.util.List.of());
+
+        BpiJointAcceptanceReplay.writeReport(config, scenario, result, "PASS", null);
+
+        JsonNode json = new ObjectMapper().readTree(report.toFile());
+        assertEquals("PASS", json.path("status").asText());
+        assertEquals("BPI_BROWSER_PUBLICATION_OUTBOX", json.path("ruleSource").asText());
+        assertEquals("RULE-S07-START@1.2.0", json.path("scope").path("rule").asText());
+        assertEquals(84, json.path("candidate").path("offset").asLong());
+        assertTrue(json.path("error").isNull());
+    }
+
+    private BpiJointAcceptanceReplayConfig config(Path report) {
+        return BpiJointAcceptanceReplayConfig.fromEnvironment(Map.ofEntries(
+                Map.entry("BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092"),
+                Map.entry("BPI_JOINT_MARKER", MARKER),
+                Map.entry("BPI_JOINT_TENANT_ID", "1000"),
+                Map.entry("BPI_JOINT_PLANT_ID", "PLANT-01"),
+                Map.entry("BPI_JOINT_LINE_ID", "LINE-S07-01"),
+                Map.entry("BPI_JOINT_TOPOLOGY_CODE", "TOPO-S07"),
+                Map.entry("BPI_JOINT_TOPOLOGY_VERSION", "3"),
+                Map.entry("BPI_JOINT_RULE_CODE", "RULE-S07-START"),
+                Map.entry("BPI_JOINT_RULE_VERSION", "1.2.0"),
+                Map.entry("BPI_JOINT_DEVICE_ID", "DEVICE-S07-01"),
+                Map.entry("BPI_JOINT_REPORT", report.toAbsolutePath().toString())));
+    }
+}

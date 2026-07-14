@@ -71,7 +71,11 @@ after(async () => {
 });
 
 test('desktop operator confirms a candidate and opens the shadow batch', async () => {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await context.addInitScript(() => {
+    Object.defineProperty(window.crypto, 'randomUUID', { value: undefined, configurable: true });
+  });
+  const page = await context.newPage();
   const errors = observe(page);
   await page.goto(APP_URL, { waitUntil: 'networkidle' });
 
@@ -93,7 +97,7 @@ test('desktop operator confirms a candidate and opens the shadow batch', async (
   assert.equal(await page.locator('#candidate-count').textContent(), '1');
   await page.screenshot({ path: '/tmp/bpi-console-desktop.png', fullPage: true });
   assert.deepEqual(errors, []);
-  await page.close();
+  await context.close();
 });
 
 test('shift lead confirms the END boundary and closes the raw batch', async () => {

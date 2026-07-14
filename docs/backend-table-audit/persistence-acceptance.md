@@ -1,5 +1,21 @@
 # 后端落库验收报告
 
+## 2026-07-14 BPI 目标环境同一 marker 联合验收
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 规则历史回放模拟 | BPI `/#/rules` | `POST /bpi/v1/rules/{ruleId}/simulate` | `RuleController -> RuleService -> BpiPostgresRepository` | `bpi_rule_simulations`、`bpi_rule_versions`、`bpi_api_idempotency` | marker `ADP_E2E_20260714_091536_BPI_JOINT`；HTTP `202`；2 条历史观测、1 条 golden，matched=1、missed=0、falsePositive=0、meanBoundaryError=0；simulation `81d3e369-f233-4fc9-8aa7-894dd03ceda0` | PASS |
+| 规则发布与 Flink 应用回执 | BPI `/#/rules` | `POST /bpi/v1/rules/{ruleId}/publish` | `RuleController -> RuleService -> RulePublicationOutboxRepository/Dispatcher -> Kafka -> BpiKafkaJob -> RuleApplicationKafkaListener/ReceiptService` | `bpi_rule_versions`、`bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events`、`bpi_api_idempotency` | HTTP `200`；规则 `PUBLISHED` revision 3；publication event `1f19127c-fff8-4dcb-b3e4-d4d55b6442c2` 为 `PUBLISHED/APPLIED`，deployment `ubuntu-test-v1`；页面最终显示“Flink 已应用” | PASS |
+| 上下文/遥测形成唯一候选 | BPI 候选列表；输入由联合回放器发送 | `mes.production.context.v1`、`iot.telemetry.selected.v1` -> `bpi.batch.candidate.v1` | `BpiKafkaJob -> event-time/context join -> boundary rule Broadcast State -> CandidateKafkaListener -> CandidateIngestionService` | `bpi_inbox_events`、`bpi_batch_candidates` | context partition 1 offset 0；telemetry partition 5 offsets 3/4/5；candidate partition 2 offset 0；matching candidate=1，data quality issue=0；PostgreSQL `PENDING` candidate=1 | PASS |
+| 候选确认和影子批次生成 | BPI `/#/candidates` | `POST /bpi/v1/candidates/{candidateId}/confirm` | `CandidateController -> CandidateService -> BpiPostgresRepository` | `bpi_batch_candidates`、`bpi_batch_instances`、`bpi_boundary_evidence`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | HTTP `200`；candidate `CONFIRMED` revision 2；batch `ACTIVE` revision 1、`is_shadow=true`；boundary evidence=2，state event=1，audit event=3；flow=19.0 GOOD，pump=true GOOD | PASS |
+| typed inactive、marker 清理和恢复 | 无业务页面写入；退场后浏览器概览复验 | `bpi.boundary.rule-publication.v1` -> `bpi.boundary.rule-application.v1`；cleanup SQL；`GET /bpi/v1/overview` | `BpiRuleDeactivationReplay -> BpiKafkaJob -> RuleApplication receipt`；单事务定向清理 | 本次 marker 涉及的 BPI 表 | inactive publication partition 1 offset 1，Flink `APPLIED` partition 1 offset 4；清理后 topology/rule/candidate/batch 均为 0；消费者恢复关闭，浏览器概览 `200` 且错误为 0 | PASS |
+
+查询与清理入口分别为 `deploy/bpi-runtime/sql/joint-acceptance-verify.sql` 和
+`deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql`。fixture SQL 只创建验收所需的
+topology/rule/golden/history 数据；规则发布、候选生成和批次确认均走真实页面、API、
+Kafka/Flink 和正式服务链，没有用 SQL 直写冒充业务动作。机器证据见
+`metadata/bpi-browser-kafka-postgres-joint-acceptance.json`。
+
 ## 2026-07-12 核心主线当前运行时回归
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |

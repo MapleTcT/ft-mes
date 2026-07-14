@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:17:11Z",
+  "generatedAt": "2026-07-14T09:47:29Z",
   "baseCommitAtTest": "9a4a81213ebfbf3a2e8ea087915a177e28ba565e",
-  "status": "PARTIAL",
+  "status": "PASS_PHASE1_CONTROLLED",
   "environment": {
     "name": "ubuntu-test",
     "host": "100.99.133.43",
@@ -15,8 +15,8 @@
   },
   "summary": {
     "checks": 8,
-    "pass": 7,
-    "blocked": 1,
+    "pass": 8,
+    "blocked": 0,
     "fail": 0
   },
   "checks": [
@@ -58,8 +58,9 @@
     },
     {
       "id": "browser-to-batch-persistence-write-chain",
-      "status": "BLOCKED",
-      "evidence": "No controlled topology/rule product data is available yet; the same-marker UI publication, outbox, Kafka, Flink application receipt, candidate confirmation and batch/evidence/audit PostgreSQL chain has not been executed"
+      "status": "PASS",
+      "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+      "evidence": "Real browser simulation/publication, PostgreSQL outbox, Kafka/Flink APPLIED receipt, scoped context/telemetry, exactly one persisted candidate, real browser confirmation, shadow batch, 2 evidence rows, state event and audit rows passed; typed inactive, marker cleanup, consumer disable and post-cleanup browser read also passed"
     }
   ],
   "rawEvidence": {
@@ -67,10 +68,16 @@
     "targetRuntimeSmoke": "/tmp/bpi-runtime-smoke.json",
     "targetClusterSmoke": "/tmp/bpi-streaming-cluster-smoke.json",
     "targetReplay": "/tmp/bpi-streaming-evidence/bpi-kafka-replay.json",
-    "targetTaskManagerRecovery": "/tmp/bpi-streaming-loaded-taskmanager-recovery.json"
+    "targetTaskManagerRecovery": "/tmp/bpi-streaming-loaded-taskmanager-recovery.json",
+    "browserRulePublish": "/tmp/bpi-joint-browser-publish.json",
+    "targetJointReplay": "/tmp/bpi-streaming-evidence/bpi-joint-replay.json",
+    "browserCandidateConfirm": "/tmp/bpi-joint-browser-confirm.json",
+    "targetRuleDeactivation": "/tmp/bpi-streaming-evidence/bpi-rule-deactivation.json",
+    "postCleanupBrowserRead": "/tmp/bpi-joint-browser-read-after-cleanup.json"
   },
   "boundaries": [
-    "This report proves the target runtime read path and streaming data plane separately; it does not claim an unexecuted end-to-end write chain.",
+    "This report proves one controlled Phase 1 same-marker write chain; it does not prove productized topology/rule authoring or production readiness.",
+    "Acceptance fixtures and deterministic context/telemetry do not replace real MapleTcT/iot and MES integration.",
     "No credential, token, cookie value, private key, database password or environment file is stored in this report.",
     "Production migration, real IoT/MES integration, 7-14 day shadow operation and QCS/WMS writeback remain outside the passed scope."
   ]

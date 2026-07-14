@@ -525,6 +525,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-runtime/scripts/preflight.sh",
       "state": "tracked",
       "tracked": true
@@ -532,6 +538,24 @@
     {
       "ignored": false,
       "path": "deploy/bpi-runtime/scripts/smoke.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -567,6 +591,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-joint-replay.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
       "state": "tracked",
       "tracked": true
@@ -580,6 +610,12 @@
     {
       "ignored": false,
       "path": "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -3765,6 +3801,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-engineering-test-plan.md",
       "state": "tracked",
       "tracked": true
@@ -3958,6 +4000,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-boundary-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5769,6 +5817,24 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiJointAcceptanceReplay.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiJointAcceptanceReplayConfig.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiJointAcceptanceScenario.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
       "state": "tracked",
       "tracked": true
@@ -5800,6 +5866,12 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJobConfig.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiRuleDeactivationReplay.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5991,6 +6063,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiJointAcceptanceScenarioTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java",
       "state": "tracked",
       "tracked": true
@@ -6010,6 +6088,12 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleDeactivationReplayTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6098,16 +6182,16 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 471
+      "tracked": 477
     },
     "docs": {
-      "tracked": 80
+      "tracked": 81
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 98
+      "tracked": 99
     },
     "package.json": {
       "tracked": 1
@@ -6125,14 +6209,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 76
+      "tracked": 82
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1012,
-    "tracked": 1012,
+    "totalFiles": 1026,
+    "tracked": 1026,
     "untracked": 0
   },
   "untrackedByDirectory": []

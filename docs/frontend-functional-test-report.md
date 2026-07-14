@@ -413,6 +413,28 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-application-receipt-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。模拟器测试 6/6、浏览器测试 6/6、错误 0；本结论不把模拟端点当成真实落库。
 
+### BPI 目标环境同一 marker 联合验收（2026-07-14）
+
+本节使用真实 ADP 会话和 `http://100.99.133.43:18091` BPI 页面，不使用前端模拟器。
+受控 fixture、流处理输入、PostgreSQL 查询和清理均使用同一个 marker
+`ADP_E2E_20260714_091536_BPI_JOINT`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则与拓扑 | `/#/rules` | 打开规则、执行历史回放模拟并发布 | `POST /bpi-api/rules/{id}/simulate`；`POST /bpi-api/rules/{id}/publish`；`GET /bpi-api/rules/{id}` | 模拟 `202`、发布 `200`；页面从等待 Kafka/Flink 刷新到“Flink 已应用”；console/page/request failure 均为 0 | 模拟匹配 1、漏报 0、误报 0、平均边界误差 0；规则 `PUBLISHED` revision 3；outbox `PUBLISHED`，application `APPLIED` | `bpi_rule_versions`、`bpi_rule_simulations`、`bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS | topology/rule 来自唯一 marker 的受控 fixture，尚不是产品化配置入口 |
+| BPI 候选批次 | `/#/candidates` | 等待流处理候选进入列表，打开详情并填写原因确认 | `GET /bpi-api/candidates`；`GET /bpi-api/candidates/{id}`；`POST /bpi-api/candidates/{id}/confirm` | 确认请求 `200`；候选 `CONFIRMED` revision 2，自动进入影子批次；console/page/request failure 均为 0 | Kafka/Flink 只产生 1 个候选且数据质量错误 0；确认后生成 `ACTIVE`、`isShadow=true` 批次和 2 条信号证据 | `bpi_inbox_events`、`bpi_batch_candidates`、`bpi_batch_instances`、`bpi_boundary_evidence`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 输入为受控 context/telemetry，不是现场 IoT/MES 事件 |
+| BPI 清理后概览 | `/#/overview` | typed inactive、定向清理和消费者恢复关闭后重新打开概览 | `GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false` | 页面标题“智能批次”、概览和 SHADOW 标识可见；API `200`；console/page/request failure 均为 0 | Flink 已确认 inactive；marker topology/rule/candidate/batch 均为 0；消费者为默认关闭和 deny-all | 不新增业务数据 | PASS | 只证明验收退场后运行栈可读 |
+
+首次目标 HTTP 页面测试发现所有写命令依赖 `crypto.randomUUID()`，普通 HTTP 不属于
+secure context，点击后会在发请求前失败。前端已增加基于 `crypto.getRandomValues()` 的
+UUID v4 fallback，候选确认 E2E 显式移除 `randomUUID` 后仍通过；规则模拟/发布、候选
+确认/拒绝、批次暂停/恢复和发布重试共用同一安全生成函数。
+
+证据：`metadata/bpi-browser-kafka-postgres-joint-acceptance.json`、
+`/tmp/bpi-joint-browser-publish.json`、`/tmp/bpi-joint-browser-confirm.json`、
+`/tmp/bpi-joint-browser-read-after-cleanup.json`。完整 Kafka offset、Flink 回执、目标表和
+清理边界见 `docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

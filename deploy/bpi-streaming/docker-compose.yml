@@ -245,6 +245,48 @@ services:
     networks:
       - bpi-streaming
 
+  bpi-joint-replay:
+    profiles: [acceptance]
+    image: ${BPI_FLINK_IMAGE:-flink:2.2.1-scala_2.12-java17}
+    user: "${BPI_HOST_UID:-1000}:${BPI_HOST_GID:-1000}"
+    entrypoint: ["java"]
+    command:
+      - -cp
+      - /opt/bpi/bpi-stream-engine-job.jar
+      - com.mapletct.ftmes.bpi.stream.BpiJointAcceptanceReplay
+    environment:
+      BPI_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
+      BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+      BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
+      BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
+      BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+      BPI_JOINT_MARKER: ${BPI_JOINT_MARKER:-}
+      BPI_JOINT_TENANT_ID: ${BPI_JOINT_TENANT_ID:?BPI_JOINT_TENANT_ID is required}
+      BPI_JOINT_PLANT_ID: ${BPI_JOINT_PLANT_ID:?BPI_JOINT_PLANT_ID is required}
+      BPI_JOINT_LINE_ID: ${BPI_JOINT_LINE_ID:?BPI_JOINT_LINE_ID is required}
+      BPI_JOINT_TOPOLOGY_CODE: ${BPI_JOINT_TOPOLOGY_CODE:?BPI_JOINT_TOPOLOGY_CODE is required}
+      BPI_JOINT_TOPOLOGY_VERSION: ${BPI_JOINT_TOPOLOGY_VERSION:?BPI_JOINT_TOPOLOGY_VERSION is required}
+      BPI_JOINT_RULE_CODE: ${BPI_JOINT_RULE_CODE:?BPI_JOINT_RULE_CODE is required}
+      BPI_JOINT_RULE_VERSION: ${BPI_JOINT_RULE_VERSION:?BPI_JOINT_RULE_VERSION is required}
+      BPI_JOINT_DEVICE_ID: ${BPI_JOINT_DEVICE_ID:?BPI_JOINT_DEVICE_ID is required}
+      BPI_JOINT_FLOW_PROPERTY_ID: ${BPI_JOINT_FLOW_PROPERTY_ID:-flow.instant}
+      BPI_JOINT_FLOW_UNIT: ${BPI_JOINT_FLOW_UNIT:-t/h}
+      BPI_JOINT_PUMP_PROPERTY_ID: ${BPI_JOINT_PUMP_PROPERTY_ID:-pump.running}
+      BPI_JOINT_PUMP_UNIT: ${BPI_JOINT_PUMP_UNIT:-bool}
+      BPI_JOINT_CALIBRATION_VERSION: ${BPI_JOINT_CALIBRATION_VERSION:-CAL-1}
+      BPI_JOINT_TIMEOUT_SECONDS: ${BPI_JOINT_TIMEOUT_SECONDS:-180}
+      BPI_JOINT_TELEMETRY_SPACING_MS: ${BPI_JOINT_TELEMETRY_SPACING_MS:-2000}
+      BPI_JOINT_RESULT_GRACE_MS: ${BPI_JOINT_RESULT_GRACE_MS:-5000}
+      BPI_JOINT_REPORT: ${BPI_JOINT_REPORT:-/evidence/bpi-joint-replay.json}
+    volumes:
+      - ${BPI_JOB_JAR:?BPI_JOB_JAR is required}:/opt/bpi/bpi-stream-engine-job.jar:ro
+      - ${BPI_REPLAY_EVIDENCE_DIR:-/tmp/bpi-streaming-evidence}:/evidence
+    depends_on:
+      bpi-jobmanager:
+        condition: service_started
+    networks:
+      - bpi-streaming
+
 networks:
   bpi-streaming:
     driver: bridge

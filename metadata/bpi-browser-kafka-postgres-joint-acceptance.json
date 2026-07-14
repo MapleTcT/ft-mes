@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T09:47:29Z",
+  "baseCommitAtTest": "ed5eb92e4cf5edc87a2e7a51a0aaf513826f231f",
+  "status": "PASS",
+  "environment": {
+    "name": "ubuntu-test",
+    "host": "100.99.133.43",
+    "network": "Tailscale private",
+    "bpiBaseUrl": "http://100.99.133.43:18091",
+    "database": "PostgreSQL",
+    "databaseName": "ft_mes_bpi",
+    "flinkJobId": "1f55da2611f488cce0de0638d8f20b6f"
+  },
+  "scope": {
+    "marker": "ADP_E2E_20260714_091536_BPI_JOINT",
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "topology": "TOPO-ADP_E2E_20260714_091536_BPI_JOINT@1",
+    "rule": "RULE-ADP_E2E_20260714_091536_BPI_JOINT@1",
+    "deviceId": "DEVICE-ADP_E2E_20260714_091536_BPI_JOINT",
+    "goldenSetId": "GOLDEN-ADP_E2E_20260714_091536_BPI_JOINT",
+    "historyBoundaryTime": "2026-07-14T09:10:00Z"
+  },
+  "summary": {
+    "checks": 11,
+    "pass": 11,
+    "fail": 0,
+    "blocked": 0
+  },
+  "checks": [
+    {
+      "id": "browser-auth",
+      "status": "PASS",
+      "evidence": "ADP login 200; BPI title visible; consoleErrors=0; pageErrors=0; requestFailures=0"
+    },
+    {
+      "id": "rule-simulation",
+      "status": "PASS",
+      "request": "POST /bpi-api/rules/1fa266e3-1f11-2a82-b36e-43feb7017948/simulate",
+      "httpStatus": 202,
+      "evidence": "observationCount=2; goldenBoundaryCount=1; matched=1; missed=0; falsePositive=0; meanBoundaryError=0"
+    },
+    {
+      "id": "rule-publication",
+      "status": "PASS",
+      "request": "POST /bpi-api/rules/1fa266e3-1f11-2a82-b36e-43feb7017948/publish",
+      "httpStatus": 200,
+      "evidence": "rule=PUBLISHED revision=3; publicationEventId=1f19127c-fff8-4dcb-b3e4-d4d55b6442c2"
+    },
+    {
+      "id": "flink-rule-application",
+      "status": "PASS",
+      "evidence": "publication=PUBLISHED; application=APPLIED; deployment=ubuntu-test-v1; browser displayed Flink applied"
+    },
+    {
+      "id": "context-telemetry-replay",
+      "status": "PASS",
+      "evidence": "context partition=1 offset=0; telemetry partition=5 offsets=3,4,5; ruleSource=BPI_BROWSER_PUBLICATION_OUTBOX"
+    },
+    {
+      "id": "single-candidate",
+      "status": "PASS",
+      "evidence": "candidate topic partition=2 offset=0; exactly one matching candidate; matching data-quality issues=0; one PENDING PostgreSQL row"
+    },
+    {
+      "id": "browser-candidate-confirmation",
+      "status": "PASS",
+      "request": "POST /bpi-api/candidates/a388ebc3-5b8f-50ff-afec-8407e1cab209/confirm",
+      "httpStatus": 200,
+      "evidence": "candidate=CONFIRMED revision=2; batch=ACTIVE revision=1; isShadow=true; console/page/request errors=0"
+    },
+    {
+      "id": "postgres-persistence",
+      "status": "PASS",
+      "evidence": "candidate=1; batch=1; boundaryEvidence=2; stateEvents=1; auditEvents=3; flow.instant=19.0 GOOD; pump.running=true GOOD"
+    },
+    {
+      "id": "typed-rule-deactivation",
+      "status": "PASS",
+      "evidence": "active publication partition=1 offset=0; inactive partition=1 offset=1; new Flink application receipt APPLIED at partition=1 offset=4"
+    },
+    {
+      "id": "marker-cleanup",
+      "status": "PASS",
+      "evidence": "single-transaction cleanup; remaining topologies=0; rules=0; candidates=0; batches=0"
+    },
+    {
+      "id": "post-cleanup-read-and-consumer-restore",
+      "status": "PASS",
+      "evidence": "candidate/rule-publication/rule-application consumers disabled; scope deny-all; overview API=200; SHADOW visible; console/page/request errors=0"
+    }
+  ],
+  "persistence": {
+    "ruleId": "1fa266e3-1f11-2a82-b36e-43feb7017948",
+    "topologyId": "23061288-3d39-7ac1-19b2-e48f38d52868",
+    "simulationId": "81d3e369-f233-4fc9-8aa7-894dd03ceda0",
+    "publicationEventId": "1f19127c-fff8-4dcb-b3e4-d4d55b6442c2",
+    "candidateKey": "48d7aae5-bbf3-5cf3-a367-21e13f6099f2",
+    "candidateId": "a388ebc3-5b8f-50ff-afec-8407e1cab209",
+    "batchId": "2d9ebfbc-5d78-5013-aa1e-652aea31fbf0",
+    "batchNo": "BPI-LINES0701-20260714-48D7AAE5",
+    "tables": [
+      "bpi_rule_versions",
+      "bpi_rule_simulations",
+      "bpi_outbox_events",
+      "bpi_inbox_events",
+      "bpi_batch_candidates",
+      "bpi_batch_instances",
+      "bpi_boundary_evidence",
+      "bpi_batch_state_events",
+      "bpi_audit_events",
+      "bpi_api_idempotency"
+    ],
+    "verificationSql": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
+    "cleanupSql": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql"
+  },
+  "rawEvidence": [
+    "/tmp/bpi-joint-browser-publish.json",
+    "/tmp/bpi-streaming-evidence/bpi-joint-replay.json",
+    "/tmp/bpi-joint-browser-confirm.json",
+    "/tmp/bpi-streaming-evidence/bpi-rule-deactivation.json",
+    "/tmp/bpi-joint-browser-read-after-cleanup.json"
+  ],
+  "boundaries": [
+    "This is a controlled Phase 1 technical-chain acceptance, not production readiness.",
+    "Topology, rule, golden boundary and history telemetry were marker-scoped acceptance fixtures; they are not a product authoring path.",
+    "Context and telemetry were deterministic replay inputs, not real MapleTcT/iot or MES outbox events.",
+    "Real IoT/MES integration, 7-14 day shadow operation, QCS/WMS writeback and production cutover remain incomplete.",
+    "No credential, token, cookie, private key, database password or environment file is stored in this report."
+  ]
+}

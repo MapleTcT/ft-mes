@@ -15,11 +15,20 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/preflight.sh",
     "deploy/bpi-streaming/scripts/smoke-cluster.sh",
     "deploy/bpi-streaming/scripts/run-replay.sh",
+    "deploy/bpi-streaming/scripts/run-joint-replay.sh",
+    "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
     "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
+    "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
+    "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
+    "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
+    "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
+    "docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md",
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
     "metadata/bpi-test-host-capacity-preflight.json",
     "metadata/bpi-kafka-postgres-replay-acceptance.json",
+    "metadata/bpi-test-environment-acceptance.json",
+    "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
 ]
 
 
@@ -44,6 +53,7 @@ def main() -> int:
         "flink-s3-fs-presto-2.2.1.jar",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaJob",
         "com.mapletct.ftmes.bpi.stream.BpiKafkaAcceptanceReplay",
+        "com.mapletct.ftmes.bpi.stream.BpiJointAcceptanceReplay",
         "BPI_CANDIDATE_DLQ_TOPIC",
         "BPI_RULE_APPLICATION_TOPIC",
         "BPI_RULE_APPLICATION_DLQ_TOPIC",
@@ -102,6 +112,50 @@ def main() -> int:
         if marker not in postgres_replay:
             failures.append(f"BPI PostgreSQL replay is missing marker: {marker}")
 
+    joint_replay = (
+        ROOT / "deploy/bpi-streaming/scripts/run-joint-replay.sh"
+    ).read_text(encoding="utf-8")
+    joint_replay += (
+        ROOT
+        / "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiJointAcceptanceReplay.java"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_JOINT_MARKER",
+        "BPI_JOINT_TENANT_ID",
+        "BPI_JOINT_PLANT_ID",
+        "BPI_JOINT_LINE_ID",
+        "BPI_BROWSER_PUBLICATION_OUTBOX",
+        "matchingDataQualityIssues",
+    ):
+        if marker not in joint_replay:
+            failures.append(f"BPI joint replay is missing safety marker: {marker}")
+
+    deactivation = (
+        ROOT / "deploy/bpi-streaming/scripts/run-rule-deactivation.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_DEACTIVATE_MARKER",
+        "BPI_DEACTIVATE_RULE_CODE",
+        "BPI_DEACTIVATE_RULE_VERSION",
+        "inactivePublication",
+        "APPLIED",
+    ):
+        if marker not in deactivation:
+            failures.append(f"BPI rule deactivation is missing safety marker: {marker}")
+
+    cleanup = (
+        ROOT / "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BEGIN;",
+        "created_by = :'marker'",
+        "order_id = 'MO-' || :'marker'",
+        "remaining",
+        "COMMIT;",
+    ):
+        if marker not in cleanup:
+            failures.append(f"BPI joint cleanup is missing scope marker: {marker}")
+
     evidence = json.loads(
         (ROOT / "metadata/bpi-test-host-capacity-preflight.json").read_text(encoding="utf-8")
     )
@@ -121,6 +175,40 @@ def main() -> int:
         failures.append("Kafka/Flink/PostgreSQL replay must remain blocked until a live target rerun passes")
     if persistence.get("targetEvidence", {}).get("destructiveActionsPerformed") is not False:
         failures.append("Kafka/Flink/PostgreSQL replay cannot claim destructive cleanup")
+
+    target_acceptance = json.loads(
+        (ROOT / "metadata/bpi-test-environment-acceptance.json").read_text(encoding="utf-8")
+    )
+    if target_acceptance.get("status") != "PASS_PHASE1_CONTROLLED":
+        failures.append("target BPI acceptance must record PASS_PHASE1_CONTROLLED")
+    target_checks = {
+        check.get("id"): check.get("status")
+        for check in target_acceptance.get("checks", [])
+        if isinstance(check, dict)
+    }
+    if target_checks.get("browser-to-batch-persistence-write-chain") != "PASS":
+        failures.append("target BPI acceptance must pass the browser-to-batch write chain")
+
+    joint_acceptance = json.loads(
+        (ROOT / "metadata/bpi-browser-kafka-postgres-joint-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if joint_acceptance.get("status") != "PASS":
+        failures.append("BPI browser/Kafka/PostgreSQL joint acceptance must be PASS")
+    if joint_acceptance.get("summary") != {
+        "checks": 11,
+        "pass": 11,
+        "fail": 0,
+        "blocked": 0,
+    }:
+        failures.append("BPI joint acceptance summary must remain 11/11 PASS")
+    if joint_acceptance.get("scope", {}).get("marker") != "ADP_E2E_20260714_091536_BPI_JOINT":
+        failures.append("BPI joint acceptance must retain the verified marker")
+    boundaries = " ".join(joint_acceptance.get("boundaries", []))
+    for forbidden in ("password=", "token=", "cookie=", "BEGIN PRIVATE KEY"):
+        if forbidden.lower() in boundaries.lower():
+            failures.append(f"BPI joint acceptance leaks a secret marker: {forbidden}")
 
     return report(failures)
 

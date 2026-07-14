@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化、BPI 目标集群流处理和目标环境浏览器只读链路已经通过真实运行验收；既有 MES 全业务闭环、BPI 浏览器写操作到批次事实的完整 marker 回路、现场影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；既有 MES 全业务闭环、BPI 配置产品化、真实 IoT/MES 接入、连续影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
 
 ## 项目定位
 
@@ -21,8 +21,8 @@
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
-| BPI 产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka 消费重启/DLQ、本地 MiniCluster 和目标 Flink 集群恢复验收 | 浏览器规则发布、应用回执、候选确认、批次/证据/审计必须用同一 marker 闭合 |
-| 目标测试环境 | `PARTIAL` | BPI 页面与真实 ADP 会话桥接、Java 8 适配器、Java 17 服务、PostgreSQL、三 broker Kafka、Flink/MinIO checkpoint 和 TaskManager 重启均已实测 | 规则/拓扑受控数据、消费者白名单、完整写链和现场数据尚未验收 |
+| BPI 产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka 消费重启/DLQ、本地 MiniCluster，以及目标环境同一 marker 的规则发布、Flink 应用、候选确认和影子批次落库链均已通过 | 拓扑/规则产品化配置、真实 IoT/MES 接入、连续影子运行和 QCS/WMS 写回仍未完成 |
+| 目标测试环境 | `PASS_PHASE1_CONTROLLED` | BPI 页面与真实 ADP 会话桥接、Java 8 适配器、Java 17 服务、PostgreSQL、三 broker Kafka、Flink/MinIO checkpoint、TaskManager 恢复和受控写链均已实测 | 该状态只覆盖受控 Phase 1，不代表现场或生产 READY |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
 权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。README 是接手入口，不替代验收证据。
@@ -69,7 +69,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 -> candidate -> 浏览器确认 -> batch/evidence/audit
 ```
 
-这条链必须使用同一个唯一 `ADP_E2E_*` marker 验证。任何分段测试、接口 `200` 或页面可见都不能替代完整闭环。
+这条链已使用同一个唯一 `ADP_E2E_*` marker 在目标环境闭合。任何后续改动仍必须重复全链验证，分段测试、接口 `200` 或页面可见都不能替代完整闭环。
 
 ## 已实现的 BPI 能力
 
@@ -83,8 +83,10 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后回执可见、未完成事务不可见、TaskManager 重启恢复规则终态、同版本规则禁止重新启用。
 - 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
 - 目标测试环境独立流处理栈：三 broker Kafka、八个 BPI topic、Flink 2.2.1、两个 TaskManager、MinIO checkpoint、唯一 marker 回放和带负载 TaskManager 重启恢复。
+- 目标环境受控联合验收：真实浏览器模拟/发布规则，PostgreSQL outbox 投递，Flink 应用回执 `APPLIED`，上下文/遥测产生唯一候选，真实浏览器确认后形成影子批次、边界证据、状态事件和审计；验收后发布 typed inactive 规则、定向清理 marker，并恢复消费者默认关闭。
+- 非 HTTPS 测试入口写命令兼容：浏览器不支持 `crypto.randomUUID()` 时改用 `crypto.getRandomValues()` 生成 UUID v4，并有 E2E 覆盖。
 
-本地 MiniCluster、目标流处理集群和目标浏览器只读链路是三份不同证据。它们已经分别通过，但仍不能拼接成尚未执行的浏览器写入全链路。
+本地 MiniCluster、目标流处理集群和目标浏览器联合写链是三份独立证据。目标环境联合写链已经真实执行，不再用分段结果推断；详细 marker、offset、目标表和清理结果记录在联合验收报告中。
 
 ## 目标测试环境（2026-07-14）
 
@@ -98,10 +100,12 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 | Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | 3 broker、8 topic、Flink job `RUNNING`、30/30 task、持续成功 checkpoint |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |
 | TaskManager 恢复 | 带负载重启 1 个 TaskManager | 30/30 task 恢复，重启后继续完成 checkpoint |
+| 浏览器/Kafka/Flink/PostgreSQL 联合写链 | `ADP_E2E_20260714_091536_BPI_JOINT` | 规则发布与应用、唯一候选、影子批次、2 条证据、状态事件和审计全部 PASS |
+| 验收清理 | typed inactive + 定向 SQL + consumer deny-all | Flink 确认 inactive；marker topology/rule/candidate/batch 均为 0；读路径复验 PASS |
 
 访问 BPI 前需要先在同一浏览器完成 ADP 登录，BPI 不保存或复制旧平台密码。适配器接受真实旧平台不透明会话票据，也保留严格 issuer/audience 校验的 JWT 路径；角色和租户/工厂/产线范围均由服务端映射，未配置映射时默认拒绝。
 
-详细证据和结论边界见 [BPI 目标环境部署验收](docs/testing/bpi-test-environment-deployment-readiness.md) 与 [机器可读报告](metadata/bpi-test-environment-acceptance.json)。当前尚未通过的是同一 marker 的“浏览器规则发布到批次确认落库”完整写链，因此目标环境状态仍是 `PARTIAL`。
+详细证据和结论边界见 [BPI 目标环境部署验收](docs/testing/bpi-test-environment-deployment-readiness.md)、[浏览器/Kafka/Flink/PostgreSQL 联合验收](docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md) 与 [机器可读报告](metadata/bpi-browser-kafka-postgres-joint-acceptance.json)。目标环境的受控 Phase 1 写链已经通过；BPI 产品总目标仍为 `PARTIAL`，因为真实现场数据、连续影子运行和生产写回尚未完成。
 
 ## 第一次接手
 
@@ -159,6 +163,21 @@ make bpi-api-contract-check
 make bpi-simulation-test
 make bpi-ui-build
 ```
+
+目标环境受控联合验收需要先准备唯一 marker 的 topology/rule fixture，并仅对一个
+tenant/plant/line 打开消费者白名单。执行顺序为：
+
+```bash
+# 先在真实 BPI 页面完成规则模拟和发布，再运行流处理回放
+make bpi-stream-joint-replay
+
+# 浏览器确认候选并查库后，先从 Flink Broadcast State 移除该规则
+make bpi-stream-rule-deactivate
+```
+
+最后必须运行 `deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql` 定向清理 marker，
+恢复 runtime consumer 默认关闭，并重新执行浏览器只读 smoke。不要在生产环境直接
+使用验收 fixture；完整操作和证据要求见联合验收报告。
 
 ### Kafka + PostgreSQL 回执验收
 

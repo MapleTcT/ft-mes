@@ -46,6 +46,25 @@ Candidate, rule-publication, and rule-application Kafka consumers are disabled b
 them only after setting explicit tenant, plant, and line allowlists. `_DENY_ALL_` is the fail-closed
 default; `*` should be used only for a documented test marker scope.
 
+## Controlled joint acceptance
+
+The target browser/Kafka/Flink/PostgreSQL chain is reproducible with these marker-scoped assets:
+
+- `sql/joint-acceptance-seed.sql` creates only the topology, rule, golden boundary, history points,
+  and line flags required by one acceptance run. It refuses to overwrite existing line flags.
+- `scripts/browser-joint-acceptance.js` runs the real `publish`, `confirm`, and post-cleanup `read`
+  browser phases. Credentials are supplied only through the process environment and are never
+  written to its report.
+- `sql/joint-acceptance-verify.sql` reads rule, outbox/application, candidate, batch, evidence,
+  state-event, and audit state from PostgreSQL.
+- `sql/joint-acceptance-cleanup.sql` removes only rows linked to the exact marker in one transaction.
+
+Before SQL cleanup, publish the typed inactive rule with
+`make bpi-stream-rule-deactivate` and require a Flink `APPLIED` receipt. After cleanup, force-recreate
+the service from the base `.env` so all three consumers return to disabled and `_DENY_ALL_`, then run
+the browser `read` phase. These fixtures must not be used as a production topology/rule authoring
+path. See `docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md` for the accepted sequence.
+
 The `bpi-postgres-data` named volume is intentionally retained by `docker compose down`. Removing
 that volume, dropping `ft_mes_bpi`, or rolling back Flyway is destructive and requires an explicit
 backup and approval.
