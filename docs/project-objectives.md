@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入目标环境实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备可复验证据。目标测试环境已运行独立 Java/PostgreSQL 与 Kafka/Flink/MinIO Compose；真实 ADP 会话、三 broker Kafka、Flink job、MinIO checkpoint、固定 marker 回放和带负载 TaskManager 恢复均已通过。2026-07-14 又以同一 marker `ADP_E2E_20260714_091536_BPI_JOINT` 闭合真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、候选入库、浏览器确认、影子批次/证据/审计，并完成 typed inactive、定向清理、消费者默认关闭和清理后只读复验。该结果只证明受控 Phase 1 技术链；拓扑/规则产品化维护、真实 IoT/MES 上下文、7-14 天影子运行和 QCS/WMS 写回仍未完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称已可投产。
+当前 BPI 已从设计进入目标环境实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备可复验证据。目标测试环境已运行独立 Java/PostgreSQL 与 Kafka/Flink/MinIO Compose；真实 ADP 会话、三 broker Kafka、Flink job、MinIO checkpoint、固定 marker 回放和带负载 TaskManager 恢复均已通过。2026-07-14 又以同一 marker `ADP_E2E_20260714_091536_BPI_JOINT` 闭合真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、候选入库、浏览器确认、影子批次/证据/审计，并完成 typed inactive、定向清理、消费者默认关闭和清理后只读复验。同日 `MapleTcT/iot@be89aecf` 完成 JetLinks 解码后属性事件到 `iot.telemetry.selected.v1` 的受控 exporter：显式设备/测点映射、来源产品校验、稳定消息身份、来源或 Redis 序列、持久化磁盘缓冲、Kafka 幂等生产、指标和失败关闭均已实现，9 个测试与 38 模块 standalone 打包通过。该结果仍只证明受控 Phase 1 技术链和 exporter 工程链；IoT 现场映射/部署、MES production context、7-14 天影子运行和 QCS/WMS 写回尚未完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称已可投产。
 
 权威设计和验收入口：
 
@@ -237,8 +237,9 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
 2. 为拓扑/规则补产品化创建或导入入口；当前受控 SQL fixture 只用于验收，不能作为日常配置方式。
 3. 完成 broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复和单 marker 清理恢复。
-4. 接入 `MapleTcT/iot` exporter 和一条产线生产上下文，盘点真实点位、单位、质量码、sequence 和规则 locality group。
-5. 连续运行 7-14 天影子批次，达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
+4. 以 `MapleTcT/iot@be89aecf` 为基线配置并部署一条试点产线，同时实现 MES production context outbox，盘点真实点位、单位、质量码、source epoch/sequence 和规则 locality group。
+5. 用真实 JetLinks 事件和 MES 上下文替换受控 fixture，完成 EventBus、磁盘缓冲、Kafka、Flink、BPI PostgreSQL 和浏览器证据链后，连续运行 7-14 天影子批次。
+6. 达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
 
 ### 主线 B：既有生产/质量核心链
 
