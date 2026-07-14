@@ -9,7 +9,20 @@
 
 > 当前整体状态：`IN_PROGRESS_NOT_COMPLETE`。仓库工程化和多项平台能力已经通过验收，但既有 MES 全业务产品、BPI 现场影子运行和生产迁移条件均未全部完成。任何局部测试通过都不能解释为“已可直接投产”。
 
-## 当前主线
+## 当前状态
+
+| 范围 | 状态 | 已证实 | 尚未闭合 |
+|---|---|---|---|
+| 可持续开发仓库 | `READY` | 父 POM、模块边界、CI、依赖/文件库存和 PostgreSQL-first 门禁 | 随新模块持续补充测试和库存 |
+| 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量业务已有真实页面与 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，恢复资产不等于原厂完整源码 |
+| BPI 本地产品链 | `PARTIAL` | 契约、服务、Flink job 代码、操作台、真实 PostgreSQL、Kafka 消费重启/幂等/DLQ 验收 | 真实 Flink job checkpoint 回执、浏览器到 Java 联合链路和现场影子运行 |
+| 目标测试环境 | `BLOCKED` | 既有 ADP/MES 测试栈已有历史验收 | BPI 全栈尚未完成目标机部署与远端复验 |
+| 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字未 READY |
+
+权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md) 和
+[机器可读目标账本](metadata/project-goal-acceptance.json) 为准；README 只提供接手导航，不能替代验收证据。
+
+## 产品主线
 
 当前开发主线是 BPI Phase 0/1，并服务于后续核心闭环：
 
@@ -32,11 +45,13 @@ JetLinks/IoT 测点
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和审计。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算、checkpoint 恢复和 exactly-once sink。
 - BPI 操作台、模拟服务和浏览器 E2E。
-- Flink 规则应用回执契约、消费入库和操作台状态展示已完成本地 PostgreSQL/模拟浏览器验收；在真实 Kafka/Flink checkpoint/restart/DLQ 联合验收完成前仍按 `PARTIAL` 管理。
+- Flink 规则应用回执契约、消费入库和操作台状态展示已完成本地 PostgreSQL/模拟浏览器验收。
+- 规则应用回执已通过 Embedded Kafka 3.8.1 + PostgreSQL 16.13 联合验收，覆盖 `read_committed`、事务回滚不可见、消费端重启重放、精确幂等、终态防回退和坏消息 DLQ；该测试使用事务生产者模拟 Flink sink，不等同于真实 Flink checkpoint 验收。
 
 尚未完成的关键边界：
 
 - 目标测试服务器上的 BPI 全栈部署和远端浏览器/API/PostgreSQL 验收。
+- 真实 Flink job 从 checkpoint exactly-once sink 产生 application receipt 的集群级重启/恢复验收。
 - JetLinks/IoT exporter 的真实点位映射、单位/质量码/sequence 现场核对。
 - MES 生产上下文 outbox 与 Flink 的真实联调。
 - 选定产线连续 7-14 天影子运行及边界人工认同率验收。
@@ -44,6 +59,20 @@ JetLinks/IoT 测点
 - Iceberg/MLflow 训练数据产品和建议型模型阶段。
 
 完整设计见 [BPI 总设计](docs/designs/batch-process-intelligence.md)，当前目标状态见 [项目总目标验收总账](docs/project-goal-acceptance.md)。
+
+## 核心业务闭环
+
+当前产品开发只围绕以下两条相互衔接的链路推进：
+
+```text
+既有 MES：制造指令 -> 投料/报工 -> 请检 -> 合格/不合格处置 -> 完工入库 -> 批次追溯
+
+BPI：测点 + 生产上下文 -> 规则判断 -> 边界候选 -> 人工确认 -> 影子批次
+     -> 工艺/物料/能源/质量证据 -> 后续 QCS/WMS 幂等写回
+```
+
+BPI Phase 1 只形成影子批次，不直接改写 WOM、QCS 或 WMS 生产状态。只有在一条选定产线连续
+7-14 天运行并通过边界人工认同率、累计量偏差和数据质量门槛后，才允许进入生产写回阶段。
 
 ## 架构与运行边界
 
@@ -81,6 +110,17 @@ scripts/                       # 构建、恢复、审计和门禁脚本
 
 ## 快速验证
 
+### 工具链
+
+| 区域 | 基线 |
+|---|---|
+| 既有 ADP/MES reactor | Java 8、Maven 3.6+ |
+| BPI service / Flink | Java 17、Maven 3.9+ |
+| BPI 操作台 | Node.js、npm、Vite |
+| 运行与真实落库验收 | Docker、PostgreSQL；流处理验收另需 Kafka/Flink |
+
+不要用 Java 8 运行 BPI reactor，也不要为了兼容旧平台把 Java 17 模块降级或并入旧服务进程。
+
 仓库级门禁：
 
 ```bash
@@ -105,6 +145,22 @@ make bpi-ui-build
 ```
 
 执行真实 PostgreSQL 验收时，使用独立测试库并显式提供 `BPI_TEST_DATABASE_*`；没有真实数据库查询证据时，不得把接口 `200` 记为落库通过。
+
+规则应用回执的 Kafka + PostgreSQL 联合验收入口：
+
+```bash
+export BPI_TEST_DATABASE_URL='jdbc:postgresql://localhost:5432/bpi_acceptance'
+export BPI_TEST_DATABASE_USER='bpi_acceptance'
+export BPI_TEST_DATABASE_PASSWORD='本地私密值'
+
+JAVA_HOME=$(/usr/libexec/java_home -v 17) \
+mvn -f acceptance/bpi-runtime/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiRuleApplicationKafkaPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+该命令会启动 Embedded Kafka，并要求连接真实 PostgreSQL。通过只证明 BPI 消费端与数据库边界；真实
+Flink 集群 checkpoint、目标服务器部署和浏览器到 Java 的完整回路仍需分别验收。
 
 ## 本地启动
 
@@ -146,6 +202,11 @@ docker compose --env-file .env up -d
 - [机器可读落库账本](metadata/persistence-acceptance.json)
 - [BPI 工程测试计划](docs/testing/bpi-engineering-test-plan.md)
 - [目标缺口总账](docs/goal-gap-register.md)
+- [规则应用 Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json)
+
+证据等级从低到高依次为：静态/单元测试、模拟浏览器、真实 PostgreSQL、Kafka + PostgreSQL、真实
+Flink 集群、目标环境全链路、现场影子运行。高等级证据可以覆盖同一范围的低等级判断，低等级证据不能
+反向冒充高等级通过。
 
 ## 既有资产恢复范围
 

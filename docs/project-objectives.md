@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已完成本地 PostgreSQL 状态迁移和模拟浏览器可见性验收；真实 Kafka/Flink checkpoint/restart/DLQ 联合验收和目标测试环境部署仍在推进，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
+当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已完成真实 PostgreSQL 状态迁移、Embedded Kafka `read_committed`、消费端重启重放、终态防回退、DLQ 和模拟浏览器可见性验收；当前联合测试使用事务生产者模拟 Flink sink，真实 Flink job checkpoint 回执、目标测试环境部署和现场影子运行仍未完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
 
 权威设计和验收入口：
 
@@ -234,9 +234,9 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 
 ### 主线 A：BPI Phase 0/1
 
-1. 闭合规则发布 `Outbox -> Kafka -> Flink checkpoint -> application receipt -> BPI PostgreSQL/audit -> UI`，明确区分 broker 已投递和 Flink 已应用。
-2. 完成真实 PostgreSQL、Kafka/Flink checkpoint/restart 和重复回执验收，禁止用 mock 代替状态落库。
-3. 部署到目标测试环境，通过真实浏览器、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。
+1. 闭合规则发布 `Outbox -> Kafka -> Flink checkpoint -> application receipt -> BPI PostgreSQL/audit -> UI`，明确区分 broker 已投递和 Flink 已应用；其中 Kafka 消费、PostgreSQL 状态迁移、restart/replay 和 DLQ 已有本地联合证据。
+2. 让真实 Flink job 的 checkpoint exactly-once sink 产生应用回执，验证失败 checkpoint 不可见、成功 checkpoint 可见和 job restart 恢复，禁止用事务生产者模拟结果冒充 Flink 集群证据。
+3. 部署到目标测试环境，通过真实浏览器、Java API、Kafka offset、Flink checkpoint 和 PostgreSQL marker 验收。
 4. 接入 JetLinks/IoT fork 的 exporter 和一条产线生产上下文，盘点真实点位、单位、质量码、sequence 和规则 locality group。
 5. 连续运行 7-14 天影子批次，达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。
 

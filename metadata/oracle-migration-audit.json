@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T01:56:59+00:00",
-  "repoCommit": "f4c73962e81421f29b0aa1a560b65f5c7809ece3",
+  "generatedAt": "2026-07-14T01:16:56+00:00",
+  "repoCommit": "7e8b3c20a78dc5e022090d977e8fac71be9de380",
   "findingCount": 982,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -357,7 +357,7 @@
     },
     {
       "file": "README.md",
-      "line": 56,
+      "line": 85,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -365,7 +365,7 @@
     },
     {
       "file": "README.md",
-      "line": 94,
+      "line": 134,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-14T00:34:41Z",
-  "repoBaseline": "0279e279",
+  "generatedAt": "2026-07-14T01:08:35Z",
+  "repoBaseline": "7e8b3c20",
   "database": "PostgreSQL 16.13",
   "status": "PASS_LOCAL_POSTGRES_ONLY",
   "scope": "Flink rule application receipt PostgreSQL transition and idempotency acceptance",
@@ -48,10 +48,23 @@
       "/tmp/bpi-console-rule-application-applied.png"
     ]
   },
+  "kafkaPostgresAcceptance": {
+    "status": "PASS_LOCAL_EMBEDDED_KAFKA_POSTGRES",
+    "evidence": "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+    "test": "BpiRuleApplicationKafkaPostgresAcceptanceTest.committedReceiptSurvivesRestartAndPoisonRecordReachesDlq",
+    "assertions": [
+      "read_committed ignores an aborted transactional receipt.",
+      "A committed REJECTED receipt reaches PostgreSQL through the Kafka listener.",
+      "Listener restart and exact replay do not create another inbox, audit row or revision.",
+      "APPLIED clears rejection details and cannot be regressed by a later distinct REJECTED event.",
+      "A poison payload reaches the dead-letter topic without mutating the business inbox."
+    ]
+  },
   "limitations": [
-    "This evidence does not claim a live Kafka/Flink checkpoint round trip.",
+    "Local Kafka/PostgreSQL consumption, restart replay and DLQ are accepted, but the producer in that test emulates the Flink checkpoint sink.",
+    "This evidence does not claim a live Flink job checkpoint round trip.",
     "Browser status acceptance uses the deterministic simulator and does not claim a browser-to-Java-to-Kafka/Flink round trip.",
     "This evidence does not claim target test-environment deployment.",
-    "Kafka retry/DLQ and checkpoint/restart acceptance remain required before G-021 can advance."
+    "A real Flink cluster checkpoint/restart receipt, target-environment deployment and end-to-end browser acceptance remain required before G-021 can advance."
   ]
 }

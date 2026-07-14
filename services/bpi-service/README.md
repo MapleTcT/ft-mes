@@ -27,6 +27,18 @@ make bpi-service-test
 Real PostgreSQL acceptance additionally requires `BPI_TEST_DATABASE_URL`,
 `BPI_TEST_DATABASE_USER`, and `BPI_TEST_DATABASE_PASSWORD`.
 
+The rule-application consumer has a dedicated Embedded Kafka + real PostgreSQL acceptance test:
+
+```bash
+JAVA_HOME=/path/to/jdk17 mvn -f acceptance/bpi-runtime/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiRuleApplicationKafkaPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+It verifies `read_committed`, aborted-transaction invisibility, listener restart/replay,
+terminal-state protection and DLQ behavior. A transactional producer emulates the Flink sink, so
+this test is not evidence that a deployed Flink job emitted the receipt after checkpoint success.
+
 The repository Docker topology keeps Java 8 and Java 17 separate. Start only the isolated BPI
 profile with `make up-bpi`. PostgreSQL initialization creates `ft_mes_bpi`, a DDL-owning
 `bpi_migrator` role and a DML-only `bpi_service` role; the Flyway one-shot container must complete

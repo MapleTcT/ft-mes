@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-07-14T01:21:15Z",
+  "repoBaseline": "7e8b3c20",
+  "status": "PASS_LOCAL_EMBEDDED_KAFKA_POSTGRES",
+  "scope": "BPI rule application receipt transaction visibility, restart replay, idempotency, terminal-state protection and DLQ acceptance",
+  "runtime": {
+    "database": "PostgreSQL 16.13",
+    "kafka": "Embedded Kafka 3.8.1",
+    "consumerIsolationLevel": "read_committed",
+    "flywayVersion": 8
+  },
+  "test": {
+    "class": "com.mapletct.ftmes.bpi.BpiRuleApplicationKafkaPostgresAcceptanceTest",
+    "method": "committedReceiptSurvivesRestartAndPoisonRecordReachesDlq",
+    "tests": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "durationSeconds": 20.861
+  },
+  "topics": {
+    "source": "bpi.boundary.rule-application.v1",
+    "deadLetter": "bpi.boundary.rule-application.dlq.v1"
+  },
+  "phases": [
+    {
+      "name": "abortedTransactionInvisible",
+      "expected": "WAITING revision 1; inbox 0; audit 0",
+      "status": "PASS"
+    },
+    {
+      "name": "committedRejectedApplied",
+      "expected": "REJECTED revision 2; inbox 1; audit 1",
+      "status": "PASS"
+    },
+    {
+      "name": "listenerRestartExactReplay",
+      "expected": "exact redelivery keeps revision 2; inbox 1; audit 1",
+      "status": "PASS"
+    },
+    {
+      "name": "committedApplied",
+      "expected": "APPLIED revision 3; inbox 2; audit 2; rejection error cleared",
+      "status": "PASS"
+    },
+    {
+      "name": "staleRejectedAfterApplied",
+      "expected": "inbox records the distinct event while APPLIED revision 3 and audit count 2 remain unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "poisonPayloadDeadLetter",
+      "expected": "original bytes and source-topic DLT header reach the DLQ; no business inbox mutation",
+      "status": "PASS"
+    }
+  ],
+  "databaseAssertions": {
+    "finalOutboxState": "APPLIED",
+    "finalOutboxRevision": 3,
+    "inboxRows": 3,
+    "auditRows": 2,
+    "deadLetterRowsObserved": 1
+  },
+  "verificationSql": [
+    "SELECT application_status, application_deployment_id, revision, application_error_code FROM bpi.bpi_outbox_events WHERE tenant_id = :tenant AND id = :publication_id;",
+    "SELECT count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant;",
+    "SELECT action, before_revision, after_revision FROM bpi.bpi_audit_events WHERE tenant_id = :tenant AND object_id = :publication_id ORDER BY after_revision;"
+  ],
+  "limitations": [
+    "Embedded Kafka is real broker protocol execution but is not the target Kafka cluster.",
+    "A transactional Kafka producer emulates the Flink checkpoint sink; this does not prove that the deployed Flink job emits the receipt after a successful checkpoint.",
+    "The acceptance does not cover a browser-to-Java-to-Kafka/Flink round trip.",
+    "The acceptance does not claim target test-environment deployment or production readiness."
+  ]
+}

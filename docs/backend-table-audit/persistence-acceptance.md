@@ -390,7 +390,19 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 |---|---|---|---|---|---|---|---|
 | Flink 规则应用回执 `WAITING -> REJECTED -> APPLIED` | `/bpi/#/rules` 规则抽屉；浏览器状态使用确定性模拟器单独验收 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision、inbox source count、audit before/after revision | Flyway V1-V8 在全新 PostgreSQL 16.13 应用成功；`BpiRulePostgresAcceptanceTest` 5/5 通过；回执状态最终 `APPLIED`、revision `3`、两条唯一 inbox、`REJECTED 1->2` 和 `APPLIED 2->3` 两条审计，完全相同 APPLIED 回执重放未新增 revision；浏览器另以模拟器验证相同状态可见且错误 0 | PASS_LOCAL_POSTGRES_PLUS_SIMULATED_UI |
 
-机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`、`metadata/bpi-ui-acceptance.json`。两份分离证据分别证明 BPI 事务入库和 UI 状态呈现；仍不代表真实 Kafka/Flink checkpoint 回路、DLQ、浏览器到 Java 服务联合链路或目标测试环境已经通过。
+机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`、`metadata/bpi-ui-acceptance.json`。两份分离证据分别证明 BPI 事务入库和 UI 状态呈现；Kafka 重启/DLQ 由下一节的独立联合测试补充，但仍不代表真实 Flink job checkpoint、浏览器到 Java 服务联合链路或目标测试环境已经通过。
+
+### BPI 规则应用回执（Embedded Kafka + 真实 PostgreSQL）
+
+| 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 已提交回执、消费端重启和重复投递 | 不适用；本项验收事件消费边界，UI 由独立 E2E 覆盖 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision/error、marker inbox 数和 audit revision | Embedded Kafka 3.8.1 `read_committed` 忽略 aborted transaction；已提交 `REJECTED` 落库到 revision 2；listener stop/start 后精确重放不新增 inbox/audit/revision；`APPLIED` 到 revision 3 并清理拒绝错误 | PASS_LOCAL_KAFKA_POSTGRES |
+| APPLIED 终态防回退 | 不适用 | 同上 | 同上 | 同上 | 查询最终 application status/revision、inbox/audit 数 | distinct stale `REJECTED` 被 inbox 记录，但最终状态保持 `APPLIED/revision=3`，audit 仍为 2 条 | PASS_LOCAL_KAFKA_POSTGRES |
+| 坏消息 DLQ | 不适用 | `bpi.boundary.rule-application.v1` -> `bpi.boundary.rule-application.dlq.v1` | Spring Kafka error handler / dead-letter publisher | 业务 inbox 无新增；DLQ 保留原 payload 与 DLT header | 查询 inbox 数并消费 DLQ | 非法 Protobuf 在重试耗尽后进入 DLQ，原 bytes 和 original-topic header 保留，业务 inbox 仍为 3 条 | PASS_LOCAL_KAFKA_POSTGRES |
+
+机器记录：`metadata/bpi-rule-application-kafka-postgres-acceptance.json`。测试使用真实 broker 协议和真实 PostgreSQL，
+但由事务 Kafka producer 模拟 Flink checkpoint sink；因此不声明真实 Flink job checkpoint、目标 Kafka 集群、
+浏览器到 Java 联合链路或目标测试环境通过。
 
 ## 证据要求
 

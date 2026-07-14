@@ -123,8 +123,8 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `iot.telemetry.selected.v1` | `plantId+deviceId` | `TelemetryEnvelopeV1` | JetLinks/exporter -> BPI | JOB_WIRED |
 | `mes.production.context.v1` | `orderId+taskId` | `ProductionContextEventV1` | WOM adapter -> BPI | JOB_WIRED |
 | `bpi.boundary.rule-publication.v1` | `tenantId+lineId+ruleCode+ruleVersion` | `BoundaryRulePublicationV1` | BPI outbox -> Flink Broadcast State | JOB_WIRED |
-| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | LOCAL_POSTGRES_AND_SIMULATED_UI_ACCEPTED_LIVE_PENDING |
-| `bpi.boundary.rule-application.dlq.v1` | 原 publication key | 原 `BoundaryRuleApplicationV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_ACCEPTANCE_PENDING |
+| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | LOCAL_KAFKA_POSTGRES_ACCEPTED_FLINK_JOB_PENDING |
+| `bpi.boundary.rule-application.dlq.v1` | 原 publication key | 原 `BoundaryRuleApplicationV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI Kafka consumer -> PostgreSQL | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.data-quality.v1` | `source+propertyId` | `DataQualityEventV1` | ingest/Flink -> BPI | JOB_WIRED |

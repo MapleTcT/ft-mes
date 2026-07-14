@@ -3963,6 +3963,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-rule-application-receipt-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -5325,6 +5331,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleOutboxKafkaPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -6017,7 +6029,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 95
+      "tracked": 96
     },
     "package.json": {
       "tracked": 1
@@ -6029,7 +6041,7 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 130
+      "tracked": 131
     },
     "simulation": {
       "tracked": 4
@@ -6041,8 +6053,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 997,
-    "tracked": 997,
+    "totalFiles": 999,
+    "tracked": 999,
     "untracked": 0
   },
   "untrackedByDirectory": []
