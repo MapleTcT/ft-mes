@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T01:14:51+00:00",
-  "repoCommit": "7e8b3c20a78dc5e022090d977e8fac71be9de380",
+  "generatedAt": "2026-07-14T03:49:16+00:00",
+  "repoCommit": "44df18fd9e73c211f382fb9b51391696f84e424a",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -75,7 +75,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=982, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 982 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent count change comes from the README rewrite removing stale documentation-only references, not from runtime dependency changes.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=980, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 980 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent count change comes from the README rewrite removing stale documentation-only references, not from runtime dependency changes.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -615,24 +615,25 @@
       "scope": "把 JetLinks/IoT 测点、MES 生产上下文、Kafka/Flink 规则引擎、PostgreSQL 批次事实、人工审核以及后续 QCS/WMS 联动建设为独立可持续开发产品模块。",
       "currentEvidence": [
         "BPI 总设计、交互设计、API 目录和工程测试计划已进入仓库，Java 8 旧平台适配与 Java 17 BPI/Flink 边界明确。",
-        "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理 reactor 当前 78 项测试通过。",
+        "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理常规测试和显式运行时验收均有可重复执行入口。",
         "BPI PostgreSQL 服务已实现遥测入库、规则/拓扑、规则模拟、候选、影子批次、证据、幂等和审计。",
         "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据；当前已提交基线为 7e8b3c20。",
         "Flink 已具备事件时间、生产上下文 join、规则生命周期、Broadcast State、索引路由、边界计算、checkpoint 恢复、candidate/data-quality/rule-application exactly-once sink；APPLIED/REJECTED 回执契约和 BPI 消费入库链路已实现。",
         "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。",
         "2026-07-14 BPI 操作台已明确分离 Kafka 分发与 Flink 应用状态；确定性浏览器测试覆盖 WAITING -> REJECTED -> APPLIED、拒绝详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。",
-        "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。"
+        "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。",
+        "2026-07-14 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED、TaskManager 重启从 checkpoint 恢复终态、同版本重新启用提交 REJECTED 以及无重复回执；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。"
       ],
       "blockingIssues": [
-        "规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ 和模拟浏览器验收已完成；仍需真实 Flink job checkpoint sink 产生回执、集群 restart 恢复及浏览器到 Java 服务联合回路。",
+        "规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ、模拟浏览器以及真实本地 Flink MiniCluster checkpoint/TaskManager 重启验收已分别完成；仍需目标三 broker Kafka/Flink/MinIO 集群恢复和浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路。",
         "BPI 全栈尚未部署到目标测试环境完成远端页面、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。",
         "JetLinks/IoT exporter、MES 生产上下文 outbox 和真实产线点位/单位/质量码/sequence 尚未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
-        "使用真实 Flink MiniCluster 或部署集群从 checkpoint exactly-once sink 产生 rule application receipt，验证失败 checkpoint 不可见、成功 checkpoint 可见和 job restart 恢复。",
-        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/PostgreSQL 验收。",
+        "在目标三 broker Kafka、Flink 和 MinIO checkpoint storage 上复验 rule application receipt、broker/TaskManager 重启、offset 和 checkpoint 恢复。",
+        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/Kafka/Flink/PostgreSQL 联合 marker 验收。",
         "接入 MapleTcT/iot exporter 和一条产线 MES production context，完成点位语义与规则 locality group 盘点。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ],
@@ -647,12 +648,15 @@
         "services/bpi-service/app/src/main/resources/db/migration/V8__bpi_rule_application_receipts.sql",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
         "streaming/bpi-stream-engine/pom.xml",
+        "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
         "deploy/bpi-streaming/docker-compose.yml",
+        "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
         "backend/source-modules/batch-intelligence-adapter/pom.xml",
         "frontend/apps/bpi/package.json",
         "metadata/bpi-rule-publication-retry-acceptance.json",
         "metadata/bpi-rule-application-receipt-acceptance.json",
         "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+        "metadata/bpi-rule-application-flink-kafka-acceptance.json",
         "metadata/bpi-ui-acceptance.json"
       ]
     }

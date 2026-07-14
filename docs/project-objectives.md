@@ -53,7 +53,7 @@ BPI 的产品目标不是做一个监控大屏，而是把数采信号变成可�
 - 保留人工确认、拒绝、修订和异常救援入口，首期只运行影子批次，不直接改写 WOM/QCS/WMS 生产状态。
 - 为 Iceberg/MLflow 训练数据产品保留 point-in-time、版本、质量码、校准和标签来源，禁止用无法追溯的聚合结果训练模型。
 
-当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已完成真实 PostgreSQL 状态迁移、Embedded Kafka `read_committed`、消费端重启重放、终态防回退、DLQ 和模拟浏览器可见性验收；当前联合测试使用事务生产者模拟 Flink sink，真实 Flink job checkpoint 回执、目标测试环境部署和现场影子运行仍未完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
+当前 BPI 已从设计进入实施：事件/API 契约、Java 17 PostgreSQL 服务、Java 8 适配器、操作台、模拟器、遥测入库、规则/拓扑、候选/影子批次、Flink 事件时间与 Broadcast State、规则发布 transactional outbox、失败重试和审计已经具备本地验证证据。Flink 应用回执已分别完成真实 PostgreSQL 状态迁移、Embedded Kafka `read_committed`/消费端重启/DLQ，以及 Kafka 4.2 + Flink 2.2.1 MiniCluster checkpoint 事务可见性和 TaskManager 重启恢复验收。三份证据仍是分离边界，本地 MiniCluster 使用单进程 broker 和本地文件 checkpoint，不代表目标三节点 Kafka/Flink/MinIO、浏览器到 Java/PostgreSQL 联合链路或现场影子运行已完成，因此 BPI 总目标保持 `PARTIAL`，不能宣称 Phase 1 已完成。
 
 权威设计和验收入口：
 

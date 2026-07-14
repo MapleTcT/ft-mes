@@ -390,7 +390,7 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 |---|---|---|---|---|---|---|---|
 | Flink 规则应用回执 `WAITING -> REJECTED -> APPLIED` | `/bpi/#/rules` 规则抽屉；浏览器状态使用确定性模拟器单独验收 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision、inbox source count、audit before/after revision | Flyway V1-V8 在全新 PostgreSQL 16.13 应用成功；`BpiRulePostgresAcceptanceTest` 5/5 通过；回执状态最终 `APPLIED`、revision `3`、两条唯一 inbox、`REJECTED 1->2` 和 `APPLIED 2->3` 两条审计，完全相同 APPLIED 回执重放未新增 revision；浏览器另以模拟器验证相同状态可见且错误 0 | PASS_LOCAL_POSTGRES_PLUS_SIMULATED_UI |
 
-机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`、`metadata/bpi-ui-acceptance.json`。两份分离证据分别证明 BPI 事务入库和 UI 状态呈现；Kafka 重启/DLQ 由下一节的独立联合测试补充，但仍不代表真实 Flink job checkpoint、浏览器到 Java 服务联合链路或目标测试环境已经通过。
+机器记录：`metadata/bpi-rule-application-receipt-acceptance.json`、`metadata/bpi-ui-acceptance.json`。两份分离证据分别证明 BPI 事务入库和 UI 状态呈现；Kafka 重启/DLQ 及 Flink checkpoint 由后续独立测试补充，但仍不代表浏览器到 Java/Kafka/Flink/PostgreSQL 联合链路或目标测试环境已经通过。
 
 ### BPI 规则应用回执（Embedded Kafka + 真实 PostgreSQL）
 
@@ -401,8 +401,19 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 坏消息 DLQ | 不适用 | `bpi.boundary.rule-application.v1` -> `bpi.boundary.rule-application.dlq.v1` | Spring Kafka error handler / dead-letter publisher | 业务 inbox 无新增；DLQ 保留原 payload 与 DLT header | 查询 inbox 数并消费 DLQ | 非法 Protobuf 在重试耗尽后进入 DLQ，原 bytes 和 original-topic header 保留，业务 inbox 仍为 3 条 | PASS_LOCAL_KAFKA_POSTGRES |
 
 机器记录：`metadata/bpi-rule-application-kafka-postgres-acceptance.json`。测试使用真实 broker 协议和真实 PostgreSQL，
-但由事务 Kafka producer 模拟 Flink checkpoint sink；因此不声明真实 Flink job checkpoint、目标 Kafka 集群、
-浏览器到 Java 联合链路或目标测试环境通过。
+但由事务 Kafka producer 模拟 Flink checkpoint sink；真实 Flink 运行时由下一节单独验收，两份测试仍不构成
+浏览器到 Java/Kafka/Flink/PostgreSQL 的联合链路，也不代表目标测试环境通过。
+
+### BPI 规则应用回执（Kafka 4.2 + Flink 2.2.1 MiniCluster）
+
+| 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| checkpoint 提交控制回执可见性 | 不适用；本项验收 Flink/Kafka 数据面 | `bpi.boundary.rule-publication.v1` -> `bpi.boundary.rule-application.v1` | `BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction -> RuleApplicationKafkaSerializationSchema -> KafkaSink` | 不落库；PostgreSQL 消费由独立测试覆盖 | `NOT_APPLICABLE` | checkpoint 前 `read_uncommitted` 可见、`read_committed` 不可见；取消作业后未完成事务仍不可见；恢复作业并成功 checkpoint 后 `APPLIED` 可见 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+| TaskManager 重启与规则终态恢复 | 不适用 | 同上 | Flink keyed state + checkpoint restore | 不落库 | `NOT_APPLICABLE` | 停用规则在 checkpoint 2 提交；TaskManager 重启后从 checkpoint 2 恢复；同版本重新启用在 checkpoint 3 作为 `REJECTED/RULE_REACTIVATION_REQUIRES_NEW_VERSION` 提交；完成 checkpoint 3 个、恢复 1 次、无重复回执 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+
+机器记录：`metadata/bpi-rule-application-flink-kafka-acceptance.json`。默认运行时为一次性单进程 Kafka 4.2
+KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目录。该项真实执行 Flink job，
+但不包含目标三 broker/MinIO、PostgreSQL 消费或浏览器，因此目标环境联合链路仍为 `BLOCKED`。
 
 ## 证据要求
 

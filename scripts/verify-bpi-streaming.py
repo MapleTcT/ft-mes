@@ -37,6 +37,8 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastHarnessTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
+    "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
@@ -50,6 +52,7 @@ REQUIRED_FILES = [
     "metadata/bpi-production-context-join-acceptance.json",
     "metadata/bpi-stream-replay-acceptance.json",
     "metadata/bpi-kafka-flink-topology-acceptance.json",
+    "metadata/bpi-rule-application-flink-kafka-acceptance.json",
     "metadata/bpi-kafka-cluster-replay-acceptance.json",
 ]
 
@@ -70,6 +73,7 @@ def main() -> int:
     kafka_connector_version = parent.findtext(
         "m:properties/m:flink.kafka.connector.version", namespaces=NS
     )
+    kafka_version = parent.findtext("m:properties/m:kafka.version", namespaces=NS)
     modules = {item.text for item in parent.findall("m:modules/m:module", NS)}
     expected_modules = {
         "../contracts/bpi-events",
@@ -84,6 +88,10 @@ def main() -> int:
         failures.append(
             "BPI streaming Kafka connector baseline must remain 5.0.0-2.2, "
             f"found {kafka_connector_version!r}"
+        )
+    if kafka_version != "4.2.0":
+        failures.append(
+            f"BPI streaming Kafka runtime baseline must remain 4.2.0, found {kafka_version!r}"
         )
     if modules != expected_modules:
         failures.append(f"unexpected BPI streaming reactor modules: {sorted(modules)}")
@@ -142,6 +150,7 @@ def main() -> int:
         "bpi-boundary-indexed-routing-v1",
         "BpiKafkaIO.candidateSink",
         "BpiKafkaIO.dataQualitySink",
+        "BpiKafkaIO.ruleApplicationSink",
         "ruleWatermarks",
         "contextualWatermarks",
         "boundaryStateTtl",
@@ -183,12 +192,37 @@ def main() -> int:
     topology_acceptance = json.loads(
         (ROOT / "metadata/bpi-kafka-flink-topology-acceptance.json").read_text(encoding="utf-8")
     )
-    if topology_acceptance.get("status") != "JOB_WIRED_HARNESS_PASS":
+    if topology_acceptance.get("status") != "LOCAL_MINICLUSTER_ACCEPTED_TARGET_CLUSTER_PENDING":
         failures.append("BPI Kafka/Flink topology acceptance status must remain explicit")
-    if topology_acceptance.get("summary", {}).get("streamFail") != 0:
+    topology_summary = topology_acceptance.get("summary", {})
+    if topology_summary.get("streamFail") != 0:
         failures.append("BPI Kafka/Flink topology acceptance must not contain failed stream tests")
-    if topology_acceptance.get("summary", {}).get("realClusterAccepted") is not False:
-        failures.append("BPI Kafka/Flink topology acceptance must not claim live cluster acceptance")
+    if topology_summary.get("localMiniClusterAccepted") is not True:
+        failures.append("BPI Kafka/Flink topology acceptance must record local MiniCluster acceptance")
+    if topology_summary.get("targetClusterAccepted") is not False:
+        failures.append("BPI Kafka/Flink topology acceptance must not claim target cluster acceptance")
+    if topology_summary.get("flinkKafkaRuntimeAcceptancePass") != 1:
+        failures.append("BPI Kafka/Flink topology acceptance must record the runtime acceptance pass")
+
+    rule_application_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-application-flink-kafka-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if rule_application_acceptance.get("status") != "PASS_LOCAL_FLINK_MINICLUSTER_KAFKA":
+        failures.append("BPI rule-application Flink/Kafka acceptance must be an explicit local PASS")
+    if rule_application_acceptance.get("kafkaClientVersion") != "4.2.0":
+        failures.append("BPI rule-application Flink/Kafka acceptance must use Kafka 4.2.0")
+    checkpoint_evidence = rule_application_acceptance.get("checkpoints", {})
+    if checkpoint_evidence.get("completedCount", 0) < 3:
+        failures.append("BPI rule-application acceptance requires at least three completed checkpoints")
+    if checkpoint_evidence.get("restoredCount", 0) < 1:
+        failures.append("BPI rule-application acceptance requires a restored checkpoint")
+    pre_checkpoint = rule_application_acceptance.get("preCheckpoint", {})
+    if pre_checkpoint.get("readCommittedVisible") is not False:
+        failures.append("BPI rule-application acceptance must prove pre-checkpoint invisibility")
+    if pre_checkpoint.get("interruptedTransactionCommitted") is not False:
+        failures.append("BPI rule-application acceptance must prove canceled transaction rollback")
     cluster_replay = json.loads(
         (ROOT / "metadata/bpi-kafka-cluster-replay-acceptance.json").read_text(encoding="utf-8")
     )

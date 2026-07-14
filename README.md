@@ -1,114 +1,80 @@
-# FT MES 可持续开发仓库
+# FT MES 与智能批次工艺数据中心
 
-本仓库同时承载两条明确分离、但可逐步集成的产品线：
+这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-1. **ADP/MES 既有平台恢复与 PostgreSQL 迁移**：把 Windows 交付包中可恢复的前端、后端、配置和运行资产整理为可维护、可验证、可在 Linux/Docker 上持续演进的工程。
-2. **智能批次与工艺数据中心（BPI）**：连接数采、生产上下文、工艺规则、质量和物料系统，基于 Kafka/Flink 自动识别批次边界，形成可追溯、可回放、可用于后续模型训练的生产事实。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 多项本地能力已经通过真实运行验收，但既有 MES 全业务闭环、BPI 目标环境全链路、现场影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
 
-仓库默认数据库是 **PostgreSQL**。Oracle 只允许保留在显式 legacy 模板、迁移对照和 backlog 中，不能重新成为默认运行路径。
+## 项目定位
 
-> 当前整体状态：`IN_PROGRESS_NOT_COMPLETE`。仓库工程化和多项平台能力已经通过验收，但既有 MES 全业务产品、BPI 现场影子运行和生产迁移条件均未全部完成。任何局部测试通过都不能解释为“已可直接投产”。
+仓库承载两条边界明确、逐步集成的产品线：
 
-## 当前状态
+| 产品线 | 目标 | 当前边界 |
+|---|---|---|
+| ADP/MES 恢复与 PostgreSQL 迁移 | 把恢复前端、后端、配置和运行资产提升为可维护工程，逐步闭合生产、质量、仓储等业务 | 恢复资产不等于原厂完整源码；每项功能必须重新做页面、API 和落库验收 |
+| 智能批次与工艺数据中心（BPI） | 连接数采、生产上下文、工艺规则、质量和物料系统，自动识别批次边界并形成可追溯生产事实 | Phase 1 只生成影子批次，不直接改写 WOM、QCS 或 WMS 生产状态 |
 
-| 范围 | 状态 | 已证实 | 尚未闭合 |
+默认数据库是 **PostgreSQL**。Oracle 只允许存在于显式 `legacy-template-only` 模板、迁移对照和 backlog 中，不允许重新成为默认运行路径。
+
+## 当前完成度
+
+| 范围 | 状态 | 已有证据 | 继续完成的门槛 |
 |---|---|---|---|
-| 可持续开发仓库 | `READY` | 父 POM、模块边界、CI、依赖/文件库存和 PostgreSQL-first 门禁 | 随新模块持续补充测试和库存 |
-| 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量业务已有真实页面与 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，恢复资产不等于原厂完整源码 |
-| BPI 本地产品链 | `PARTIAL` | 契约、服务、Flink job 代码、操作台、真实 PostgreSQL、Kafka 消费重启/幂等/DLQ 验收 | 真实 Flink job checkpoint 回执、浏览器到 Java 联合链路和现场影子运行 |
-| 目标测试环境 | `BLOCKED` | 既有 ADP/MES 测试栈已有历史验收 | BPI 全栈尚未完成目标机部署与远端复验 |
-| 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字未 READY |
+| 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
+| 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
+| BPI 本地产品链 | `PARTIAL` | 契约、服务、操作台、真实 PostgreSQL、Kafka 消费重启/DLQ，以及真实 Flink MiniCluster checkpoint/TaskManager 重启验收 | 浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路和目标集群验收 |
+| 目标测试环境 | `BLOCKED` | 既有 ADP/MES 测试栈有历史验收 | BPI 尚未在目标机完成远端页面、API、Kafka offset、Flink checkpoint 和 PostgreSQL marker 复验 |
+| 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
-权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md) 和
-[机器可读目标账本](metadata/project-goal-acceptance.json) 为准；README 只提供接手导航，不能替代验收证据。
+权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。README 是接手入口，不替代验收证据。
 
-## 产品主线
+## 当前开发主线
 
-当前开发主线是 BPI Phase 0/1，并服务于后续核心闭环：
+当前优先建设 BPI Phase 0/1，并为后续 MES 核心闭环提供可信批次事实：
 
 ```text
-制造指令/生产上下文
-        +
-JetLinks/IoT 测点
-        -> Kafka 版本化事件
-        -> Flink 事件时间、规则 Broadcast State、批次边界候选
-        -> BPI PostgreSQL 候选/批次/证据/审计
-        -> 人工确认与影子批次
-        -> 后续 QCS/WMS 幂等联动
+JetLinks/IoT 测点 + MES 生产指令/生产上下文
+                    |
+                    v
+            Kafka 版本化事件契约
+                    |
+                    v
+       Flink 事件时间 + 规则 Broadcast State
+                    |
+                    v
+        批次边界候选 + 数据质量 + 应用回执
+                    |
+                    v
+      BPI PostgreSQL 候选/批次/证据/审计
+                    |
+                    v
+             人工确认与影子批次
+                    |
+                    v
+       后续 QCS/WMS 幂等联动与批次谱系
 ```
 
-已实现并有本地证据的 BPI 能力包括：
+MES 目标业务链保持为：
+
+```text
+制造指令 -> 投料/报工 -> 请检 -> 合格/不合格处置 -> 完工入库 -> 批次追溯
+```
+
+BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工认同率、累计量偏差和数据质量门槛后，才允许进入 QCS/WMS 生产写回阶段。
+
+## 已实现的 BPI 能力
 
 - Java 8 旧平台认证适配器与 Java 17 BPI 服务边界。
-- Protobuf 事件契约、兼容性基线和 API 契约门禁。
-- PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认和影子批次。
-- 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和审计。
-- Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算、checkpoint 恢复和 exactly-once sink。
-- BPI 操作台、模拟服务和浏览器 E2E。
-- Flink 规则应用回执契约、消费入库和操作台状态展示已完成本地 PostgreSQL/模拟浏览器验收。
-- 规则应用回执已通过 Embedded Kafka 3.8.1 + PostgreSQL 16.13 联合验收，覆盖 `read_committed`、事务回滚不可见、消费端重启重放、精确幂等、终态防回退和坏消息 DLQ；该测试使用事务生产者模拟 Flink sink，不等同于真实 Flink checkpoint 验收。
+- OpenAPI、Protobuf 事件契约、兼容性基线和契约门禁。
+- PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认、影子批次、证据和审计。
+- 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发和规则应用回执。
+- Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
+- BPI 操作台、确定性模拟服务和浏览器 E2E。
+- Kafka + PostgreSQL 回执消费验收：`read_committed`、回滚不可见、重启重放、精确幂等、终态防回退和 DLQ。
+- Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后回执可见、未完成事务不可见、TaskManager 重启恢复规则终态、同版本规则禁止重新启用。
 
-尚未完成的关键边界：
+最新本地 Flink 验收不是目标集群验收：默认使用一次性单进程 Kafka KRaft 和本地 checkpoint 目录，不包含 MinIO、三 broker、浏览器或 PostgreSQL 消费端。
 
-- 目标测试服务器上的 BPI 全栈部署和远端浏览器/API/PostgreSQL 验收。
-- 真实 Flink job 从 checkpoint exactly-once sink 产生 application receipt 的集群级重启/恢复验收。
-- JetLinks/IoT exporter 的真实点位映射、单位/质量码/sequence 现场核对。
-- MES 生产上下文 outbox 与 Flink 的真实联调。
-- 选定产线连续 7-14 天影子运行及边界人工认同率验收。
-- QCS/WMS 生产写回、异常补偿、谱系与完工入库闭环。
-- Iceberg/MLflow 训练数据产品和建议型模型阶段。
-
-完整设计见 [BPI 总设计](docs/designs/batch-process-intelligence.md)，当前目标状态见 [项目总目标验收总账](docs/project-goal-acceptance.md)。
-
-## 核心业务闭环
-
-当前产品开发只围绕以下两条相互衔接的链路推进：
-
-```text
-既有 MES：制造指令 -> 投料/报工 -> 请检 -> 合格/不合格处置 -> 完工入库 -> 批次追溯
-
-BPI：测点 + 生产上下文 -> 规则判断 -> 边界候选 -> 人工确认 -> 影子批次
-     -> 工艺/物料/能源/质量证据 -> 后续 QCS/WMS 幂等写回
-```
-
-BPI Phase 1 只形成影子批次，不直接改写 WOM、QCS 或 WMS 生产状态。只有在一条选定产线连续
-7-14 天运行并通过边界人工认同率、累计量偏差和数据质量门槛后，才允许进入生产写回阶段。
-
-## 架构与运行边界
-
-| 区域 | 技术基线 | 责任 |
-|---|---|---|
-| 既有 ADP/MES | Java 8、恢复前端、Nacos、Keycloak | 旧平台兼容、菜单/组织/权限和现有业务运行包 |
-| BPI API/事务 | Java 17、Spring Boot、Flyway、PostgreSQL | 规则、拓扑、候选、批次、证据、审计和幂等 |
-| BPI 流处理 | Java 17、Kafka、Flink | 事件时间、上下文 join、规则状态、批次候选和回执 |
-| 前端 | 恢复前端 + 独立 BPI 操作台 | 旧平台入口和 BPI 运营交互 |
-| 数据库 | PostgreSQL 默认 | 新能力和迁移目标；Oracle 仅 legacy |
-
-Java 8 运行包不直接依赖 Java 17 的 BPI domain/repository/migration。两侧只能通过版本化 HTTP 或事件契约交互，避免为了兼容旧 JAR 把新模块重新降级。
-
-## 仓库结构
-
-```text
-frontend/apps/                 # 恢复前端与 BPI 操作台
-backend/modules/               # sources.jar 恢复源码，只读排查和迁移依据
-backend/decompiled-services/   # 运行服务反编译启动壳
-backend/source-modules/        # 可编译、可测试、可持续维护的源码模块
-services/bpi-service/          # Java 17 BPI PostgreSQL 服务与规则运行时
-streaming/bpi-stream-engine/   # Java 17 Flink 批次边界引擎
-contracts/bpi-api/             # BPI OpenAPI 与实施/模拟能力清单
-contracts/bpi-events/          # Protobuf 事件契约与兼容性基线
-simulation/bpi/                # 无外部依赖的交互/API 模拟器
-deploy/docker/                 # ADP/MES PostgreSQL-first 测试编排
-deploy/bpi-streaming/          # Kafka/Flink/MinIO 流处理编排
-deploy/database/               # PostgreSQL 迁移与生产迁移证据工具
-docs/                          # 目标、设计、测试、落库和交接文档
-metadata/                      # 机器可读验收与治理账本
-scripts/                       # 构建、恢复、审计和门禁脚本
-```
-
-上层原始 Windows 包仍保留在 `../bap-server/`、`../Commands/`、`../nginx/` 和 `../Manual/`。本仓库不提交 fat jar、exe、dll、内置 JDK、数据库 dump、运行日志或真实密钥。
-
-## 快速验证
+## 第一次接手
 
 ### 工具链
 
@@ -117,36 +83,46 @@ scripts/                       # 构建、恢复、审计和门禁脚本
 | 既有 ADP/MES reactor | Java 8、Maven 3.6+ |
 | BPI service / Flink | Java 17、Maven 3.9+ |
 | BPI 操作台 | Node.js、npm、Vite |
-| 运行与真实落库验收 | Docker、PostgreSQL；流处理验收另需 Kafka/Flink |
+| 部署和真实落库验收 | Docker Compose、PostgreSQL、Python 3 |
 
-不要用 Java 8 运行 BPI reactor，也不要为了兼容旧平台把 Java 17 模块降级或并入旧服务进程。
+不要用 Java 8 运行 BPI reactor，也不要为了兼容旧 JAR 把 Java 17 模块降级或并入旧服务进程。两侧只通过版本化 HTTP 或事件契约交互。
 
-仓库级门禁：
+### 最短可信验证
+
+从仓库根目录执行：
 
 ```bash
+make help
 make verify
 make ci
-make sustainable-check
-make project-goal-acceptance-check
-make goal-gap-register-check
-make persistence-acceptance-check
-make source-module-test
-make oracle-replacement-check
 ```
 
-BPI Java 17 服务与流引擎：
+本地验证真实 Flink checkpoint 与 Kafka 事务边界：
 
 ```bash
-JAVA_HOME=$(/usr/libexec/java_home -v 17) mvn -f services/bpi-service/pom.xml -pl app -am test
-JAVA_HOME=$(/usr/libexec/java_home -v 17) mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
+JAVA_HOME=$(/usr/libexec/java_home -v 17) \
+make bpi-rule-application-flink-acceptance
+```
+
+该命令默认启动测试进程内的一次性 Kafka 4.2 KRaft server 和 Flink MiniCluster，不需要 Docker 或 PostgreSQL。Linux 请把 `JAVA_HOME` 换成实际 JDK 17 路径；也可用 `BPI_TEST_KAFKA_BOOTSTRAP_SERVERS` 指向专用外部 Kafka。报告默认写入 `/tmp/bpi-rule-application-flink-kafka-acceptance.json`。
+
+常用 BPI 验证入口：
+
+```bash
+JAVA_HOME=$(/usr/libexec/java_home -v 17) \
+  mvn -f services/bpi-service/pom.xml -pl app -am test
+
+JAVA_HOME=$(/usr/libexec/java_home -v 17) \
+  mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
+
 make bpi-api-contract-check
 make bpi-simulation-test
 make bpi-ui-build
 ```
 
-执行真实 PostgreSQL 验收时，使用独立测试库并显式提供 `BPI_TEST_DATABASE_*`；没有真实数据库查询证据时，不得把接口 `200` 记为落库通过。
+### Kafka + PostgreSQL 回执验收
 
-规则应用回执的 Kafka + PostgreSQL 联合验收入口：
+使用独立测试库并显式提供测试凭据：
 
 ```bash
 export BPI_TEST_DATABASE_URL='jdbc:postgresql://localhost:5432/bpi_acceptance'
@@ -159,12 +135,11 @@ mvn -f acceptance/bpi-runtime/pom.xml -pl :bpi-service -am \
   -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
-该命令会启动 Embedded Kafka，并要求连接真实 PostgreSQL。通过只证明 BPI 消费端与数据库边界；真实
-Flink 集群 checkpoint、目标服务器部署和浏览器到 Java 的完整回路仍需分别验收。
+这个测试证明 Kafka 消费端与 PostgreSQL 的事务、幂等和 DLQ 边界；它与 Flink MiniCluster 测试是两份互补证据，不能拼接成未经执行的“浏览器到数据库全链路通过”。
 
 ## 本地启动
 
-既有 ADP/MES 测试栈：
+### 既有 ADP/MES 测试栈
 
 ```bash
 cd deploy/docker
@@ -173,28 +148,46 @@ python3 scripts/render-nacos-configs.py
 docker compose --env-file .env up -d
 ```
 
-BPI Kafka/Flink 栈需要先构建 shaded job，并在本地私有 `.env` 中提供部署 ID、MinIO 凭据和 JAR 路径：
+### BPI Kafka/Flink 测试栈
+
+先构建 shaded job，再准备本地私有配置：
 
 ```bash
 make bpi-stream-package
-cd deploy/bpi-streaming
-docker compose --env-file .env up -d
+cp deploy/bpi-streaming/.env.example deploy/bpi-streaming/.env
+make bpi-stream-deploy-preflight
+make up-bpi-stream
+make bpi-stream-cluster-smoke
 ```
 
-具体变量、容量预检和 marker 回放见 [BPI 流处理部署说明](deploy/bpi-streaming/README.md)。不要把 `.env`、token、证书私钥或现场账号提交到 Git。
+需要停止时执行 `make down-bpi-stream`；该命令保留 Kafka 和 MinIO named volumes，便于做重启与 checkpoint 恢复验证。详细变量、容量预检和 marker 回放见 [BPI 流处理部署说明](deploy/bpi-streaming/README.md)。
 
-## 验收规则
+不要提交 `.env`、真实密码、token、证书私钥、数据库 dump、运行日志或现场数据。
 
-本项目以“真实页面 -> HTTP -> 后端链路 -> PostgreSQL”为功能完成证据：
+## 验收证据
 
-- 不能只凭源码、静态检查或 `make ci` 判断功能完成。
-- 不能只看源码、菜单可见或静态检查判断功能可用。
-- 写操作必须使用唯一 marker，并直接查询 PostgreSQL 证明新增、更新、状态变化和清理。
-- Kafka `PUBLISHED` 只表示 broker 投递；Flink `APPLIED` 回执才表示规则随成功 checkpoint 进入运行状态。
-- 模拟器、单元测试和本地 E2E 不能冒充测试服务器或现场产线验收。
-- `PASS / FAIL / BLOCKED / NOT_APPLICABLE` 必须按事实记录，不能为了绿色报告改写结果。
+| 验收面 | 当前证据 | 结论边界 |
+|---|---|---|
+| BPI 浏览器状态交互 | [BPI UI 验收](metadata/bpi-ui-acceptance.json) | 确定性模拟浏览器，不代表真实 Java/Kafka/Flink |
+| 回执 PostgreSQL 状态迁移 | [回执落库验收](metadata/bpi-rule-application-receipt-acceptance.json) | 真实 PostgreSQL，不含真实 broker |
+| Kafka 消费重启、幂等与 DLQ | [Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json) | 本地 Embedded Kafka + PostgreSQL，不含 Flink job |
+| Flink checkpoint、事务可见性与恢复 | [Flink/Kafka 验收](metadata/bpi-rule-application-flink-kafka-acceptance.json) | 真实 Flink MiniCluster + Kafka 4.2，本地文件 checkpoint，不含 PostgreSQL/MinIO |
+| 目标环境全链路 | [项目总目标验收总账](docs/project-goal-acceptance.md) | 尚未完成，保持 `BLOCKED` |
 
-固定证据入口：
+证据等级从低到高为：静态/单元测试、模拟浏览器、真实 PostgreSQL、本地 Kafka + PostgreSQL、本地 Flink + Kafka、目标集群全链路、现场影子运行。每一级只证明自己实际执行的边界，不能用两份分离测试冒充一条没有跑过的联合链路。
+
+## 验收原则
+
+功能完成必须形成“真实页面 -> HTTP -> 后端链路 -> PostgreSQL”证据：
+
+- 不能只凭源码、静态检查或 `make ci` 判断功能完成；菜单可见和接口 `200` 也不能单独证明业务完成。
+- 写操作使用唯一 `ADP_E2E_*` marker，并直接查询 PostgreSQL 验证新增、更新、状态变化和清理。
+- 记录页面/路由、操作步骤、console error、network error、API、payload、response、Controller/Service/Mapper/SQL 和目标表。
+- Kafka `PUBLISHED` 只说明 broker 已接收；Flink `APPLIED` 回执才说明规则随成功 checkpoint 进入运行状态。
+- 使用 `PASS / FAIL / BLOCKED / NOT_APPLICABLE` 如实记录，禁止为了绿色报告改写结果。
+- 模拟器、本地 MiniCluster 和单元测试不能冒充目标服务器或现场产线验收。
+
+固定入口：
 
 - [功能验收与落库验收规则](docs/functional-persistence-acceptance.md)
 - [前端功能测试报告](docs/frontend-functional-test-report.md)
@@ -202,19 +195,36 @@ docker compose --env-file .env up -d
 - [机器可读落库账本](metadata/persistence-acceptance.json)
 - [BPI 工程测试计划](docs/testing/bpi-engineering-test-plan.md)
 - [目标缺口总账](docs/goal-gap-register.md)
-- [规则应用 Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json)
 
-证据等级从低到高依次为：静态/单元测试、模拟浏览器、真实 PostgreSQL、Kafka + PostgreSQL、真实
-Flink 集群、目标环境全链路、现场影子运行。高等级证据可以覆盖同一范围的低等级判断，低等级证据不能
-反向冒充高等级通过。
+## 仓库结构
 
-## 既有资产恢复范围
+```text
+frontend/apps/                 恢复前端与 BPI 操作台
+backend/modules/               sources.jar 恢复源码，只读排查和迁移依据
+backend/decompiled-services/   运行服务反编译启动壳
+backend/source-modules/        可编译、可测试、可持续维护的源码模块
+services/bpi-service/          Java 17 BPI PostgreSQL 服务与规则运行时
+streaming/bpi-stream-engine/   Java 17 Flink 批次边界引擎
+contracts/bpi-api/             BPI OpenAPI 与实施/模拟能力清单
+contracts/bpi-events/          Protobuf 事件契约与兼容性基线
+simulation/bpi/                无外部依赖的交互/API 模拟器
+deploy/docker/                 ADP/MES PostgreSQL-first 测试编排
+deploy/bpi-streaming/          Kafka/Flink/MinIO 流处理编排
+deploy/database/               PostgreSQL 迁移与生产迁移证据工具
+docs/                          目标、设计、测试、落库和交接文档
+metadata/                      机器可读验收与治理账本
+scripts/                       构建、恢复、审计和门禁脚本
+```
+
+原始 Windows 包仍保留在仓库上层的 `../bap-server/`、`../Commands/`、`../nginx/` 和 `../Manual/`，不进入默认源码 reactor。
+
+## 恢复资产边界
 
 - 从 `366` 个 source map 恢复约 `991` 个前端源码文件。
 - 解包 `250` 个 ADP 相关 `sources.jar`，包含约 `4807` 个 Java 和 `398` 个 XML 文件。
-- 对 `23` 个可运行服务补充反编译启动/壳代码和服务清单。
+- 对 `23` 个可运行服务补充反编译启动壳和服务清单。
 
-这些资产不是原厂完整源码工程。需要维护的模块必须逐步提升到 `backend/source-modules/`，补齐父 POM、依赖边界、测试、PostgreSQL migration 和运行验收，不能把恢复目录中的嵌套 POM 全量塞回 reactor。
+这些数字描述“可排查资产”，不代表全部模块已经可编译或可维护。需要持续开发的模块必须逐步提升到 `backend/source-modules/`，补齐父 POM、依赖边界、测试、PostgreSQL migration 和运行验收。
 
 ## 接手顺序
 
@@ -223,5 +233,15 @@ Flink 集群、目标环境全链路、现场影子运行。高等级证据可�
 3. BPI 开发先读 [BPI 总设计](docs/designs/batch-process-intelligence.md)、[交互设计](docs/designs/bpi-interaction-design.md) 和 [API 目录](docs/api/bpi-api-catalog.md)。
 4. 既有业务修复先读 [后端落表排查交接](docs/backend-table-audit-handoff.md) 和对应模块审计。
 5. 新业务包先执行 `make module-intake-check INTAKE=/path/to/package-or-dir`，再决定是否进入默认源码路径。
+
+## 当前未闭合事项
+
+- BPI 全栈部署到目标测试服务器，并完成远端浏览器/API/Kafka/Flink/PostgreSQL 联合 marker 验收。
+- 目标三 broker Kafka、Flink 集群、MinIO checkpoint storage 的 broker/TaskManager 重启与恢复演练。
+- [MapleTcT/iot](https://github.com/MapleTcT/iot) exporter 的真实点位、单位、质量码、sequence 和 locality group 映射。
+- MES production context outbox 与真实产线联调。
+- 选定产线 7-14 天影子运行、人工边界认同率和累计量偏差验收。
+- QCS/WMS 幂等写回、异常补偿、谱系、完工入库闭环和后续训练数据产品。
+- 既有 MES 生产、质量、仓储主链剩余页面/API/落库阻断项。
 
 生产迁移在数据库、回滚、license、MinIO、Keycloak、Nacos/runtime、TLS、安全和业务签字证据全部完成前，必须保持 `NOT_READY_FOR_PRODUCTION_MIGRATION`。

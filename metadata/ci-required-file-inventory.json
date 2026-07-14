@@ -531,6 +531,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/smoke-cluster.sh",
       "state": "tracked",
       "tracked": true
@@ -3963,6 +3969,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-rule-application-flink-kafka-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -5937,6 +5949,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/CandidateKafkaSerializationSchemaTest.java",
       "state": "tracked",
       "tracked": true
@@ -6020,7 +6038,7 @@
       "tracked": 18
     },
     "deploy": {
-      "tracked": 468
+      "tracked": 469
     },
     "docs": {
       "tracked": 80
@@ -6029,7 +6047,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 96
+      "tracked": 97
     },
     "package.json": {
       "tracked": 1
@@ -6047,14 +6065,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 75
+      "tracked": 76
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 999,
-    "tracked": 999,
+    "totalFiles": 1002,
+    "tracked": 1002,
     "untracked": 0
   },
   "untrackedByDirectory": []

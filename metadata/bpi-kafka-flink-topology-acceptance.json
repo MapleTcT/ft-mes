@@ -1,21 +1,26 @@
 {
-  "generatedAt": "2026-07-13T00:08:00+08:00",
-  "repoCommit": "0b9f0de",
+  "generatedAt": "2026-07-14T11:43:11+08:00",
+  "repoCommit": "44df18fd",
   "workingTree": "uncommitted",
-  "status": "JOB_WIRED_HARNESS_PASS",
+  "status": "LOCAL_MINICLUSTER_ACCEPTED_TARGET_CLUSTER_PENDING",
   "runtime": "streaming/bpi-stream-engine",
   "java": "17",
   "flink": "2.2.1",
   "kafkaConnector": "5.0.0-2.2",
   "summary": {
-    "streamTestsRun": 75,
-    "streamPass": 75,
+    "streamTestsRun": 79,
+    "streamPass": 78,
     "streamFail": 0,
+    "streamSkipped": 1,
     "contractTestsRun": 14,
     "ruleRuntimeTestsRun": 9,
-    "reactorTestsRun": 98,
-    "reactorPass": 98,
-    "realClusterAccepted": false
+    "reactorTestsRun": 102,
+    "reactorPass": 101,
+    "reactorSkipped": 1,
+    "flinkKafkaRuntimeAcceptanceRun": 1,
+    "flinkKafkaRuntimeAcceptancePass": 1,
+    "localMiniClusterAccepted": true,
+    "targetClusterAccepted": false
   },
   "topics": {
     "sources": [
@@ -25,7 +30,8 @@
     ],
     "sinks": [
       "bpi.batch.candidate.v1",
-      "bpi.data-quality.v1"
+      "bpi.data-quality.v1",
+      "bpi.boundary.rule-application.v1"
     ]
   },
   "wireFormats": [
@@ -34,7 +40,8 @@
     "BPCT/v1",
     "BPRU/v1",
     "BatchCandidateV1",
-    "DataQualityEventV1"
+    "DataQualityEventV1",
+    "BoundaryRuleApplicationV1"
   ],
   "capabilities": [
     "raw Kafka metadata preservation and tombstone isolation",
@@ -47,21 +54,25 @@
     "source watermarks and idleness",
     "bounded context and boundary keyed-state TTL",
     "stable operator UIDs",
-    "exactly-once candidate and data-quality Kafka sinks",
-    "marker-scoped read-committed Kafka cluster replay harness"
+    "exactly-once candidate, data-quality and rule-application Kafka sinks",
+    "marker-scoped read-committed Kafka cluster replay harness",
+    "local Kafka 4.2 and Flink 2.2.1 MiniCluster checkpoint transaction visibility",
+    "TaskManager restart checkpoint restore and terminal rule lifecycle protection"
   ],
   "limitations": [
-    "No real Kafka or Flink HA cluster acceptance was performed.",
-    "No RocksDB/MinIO checkpoint, savepoint upgrade, chaos, lag or backpressure acceptance was performed.",
+    "The accepted local broker is a disposable single-process Kafka KRaft server, not the target three-broker cluster.",
+    "No target Flink HA, RocksDB/MinIO checkpoint, savepoint upgrade, chaos, lag or backpressure acceptance was performed.",
     "No 100k-point load benchmark was performed.",
     "Schema Registry compatibility was not exercised against a live registry.",
-    "End-to-end business persistence still requires BPI inbox and PostgreSQL marker acceptance."
+    "PostgreSQL receipt consumption has separate local evidence; browser-to-Java/Kafka/Flink/PostgreSQL joint acceptance remains pending."
   ],
   "evidence": [
     "docs/testing/bpi-kafka-flink-topology-acceptance.md",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java",
     "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BpiKafkaJobTopologyTest.xml",
     "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRulePublicationLifecycleHarnessTest.xml",
-    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRuleRoutingBroadcastHarnessTest.xml"
+    "streaming/bpi-stream-engine/target/surefire-reports/TEST-com.mapletct.ftmes.bpi.stream.BoundaryRuleRoutingBroadcastHarnessTest.xml",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
+    "metadata/bpi-rule-application-flink-kafka-acceptance.json"
   ]
 }

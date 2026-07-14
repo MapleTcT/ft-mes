@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T02:02:43.004Z",
+  "generatedAt": "2026-07-14T03:03:06.045Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -31,11 +31,11 @@
     }
   },
   "summary": {
-    "testedFeatures": 127,
+    "testedFeatures": 128,
     "pass": 123,
     "fail": 0,
     "blocked": 3,
-    "notApplicable": 1
+    "notApplicable": 2
   },
   "items": [
     {
@@ -2776,6 +2776,23 @@
       "evidence": "metadata/process-analysis-persistence-acceptance.json and metadata/process-analysis-trace.png. Real WOM button selected task 8991075113025740, opened the trace page with 10 timeline events and no console/network failures. PostgreSQL changed from 0 to 3 snapshots; task revision reached 2, process/activity revision reached 1; WMS fixture produced one document and two transactions. Cleanup returned marker snapshot, document and transaction counts to 0.",
       "issues": [
         "Production full-stack migration and rollback remain independent cutover gates."
+      ]
+    },
+    {
+      "module": "BPI 流处理规则应用回执",
+      "route": "NOT_APPLICABLE: Flink/Kafka 数据面验收，无前端路由",
+      "operation": "checkpoint 事务可见性、取消回滚、TaskManager 重启恢复和规则终态保护",
+      "api": "bpi.boundary.rule-publication.v1 -> bpi.boundary.rule-application.v1",
+      "method": "KAFKA_EVENT",
+      "requiresPersistence": false,
+      "backendEntry": "BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction -> RuleApplicationKafkaSerializationSchema -> KafkaSink",
+      "tables": [],
+      "marker": "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed",
+      "verificationSql": "NOT_APPLICABLE: PostgreSQL consumption is intentionally covered by metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+      "status": "NOT_APPLICABLE",
+      "evidence": "metadata/bpi-rule-application-flink-kafka-acceptance.json records Kafka 4.2 + Flink 2.2.1 MiniCluster execution with 3 completed checkpoints, 1 restored checkpoint, read_committed invisibility before checkpoint, canceled transaction rollback, APPLIED/INACTIVE commit, restored terminal state and REJECTED same-version reactivation. This data-plane test intentionally does not write PostgreSQL.",
+      "issues": [
+        "Target three-broker Kafka/Flink/MinIO and browser-to-Java/PostgreSQL joint acceptance remain blocked."
       ]
     }
   ],

@@ -36,7 +36,7 @@
         "make ci passed on 2026-06-15 after commit d13b817",
         "make sustainable-check now validates generated-artifact ignore rules and blocks tracked __pycache__, pyc, target, node_modules, dist, class and log artifacts except narrow runtime patch class allowlist with adjacent source.",
         "make ci now includes runtime-smoke-reports-check so committed runtime smoke reports are checked for schema, PASS status, current host, expected checks, and secret hygiene.",
-        "make ci now includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 999 CI/governance/runtime assets, 999 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, all maintainable source modules, BPI event/API contracts, Java 17/PostgreSQL shadow service, Java 8 authentication adapter, BPI operator console browser acceptance, deterministic simulation acceptance, telemetry replay staging and persistence acceptance, event-time boundary rule runtime acceptance, Java 17/Flink stream replay, keyed broadcast operator and checkpoint recovery acceptance, rich Protobuf candidate persistence and confirmation acceptance, Kafka candidate consumer/DLQ/PostgreSQL acceptance, transactional rule-publication outbox/PostgreSQL/Kafka acceptance, failed-publication administrator retry/audit acceptance, rule-application Kafka/PostgreSQL restart/replay/DLQ acceptance and truthful publication/application status, guarded Kafka/Flink/PostgreSQL marker replay harness, IoT signal to Protobuf/confirmation/PostgreSQL cross-module runtime acceptance, versioned watermark/lateness/timeout rule semantics acceptance, rule-publication Protobuf/AsyncAPI contract, point-in-time production-context resolution, keyed dual-input context wait, Kafka metadata decode, checkpointed rule lifecycle, scoped indexed routing, stable UIDs, candidate/data-quality/rule-application three transactional sinks, deployable shaded job, isolated Kafka/Flink Compose, capacity preflight, cluster smoke and marker-scoped read-committed replay acceptance, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, ProcessAnalysis acceptance assets, core runtime rollback rehearsal, core-flow regression evidence, production rehearsal verifier, and verifier assets were added to Git tracking.",
+        "make ci now includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1002 CI/governance/runtime assets, 1002 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, all maintainable source modules, BPI event/API contracts, Java 17/PostgreSQL shadow service, Java 8 authentication adapter, BPI operator console browser acceptance, deterministic simulation acceptance, telemetry replay staging and persistence acceptance, event-time boundary rule runtime acceptance, Java 17/Flink stream replay, keyed broadcast operator and checkpoint recovery acceptance, rich Protobuf candidate persistence and confirmation acceptance, Kafka candidate consumer/DLQ/PostgreSQL acceptance, transactional rule-publication outbox/PostgreSQL/Kafka acceptance, failed-publication administrator retry/audit acceptance, rule-application Kafka/PostgreSQL restart/replay/DLQ acceptance, Kafka 4.2/Flink MiniCluster checkpoint/restart acceptance and truthful publication/application status, guarded Kafka/Flink/PostgreSQL marker replay harness, IoT signal to Protobuf/confirmation/PostgreSQL cross-module runtime acceptance, versioned watermark/lateness/timeout rule semantics acceptance, rule-publication Protobuf/AsyncAPI contract, point-in-time production-context resolution, keyed dual-input context wait, Kafka metadata decode, checkpointed rule lifecycle, scoped indexed routing, stable UIDs, candidate/data-quality/rule-application three transactional sinks, deployable shaded job, isolated Kafka/Flink Compose, capacity preflight, cluster smoke and marker-scoped read-committed replay acceptance, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, ProcessAnalysis acceptance assets, core runtime rollback rehearsal, core-flow regression evidence, production rehearsal verifier, and verifier assets were added to Git tracking.",
         "make ci now includes goal-gap-register-check; metadata/goal-gap-register.json and docs/goal-gap-register.md are generated from the project goal ledger, production blockers, backlog, dependency readiness, export readiness and production migration ledgers so open gaps cannot be hidden by localized PASS evidence.",
         "make ci-required-file-strict-check now passes and scripts/verify-project-goal-acceptance.py rejects G-001 READY if the strict inventory is not clean or if the inventory generator/report artifacts are not tracked."
       ],
@@ -89,7 +89,7 @@
         "docs/module-intake-latest-basic-modules.md"
       ],
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=982, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 982 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent count change comes from the README rewrite removing stale documentation-only references, not from runtime dependency changes.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=980, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 980 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The recent count change comes from the README rewrite removing stale documentation-only references, not from runtime dependency changes.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -105,7 +105,7 @@
       "nextActions": [
         "逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。"
       ],
-      "evidence": "Docker/POM default PostgreSQL; Nacos source/rendered runtime configs scan 88 files and 1620 active lines with active Oracle-like defaults=0; Oracle is legacy/profile/backlog only; Oracle replacement summary has blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=982, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0; Oracle audit currently has 982 classified references and 0 unclassified references; the recent count change comes from removing stale documentation-only references, not runtime dependency changes; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and role-to-user inheritance sync; 079 covers WOM_WAIT_PUT_RECORDS/wom_wait_put_records for updateTaskState; 101 covers WOM output-detail finish_num sync; 104/105/106 cover WOM process start/end PostgreSQL compatibility. 新业务包准入报告现在包含 scanPolicy/scanCoverage，真实最新基础模块复扫证明嵌套 zip/jar 路径可追溯，同时仍阻断 7z 和 jdbc:oracle:thin 默认路径。",
+      "evidence": "Docker/POM default PostgreSQL; Nacos source/rendered runtime configs scan 88 files and 1620 active lines with active Oracle-like defaults=0; Oracle is legacy/profile/backlog only; Oracle replacement summary has blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=980, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0; Oracle audit currently has 980 classified references and 0 unclassified references; the recent count change comes from removing stale documentation-only references, not runtime dependency changes; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and role-to-user inheritance sync; 079 covers WOM_WAIT_PUT_RECORDS/wom_wait_put_records for updateTaskState; 101 covers WOM output-detail finish_num sync; 104/105/106 cover WOM process start/end PostgreSQL compatibility. 新业务包准入报告现在包含 scanPolicy/scanCoverage，真实最新基础模块复扫证明嵌套 zip/jar 路径可追溯，同时仍阻断 7z 和 jdbc:oracle:thin 默认路径。",
       "gap": "Oracle backlog still has references and must be migrated module by module."
     },
     {
@@ -809,34 +809,38 @@
         "services/bpi-service/app/src/main/resources/db/migration/V8__bpi_rule_application_receipts.sql",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
         "streaming/bpi-stream-engine/pom.xml",
+        "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
         "deploy/bpi-streaming/docker-compose.yml",
+        "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
         "backend/source-modules/batch-intelligence-adapter/pom.xml",
         "frontend/apps/bpi/package.json",
         "metadata/bpi-rule-publication-retry-acceptance.json",
         "metadata/bpi-rule-application-receipt-acceptance.json",
         "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+        "metadata/bpi-rule-application-flink-kafka-acceptance.json",
         "metadata/bpi-ui-acceptance.json"
       ],
       "currentEvidence": [
         "BPI 总设计、交互设计、API 目录和工程测试计划已进入仓库，Java 8 旧平台适配与 Java 17 BPI/Flink 边界明确。",
-        "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理 reactor 当前 78 项测试通过。",
+        "Protobuf 契约、兼容性基线、OpenAPI、模拟器和静态门禁已建立；本地流处理常规测试和显式运行时验收均有可重复执行入口。",
         "BPI PostgreSQL 服务已实现遥测入库、规则/拓扑、规则模拟、候选、影子批次、证据、幂等和审计。",
         "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据；当前已提交基线为 7e8b3c20。",
         "Flink 已具备事件时间、生产上下文 join、规则生命周期、Broadcast State、索引路由、边界计算、checkpoint 恢复、candidate/data-quality/rule-application exactly-once sink；APPLIED/REJECTED 回执契约和 BPI 消费入库链路已实现。",
         "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。",
         "2026-07-14 BPI 操作台已明确分离 Kafka 分发与 Flink 应用状态；确定性浏览器测试覆盖 WAITING -> REJECTED -> APPLIED、拒绝详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。",
-        "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。"
+        "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。",
+        "2026-07-14 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED、TaskManager 重启从 checkpoint 恢复终态、同版本重新启用提交 REJECTED 以及无重复回执；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。"
       ],
       "blockingIssues": [
-        "规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ 和模拟浏览器验收已完成；仍需真实 Flink job checkpoint sink 产生回执、集群 restart 恢复及浏览器到 Java 服务联合回路。",
+        "规则应用回执的本地 PostgreSQL、Embedded Kafka 消费重启/重放/DLQ、模拟浏览器以及真实本地 Flink MiniCluster checkpoint/TaskManager 重启验收已分别完成；仍需目标三 broker Kafka/Flink/MinIO 集群恢复和浏览器到 Java/Kafka/Flink/PostgreSQL 联合回路。",
         "BPI 全栈尚未部署到目标测试环境完成远端页面、API、Kafka offset/checkpoint 和 PostgreSQL marker 验收。",
         "JetLinks/IoT exporter、MES 生产上下文 outbox 和真实产线点位/单位/质量码/sequence 尚未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
-        "使用真实 Flink MiniCluster 或部署集群从 checkpoint exactly-once sink 产生 rule application receipt，验证失败 checkpoint 不可见、成功 checkpoint 可见和 job restart 恢复。",
-        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/PostgreSQL 验收。",
+        "在目标三 broker Kafka、Flink 和 MinIO checkpoint storage 上复验 rule application receipt、broker/TaskManager 重启、offset 和 checkpoint 恢复。",
+        "更新 BPI topic/部署 smoke，构建并部署目标测试环境，执行真实浏览器/API/Kafka/Flink/PostgreSQL 联合 marker 验收。",
         "接入 MapleTcT/iot exporter 和一条产线 MES production context，完成点位语义与规则 locality group 盘点。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ]

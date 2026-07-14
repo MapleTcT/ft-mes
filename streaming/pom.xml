@@ -18,6 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flink.version>2.2.1</flink.version>
         <flink.kafka.connector.version>5.0.0-2.2</flink.kafka.connector.version>
+        <kafka.version>4.2.0</kafka.version>
         <junit.version>5.11.4</junit.version>
     </properties>
     <build>

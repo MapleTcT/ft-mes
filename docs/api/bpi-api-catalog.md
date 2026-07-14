@@ -16,6 +16,8 @@
 - `SIMULATED` 表示本地确定性模拟器已实现并纳入自动测试，不表示真实 PostgreSQL/Kafka/Flink 已验收。
 - 事件状态 `JOB_WIRED` 表示 Kafka/Flink 作业图、Harness 和事务 sink 已接线，不表示真实 broker、Flink HA、
   checkpoint storage 或端到端 PostgreSQL 已验收；只有完成实机证据后才能标记 `CLUSTER_ACCEPTED`。
+- `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
+  事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
 - Java 17 服务当前实现 `service-phase1-profile.json` 中的 19 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
@@ -123,7 +125,7 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `iot.telemetry.selected.v1` | `plantId+deviceId` | `TelemetryEnvelopeV1` | JetLinks/exporter -> BPI | JOB_WIRED |
 | `mes.production.context.v1` | `orderId+taskId` | `ProductionContextEventV1` | WOM adapter -> BPI | JOB_WIRED |
 | `bpi.boundary.rule-publication.v1` | `tenantId+lineId+ruleCode+ruleVersion` | `BoundaryRulePublicationV1` | BPI outbox -> Flink Broadcast State | JOB_WIRED |
-| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | LOCAL_KAFKA_POSTGRES_ACCEPTED_FLINK_JOB_PENDING |
+| `bpi.boundary.rule-application.v1` | `publicationEventId` | `BoundaryRuleApplicationV1` | Flink exactly-once checkpoint sink -> BPI inbox/PostgreSQL/audit | LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED_POSTGRES_CHAIN_SEPARATE |
 | `bpi.boundary.rule-application.dlq.v1` | 原 publication key | 原 `BoundaryRuleApplicationV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI Kafka consumer -> PostgreSQL | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |

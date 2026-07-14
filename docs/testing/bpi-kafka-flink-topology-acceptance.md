@@ -3,12 +3,14 @@
 ## 结论
 
 `streaming/bpi-stream-engine` 已组装 Java 17 / Flink 2.2.1 的可部署 Kafka 作业入口
-`BpiKafkaJob`。本里程碑状态为 **JOB_WIRED / HARNESS_PASS**：生产数据面、控制面、候选输出和
-数据质量输出已经在作业图中闭合，但尚未在真实 Kafka/Flink 集群完成运行验收。
+`BpiKafkaJob`。本里程碑状态为 **LOCAL_MINICLUSTER_ACCEPTED / TARGET_CLUSTER_PENDING**：生产数据面、
+控制面、候选输出、数据质量输出和规则应用回执已经在作业图中闭合；规则应用回执已通过真实本地 Kafka 4.2
+与 Flink 2.2.1 MiniCluster 的 checkpoint/TaskManager 重启验收，但尚未在目标三 broker、Flink、MinIO
+测试集群完成联合运行验收。
 
-当前 Java 17 streaming module 为 **75/75 PASS**；连同事件契约 14 项和规则运行时 9 项，
-本次 Reactor 共 **98/98 PASS**。其中新增 4 项覆盖唯一 marker 的集群 replay fixture、范围过滤、
-fail-closed 配置和机器可读报告；实机 replay 仍受测试机磁盘阻断。
+常规 Java 17 streaming reactor 测试继续覆盖 wire、拓扑、Harness、checkpoint state 和 replay；
+需要真实运行时的 `BpiRuleApplicationFlinkKafkaAcceptanceTest` 为显式启用测试，已连续通过本地独立 broker/job
+运行，并输出机器可读证据。测试数量以当前 Surefire 报告为准，文档不固定易失真的累计数字。
 
 ## 作业链路
 
@@ -19,6 +21,7 @@ mes.production.context.v1 -> BPKR/v1 -> ProductionContextEventV1 validation
 bpi.boundary.rule-publication.v1 -> immutable lifecycle -> indexed broadcast routes
     -> scoped rule update BPRU/v1 -> keyed boundary evaluator
     -> bpi.batch.candidate.v1 (Kafka exactly-once sink)
+    -> bpi.boundary.rule-application.v1 (Kafka exactly-once checkpoint sink)
 
 decode/join/routing/evaluation issues
     -> DataQualityEventV1 -> bpi.data-quality.v1 (Kafka exactly-once sink)
@@ -86,14 +89,25 @@ JAVA_HOME=<jdk17> mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
 | event-time evaluator/late replay/checkpoint | `BoundaryKeyedBroadcastHarnessTest` | PASS |
 | candidate/data-quality Kafka record | `CandidateKafkaSerializationSchemaTest`、`DataQualityKafkaSerializationSchemaTest` | PASS |
 | checkpoint、稳定 UID、candidate/data-quality/rule-application 三个事务 sink 作业图 | `BpiKafkaJobTopologyTest` | PASS |
+| checkpoint 提交可见性、取消回滚、TaskManager 重启恢复和终态规则保护 | `BpiRuleApplicationFlinkKafkaAcceptanceTest` | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+
+本地运行时验收入口：
+
+```bash
+JAVA_HOME=/path/to/jdk17 make bpi-rule-application-flink-acceptance
+```
+
+机器记录：`metadata/bpi-rule-application-flink-kafka-acceptance.json`。默认 broker 为测试进程内的一次性
+Kafka 4.2 KRaft server，checkpoint 存储为测试拥有的本地目录；可通过
+`BPI_TEST_KAFKA_BOOTSTRAP_SERVERS` 使用专用外部测试 broker。
 
 ## 尚未完成
 
-- 未连接真实 3 broker Kafka、Schema Registry 或 Flink HA 集群。
-- checkpoint storage、RocksDB state backend、MinIO/S3 凭据和保留策略由目标集群配置，本次未实机验证。
-- 未执行 broker/TaskManager 重启、savepoint 升级、事务超时、consumer lag、backpressure 和 10 万点压测。
+- 未在目标环境连接 3 broker Kafka、Schema Registry 或 Flink HA 集群。
+- 目标 checkpoint storage、RocksDB state backend、MinIO/S3 凭据和保留策略尚未实机验证。
+- 本地 TaskManager 重启恢复已经通过；目标 broker/TaskManager 重启、savepoint 升级、事务超时、consumer lag、backpressure 和 10 万点压测仍未执行。
 - Flink 到 BPI 业务语义仍是 Kafka at-least-once + BPI inbox 幂等；本次 exactly-once 只描述 Kafka sink
-  与 Flink checkpoint 的事务边界，不替代 BPI PostgreSQL marker 验收。
+  与 Flink checkpoint 的事务边界。PostgreSQL 消费另有独立真实落库证据，但两份分离测试不替代浏览器到数据库的联合 marker 验收。
 - `LATE_EVENT_REVISION_REQUIRED` 已进入数据质量 topic，但人工修订消费者和页面尚未实现。
 - 真实 JetLinks -> Kafka -> Flink -> BPI -> PostgreSQL -> 浏览器候选确认链必须单独验收后，状态才能提升为
   `CLUSTER_ACCEPTED`。

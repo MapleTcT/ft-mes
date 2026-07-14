@@ -31,6 +31,16 @@ make bpi-stream-deploy-preflight
 
 ## 启停与验收
 
+启动 Compose 集群前，可先运行不依赖 Docker/PostgreSQL 的本地事务与恢复验收：
+
+```bash
+JAVA_HOME=/path/to/jdk17 make bpi-rule-application-flink-acceptance
+```
+
+该命令以一次性 Kafka 4.2 KRaft server 和 Flink 2.2.1 MiniCluster 验证未完成 checkpoint 的事务不可见、
+成功 checkpoint 后回执可见、TaskManager 重启恢复规则终态及同版本规则禁止重新启用。它使用本地文件
+checkpoint，不替代下面的三 broker、MinIO 和目标环境验收。
+
 ```bash
 make up-bpi-stream
 make bpi-stream-cluster-smoke

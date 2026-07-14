@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T01:16:56+00:00",
-  "repoCommit": "7e8b3c20a78dc5e022090d977e8fac71be9de380",
-  "findingCount": 982,
+  "generatedAt": "2026-07-14T03:47:43+00:00",
+  "repoCommit": "44df18fd9e73c211f382fb9b51391696f84e424a",
+  "findingCount": 980,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
-    "documentation-or-workflow": 186,
+    "documentation-or-workflow": 184,
     "frontend-row-index-noise": 4,
     "java-row-index-noise": 19,
     "legacy-ojdbc-dependency": 6,
@@ -20,7 +20,7 @@
   "patternCounts": {
     "from-dual": 140,
     "ojdbc": 15,
-    "oracle-keyword": 631,
+    "oracle-keyword": 629,
     "rownum": 61,
     "sysdate": 135
   },
@@ -245,7 +245,7 @@
     },
     {
       "file": "Makefile",
-      "line": 223,
+      "line": 224,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -253,7 +253,7 @@
     },
     {
       "file": "Makefile",
-      "line": 224,
+      "line": 225,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -261,7 +261,7 @@
     },
     {
       "file": "Makefile",
-      "line": 227,
+      "line": 228,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -269,7 +269,7 @@
     },
     {
       "file": "Makefile",
-      "line": 228,
+      "line": 229,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -277,7 +277,7 @@
     },
     {
       "file": "Makefile",
-      "line": 321,
+      "line": 322,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -285,7 +285,7 @@
     },
     {
       "file": "Makefile",
-      "line": 693,
+      "line": 698,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -293,7 +293,7 @@
     },
     {
       "file": "Makefile",
-      "line": 694,
+      "line": 699,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -301,7 +301,7 @@
     },
     {
       "file": "Makefile",
-      "line": 696,
+      "line": 701,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -309,7 +309,7 @@
     },
     {
       "file": "Makefile",
-      "line": 697,
+      "line": 702,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -317,7 +317,7 @@
     },
     {
       "file": "Makefile",
-      "line": 705,
+      "line": 710,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -325,7 +325,7 @@
     },
     {
       "file": "Makefile",
-      "line": 706,
+      "line": 711,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -333,7 +333,7 @@
     },
     {
       "file": "Makefile",
-      "line": 708,
+      "line": 713,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -341,7 +341,7 @@
     },
     {
       "file": "Makefile",
-      "line": 709,
+      "line": 714,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -349,27 +349,11 @@
     },
     {
       "file": "README.md",
-      "line": 8,
+      "line": 16,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "仓库默认数据库是 **PostgreSQL**。Oracle 只允许保留在显式 legacy 模板、迁移对照和 backlog 中，不能重新成为默认运行路径。"
-    },
-    {
-      "file": "README.md",
-      "line": 85,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| 数据库 | PostgreSQL 默认 | 新能力和迁移目标；Oracle 仅 legacy |"
-    },
-    {
-      "file": "README.md",
-      "line": 134,
-      "pattern": "oracle-keyword",
-      "category": "documentation-or-workflow",
-      "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "make oracle-replacement-check"
+      "excerpt": "默认数据库是 **PostgreSQL**。Oracle 只允许存在于显式 `legacy-template-only` 模板、迁移对照和 backlog 中，不允许重新成为默认运行路径。"
     },
     {
       "file": "backend/decompiled-services/auditlog/src/main/java/com/supcon/supfusion/auditlog/bootstrap/config/MybatisPlusConfig.java",
@@ -7005,7 +6989,7 @@
     },
     {
       "file": "scripts/verify-bpi-streaming.py",
-      "line": 163,
+      "line": 172,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
