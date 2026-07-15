@@ -2,13 +2,13 @@
 
 ## 2026-07-15 BPI 控制面与运行时状态分离
 
-本轮使用本地确定性 BPI 模拟器和真实 Chromium 页面验收，共 `8/8 PASS`，
+本轮使用本地确定性 BPI 模拟器和真实 Chromium 页面验收，共 `9/9 PASS`，
 console/page/request error 均为 `0`。本节只证明操作台交互，不把模拟器当成 PostgreSQL
 落库；真实 Kafka/PostgreSQL 与 Flink checkpoint 证据分别记录在后端验收中。
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 规则运行状态 | `/bpi/#/rules` | 查看已发布规则，注入 `DEGRADED` 后再注入 `READY` | `GET /bpi/v1/rules/{id}`；模拟器控制端点 `POST /__simulation/rule-runtime-readiness` | 页面始终显示控制面 `APPLIED`，运行时独立显示 `DEGRADED -> READY`；降级原因、目录 event/revision 和更新时间正确呈现并在 READY 后清理；无浏览器错误 | 本浏览器项使用模拟器，不声明后端落库；真实落库由 `BpiRuleApplicationKafkaPostgresAcceptanceTest` 单独证明 | 不适用 | PASS_SIMULATOR | 目标环境 V13 尚未部署 |
+| BPI 规则运行状态 | `/bpi/#/rules` | 查看已发布规则，注入 `DEGRADED` 后再注入 `READY` | `GET /bpi/v1/rules/{id}`；模拟器控制端点 `POST /__simulation/rule-runtime-readiness` | 页面始终显示控制面 `APPLIED`，运行时独立显示 `DEGRADED -> READY`；降级原因、目录 event/revision 和更新时间正确呈现并在 READY 后清理；无浏览器错误 | 本浏览器项使用模拟器，不声明后端落库；真实落库由 `BpiRuleApplicationKafkaPostgresAcceptanceTest` 单独证明 | 不适用 | PASS_SIMULATOR | 目标 V13 已部署；真实点位仍未 READY |
 | BPI 点位目录 | `/bpi/#/points` | 导入目录并检查 readiness blocker | `POST /bpi/v1/point-catalog/snapshots`、`GET /bpi/v1/point-catalog/current` | 点位总数、READY 数和五类 blocker 可见；无浏览器错误 | 模拟器返回确定性结果 | 不适用 | PASS_SIMULATOR | 不代表现场点位 READY |
 
 证据：`metadata/bpi-ui-acceptance.json`、`/tmp/bpi-console-rule-application-applied.png`、
@@ -22,12 +22,23 @@ console/page/request error 均为 `0`。本节只证明操作台交互，不把�
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 点位目录 | `/#/points` | 导入目标 JetLinks 状态快照并使用同一幂等键重放 | `GET /bpi-api/point-catalog/current`、`POST /bpi-api/point-catalog/snapshots` | 页面显示 `0/1 就绪`、`instantFlow -> flow.instant`、设备未注册/未激活/属性不存在/标定未验证；console/page/request error 均为 0 | 首次 `200`，重放 `200 + Idempotent-Replay:true`，source revision 仅 1 条 | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS | 准入功能通过；目标点位本身仍 BLOCKED |
+| BPI 点位目录 | `/#/points` | 导入目标 JetLinks 状态快照并使用同一幂等键重放 | `GET /bpi-api/point-catalog/current`、`POST /bpi-api/point-catalog/snapshots` | 页面显示 `0/1 就绪`、`instantFlow -> flow.instant`、设备未注册/未激活/设备属性不可用/标定未验证；console/page/request error 均为 0 | 首次 `200`，重放 `200 + Idempotent-Replay:true`，source revision 仅 1 条 | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS | 准入功能通过；目标点位本身仍 BLOCKED |
 | BPI 拓扑硬门禁 | `/#/rules` | 创建绑定试点点位的拓扑并校验 | `POST /bpi-api/topologies/drafts`、`POST /bpi-api/topologies/{id}/validate` | 抽屉显示 `DRAFT/FAILED`、4 项错误和 1 项警告，不显示发布按钮 | topology `r1 -> r2`，固定本次点位 snapshot；审计写入 `TOPOLOGY_VALIDATION_FAILED` | `bpi_topology_versions`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 设备、属性、标定恢复后必须导入新快照并重新校验 |
-| BPI 重启读取 | `/#/points`、`/#/rules` | force-recreate Java 服务后只读既有 marker | GET current catalog/topologies/topology | 点位和失败拓扑仍唯一可见，无 console/page/network error | 服务健康 `UP`，Flyway V12，数据未丢失 | 上述五张表 | PASS | 不包含 7-14 天影子运行 |
+| BPI 重启读取 | `/#/points`、`/#/rules` | force-recreate Java 服务后只读既有 marker | GET current catalog/topologies/topology | 点位和失败拓扑仍唯一可见，无 console/page/network error | 服务健康 `UP`；后续 expand-only 升级达到 Flyway V13，数据未丢失 | 上述五张表 | PASS | 不包含 7-14 天影子运行 |
 
 控制面验收为 PASS，但不能把数据源状态升级为 READY。目标 JetLinks 当前产品 metadata
 为空，设备为 `notActive`、`registry_time=NULL`，标定未验证。
+
+## 2026-07-15 BPI V13 目标来源准入与页面错误收口
+
+本轮在 `10.11.100.17` 的 V13 运行栈使用真实 ADP 登录、真实 BPI 页面和唯一 marker
+`ADP_E2E_20260715_184156_BPI_V13_UI` 复验。机器记录见
+`metadata/bpi-rule-runtime-readiness-target-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则来源准入 | `http://100.99.133.43:18091/#/rules` | 对绑定真实 JetLinks 点位的 marker 规则执行历史回放并尝试发布 | `POST /bpi-api/rules/{id}/simulate`、`POST /bpi-api/rules/{id}/publish` | 模拟 `202`；发布 `422`；toast 使用中文业务原因且不暴露英文后端描述或 `POINT_*`；非预期 console/page/request error 均为 0 | 规则保持 `SIMULATION_PASSED/r2`；point catalog 为 `1/0 READY`；设备 inactive、未注册，属性、单位、标定和来源序列未就绪 | `bpi_rule_versions`、`bpi_rule_simulations`、`bpi_point_catalog_snapshots`、`bpi_point_catalog_entries` | PASS_FAIL_CLOSED | 现场点位修复前不能验收目标 `APPLIED + READY` |
+| BPI 拒绝反证 | 同上 | 发布失败后直接查 PostgreSQL、Kafka，再定向清理 marker | 同一发布 API；`bpi.boundary.rule.v1` 只读核对 | 页面没有假成功，确认弹窗保留；清理后概览页正常，错误为 0 | `outbox/candidate/batch/evidence/stateEvent=0`，Kafka marker `0`；清理后 fixture 均为 0，既有 rule-management flag 保留 | `bpi_outbox_events`、`bpi_batch_candidates`、`bpi_batch_instances`、`bpi_boundary_evidence`、`bpi_batch_state_events` | PASS | 正确拒绝不是运行态完成 |
 
 ## 2026-07-12 核心主线当前运行时回归
 
@@ -438,9 +449,9 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 规则与拓扑 | `/bpi/#/rules` | 规则发布后依次模拟 broker 确认、Flink 拒绝、应用成功及运行时 `DEGRADED -> READY` | `GET /bpi/v1/rules/{id}`；`POST /__simulation/complete-rule-publication`、`POST /__simulation/rule-application`、`POST /__simulation/rule-runtime-readiness` 仅为测试控制面 | 页面明确区分 `PENDING/等待 Flink`、`Kafka 已确认/等待 Flink`、`REJECTED/APPLIED` 和独立 `DEGRADED/READY`；APPLIED 不随 runtime 改变，降级原因在 READY 后清理；抽屉位于 1440x900 视口内；console/page/request error 均为 0 | 确定性模拟器验证 UI 状态机；独立 Embedded Kafka + PostgreSQL 16.13/Flyway V13 验收已证明控制面和运行时回执真实消费、幂等、排序、审计及落库 | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS_WITH_SPLIT_EVIDENCE | 本轮未部署目标 V13，仍不是单一浏览器到 Flink/PostgreSQL marker |
+| BPI 规则与拓扑 | `/bpi/#/rules` | 规则发布后依次模拟 broker 确认、Flink 拒绝、应用成功及运行时 `DEGRADED -> READY` | `GET /bpi/v1/rules/{id}`；`POST /__simulation/complete-rule-publication`、`POST /__simulation/rule-application`、`POST /__simulation/rule-runtime-readiness` 仅为测试控制面 | 页面明确区分 `PENDING/等待 Flink`、`Kafka 已确认/等待 Flink`、`REJECTED/APPLIED` 和独立 `DEGRADED/READY`；APPLIED 不随 runtime 改变，降级原因在 READY 后清理；抽屉位于 1440x900 视口内；console/page/request error 均为 0 | 确定性模拟器验证 UI 状态机；独立 Embedded Kafka + PostgreSQL 16.13/Flyway V13 验收已证明控制面和运行时回执真实消费、幂等、排序、审计及落库 | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS_WITH_SPLIT_EVIDENCE | 目标 V13 已部署；真实点位发布到目标运行时回执仍受来源准入阻断 |
 
-证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-runtime-readiness-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。模拟器测试 6/6、浏览器测试 8/8、错误 0；本结论不把模拟端点当成真实落库。
+证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-runtime-readiness-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。浏览器测试 9/9、错误 0；本结论不把模拟端点当成真实落库。
 
 ### BPI 目标环境同一 marker 联合验收（2026-07-14）
 
@@ -484,7 +495,7 @@ PostgreSQL，再由真实 ADP 会话访问目标 BPI 页面读取。同步链通
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 点位准入 | `http://100.99.133.43:18091/#/points` | 本地导入仅缺来源序列的快照；目标环境用真实 ADP 会话读取自动目录 revision | `POST /bpi/v1/point-catalog/snapshots`；`GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | 本地 Playwright `8/8 PASS`；目标页面显示来源序列“未启用”、`BLOCKED` 和五项阻断，GET `200`，console/page/request failure 均为 0 | 模拟器与 Java 服务均把 `SOURCE_SEQUENCE_DISABLED` 纳入 readiness；本地 PostgreSQL 证明仅缺序列不会 READY；目标 PostgreSQL 15.18 为 1 点/0 READY 且 `source_sequence_enabled=false` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_TARGET_GATE_WITH_BLOCKED_SOURCE | 目标试点设备仍未提供设备/网关原生序列，目标数据源继续 BLOCKED |
+| BPI 点位准入 | `http://100.99.133.43:18091/#/points` | 本地导入仅缺来源序列的快照；目标环境用真实 ADP 会话读取自动目录 revision | `POST /bpi/v1/point-catalog/snapshots`；`GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | 本地 Playwright `9/9 PASS`；目标页面显示来源序列“未启用”、`BLOCKED` 和五项阻断，GET `200`，console/page/request failure 均为 0 | 模拟器与 Java 服务均把 `SOURCE_SEQUENCE_DISABLED` 纳入 readiness；本地 PostgreSQL 证明仅缺序列不会 READY；目标 PostgreSQL 15.18 为 1 点/0 READY 且 `source_sequence_enabled=false` | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_TARGET_GATE_WITH_BLOCKED_SOURCE | 目标试点设备仍未提供设备/网关原生序列，目标数据源继续 BLOCKED |
 | BPI 拓扑准入 | `/bpi/#/rules` | 绑定其余条件均通过、仅缺来源序列的点位并执行校验 | `POST /bpi/v1/topologies/drafts`；`POST /bpi/v1/topologies/{id}/validate` | 页面使用同一错误模型显示校验失败；前端构建和规则工作台 E2E 通过 | PostgreSQL 验收返回唯一 `POINT_SOURCE_SEQUENCE_DISABLED / ERROR`，不可发布 | `bpi_topology_versions`、`bpi_api_idempotency`、`bpi_audit_events` | PASS | 只有自动目录出现新 READY revision 后才能重新验证 |
 
 marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-15T07:26:47Z",
-  "repoCommit": "7e3fcf185c09e53a3eca763302d9183eda291461",
-  "workingTree": "uncommitted",
+  "generatedAt": "2026-07-15T10:51:55Z",
+  "repoCommit": "137fa59896cdbf504af64cbea8a0e525465e907c",
+  "workingTree": "clean-at-tested-code-commit",
   "database": "PostgreSQL",
-  "status": "PASS_LOCAL_MULTI_LAYER_TARGET_NOT_RUN",
+  "status": "PASS_LOCAL_AND_TARGET_FAIL_CLOSED_SOURCE_BLOCKED",
   "summary": {
-    "layers": 3,
-    "pass": 3,
+    "layers": 6,
+    "pass": 5,
     "fail": 0,
-    "blocked": 0,
-    "targetEnvironmentStatus": "NOT_RUN"
+    "blocked": 1,
+    "targetEnvironmentStatus": "PASS_FAIL_CLOSED_SOURCE_BLOCKED"
   },
   "items": [
     {
@@ -45,11 +45,52 @@
       "marker": "SIMULATED_RULE_RUNTIME_READINESS",
       "status": "PASS",
       "assertions": [
-        "Eight browser scenarios pass with zero console, page and request failures.",
+        "Nine browser scenarios pass with zero unexpected console, page and request failures.",
         "The rule drawer keeps APPLIED control-plane state while runtime changes DEGRADED to READY.",
-        "DEGRADED reason and point-catalog revision are visible and cleared by the newer READY receipt."
+        "DEGRADED reason and point-catalog revision are visible and cleared by the newer READY receipt.",
+        "A 422 point-readiness rejection is translated to business-facing Chinese and does not expose the backend English detail or POINT_* codes."
       ],
       "evidence": "metadata/bpi-ui-acceptance.json; /tmp/bpi-console-rule-application-applied.png; /tmp/bpi-console-rule-application-rejected.png"
+    },
+    {
+      "layer": "Target V13 upgrade",
+      "runtime": "10.11.100.17; PostgreSQL Flyway V13; Kafka 4.2.0 KRaft x3; Flink 2.2.1",
+      "marker": "V12_TO_V13_SAVEPOINT_RESTORE_20260715",
+      "status": "PASS",
+      "assertions": [
+        "The V12 database backup is readable with pg_restore and the expand-only migration reaches Flyway V13.",
+        "The V12 streaming job savepoint restores into V13 job 40408b7907ca7b97ad750cc7d2bfb345.",
+        "A checkpoint succeeds after restore and all 12 Kafka topics have replication factor 3, min ISR 2 and no under-replicated partitions.",
+        "Service, adapter and web health checks pass after the upgrade."
+      ],
+      "evidence": "/data/docker/bpi-upgrade-evidence/bpi-runtime-v13-expand.json; /data/docker/bpi-upgrade-evidence/bpi-v13-savepoint-restore.json; /data/docker/bpi-upgrade-evidence/bpi-v13-post-runtime-cluster-smoke.json"
+    },
+    {
+      "layer": "Target source-readiness fail-closed acceptance",
+      "runtime": "Real ADP login + deployed BPI page + Java service + PostgreSQL + Kafka",
+      "marker": "ADP_E2E_20260715_184156_BPI_V13_UI",
+      "status": "PASS_FAIL_CLOSED",
+      "assertions": [
+        "ADP login returns 200 and the historical simulation returns 202.",
+        "Rule publication returns the expected 422 because the bound JetLinks point is not READY.",
+        "The visible toast is Chinese business wording and contains neither Rule publication requires nor POINT_* implementation codes.",
+        "PostgreSQL remains SIMULATION_PASSED with one simulation and zero outbox, candidates, batches, evidence and state events.",
+        "The rule Kafka topic contains zero marker messages and marker cleanup preserves the pre-existing enabled rule-management flag.",
+        "Post-cleanup browser read and runtime smoke pass with zero unexpected browser errors."
+      ],
+      "evidence": "metadata/bpi-rule-runtime-readiness-target-acceptance.json"
+    },
+    {
+      "layer": "Target real runtime receipt",
+      "runtime": "JetLinks point catalog + Kafka/Flink + PostgreSQL",
+      "marker": "bpi-pilot-product-01/bpi-pilot-device-01/flow.instant",
+      "status": "BLOCKED_BY_SOURCE",
+      "assertions": [
+        "The current point-catalog snapshot has pointCount 1 and readyPointCount 0.",
+        "The source device is inactive and unregistered; the property, unit, verified calibration and source sequence evidence are not ready.",
+        "The production fail-closed gate correctly prevents a synthetic READY publication, so no target APPLIED plus runtime READY claim is made."
+      ],
+      "evidence": "/data/docker/bpi-upgrade-evidence/bpi-v13-source-catalog-20260715.json"
     }
   ],
   "databaseVerificationSql": [
@@ -60,7 +101,8 @@
   "limitations": [
     "The browser layer uses the deterministic simulator and is not browser-to-PostgreSQL evidence.",
     "The Flink and PostgreSQL layers are separate local acceptances; no single local test spans browser, Java, Kafka, Flink and PostgreSQL.",
-    "The target environment remains on the prior Flyway V12 evidence baseline and was not redeployed in this run.",
-    "Target savepoint migration, rollback rehearsal, real JetLinks READY points and 7-14 day shadow operation remain pending."
+    "The target environment V13 upgrade and source-readiness rejection are verified, but the real JetLinks point is not READY.",
+    "Target rule publication through Kafka/Flink to APPLIED plus runtime READY or DEGRADED remains blocked by source readiness.",
+    "Real IoT telemetry, MES context, candidate/batch closure, application image rollback rehearsal and 7-14 day shadow operation remain pending."
   ]
 }

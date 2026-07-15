@@ -15,7 +15,18 @@
 
 验收 SQL、marker 和限制见 `metadata/bpi-rule-runtime-readiness-acceptance.json`、
 `metadata/bpi-rule-application-kafka-postgres-acceptance.json` 和
-`metadata/bpi-rule-application-flink-kafka-acceptance.json`。本项不声明目标环境已部署 V13。
+`metadata/bpi-rule-application-flink-kafka-acceptance.json`。目标环境 V13 与来源准入反证见下节。
+
+## 2026-07-15 BPI V13 目标来源准入反证
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 规则历史回放 | BPI `/#/rules` | `POST /bpi/v1/rules/{id}/simulate` | `RuleController -> RuleService -> BpiPostgresRepository` | `bpi_rule_simulations`、`bpi_rule_versions`、`bpi_api_idempotency`、`bpi_audit_events` | marker `ADP_E2E_20260715_184156_BPI_V13_UI`；HTTP `202`；规则 `SIMULATION_PASSED/r2`，simulation=1 | PASS |
+| 未 READY 点位阻断发布 | 同上 | `POST /bpi/v1/rules/{id}/publish` | `RuleService -> PointCatalogService.validateBindings` | 只读 `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`；不应新增 outbox | HTTP `422`；真实目录 `pointCount=1/readyPointCount=0`；toast 为中文业务原因；直接查库 `outbox=0/candidate=0/batch=0/evidence=0/stateEvent=0`，规则 topic marker=0 | PASS_FAIL_CLOSED |
+| marker 定向清理与恢复 | 清理后 BPI `/#/overview` 只读 | cleanup SQL；`GET /bpi/v1/overview` | 单事务 marker cleanup；浏览器 read；runtime smoke | 本次 fixture 涉及表 | topology/rule/golden/telemetry/marker flag 均为 0；既有已启用 rule-management flag=1；概览登录/API `200`，浏览器非预期错误 0，runtime smoke PASS | PASS |
+
+机器证据：`metadata/bpi-rule-runtime-readiness-target-acceptance.json`。本项只接受来源准入
+fail closed，不声明目标规则已进入 Kafka/Flink `APPLIED + READY`；该链路仍由真实点位 READY 阻断。
 
 ## 2026-07-15 BPI 点位目录与拓扑准入门禁
 

@@ -150,6 +150,7 @@ REQUIRED_PATHS = [
     "metadata/bpi-ui-acceptance.json",
     "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
     "metadata/bpi-rule-runtime-readiness-acceptance.json",
+    "metadata/bpi-rule-runtime-readiness-target-acceptance.json",
     "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
     "metadata/bpi-adapter-acceptance.json",
     ".github/workflows/verify.yml",

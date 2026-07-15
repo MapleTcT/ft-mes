@@ -663,6 +663,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/upgrade-expand-only.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
       "state": "tracked",
       "tracked": true
@@ -699,6 +705,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/capture-upgrade-savepoint.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/create-topics.sh",
       "state": "tracked",
       "tracked": true
@@ -712,6 +724,12 @@
     {
       "ignored": false,
       "path": "deploy/bpi-streaming/scripts/preflight.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/restore-from-savepoint.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -754,6 +772,18 @@
     {
       "ignored": false,
       "path": "deploy/bpi-streaming/scripts/smoke-cluster.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/start-jobmanager.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/verify-savepoint-restore.sh",
       "state": "tracked",
       "tracked": true
     },
@@ -4317,6 +4347,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-rule-runtime-readiness-target-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-rule-timing-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6656,7 +6692,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 483
+      "tracked": 488
     },
     "docs": {
       "tracked": 88
@@ -6665,7 +6701,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 106
+      "tracked": 107
     },
     "package.json": {
       "tracked": 1
@@ -6689,8 +6725,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1105,
-    "tracked": 1105,
+    "totalFiles": 1111,
+    "tracked": 1111,
     "untracked": 0
   },
   "untrackedByDirectory": []

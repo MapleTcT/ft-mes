@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-07-15T10:51:55Z",
+  "testedCodeCommit": "137fa59896cdbf504af64cbea8a0e525465e907c",
+  "deploymentHost": "10.11.100.17",
+  "database": "PostgreSQL",
+  "databaseSchemaVersion": 13,
+  "status": "PASS_FAIL_CLOSED_SOURCE_BLOCKED",
+  "marker": "ADP_E2E_20260715_184156_BPI_V13_UI",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "deployment": {
+    "serviceImageSha256": "sha256:61677dccc44aa4474ef2a05e6a26d24634d085d57b0863ea05de22352fdc873a",
+    "restoredFlinkJobId": "40408b7907ca7b97ad750cc7d2bfb345",
+    "sourceSavepoint": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-2a882b-7ed0c10ba6b4",
+    "runtimeSmoke": "PASS",
+    "streamClusterSmoke": "PASS"
+  },
+  "pointCatalog": {
+    "source": "JETLINKS",
+    "sourceInstance": "jetlinks-pilot-node-01",
+    "sourceRevision": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
+    "pointCount": 1,
+    "readyPointCount": 0,
+    "productId": "bpi-pilot-product-01",
+    "deviceId": "bpi-pilot-device-01",
+    "propertyId": "flow.instant",
+    "sourcePropertyId": "instantFlow",
+    "deviceState": "INACTIVE",
+    "registered": false,
+    "propertyPresent": false,
+    "unit": null,
+    "calibrationVersion": "pilot-unverified-20260714",
+    "calibrationStatus": "UNVERIFIED",
+    "sourceSequenceEnabled": false
+  },
+  "browser": {
+    "adpLoginStatus": 200,
+    "route": "http://100.99.133.43:18091/#/rules",
+    "title": "智能批次",
+    "simulationStatus": 202,
+    "publicationStatus": 422,
+    "publicationBlocked": true,
+    "publicationToast": "规则未发布：当前点位未通过运行准入（标定未验证、点位目录中找不到规则绑定、设备未激活、设备未注册、设备属性不可用、来源序列未启用、单位缺失）。请先在点位目录修复后重新校验。",
+    "unexpectedConsoleErrors": 0,
+    "expectedHttpConsoleErrors": 1,
+    "pageErrors": 0,
+    "requestFailures": 0
+  },
+  "persistence": {
+    "ruleState": "SIMULATION_PASSED",
+    "ruleRevision": 2,
+    "simulations": 1,
+    "outbox": 0,
+    "candidates": 0,
+    "batches": 0,
+    "boundaryEvidence": 0,
+    "stateEvents": 0,
+    "auditEvents": 1,
+    "ruleTopicMarkerCount": 0
+  },
+  "cleanup": {
+    "topologies": 0,
+    "rules": 0,
+    "goldenBoundaries": 0,
+    "telemetryEvents": 0,
+    "markerFeatureFlags": 0,
+    "preservedEnabledRuleManagementFlags": 1,
+    "postCleanupBrowserRead": "PASS",
+    "postCleanupRuntimeSmoke": "PASS"
+  },
+  "evidence": [
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-ADP_E2E_20260715_184156_BPI_V13_UI.json",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-ADP_E2E_20260715_184156_BPI_V13_UI.png",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-postgres-ADP_E2E_20260715_184156_BPI_V13_UI.json",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-kafka-marker-count-ADP_E2E_20260715_184156_BPI_V13_UI.txt",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-cleanup-ADP_E2E_20260715_184156_BPI_V13_UI.json",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-read-ADP_E2E_20260715_184156_BPI_V13_UI.json",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-ui-localization-read-ADP_E2E_20260715_184156_BPI_V13_UI.png",
+    "/data/docker/bpi-upgrade-evidence/bpi-v13-source-catalog-20260715.json"
+  ],
+  "blocked": [
+    "A real READY point-catalog snapshot is required before the rule can be published.",
+    "Target Kafka/Flink APPLIED and runtime READY or DEGRADED receipts cannot be accepted until source readiness is real.",
+    "Real IoT telemetry plus MES production context and 7-14 day shadow operation remain pending."
+  ]
+}

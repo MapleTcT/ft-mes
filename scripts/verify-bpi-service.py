@@ -78,6 +78,7 @@ REQUIRED_FILES = [
     "metadata/bpi-rule-publication-outbox-acceptance.json",
     "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
     "metadata/bpi-rule-runtime-readiness-acceptance.json",
+    "metadata/bpi-rule-runtime-readiness-target-acceptance.json",
     "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
@@ -411,13 +412,39 @@ def main() -> int:
     )
     if readiness_acceptance.get("database") != "PostgreSQL":
         fail("BPI runtime-readiness acceptance must identify PostgreSQL", failures)
-    if readiness_acceptance.get("status") != "PASS_LOCAL_MULTI_LAYER_TARGET_NOT_RUN":
-        fail("BPI runtime-readiness acceptance must retain explicit local/target scope", failures)
+    if readiness_acceptance.get("status") != "PASS_LOCAL_AND_TARGET_FAIL_CLOSED_SOURCE_BLOCKED":
+        fail("BPI runtime-readiness acceptance must retain explicit local and target scope", failures)
     readiness_summary = readiness_acceptance.get("summary", {})
-    if readiness_summary.get("pass") != 3 or readiness_summary.get("fail") != 0:
-        fail("BPI runtime-readiness acceptance must record three passing local layers", failures)
-    if readiness_summary.get("targetEnvironmentStatus") != "NOT_RUN":
-        fail("BPI runtime-readiness acceptance cannot claim an unexecuted target deployment", failures)
+    if (readiness_summary.get("pass") != 5 or readiness_summary.get("fail") != 0
+            or readiness_summary.get("blocked") != 1):
+        fail("BPI runtime-readiness acceptance must preserve five passes and one source blocker", failures)
+    if readiness_summary.get("targetEnvironmentStatus") != "PASS_FAIL_CLOSED_SOURCE_BLOCKED":
+        fail("BPI runtime-readiness target status must distinguish fail-closed PASS from source readiness", failures)
+
+    target_readiness = json.loads(
+        (ROOT / "metadata/bpi-rule-runtime-readiness-target-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if target_readiness.get("status") != "PASS_FAIL_CLOSED_SOURCE_BLOCKED":
+        fail("BPI target readiness acceptance must retain its fail-closed source blocker", failures)
+    target_browser = target_readiness.get("browser", {})
+    if target_browser.get("publicationStatus") != 422:
+        fail("BPI target readiness acceptance must prove HTTP 422 publication rejection", failures)
+    if target_browser.get("unexpectedConsoleErrors") != 0 or target_browser.get("pageErrors") != 0:
+        fail("BPI target readiness browser acceptance must have zero unexpected errors", failures)
+    target_persistence = target_readiness.get("persistence", {})
+    if any(target_persistence.get(key) != 0 for key in ("outbox", "candidates", "batches")):
+        fail("BPI target source rejection must not create outbox, candidate or batch rows", failures)
+    target_catalog = target_readiness.get("pointCatalog", {})
+    if target_catalog.get("readyPointCount") != 0 or target_catalog.get("deviceState") != "INACTIVE":
+        fail("BPI target source blocker must match the observed inactive non-READY point", failures)
+    target_cleanup = target_readiness.get("cleanup", {})
+    if any(target_cleanup.get(key) != 0 for key in (
+            "topologies", "rules", "goldenBoundaries", "telemetryEvents", "markerFeatureFlags")):
+        fail("BPI target readiness marker cleanup must leave no fixture rows", failures)
+    if target_cleanup.get("preservedEnabledRuleManagementFlags") != 1:
+        fail("BPI target cleanup must preserve the existing enabled rule-management flag", failures)
 
     kafka_postgres_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-application-kafka-postgres-acceptance.json").read_text(
