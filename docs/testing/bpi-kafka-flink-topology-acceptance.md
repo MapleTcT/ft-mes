@@ -16,9 +16,11 @@
 
 ```text
 iot.telemetry.selected.v1 -> BPKR/v1 -> TelemetryEnvelopeV1 validation -> BPTE/v1
+iot.point-catalog.snapshot.v1 -> BPKR/v1 -> PointCatalogSnapshotV1 validation
 mes.production.context.v1 -> BPKR/v1 -> ProductionContextEventV1 validation
     -> tenant|plant|line event-time join -> BPCT/v1 -> timestamp reassignment
-bpi.boundary.rule-publication.v1 -> immutable lifecycle -> indexed broadcast routes
+bpi.boundary.rule-publication.v1 -> immutable lifecycle
+point catalog + rule publication -> BRTC/v1 runtime READY gate -> product/device/property indexed routes
     -> scoped rule update BPRU/v1 -> keyed boundary evaluator
     -> bpi.batch.candidate.v1 (Kafka exactly-once sink)
     -> bpi.boundary.rule-application.v1 (Kafka exactly-once checkpoint sink)
@@ -31,13 +33,19 @@ decode/join/routing/evaluation issues
 
 - Kafka source 保留 topic、partition、offset、timestamp、key 和 tombstone，解码失败不会丢失定位证据。
 - telemetry envelope 级错误整体隔离；单个非法 point 只隔离该 point，其余合法点继续处理。
-- 三条 source 使用按 lane 区分且跨重启稳定的 consumer group、`read_committed` 和
+- 四条 source 使用按 lane 区分且跨重启稳定的 consumer group、`read_committed` 和
   committed-offset/earliest fallback；`deployment-id` 只参与事务 producer 身份，不改变消费位点。
-- telemetry、context、rule publication 都配置 event-time watermark 和 source idleness。
+- telemetry、context、rule publication 配置 event-time watermark 和 source idleness；点位目录是控制流，
+  按 scope 保留最新 `observed_at_ms` 快照并拒绝倒序或同时间不同内容。
 - 上下文迟到补齐后，拓扑从 `BPCT/v1` 中重新赋 telemetry point 时间，禁止继承 context 时间。
 - 规则生命周期使用 checkpointed keyed state；同版本只允许 `ACTIVE -> INACTIVE`，重新启用必须新版本。
 - 规则引用使用 `tenant|plant|line|ruleCode|ruleVersion`，同名规则不会跨租户或产线冲突。
-- device/property 路由使用 broadcast index；单点只访问命中的规则列表，不扫描全部规则。
+- 路由使用 tenant/plant/line/product/device/property broadcast index；单点只访问命中的规则列表，不扫描全部规则。
+- 规则绑定同时固化 `productId` 与 `calibrationVersion`。目录缺失、设备停用、属性缺失、单位不符、
+  校准版本漂移或来源序列未启用时，规则不会进入 evaluator；READY 降级会发送 DELETE 并清空该规则的
+  全部待决窗口，旧 event-time timer 不会再产生候选，恢复后必须从新观测重新累积。
+- `bpi.boundary.rule-application.v1` 的 `APPLIED` 当前表示规则控制事件通过不可变生命周期检查，
+  不等价于点位目录运行时 READY；运行时阻断原因进入 `bpi.data-quality.v1`。独立运行时准入回执仍列为后续缺口。
 - evaluator key 包含 tenant、plant、line、locality、boundary kind 和 scoped rule identity，多规则窗口不共享状态。
 - context join state TTL 为 retention+wait；边界窗口 state TTL 可配置，规则发布时强制
   `evaluationTimeout + allowedLateness < TTL`，过期 state 不会被读取。
@@ -56,6 +64,8 @@ decode/join/routing/evaluation issues
 | `BPI_DEPLOYMENT_ID` | `deployment-id` | 必填；并行/蓝绿作业间唯一，恢复同一作业时保持稳定 |
 | `BPI_KAFKA_GROUP_PREFIX` | `group-prefix` | `ft-mes-bpi` |
 | `BPI_TELEMETRY_TOPIC` | `telemetry-topic` | `iot.telemetry.selected.v1` |
+| `BPI_POINT_CATALOG_TOPIC` | `point-catalog-topic` | `iot.point-catalog.snapshot.v1` |
+| `BPI_POINT_CATALOG_MAX_MESSAGE_BYTES` | `point-catalog-max-message-bytes` | `6291456`；允许范围 1-8 MiB |
 | `BPI_CONTEXT_TOPIC` | `context-topic` | `mes.production.context.v1` |
 | `BPI_RULE_TOPIC` | `rule-topic` | `bpi.boundary.rule-publication.v1` |
 | `BPI_CANDIDATE_TOPIC` | `candidate-topic` | `bpi.batch.candidate.v1` |
@@ -82,11 +92,11 @@ JAVA_HOME=<jdk17> mvn -f streaming/pom.xml -pl bpi-stream-engine -am test
 | 验收面 | 证据 | 状态 |
 |---|---|---|
 | Kafka record wire/metadata/tombstone | `KafkaIngressRecordCodecTest`、`KafkaIngressDeserializationSchemaTest` | PASS |
-| 三类 Kafka payload 解码和 side output | `KafkaDecodeFunctionsHarnessTest` | PASS |
+| 四类 Kafka payload 解码和 side output | `KafkaDecodeFunctionsHarnessTest` | PASS |
 | point-in-time context join/checkpoint | `ProductionContextJoinHarnessTest` | PASS |
 | 规则生命周期/checkpoint | `BoundaryRulePublicationLifecycleHarnessTest` | PASS |
-| scoped indexed route/fan-out/deactivate | `BoundaryRuleRoutingBroadcastHarnessTest` | PASS |
-| event-time evaluator/late replay/checkpoint | `BoundaryKeyedBroadcastHarnessTest` | PASS |
+| point catalog READY/降级/校准恢复、scoped indexed route/fan-out/deactivate | `BoundaryRuleRoutingBroadcastHarnessTest` | PASS |
+| event-time evaluator/late replay/checkpoint/运行时 DELETE 清窗 | `BoundaryKeyedBroadcastHarnessTest` | PASS |
 | candidate/data-quality Kafka record | `CandidateKafkaSerializationSchemaTest`、`DataQualityKafkaSerializationSchemaTest` | PASS |
 | checkpoint、稳定 UID、candidate/data-quality/rule-application 三个事务 sink 作业图 | `BpiKafkaJobTopologyTest` | PASS |
 | checkpoint 提交可见性、取消回滚、TaskManager 重启恢复和终态规则保护 | `BpiRuleApplicationFlinkKafkaAcceptanceTest` | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
@@ -109,5 +119,6 @@ Kafka 4.2 KRaft server，checkpoint 存储为测试拥有的本地目录；可�
 - Flink 到 BPI 业务语义仍是 Kafka at-least-once + BPI inbox 幂等；本次 exactly-once 只描述 Kafka sink
   与 Flink checkpoint 的事务边界。PostgreSQL 消费另有独立真实落库证据，但两份分离测试不替代浏览器到数据库的联合 marker 验收。
 - `LATE_EVENT_REVISION_REQUIRED` 已进入数据质量 topic，但人工修订消费者和页面尚未实现。
+- 规则运行时 READY/DEGRADED 状态尚未形成独立回执和前端状态列；当前必须联合规则应用回执与数据质量事件判断。
 - 真实 JetLinks -> Kafka -> Flink -> BPI -> PostgreSQL -> 浏览器候选确认链必须单独验收后，状态才能提升为
   `CLUSTER_ACCEPTED`。

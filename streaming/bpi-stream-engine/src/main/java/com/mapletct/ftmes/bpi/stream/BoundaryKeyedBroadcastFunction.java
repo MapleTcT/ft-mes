@@ -56,15 +56,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
 
     @Override
     public void open(OpenContext openContext) {
-        ValueStateDescriptor<byte[]> descriptor = new ValueStateDescriptor<>(
-                WINDOW_STATE_NAME, byte[].class);
-        descriptor.enableTimeToLive(StateTtlConfig.newBuilder(stateTtl)
-                .updateTtlOnCreateAndWrite()
-                .neverReturnExpired()
-                .cleanupFullSnapshot()
-                .cleanupInRocksdbCompactFilter(1_000)
-                .build());
-        encodedState = getRuntimeContext().getState(descriptor);
+        encodedState = getRuntimeContext().getState(windowStateDescriptor());
     }
 
     @Override
@@ -195,6 +187,13 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
         }
         if (update.operation() == BoundaryRuleUpdate.Operation.DELETE) {
             context.getBroadcastState(RULES).remove(update.ruleRef().key());
+            context.applyToKeyedState(windowStateDescriptor(), (key, state) -> {
+                byte[] stateBytes = state.value();
+                if (stateBytes != null
+                        && BoundaryOperatorStateCodec.decode(stateBytes).ruleRef().equals(update.ruleRef())) {
+                    state.clear();
+                }
+            });
         } else {
             byte[] encodedRule = BoundaryRuleCodec.encode(update.rule());
             byte[] existingRule = context.getBroadcastState(RULES).get(update.ruleRef().key());
@@ -210,6 +209,18 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
             }
             context.getBroadcastState(RULES).put(update.ruleRef().key(), encodedRule);
         }
+    }
+
+    private ValueStateDescriptor<byte[]> windowStateDescriptor() {
+        ValueStateDescriptor<byte[]> descriptor = new ValueStateDescriptor<>(
+                WINDOW_STATE_NAME, byte[].class);
+        descriptor.enableTimeToLive(StateTtlConfig.newBuilder(stateTtl)
+                .updateTtlOnCreateAndWrite()
+                .neverReturnExpired()
+                .cleanupFullSnapshot()
+                .cleanupInRocksdbCompactFilter(1_000)
+                .build());
+        return descriptor;
     }
 
     @Override

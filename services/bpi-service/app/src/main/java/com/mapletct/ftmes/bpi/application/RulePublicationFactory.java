@@ -127,10 +127,12 @@ public class RulePublicationFactory {
             throw new BpiValidationException("Numeric signal binding requires expectedUnit: " + condition.signal());
         }
         return BoundarySignalBindingV1.newBuilder()
+                .setProductId(required(binding, "productId"))
                 .setDeviceId(required(binding, "deviceId"))
                 .setPropertyId(required(binding, "propertyId"))
                 .setSignal(condition.signal())
                 .setExpectedUnit(expectedUnit)
+                .setCalibrationVersion(required(binding, "calibrationVersion"))
                 .build();
     }
 

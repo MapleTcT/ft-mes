@@ -66,6 +66,13 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 没有真实来源流量，因此证据键为 0、目录仍为 1 点/0 READY。该结果没有证明多事件连续单调递增、
 重连/断电 epoch 语义或影子运行稳定性，禁止据此打开自动批次。
 
+仓库级运行时准入随后补齐：规则发布契约固化 `productId`/`calibrationVersion`，Java 服务在发布事务内
+按当前目录重验全部绑定；Flink 增加 `iot.point-catalog.snapshot.v1` 控制流，只向 evaluator UPSERT
+全部绑定 READY 的规则。目录降级会发送 DELETE 并清空匹配规则的待决窗口，旧 event-time timer 不会
+继续产出候选，精确校准恢复后也不会复用旧观测。本地 streaming 常规回归 `99` 项（1 项显式运行时
+测试跳过）、服务测试 `41` 项和 PostgreSQL 规则验收 `5/5` 通过。该批尚未部署目标 Flink；历史发布
+缺少新增绑定字段，必须通过 savepoint/新规则版本迁移演练，G-021 因此仍为 `PARTIAL`。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)

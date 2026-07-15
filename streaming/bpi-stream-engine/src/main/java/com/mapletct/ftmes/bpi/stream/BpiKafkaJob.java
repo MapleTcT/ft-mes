@@ -47,6 +47,16 @@ public final class BpiKafkaJob {
                 .name("Telemetry event-time watermarks")
                 .uid("bpi-telemetry-watermarks-v1");
 
+        SingleOutputStreamOperator<byte[]> pointCatalogs = environment
+                .fromSource(
+                        BpiKafkaIO.pointCatalogSource(config),
+                        WatermarkStrategy.noWatermarks(),
+                        "Kafka point-catalog source")
+                .uid("bpi-kafka-point-catalog-source-v1")
+                .process(new PointCatalogKafkaDecodeFunction())
+                .name("Decode and validate point catalogs")
+                .uid("bpi-point-catalog-decode-v1");
+
         SingleOutputStreamOperator<byte[]> decodedContexts = environment
                 .fromSource(
                         BpiKafkaIO.source(config, config.contextTopic(), "context"),
@@ -98,11 +108,26 @@ public final class BpiKafkaJob {
                 .name("Reassign contextual point event time")
                 .uid("bpi-contextual-watermarks-v1");
 
-        BroadcastStream<byte[]> routeRules = rules.broadcast(
+        SingleOutputStreamOperator<byte[]> routingRules = rules
+                .map(BoundaryRoutingControlCodec::rule)
+                .returns(byte[].class)
+                .name("Map rule routing controls")
+                .uid("bpi-rule-routing-control-v1");
+        SingleOutputStreamOperator<byte[]> routingCatalogs = pointCatalogs
+                .map(BoundaryRoutingControlCodec::pointCatalog)
+                .returns(byte[].class)
+                .name("Map point-catalog routing controls")
+                .uid("bpi-point-catalog-routing-control-v1");
+        BroadcastStream<byte[]> routeControls = routingRules
+                .union(routingCatalogs)
+                .broadcast(
                 BoundaryRuleRoutingBroadcastFunction.PUBLICATIONS,
-                BoundaryRuleRoutingBroadcastFunction.ROUTES);
+                BoundaryRuleRoutingBroadcastFunction.ROUTES,
+                BoundaryRuleRoutingBroadcastFunction.POINT_CATALOGS,
+                BoundaryRuleRoutingBroadcastFunction.POINTS,
+                BoundaryRuleRoutingBroadcastFunction.RUNTIME_RULE_STATUS);
         SingleOutputStreamOperator<BoundaryStreamInput> routedInputs = contextual
-                .connect(routeRules)
+                .connect(routeControls)
                 .process(new BoundaryRuleRoutingBroadcastFunction())
                 .name("Route points through indexed published bindings")
                 .uid("bpi-boundary-indexed-routing-v1");
@@ -111,11 +136,8 @@ public final class BpiKafkaJob {
                 .name("Boundary-input event-time watermarks")
                 .uid("bpi-boundary-input-watermarks-v1");
 
-        SingleOutputStreamOperator<byte[]> ruleUpdates = rules
-                .map(new BoundaryRuleUpdateMapper())
-                .returns(byte[].class)
-                .name("Map scoped boundary rule updates")
-                .uid("bpi-boundary-rule-update-v1");
+        DataStream<byte[]> ruleUpdates = routedInputs
+                .getSideOutput(BoundaryRuleRoutingBroadcastFunction.RULE_UPDATES);
         BroadcastStream<byte[]> evaluatorRules = ruleUpdates.broadcast(
                 BoundaryKeyedBroadcastFunction.RULES);
 
@@ -135,7 +157,8 @@ public final class BpiKafkaJob {
                 .getSideOutput(TelemetryKafkaDecodeFunction.ISSUES)
                 .union(
                         decodedContexts.getSideOutput(ProductionContextKafkaDecodeFunction.ISSUES),
-                        decodedRules.getSideOutput(BoundaryRuleKafkaDecodeFunction.ISSUES))
+                        decodedRules.getSideOutput(BoundaryRuleKafkaDecodeFunction.ISSUES),
+                        pointCatalogs.getSideOutput(PointCatalogKafkaDecodeFunction.ISSUES))
                 .map(new KafkaIssueMap())
                 .returns(byte[].class);
         DataStream<byte[]> joinQuality = joinedContextual

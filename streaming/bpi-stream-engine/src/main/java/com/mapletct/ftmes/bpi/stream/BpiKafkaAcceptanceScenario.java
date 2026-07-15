@@ -6,6 +6,10 @@ import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceConditionV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
@@ -62,10 +66,12 @@ final class BpiKafkaAcceptanceScenario {
                         .setClassification(BoundaryEvidenceClassV1.QUORUM)
                         .setWeight(100))
                 .addSignalBindings(BoundarySignalBindingV1.newBuilder()
+                        .setProductId("PRODUCT-E2E")
                         .setDeviceId(deviceId)
                         .setPropertyId("flow")
                         .setSignal("feed.flow")
-                        .setExpectedUnit("m3/h"))
+                        .setExpectedUnit("m3/h")
+                        .setCalibrationVersion("E2E-1"))
                 .setActive(true)
                 .setPublishedAtMs(baseTime.toEpochMilli())
                 .setChecksum("acceptance:" + marker)
@@ -91,8 +97,31 @@ final class BpiKafkaAcceptanceScenario {
                 telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(1), 1),
                 telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(2), 2),
                 telemetry(marker, tenantId, plantId, lineId, deviceId, baseTime.plusSeconds(3), 3));
+        PointCatalogSnapshotV1 pointCatalog = PointCatalogSnapshotV1.newBuilder()
+                .setEventId(marker + "-POINT-CATALOG")
+                .setSource("ACCEPTANCE")
+                .setSourceInstance("LOCAL-KAFKA")
+                .setSourceRevision("sha256:" + marker)
+                .setTenantId(tenantId)
+                .setPlantId(plantId)
+                .setLineId(lineId)
+                .setObservedAtMs(baseTime.minusSeconds(1).toEpochMilli())
+                .setReason("Controlled local Kafka acceptance")
+                .addPoints(PointCatalogPointV1.newBuilder()
+                        .setProductId("PRODUCT-E2E")
+                        .setDeviceId(deviceId)
+                        .setPropertyId("flow")
+                        .setUnit("m3/h")
+                        .setDataType("double")
+                        .setDeviceState(PointDeviceStateV1.POINT_DEVICE_ACTIVE)
+                        .setRegistered(true)
+                        .setPropertyPresent(true)
+                        .setCalibrationVersion("E2E-1")
+                        .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED)
+                        .setSourceSequenceEnabled(true))
+                .build();
         return new Scenario(marker, tenantId, plantId, lineId, ruleCode, orderId, deviceId,
-                publication, context, telemetry);
+                publication, pointCatalog, context, telemetry);
     }
 
     private static TelemetryEnvelopeV1 telemetry(
@@ -116,7 +145,7 @@ final class BpiKafkaAcceptanceScenario {
                 .setIngestTimeMs(Instant.now().toEpochMilli())
                 .setSequence(sequence)
                 .setSourceEpoch(1)
-                .setSequenceOrigin(SequenceOrigin.EXPORTER)
+                .setSequenceOrigin(SequenceOrigin.GATEWAY)
                 .addPoints(PointValue.newBuilder()
                         .setPropertyId("flow")
                         .setDoubleValue(3.0 + sequence)
@@ -137,6 +166,7 @@ final class BpiKafkaAcceptanceScenario {
             String orderId,
             String deviceId,
             BoundaryRulePublicationV1 publication,
+            PointCatalogSnapshotV1 pointCatalog,
             ProductionContextEventV1 context,
             List<TelemetryEnvelopeV1> telemetry) {
 

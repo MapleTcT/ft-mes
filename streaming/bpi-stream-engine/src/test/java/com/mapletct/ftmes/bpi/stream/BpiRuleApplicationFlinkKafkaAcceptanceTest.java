@@ -243,6 +243,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 Map.entry("group-prefix", "bpi-flink-acceptance-" + marker),
                 Map.entry("deployment-id", "flink-acceptance-" + marker),
                 Map.entry("telemetry-topic", topics.telemetry()),
+                Map.entry("point-catalog-topic", topics.pointCatalog()),
                 Map.entry("context-topic", topics.context()),
                 Map.entry("rule-topic", topics.rules()),
                 Map.entry("rule-application-topic", topics.application()),
@@ -605,6 +606,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
 
     private record Topics(
             String telemetry,
+            String pointCatalog,
             String context,
             String rules,
             String application,
@@ -616,6 +618,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
             String prefix = "bpi.acceptance." + suffix;
             return new Topics(
                     prefix + ".telemetry",
+                    prefix + ".point-catalog",
                     prefix + ".context",
                     prefix + ".rules",
                     prefix + ".rule-application",
@@ -624,7 +627,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
         }
 
         List<String> all() {
-            return List.of(telemetry, context, rules, application, candidate, quality);
+            return List.of(telemetry, pointCatalog, context, rules, application, candidate, quality);
         }
     }
 }

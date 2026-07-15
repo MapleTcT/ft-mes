@@ -6,6 +6,10 @@ import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceConditionV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
@@ -123,6 +127,28 @@ class KafkaDecodeFunctionsHarnessTest {
                 ingress("boundary-rules.v1", 4, 43L,
                         publication.toBuilder().clearChecksum().build().toByteArray()),
                 "RULE_CONTRACT_REJECTED", "boundary-rules.v1", 4, 43L, "RULE-EVENT-1");
+    }
+
+    @Test
+    void pointCatalogPassesValidPayloadAndRejectsInvalidInputs() throws Exception {
+        PointCatalogSnapshotV1 snapshot = validPointCatalog();
+        assertAccepted(
+                new PointCatalogKafkaDecodeFunction(), PointCatalogKafkaDecodeFunction.ISSUES,
+                ingress("point-catalog.v1", 5, 50L, snapshot.toByteArray()), snapshot.toByteArray());
+
+        assertRejected(
+                new PointCatalogKafkaDecodeFunction(), PointCatalogKafkaDecodeFunction.ISSUES,
+                ingress("point-catalog.v1", 5, 51L, null),
+                "POINT_CATALOG_TOMBSTONE_REJECTED", "point-catalog.v1", 5, 51L, "");
+        assertRejected(
+                new PointCatalogKafkaDecodeFunction(), PointCatalogKafkaDecodeFunction.ISSUES,
+                ingress("point-catalog.v1", 5, 52L, new byte[]{0x0A}),
+                "POINT_CATALOG_PROTOBUF_REJECTED", "point-catalog.v1", 5, 52L, "");
+        assertRejected(
+                new PointCatalogKafkaDecodeFunction(), PointCatalogKafkaDecodeFunction.ISSUES,
+                ingress("point-catalog.v1", 5, 53L,
+                        snapshot.toBuilder().clearSourceRevision().build().toByteArray()),
+                "POINT_CATALOG_CONTRACT_REJECTED", "point-catalog.v1", 5, 53L, "CATALOG-1");
     }
 
     private static void assertAccepted(
@@ -281,17 +307,47 @@ class KafkaDecodeFunctionsHarnessTest {
                         .setClassification(BoundaryEvidenceClassV1.QUORUM)
                         .setWeight(50))
                 .addSignalBindings(BoundarySignalBindingV1.newBuilder()
+                        .setProductId("PRODUCT-1")
                         .setDeviceId("DEVICE-1")
                         .setPropertyId("order")
-                        .setSignal("order.active"))
+                        .setSignal("order.active")
+                        .setCalibrationVersion("CAL-1"))
                 .addSignalBindings(BoundarySignalBindingV1.newBuilder()
+                        .setProductId("PRODUCT-1")
                         .setDeviceId("DEVICE-1")
                         .setPropertyId("flow")
                         .setSignal("feed.flow")
-                        .setExpectedUnit("m3/h"))
+                        .setExpectedUnit("m3/h")
+                        .setCalibrationVersion("CAL-1"))
                 .setActive(true)
                 .setPublishedAtMs(EVENT_TIME_MS)
                 .setChecksum("sha256:rule-1")
+                .build();
+    }
+
+    private static PointCatalogSnapshotV1 validPointCatalog() {
+        return PointCatalogSnapshotV1.newBuilder()
+                .setEventId("CATALOG-1")
+                .setSource("JETLINKS")
+                .setSourceInstance("TEST")
+                .setSourceRevision("sha256:catalog-1")
+                .setTenantId("TENANT-A")
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-01")
+                .setObservedAtMs(EVENT_TIME_MS)
+                .setReason("Kafka decode test")
+                .addPoints(PointCatalogPointV1.newBuilder()
+                        .setProductId("PRODUCT-1")
+                        .setDeviceId("DEVICE-1")
+                        .setPropertyId("flow")
+                        .setUnit("m3/h")
+                        .setDataType("double")
+                        .setDeviceState(PointDeviceStateV1.POINT_DEVICE_ACTIVE)
+                        .setRegistered(true)
+                        .setPropertyPresent(true)
+                        .setCalibrationVersion("CAL-1")
+                        .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED)
+                        .setSourceSequenceEnabled(true))
                 .build();
     }
 }

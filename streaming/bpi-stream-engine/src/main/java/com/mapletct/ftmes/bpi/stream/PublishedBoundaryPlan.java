@@ -43,7 +43,7 @@ public record PublishedBoundaryPlan(
                         rule.ruleVersion());
     }
 
-    static String bindingKey(String deviceId, String propertyId) {
-        return deviceId + "|" + propertyId;
+    static String bindingKey(String productId, String deviceId, String propertyId) {
+        return productId + "|" + deviceId + "|" + propertyId;
     }
 }

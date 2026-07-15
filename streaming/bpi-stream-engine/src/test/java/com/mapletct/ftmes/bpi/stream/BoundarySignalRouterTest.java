@@ -32,7 +32,7 @@ class BoundarySignalRouterTest {
         assertEquals(Duration.ofSeconds(30), plan.rule().timing().allowedLateness());
         assertEquals(Duration.ofSeconds(5), plan.rule().timing().watermarkDelay());
         assertEquals(Duration.ofMinutes(2), plan.rule().timing().evaluationTimeout());
-        assertEquals("feed.flow", plan.bindings().get("DEVICE-1|flow").getSignal());
+        assertEquals("feed.flow", plan.bindings().get("PRODUCT-1|DEVICE-1|flow").getSignal());
         assertEquals(BoundaryRuleUpdate.Operation.UPSERT, plan.ruleUpdate().operation());
     }
 
@@ -179,10 +179,12 @@ class BoundarySignalRouterTest {
 
     private static BoundarySignalBindingV1 binding(String property, String signal, String unit) {
         return BoundarySignalBindingV1.newBuilder()
+                .setProductId("PRODUCT-1")
                 .setDeviceId("DEVICE-1")
                 .setPropertyId(property)
                 .setSignal(signal)
                 .setExpectedUnit(unit)
+                .setCalibrationVersion("CAL-1")
                 .build();
     }
 

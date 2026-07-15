@@ -6,8 +6,13 @@ import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceConditionV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
+import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
+import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 import org.apache.flink.streaming.api.operators.co.CoBroadcastWithNonKeyedOperator;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
@@ -31,8 +36,9 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
             harness.open();
             BoundaryRulePublicationV1 tenantA = publication("TENANT-A", "RULE-A", true, "sha:a");
             BoundaryRulePublicationV1 tenantB = publication("TENANT-B", "RULE-A", true, "sha:b");
-            harness.processBroadcastElement(tenantA.toByteArray(), T0.toEpochMilli());
-            harness.processBroadcastElement(tenantB.toByteArray(), T0.toEpochMilli());
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, tenantA);
+            rule(harness, tenantB);
 
             harness.processElement(
                     ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
@@ -63,11 +69,14 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                             .setDeviceId("DEVICE-2")
                             .setPropertyId("flow")
                             .setSignal("feed.flow")
-                            .setExpectedUnit("m3/h"))
+                            .setExpectedUnit("m3/h")
+                            .setProductId("PRODUCT-1")
+                            .setCalibrationVersion("CAL-1"))
                     .build();
-            harness.processBroadcastElement(first.toByteArray(), T0.toEpochMilli());
-            harness.processBroadcastElement(second.toByteArray(), T0.toEpochMilli());
-            harness.processBroadcastElement(unrelated.toByteArray(), T0.toEpochMilli());
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, first);
+            rule(harness, second);
+            rule(harness, unrelated);
 
             harness.processElement(
                     ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
@@ -97,15 +106,16 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                     .setActive(false)
                     .setPublishedAtMs(T0.plusSeconds(5).toEpochMilli())
                     .build();
-            harness.processBroadcastElement(active.toByteArray(), T0.toEpochMilli());
-            harness.processBroadcastElement(inactive.toByteArray(), T0.plusSeconds(5).toEpochMilli());
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, active);
+            rule(harness, inactive);
 
             harness.processElement(
                     ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
                     T0.plusSeconds(6).toEpochMilli());
 
             assertTrue(harness.getOutput().stream().noneMatch(StreamRecord.class::isInstance));
-            String route = "TENANT-A|PLANT-01|LINE-01|DEVICE-1|flow";
+            String route = "TENANT-A|PLANT-01|LINE-01|PRODUCT-1|DEVICE-1|flow";
             assertNull(harness.getBroadcastState(BoundaryRuleRoutingBroadcastFunction.ROUTES).get(route));
             assertEquals(
                     false,
@@ -124,13 +134,111 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                     .setEventId("RULE-CONFLICT")
                     .setChecksum("sha:changed")
                     .build();
-            harness.processBroadcastElement(first.toByteArray(), T0.toEpochMilli());
-            harness.processBroadcastElement(conflict.toByteArray(), T0.plusSeconds(1).toEpochMilli());
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, first);
+            rule(harness, conflict);
 
             assertEquals(
                     "RULE_VERSION_CONFLICT",
                     harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES)
                             .peek().getValue().code());
+        }
+    }
+
+    @Test
+    void missingCatalogBlocksAnOtherwiseMatchingRule() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
+
+            harness.processElement(
+                    ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            assertTrue(harness.getOutput().stream().noneMatch(StreamRecord.class::isInstance));
+            assertEquals(
+                    "POINT_CATALOG_RUNTIME_MISSING",
+                    harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES).peek().getValue().code());
+        }
+    }
+
+    @Test
+    void newerCatalogDowngradeStopsRoutingAndOlderReadySnapshotCannotRestoreIt() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
+            catalog(harness, readyCatalog("TENANT-A", false, "CAL-1", T0.plusSeconds(10)));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(5)));
+
+            harness.processElement(
+                    ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
+                    T0.plusSeconds(11).toEpochMilli());
+
+            assertTrue(harness.getOutput().stream().noneMatch(StreamRecord.class::isInstance));
+            assertEquals(
+                    List.of("POINT_DEVICE_NOT_ACTIVE", "POINT_CATALOG_OUT_OF_ORDER"),
+                    harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES).stream()
+                            .map(StreamRecord::getValue)
+                            .map(BoundaryRoutingIssue::code)
+                            .toList());
+            assertEquals(
+                    List.of(BoundaryRuleUpdate.Operation.UPSERT, BoundaryRuleUpdate.Operation.DELETE),
+                    runtimeRuleUpdates(harness).stream().map(BoundaryRuleUpdate::operation).toList());
+        }
+    }
+
+    @Test
+    void newerReadyCatalogRestoresRuleOnlyAfterExactCalibrationMatchesAgain() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-2", T0.plusSeconds(10)));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(20)));
+
+            harness.processElement(
+                    ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
+                    T0.plusSeconds(21).toEpochMilli());
+
+            assertEquals(
+                    List.of(
+                            BoundaryRuleUpdate.Operation.UPSERT,
+                            BoundaryRuleUpdate.Operation.DELETE,
+                            BoundaryRuleUpdate.Operation.UPSERT),
+                    runtimeRuleUpdates(harness).stream().map(BoundaryRuleUpdate::operation).toList());
+            assertEquals(1, harness.getOutput().stream().filter(StreamRecord.class::isInstance).count());
+        }
+    }
+
+    @Test
+    void restoredLegacyPublicationWithoutProductAndCalibrationFailsClosedWithoutCrashingCatalogFlow()
+            throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            BoundaryRulePublicationV1 legacy = publication("TENANT-A", "RULE-LEGACY", true, "sha:legacy")
+                    .toBuilder()
+                    .setSignalBindings(0, BoundarySignalBindingV1.newBuilder()
+                            .setDeviceId("DEVICE-1")
+                            .setPropertyId("flow")
+                            .setSignal("feed.flow")
+                            .setExpectedUnit("m3/h"))
+                    .build();
+            harness.getBroadcastState(BoundaryRuleRoutingBroadcastFunction.PUBLICATIONS)
+                    .put("TENANT-A|PLANT-01|LINE-01|RULE-LEGACY|1", legacy.toByteArray());
+
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+
+            assertEquals(
+                    "RULE_PUBLICATION_RUNTIME_REJECTED",
+                    harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES)
+                            .peek().getValue().code());
+            List<BoundaryRuleUpdate> updates = runtimeRuleUpdates(harness);
+            assertEquals(1, updates.size());
+            assertEquals(BoundaryRuleUpdate.Operation.DELETE, updates.get(0).operation());
+            assertEquals(
+                    "TENANT-A|PLANT-01|LINE-01|RULE-LEGACY|1",
+                    updates.get(0).ruleRef().key());
         }
     }
 
@@ -141,7 +249,10 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                         new BoundaryRuleRoutingBroadcastFunction(),
                         List.of(
                                 BoundaryRuleRoutingBroadcastFunction.PUBLICATIONS,
-                                BoundaryRuleRoutingBroadcastFunction.ROUTES)),
+                                BoundaryRuleRoutingBroadcastFunction.ROUTES,
+                                BoundaryRuleRoutingBroadcastFunction.POINT_CATALOGS,
+                                BoundaryRuleRoutingBroadcastFunction.POINTS,
+                                BoundaryRuleRoutingBroadcastFunction.RUNTIME_RULE_STATUS)),
                 1,
                 1,
                 0);
@@ -178,10 +289,12 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                         .setClassification(BoundaryEvidenceClassV1.QUORUM)
                         .setWeight(100))
                 .addSignalBindings(BoundarySignalBindingV1.newBuilder()
+                        .setProductId("PRODUCT-1")
                         .setDeviceId("DEVICE-1")
                         .setPropertyId("flow")
                         .setSignal("feed.flow")
-                        .setExpectedUnit("m3/h"))
+                        .setExpectedUnit("m3/h")
+                        .setCalibrationVersion("CAL-1"))
                 .setActive(active)
                 .setPublishedAtMs(T0.toEpochMilli())
                 .setChecksum(checksum)
@@ -198,6 +311,9 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                 .setGatewayId("GW-1")
                 .setProductId("PRODUCT-1")
                 .setDeviceId("DEVICE-1")
+                .setSourceEpoch(1)
+                .setSequence(1)
+                .setSequenceOrigin(SequenceOrigin.GATEWAY)
                 .setEventTimeMs(T0.plusSeconds(1).toEpochMilli())
                 .setIngestTimeMs(T0.plusSeconds(2).toEpochMilli())
                 .addPoints(PointValue.newBuilder()
@@ -205,6 +321,7 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                         .setDoubleValue(3)
                         .setUnit("m3/h")
                         .setQualityCode("GOOD")
+                        .setCalibrationVersion("CAL-1")
                         .setSampleTimeMs(T0.plusSeconds(1).toEpochMilli()))
                 .build();
         ProductionContextEventV1 context = ProductionContextEventV1.newBuilder()
@@ -218,5 +335,63 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                 .setActive(true)
                 .build();
         return new ContextualTelemetryPoint(new TelemetryPointEvent(envelope, 0), context);
+    }
+
+    private static PointCatalogSnapshotV1 readyCatalog(
+            String tenant,
+            boolean active,
+            String calibrationVersion,
+            Instant observedAt) {
+        return PointCatalogSnapshotV1.newBuilder()
+                .setEventId("CATALOG-" + tenant + "-" + observedAt.toEpochMilli())
+                .setSource("JETLINKS")
+                .setSourceInstance("TEST")
+                .setSourceRevision("sha256:" + observedAt.toEpochMilli())
+                .setTenantId(tenant)
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-01")
+                .setObservedAtMs(observedAt.toEpochMilli())
+                .setReason("Runtime readiness test")
+                .addPoints(PointCatalogPointV1.newBuilder()
+                        .setProductId("PRODUCT-1")
+                        .setDeviceId("DEVICE-1")
+                        .setPropertyId("flow")
+                        .setUnit("m3/h")
+                        .setDataType("double")
+                        .setDeviceState(active
+                                ? PointDeviceStateV1.POINT_DEVICE_ACTIVE
+                                : PointDeviceStateV1.POINT_DEVICE_INACTIVE)
+                        .setRegistered(true)
+                        .setPropertyPresent(true)
+                        .setCalibrationVersion(calibrationVersion)
+                        .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED)
+                        .setSourceSequenceEnabled(true))
+                .build();
+    }
+
+    private static void rule(
+            BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness,
+            BoundaryRulePublicationV1 publication) throws Exception {
+        harness.processBroadcastElement(
+                BoundaryRoutingControlCodec.rule(publication.toByteArray()), publication.getPublishedAtMs());
+    }
+
+    private static void catalog(
+            BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness,
+            PointCatalogSnapshotV1 snapshot) throws Exception {
+        harness.processBroadcastElement(
+                BoundaryRoutingControlCodec.pointCatalog(snapshot.toByteArray()), snapshot.getObservedAtMs());
+    }
+
+    private static List<BoundaryRuleUpdate> runtimeRuleUpdates(
+            BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness) {
+        var output = harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.RULE_UPDATES);
+        if (output == null) {
+            return List.of();
+        }
+        return output.stream()
+                .map(StreamRecord::getValue)
+                .map(BoundaryRuleUpdateCodec::decode)
+                .toList();
     }
 }

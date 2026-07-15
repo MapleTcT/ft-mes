@@ -115,6 +115,7 @@ class BpiRulePostgresAcceptanceTest {
                 java.sql.Timestamp.from(boundaryTime.plusMillis(10)), "a".repeat(64));
         insertPoint("RULE-FLOW-001", "flow.instant", "DOUBLE", 18.6, null, "t/h");
         insertPoint("RULE-PUMP-001", "pump.running", "BOOLEAN", null, true, "bool");
+        insertCatalogSnapshot(true, boundaryTime.minusSeconds(1));
     }
 
     @AfterEach
@@ -133,6 +134,8 @@ class BpiRulePostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_feature_flags WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
     }
 
     @Test
@@ -254,6 +257,27 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(count("bpi_api_idempotency")).isEqualTo(1);
         assertThat(count("bpi_outbox_events")).isZero();
 
+        insertCatalogSnapshot(false, boundaryTime.plusSeconds(2));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "catalog-drift-publish-" + ruleId)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "目录漂移时禁止发布",
+                                "simulationId", simulationId,
+                                "simulationChecksum", simulationChecksum))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("POINT_DEVICE_NOT_ACTIVE")));
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision FROM bpi.bpi_rule_versions
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, ruleId)).isEqualTo("SIMULATION_PASSED|2");
+        assertThat(count("bpi_outbox_events")).isZero();
+        assertThat(count("bpi_api_idempotency")).isEqualTo(1);
+        insertCatalogSnapshot(true, boundaryTime.plusSeconds(3));
+
         byte[] publishBody = objectMapper.writeValueAsBytes(Map.of(
                 "reason", "审批发布规则版本",
                 "simulationId", simulationId,
@@ -304,6 +328,11 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(publication.getTopologyCode()).isEqualTo("TOPO-S07");
         assertThat(publication.getConditionsCount()).isEqualTo(2);
         assertThat(publication.getSignalBindingsCount()).isEqualTo(2);
+        assertThat(publication.getSignalBindingsList())
+                .allSatisfy(binding -> {
+                    assertThat(binding.getProductId()).isEqualTo("PRODUCT-SUGAR");
+                    assertThat(binding.getCalibrationVersion()).isEqualTo("CAL-1");
+                });
         assertThat(publication.getActive()).isTrue();
         assertThat(publication.getChecksum()).isEqualTo("r".repeat(64));
         assertThat(jdbc.queryForList("""
@@ -618,16 +647,47 @@ class BpiRulePostgresAcceptanceTest {
                 "bindings", List.of(
                         Map.of(
                                 "signal", "flow.instant",
+                                "productId", "PRODUCT-SUGAR",
                                 "deviceId", "DEVICE-S07-01",
                                 "propertyId", "flow.instant",
                                 "expectedUnit", "t/h",
                                 "calibrationVersion", "CAL-1"),
                         Map.of(
                                 "signal", "pump.running",
+                                "productId", "PRODUCT-SUGAR",
                                 "deviceId", "DEVICE-S07-01",
                                 "propertyId", "pump.running",
                                 "expectedUnit", "bool",
                                 "calibrationVersion", "CAL-1"))));
+    }
+
+    private void insertCatalogSnapshot(boolean active, Instant observedAt) {
+        UUID snapshotId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_catalog_snapshots
+                    (id, tenant_id, source, source_instance, source_revision,
+                     plant_id, line_id, checksum, observed_at, point_count,
+                     ready_point_count, imported_by)
+                VALUES (?, ?, 'JETLINKS', 'RULE-ACCEPTANCE', ?,
+                        'PLANT-01', 'LINE-S07-01', ?, ?, 2, ?, 'acceptance')
+                """, snapshotId, tenantId, "revision-" + snapshotId,
+                UUID.randomUUID().toString().replace("-", "").repeat(2).substring(0, 64),
+                java.sql.Timestamp.from(observedAt), active ? 2 : 0);
+        for (String property : List.of("flow.instant", "pump.running")) {
+            jdbc.update("""
+                    INSERT INTO bpi.bpi_point_catalog_entries
+                        (id, tenant_id, snapshot_id, plant_id, line_id, locality_group,
+                         product_id, device_id, property_id, point_name, unit, data_type,
+                         device_state, registered, property_present, calibration_version,
+                         calibration_status, source_sequence_enabled)
+                    VALUES (?, ?, ?, 'PLANT-01', 'LINE-S07-01', 'LOCALITY-S07-EVAP',
+                            'PRODUCT-SUGAR', 'DEVICE-S07-01', ?, ?, ?, ?, ?, true, true,
+                            'CAL-1', 'VERIFIED', true)
+                    """, UUID.randomUUID(), tenantId, snapshotId, property, property,
+                    "flow.instant".equals(property) ? "t/h" : "bool",
+                    "flow.instant".equals(property) ? "double" : "boolean",
+                    active ? "ACTIVE" : "INACTIVE");
+        }
     }
 
     private String ruleDefinition(int holdSeconds) throws Exception {

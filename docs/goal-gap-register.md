@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-14T22:17:50+00:00` |
-| Repo Commit | `d0c0f2f471189c4aea929bb1dfbcf43189f472bc` |
+| Generated At | `2026-07-15T00:03:06+00:00` |
+| Repo Commit | `cc1b407520f98af0bc57ea758becb98d6a8855bd` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；ProcessAnalysis 已闭合。 | 保持 material/WMS 与 ProcessAnalysis 回归，继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过，但版本比较、业务审批流、受控退休和产品级回退尚未实现。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过；新运行时点位目录准入批次尚未完成目标 Flink savepoint/历史规则新版本迁移，且 APPLIED 与独立运行时 READY/DEGRADED 状态尚未形成单独回执和前端状态列。版本比较、业务审批流、受控退休和产品级回退也尚未实现。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |
 
 ## Production Blockers
 

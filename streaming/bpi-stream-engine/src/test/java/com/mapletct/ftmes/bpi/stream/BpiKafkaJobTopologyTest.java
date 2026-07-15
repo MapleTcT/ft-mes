@@ -36,6 +36,8 @@ class BpiKafkaJobTopologyTest {
         assertEquals(CheckpointingMode.EXACTLY_ONCE, graph.getCheckpointingMode());
         assertEquals(30_000, graph.getCheckpointConfig().getCheckpointInterval());
         assertTrue(uids.contains("bpi-production-context-join-v1"));
+        assertTrue(uids.contains("bpi-kafka-point-catalog-source-v1"));
+        assertTrue(uids.contains("bpi-point-catalog-decode-v1"));
         assertTrue(uids.contains("bpi-rule-watermarks-v1"));
         assertTrue(uids.contains("bpi-rule-lifecycle-v1"));
         assertTrue(uids.contains("bpi-boundary-indexed-routing-v1"));
@@ -46,6 +48,7 @@ class BpiKafkaJobTopologyTest {
         assertTrue(names.stream().anyMatch(name -> name.contains("batch-candidate sink")));
         assertTrue(names.stream().anyMatch(name -> name.contains("data-quality sink")));
         assertTrue(names.stream().anyMatch(name -> name.contains("rule-application sink")));
+        assertTrue(names.stream().anyMatch(name -> name.contains("point-catalog source")));
         assertEquals(3, environment.getParallelism());
     }
 }

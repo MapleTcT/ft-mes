@@ -10,7 +10,7 @@ public final class KafkaIngressRecordCodec {
 
     private static final int MAGIC = 0x42504B52;
     private static final int VERSION = 1;
-    private static final int MAX_BYTES = 1_048_576;
+    private static final int MAX_BYTES = 8 * 1024 * 1024;
 
     private KafkaIngressRecordCodec() {
     }
@@ -57,7 +57,7 @@ public final class KafkaIngressRecordCodec {
             return;
         }
         if (value.length > MAX_BYTES) {
-            throw new IOException("Kafka ingress field exceeds one MiB");
+            throw new IOException("Kafka ingress field exceeds eight MiB");
         }
         output.writeInt(value.length);
         output.write(value);

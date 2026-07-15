@@ -404,6 +404,18 @@ public class RuleService {
         }
         BoundaryRuleDefinition definition = definitionParser.parse(rule);
         TopologyVersionView topology = repository.findTopologyForRule(actor, rule.id());
+        PointCatalogService.BindingValidationResult catalog = pointCatalogService.validateBindings(
+                actor, topology.plantId(), topology.lineId(), topology.definition());
+        if (!catalog.errors().isEmpty()) {
+            String codes = catalog.errors().stream()
+                    .map(com.mapletct.ftmes.bpi.domain.TopologyValidationIssue::code)
+                    .distinct()
+                    .sorted()
+                    .reduce((left, right) -> left + ", " + right)
+                    .orElse("UNKNOWN");
+            throw new BpiValidationException(
+                    "Rule publication requires current READY point catalog bindings: " + codes + ".");
+        }
         UUID publicationEventId = UUID.randomUUID();
         var publication = publicationFactory.create(
                 actor, rule, topology, definition, publicationEventId, Instant.now(),
@@ -415,7 +427,9 @@ public class RuleService {
                 actor, rule, "RULE_PUBLISHED", rule.revision(), rule.revision() + 1,
                 command.reason(), traceId,
                 Map.of("simulationId", simulation.id(), "simulationChecksum", simulation.checksum(),
-                        "publicationEventId", publicationEventId));
+                        "publicationEventId", publicationEventId,
+                        "pointCatalogSnapshotId", catalog.snapshotId().toString(),
+                        "pointCatalogChecksum", catalog.snapshotChecksum()));
         RuleVersionView published = repository.findRule(actor, rule.id());
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(published));
         return new CommandResult<>(published, false);

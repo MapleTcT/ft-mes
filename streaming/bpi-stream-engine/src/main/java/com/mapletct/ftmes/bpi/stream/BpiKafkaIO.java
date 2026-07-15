@@ -4,6 +4,7 @@ import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
@@ -19,7 +20,23 @@ public final class BpiKafkaIO {
             BpiKafkaJobConfig config,
             String topic,
             String lane) {
-        return KafkaSource.<byte[]>builder()
+        return source(config, topic, lane, null);
+    }
+
+    public static KafkaSource<byte[]> pointCatalogSource(BpiKafkaJobConfig config) {
+        return source(
+                config,
+                config.pointCatalogTopic(),
+                "point-catalog",
+                config.pointCatalogMaxMessageBytes());
+    }
+
+    private static KafkaSource<byte[]> source(
+            BpiKafkaJobConfig config,
+            String topic,
+            String lane,
+            Integer maxMessageBytes) {
+        KafkaSourceBuilder<byte[]> builder = KafkaSource.<byte[]>builder()
                 .setBootstrapServers(config.bootstrapServers())
                 .setTopics(topic)
                 .setGroupId(config.consumerGroup(lane))
@@ -27,8 +44,13 @@ public final class BpiKafkaIO {
                 .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
                 .setDeserializer(new KafkaIngressDeserializationSchema())
                 .setProperty(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed")
-                .setProperty(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, "false")
-                .build();
+                .setProperty(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, "false");
+        if (maxMessageBytes != null) {
+            builder.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, maxMessageBytes.toString());
+            builder.setProperty(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, maxMessageBytes.toString());
+            builder.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1");
+        }
+        return builder.build();
     }
 
     public static KafkaSink<byte[]> candidateSink(BpiKafkaJobConfig config) {

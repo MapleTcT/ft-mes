@@ -337,6 +337,42 @@ class BoundaryKeyedBroadcastHarnessTest {
         }
     }
 
+    @Test
+    void deletingRuntimeRuleClearsPendingWindowBeforeItsTimerAndRecoveryStartsFresh() throws Exception {
+        BoundaryRuleDefinition timedRule = timedRule();
+        BoundaryRuleUpdate deletion = BoundaryRuleUpdate.delete("START-01", "2");
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
+                     harness = harness()) {
+            harness.open();
+            harness.processBroadcastElement(update(timedRule), T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.bool(
+                            "ORDER-OLD", "order.active", true, SignalQuality.GOOD, T0)),
+                    T0.toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-OLD", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(1))),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            harness.processBroadcastElement(
+                    BoundaryRuleUpdateCodec.encode(deletion), T0.plusSeconds(2).toEpochMilli());
+            harness.watermark(T0.plusSeconds(11).toEpochMilli());
+            assertTrue(candidates(harness.getOutput()).isEmpty());
+
+            harness.processBroadcastElement(update(timedRule), T0.plusSeconds(12).toEpochMilli());
+            harness.processElement(
+                    input(timedRule, SignalObservation.numeric(
+                            "FLOW-NEW", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0.plusSeconds(13))),
+                    T0.plusSeconds(13).toEpochMilli());
+            harness.watermark(T0.plusSeconds(23).toEpochMilli());
+
+            assertTrue(candidates(harness.getOutput()).isEmpty());
+            assertTrue(issueCodes(harness).isEmpty());
+        }
+    }
+
     private static KeyedBroadcastOperatorTestHarness<
             String,
             BoundaryStreamInput,

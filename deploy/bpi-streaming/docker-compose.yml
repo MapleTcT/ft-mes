@@ -45,6 +45,8 @@ x-flink-environment: &flink-environment
   BPI_KAFKA_GROUP_PREFIX: ${BPI_KAFKA_GROUP_PREFIX:-ft-mes-bpi}
   BPI_DEPLOYMENT_ID: ${BPI_DEPLOYMENT_ID:?BPI_DEPLOYMENT_ID is required}
   BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+  BPI_POINT_CATALOG_TOPIC: ${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}
+  BPI_POINT_CATALOG_MAX_MESSAGE_BYTES: ${BPI_POINT_CATALOG_MAX_MESSAGE_BYTES:-6291456}
   BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
   BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
   BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
@@ -266,6 +268,7 @@ services:
     environment:
       BPI_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
       BPI_TELEMETRY_TOPIC: ${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
+      BPI_POINT_CATALOG_TOPIC: ${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}
       BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
       BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
       BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}

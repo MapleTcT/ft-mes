@@ -6117,6 +6117,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingControlCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingIssue.java",
       "state": "tracked",
       "tracked": true
@@ -6322,6 +6328,18 @@
     {
       "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PendingContextPoint.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogKafkaDecodeFunction.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogRuntimeValidator.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6593,14 +6611,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 82
+      "tracked": 85
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1090,
-    "tracked": 1090,
+    "totalFiles": 1093,
+    "tracked": 1093,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -13,6 +13,7 @@ public record BpiKafkaJobConfig(
         String groupPrefix,
         String deploymentId,
         String telemetryTopic,
+        String pointCatalogTopic,
         String contextTopic,
         String ruleTopic,
         String ruleApplicationTopic,
@@ -27,6 +28,7 @@ public record BpiKafkaJobConfig(
         Duration sourceIdleness,
         Duration boundaryStateTtl,
         Duration transactionTimeout,
+        int pointCatalogMaxMessageBytes,
         int parallelism) {
 
     private static final Pattern SAFE_TOKEN = Pattern.compile("[A-Za-z0-9._-]+");
@@ -36,15 +38,16 @@ public record BpiKafkaJobConfig(
         token(groupPrefix, "groupPrefix");
         token(deploymentId, "deploymentId");
         topic(telemetryTopic, "telemetryTopic");
+        topic(pointCatalogTopic, "pointCatalogTopic");
         topic(contextTopic, "contextTopic");
         topic(ruleTopic, "ruleTopic");
         topic(ruleApplicationTopic, "ruleApplicationTopic");
         topic(candidateTopic, "candidateTopic");
         topic(dataQualityTopic, "dataQualityTopic");
         Set<String> topics = new HashSet<>(List.of(
-                telemetryTopic, contextTopic, ruleTopic, ruleApplicationTopic,
+                telemetryTopic, pointCatalogTopic, contextTopic, ruleTopic, ruleApplicationTopic,
                 candidateTopic, dataQualityTopic));
-        if (topics.size() != 6) {
+        if (topics.size() != 7) {
             throw new IllegalArgumentException("BPI Kafka topics must be distinct");
         }
         positive(checkpointInterval, "checkpointInterval");
@@ -56,6 +59,9 @@ public record BpiKafkaJobConfig(
         positive(sourceIdleness, "sourceIdleness");
         positive(boundaryStateTtl, "boundaryStateTtl");
         positive(transactionTimeout, "transactionTimeout");
+        if (pointCatalogMaxMessageBytes < 1_048_576 || pointCatalogMaxMessageBytes > 8 * 1024 * 1024) {
+            throw new IllegalArgumentException("pointCatalogMaxMessageBytes must be between 1 and 8 MiB");
+        }
         if (contextWait.compareTo(contextRetention) > 0) {
             throw new IllegalArgumentException("contextWait cannot exceed contextRetention");
         }
@@ -83,6 +89,7 @@ public record BpiKafkaJobConfig(
                 value(values, "group-prefix", "ft-mes-bpi"),
                 value(values, "deployment-id", null),
                 value(values, "telemetry-topic", "iot.telemetry.selected.v1"),
+                value(values, "point-catalog-topic", "iot.point-catalog.snapshot.v1"),
                 value(values, "context-topic", "mes.production.context.v1"),
                 value(values, "rule-topic", "bpi.boundary.rule-publication.v1"),
                 value(values, "rule-application-topic", "bpi.boundary.rule-application.v1"),
@@ -97,6 +104,7 @@ public record BpiKafkaJobConfig(
                 millis(values, "source-idleness-ms", 60_000),
                 millis(values, "boundary-state-ttl-ms", 2_592_000_000L),
                 millis(values, "transaction-timeout-ms", 900_000),
+                integer(values, "point-catalog-max-message-bytes", 6_291_456),
                 integer(values, "parallelism", 1));
     }
 
@@ -116,6 +124,7 @@ public record BpiKafkaJobConfig(
         copy(environment, result, "BPI_KAFKA_GROUP_PREFIX", "group-prefix");
         copy(environment, result, "BPI_DEPLOYMENT_ID", "deployment-id");
         copy(environment, result, "BPI_TELEMETRY_TOPIC", "telemetry-topic");
+        copy(environment, result, "BPI_POINT_CATALOG_TOPIC", "point-catalog-topic");
         copy(environment, result, "BPI_CONTEXT_TOPIC", "context-topic");
         copy(environment, result, "BPI_RULE_TOPIC", "rule-topic");
         copy(environment, result, "BPI_RULE_APPLICATION_TOPIC", "rule-application-topic");
@@ -130,6 +139,7 @@ public record BpiKafkaJobConfig(
         copy(environment, result, "BPI_SOURCE_IDLENESS_MS", "source-idleness-ms");
         copy(environment, result, "BPI_BOUNDARY_STATE_TTL_MS", "boundary-state-ttl-ms");
         copy(environment, result, "BPI_TRANSACTION_TIMEOUT_MS", "transaction-timeout-ms");
+        copy(environment, result, "BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "point-catalog-max-message-bytes");
         copy(environment, result, "BPI_PARALLELISM", "parallelism");
         return result;
     }

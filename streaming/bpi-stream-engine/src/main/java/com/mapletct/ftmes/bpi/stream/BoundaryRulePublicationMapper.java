@@ -89,9 +89,11 @@ public final class BoundaryRulePublicationMapper {
         Set<String> boundSignals = new HashSet<>();
         Map<String, BoundarySignalBindingV1> result = new HashMap<>();
         for (BoundarySignalBindingV1 binding : publication.getSignalBindingsList()) {
+            require(binding.getProductId(), "binding.product_id");
             require(binding.getDeviceId(), "binding.device_id");
             require(binding.getPropertyId(), "binding.property_id");
             require(binding.getSignal(), "binding.signal");
+            require(binding.getCalibrationVersion(), "binding.calibration_version");
             if (!configuredSignals.contains(binding.getSignal())) {
                 throw new IllegalArgumentException(
                         "binding references a signal that is absent from conditions: " + binding.getSignal());
@@ -103,9 +105,10 @@ public final class BoundaryRulePublicationMapper {
                 throw new IllegalArgumentException(
                         "numeric signal binding requires expected_unit: " + binding.getSignal());
             }
-            String key = PublishedBoundaryPlan.bindingKey(binding.getDeviceId(), binding.getPropertyId());
+            String key = PublishedBoundaryPlan.bindingKey(
+                    binding.getProductId(), binding.getDeviceId(), binding.getPropertyId());
             if (result.put(key, binding) != null) {
-                throw new IllegalArgumentException("duplicate device/property binding: " + key);
+                throw new IllegalArgumentException("duplicate product/device/property binding: " + key);
             }
             if (!boundSignals.add(binding.getSignal())) {
                 throw new IllegalArgumentException("duplicate signal binding: " + binding.getSignal());

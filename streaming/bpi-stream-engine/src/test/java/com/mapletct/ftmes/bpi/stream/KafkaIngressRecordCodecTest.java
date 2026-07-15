@@ -55,18 +55,18 @@ class KafkaIngressRecordCodecTest {
     }
 
     @Test
-    void enforcesOneMiBFieldLimitDuringEncoding() {
+    void enforcesEightMiBFieldLimitDuringEncoding() {
         KafkaIngressRecord maximum = new KafkaIngressRecord(
-                "telemetry.v1", 0, 0L, 0L, null, new byte[1_048_576]);
+                "point-catalog.v1", 0, 0L, 0L, null, new byte[8 * 1024 * 1024]);
         KafkaIngressRecord oversized = new KafkaIngressRecord(
-                "telemetry.v1", 0, 0L, 0L, null, new byte[1_048_577]);
+                "point-catalog.v1", 0, 0L, 0L, null, new byte[8 * 1024 * 1024 + 1]);
 
-        assertEquals(1_048_576, KafkaIngressRecordCodec.decode(
+        assertEquals(8 * 1024 * 1024, KafkaIngressRecordCodec.decode(
                 KafkaIngressRecordCodec.encode(maximum)).value().length);
         IllegalStateException error = assertThrows(
                 IllegalStateException.class, () -> KafkaIngressRecordCodec.encode(oversized));
         assertEquals("cannot encode Kafka ingress record", error.getMessage());
-        assertTrue(error.getCause().getMessage().contains("exceeds one MiB"));
+        assertTrue(error.getCause().getMessage().contains("exceeds eight MiB"));
     }
 
     private static void assertDecodeFailure(byte[] bytes, String causeMessage) {

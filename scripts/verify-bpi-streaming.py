@@ -19,7 +19,10 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryKeyedBroadcastFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryOperatorStateCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingControlCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogKafkaDecodeFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogRuntimeValidator.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodec.java",
@@ -123,7 +126,13 @@ def main() -> int:
             failures.append(f"BoundaryKeyedBroadcastFunction is missing runtime marker {marker!r}")
 
     publication_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java").read_text(encoding="utf-8")
-    for marker in ("BoundaryRulePublicationV1", "BoundaryTimingPolicy", "duplicate device/property binding"):
+    for marker in (
+        "BoundaryRulePublicationV1",
+        "BoundaryTimingPolicy",
+        "duplicate product/device/property binding",
+        "binding.getProductId()",
+        "binding.getCalibrationVersion()",
+    ):
         if marker not in publication_source:
             failures.append(f"BoundaryRulePublicationMapper is missing contract marker {marker!r}")
 
@@ -148,6 +157,9 @@ def main() -> int:
         "bpi-production-context-join-v1",
         "bpi-rule-lifecycle-v1",
         "bpi-boundary-indexed-routing-v1",
+        "bpi-kafka-point-catalog-source-v1",
+        "BoundaryRoutingControlCodec::pointCatalog",
+        "PointCatalogKafkaDecodeFunction.ISSUES",
         "BpiKafkaIO.candidateSink",
         "BpiKafkaIO.dataQualitySink",
         "BpiKafkaIO.ruleApplicationSink",

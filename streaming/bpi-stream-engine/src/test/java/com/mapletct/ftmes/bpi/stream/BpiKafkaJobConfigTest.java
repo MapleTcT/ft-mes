@@ -22,6 +22,8 @@ class BpiKafkaJobConfigTest {
         assertEquals(Duration.ofSeconds(30), config.checkpointInterval());
         assertEquals(Duration.ofDays(30), config.boundaryStateTtl());
         assertEquals("iot.telemetry.selected.v1", config.telemetryTopic());
+        assertEquals("iot.point-catalog.snapshot.v1", config.pointCatalogTopic());
+        assertEquals(6_291_456, config.pointCatalogMaxMessageBytes());
         assertEquals("bpi.boundary.rule-application.v1", config.ruleApplicationTopic());
     }
 
@@ -34,10 +36,16 @@ class BpiKafkaJobConfigTest {
         duplicateTopic.put("candidate-topic", "bpi.data-quality.v1");
         Map<String, String> duplicateApplicationTopic = values();
         duplicateApplicationTopic.put("rule-application-topic", "bpi.boundary.rule-publication.v1");
+        Map<String, String> duplicatePointCatalogTopic = values();
+        duplicatePointCatalogTopic.put("point-catalog-topic", "iot.telemetry.selected.v1");
+        Map<String, String> oversizedPointCatalog = values();
+        oversizedPointCatalog.put("point-catalog-max-message-bytes", Integer.toString(9 * 1024 * 1024));
 
         assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(invalidTiming));
         assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(duplicateTopic));
         assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(duplicateApplicationTopic));
+        assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(duplicatePointCatalogTopic));
+        assertThrows(IllegalArgumentException.class, () -> BpiKafkaJobConfig.from(oversizedPointCatalog));
     }
 
     @Test

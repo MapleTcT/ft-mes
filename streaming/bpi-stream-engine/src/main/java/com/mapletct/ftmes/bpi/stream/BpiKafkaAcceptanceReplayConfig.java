@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 record BpiKafkaAcceptanceReplayConfig(
         String bootstrapServers,
         String telemetryTopic,
+        String pointCatalogTopic,
         String contextTopic,
         String ruleTopic,
         String candidateTopic,
@@ -32,6 +33,7 @@ record BpiKafkaAcceptanceReplayConfig(
     BpiKafkaAcceptanceReplayConfig {
         required(bootstrapServers, "bootstrapServers");
         topic(telemetryTopic, "telemetryTopic");
+        topic(pointCatalogTopic, "pointCatalogTopic");
         topic(contextTopic, "contextTopic");
         topic(ruleTopic, "ruleTopic");
         topic(candidateTopic, "candidateTopic");
@@ -52,6 +54,7 @@ record BpiKafkaAcceptanceReplayConfig(
         return new BpiKafkaAcceptanceReplayConfig(
                 value(environment, "BPI_KAFKA_BOOTSTRAP_SERVERS", null),
                 value(environment, "BPI_TELEMETRY_TOPIC", "iot.telemetry.selected.v1"),
+                value(environment, "BPI_POINT_CATALOG_TOPIC", "iot.point-catalog.snapshot.v1"),
                 value(environment, "BPI_CONTEXT_TOPIC", "mes.production.context.v1"),
                 value(environment, "BPI_RULE_TOPIC", "bpi.boundary.rule-publication.v1"),
                 value(environment, "BPI_CANDIDATE_TOPIC", "bpi.batch.candidate.v1"),

@@ -33,7 +33,8 @@ public final class BoundarySignalRouter {
         }
         for (PointValue point : envelope.getPointsList()) {
             BoundarySignalBindingV1 binding = plan.bindings().get(
-                    PublishedBoundaryPlan.bindingKey(envelope.getDeviceId(), point.getPropertyId()));
+                    PublishedBoundaryPlan.bindingKey(
+                            envelope.getProductId(), envelope.getDeviceId(), point.getPropertyId()));
             if (binding == null) {
                 continue;
             }
@@ -78,7 +79,8 @@ public final class BoundarySignalRouter {
         }
         PointValue point = telemetry.point();
         BoundarySignalBindingV1 binding = plan.bindings().get(
-                PublishedBoundaryPlan.bindingKey(envelope.getDeviceId(), point.getPropertyId()));
+                PublishedBoundaryPlan.bindingKey(
+                        envelope.getProductId(), envelope.getDeviceId(), point.getPropertyId()));
         if (binding == null) {
             return new BoundaryRoutingResult(inputs, issues);
         }
@@ -168,7 +170,14 @@ public final class BoundarySignalRouter {
             String code,
             String propertyId,
             String message) {
-        return new BoundaryRoutingIssue(code, envelope.getEventId(), propertyId, message);
+        return new BoundaryRoutingIssue(
+                code,
+                envelope.getEventId(),
+                propertyId,
+                message,
+                envelope.getTenantId(),
+                envelope.getPlantId(),
+                envelope.getLineId());
     }
 
     private static String emptyToNull(String value) {

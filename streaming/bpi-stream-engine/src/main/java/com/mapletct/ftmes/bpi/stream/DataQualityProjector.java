@@ -41,7 +41,8 @@ public final class DataQualityProjector {
     public static byte[] project(BoundaryRoutingIssue issue, long detectedAtMs) {
         return event(
                 issue.code(), issue.sourceEventId(), issue.propertyId(), issue.message(), detectedAtMs,
-                new String[0], Map.of("stage", "rule-routing")).toByteArray();
+                new String[]{issue.tenantId(), issue.plantId(), issue.lineId()},
+                Map.of("stage", "rule-routing")).toByteArray();
     }
 
     public static byte[] project(BoundaryProcessingIssue issue, long detectedAtMs) {

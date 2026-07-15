@@ -220,6 +220,12 @@ message BoundarySignalBindingV1 {
   string property_id = 2;
   string signal = 3;
   string expected_unit = 4;
+  // Product identity is part of the reviewed point-catalog key. Device/property
+  // alone is not sufficient when the same device id can exist in multiple products.
+  string product_id = 5;
+  // Immutable calibration version approved with the topology. Runtime telemetry
+  // and the latest point catalog must both match this value.
+  string calibration_version = 6;
 }
 
 enum BoundaryConditionOperatorV1 {

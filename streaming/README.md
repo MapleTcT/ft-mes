@@ -11,6 +11,12 @@ versioned `byte[]` keyed/broadcast state, uses event-time timers, emits
 also provides a keyed, checkpointed event-time join for point telemetry and
 versioned production context. Kafka sources, rule lifecycle/broadcast routing,
 candidate output and data-quality output are wired with checkpoint-aware sinks.
+The runtime also consumes `PointCatalogSnapshotV1` from
+`iot.point-catalog.snapshot.v1`. A published rule reaches the evaluator only
+when every exact product/device/property binding is active, calibrated to the
+published version, unit-compatible, and source-sequence ready. Catalog
+downgrades delete evaluator rules and clear pending windows before old timers
+can emit candidates.
 The rule-application sink also has local Kafka 4.2 + Flink 2.2.1 MiniCluster
 checkpoint and TaskManager-restart acceptance. This is real local runtime
 execution, but it is not the target three-broker/Flink/MinIO cluster acceptance.
@@ -45,6 +51,13 @@ declares `com.mapletct.ftmes.bpi.stream.BpiKafkaJob` as its main class. Flink
 runtime libraries remain `provided`; the job artifact includes the Kafka
 connector, BPI contracts and deterministic rule runtime. Runtime configuration
 is documented in `docs/testing/bpi-kafka-flink-topology-acceptance.md`.
+
+Existing savepoints and historical rule publications require an explicit
+migration: publications created before `product_id` and
+`calibration_version` were added to `BoundarySignalBindingV1` fail closed and
+must be republished as new immutable rule versions after a current READY point
+catalog is present. Do not deploy this job over an existing stateful job
+without the savepoint and rule-version migration rehearsal.
 
 Java 8 remains the baseline for the legacy MES reactor. Only this reactor and
 the standalone BPI service require Java 17.

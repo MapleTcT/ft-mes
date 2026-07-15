@@ -65,6 +65,14 @@ public final class BpiKafkaAcceptanceReplay {
             try {
                 inputs.add(send(
                         producer,
+                        config.pointCatalogTopic(),
+                        scenario.contextKey(),
+                        scenario.pointCatalog().getObservedAtMs(),
+                        scenario.pointCatalog().getEventId(),
+                        scenario.tenantId(),
+                        scenario.pointCatalog().toByteArray()));
+                inputs.add(send(
+                        producer,
                         config.ruleTopic(),
                         scenario.ruleKey(),
                         scenario.publication().getPublishedAtMs(),
@@ -271,6 +279,7 @@ public final class BpiKafkaAcceptanceReplay {
                 .append("  \"clusterSmokeRequired\": true,\n")
                 .append("  \"topics\": {\n")
                 .append("    \"telemetry\": ").append(quote(config.telemetryTopic())).append(",\n")
+                .append("    \"pointCatalog\": ").append(quote(config.pointCatalogTopic())).append(",\n")
                 .append("    \"context\": ").append(quote(config.contextTopic())).append(",\n")
                 .append("    \"rule\": ").append(quote(config.ruleTopic())).append(",\n")
                 .append("    \"candidate\": ").append(quote(config.candidateTopic())).append(",\n")
