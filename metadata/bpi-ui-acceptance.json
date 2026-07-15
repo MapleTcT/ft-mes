@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-14T16:00:00Z",
-  "repoCommit": "d3a543789b52fb7feafb43c224acbbb0a60e73f0",
+  "generatedAt": "2026-07-15T06:54:00Z",
+  "repoCommit": "7e3fcf185c09e53a3eca763302d9183eda291461",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 7,
-    "pass": 7,
+    "browserTests": 8,
+    "pass": 8,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -134,6 +134,25 @@
       "evidence": "/tmp/bpi-console-candidate-rejected.png"
     },
     {
+      "id": "desktop-point-catalog-readiness",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/points"
+      ],
+      "operations": [
+        "import a versioned point-catalog snapshot",
+        "verify point count and READY count",
+        "inspect device, property, unit, calibration and source-sequence blockers",
+        "verify the current source revision remains visible"
+      ],
+      "apis": [
+        "POST /bpi/v1/point-catalog/snapshots",
+        "GET /bpi/v1/point-catalog/current"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-point-catalog.png"
+    },
+    {
       "id": "desktop-topology-rule-productization",
       "viewport": "1440x900",
       "routes": [
@@ -174,6 +193,8 @@
         "verify WAITING before broker acknowledgement",
         "verify REJECTED deployment, timestamps, code and detail",
         "verify APPLIED clears stale rejection details and advances only the publication receipt revision",
+        "verify APPLIED remains a control-plane result while runtime readiness moves independently from DEGRADED to READY",
+        "verify DEGRADED reason and point-catalog revision are replaced by a clean READY receipt",
         "verify the settled detail drawer remains inside the desktop viewport"
       ],
       "apis": [
@@ -201,9 +222,9 @@
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
-    "The Java 8 authentication adapter and ADP session bridge have prior target evidence; the new topology and rule write routes still require target-environment browser acceptance.",
+    "The Java 8 authentication adapter and ADP session bridge have prior target evidence; this run did not redeploy the V13 runtime-readiness changes to the target environment.",
     "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
-    "Flink application state was exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised.",
+    "Flink application and runtime-readiness states were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]
 }

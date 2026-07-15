@@ -1,47 +1,64 @@
 {
-  "generatedAt" : "2026-07-14T03:03:06.045282Z",
+  "generatedAt" : "2026-07-15T07:15:27.347476Z",
   "status" : "PASS_LOCAL_FLINK_MINICLUSTER_KAFKA",
   "scope" : "BPI rule application checkpoint transaction visibility, task-manager restart recovery and lifecycle-state acceptance",
   "brokerMode" : "EMBEDDED_KRAFT_4_2_0",
   "kafkaClientVersion" : "4.2.0",
   "runtime" : {
-    "checkpointStorage" : "test-owned local filesystem",
     "consumerIsolationLevel" : "read_committed",
     "kafka" : "4.2.0",
-    "flink" : "2.2.1 MiniCluster"
+    "flink" : "2.2.1 MiniCluster",
+    "checkpointStorage" : "test-owned local filesystem"
   },
   "test" : "BpiRuleApplicationFlinkKafkaAcceptanceTest.checkpointCommitControlsVisibilityAndTaskManagerRestartRestoresRuleState",
-  "marker" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed",
-  "jobId" : "1c60973bf9d7128dc5230f67dd7bd895",
+  "marker" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8",
+  "jobId" : "d1b05d483b4a93d2519d99cc1e746274",
   "preCheckpoint" : {
-    "readUncommittedEventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-ACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed|APPLIED||1783998180220",
     "readCommittedVisible" : false,
-    "interruptedTransactionCommitted" : false
+    "readUncommittedReadinessEventId" : "sha256:e0eaa39f5bab65e06ae57f677a10aa807fd1fd16fa1e957020b3f6ddd3bf7f43",
+    "readCommittedReadinessVisible" : false,
+    "interruptedTransactionCommitted" : false,
+    "readUncommittedEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-ACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8|APPLIED||1784099717644"
   },
   "checkpoints" : {
-    "rejection" : 3,
     "restored" : 2,
     "inactive" : 2,
     "completedCount" : 3,
     "restoredCount" : 1,
-    "active" : 1
+    "active" : 1,
+    "rejection" : 3
   },
   "committedApplications" : [ {
-    "status" : "APPLIED",
-    "eventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-ACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed|APPLIED||1783998183369",
+    "eventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-ACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8|APPLIED||1784099722934",
     "errorCode" : "",
-    "publicationEventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-ACTIVE"
+    "publicationEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-ACTIVE",
+    "status" : "APPLIED"
   }, {
-    "status" : "APPLIED",
-    "eventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-INACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed|APPLIED||1783998183744",
+    "eventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-INACTIVE|flink-acceptance-ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8|APPLIED||1784099723699",
     "errorCode" : "",
-    "publicationEventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-INACTIVE"
+    "publicationEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-INACTIVE",
+    "status" : "APPLIED"
   }, {
-    "status" : "REJECTED",
-    "eventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-REACTIVATED|flink-acceptance-ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed|REJECTED|RULE_REACTIVATION_REQUIRES_NEW_VERSION|1783998184829",
+    "eventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-REACTIVATED|flink-acceptance-ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8|REJECTED|RULE_REACTIVATION_REQUIRES_NEW_VERSION|1784099725038",
     "errorCode" : "RULE_REACTIVATION_REQUIRES_NEW_VERSION",
-    "publicationEventId" : "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed-RULE-REACTIVATED"
+    "publicationEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-REACTIVATED",
+    "status" : "REJECTED"
   } ],
-  "assertions" : [ "An interrupted pre-checkpoint Kafka transaction is invisible to read_committed.", "APPLIED is visible only after a successful Flink checkpoint.", "TaskManager restart restores the terminal inactive lifecycle from checkpoint.", "Reactivation of the restored inactive version is committed as REJECTED.", "No duplicate committed rule application is observed." ],
+  "committedRuntimeReadiness" : [ {
+    "status" : "READY",
+    "pointCatalogSourceRevision" : "sha256:ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8",
+    "pointCatalogEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-POINT-CATALOG",
+    "eventId" : "sha256:e0eaa39f5bab65e06ae57f677a10aa807fd1fd16fa1e957020b3f6ddd3bf7f43",
+    "publicationEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-ACTIVE",
+    "reasonCode" : ""
+  }, {
+    "status" : "INACTIVE",
+    "pointCatalogSourceRevision" : "sha256:ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8",
+    "pointCatalogEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-POINT-CATALOG",
+    "eventId" : "sha256:1cb7421036e3c463e39a575c91afee80624d2fe151614be2d2885d185e9bffe5",
+    "publicationEventId" : "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8-RULE-INACTIVE",
+    "reasonCode" : "RULE_INACTIVE"
+  } ],
+  "assertions" : [ "An interrupted pre-checkpoint Kafka transaction is invisible to read_committed.", "APPLIED and runtime READY are visible only after a successful Flink checkpoint.", "Typed rule deactivation commits APPLIED control-plane state and INACTIVE runtime state independently.", "TaskManager restart restores the terminal inactive lifecycle from checkpoint.", "Reactivation of the restored inactive version is committed as REJECTED.", "No duplicate committed rule application or runtime-readiness receipt is observed." ],
   "limitations" : [ "The default broker is a disposable single-process Kafka KRaft server, not the target three-broker cluster.", "Checkpoint storage is a test-owned local filesystem, not the target MinIO/S3 storage.", "This acceptance does not include the BPI PostgreSQL consumer or a browser-to-Java round trip.", "This acceptance does not claim target-environment deployment, long-running shadow production or production readiness." ]
 }

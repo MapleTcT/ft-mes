@@ -23,7 +23,7 @@ web_bind_address=$(env_value BPI_WEB_BIND_ADDRESS 127.0.0.1)
 web_port=$(env_value BPI_WEB_PORT 18090)
 database_name=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 postgres_user=$(env_value POSTGRES_USER bpi_admin)
-expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 12)
+expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 13)
 
 health=$(curl -fsS "http://${bind_address}:${http_port}/actuator/health")
 printf '%s' "$health" | grep -q '"status":"UP"' || {

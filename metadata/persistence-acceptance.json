@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-14T21:42:00Z",
+  "generatedAt": "2026-07-15T07:26:47Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
@@ -41,8 +41,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 137,
-    "pass": 132,
+    "testedFeatures": 138,
+    "pass": 133,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -2791,18 +2791,39 @@
     {
       "module": "BPI 流处理规则应用回执",
       "route": "NOT_APPLICABLE: Flink/Kafka 数据面验收，无前端路由",
-      "operation": "checkpoint 事务可见性、取消回滚、TaskManager 重启恢复和规则终态保护",
-      "api": "bpi.boundary.rule-publication.v1 -> bpi.boundary.rule-application.v1",
+      "operation": "checkpoint 事务可见性、独立运行时就绪回执、取消回滚、TaskManager 重启恢复和规则终态保护",
+      "api": "bpi.boundary.rule-publication.v1 + iot.point-catalog.snapshot.v1 -> bpi.boundary.rule-application.v1 + bpi.boundary.rule-runtime-readiness.v1",
       "method": "KAFKA_EVENT",
       "requiresPersistence": false,
-      "backendEntry": "BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction -> RuleApplicationKafkaSerializationSchema -> KafkaSink",
+      "backendEntry": "BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction/BoundaryRuleRoutingBroadcastFunction -> RuleApplicationKafkaSerializationSchema/RuleRuntimeReadinessKafkaSerializationSchema -> KafkaSink",
       "tables": [],
-      "marker": "ADP_E2E_FLINK_RULE_4e9e5b1ce6d94c879b2608fcfc6f8fed",
+      "marker": "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8",
       "verificationSql": "NOT_APPLICABLE: PostgreSQL consumption is intentionally covered by metadata/bpi-rule-application-kafka-postgres-acceptance.json",
       "status": "NOT_APPLICABLE",
-      "evidence": "metadata/bpi-rule-application-flink-kafka-acceptance.json records Kafka 4.2 + Flink 2.2.1 MiniCluster execution with 3 completed checkpoints, 1 restored checkpoint, read_committed invisibility before checkpoint, canceled transaction rollback, APPLIED/INACTIVE commit, restored terminal state and REJECTED same-version reactivation. This data-plane test intentionally does not write PostgreSQL.",
+      "evidence": "metadata/bpi-rule-application-flink-kafka-acceptance.json records Kafka 4.2 + Flink 2.2.1 MiniCluster execution with 3 completed checkpoints, 1 restored checkpoint, APPLIED and READY read_committed invisibility before checkpoint, canceled transaction rollback, independent APPLIED/READY then APPLIED/INACTIVE commits, restored terminal state and REJECTED same-version reactivation. This data-plane test intentionally does not write PostgreSQL.",
       "issues": [
         "This item remains data-plane-only; target joint browser/PostgreSQL proof is recorded separately in metadata/bpi-browser-kafka-postgres-joint-acceptance.json."
+      ]
+    },
+    {
+      "module": "BPI 规则应用与运行时就绪落库",
+      "route": "NOT_APPLICABLE: Kafka 消费与 PostgreSQL 落库验收，前端由独立浏览器 E2E 覆盖",
+      "operation": "事务回执、listener 重启、DEGRADED 到 READY、过期事件抑制、精确重放和双 DLQ",
+      "api": "bpi.boundary.rule-application.v1; bpi.boundary.rule-runtime-readiness.v1",
+      "method": "KAFKA_EVENT",
+      "requiresPersistence": true,
+      "backendEntry": "RuleApplicationKafkaListener -> RuleApplicationKafkaRecordProcessor/RuleRuntimeReadinessKafkaRecordProcessor -> receipt services -> PostgreSQL repositories",
+      "tables": [
+        "bpi_outbox_events",
+        "bpi_inbox_events",
+        "bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_BPI_RULE_APP_KAFKA_<generated-and-cleaned>",
+      "verificationSql": "SELECT application_status,runtime_readiness_status,runtime_readiness_reason_code,runtime_point_catalog_event_id,runtime_point_catalog_source_revision,revision FROM bpi.bpi_outbox_events WHERE tenant_id=:tenant AND id=:publication; SELECT source,count(*) FROM bpi.bpi_inbox_events WHERE tenant_id=:tenant GROUP BY source; SELECT action,before_revision,after_revision FROM bpi.bpi_audit_events WHERE tenant_id=:tenant AND object_id=:publication ORDER BY after_revision;",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-application-kafka-postgres-acceptance.json records Embedded Kafka 3.8.1 + PostgreSQL 16.13/Flyway V13. Direct JDBC assertions before cleanup proved final APPLIED + READY revision 5, application inbox 3, runtime inbox 3 and audit 4; stale runtime READY did not overwrite newer DEGRADED, exact replay after listener restart added no row, and poison payloads reached topic-specific DLQs.",
+      "issues": [
+        "This is local split-layer evidence; target V13 deployment and one browser-to-Flink-to-PostgreSQL marker remain pending."
       ]
     },
     {

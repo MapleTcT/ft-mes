@@ -367,9 +367,11 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await page.getByRole('heading', { name: '规则发布链路' }).waitFor();
   await page.getByText('待分发', { exact: true }).last().waitFor();
   await page.getByText('发布事件已与规则版本同事务落库，等待 Kafka 分发。').waitFor();
-  await page.getByRole('heading', { name: 'Flink 应用确认' }).waitFor();
-  await page.getByText('等待 Flink', { exact: true }).last().waitFor();
+  await page.getByRole('heading', { name: '控制面应用回执' }).waitFor();
+  await page.getByText('控制面等待', { exact: true }).last().waitFor();
   await page.getByText('尚未收到 Flink 应用回执；即使 Kafka 已确认，也不能将该规则标记为在线生效。').waitFor();
+  await page.getByRole('heading', { name: '流式评估器运行就绪' }).waitFor();
+  await page.getByText('运行时 WAITING', { exact: true }).last().waitFor();
   assert.match(await page.locator('.batch-state-band').textContent(), /revision 9/);
 
   const rule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
@@ -404,7 +406,7 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('[data-rule-id]').click();
   await page.getByText('Kafka 已确认', { exact: true }).last().waitFor();
-  await page.getByText('等待 Flink', { exact: true }).last().waitFor();
+  await page.getByText('控制面等待', { exact: true }).last().waitFor();
   await page.getByText('发布事件已获 Kafka broker 确认；是否进入运行态仍以 Flink 应用回执为准。').waitFor();
 
   const rejectApplication = await fetch(`${simulatorUrl}/__simulation/rule-application`, {
@@ -420,10 +422,10 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.equal(rejectApplication.status, 200);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('[data-rule-id]').click();
-  await page.getByText('Flink 已拒绝', { exact: true }).last().waitFor();
+  await page.getByText('控制面 REJECTED', { exact: true }).last().waitFor();
   await page.getByText('RULE_WINDOW_EXCEEDS_STATE_TTL', { exact: true }).waitFor();
   await page.getByText('rule window exceeds state TTL', { exact: true }).waitFor();
-  await page.getByRole('heading', { name: 'Flink 应用确认' }).scrollIntoViewIfNeeded();
+  await page.getByRole('heading', { name: '控制面应用回执' }).scrollIntoViewIfNeeded();
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-application-rejected.png', fullPage: true });
 
@@ -435,8 +437,10 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.equal(applyApplication.status, 200);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('[data-rule-id]').click();
-  await page.getByText('Flink 已应用', { exact: true }).last().waitFor();
+  await page.getByText('控制面 APPLIED', { exact: true }).last().waitFor();
   await page.getByText('flink-simulator-b', { exact: true }).waitFor();
+  await page.getByText('运行时 WAITING', { exact: true }).last().waitFor();
+  await page.getByText('控制面已接受该规则版本，APPLIED 回执经 checkpoint 提交后完成作用域与 checksum 校验并写入 PostgreSQL；这不代表流式评估器已 READY。').waitFor();
   assert.equal(await page.getByText('RULE_WINDOW_EXCEEDS_STATE_TTL', { exact: true }).count(), 0);
   const appliedRule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
   assert.equal(appliedRule.data.publicationStatus, 'PUBLISHED');
@@ -444,7 +448,54 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.equal(appliedRule.data.applicationDeploymentId, 'flink-simulator-b');
   assert.equal(appliedRule.data.applicationErrorCode, null);
   assert.equal(appliedRule.data.publicationRevision, 15);
-  await page.getByRole('heading', { name: 'Flink 应用确认' }).scrollIntoViewIfNeeded();
+  const degradedReadiness = await fetch(`${simulatorUrl}/__simulation/rule-runtime-readiness`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventId: 'e2e-readiness-degraded-0001',
+      status: 'DEGRADED',
+      deploymentId: 'flink-simulator-b',
+      observedAt: '2026-07-12T08:00:04.000Z',
+      reasonCode: 'POINT_SOURCE_SEQUENCE_DISABLED',
+      detail: 'device source sequence evidence is missing',
+      pointCatalogEventId: 'catalog-event-41',
+      pointCatalogSourceRevision: 'sha256:catalog-41',
+    }),
+  });
+  assert.equal(degradedReadiness.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('控制面 APPLIED', { exact: true }).last().waitFor();
+  await page.getByText('运行时 DEGRADED', { exact: true }).last().waitFor();
+  await page.getByText('POINT_SOURCE_SEQUENCE_DISABLED', { exact: true }).waitFor();
+  await page.getByText('device source sequence evidence is missing', { exact: true }).waitFor();
+  await page.getByText('catalog-event-41', { exact: true }).waitFor();
+
+  const readyReadiness = await fetch(`${simulatorUrl}/__simulation/rule-runtime-readiness`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventId: 'e2e-readiness-ready-0002',
+      status: 'READY',
+      deploymentId: 'flink-simulator-b',
+      observedAt: '2026-07-12T08:00:20.000Z',
+      receivedAt: '2026-07-12T08:05:00.000Z',
+      pointCatalogEventId: 'catalog-event-42',
+      pointCatalogSourceRevision: 'sha256:catalog-42',
+    }),
+  });
+  assert.equal(readyReadiness.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('控制面 APPLIED', { exact: true }).last().waitFor();
+  await page.getByText('运行时 READY', { exact: true }).last().waitFor();
+  await page.getByText('流式评估器已激活该精确规则版本，并已记录运行部署和点位目录证据。').waitFor();
+  await page.getByText('catalog-event-42', { exact: true }).waitFor();
+  const readyRule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
+  assert.equal(readyRule.data.applicationStatus, 'APPLIED');
+  assert.equal(readyRule.data.runtimeReadinessStatus, 'READY');
+  assert.equal(readyRule.data.runtimeReadinessReceivedAt, '2026-07-12T08:05:00.000Z');
+  await page.getByRole('heading', { name: '流式评估器运行就绪' }).scrollIntoViewIfNeeded();
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-application-applied.png', fullPage: true });
   assert.deepEqual(errors, []);

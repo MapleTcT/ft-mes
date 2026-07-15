@@ -63,7 +63,7 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 十个 BPI topic（包含点位目录 source/DLT、rule application 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
+2. 十二个 BPI topic（包含点位目录 source/DLT、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 

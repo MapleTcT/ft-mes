@@ -69,9 +69,12 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 仓库级运行时准入随后补齐：规则发布契约固化 `productId`/`calibrationVersion`，Java 服务在发布事务内
 按当前目录重验全部绑定；Flink 增加 `iot.point-catalog.snapshot.v1` 控制流，只向 evaluator UPSERT
 全部绑定 READY 的规则。目录降级会发送 DELETE 并清空匹配规则的待决窗口，旧 event-time timer 不会
-继续产出候选，精确校准恢复后也不会复用旧观测。本地 streaming 常规回归 `99` 项（1 项显式运行时
-测试跳过）、服务测试 `41` 项和 PostgreSQL 规则验收 `5/5` 通过。该批尚未部署目标 Flink；历史发布
-缺少新增绑定字段，必须通过 savepoint/新规则版本迁移演练，G-021 因此仍为 `PARTIAL`。
+继续产出候选，精确校准恢复后也不会复用旧观测。2026-07-15 又完成控制面
+`APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 分离：Flink 2.2.1 MiniCluster + Kafka 4.2
+验证 checkpoint 前后双回执可见性、停用和 TaskManager 恢复；Embedded Kafka 3.8.1 + PostgreSQL
+16.13/Flyway V13 验证 `DEGRADED -> READY`、事件时间排序、精确重放、双 DLQ 和最终
+`APPLIED + READY/r5` 真实落库；操作台 `8/8` E2E 验证两个状态域独立显示。目标环境尚未部署 V13，
+历史规则仍需 savepoint/新版本迁移和回滚演练，因此 G-021 保持 `PARTIAL`。
 
 权威设计和验收入口：
 
@@ -253,8 +256,8 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 ### 主线 A：BPI Phase 0/1
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
-2. 保持已通过的目标环境 Flyway V12、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、独立发布、规则绑定、PostgreSQL revision 和重启读取作为发布回归；继续补版本比较、审批和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
-3. 完成 broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复和单 marker 清理恢复。
+2. 保持已通过的目标环境 Flyway V12、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、独立发布、规则绑定、PostgreSQL revision 和重启读取作为发布回归；把本地已通过的 V13 独立运行时回执部署到目标环境后，再继续版本比较、审批和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
+3. 完成 V13 目标部署、broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复和单 marker 清理恢复。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。
 5. MES 上下文真实链和 IoT source 分段链均已通过；点位准入变为 READY 后，用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链，再连续运行 7-14 天影子批次。
 6. 达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。

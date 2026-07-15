@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaRaftServer;
 import kafka.tools.StorageTool;
@@ -96,7 +99,11 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                  KafkaConsumer<byte[], byte[]> uncommitted = consumer(
                          bootstrapServers, topics.application(), "read_uncommitted");
                  KafkaConsumer<byte[], byte[]> committed = consumer(
-                         bootstrapServers, topics.application(), "read_committed")) {
+                         bootstrapServers, topics.application(), "read_committed");
+                 KafkaConsumer<byte[], byte[]> uncommittedReadiness = consumer(
+                         bootstrapServers, topics.runtimeReadiness(), "read_uncommitted");
+                 KafkaConsumer<byte[], byte[]> committedReadiness = consumer(
+                         bootstrapServers, topics.runtimeReadiness(), "read_committed")) {
                 createTopics(admin, topics.all());
                 cluster.start();
 
@@ -109,6 +116,11 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 currentJob = interruptedJob;
                 awaitStatus(cluster, interruptedJob, JobStatus.RUNNING);
                 awaitAllTasksRunning(cluster, interruptedJob);
+                publish(
+                        producer,
+                        topics.pointCatalog(),
+                        scenario.contextKey(),
+                        scenario.pointCatalog());
                 publish(producer, topics.rules(), scenario.ruleKey(), active);
 
                 BoundaryRuleApplicationV1 abortedApplication = awaitApplication(
@@ -116,14 +128,21 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                         active.getEventId(),
                         BoundaryRuleApplicationStatusV1.APPLIED,
                         Set.of());
+                BoundaryRuleRuntimeReadinessV1 abortedReadiness = awaitReadiness(
+                        uncommittedReadiness,
+                        active.getEventId(),
+                        BoundaryRuleRuntimeReadinessStatusV1.READY,
+                        Set.of());
                 assertEquals(0, checkpointStats(cluster, interruptedJob)
                         .getCounts().getNumberOfCompletedCheckpoints());
                 assertNoMarkerApplication(committed, marker, NO_RECORD_WINDOW);
+                assertNoMarkerReadiness(committedReadiness, marker, NO_RECORD_WINDOW);
 
                 cluster.cancelJob(interruptedJob).get(WAIT.toSeconds(), TimeUnit.SECONDS);
                 awaitStatus(cluster, interruptedJob, JobStatus.CANCELED);
                 currentJob = null;
                 assertNoMarkerApplication(committed, marker, NO_RECORD_WINDOW);
+                assertNoMarkerReadiness(committedReadiness, marker, NO_RECORD_WINDOW);
 
                 JobID recoveredJob = submit(
                         cluster, flink, jobConfig, marker + "-recovered");
@@ -131,6 +150,11 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 awaitStatus(cluster, recoveredJob, JobStatus.RUNNING);
                 awaitAllTasksRunning(cluster, recoveredJob);
 
+                publish(
+                        producer,
+                        topics.pointCatalog(),
+                        scenario.contextKey(),
+                        scenario.pointCatalog());
                 BoundaryRuleApplicationV1 replayedApplication = awaitApplication(
                         uncommitted,
                         active.getEventId(),
@@ -138,11 +162,22 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                         Set.of(abortedApplication.getEventId()));
                 assertNotEquals(
                         abortedApplication.getEventId(), replayedApplication.getEventId());
+                BoundaryRuleRuntimeReadinessV1 replayedReadiness = awaitReadiness(
+                        uncommittedReadiness,
+                        active.getEventId(),
+                        BoundaryRuleRuntimeReadinessStatusV1.READY,
+                        Set.of());
+                assertEquals(abortedReadiness.getEventId(), replayedReadiness.getEventId());
                 long activeCheckpoint = triggerCheckpoint(cluster, recoveredJob);
                 BoundaryRuleApplicationV1 committedActive = awaitApplication(
                         committed,
                         active.getEventId(),
                         BoundaryRuleApplicationStatusV1.APPLIED,
+                        Set.of());
+                BoundaryRuleRuntimeReadinessV1 committedReady = awaitReadiness(
+                        committedReadiness,
+                        active.getEventId(),
+                        BoundaryRuleRuntimeReadinessStatusV1.READY,
                         Set.of());
 
                 BoundaryRulePublicationV1 inactive = scenario.inactivePublication(
@@ -158,6 +193,11 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                         committed,
                         inactive.getEventId(),
                         BoundaryRuleApplicationStatusV1.APPLIED,
+                        Set.of());
+                BoundaryRuleRuntimeReadinessV1 committedInactiveReadiness = awaitReadiness(
+                        committedReadiness,
+                        inactive.getEventId(),
+                        BoundaryRuleRuntimeReadinessStatusV1.INACTIVE,
                         Set.of());
 
                 cluster.terminateTaskManager(0).get(WAIT.toSeconds(), TimeUnit.SECONDS);
@@ -192,13 +232,16 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 assertTrue(finalStats.getCounts().getNumberOfCompletedCheckpoints() >= 3);
                 assertTrue(finalStats.getCounts().getNumberOfRestoredCheckpoints() >= 1);
                 assertNoMarkerApplication(committed, marker, NO_RECORD_WINDOW);
+                assertNoMarkerReadiness(committedReadiness, marker, NO_RECORD_WINDOW);
 
                 writeEvidence(
                         broker.mode(),
                         marker,
                         recoveredJob,
                         abortedApplication,
+                        abortedReadiness,
                         List.of(committedActive, committedInactive, committedRejection),
+                        List.of(committedReady, committedInactiveReadiness),
                         activeCheckpoint,
                         inactiveCheckpoint,
                         rejectionCheckpoint,
@@ -416,10 +459,26 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
             String topic,
             String key,
             BoundaryRulePublicationV1 publication) throws Exception {
+        publish(producer, topic, key, publication.toByteArray());
+    }
+
+    private static void publish(
+            KafkaProducer<byte[], byte[]> producer,
+            String topic,
+            String key,
+            PointCatalogSnapshotV1 snapshot) throws Exception {
+        publish(producer, topic, key, snapshot.toByteArray());
+    }
+
+    private static void publish(
+            KafkaProducer<byte[], byte[]> producer,
+            String topic,
+            String key,
+            byte[] payload) throws Exception {
         producer.send(new ProducerRecord<>(
                         topic,
                         key.getBytes(StandardCharsets.UTF_8),
-                        publication.toByteArray()))
+                        payload))
                 .get(10, TimeUnit.SECONDS);
         producer.flush();
     }
@@ -446,6 +505,28 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
         return BoundaryRuleApplicationV1.getDefaultInstance();
     }
 
+    private static BoundaryRuleRuntimeReadinessV1 awaitReadiness(
+            KafkaConsumer<byte[], byte[]> consumer,
+            String publicationEventId,
+            BoundaryRuleRuntimeReadinessStatusV1 status,
+            Set<String> excludedEventIds) throws Exception {
+        Instant deadline = Instant.now().plus(WAIT);
+        while (Instant.now().isBefore(deadline)) {
+            ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(250));
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                BoundaryRuleRuntimeReadinessV1 readiness =
+                        BoundaryRuleRuntimeReadinessV1.parseFrom(record.value());
+                if (publicationEventId.equals(readiness.getPublicationEventId())
+                        && status == readiness.getStatus()
+                        && !excludedEventIds.contains(readiness.getEventId())) {
+                    return readiness;
+                }
+            }
+        }
+        fail("No " + status + " runtime readiness arrived for " + publicationEventId);
+        return BoundaryRuleRuntimeReadinessV1.getDefaultInstance();
+    }
+
     private static void assertNoMarkerApplication(
             KafkaConsumer<byte[], byte[]> consumer,
             String marker,
@@ -465,12 +546,33 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
         assertTrue(unexpected.isEmpty(), "unexpected committed applications: " + unexpected);
     }
 
+    private static void assertNoMarkerReadiness(
+            KafkaConsumer<byte[], byte[]> consumer,
+            String marker,
+            Duration window) throws Exception {
+        Instant deadline = Instant.now().plus(window);
+        List<String> unexpected = new ArrayList<>();
+        while (Instant.now().isBefore(deadline)) {
+            for (ConsumerRecord<byte[], byte[]> record : consumer.poll(Duration.ofMillis(100))) {
+                BoundaryRuleRuntimeReadinessV1 readiness =
+                        BoundaryRuleRuntimeReadinessV1.parseFrom(record.value());
+                if (readiness.getPublicationEventId().startsWith(marker)) {
+                    unexpected.add(readiness.getStatus().name()
+                            + ":" + readiness.getPublicationEventId());
+                }
+            }
+        }
+        assertTrue(unexpected.isEmpty(), "unexpected committed runtime readiness: " + unexpected);
+    }
+
     private static void writeEvidence(
             String brokerMode,
             String marker,
             JobID jobId,
             BoundaryRuleApplicationV1 aborted,
+            BoundaryRuleRuntimeReadinessV1 abortedReadiness,
             List<BoundaryRuleApplicationV1> committed,
+            List<BoundaryRuleRuntimeReadinessV1> committedReadiness,
             long activeCheckpoint,
             long inactiveCheckpoint,
             long rejectionCheckpoint,
@@ -504,7 +606,9 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
         evidence.put("jobId", jobId.toHexString());
         evidence.put("preCheckpoint", Map.of(
                 "readUncommittedEventId", aborted.getEventId(),
+                "readUncommittedReadinessEventId", abortedReadiness.getEventId(),
                 "readCommittedVisible", false,
+                "readCommittedReadinessVisible", false,
                 "interruptedTransactionCommitted", false));
         evidence.put("checkpoints", Map.of(
                 "active", activeCheckpoint,
@@ -518,12 +622,21 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 "publicationEventId", application.getPublicationEventId(),
                 "status", application.getStatus().name(),
                 "errorCode", application.getErrorCode())).toList());
+        evidence.put("committedRuntimeReadiness", committedReadiness.stream().map(readiness -> Map.of(
+                "eventId", readiness.getEventId(),
+                "publicationEventId", readiness.getPublicationEventId(),
+                "status", readiness.getStatus().name(),
+                "reasonCode", readiness.getReasonCode(),
+                "pointCatalogEventId", readiness.getPointCatalogEventId(),
+                "pointCatalogSourceRevision", readiness.getPointCatalogSourceRevision()))
+                .toList());
         evidence.put("assertions", List.of(
                 "An interrupted pre-checkpoint Kafka transaction is invisible to read_committed.",
-                "APPLIED is visible only after a successful Flink checkpoint.",
+                "APPLIED and runtime READY are visible only after a successful Flink checkpoint.",
+                "Typed rule deactivation commits APPLIED control-plane state and INACTIVE runtime state independently.",
                 "TaskManager restart restores the terminal inactive lifecycle from checkpoint.",
                 "Reactivation of the restored inactive version is committed as REJECTED.",
-                "No duplicate committed rule application is observed."));
+                "No duplicate committed rule application or runtime-readiness receipt is observed."));
         evidence.put("limitations", List.of(
                 "The default broker is a disposable single-process Kafka KRaft server, not the target three-broker cluster.",
                 "Checkpoint storage is a test-owned local filesystem, not the target MinIO/S3 storage.",

@@ -1,5 +1,22 @@
 # 后端落库验收报告
 
+## 2026-07-15 BPI V13 规则运行时就绪回执
+
+本轮在隔离 PostgreSQL 16.13 上从空库应用 Flyway V1-V13，并通过 Embedded Kafka 3.8.1
+真实消费控制面和运行时两个 topic。随机 marker 在直接 JDBC 断言后由测试定向清理，
+所以清理后的 0 行不是“未落库”，而是验收不保留测试数据。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| Kafka 控制面回执 | 不适用；事件消费验收 | `bpi.boundary.rule-application.v1` | `RuleApplicationKafkaListener -> RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | aborted transaction 不可见；`REJECTED -> APPLIED` 后 application inbox `3`、审计 `2`，distinct stale REJECTED 不回退终态 | PASS_LOCAL_KAFKA_POSTGRES |
+| Kafka 运行时就绪回执 | 不适用；页面由独立 E2E 验收 | `bpi.boundary.rule-runtime-readiness.v1` | `RuleApplicationKafkaListener -> RuleRuntimeReadinessKafkaRecordProcessor -> RuleRuntimeReadinessReceiptService -> RuleRuntimeReadinessPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | application 始终 `APPLIED`；runtime `WAITING -> DEGRADED -> READY`，outbox revision `3 -> 4 -> 5`；较旧 READY 只记 inbox 不覆盖，精确重放不增行；runtime inbox `3`、运行时审计 `2` | PASS_LOCAL_KAFKA_POSTGRES |
+| 双 source DLQ | 不适用 | application/readiness source -> 各自 DLQ | `BpiRuleApplicationKafkaConfiguration -> DeadLetterPublishingRecoverer` | 无业务写入 | 两个非法 Protobuf 分别保留原 bytes 和 original-topic header 到对应 DLQ；最终业务状态仍 `APPLIED + READY/r5` | PASS_LOCAL_KAFKA_POSTGRES |
+| Flink checkpoint 输出 | 不适用；数据面验收 | rule publication + point catalog -> application + readiness topics | `BpiKafkaJob -> BoundaryRuleRoutingBroadcastFunction -> KafkaSink` | 不落库；上两行覆盖消费落库 | checkpoint 前 `read_committed` 同时看不到 APPLIED/READY；提交后可见；停用提交 `APPLIED + INACTIVE`；TaskManager 恢复后无重复并拒绝同版本重启用 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+
+验收 SQL、marker 和限制见 `metadata/bpi-rule-runtime-readiness-acceptance.json`、
+`metadata/bpi-rule-application-kafka-postgres-acceptance.json` 和
+`metadata/bpi-rule-application-flink-kafka-acceptance.json`。本项不声明目标环境已部署 V13。
+
 ## 2026-07-15 BPI 点位目录与拓扑准入门禁
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
@@ -427,7 +444,8 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 |---|---|---|---|---|---|---|---|
 | 已提交回执、消费端重启和重复投递 | 不适用；本项验收事件消费边界，UI 由独立 E2E 覆盖 | `bpi.boundary.rule-application.v1` / `BoundaryRuleApplicationV1` | `RuleApplicationKafkaRecordProcessor -> RuleApplicationReceiptService -> RuleApplicationPostgresRepository` | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 查询 application status/deployment/revision/error、marker inbox 数和 audit revision | Embedded Kafka 3.8.1 `read_committed` 忽略 aborted transaction；已提交 `REJECTED` 落库到 revision 2；listener stop/start 后精确重放不新增 inbox/audit/revision；`APPLIED` 到 revision 3 并清理拒绝错误 | PASS_LOCAL_KAFKA_POSTGRES |
 | APPLIED 终态防回退 | 不适用 | 同上 | 同上 | 同上 | 查询最终 application status/revision、inbox/audit 数 | distinct stale `REJECTED` 被 inbox 记录，但最终状态保持 `APPLIED/revision=3`，audit 仍为 2 条 | PASS_LOCAL_KAFKA_POSTGRES |
-| 坏消息 DLQ | 不适用 | `bpi.boundary.rule-application.v1` -> `bpi.boundary.rule-application.dlq.v1` | Spring Kafka error handler / dead-letter publisher | 业务 inbox 无新增；DLQ 保留原 payload 与 DLT header | 查询 inbox 数并消费 DLQ | 非法 Protobuf 在重试耗尽后进入 DLQ，原 bytes 和 original-topic header 保留，业务 inbox 仍为 3 条 | PASS_LOCAL_KAFKA_POSTGRES |
+| 运行时 DEGRADED/READY 独立落库 | 不适用 | `bpi.boundary.rule-runtime-readiness.v1` / `BoundaryRuleRuntimeReadinessV1` | `RuleRuntimeReadinessKafkaRecordProcessor -> RuleRuntimeReadinessReceiptService -> RuleRuntimeReadinessPostgresRepository` | 同上 | 查询 application/runtime 状态、目录 revision、inbox source 和 runtime audit | application 保持 `APPLIED`；runtime `DEGRADED/r4 -> READY/r5`；旧 READY 只写 inbox 不覆盖，listener 重启精确重放不增行；runtime inbox 3、runtime audit 2 | PASS_LOCAL_KAFKA_POSTGRES |
+| 坏消息双 DLQ | 不适用 | application/readiness source -> 对应 DLQ | Spring Kafka error handler / dead-letter publisher | 业务 inbox 无新增；DLQ 保留原 payload 与 DLT header | 查询 inbox 数并分别消费两个 DLQ | 两类非法 Protobuf 分别进入自己的 DLQ，original-topic 正确，最终业务状态仍为 `APPLIED + READY/r5` | PASS_LOCAL_KAFKA_POSTGRES |
 
 机器记录：`metadata/bpi-rule-application-kafka-postgres-acceptance.json`。测试使用真实 broker 协议和真实 PostgreSQL，
 但由事务 Kafka producer 模拟 Flink checkpoint sink；真实 Flink 运行时由下一节单独验收，两份测试仍不构成
@@ -437,8 +455,8 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 
 | 业务动作 | 前端入口 | API / event | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
-| checkpoint 提交控制回执可见性 | 不适用；本项验收 Flink/Kafka 数据面 | `bpi.boundary.rule-publication.v1` -> `bpi.boundary.rule-application.v1` | `BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction -> RuleApplicationKafkaSerializationSchema -> KafkaSink` | 不落库；PostgreSQL 消费由独立测试覆盖 | `NOT_APPLICABLE` | checkpoint 前 `read_uncommitted` 可见、`read_committed` 不可见；取消作业后未完成事务仍不可见；恢复作业并成功 checkpoint 后 `APPLIED` 可见 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
-| TaskManager 重启与规则终态恢复 | 不适用 | 同上 | Flink keyed state + checkpoint restore | 不落库 | `NOT_APPLICABLE` | 停用规则在 checkpoint 2 提交；TaskManager 重启后从 checkpoint 2 恢复；同版本重新启用在 checkpoint 3 作为 `REJECTED/RULE_REACTIVATION_REQUIRES_NEW_VERSION` 提交；完成 checkpoint 3 个、恢复 1 次、无重复回执 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+| checkpoint 提交控制双回执可见性 | 不适用；本项验收 Flink/Kafka 数据面 | rule publication + point catalog -> rule application + runtime readiness | `BpiKafkaJob -> BoundaryRulePublicationLifecycleFunction/BoundaryRuleRoutingBroadcastFunction -> KafkaSink` | 不落库；PostgreSQL 消费由独立测试覆盖 | `NOT_APPLICABLE` | checkpoint 前 `read_uncommitted` 可见 `APPLIED/READY`，`read_committed` 均不可见；取消作业后事务仍不可见；恢复并成功 checkpoint 后两类回执同时可见 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
+| TaskManager 重启与规则终态恢复 | 不适用 | 同上 | Flink keyed/broadcast state + checkpoint restore | 不落库 | `NOT_APPLICABLE` | 停用规则在 checkpoint 2 提交 `APPLIED + INACTIVE`；TaskManager 重启后恢复；同版本重新启用在 checkpoint 3 提交 `REJECTED/RULE_REACTIVATION_REQUIRES_NEW_VERSION`；完成 checkpoint 3 个、恢复 1 次、两类回执均无重复 | PASS_LOCAL_FLINK_MINICLUSTER_KAFKA |
 
 机器记录：`metadata/bpi-rule-application-flink-kafka-acceptance.json`。默认运行时为一次性单进程 Kafka 4.2
 KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目录。该项真实执行 Flink job，

@@ -252,6 +252,14 @@ export interface RuleVersion {
   applicationReceivedAt?: string | null;
   applicationErrorCode?: string | null;
   applicationErrorDetail?: string | null;
+  runtimeReadinessStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'WAITING' | 'READY' | 'DEGRADED' | 'INACTIVE';
+  runtimeReadinessDeploymentId?: string | null;
+  runtimeReadinessObservedAt?: string | null;
+  runtimeReadinessReceivedAt?: string | null;
+  runtimeReadinessReasonCode?: string | null;
+  runtimeReadinessDetail?: string | null;
+  runtimePointCatalogEventId?: string | null;
+  runtimePointCatalogSourceRevision?: string | null;
 }
 
 export interface RuleDraftCommand {

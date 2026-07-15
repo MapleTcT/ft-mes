@@ -147,6 +147,10 @@ function createScenario() {
     applicationStatus: 'NOT_PUBLISHED', applicationDeploymentId: null,
     applicationObservedAt: null, applicationReceivedAt: null,
     applicationErrorCode: null, applicationErrorDetail: null,
+    runtimeReadinessStatus: 'NOT_PUBLISHED', runtimeReadinessDeploymentId: null,
+    runtimeReadinessObservedAt: null, runtimeReadinessReceivedAt: null,
+    runtimeReadinessReasonCode: null, runtimeReadinessDetail: null,
+    runtimePointCatalogEventId: null, runtimePointCatalogSourceRevision: null,
   };
 
   const incident = {
@@ -169,6 +173,7 @@ function createScenario() {
     rules: [rule],
     simulations: new Map(),
     incident,
+    runtimeReadinessReceipts: new Map(),
     integrations: [
       { id: 'jetlinks-exporter', status: 'UP', businessImpact: '关键测点可用', lastSuccessAt: FIXED_TIME, lag: 1.2, revision: 5 },
       { id: 'kafka', status: 'UP', businessImpact: '事件总线正常', lastSuccessAt: FIXED_TIME, lag: 0.4, revision: 8 },

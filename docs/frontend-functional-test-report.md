@@ -1,5 +1,19 @@
 # 前端功能测试报告
 
+## 2026-07-15 BPI 控制面与运行时状态分离
+
+本轮使用本地确定性 BPI 模拟器和真实 Chromium 页面验收，共 `8/8 PASS`，
+console/page/request error 均为 `0`。本节只证明操作台交互，不把模拟器当成 PostgreSQL
+落库；真实 Kafka/PostgreSQL 与 Flink checkpoint 证据分别记录在后端验收中。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则运行状态 | `/bpi/#/rules` | 查看已发布规则，注入 `DEGRADED` 后再注入 `READY` | `GET /bpi/v1/rules/{id}`；模拟器控制端点 `POST /__simulation/rule-runtime-readiness` | 页面始终显示控制面 `APPLIED`，运行时独立显示 `DEGRADED -> READY`；降级原因、目录 event/revision 和更新时间正确呈现并在 READY 后清理；无浏览器错误 | 本浏览器项使用模拟器，不声明后端落库；真实落库由 `BpiRuleApplicationKafkaPostgresAcceptanceTest` 单独证明 | 不适用 | PASS_SIMULATOR | 目标环境 V13 尚未部署 |
+| BPI 点位目录 | `/bpi/#/points` | 导入目录并检查 readiness blocker | `POST /bpi/v1/point-catalog/snapshots`、`GET /bpi/v1/point-catalog/current` | 点位总数、READY 数和五类 blocker 可见；无浏览器错误 | 模拟器返回确定性结果 | 不适用 | PASS_SIMULATOR | 不代表现场点位 READY |
+
+证据：`metadata/bpi-ui-acceptance.json`、`/tmp/bpi-console-rule-application-applied.png`、
+`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-point-catalog.png`。
+
 ## 2026-07-15 BPI 点位目录与拓扑准入门禁
 
 本轮在 `http://100.99.133.43:18091` 使用真实 ADP 会话执行页面、API、PostgreSQL
@@ -424,9 +438,9 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
-| BPI 规则与拓扑 | `/bpi/#/rules` | 规则发布后依次模拟 broker 确认、Flink 拒绝和后续应用成功 | `GET /bpi/v1/rules/{id}`；`POST /__simulation/complete-rule-publication`、`POST /__simulation/rule-application` 仅为测试控制面 | 页面明确区分 `PENDING/等待 Flink`、`Kafka 已确认/等待 Flink`、`Flink 已拒绝` 和 `Flink 已应用`；拒绝态显示 deployment、观察/接收时间、错误码和原因，应用成功后旧错误消失；抽屉完成动画后完整位于 1440x900 视口内；console/page/request error 均为 0 | 确定性模拟器验证 UI 状态机；独立真实 PostgreSQL 16.13 验收已证明 `WAITING -> REJECTED -> APPLIED`、inbox 幂等、revision 和审计落库 | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS_WITH_SPLIT_EVIDENCE | 尚未证明浏览器 -> Java 服务 -> Kafka -> Flink checkpoint -> Kafka -> Java 服务的真实联合回路 |
+| BPI 规则与拓扑 | `/bpi/#/rules` | 规则发布后依次模拟 broker 确认、Flink 拒绝、应用成功及运行时 `DEGRADED -> READY` | `GET /bpi/v1/rules/{id}`；`POST /__simulation/complete-rule-publication`、`POST /__simulation/rule-application`、`POST /__simulation/rule-runtime-readiness` 仅为测试控制面 | 页面明确区分 `PENDING/等待 Flink`、`Kafka 已确认/等待 Flink`、`REJECTED/APPLIED` 和独立 `DEGRADED/READY`；APPLIED 不随 runtime 改变，降级原因在 READY 后清理；抽屉位于 1440x900 视口内；console/page/request error 均为 0 | 确定性模拟器验证 UI 状态机；独立 Embedded Kafka + PostgreSQL 16.13/Flyway V13 验收已证明控制面和运行时回执真实消费、幂等、排序、审计及落库 | `bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | PASS_WITH_SPLIT_EVIDENCE | 本轮未部署目标 V13，仍不是单一浏览器到 Flink/PostgreSQL marker |
 
-证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-application-receipt-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。模拟器测试 6/6、浏览器测试 6/6、错误 0；本结论不把模拟端点当成真实落库。
+证据：`metadata/bpi-ui-acceptance.json`、`metadata/bpi-rule-runtime-readiness-acceptance.json`、`/tmp/bpi-console-rule-application-rejected.png`、`/tmp/bpi-console-rule-application-applied.png`。模拟器测试 6/6、浏览器测试 8/8、错误 0；本结论不把模拟端点当成真实落库。
 
 ### BPI 目标环境同一 marker 联合验收（2026-07-14）
 

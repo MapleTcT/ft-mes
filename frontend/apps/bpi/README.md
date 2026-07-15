@@ -16,7 +16,8 @@ npm run test:e2e
 ```
 
 The Playwright suite exercises START shadow-batch creation, END closure to `CLOSED_RAW`, candidate
-rejection without batch creation, batch suspend/resume, rule replay/publication, and mobile layout.
+rejection without batch creation, batch suspend/resume, rule replay/publication, independent
+`APPLIED` versus runtime `READY/DEGRADED/INACTIVE` receipts, and mobile layout.
 Screenshots are written to `/tmp`, not committed as product assets. Rule browser tests use the
 deterministic simulator; real PostgreSQL evidence is recorded separately in
 `metadata/bpi-rule-management-acceptance.json`.

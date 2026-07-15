@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T00:03:06+00:00",
-  "repoCommit": "cc1b407520f98af0bc57ea758becb98d6a8855bd",
+  "generatedAt": "2026-07-15T07:56:59+00:00",
+  "repoCommit": "7e3fcf185c09e53a3eca763302d9183eda291461",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -75,7 +75,7 @@
       "status": "PARTIAL",
       "scope": "默认运行、默认构建和默认 Docker 路径使用 PostgreSQL；Oracle 仅作为 legacy 对照。",
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=986, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 986 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The latest reference increment is a Spring JDBC RowMapper rowNum parameter classified as java-row-index-noise, not a runtime Oracle dependency.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=987, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 987 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. The latest reference increment is a Spring JDBC RowMapper rowNum parameter classified as java-row-index-noise, not a runtime Oracle dependency.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -394,7 +394,7 @@
         "production module test matrix has 43 cases: 39 PASS, 4 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 4 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 7 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
-        "persistence acceptance ledger has 136 tested features: 131 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE",
+        "persistence acceptance ledger has 138 tested features: 133 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "production export readiness smoke was refreshed on the current address at 2026-06-22T11:24:47.554Z: API base=http://100.99.133.43:18080, browser base=http://222.88.185.146:18080; it has 5 BLOCKED targets and 1 READY target, pagePass=6, visibleExportActions=1, runtimeExportActions=1, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=1 and targetExportMatches=4. All 6 target pages are reachable. WTS work-permit now has a visible/runtime export action and real browser download WTS_workPermitList.xls, 200/OLE_XLS/8704. Remaining blocker is backend query-export file mode or target export hook coverage on WOM/RM/QCS. Evidence: metadata/production-export-readiness-smoke.json.",
         "2026-06-21 production module browser/API smoke and marker persistence evidence added to docs/frontend-functional-test-report.md, docs/backend-table-audit/persistence-acceptance.md, and metadata/persistence-acceptance.json latestRevalidation.",
@@ -445,7 +445,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 136 tested features: 131 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 138 tested features: 133 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check cross-check the coverage.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED",
         "metadata/postgres-migration-inventory.json currently has 177 scripts, highRiskStatementCount=0, watchStatementCount=64, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
@@ -619,12 +619,12 @@
         "BPI PostgreSQL 服务已实现遥测入库、规则/拓扑、规则模拟、候选、影子批次、证据、幂等和审计。",
         "规则发布已通过 transactional outbox 进入 Kafka，并具备 FAILED 管理员重试、版本并发控制、浏览器 E2E 和真实 PostgreSQL 落库证据。",
         "Flink 已具备事件时间、生产上下文 join、规则生命周期、Broadcast State、索引路由、边界计算、checkpoint 恢复、candidate/data-quality/rule-application exactly-once sink；APPLIED/REJECTED 回执契约和 BPI 消费入库链路已实现。",
-        "2026-07-15 仓库规则发布契约新增 productId/calibrationVersion，Java 服务在发布事务内重验当前点位目录；Flink 新增 point-catalog Kafka 控制流，目录缺失、降级、产品/校准不匹配或来源序列不权威时失败关闭，READY 降级会 DELETE evaluator 规则并清空待决窗口，恢复后不复用旧观测。streaming 常规回归 99 项（1 项显式 MiniCluster 测试跳过）、服务测试 41 项和真实 PostgreSQL 规则验收 5/5 通过；该批尚未部署目标 Flink。",
+        "2026-07-15 仓库规则发布契约新增 productId/calibrationVersion，Java 服务在发布事务内重验当前点位目录；Flink 新增 point-catalog Kafka 控制流，目录缺失、降级、产品/校准不匹配或来源序列不权威时失败关闭，READY 降级会 DELETE evaluator 规则并清空待决窗口，恢复后不复用旧观测。随后补齐独立运行时 READY/DEGRADED/INACTIVE 回执、V13 落表和操作台状态列；该批尚未部署目标 Flink。",
         "2026-07-13 在全新 PostgreSQL 16.13 上应用 Flyway V1-V8，BpiRulePostgresAcceptanceTest 5/5 通过；规则回执 WAITING -> REJECTED -> APPLIED、inbox 幂等、revision 和审计证据记录在 metadata/bpi-rule-application-receipt-acceptance.json。",
-        "2026-07-14 BPI 操作台已明确分离 Kafka 分发与 Flink 应用状态；确定性浏览器测试覆盖 WAITING -> REJECTED -> APPLIED、拒绝详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。",
+        "2026-07-15 BPI 操作台已明确分离控制面 WAITING/REJECTED/APPLIED 与运行时 READY/DEGRADED/INACTIVE；8/8 确定性浏览器 E2E 覆盖 DEGRADED -> READY、拒绝/降级详情清理、抽屉视口几何和零浏览器错误，记录在 metadata/bpi-ui-acceptance.json。",
         "2026-07-14 拓扑/规则产品化完成：Java 17 服务和 Java 8 adapter 新增拓扑草稿、校验、独立管理员发布及规则草稿入口；Flyway V1-V9 在隔离 PostgreSQL 16.13 连续应用，真实 marker 验收覆盖 FAILED/PASSED 校验、创建人发布拒绝、PUBLISHED r3、未绑定规则信号回滚、幂等和审计；7 条 Chromium E2E 覆盖页面新建/校验/发布/新建规则、移动端零溢出和零浏览器错误，证据记录在 metadata/bpi-topology-rule-productization-acceptance.json。",
-        "2026-07-14 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、listener restart 精确重放幂等、APPLIED 终态防回退和 poison payload DLQ；证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。",
-        "2026-07-14 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED、TaskManager 重启从 checkpoint 恢复终态、同版本重新启用提交 REJECTED 以及无重复回执；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。",
+        "2026-07-15 BpiRuleApplicationKafkaPostgresAcceptanceTest 使用 Embedded Kafka 3.8.1 和真实 PostgreSQL 16.13/Flyway V13 通过 1/1：覆盖 read_committed、事务回滚不可见、REJECTED/APPLIED 落库、独立 DEGRADED/READY 落库、旧事件抑制、listener restart 精确重放幂等和双 source DLQ；最终直接 JDBC 断言为 APPLIED + READY/r5，证据记录在 metadata/bpi-rule-application-kafka-postgres-acceptance.json。",
+        "2026-07-15 BpiRuleApplicationFlinkKafkaAcceptanceTest 使用 Kafka 4.2 KRaft 和 Flink 2.2.1 MiniCluster 真实运行通过：覆盖 checkpoint 前 APPLIED/READY 的 read_committed 不可见、取消事务不提交、成功 checkpoint 提交 APPLIED + READY、停用提交 APPLIED + INACTIVE、TaskManager 重启恢复终态、同版本重新启用提交 REJECTED 以及两类回执无重复；证据记录在 metadata/bpi-rule-application-flink-kafka-acceptance.json。",
         "2026-07-15 目标测试环境 ft-mes-bpi-runtime 已升级到 Flyway V9：Web、Java 8 adapter、Java 17 service、PostgreSQL healthy，19 张 BPI schema 表通过 runtime smoke；真实 ADP suposTicket 经可信 gateway 验证后访问 BPI 页面和 API，浏览器无非预期 console/page/request error。",
         "2026-07-15 使用目标 marker ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET 完成真实页面拓扑草稿、PASSED/r2 校验、创建人发布 422 拒绝、独立管理员 PUBLISHED/r3 发布、拓扑绑定 DRAFT/r1 规则；直接 PostgreSQL 查询确认 4 条动作审计和 4 条 COMPLETED/200 幂等记录，bpi-service 重启后页面仍唯一显示同一拓扑和规则，证据记录在 metadata/bpi-target-topology-rule-acceptance.json。",
         "2026-07-15 目标 ft-mes-bpi-runtime 已升级到 Flyway V12 和 21 张 BPI 基表；marker ADP_E2E_20260715_POINTCAT_02 通过真实页面点位快照导入、幂等重放、拓扑快照绑定、四项失败关闭、PostgreSQL 审计和服务重启读取。随后自动 revision sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5 又闭合 JetLinks -> Kafka -> BPI service -> PostgreSQL -> 浏览器：1 个 snapshot/entry/idempotency/audit、重复不增行、毒消息 DLT、重启幂等和零浏览器错误均通过；目标产品 metadata 为空、设备 notActive/未注册、标定和来源序列未验证，因此同步控制 PASS 但试点点位保持 BLOCKED。证据记录在 metadata/bpi-point-catalog-kafka-sync-acceptance.json。",
@@ -636,14 +636,14 @@
         "2026-07-14 MES production context transactional outbox 工程链完成：177 号 PostgreSQL 迁移在 WOM 同事务触发捕获，显式 scope/state 映射和 BLOCKED_* 状态默认拒绝未知语义，Java 8 发布器使用 SKIP LOCKED、稳定 event_id、Kafka 幂等生产、指数重试和 DEAD 终态；合同/模块 23 项测试通过，独立 PostgreSQL 验收确认 BLOCKED_MAPPING、活动/结束 READY、scope revision 1->2 以及 WOM 回滚不残留 outbox。"
       ],
       "blockingIssues": [
-        "拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过；新运行时点位目录准入批次尚未完成目标 Flink savepoint/历史规则新版本迁移，且 APPLIED 与独立运行时 READY/DEGRADED 状态尚未形成单独回执和前端状态列。版本比较、业务审批流、受控退休和产品级回退也尚未实现。",
+        "拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过；独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、Flyway V13 落表和前端状态列已在本地多层验收通过，但尚未完成目标 V13 部署、Flink savepoint/历史规则新版本迁移与回滚。版本比较、业务审批流、受控退休和产品级回退也尚未实现。",
         "JetLinks 自动点位目录已经真实落库并可由页面读取，但试点设备仍未注册/激活，产品 metadata、标定和连续单调 source sequence 未就绪；实时 IoT 遥测与 MES production context 的同一试点 scope marker candidate/batch 仍未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
         "把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。",
-        "保持目标环境 Flyway V12、点位目录自动同步、真实 ADP 页面拓扑创建/校验、职责分离发布、规则绑定、PostgreSQL revision 和重启读取为发布回归；先完成新运行时目录准入的 savepoint/历史规则新版本迁移与回滚演练，再补独立 READY/DEGRADED 回执、版本比较、审批、broker 故障和 BPI 整体回滚演练。",
+        "保持目标环境 Flyway V12、点位目录自动同步、真实 ADP 页面拓扑创建/校验、职责分离发布、规则绑定、PostgreSQL revision 和重启读取为发布回归；先把已通过的 V13 独立运行时回执部署到目标环境，完成 savepoint/历史规则新版本迁移与回滚演练，再补版本比较、审批、broker 故障和 BPI 整体回滚演练。",
         "先在 JetLinks 注册并激活 bpi-pilot-device-01，补 instantFlow metadata、单位、标定和 source sequence；等待自动同步生成新 revision 并重新校验，禁止手工伪造 READY 快照。READY 后再与 MES production context 用同一 marker 闭合 Kafka/Flink/candidate/batch/browser 证据链。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ],
@@ -660,6 +660,7 @@
         "services/bpi-service/app/src/main/resources/db/migration/V10__bpi_point_catalog_readiness.sql",
         "services/bpi-service/app/src/main/resources/db/migration/V11__bpi_point_catalog_least_privilege.sql",
         "services/bpi-service/app/src/main/resources/db/migration/V12__bpi_point_catalog_source_property.sql",
+        "services/bpi-service/app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogPostgresAcceptanceTest.java",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTopologyRuleProductizationPostgresAcceptanceTest.java",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
@@ -705,7 +706,9 @@
         "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
         "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
         "docs/testing/bpi-source-sequence-readiness-acceptance.md",
-        "metadata/bpi-source-sequence-readiness-acceptance.json"
+        "metadata/bpi-source-sequence-readiness-acceptance.json",
+        "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
+        "metadata/bpi-rule-runtime-readiness-acceptance.json"
       ]
     }
   ],

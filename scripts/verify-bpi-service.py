@@ -22,6 +22,13 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V4__bpi_end_boundary_lifecycle.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V5__bpi_rule_simulation_and_topology_scope.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V6__bpi_rule_publication_outbox.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V7__bpi_rule_publication_operations.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V8__bpi_rule_application_receipts.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V9__bpi_topology_productization.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V10__bpi_point_catalog_readiness.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V11__bpi_point_catalog_least_privilege.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V12__bpi_point_catalog_source_property.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -37,6 +44,11 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxDispatcher.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationKafkaConfiguration.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleRuntimeReadinessReceiptService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleApplicationKafkaListener.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessPostgresRepository.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
@@ -64,6 +76,9 @@ REQUIRED_FILES = [
     "metadata/bpi-rule-management-acceptance.json",
     "docs/backend-table-audit/bpi-rule-publication-outbox.md",
     "metadata/bpi-rule-publication-outbox-acceptance.json",
+    "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
+    "metadata/bpi-rule-runtime-readiness-acceptance.json",
+    "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -166,6 +181,16 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
+        [
+            "runtime_readiness_status",
+            "runtime_readiness_event_id",
+            "runtime_point_catalog_source_revision",
+            "uq_bpi_outbox_runtime_readiness_event",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
          "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
@@ -221,7 +246,21 @@ def main() -> int:
     require_text(
         SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
         ["replayEmitsAtTheExactHoldTimerInsteadOfTheWindowEnd", "expectedBoundary", "meanBoundaryErrorSeconds",
-         "outboxClaimsRecoverAndReachPublishedOrFailedTerminalState", "publicationStatus"],
+         "outboxClaimsRecoverAndReachPublishedOrFailedTerminalState", "publicationStatus",
+         "flinkRuntimeReadinessTransitionsPersistAndOlderReceiptCannotOverwriteApiTruth",
+         "RULE_RUNTIME_DEGRADED", "RULE_RUNTIME_READY"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
+        [
+            "bpi.boundary.rule-runtime-readiness.v1",
+            "POINT_DEVICE_NOT_ACTIVE",
+            "awaitRuntimeState",
+            "RULE_RUNTIME_DEGRADED|3|4",
+            "RULE_RUNTIME_READY|4|5",
+            "READINESS_DLQ_TOPIC",
+        ],
         failures,
     )
     require_text(
@@ -259,6 +298,8 @@ def main() -> int:
             "BPI_CANDIDATE_KAFKA_ENABLED:false",
             "BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_",
             "BPI_RULE_PUBLICATION_OUTBOX_ENABLED:false",
+            "BPI_RULE_RUNTIME_READINESS_KAFKA_TOPIC",
+            "BPI_RULE_RUNTIME_READINESS_KAFKA_DLQ_TOPIC",
         ],
         failures,
     )
@@ -300,6 +341,8 @@ def main() -> int:
             "BPI_CANDIDATE_KAFKA_ALLOWED_TENANT_IDS",
             "BPI_RULE_PUBLICATION_OUTBOX_ENABLED",
             "BPI_RULE_PUBLICATION_TOPIC",
+            "BPI_RULE_RUNTIME_READINESS_KAFKA_TOPIC",
+            "BPI_RULE_RUNTIME_READINESS_KAFKA_DLQ_TOPIC",
             "profiles: [\"bpi\"]",
         ],
         failures,
@@ -362,6 +405,34 @@ def main() -> int:
         fail("BPI rule publication outbox acceptance must identify Kafka", failures)
     if outbox_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI rule publication outbox acceptance must not contain failed items", failures)
+
+    readiness_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-runtime-readiness-acceptance.json").read_text(encoding="utf-8")
+    )
+    if readiness_acceptance.get("database") != "PostgreSQL":
+        fail("BPI runtime-readiness acceptance must identify PostgreSQL", failures)
+    if readiness_acceptance.get("status") != "PASS_LOCAL_MULTI_LAYER_TARGET_NOT_RUN":
+        fail("BPI runtime-readiness acceptance must retain explicit local/target scope", failures)
+    readiness_summary = readiness_acceptance.get("summary", {})
+    if readiness_summary.get("pass") != 3 or readiness_summary.get("fail") != 0:
+        fail("BPI runtime-readiness acceptance must record three passing local layers", failures)
+    if readiness_summary.get("targetEnvironmentStatus") != "NOT_RUN":
+        fail("BPI runtime-readiness acceptance cannot claim an unexecuted target deployment", failures)
+
+    kafka_postgres_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-application-kafka-postgres-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if kafka_postgres_acceptance.get("status") != "PASS_LOCAL_EMBEDDED_KAFKA_POSTGRES":
+        fail("BPI rule receipt Kafka/PostgreSQL acceptance must be an explicit local PASS", failures)
+    if kafka_postgres_acceptance.get("runtime", {}).get("flywayVersion") != 13:
+        fail("BPI rule receipt Kafka/PostgreSQL acceptance must prove Flyway V13", failures)
+    database_assertions = kafka_postgres_acceptance.get("databaseAssertions", {})
+    if database_assertions.get("finalApplicationStatus") != "APPLIED":
+        fail("BPI Kafka/PostgreSQL acceptance must finish with APPLIED control-plane state", failures)
+    if database_assertions.get("finalRuntimeReadinessStatus") != "READY":
+        fail("BPI Kafka/PostgreSQL acceptance must finish with READY runtime state", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

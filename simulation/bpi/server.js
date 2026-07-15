@@ -251,6 +251,66 @@ function createHandler(state) {
         state.rule.publicationRevision += 1;
         return send(res, 200, envelope('simulationRuleApplication', state.rule), 'simulationRuleApplication');
       }
+      if (req.method === 'POST' && path === '/__simulation/rule-runtime-readiness') {
+        const operationId = 'simulationRuleRuntimeReadiness';
+        if (state.rule.publicationStatus !== 'PUBLISHED') {
+          return send(res, 409, { status: 'PUBLICATION_NOT_CONFIRMED' }, operationId);
+        }
+        const body = await readJson(req);
+        if (!['READY', 'DEGRADED', 'INACTIVE'].includes(body.status)) {
+          return send(res, 422, { status: 'INVALID_RUNTIME_READINESS_STATUS' }, operationId);
+        }
+        if (body.status !== 'READY' && (!body.reasonCode || !body.detail)) {
+          return send(res, 422, { status: 'RUNTIME_READINESS_REASON_REQUIRED' }, operationId);
+        }
+        const observedAt = body.observedAt || '2026-07-12T08:00:04.000Z';
+        const observedAtMs = Date.parse(observedAt);
+        if (!Number.isFinite(observedAtMs)) {
+          return send(res, 422, { status: 'INVALID_RUNTIME_READINESS_TIME' }, operationId);
+        }
+        const receipt = {
+          eventId: body.eventId || `sha256:${sha256({
+            ruleId: state.rule.id,
+            status: body.status,
+            reasonCode: body.reasonCode || '',
+            observedAt,
+          })}`,
+          status: body.status,
+          deploymentId: body.deploymentId || 'flink-simulator-b',
+          observedAt,
+          receivedAt: body.receivedAt || '2026-07-12T08:00:05.000Z',
+          reasonCode: body.status === 'READY' ? null : body.reasonCode,
+          detail: body.status === 'READY' ? null : body.detail,
+          pointCatalogEventId: body.pointCatalogEventId || null,
+          pointCatalogSourceRevision: body.pointCatalogSourceRevision || null,
+        };
+        const payloadChecksum = sha256(receipt);
+        const existing = state.runtimeReadinessReceipts.get(receipt.eventId);
+        if (existing) {
+          if (existing.payloadChecksum !== payloadChecksum) {
+            return send(res, 409, { status: 'RUNTIME_READINESS_REPLAY_CONFLICT' }, operationId);
+          }
+          return send(res, 200, envelope(operationId, state.rule), operationId);
+        }
+        state.runtimeReadinessReceipts.set(receipt.eventId, { payloadChecksum, receipt: clone(receipt) });
+        const currentObservedAtMs = Date.parse(state.rule.runtimeReadinessObservedAt || '');
+        if (Number.isFinite(currentObservedAtMs) && observedAtMs < currentObservedAtMs) {
+          return send(res, 200, envelope(operationId, state.rule), operationId);
+        }
+        if (Number.isFinite(currentObservedAtMs) && observedAtMs === currentObservedAtMs) {
+          return send(res, 409, { status: 'RUNTIME_READINESS_TIME_CONFLICT' }, operationId);
+        }
+        state.rule.runtimeReadinessStatus = receipt.status;
+        state.rule.runtimeReadinessDeploymentId = receipt.deploymentId;
+        state.rule.runtimeReadinessObservedAt = receipt.observedAt;
+        state.rule.runtimeReadinessReceivedAt = receipt.receivedAt;
+        state.rule.runtimeReadinessReasonCode = receipt.reasonCode;
+        state.rule.runtimeReadinessDetail = receipt.detail;
+        state.rule.runtimePointCatalogEventId = receipt.pointCatalogEventId;
+        state.rule.runtimePointCatalogSourceRevision = receipt.pointCatalogSourceRevision;
+        state.rule.publicationRevision += 1;
+        return send(res, 200, envelope(operationId, state.rule), operationId);
+      }
       if (req.method === 'GET' && path === '/bpi/v1/overview') {
         return send(res, 200, envelope('getBpiOverview', [state.line]), 'getBpiOverview');
       }
@@ -572,6 +632,10 @@ function createHandler(state) {
           applicationStatus: 'NOT_PUBLISHED', applicationDeploymentId: null,
           applicationObservedAt: null, applicationReceivedAt: null,
           applicationErrorCode: null, applicationErrorDetail: null,
+          runtimeReadinessStatus: 'NOT_PUBLISHED', runtimeReadinessDeploymentId: null,
+          runtimeReadinessObservedAt: null, runtimeReadinessReceivedAt: null,
+          runtimeReadinessReasonCode: null, runtimeReadinessDetail: null,
+          runtimePointCatalogEventId: null, runtimePointCatalogSourceRevision: null,
         };
         state.rules.unshift(rule);
         return rememberAndSend(state, context, res, 200, envelope(operationId, rule), operationId);
@@ -645,6 +709,14 @@ function createHandler(state) {
         rule.applicationReceivedAt = null;
         rule.applicationErrorCode = null;
         rule.applicationErrorDetail = null;
+        rule.runtimeReadinessStatus = 'WAITING';
+        rule.runtimeReadinessDeploymentId = null;
+        rule.runtimeReadinessObservedAt = null;
+        rule.runtimeReadinessReceivedAt = null;
+        rule.runtimeReadinessReasonCode = null;
+        rule.runtimeReadinessDetail = null;
+        rule.runtimePointCatalogEventId = null;
+        rule.runtimePointCatalogSourceRevision = null;
         rule.revision += 1;
         const response = envelope(operationId, rule);
         return rememberAndSend(state, context, res, 200, response, operationId);

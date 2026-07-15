@@ -21,6 +21,13 @@ Publication atomically checks that the pinned snapshot is still current, so a ne
 cannot race a previously validated topology into production. The runtime `bpi_service` role has only
 `SELECT` and `INSERT` on the two point-catalog tables.
 
+Flyway V13 separates control-plane application from evaluator runtime readiness. An `APPLIED`
+publication proves that Flink accepted the rule identity and checksum after checkpoint; it does not
+prove that the evaluator has a usable point catalog. The independent runtime receipt persists
+`READY`, `DEGRADED` or `INACTIVE`, its point-catalog event/revision and degradation reason. Older
+receipts cannot overwrite newer event-time truth, exact replay is idempotent, and application status
+remains unchanged while readiness moves between states.
+
 The production candidate path is the disabled-by-default `bpi.batch.candidate.v1` Kafka consumer.
 It validates Protobuf, canonical key, required headers and explicit tenant/plant/line allowlists,
 then acknowledges only after the shared PostgreSQL transaction returns. Exact redelivery is safe
@@ -44,8 +51,9 @@ JAVA_HOME=/path/to/jdk17 mvn -f acceptance/bpi-runtime/pom.xml -pl :bpi-service 
 ```
 
 It verifies `read_committed`, aborted-transaction invisibility, listener restart/replay,
-terminal-state protection and DLQ behavior. A transactional producer emulates the Flink sink, so
-this test is not evidence that a deployed Flink job emitted the receipt after checkpoint success.
+application terminal-state protection, independent `DEGRADED -> READY` persistence, stale runtime
+receipt suppression, exact replay and topic-specific DLQ behavior. A transactional producer emulates
+the Flink sink; actual checkpoint output is covered separately by the Flink MiniCluster acceptance.
 
 The repository Docker topology keeps Java 8 and Java 17 separate. Start only the isolated BPI
 profile with `make up-bpi`. PostgreSQL initialization creates `ft_mes_bpi`, a DDL-owning

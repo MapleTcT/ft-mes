@@ -20,6 +20,8 @@ REQUIRED_TOPICS = {
     "mes.production.context.v1": "ProductionContextEventV1",
     "bpi.boundary.rule-publication.v1": "BoundaryRulePublicationV1",
     "bpi.boundary.rule-application.v1": "BoundaryRuleApplicationV1",
+    "bpi.boundary.rule-runtime-readiness.v1": "BoundaryRuleRuntimeReadinessV1",
+    "bpi.boundary.rule-runtime-readiness.dlq.v1": "BoundaryRuleRuntimeReadinessV1",
     "bpi.batch.candidate.v1": "BatchCandidateV1",
     "bpi.data-quality.v1": "DataQualityEventV1",
     "bpi.batch.fact.v1": "BatchFactV1",

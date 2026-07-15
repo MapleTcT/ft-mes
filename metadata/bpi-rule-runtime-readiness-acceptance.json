@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-07-15T07:26:47Z",
+  "repoCommit": "7e3fcf185c09e53a3eca763302d9183eda291461",
+  "workingTree": "uncommitted",
+  "database": "PostgreSQL",
+  "status": "PASS_LOCAL_MULTI_LAYER_TARGET_NOT_RUN",
+  "summary": {
+    "layers": 3,
+    "pass": 3,
+    "fail": 0,
+    "blocked": 0,
+    "targetEnvironmentStatus": "NOT_RUN"
+  },
+  "items": [
+    {
+      "layer": "Flink/Kafka data plane",
+      "runtime": "Flink 2.2.1 MiniCluster + Kafka 4.2.0 KRaft",
+      "marker": "ADP_E2E_FLINK_RULE_2b0268e6477d4913b7783c7ff5b7c3d8",
+      "status": "PASS",
+      "assertions": [
+        "APPLIED and READY are invisible to read_committed before checkpoint and visible after checkpoint.",
+        "Typed deactivation emits APPLIED control-plane state and INACTIVE runtime state independently.",
+        "TaskManager restart restores the inactive terminal state without duplicate receipts.",
+        "Same-version reactivation emits REJECTED while the committed runtime receipt remains unique."
+      ],
+      "evidence": "metadata/bpi-rule-application-flink-kafka-acceptance.json"
+    },
+    {
+      "layer": "Kafka/PostgreSQL consumption",
+      "runtime": "Embedded Kafka 3.8.1 + PostgreSQL 16.13 + Flyway V13",
+      "marker": "ADP_E2E_BPI_RULE_APP_KAFKA_<generated-and-cleaned>",
+      "status": "PASS",
+      "assertions": [
+        "Transactional application receipts persist REJECTED then APPLIED and reject stale regression.",
+        "Runtime receipts persist DEGRADED then READY while application remains APPLIED.",
+        "An older READY receipt is recorded in inbox but cannot overwrite newer DEGRADED truth.",
+        "Exact replay across listener restart is idempotent and both source topics route poison payloads to their own DLQ."
+      ],
+      "databaseResult": "Final in-test state APPLIED + READY, outbox revision 5, application inbox 3, runtime inbox 3, audit 4; marker rows were deleted only after direct JDBC assertions.",
+      "evidence": "metadata/bpi-rule-application-kafka-postgres-acceptance.json"
+    },
+    {
+      "layer": "Operator console",
+      "runtime": "Vite browser E2E + deterministic BPI simulator",
+      "marker": "SIMULATED_RULE_RUNTIME_READINESS",
+      "status": "PASS",
+      "assertions": [
+        "Eight browser scenarios pass with zero console, page and request failures.",
+        "The rule drawer keeps APPLIED control-plane state while runtime changes DEGRADED to READY.",
+        "DEGRADED reason and point-catalog revision are visible and cleared by the newer READY receipt."
+      ],
+      "evidence": "metadata/bpi-ui-acceptance.json; /tmp/bpi-console-rule-application-applied.png; /tmp/bpi-console-rule-application-rejected.png"
+    }
+  ],
+  "databaseVerificationSql": [
+    "SELECT application_status, runtime_readiness_status, runtime_readiness_deployment_id, runtime_readiness_reason_code, runtime_point_catalog_event_id, runtime_point_catalog_source_revision, revision FROM bpi.bpi_outbox_events WHERE tenant_id = :tenant AND id = :publication_id;",
+    "SELECT source, count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant GROUP BY source ORDER BY source;",
+    "SELECT action, before_revision, after_revision FROM bpi.bpi_audit_events WHERE tenant_id = :tenant AND object_id = :publication_id ORDER BY after_revision;"
+  ],
+  "limitations": [
+    "The browser layer uses the deterministic simulator and is not browser-to-PostgreSQL evidence.",
+    "The Flink and PostgreSQL layers are separate local acceptances; no single local test spans browser, Java, Kafka, Flink and PostgreSQL.",
+    "The target environment remains on the prior Flyway V12 evidence baseline and was not redeployed in this run.",
+    "Target savepoint migration, rollback rehearsal, real JetLinks READY points and 7-14 day shadow operation remain pending."
+  ]
+}

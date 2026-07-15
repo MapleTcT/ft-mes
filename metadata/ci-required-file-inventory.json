@@ -4011,6 +4011,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-rule-timing-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -4300,6 +4306,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-publication-routing-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-runtime-readiness-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5181,6 +5193,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleRuntimeReadinessReceiptService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
       "state": "tracked",
       "tracked": true
@@ -5349,6 +5367,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleRuntimeReadinessTarget.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleSimulationView.java",
       "state": "tracked",
       "tracked": true
@@ -5422,6 +5446,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleApplicationPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessPostgresRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5727,6 +5769,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -5854,6 +5902,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/RuleApplicationKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/RuleRuntimeReadinessKafkaRecordProcessorTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6399,6 +6453,18 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessKafkaSerializationSchema.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessProjector.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryEnvelopeFlattener.java",
       "state": "tracked",
       "tracked": true
@@ -6555,6 +6621,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessKafkaSerializationSchemaTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/pom.xml",
       "state": "tracked",
       "tracked": true
@@ -6587,13 +6659,13 @@
       "tracked": 483
     },
     "docs": {
-      "tracked": 87
+      "tracked": 88
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 105
+      "tracked": 106
     },
     "package.json": {
       "tracked": 1
@@ -6605,20 +6677,20 @@
       "tracked": 51
     },
     "services": {
-      "tracked": 160
+      "tracked": 167
     },
     "simulation": {
       "tracked": 4
     },
     "streaming": {
-      "tracked": 85
+      "tracked": 88
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1093,
-    "tracked": 1093,
+    "totalFiles": 1105,
+    "tracked": 1105,
     "untracked": 0
   },
   "untrackedByDirectory": []

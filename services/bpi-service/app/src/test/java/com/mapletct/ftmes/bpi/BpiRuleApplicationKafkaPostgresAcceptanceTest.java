@@ -2,6 +2,8 @@ package com.mapletct.ftmes.bpi;
 
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -72,6 +74,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BpiRuleApplicationKafkaPostgresAcceptanceTest {
     private static final String SOURCE_TOPIC = "bpi.boundary.rule-application.v1";
     private static final String DLQ_TOPIC = "bpi.boundary.rule-application.dlq.v1";
+    private static final String READINESS_TOPIC = "bpi.boundary.rule-runtime-readiness.v1";
+    private static final String READINESS_DLQ_TOPIC = "bpi.boundary.rule-runtime-readiness.dlq.v1";
     private static final String LISTENER_ID = "bpi-rule-application-acceptance-listener";
 
     @DynamicPropertySource
@@ -191,6 +195,80 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
             assertThat(header(dlq, "kafka_dlt-original-topic")).isEqualTo(SOURCE_TOPIC);
             assertThat(count("bpi_inbox_events")).isEqualTo(3);
             assertThat(applicationState()).startsWith("APPLIED|flink-rule-app-b|3|");
+
+            Instant readinessBase = Instant.now().minusSeconds(10);
+            BoundaryRuleRuntimeReadinessV1 degraded = runtimeReadiness(
+                    "sha256:" + "1".repeat(64),
+                    BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
+                    "POINT_DEVICE_NOT_ACTIVE",
+                    "bound device is not active",
+                    readinessBase.plusSeconds(2),
+                    "CATALOG-DEGRADED",
+                    "revision-degraded");
+            sendTransaction(producer, readinessRecord(degraded), true);
+            awaitRuntimeState(
+                    "APPLIED|DEGRADED|4|POINT_DEVICE_NOT_ACTIVE|CATALOG-DEGRADED",
+                    4,
+                    3);
+
+            stop(listener);
+            sendTransaction(producer, readinessRecord(degraded), true);
+            listener.start();
+            ContainerTestUtils.waitForAssignment(listener, 2);
+            awaitStableRuntimeState(
+                    "APPLIED|DEGRADED|4|POINT_DEVICE_NOT_ACTIVE|CATALOG-DEGRADED",
+                    4,
+                    3);
+
+            BoundaryRuleRuntimeReadinessV1 olderReady = runtimeReadiness(
+                    "sha256:" + "2".repeat(64),
+                    BoundaryRuleRuntimeReadinessStatusV1.READY,
+                    "",
+                    "",
+                    readinessBase.plusSeconds(1),
+                    "CATALOG-OLDER",
+                    "revision-older");
+            sendTransaction(producer, readinessRecord(olderReady), true);
+            awaitStableRuntimeState(
+                    "APPLIED|DEGRADED|4|POINT_DEVICE_NOT_ACTIVE|CATALOG-DEGRADED",
+                    5,
+                    3);
+
+            BoundaryRuleRuntimeReadinessV1 ready = runtimeReadiness(
+                    "sha256:" + "3".repeat(64),
+                    BoundaryRuleRuntimeReadinessStatusV1.READY,
+                    "",
+                    "",
+                    readinessBase.plusSeconds(3),
+                    "CATALOG-READY",
+                    "revision-ready");
+            sendTransaction(producer, readinessRecord(ready), true);
+            awaitRuntimeState("APPLIED|READY|5||CATALOG-READY", 6, 4);
+
+            sendTransaction(producer, readinessRecord(ready), true);
+            awaitStableRuntimeState("APPLIED|READY|5||CATALOG-READY", 6, 4);
+            assertThat(jdbc.queryForObject("""
+                    SELECT count(*) FROM bpi.bpi_inbox_events
+                     WHERE tenant_id = ? AND source = 'bpi.boundary.rule-runtime-readiness.v1'
+                    """, Integer.class, tenantId)).isEqualTo(3);
+            assertThat(jdbc.queryForList("""
+                    SELECT action || '|' || before_revision || '|' || after_revision
+                      FROM bpi.bpi_audit_events
+                     WHERE tenant_id = ? AND object_id = ? AND action LIKE 'RULE_RUNTIME_%'
+                     ORDER BY after_revision
+                    """, String.class, tenantId, publicationId))
+                    .containsExactly("RULE_RUNTIME_DEGRADED|3|4", "RULE_RUNTIME_READY|4|5");
+
+            byte[] readinessPoison = new byte[] {4, 5, 6};
+            sendTransaction(producer, new ProducerRecord<>(
+                    READINESS_TOPIC,
+                    publicationId.toString().getBytes(StandardCharsets.UTF_8),
+                    readinessPoison), true);
+            ConsumerRecord<byte[], byte[]> readinessDlq = awaitDlqRecord(
+                    READINESS_DLQ_TOPIC, Duration.ofSeconds(15));
+            assertThat(readinessDlq.value()).containsExactly(readinessPoison);
+            assertThat(header(readinessDlq, "kafka_dlt-original-topic")).isEqualTo(READINESS_TOPIC);
+            assertThat(runtimeState()).isEqualTo("APPLIED|READY|5||CATALOG-READY");
         }
     }
 
@@ -221,6 +299,48 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
     private ProducerRecord<byte[], byte[]> record(BoundaryRuleApplicationV1 event) {
         ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(
                 SOURCE_TOPIC,
+                publicationId.toString().getBytes(StandardCharsets.UTF_8),
+                event.toByteArray());
+        record.headers()
+                .add("event_id", event.getEventId().getBytes(StandardCharsets.UTF_8))
+                .add("publication_event_id", publicationId.toString().getBytes(StandardCharsets.UTF_8))
+                .add("tenant_id", tenantId.getBytes(StandardCharsets.UTF_8))
+                .add("status", event.getStatus().name().getBytes(StandardCharsets.UTF_8))
+                .add("schema_version", "v1".getBytes(StandardCharsets.UTF_8));
+        return record;
+    }
+
+    private BoundaryRuleRuntimeReadinessV1 runtimeReadiness(
+            String eventId,
+            BoundaryRuleRuntimeReadinessStatusV1 status,
+            String reasonCode,
+            String detail,
+            Instant observedAt,
+            String pointCatalogEventId,
+            String pointCatalogSourceRevision) {
+        return BoundaryRuleRuntimeReadinessV1.newBuilder()
+                .setEventId(eventId)
+                .setPublicationEventId(publicationId.toString())
+                .setTenantId(tenantId)
+                .setPlantId("PLANT-RULE-APP")
+                .setLineId("LINE-RULE-APP")
+                .setRuleCode("RULE-RULE-APP-START")
+                .setRuleVersion("1")
+                .setChecksum("r".repeat(64))
+                .setDeploymentId("flink-rule-app-b")
+                .setStatus(status)
+                .setReasonCode(reasonCode)
+                .setDetail(detail)
+                .setObservedAtMs(observedAt.toEpochMilli())
+                .setPointCatalogEventId(pointCatalogEventId)
+                .setPointCatalogSourceRevision(pointCatalogSourceRevision)
+                .putHeaders("trace_id", "TRACE-" + eventId)
+                .build();
+    }
+
+    private ProducerRecord<byte[], byte[]> readinessRecord(BoundaryRuleRuntimeReadinessV1 event) {
+        ProducerRecord<byte[], byte[]> record = new ProducerRecord<>(
+                READINESS_TOPIC,
                 publicationId.toString().getBytes(StandardCharsets.UTF_8),
                 event.toByteArray());
         record.headers()
@@ -280,10 +400,42 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
         assertThat(count("bpi_audit_events")).isEqualTo(auditCount);
     }
 
+    private void awaitRuntimeState(String expected, long inboxCount, long auditCount)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plusSeconds(15);
+        while (Instant.now().isBefore(deadline)) {
+            if (runtimeState().equals(expected)
+                    && count("bpi_inbox_events") == inboxCount
+                    && count("bpi_audit_events") == auditCount) return;
+            Thread.sleep(100);
+        }
+        assertThat(runtimeState()).isEqualTo(expected);
+        assertThat(count("bpi_inbox_events")).isEqualTo(inboxCount);
+        assertThat(count("bpi_audit_events")).isEqualTo(auditCount);
+    }
+
+    private void awaitStableRuntimeState(String expected, long inboxCount, long auditCount)
+            throws InterruptedException {
+        Thread.sleep(750);
+        assertThat(runtimeState()).isEqualTo(expected);
+        assertThat(count("bpi_inbox_events")).isEqualTo(inboxCount);
+        assertThat(count("bpi_audit_events")).isEqualTo(auditCount);
+    }
+
     private String applicationState() {
         return jdbc.queryForObject("""
                 SELECT application_status || '|' || COALESCE(application_deployment_id, '') || '|'
                        || revision || '|' || COALESCE(application_error_code, '')
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, publicationId);
+    }
+
+    private String runtimeState() {
+        return jdbc.queryForObject("""
+                SELECT application_status || '|' || runtime_readiness_status || '|'
+                       || revision || '|' || COALESCE(runtime_readiness_reason_code, '') || '|'
+                       || COALESCE(runtime_point_catalog_event_id, '')
                   FROM bpi.bpi_outbox_events
                  WHERE tenant_id = ? AND id = ?
                 """, String.class, tenantId, publicationId);
@@ -298,6 +450,10 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
     }
 
     private ConsumerRecord<byte[], byte[]> awaitDlqRecord(Duration timeout) {
+        return awaitDlqRecord(DLQ_TOPIC, timeout);
+    }
+
+    private ConsumerRecord<byte[], byte[]> awaitDlqRecord(String topic, Duration timeout) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, broker.getBrokersAsString());
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "bpi-rule-application-dlq-" + UUID.randomUUID());
@@ -306,7 +462,7 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class);
         try (KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<>(properties)) {
-            consumer.subscribe(List.of(DLQ_TOPIC));
+            consumer.subscribe(List.of(topic));
             Instant deadline = Instant.now().plus(timeout);
             while (Instant.now().isBefore(deadline)) {
                 ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofMillis(500));

@@ -132,18 +132,18 @@ function publicationExplanation(rule: RuleVersion): string {
 
 function applicationChip(status: RuleVersion['applicationStatus']): string {
   const labels: Record<RuleVersion['applicationStatus'], string> = {
-    NOT_PUBLISHED: '未进入运行态',
-    NOT_TRACKED: '应用未跟踪',
-    WAITING: '等待 Flink',
-    REJECTED: 'Flink 已拒绝',
-    APPLIED: 'Flink 已应用',
+    NOT_PUBLISHED: '控制面未发布',
+    NOT_TRACKED: '控制面未跟踪',
+    WAITING: '控制面等待',
+    REJECTED: '控制面 REJECTED',
+    APPLIED: '控制面 APPLIED',
   };
   return `<span class="status status--${statusTone(status)}">${labels[status]}</span>`;
 }
 
 function applicationExplanation(rule: RuleVersion): string {
   if (rule.applicationStatus === 'APPLIED') {
-    return 'Flink 已接受该规则版本，应用回执经 checkpoint 提交后完成作用域与 checksum 校验并写入 PostgreSQL。';
+    return '控制面已接受该规则版本，APPLIED 回执经 checkpoint 提交后完成作用域与 checksum 校验并写入 PostgreSQL；这不代表流式评估器已 READY。';
   }
   if (rule.applicationStatus === 'REJECTED') {
     return 'Flink 已拒绝该规则版本；排除拒绝原因并收到 APPLIED 回执前，该版本不能视为在线生效。';
@@ -155,6 +155,37 @@ function applicationExplanation(rule: RuleVersion): string {
     return '该已发布版本没有可核验的应用回执链路，运行态状态未知。';
   }
   return '规则尚未发布，不存在运行态应用回执。';
+}
+
+function runtimeReadinessChip(status: RuleVersion['runtimeReadinessStatus']): string {
+  const labels: Record<RuleVersion['runtimeReadinessStatus'], string> = {
+    NOT_PUBLISHED: '运行时未发布',
+    NOT_TRACKED: '运行时未跟踪',
+    WAITING: '运行时 WAITING',
+    READY: '运行时 READY',
+    DEGRADED: '运行时 DEGRADED',
+    INACTIVE: '运行时 INACTIVE',
+  };
+  return `<span class="status status--${statusTone(status)}">${labels[status]}</span>`;
+}
+
+function runtimeReadinessExplanation(rule: RuleVersion): string {
+  if (rule.runtimeReadinessStatus === 'READY') {
+    return '流式评估器已激活该精确规则版本，并已记录运行部署和点位目录证据。';
+  }
+  if (rule.runtimeReadinessStatus === 'DEGRADED') {
+    return '该精确规则版本未进入评估器；运行准入条件已降级，排除原因并收到更新的 READY 回执前不会参与边界计算。';
+  }
+  if (rule.runtimeReadinessStatus === 'INACTIVE') {
+    return '该精确规则版本已从评估器停用，不会参与新的边界计算。';
+  }
+  if (rule.runtimeReadinessStatus === 'WAITING') {
+    return '控制面可能已经 APPLIED，但尚未收到评估器对该精确规则版本的运行就绪回执。';
+  }
+  if (rule.runtimeReadinessStatus === 'NOT_TRACKED') {
+    return '该已发布版本没有可核验的评估器就绪回执，不能推断为 READY。';
+  }
+  return '规则尚未发布，不存在评估器运行就绪证据。';
 }
 
 function icon(name: string, label: string): string {
@@ -711,7 +742,7 @@ function renderRules(): void {
   const rows = state.rules.map((rule) => `
     <tr data-rule-id="${escapeHtml(rule.id)}" tabindex="0">
       <td><strong>${escapeHtml(rule.code)}</strong><small>${escapeHtml(rule.id)}</small></td>
-      <td>${escapeHtml(rule.lineId)}</td><td>${escapeHtml(rule.version)}</td><td><div class="status-stack">${statusChip(rule.state)}${publicationChip(rule.publicationStatus)}${applicationChip(rule.applicationStatus)}</div></td>
+      <td>${escapeHtml(rule.lineId)}</td><td>${escapeHtml(rule.version)}</td><td><div class="status-stack">${statusChip(rule.state)}${publicationChip(rule.publicationStatus)}${applicationChip(rule.applicationStatus)}${runtimeReadinessChip(rule.runtimeReadinessStatus)}</div></td>
       <td>${escapeHtml(rule.topologyVersion)}</td><td>${ruleConditions(rule).length}</td>
       <td>${rule.latestSimulationId ? '<span class="evidence-state evidence-state--ok"></span> 已回放' : '未回放'}</td>
       <td><span class="revision">r${rule.revision}</span></td><td><i data-lucide="chevron-right"></i></td>
@@ -729,7 +760,7 @@ function renderRules(): void {
     <div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="rule-search" placeholder="规则编码、产线、拓扑版本" /></label><div class="toolbar-actions"><button id="new-topology" class="icon-text-button"><i data-lucide="plus"></i><span>新建拓扑</span></button><button id="new-rule" class="icon-text-button"><i data-lucide="plus"></i><span>新建规则</span></button></div></div>
     <div class="rule-workbench">
       <section><div class="section-bar"><div><i data-lucide="flask-conical"></i><strong>边界规则版本</strong></div><span>${state.rules.length} 个版本</span></div>
-        ${rows ? `<div class="table-frame"><table class="rule-table"><thead><tr><th>规则</th><th>产线</th><th>版本</th><th>状态 / 分发 / 应用</th><th>拓扑</th><th>条件</th><th>模拟</th><th>版本号</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="network"></i><strong>暂无作用域规则</strong><span>仅展示当前工厂和令牌范围内的版本。</span></div>`}
+        ${rows ? `<div class="table-frame"><table class="rule-table"><thead><tr><th>规则</th><th>产线</th><th>版本</th><th>状态 / Kafka / 控制面 / 运行时</th><th>拓扑</th><th>条件</th><th>模拟</th><th>版本号</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="network"></i><strong>暂无作用域规则</strong><span>仅展示当前工厂和令牌范围内的版本。</span></div>`}
       </section>
       <section><div class="section-bar"><div><i data-lucide="network"></i><strong>工艺拓扑版本</strong></div><span>${state.topologies.length} 个版本</span></div>
         ${topologyRows ? `<div class="table-frame"><table class="topology-table"><thead><tr><th>拓扑</th><th>产线</th><th>版本</th><th>状态 / 校验</th><th>节点</th><th>绑定</th><th>版本号</th><th></th></tr></thead><tbody>${topologyRows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="network"></i><strong>暂无拓扑版本</strong><span>先创建并校验产线拓扑。</span></div>`}
@@ -1004,7 +1035,10 @@ async function openRule(ruleId: string): Promise<void> {
     const applicationError = rule.applicationErrorCode || rule.applicationErrorDetail
       ? `<div class="error-callout"><strong>${escapeHtml(rule.applicationErrorCode || 'FLINK_APPLICATION_REJECTED')}</strong>${rule.applicationErrorDetail ? `<span>${escapeHtml(rule.applicationErrorDetail)}</span>` : ''}</div>`
       : '';
-    const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>本轮尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>人工重试</span><b>${rule.publicationManualRetryCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div><div><span>最近重新入队</span><b>${formatTime(rule.publicationLastRequeuedAt)}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}<div class="application-trace"><div class="section-title"><h3>Flink 应用确认</h3>${applicationChip(rule.applicationStatus)}</div><div class="facts-grid"><div><span>运行部署</span><b>${escapeHtml(rule.applicationDeploymentId || '-')}</b></div><div><span>Flink 观察时间</span><b>${formatTime(rule.applicationObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.applicationReceivedAt)}</b></div><div><span>回执后修订</span><b>r${rule.publicationRevision}</b></div></div><p>${escapeHtml(applicationExplanation(rule))}</p>${applicationError}</div>`;
+    const runtimeReadinessError = rule.runtimeReadinessReasonCode || rule.runtimeReadinessDetail
+      ? `<div class="error-callout"><strong>${escapeHtml(rule.runtimeReadinessReasonCode || 'RUNTIME_NOT_READY')}</strong>${rule.runtimeReadinessDetail ? `<span>${escapeHtml(rule.runtimeReadinessDetail)}</span>` : ''}</div>`
+      : '';
+    const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>本轮尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>人工重试</span><b>${rule.publicationManualRetryCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div><div><span>最近重新入队</span><b>${formatTime(rule.publicationLastRequeuedAt)}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}<div class="application-trace"><div class="section-title"><h3>控制面应用回执</h3>${applicationChip(rule.applicationStatus)}</div><div class="facts-grid"><div><span>控制面部署</span><b>${escapeHtml(rule.applicationDeploymentId || '-')}</b></div><div><span>Flink 观察时间</span><b>${formatTime(rule.applicationObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.applicationReceivedAt)}</b></div><div><span>回执后修订</span><b>r${rule.publicationRevision}</b></div></div><p>${escapeHtml(applicationExplanation(rule))}</p>${applicationError}</div><div class="runtime-readiness-trace runtime-readiness-trace--${statusTone(rule.runtimeReadinessStatus)}"><div class="section-title"><h3>流式评估器运行就绪</h3>${runtimeReadinessChip(rule.runtimeReadinessStatus)}</div><div class="facts-grid"><div><span>规则版本</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>评估器部署</span><b>${escapeHtml(rule.runtimeReadinessDeploymentId || '-')}</b></div><div><span>运行观察时间</span><b>${formatTime(rule.runtimeReadinessObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.runtimeReadinessReceivedAt)}</b></div><div><span>点位目录事件</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogEventId || '-')}</b></div><div><span>目录来源版本</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogSourceRevision || '-')}</b></div></div><p>${escapeHtml(runtimeReadinessExplanation(rule))}</p>${runtimeReadinessError}</div>`;
     const canPublish = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
     openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${rule.publicationStatus === 'FAILED' ? '<button class="button button--danger" id="open-publication-retry">管理员重新入队</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-rule-publish">发布规则版本</button>' : ''}</footer>`);
     document.querySelector('#open-simulation')?.addEventListener('click', openRuleSimulationDialog);

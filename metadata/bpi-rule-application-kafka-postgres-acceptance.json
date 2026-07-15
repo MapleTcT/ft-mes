@@ -1,13 +1,14 @@
 {
-  "generatedAt": "2026-07-14T01:21:15Z",
-  "repoBaseline": "7e8b3c20",
+  "generatedAt": "2026-07-15T07:26:47Z",
+  "repoBaseline": "7e3fcf185c09e53a3eca763302d9183eda291461",
+  "workingTree": "uncommitted",
   "status": "PASS_LOCAL_EMBEDDED_KAFKA_POSTGRES",
-  "scope": "BPI rule application receipt transaction visibility, restart replay, idempotency, terminal-state protection and DLQ acceptance",
+  "scope": "BPI control-plane rule application and independent runtime-readiness receipt transaction visibility, restart replay, event-time ordering, idempotency and DLQ acceptance",
   "runtime": {
     "database": "PostgreSQL 16.13",
     "kafka": "Embedded Kafka 3.8.1",
     "consumerIsolationLevel": "read_committed",
-    "flywayVersion": 8
+    "flywayVersion": 13
   },
   "test": {
     "class": "com.mapletct.ftmes.bpi.BpiRuleApplicationKafkaPostgresAcceptanceTest",
@@ -16,60 +17,71 @@
     "failures": 0,
     "errors": 0,
     "skipped": 0,
-    "durationSeconds": 20.861
+    "durationSeconds": 22.97
   },
   "topics": {
-    "source": "bpi.boundary.rule-application.v1",
-    "deadLetter": "bpi.boundary.rule-application.dlq.v1"
+    "ruleApplicationSource": "bpi.boundary.rule-application.v1",
+    "ruleApplicationDeadLetter": "bpi.boundary.rule-application.dlq.v1",
+    "runtimeReadinessSource": "bpi.boundary.rule-runtime-readiness.v1",
+    "runtimeReadinessDeadLetter": "bpi.boundary.rule-runtime-readiness.dlq.v1"
   },
   "phases": [
     {
-      "name": "abortedTransactionInvisible",
-      "expected": "WAITING revision 1; inbox 0; audit 0",
+      "name": "abortedApplicationTransactionInvisible",
+      "expected": "application WAITING revision 1; inbox 0; audit 0",
       "status": "PASS"
     },
     {
-      "name": "committedRejectedApplied",
-      "expected": "REJECTED revision 2; inbox 1; audit 1",
+      "name": "committedRejectedAndListenerRestartReplay",
+      "expected": "REJECTED revision 2; exact replay after listener restart keeps application inbox 1 and audit 1",
       "status": "PASS"
     },
     {
-      "name": "listenerRestartExactReplay",
-      "expected": "exact redelivery keeps revision 2; inbox 1; audit 1",
+      "name": "committedAppliedAndStaleRejected",
+      "expected": "APPLIED revision 3; stale distinct REJECTED is recorded in inbox but cannot change APPLIED or add audit",
       "status": "PASS"
     },
     {
-      "name": "committedApplied",
-      "expected": "APPLIED revision 3; inbox 2; audit 2; rejection error cleared",
+      "name": "runtimeDegradedAndListenerRestartReplay",
+      "expected": "application remains APPLIED; runtime becomes DEGRADED revision 4 with point-catalog reason; exact replay after listener restart adds no row",
       "status": "PASS"
     },
     {
-      "name": "staleRejectedAfterApplied",
-      "expected": "inbox records the distinct event while APPLIED revision 3 and audit count 2 remain unchanged",
+      "name": "olderRuntimeReadyIgnored",
+      "expected": "older distinct READY is recorded in readiness inbox but runtime remains DEGRADED revision 4 and audit is unchanged",
       "status": "PASS"
     },
     {
-      "name": "poisonPayloadDeadLetter",
-      "expected": "original bytes and source-topic DLT header reach the DLQ; no business inbox mutation",
+      "name": "newerRuntimeReadyAndExactReplay",
+      "expected": "application remains APPLIED; runtime becomes READY revision 5, clears degradation reason, records CATALOG-READY and exact replay is idempotent",
+      "status": "PASS"
+    },
+    {
+      "name": "topicSpecificPoisonPayloadDeadLetter",
+      "expected": "application poison reaches application DLQ and runtime poison reaches runtime-readiness DLQ with original bytes and source-topic header; no business mutation",
       "status": "PASS"
     }
   ],
   "databaseAssertions": {
-    "finalOutboxState": "APPLIED",
-    "finalOutboxRevision": 3,
-    "inboxRows": 3,
-    "auditRows": 2,
-    "deadLetterRowsObserved": 1
+    "finalApplicationStatus": "APPLIED",
+    "finalRuntimeReadinessStatus": "READY",
+    "finalOutboxRevision": 5,
+    "applicationInboxRows": 3,
+    "runtimeReadinessInboxRows": 3,
+    "auditRows": 4,
+    "ruleApplicationDeadLetterRowsObserved": 1,
+    "runtimeReadinessDeadLetterRowsObserved": 1,
+    "markerCleanup": "PASS_AFTER_DIRECT_ASSERTIONS"
   },
   "verificationSql": [
-    "SELECT application_status, application_deployment_id, revision, application_error_code FROM bpi.bpi_outbox_events WHERE tenant_id = :tenant AND id = :publication_id;",
-    "SELECT count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant;",
+    "SELECT application_status, runtime_readiness_status, runtime_readiness_deployment_id, runtime_readiness_reason_code, runtime_point_catalog_event_id, runtime_point_catalog_source_revision, revision FROM bpi.bpi_outbox_events WHERE tenant_id = :tenant AND id = :publication_id;",
+    "SELECT source, count(*) FROM bpi.bpi_inbox_events WHERE tenant_id = :tenant GROUP BY source ORDER BY source;",
     "SELECT action, before_revision, after_revision FROM bpi.bpi_audit_events WHERE tenant_id = :tenant AND object_id = :publication_id ORDER BY after_revision;"
   ],
   "limitations": [
-    "Embedded Kafka is real broker protocol execution but is not the target Kafka cluster.",
-    "A transactional Kafka producer emulates the Flink checkpoint sink; this does not prove that the deployed Flink job emits the receipt after a successful checkpoint.",
-    "The acceptance does not cover a browser-to-Java-to-Kafka/Flink round trip.",
-    "The acceptance does not claim target test-environment deployment or production readiness."
+    "Embedded Kafka is real broker protocol execution but is not the target three-broker cluster.",
+    "A transactional Kafka producer emulates the Flink checkpoint sink; actual Flink 2.2.1 MiniCluster checkpoint behavior is proven separately by metadata/bpi-rule-application-flink-kafka-acceptance.json.",
+    "The test directly asserts PostgreSQL rows before its test-owned marker cleanup; no acceptance marker rows are intentionally retained afterward.",
+    "The acceptance does not cover a browser-to-Java-to-Kafka/Flink/PostgreSQL round trip or claim target-environment deployment or production readiness."
   ]
 }

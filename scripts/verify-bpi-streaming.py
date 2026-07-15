@@ -23,6 +23,8 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogKafkaDecodeFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogRuntimeValidator.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessProjector.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessKafkaSerializationSchema.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextJoinStateCodec.java",
@@ -163,6 +165,7 @@ def main() -> int:
         "BpiKafkaIO.candidateSink",
         "BpiKafkaIO.dataQualitySink",
         "BpiKafkaIO.ruleApplicationSink",
+        "BpiKafkaIO.ruleRuntimeReadinessSink",
         "ruleWatermarks",
         "contextualWatermarks",
         "boundaryStateTtl",
@@ -235,6 +238,14 @@ def main() -> int:
         failures.append("BPI rule-application acceptance must prove pre-checkpoint invisibility")
     if pre_checkpoint.get("interruptedTransactionCommitted") is not False:
         failures.append("BPI rule-application acceptance must prove canceled transaction rollback")
+    if pre_checkpoint.get("readCommittedReadinessVisible") is not False:
+        failures.append("BPI runtime-readiness acceptance must prove pre-checkpoint invisibility")
+    committed_readiness = rule_application_acceptance.get("committedRuntimeReadiness", [])
+    readiness_statuses = {item.get("status") for item in committed_readiness}
+    if readiness_statuses != {"READY", "INACTIVE"}:
+        failures.append("BPI Flink acceptance must commit independent READY and INACTIVE receipts")
+    if any(not item.get("pointCatalogEventId") for item in committed_readiness):
+        failures.append("BPI Flink readiness receipts must retain point-catalog evidence")
     cluster_replay = json.loads(
         (ROOT / "metadata/bpi-kafka-cluster-replay-acceptance.json").read_text(encoding="utf-8")
     )

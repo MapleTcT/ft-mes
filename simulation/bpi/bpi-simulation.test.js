@@ -344,6 +344,8 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.json.data.publicationAttemptCount, 0);
   assert.equal(result.json.data.publicationTotalAttemptCount, 0);
   assert.equal(result.json.data.revision, 9);
+  assert.equal(result.json.data.applicationStatus, 'WAITING');
+  assert.equal(result.json.data.runtimeReadinessStatus, 'WAITING');
 
   result = await request('POST', '/__simulation/fail-rule-publication');
   assert.equal(result.response.status, 200);
@@ -388,13 +390,98 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.json.data.applicationErrorCode, null);
   assert.equal(result.json.data.applicationErrorDetail, null);
   assert.equal(result.json.data.publicationRevision, 15);
+  assert.equal(result.json.data.runtimeReadinessStatus, 'WAITING');
+
+  result = await request('POST', '/__simulation/rule-runtime-readiness', {
+    body: {
+      eventId: 'readiness-degraded-0001',
+      status: 'DEGRADED',
+      deploymentId: 'flink-simulator-b',
+      observedAt: '2026-07-12T08:00:04.000Z',
+      reasonCode: 'POINT_SOURCE_SEQUENCE_DISABLED',
+      detail: 'device source sequence evidence is missing',
+      pointCatalogEventId: 'catalog-event-41',
+      pointCatalogSourceRevision: 'sha256:catalog-41',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.runtimeReadinessStatus, 'DEGRADED');
+  assert.equal(result.json.data.runtimeReadinessReasonCode, 'POINT_SOURCE_SEQUENCE_DISABLED');
+  assert.equal(result.json.data.publicationRevision, 16);
+
+  result = await request('POST', '/__simulation/rule-runtime-readiness', {
+    body: {
+      eventId: 'readiness-ready-delayed-0002',
+      status: 'READY',
+      deploymentId: 'flink-simulator-b',
+      observedAt: '2026-07-12T08:00:20.000Z',
+      receivedAt: '2026-07-12T08:05:00.000Z',
+      pointCatalogEventId: 'catalog-event-42',
+      pointCatalogSourceRevision: 'sha256:catalog-42',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.runtimeReadinessStatus, 'READY');
+  assert.equal(result.json.data.runtimeReadinessReceivedAt, '2026-07-12T08:05:00.000Z');
+  assert.equal(result.json.data.runtimeReadinessReasonCode, null);
+  assert.equal(result.json.data.publicationRevision, 17);
+
+  const duplicateReady = {
+    eventId: 'readiness-ready-delayed-0002',
+    status: 'READY',
+    deploymentId: 'flink-simulator-b',
+    observedAt: '2026-07-12T08:00:20.000Z',
+    receivedAt: '2026-07-12T08:05:00.000Z',
+    pointCatalogEventId: 'catalog-event-42',
+    pointCatalogSourceRevision: 'sha256:catalog-42',
+  };
+  result = await request('POST', '/__simulation/rule-runtime-readiness', { body: duplicateReady });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.runtimeReadinessStatus, 'READY');
+  assert.equal(result.json.data.publicationRevision, 17);
+
+  result = await request('POST', '/__simulation/rule-runtime-readiness', {
+    body: {
+      eventId: 'readiness-stale-degraded-0003',
+      status: 'DEGRADED',
+      observedAt: '2026-07-12T08:00:10.000Z',
+      reasonCode: 'STALE_POINT_CATALOG',
+      detail: 'an older delayed receipt must not replace READY',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.runtimeReadinessStatus, 'READY');
+  assert.equal(result.json.data.publicationRevision, 17);
+
+  result = await request('POST', '/__simulation/rule-runtime-readiness', {
+    body: { ...duplicateReady, status: 'DEGRADED', reasonCode: 'REPLAY_MUTATION', detail: 'mutated duplicate' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.status, 'RUNTIME_READINESS_REPLAY_CONFLICT');
+
+  result = await request('POST', '/__simulation/rule-runtime-readiness', {
+    body: {
+      eventId: 'readiness-inactive-0004',
+      status: 'INACTIVE',
+      observedAt: '2026-07-12T08:00:30.000Z',
+      reasonCode: 'RULE_INACTIVE',
+      detail: 'published rule version is inactive',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.runtimeReadinessStatus, 'INACTIVE');
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.publicationRevision, 18);
 
   result = await request('POST', '/__simulation/rule-application', {
     body: { status: 'REJECTED', errorCode: 'STALE_REPLAY' },
   });
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.applicationStatus, 'APPLIED');
-  assert.equal(result.json.data.publicationRevision, 15);
+  assert.equal(result.json.data.runtimeReadinessStatus, 'INACTIVE');
+  assert.equal(result.json.data.publicationRevision, 18);
 
   result = await request('POST', '/__simulation/fail-rule-publication');
   assert.equal(result.response.status, 409);

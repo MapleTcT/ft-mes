@@ -68,6 +68,8 @@ def main() -> int:
         "BPI_CANDIDATE_DLQ_TOPIC",
         "BPI_RULE_APPLICATION_TOPIC",
         "BPI_RULE_APPLICATION_DLQ_TOPIC",
+        "BPI_RULE_RUNTIME_READINESS_TOPIC",
+        "BPI_RULE_RUNTIME_READINESS_DLQ_TOPIC",
         "mes-production-context-outbox",
         "MES_CONTEXT_OUTBOX_ENABLED",
         "ADP_RUNTIME_NETWORK_NAME",
@@ -106,6 +108,10 @@ def main() -> int:
         failures.append("BPI topic initialization must create the rule application topic")
     if "bpi.boundary.rule-application.dlq.v1" not in topic_script:
         failures.append("BPI topic initialization must create the rule application DLQ")
+    if "bpi.boundary.rule-runtime-readiness.v1" not in topic_script:
+        failures.append("BPI topic initialization must create the runtime readiness topic")
+    if "bpi.boundary.rule-runtime-readiness.dlq.v1" not in topic_script:
+        failures.append("BPI topic initialization must create the runtime readiness DLQ")
     for marker in (
         "iot.point-catalog.snapshot.v1",
         "iot.point-catalog.snapshot.dlq.v1",
@@ -122,8 +128,8 @@ def main() -> int:
         failures.append(
             "BPI cluster smoke must isolate kafka-topics stdin so every configured topic is checked"
         )
-    if '"topics": 10' not in smoke_script:
-        failures.append("BPI cluster smoke must report all ten configured topics")
+    if '"topics": 12' not in smoke_script:
+        failures.append("BPI cluster smoke must report all twelve configured topics")
     for marker in (
         "kafka-configs.sh",
         "POINT_CATALOG_CONFIGS",

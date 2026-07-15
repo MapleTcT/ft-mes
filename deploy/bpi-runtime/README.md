@@ -25,7 +25,7 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 with the DML-only `bpi_service` account.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`12`). Set it explicitly in the target `.env` when preparing a release;
+latest repository migration (`13`). Set it explicitly in the target `.env` when preparing a release;
 the smoke check fails if the database is behind or unexpectedly ahead of that version.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
@@ -46,12 +46,16 @@ URL that happens to reach Keycloak. `BPI_ADAPTER_ROLE_RULES` and
 mapped. The legacy gateway URL must be an internal service address; never point ticket verification
 at a caller-controlled host.
 
-Candidate, point-catalog, rule-publication, and rule-application Kafka consumers are disabled by
+Candidate, point-catalog, rule-publication, rule-application, and runtime-readiness Kafka consumers are disabled by
 default. Enable them only after setting explicit tenant, plant, and line allowlists. `_DENY_ALL_` is
 the fail-closed default; `*` should be used only for a documented test marker scope. The point-catalog
 consumer additionally validates Kafka key, required single-value headers, Protobuf schema version,
 content-addressed revision, 5 MiB payload limit and source identity before persistence; failed records
 use bounded retry and `iot.point-catalog.snapshot.dlq.v1`.
+
+The rule-application listener consumes both control-plane `APPLIED/REJECTED` receipts and the
+independent evaluator `READY/DEGRADED/INACTIVE` receipts. The two source topics and their DLQs must
+remain distinct: an `APPLIED` control-plane receipt never implies runtime `READY`.
 
 ## Controlled joint acceptance
 

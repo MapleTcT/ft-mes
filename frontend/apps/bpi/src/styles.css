@@ -190,6 +190,12 @@ td > svg { width: 16px; color: #8b96a1; }
 .application-trace { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
 .application-trace .error-callout { display: grid; gap: 4px; }
 .application-trace .error-callout span { overflow-wrap: anywhere; }
+.runtime-readiness-trace { margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-left-width: 4px; background: #f7f9fa; }
+.runtime-readiness-trace--ok { border-left-color: var(--green); background: #f5fbf8; }
+.runtime-readiness-trace--warn { border-left-color: var(--amber); background: #fffaf0; }
+.runtime-readiness-trace--danger { border-left-color: var(--red); background: #fff7f7; }
+.runtime-readiness-trace .error-callout { display: grid; gap: 4px; }
+.runtime-readiness-trace .error-callout span { overflow-wrap: anywhere; }
 .mono-value, .checksum code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 10px; overflow-wrap: anywhere; }
 .simulation-result { padding: 14px; border: 1px solid var(--line); border-left-width: 4px; }
 .simulation-result--pass { border-left-color: var(--green); background: #f5fbf8; }
