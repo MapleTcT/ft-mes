@@ -132,12 +132,52 @@ Flink 返回新的 `APPLIED`，避免只删 PostgreSQL 后 Broadcast State 仍�
 [`docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md`](../../docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md)。
 WOM/QCS/WMS 写回和 7-14 天影子运行仍是后续门禁。
 
-## 回滚
+## 带状态升级与回滚
+
+升级 Flink job JAR 前先保持旧作业运行并抓取 canonical savepoint：
+
+```bash
+make bpi-stream-capture-savepoint
+```
+
+命令只创建 savepoint，不取消作业，也不修改 Kafka、PostgreSQL 或 named volume。将输出的精确
+`BPI_FLINK_RESTORE_SAVEPOINT_PATH` 写入目标机 `deploy/bpi-streaming/.env`，保持
+`BPI_FLINK_ALLOW_NON_RESTORED_STATE=false`。完成旧 JAR 哈希记录、新 JAR/versioned path 切换和
+预检后，显式确认只重建 JobManager/TaskManager：
+
+```bash
+BPI_STREAM_RESTORE_CONFIRM=RESTORE_BPI_FLINK_FROM_SAVEPOINT \
+  make bpi-stream-restore-savepoint
+```
+
+恢复验收必须同时看到：Flink `latest.restored.external_path` 等于配置的 savepoint、恢复后至少一个
+新 checkpoint、点位目录 source、runtime-readiness sink、12 个复制主题和零欠副本。可单独复验：
+
+```bash
+make bpi-stream-verify-savepoint
+```
+
+`allowNonRestoredState` 默认禁止。只有经过算子 UID/state 清单审查并明确知道被丢弃状态的操作员
+才可临时开启；新增无历史状态的算子不构成开启理由。保存升级前 JAR、savepoint 路径、镜像 ID、
+topic 配置和证据 JSON，禁止覆盖唯一回滚制品。
+
+推荐升级顺序：
+
+1. 通过磁盘、broker、checkpoint 和唯一运行作业预检；
+2. 抓取旧作业 canonical savepoint，并确认作业继续运行；
+3. 备份 BPI PostgreSQL，执行 expand-only Flyway migration；
+4. 创建新增 topic，部署 V13 runtime，但保持 candidate/rule consumers deny-all；
+5. 从旧 savepoint 恢复新 Flink JAR，完成 restore smoke；
+6. 使用唯一 marker 完成页面、API、Kafka、Flink、PostgreSQL 联合验收；
+7. 清理 marker 并重新关闭验收消费者。
+
+若新作业版本失败，保持 Kafka/MinIO volumes 和 PostgreSQL V13 扩展字段，恢复上一版 versioned
+job JAR，把 `.env` 的 restore path 指回升级前 savepoint，再执行带确认的 restore 与 smoke。
+数据库 migration 不做 DROP 降级；旧 runtime 应用镜像只在 consumers/outbox 保持关闭时回退。
+带负载 TaskManager 恢复已经通过；broker 故障和完整业务回滚仍需独立演练。
+
+停止整套测试流环境时才使用：
 
 ```bash
 make down-bpi-stream
 ```
-
-若新作业版本失败，先保留 volumes 和 MinIO checkpoint，恢复上一版 job JAR，然后重新执行
-预检、启动和 smoke。带负载 TaskManager 恢复已经通过；broker 故障、savepoint 升级和整体
-回滚演练仍需补齐。

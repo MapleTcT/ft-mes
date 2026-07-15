@@ -18,9 +18,14 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/run-joint-replay.sh",
     "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
     "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
+    "deploy/bpi-streaming/scripts/start-jobmanager.sh",
+    "deploy/bpi-streaming/scripts/capture-upgrade-savepoint.sh",
+    "deploy/bpi-streaming/scripts/restore-from-savepoint.sh",
+    "deploy/bpi-streaming/scripts/verify-savepoint-restore.sh",
     "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
     "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
     "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
+    "deploy/bpi-runtime/scripts/upgrade-expand-only.sh",
     "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
@@ -70,6 +75,8 @@ def main() -> int:
         "BPI_RULE_APPLICATION_DLQ_TOPIC",
         "BPI_RULE_RUNTIME_READINESS_TOPIC",
         "BPI_RULE_RUNTIME_READINESS_DLQ_TOPIC",
+        "BPI_FLINK_RESTORE_SAVEPOINT_PATH",
+        "start-jobmanager.sh",
         "mes-production-context-outbox",
         "MES_CONTEXT_OUTBOX_ENABLED",
         "ADP_RUNTIME_NETWORK_NAME",
@@ -100,6 +107,102 @@ def main() -> int:
     for forbidden in ("docker system prune", "docker volume prune", "rm -rf"):
         if forbidden in preflight:
             failures.append(f"BPI preflight contains destructive command: {forbidden}")
+
+    jobmanager_entrypoint = (
+        ROOT / "deploy/bpi-streaming/scripts/start-jobmanager.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "--fromSavepoint",
+        "--allowNonRestoredState",
+        "BPI_FLINK_RESTORE_SAVEPOINT_PATH",
+        "BPI_FLINK_ALLOW_NON_RESTORED_STATE",
+        "s3://*/savepoints/*",
+    ):
+        if marker not in jobmanager_entrypoint:
+            failures.append(f"BPI jobmanager restore entrypoint is missing marker: {marker}")
+
+    savepoint_capture = (
+        ROOT / "deploy/bpi-streaming/scripts/capture-upgrade-savepoint.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "exactly one RUNNING BPI Flink job",
+        "--under-replicated-partitions",
+        "-type canonical",
+        '"jobCancelled": False',
+        '"destructiveActionsPerformed": False',
+    ):
+        if marker not in savepoint_capture:
+            failures.append(f"BPI savepoint capture is missing safety marker: {marker}")
+    for forbidden in (" cancel ", " stop ", "docker compose down", "docker volume"):
+        if forbidden in savepoint_capture:
+            failures.append(f"BPI savepoint capture contains destructive marker: {forbidden.strip()}")
+
+    savepoint_restore = (
+        ROOT / "deploy/bpi-streaming/scripts/restore-from-savepoint.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_STREAM_RESTORE_CONFIRM",
+        "RESTORE_BPI_FLINK_FROM_SAVEPOINT",
+        "--force-recreate bpi-jobmanager bpi-taskmanager",
+        "verify-savepoint-restore.sh",
+    ):
+        if marker not in savepoint_restore:
+            failures.append(f"BPI savepoint restore is missing safety marker: {marker}")
+    for forbidden in ("kafka-1 kafka-2 kafka-3", "bpi-minio", "docker compose down", "docker volume"):
+        if forbidden in savepoint_restore:
+            failures.append(f"BPI savepoint restore crosses persistence boundary: {forbidden}")
+
+    savepoint_verify = (
+        ROOT / "deploy/bpi-streaming/scripts/verify-savepoint-restore.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        'restored.get("external_path")',
+        'completed.get("trigger_timestamp")',
+        "JOB_START_TIME",
+        "Kafka point-catalog source",
+        "runtime-readiness sink",
+        "smoke-cluster.sh",
+        '"postRestoreCheckpointId"',
+        '"postRestoreCheckpointTriggerTime"',
+    ):
+        if marker not in savepoint_verify:
+            failures.append(f"BPI savepoint verification is missing marker: {marker}")
+
+    runtime_upgrade = (
+        ROOT / "deploy/bpi-runtime/scripts/upgrade-expand-only.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BPI_RUNTIME_UPGRADE_CONFIRM",
+        "UPGRADE_BPI_RUNTIME_EXPAND_ONLY",
+        "pg_dump -Fc",
+        "docker image tag",
+        "--exit-code-from bpi-migrate",
+        "BPI_EXPECTED_FLYWAY_VERSION",
+        "BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS",
+        "wait_for_service_health",
+        '"recoveryRequired"',
+        "MIGRATION_APPLIED",
+        '"strategy": "EXPAND_ONLY"',
+        '"schemaDowngrade": False',
+        "smoke.sh",
+    ):
+        if marker not in runtime_upgrade:
+            failures.append(f"BPI runtime expand-only upgrade is missing marker: {marker}")
+    for forbidden in ("drop database", "drop schema", "docker volume", "rm -rf"):
+        if forbidden in runtime_upgrade.lower():
+            failures.append(f"BPI runtime expand-only upgrade contains destructive marker: {forbidden}")
+
+    runtime_smoke = (ROOT / "deploy/bpi-runtime/scripts/smoke.sh").read_text(
+        encoding="utf-8"
+    )
+    for marker in (
+        "BPI_RUNTIME_SMOKE_CONNECT_TIMEOUT_SECONDS",
+        "BPI_RUNTIME_SMOKE_REQUEST_TIMEOUT_SECONDS",
+        "--connect-timeout",
+        "--max-time",
+    ):
+        if marker not in runtime_smoke:
+            failures.append(f"BPI runtime smoke is missing bounded request marker: {marker}")
 
     topic_script = (ROOT / "deploy/bpi-streaming/scripts/create-topics.sh").read_text(encoding="utf-8")
     if "bpi.batch.candidate.dlq.v1" not in topic_script:

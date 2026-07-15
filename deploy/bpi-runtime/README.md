@@ -57,6 +57,37 @@ The rule-application listener consumes both control-plane `APPLIED/REJECTED` rec
 independent evaluator `READY/DEGRADED/INACTIVE` receipts. The two source topics and their DLQs must
 remain distinct: an `APPLIED` control-plane receipt never implies runtime `READY`.
 
+## Expand-only runtime upgrade
+
+The runtime upgrade helper refuses to run without an explicit confirmation, an absolute protected
+backup directory, a running PostgreSQL/service pair and a target Flyway version greater than the
+current version. It creates a custom-format `pg_dump`, a mode-0600 environment backup and a tagged
+rollback image before it builds or migrates anything:
+
+```bash
+BPI_RUNTIME_UPGRADE_BACKUP_DIR=/secure/bpi-upgrade-backups \
+BPI_RUNTIME_UPGRADE_CONFIRM=UPGRADE_BPI_RUNTIME_EXPAND_ONLY \
+  make bpi-runtime-upgrade-expand-only
+```
+
+For the V12 to V13 readiness upgrade, set `BPI_EXPECTED_FLYWAY_VERSION=13` first. The helper builds
+the new service image, runs only `bpi-migrate`, verifies the exact Flyway version, recreates only
+`bpi-service`, waits up to 180 seconds for its Docker health check, and then runs the runtime smoke.
+It does not recreate PostgreSQL, the adapter, the web container or any named volume. Override the
+bounded wait with `BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS` only when a measured cold start needs
+more time. Runtime HTTP checks also use bounded connect/request timeouts so a failed dependency
+cannot leave the upgrade command hanging indefinitely.
+
+The JSON report is written as soon as the protected backup and rollback image exist, then refreshed
+after migration, service recreation and final smoke. If a later phase fails, keep that non-PASS
+report and its referenced artifacts: `phase=MIGRATION_APPLIED` means the schema must stay expanded
+even if the previous application image is restored.
+
+Rollback is application-only: keep the expanded V13 schema, keep rule publication/application and
+candidate consumers disabled, select the tagged rollback service image recorded in the report,
+recreate only `bpi-service`, and rerun the runtime smoke. Schema downgrade or `DROP` rollback is
+intentionally unsupported.
+
 ## Controlled joint acceptance
 
 The target browser/Kafka/Flink/PostgreSQL chain is reproducible with these marker-scoped assets:

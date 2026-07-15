@@ -63,6 +63,9 @@ x-flink-environment: &flink-environment
   BPI_BOUNDARY_STATE_TTL_MS: ${BPI_BOUNDARY_STATE_TTL_MS:-2592000000}
   BPI_TRANSACTION_TIMEOUT_MS: ${BPI_TRANSACTION_TIMEOUT_MS:-900000}
   BPI_PARALLELISM: ${BPI_PARALLELISM:-3}
+  BPI_FLINK_JOB_CLASS: ${BPI_FLINK_JOB_CLASS:-com.mapletct.ftmes.bpi.stream.BpiKafkaJob}
+  BPI_FLINK_RESTORE_SAVEPOINT_PATH: ${BPI_FLINK_RESTORE_SAVEPOINT_PATH:-}
+  BPI_FLINK_ALLOW_NON_RESTORED_STATE: ${BPI_FLINK_ALLOW_NON_RESTORED_STATE:-false}
   FLINK_PROPERTIES: |
     jobmanager.rpc.address: bpi-jobmanager
     jobmanager.memory.process.size: ${BPI_JOBMANAGER_MEMORY:-1536m}
@@ -88,6 +91,7 @@ x-flink-service: &flink-service
   environment: *flink-environment
   volumes:
     - ${BPI_JOB_JAR:?BPI_JOB_JAR is required}:/opt/flink/usrlib/bpi-stream-engine-job.jar:ro
+    - ./scripts/start-jobmanager.sh:/opt/bpi/start-jobmanager.sh:ro
   networks:
     - bpi-streaming
 
@@ -238,10 +242,7 @@ services:
   bpi-jobmanager:
     <<: *flink-service
     hostname: bpi-jobmanager
-    command:
-      - standalone-job
-      - --job-classname
-      - com.mapletct.ftmes.bpi.stream.BpiKafkaJob
+    command: ["/opt/bpi/start-jobmanager.sh"]
     ports:
       - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_FLINK_REST_PORT:-18081}:8081"
     depends_on:

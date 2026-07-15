@@ -24,21 +24,33 @@ web_port=$(env_value BPI_WEB_PORT 18090)
 database_name=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 postgres_user=$(env_value POSTGRES_USER bpi_admin)
 expected_flyway=$(env_value BPI_EXPECTED_FLYWAY_VERSION 13)
+connect_timeout=${BPI_RUNTIME_SMOKE_CONNECT_TIMEOUT_SECONDS:-5}
+request_timeout=${BPI_RUNTIME_SMOKE_REQUEST_TIMEOUT_SECONDS:-20}
 
-health=$(curl -fsS "http://${bind_address}:${http_port}/actuator/health")
+case "$connect_timeout" in
+    ''|*[!0-9]*|0) printf 'ERROR: BPI_RUNTIME_SMOKE_CONNECT_TIMEOUT_SECONDS must be a positive integer\n' >&2; exit 1 ;;
+esac
+case "$request_timeout" in
+    ''|*[!0-9]*|0) printf 'ERROR: BPI_RUNTIME_SMOKE_REQUEST_TIMEOUT_SECONDS must be a positive integer\n' >&2; exit 1 ;;
+esac
+
+health=$(curl -fsS --connect-timeout "$connect_timeout" --max-time "$request_timeout" \
+    "http://${bind_address}:${http_port}/actuator/health")
 printf '%s' "$health" | grep -q '"status":"UP"' || {
     printf 'ERROR: BPI service health is not UP\n' >&2
     exit 1
 }
 
-web_health=$(curl -fsS "http://${web_bind_address}:${web_port}/healthz")
+web_health=$(curl -fsS --connect-timeout "$connect_timeout" --max-time "$request_timeout" \
+    "http://${web_bind_address}:${web_port}/healthz")
 test "$web_health" = "ok" || {
     printf 'ERROR: BPI web health is not OK\n' >&2
     exit 1
 }
 
 adapter_health=$(compose exec -T bpi-adapter \
-    curl -fsS http://127.0.0.1:19080/actuator/health)
+    curl -fsS --connect-timeout "$connect_timeout" --max-time "$request_timeout" \
+    http://127.0.0.1:19080/actuator/health)
 printf '%s' "$adapter_health" | grep -q '"status":"UP"' || {
     printf 'ERROR: BPI adapter health is not UP\n' >&2
     exit 1
