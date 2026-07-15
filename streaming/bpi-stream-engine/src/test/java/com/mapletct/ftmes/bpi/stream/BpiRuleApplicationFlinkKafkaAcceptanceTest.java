@@ -247,6 +247,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                 Map.entry("context-topic", topics.context()),
                 Map.entry("rule-topic", topics.rules()),
                 Map.entry("rule-application-topic", topics.application()),
+                Map.entry("rule-runtime-readiness-topic", topics.runtimeReadiness()),
                 Map.entry("candidate-topic", topics.candidate()),
                 Map.entry("data-quality-topic", topics.quality()),
                 Map.entry("checkpoint-interval-ms", "600000"),
@@ -610,6 +611,7 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
             String context,
             String rules,
             String application,
+            String runtimeReadiness,
             String candidate,
             String quality) {
 
@@ -622,12 +624,14 @@ class BpiRuleApplicationFlinkKafkaAcceptanceTest {
                     prefix + ".context",
                     prefix + ".rules",
                     prefix + ".rule-application",
+                    prefix + ".rule-runtime-readiness",
                     prefix + ".candidate",
                     prefix + ".quality");
         }
 
         List<String> all() {
-            return List.of(telemetry, pointCatalog, context, rules, application, candidate, quality);
+            return List.of(
+                    telemetry, pointCatalog, context, rules, application, runtimeReadiness, candidate, quality);
         }
     }
 }

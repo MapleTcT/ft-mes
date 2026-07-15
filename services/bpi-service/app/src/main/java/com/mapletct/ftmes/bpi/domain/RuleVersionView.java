@@ -29,5 +29,13 @@ public record RuleVersionView(
         Instant applicationObservedAt,
         Instant applicationReceivedAt,
         String applicationErrorCode,
-        String applicationErrorDetail) {
+        String applicationErrorDetail,
+        String runtimeReadinessStatus,
+        String runtimeReadinessDeploymentId,
+        Instant runtimeReadinessObservedAt,
+        Instant runtimeReadinessReceivedAt,
+        String runtimeReadinessReasonCode,
+        String runtimeReadinessDetail,
+        String runtimePointCatalogEventId,
+        String runtimePointCatalogSourceRevision) {
 }

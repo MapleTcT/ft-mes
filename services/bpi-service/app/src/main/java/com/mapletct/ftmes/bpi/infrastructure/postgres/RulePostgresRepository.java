@@ -46,7 +46,16 @@ public class RulePostgresRepository {
                    o.application_observed_at,
                    o.application_received_at,
                    o.application_error_code,
-                   o.application_error_detail
+                   o.application_error_detail,
+                   COALESCE(o.runtime_readiness_status, CASE WHEN r.state = 'PUBLISHED'
+                       THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS runtime_readiness_status,
+                   o.runtime_readiness_deployment_id,
+                   o.runtime_readiness_observed_at,
+                   o.runtime_readiness_received_at,
+                   o.runtime_readiness_reason_code,
+                   o.runtime_readiness_detail,
+                   o.runtime_point_catalog_event_id,
+                   o.runtime_point_catalog_source_revision
               FROM bpi.bpi_rule_versions r
               JOIN bpi.bpi_topology_versions t
                 ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
@@ -552,6 +561,8 @@ public class RulePostgresRepository {
         Timestamp publicationLastRequeuedAt = rs.getTimestamp("publication_last_requeued_at");
         Timestamp applicationObservedAt = rs.getTimestamp("application_observed_at");
         Timestamp applicationReceivedAt = rs.getTimestamp("application_received_at");
+        Timestamp runtimeReadinessObservedAt = rs.getTimestamp("runtime_readiness_observed_at");
+        Timestamp runtimeReadinessReceivedAt = rs.getTimestamp("runtime_readiness_received_at");
         return new RuleVersionView(
                 rs.getObject("id", UUID.class), rs.getString("rule_code"), rs.getString("version"),
                 rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
@@ -566,7 +577,15 @@ public class RulePostgresRepository {
                 rs.getString("application_deployment_id"),
                 applicationObservedAt == null ? null : applicationObservedAt.toInstant(),
                 applicationReceivedAt == null ? null : applicationReceivedAt.toInstant(),
-                rs.getString("application_error_code"), rs.getString("application_error_detail"));
+                rs.getString("application_error_code"), rs.getString("application_error_detail"),
+                rs.getString("runtime_readiness_status"),
+                rs.getString("runtime_readiness_deployment_id"),
+                runtimeReadinessObservedAt == null ? null : runtimeReadinessObservedAt.toInstant(),
+                runtimeReadinessReceivedAt == null ? null : runtimeReadinessReceivedAt.toInstant(),
+                rs.getString("runtime_readiness_reason_code"),
+                rs.getString("runtime_readiness_detail"),
+                rs.getString("runtime_point_catalog_event_id"),
+                rs.getString("runtime_point_catalog_source_revision"));
     }
 
     private MapSqlParameterSource scope(ActorContext actor, StringBuilder sql) {

@@ -41,6 +41,16 @@
       "messages": {"application": {"$ref": "#/components/messages/BoundaryRuleApplicationV1"}},
       "description": "Rejected or retry-exhausted rule application receipts with Spring Kafka DLT headers"
     },
+    "boundaryRuleRuntimeReadiness": {
+      "address": "bpi.boundary.rule-runtime-readiness.v1",
+      "messages": {"readiness": {"$ref": "#/components/messages/BoundaryRuleRuntimeReadinessV1"}},
+      "description": "Flink runtime point-catalog admission receipts keyed by publicationEventId; independent from lifecycle application"
+    },
+    "boundaryRuleRuntimeReadinessDlq": {
+      "address": "bpi.boundary.rule-runtime-readiness.dlq.v1",
+      "messages": {"readiness": {"$ref": "#/components/messages/BoundaryRuleRuntimeReadinessV1"}},
+      "description": "Rejected or retry-exhausted runtime-readiness receipts with Spring Kafka DLT headers"
+    },
     "batchCandidate": {
       "address": "bpi.batch.candidate.v1",
       "messages": {"candidate": {"$ref": "#/components/messages/BatchCandidateV1"}},
@@ -76,6 +86,9 @@
     "publishBoundaryRuleApplication": {"action": "send", "channel": {"$ref": "#/channels/boundaryRuleApplication"}, "messages": [{"$ref": "#/channels/boundaryRuleApplication/messages/application"}]},
     "consumeBoundaryRuleApplication": {"action": "receive", "channel": {"$ref": "#/channels/boundaryRuleApplication"}, "messages": [{"$ref": "#/channels/boundaryRuleApplication/messages/application"}]},
     "publishRejectedBoundaryRuleApplication": {"action": "send", "channel": {"$ref": "#/channels/boundaryRuleApplicationDlq"}, "messages": [{"$ref": "#/channels/boundaryRuleApplicationDlq/messages/application"}]},
+    "publishBoundaryRuleRuntimeReadiness": {"action": "send", "channel": {"$ref": "#/channels/boundaryRuleRuntimeReadiness"}, "messages": [{"$ref": "#/channels/boundaryRuleRuntimeReadiness/messages/readiness"}]},
+    "consumeBoundaryRuleRuntimeReadiness": {"action": "receive", "channel": {"$ref": "#/channels/boundaryRuleRuntimeReadiness"}, "messages": [{"$ref": "#/channels/boundaryRuleRuntimeReadiness/messages/readiness"}]},
+    "publishRejectedBoundaryRuleRuntimeReadiness": {"action": "send", "channel": {"$ref": "#/channels/boundaryRuleRuntimeReadinessDlq"}, "messages": [{"$ref": "#/channels/boundaryRuleRuntimeReadinessDlq/messages/readiness"}]},
     "consumeBatchCandidate": {"action": "receive", "channel": {"$ref": "#/channels/batchCandidate"}, "messages": [{"$ref": "#/channels/batchCandidate/messages/candidate"}]},
     "publishRejectedBatchCandidate": {"action": "send", "channel": {"$ref": "#/channels/batchCandidateDlq"}, "messages": [{"$ref": "#/channels/batchCandidateDlq/messages/candidate"}]},
     "publishBatchFact": {"action": "send", "channel": {"$ref": "#/channels/batchFact"}, "messages": [{"$ref": "#/channels/batchFact/messages/fact"}]},
@@ -89,6 +102,7 @@
       "ProductionContextEventV1": {"name": "ProductionContextEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.ProductionContextEventV1"}}},
       "BoundaryRulePublicationV1": {"name": "BoundaryRulePublicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRulePublicationV1"}}},
       "BoundaryRuleApplicationV1": {"name": "BoundaryRuleApplicationV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/RuleApplicationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRuleApplicationV1"}}},
+      "BoundaryRuleRuntimeReadinessV1": {"name": "BoundaryRuleRuntimeReadinessV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/RuleRuntimeReadinessKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1"}}},
       "BatchCandidateV1": {"name": "BatchCandidateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/CandidateKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BatchCandidateV1"}}},
       "DataQualityEventV1": {"name": "DataQualityEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.DataQualityEventV1"}}},
       "BatchFactV1": {"name": "BatchFactV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "2", "x-status": "RESERVED_NOT_IMPLEMENTED"}}},
@@ -98,7 +112,8 @@
       "EventHeaders": {"type": "object", "required": ["eventId", "tenantId", "traceId", "schemaVersion"], "properties": {"eventId": {"type": "string"}, "tenantId": {"type": "string"}, "traceId": {"type": "string"}, "schemaVersion": {"type": "string"}, "payloadChecksum": {"type": "string"}}},
       "CandidateKafkaHeaders": {"type": "object", "required": ["event_id", "candidate_key", "tenant_id", "schema_version"], "properties": {"event_id": {"type": "string"}, "candidate_key": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "schema_version": {"const": "v1"}}},
       "PointCatalogKafkaHeaders": {"type": "object", "required": ["event_id", "tenant_id", "source_revision", "schema_version"], "properties": {"event_id": {"type": "string"}, "tenant_id": {"type": "string"}, "source_revision": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "schema_version": {"const": "v1"}}},
-      "RuleApplicationKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["APPLIED", "REJECTED"]}, "schema_version": {"const": "v1"}}}
+      "RuleApplicationKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["APPLIED", "REJECTED"]}, "schema_version": {"const": "v1"}}},
+      "RuleRuntimeReadinessKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["READY", "DEGRADED", "INACTIVE"]}, "schema_version": {"const": "v1"}}}
     }
   }
 }

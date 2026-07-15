@@ -80,6 +80,8 @@ bpi:
     bootstrap-servers: ${BPI_RULE_APPLICATION_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
     topic: ${BPI_RULE_APPLICATION_KAFKA_TOPIC:bpi.boundary.rule-application.v1}
     dlq-topic: ${BPI_RULE_APPLICATION_KAFKA_DLQ_TOPIC:bpi.boundary.rule-application.dlq.v1}
+    runtime-readiness-topic: ${BPI_RULE_RUNTIME_READINESS_KAFKA_TOPIC:bpi.boundary.rule-runtime-readiness.v1}
+    runtime-readiness-dlq-topic: ${BPI_RULE_RUNTIME_READINESS_KAFKA_DLQ_TOPIC:bpi.boundary.rule-runtime-readiness.dlq.v1}
     group-id: ${BPI_RULE_APPLICATION_KAFKA_GROUP_ID:ft-mes-bpi-service-rule-applications-v1}
     client-id: ${BPI_RULE_APPLICATION_KAFKA_CLIENT_ID:ft-mes-bpi-rule-application}
     allowed-tenant-ids: ${BPI_RULE_APPLICATION_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_}

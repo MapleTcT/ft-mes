@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi.stream;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
@@ -44,6 +45,22 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
     public static final OutputTag<byte[]> RULE_UPDATES =
             new OutputTag<>("bpi-runtime-ready-rule-updates") {
             };
+    public static final OutputTag<byte[]> RUNTIME_READINESS =
+            new OutputTag<>("bpi-rule-runtime-readiness") {
+            };
+
+    private final String deploymentId;
+
+    BoundaryRuleRoutingBroadcastFunction() {
+        this("test-deployment");
+    }
+
+    public BoundaryRuleRoutingBroadcastFunction(String deploymentId) {
+        if (deploymentId == null || deploymentId.isBlank()) {
+            throw new IllegalArgumentException("deploymentId is required");
+        }
+        this.deploymentId = deploymentId;
+    }
 
     @Override
     public void processElement(
@@ -223,7 +240,8 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 }
             } catch (InvalidProtocolBufferException | IllegalArgumentException | IllegalStateException error) {
                 if (publication != null) {
-                    failClosedLegacyPublication(context, publication, runtimeStatus);
+                    failClosedLegacyPublication(
+                            context, publication, incoming, runtimeStatus, error.getMessage());
                 }
                 context.output(ISSUES, publication == null
                         ? new BoundaryRoutingIssue(
@@ -237,15 +255,19 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         }
     }
 
-    private static void failClosedLegacyPublication(
+    private void failClosedLegacyPublication(
             Context context,
             BoundaryRulePublicationV1 publication,
-            BroadcastState<String, byte[]> runtimeStatus) throws Exception {
-        if (publication.getTenantId().isBlank()
+            PointCatalogSnapshotV1 catalog,
+            BroadcastState<String, byte[]> runtimeStatus,
+            String detail) throws Exception {
+        if (publication.getEventId().isBlank()
+                || publication.getTenantId().isBlank()
                 || publication.getPlantId().isBlank()
                 || publication.getLineId().isBlank()
                 || publication.getRuleCode().isBlank()
-                || publication.getRuleVersion().isBlank()) {
+                || publication.getRuleVersion().isBlank()
+                || publication.getChecksum().isBlank()) {
             return;
         }
         BoundaryRuleUpdate delete = BoundaryRuleUpdate.delete(
@@ -255,10 +277,24 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 publication.getRuleCode(),
                 publication.getRuleVersion());
         byte[] previousStatus = runtimeStatus.get(delete.ruleRef().key());
-        if (previousStatus == null || ready(previousStatus)) {
+        if (previousStatus == null || RuleRuntimeReadinessProjector.ready(previousStatus)) {
             context.output(RULE_UPDATES, BoundaryRuleUpdateCodec.encode(delete));
         }
-        runtimeStatus.put(delete.ruleRef().key(), new byte[]{0});
+        String safeDetail = detail == null || detail.isBlank()
+                ? "stored rule publication cannot be mapped by the current runtime"
+                : detail;
+        byte[] receipt = RuleRuntimeReadinessProjector.project(
+                publication,
+                deploymentId,
+                BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
+                "RULE_PUBLICATION_RUNTIME_REJECTED",
+                safeDetail,
+                catalog.getObservedAtMs(),
+                catalog);
+        if (!RuleRuntimeReadinessProjector.sameStatusAndReason(previousStatus, receipt)) {
+            context.output(RUNTIME_READINESS, receipt);
+        }
+        runtimeStatus.put(delete.ruleRef().key(), receipt);
     }
 
     private void reconcileRule(
@@ -271,7 +307,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         String ruleKey = plan.ruleRef().key();
         byte[] previousStatus = runtimeStatus.get(ruleKey);
         boolean knownStatus = previousStatus != null;
-        boolean wasReady = ready(previousStatus);
+        boolean wasReady = RuleRuntimeReadinessProjector.ready(previousStatus);
         if (wasReady) {
             removeRoutes(routes, plan);
         }
@@ -282,7 +318,26 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         if (isReady) {
             addRoutes(routes, plan);
         }
-        runtimeStatus.put(ruleKey, new byte[]{isReady ? (byte) 1 : (byte) 0});
+        PointCatalogSnapshotV1 catalog = currentCatalog(plan.publication(), catalogs);
+        BoundaryRuleRuntimeReadinessStatusV1 status = !plan.publication().getActive()
+                ? BoundaryRuleRuntimeReadinessStatusV1.INACTIVE
+                : isReady
+                        ? BoundaryRuleRuntimeReadinessStatusV1.READY
+                        : BoundaryRuleRuntimeReadinessStatusV1.DEGRADED;
+        String reasonCode = status == BoundaryRuleRuntimeReadinessStatusV1.INACTIVE
+                ? "RULE_INACTIVE"
+                : readinessIssue == null ? "" : readinessIssue.code();
+        String detail = status == BoundaryRuleRuntimeReadinessStatusV1.INACTIVE
+                ? "published rule version is inactive"
+                : readinessIssue == null ? "" : readinessIssue.message();
+        long observedAtMs = catalog == null
+                ? plan.publication().getPublishedAtMs()
+                : catalog.getObservedAtMs();
+        byte[] receipt = RuleRuntimeReadinessProjector.project(
+                plan.publication(), deploymentId, status, reasonCode, detail, observedAtMs, catalog);
+        boolean readinessChanged =
+                !RuleRuntimeReadinessProjector.sameStatusAndReason(previousStatus, receipt);
+        runtimeStatus.put(ruleKey, receipt);
         if (!knownStatus || isReady != wasReady) {
             BoundaryRuleUpdate update = isReady
                     ? plan.ruleUpdate()
@@ -293,10 +348,20 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                             plan.rule().ruleCode(),
                             plan.rule().ruleVersion());
             context.output(RULE_UPDATES, BoundaryRuleUpdateCodec.encode(update));
-            if (readinessIssue != null) {
-                context.output(ISSUES, readinessIssue);
-            }
         }
+        if (readinessChanged) {
+            context.output(RUNTIME_READINESS, receipt);
+            if (readinessIssue != null) context.output(ISSUES, readinessIssue);
+        }
+    }
+
+    private static PointCatalogSnapshotV1 currentCatalog(
+            BoundaryRulePublicationV1 publication,
+            BroadcastState<String, byte[]> catalogs) throws Exception {
+        String scopeKey = String.join(
+                "|", publication.getTenantId(), publication.getPlantId(), publication.getLineId());
+        byte[] catalogBytes = catalogs.get(scopeKey);
+        return catalogBytes == null ? null : PointCatalogSnapshotV1.parseFrom(catalogBytes);
     }
 
     private static BoundaryRoutingIssue catalogBindingsReadinessIssue(
@@ -383,10 +448,6 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                     "catalog source sequence is not ready");
         }
         return null;
-    }
-
-    private static boolean ready(byte[] value) {
-        return value != null && value.length == 1 && value[0] == 1;
     }
 
     private static boolean sameScope(

@@ -268,3 +268,31 @@ enum BoundaryRuleApplicationStatusV1 {
   APPLIED = 1;
   REJECTED = 2;
 }
+
+// Runtime point-catalog admission is independent from rule lifecycle application.
+// Flink emits a new receipt whenever the exact status or controlled reason changes.
+message BoundaryRuleRuntimeReadinessV1 {
+  string event_id = 1;
+  string publication_event_id = 2;
+  string tenant_id = 3;
+  string plant_id = 4;
+  string line_id = 5;
+  string rule_code = 6;
+  string rule_version = 7;
+  string checksum = 8;
+  string deployment_id = 9;
+  BoundaryRuleRuntimeReadinessStatusV1 status = 10;
+  string reason_code = 11;
+  string detail = 12;
+  int64 observed_at_ms = 13;
+  string point_catalog_event_id = 14;
+  string point_catalog_source_revision = 15;
+  map<string, string> headers = 16;
+}
+
+enum BoundaryRuleRuntimeReadinessStatusV1 {
+  BOUNDARY_RULE_RUNTIME_READINESS_STATUS_UNSPECIFIED = 0;
+  READY = 1;
+  DEGRADED = 2;
+  INACTIVE = 3;
+}

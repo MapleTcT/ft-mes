@@ -1,12 +1,12 @@
 package com.mapletct.ftmes.bpi;
 
 import com.mapletct.ftmes.bpi.application.Checksums;
-import com.mapletct.ftmes.bpi.application.RuleApplicationReceiptService;
-import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
-import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
+import com.mapletct.ftmes.bpi.application.RuleRuntimeReadinessReceiptService;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.infrastructure.application.BpiRuleApplicationKafkaProperties;
-import com.mapletct.ftmes.bpi.infrastructure.application.RuleApplicationKafkaRecordProcessor;
-import com.mapletct.ftmes.bpi.infrastructure.application.RuleApplicationKafkaRecordRejectedException;
+import com.mapletct.ftmes.bpi.infrastructure.application.RuleRuntimeReadinessKafkaRecordProcessor;
+import com.mapletct.ftmes.bpi.infrastructure.application.RuleRuntimeReadinessKafkaRecordRejectedException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,38 +22,39 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-class RuleApplicationKafkaRecordProcessorTest {
-    private static final String TOPIC = "bpi.boundary.rule-application.v1";
+class RuleRuntimeReadinessKafkaRecordProcessorTest {
+    private static final String TOPIC = "bpi.boundary.rule-runtime-readiness.v1";
     private static final String TENANT = "TENANT-E2E";
     private static final String PLANT = "PLANT-01";
     private static final String LINE = "LINE-01";
 
-    private RuleApplicationReceiptService receiptService;
-    private RuleApplicationKafkaRecordProcessor processor;
+    private RuleRuntimeReadinessReceiptService receiptService;
+    private RuleRuntimeReadinessKafkaRecordProcessor processor;
 
     @BeforeEach
     void setUp() {
-        receiptService = mock(RuleApplicationReceiptService.class);
-        processor = new RuleApplicationKafkaRecordProcessor(receiptService, properties());
+        receiptService = mock(RuleRuntimeReadinessReceiptService.class);
+        processor = new RuleRuntimeReadinessKafkaRecordProcessor(receiptService, properties());
     }
 
     @Test
     void trustedReceiptPassesRawPayloadChecksumToTransactionalService() {
-        BoundaryRuleApplicationV1 event = event("APPLICATION-1", "flink-a");
-        ConsumerRecord<byte[], byte[]> record = record(event);
+        BoundaryRuleRuntimeReadinessV1 event = event(
+                "READINESS-1", BoundaryRuleRuntimeReadinessStatusV1.READY, "", "");
 
-        processor.process(record);
+        processor.process(record(event));
 
         verify(receiptService).apply(event, Checksums.sha256(event.toByteArray()));
     }
 
     @Test
-    void oversizedDeploymentIdentityIsRejectedBeforePersistence() {
-        BoundaryRuleApplicationV1 oversized = event("APPLICATION-2", "x".repeat(129));
+    void degradedReceiptWithoutReasonIsRejectedBeforePersistence() {
+        BoundaryRuleRuntimeReadinessV1 event = event(
+                "READINESS-2", BoundaryRuleRuntimeReadinessStatusV1.DEGRADED, "", "");
 
-        assertThatThrownBy(() -> processor.process(record(oversized)))
-                .isInstanceOf(RuleApplicationKafkaRecordRejectedException.class)
-                .hasMessageContaining("deployment_id exceeds 128");
+        assertThatThrownBy(() -> processor.process(record(event)))
+                .isInstanceOf(RuleRuntimeReadinessKafkaRecordRejectedException.class)
+                .hasMessageContaining("requires a reason and detail");
         verifyNoInteractions(receiptService);
     }
 
@@ -61,12 +62,12 @@ class RuleApplicationKafkaRecordProcessorTest {
         return new BpiRuleApplicationKafkaProperties(
                 false,
                 "localhost:29092",
-                TOPIC,
+                "bpi.boundary.rule-application.v1",
                 "bpi.boundary.rule-application.dlq.v1",
-                "bpi.boundary.rule-runtime-readiness.v1",
+                TOPIC,
                 "bpi.boundary.rule-runtime-readiness.dlq.v1",
-                "rule-application-test",
-                "rule-application-test",
+                "rule-readiness-test",
+                "rule-readiness-test",
                 Set.of(TENANT),
                 Set.of(PLANT),
                 Set.of(LINE),
@@ -76,8 +77,12 @@ class RuleApplicationKafkaRecordProcessorTest {
                 65_536);
     }
 
-    private static BoundaryRuleApplicationV1 event(String eventId, String deploymentId) {
-        return BoundaryRuleApplicationV1.newBuilder()
+    private static BoundaryRuleRuntimeReadinessV1 event(
+            String eventId,
+            BoundaryRuleRuntimeReadinessStatusV1 status,
+            String reasonCode,
+            String detail) {
+        return BoundaryRuleRuntimeReadinessV1.newBuilder()
                 .setEventId(eventId)
                 .setPublicationEventId(UUID.randomUUID().toString())
                 .setTenantId(TENANT)
@@ -86,13 +91,15 @@ class RuleApplicationKafkaRecordProcessorTest {
                 .setRuleCode("RULE-START")
                 .setRuleVersion("1")
                 .setChecksum("a".repeat(64))
-                .setDeploymentId(deploymentId)
-                .setStatus(BoundaryRuleApplicationStatusV1.APPLIED)
+                .setDeploymentId("flink-a")
+                .setStatus(status)
+                .setReasonCode(reasonCode)
+                .setDetail(detail)
                 .setObservedAtMs(Instant.parse("2026-07-13T01:00:00Z").toEpochMilli())
                 .build();
     }
 
-    private static ConsumerRecord<byte[], byte[]> record(BoundaryRuleApplicationV1 event) {
+    private static ConsumerRecord<byte[], byte[]> record(BoundaryRuleRuntimeReadinessV1 event) {
         ConsumerRecord<byte[], byte[]> record = new ConsumerRecord<>(
                 TOPIC,
                 0,

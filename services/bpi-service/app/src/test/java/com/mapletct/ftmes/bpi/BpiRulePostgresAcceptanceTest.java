@@ -10,8 +10,11 @@ import com.nimbusds.jwt.SignedJWT;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.application.Checksums;
 import com.mapletct.ftmes.bpi.application.RuleApplicationReceiptService;
+import com.mapletct.ftmes.bpi.application.RuleRuntimeReadinessReceiptService;
 import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -61,6 +64,7 @@ class BpiRulePostgresAcceptanceTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired RulePublicationOutboxRepository outboxRepository;
     @Autowired RuleApplicationReceiptService receiptService;
+    @Autowired RuleRuntimeReadinessReceiptService runtimeReadinessReceiptService;
 
     private String tenantId;
     private UUID topologyId;
@@ -568,6 +572,90 @@ class BpiRulePostgresAcceptanceTest {
                 .isEqualTo("APPLIED|flink-acceptance-a|3|true");
     }
 
+    @Test
+    void flinkRuntimeReadinessTransitionsPersistAndOlderReceiptCannotOverwriteApiTruth() throws Exception {
+        jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'PUBLISHED', revision = 3
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, ruleId);
+        UUID publicationId = insertOutbox(
+                "BOUNDARY_RULE_PUBLISHED", "PUBLISHED", 1, null, null);
+        BoundaryRuleRuntimeReadinessV1 degraded = runtimeReadiness(
+                publicationId,
+                "READINESS-DEGRADED-" + publicationId,
+                BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
+                "POINT_DEVICE_NOT_ACTIVE",
+                "bound device is not active",
+                boundaryTime.plusSeconds(2),
+                "CATALOG-DEGRADED",
+                "revision-degraded");
+
+        var degradedRule = runtimeReadinessReceiptService.apply(
+                degraded, Checksums.sha256(degraded.toByteArray()));
+
+        assertThat(degradedRule.runtimeReadinessStatus()).isEqualTo("DEGRADED");
+        assertThat(degradedRule.runtimeReadinessReasonCode()).isEqualTo("POINT_DEVICE_NOT_ACTIVE");
+        assertThat(degradedRule.runtimePointCatalogEventId()).isEqualTo("CATALOG-DEGRADED");
+        assertThat(degradedRule.publicationRevision()).isEqualTo(2);
+
+        BoundaryRuleRuntimeReadinessV1 olderReady = runtimeReadiness(
+                publicationId,
+                "READINESS-OLDER-" + publicationId,
+                BoundaryRuleRuntimeReadinessStatusV1.READY,
+                "",
+                "",
+                boundaryTime.plusSeconds(1),
+                "CATALOG-OLDER",
+                "revision-older");
+        var afterOlder = runtimeReadinessReceiptService.apply(
+                olderReady, Checksums.sha256(olderReady.toByteArray()));
+        assertThat(afterOlder.runtimeReadinessStatus()).isEqualTo("DEGRADED");
+        assertThat(afterOlder.publicationRevision()).isEqualTo(2);
+
+        BoundaryRuleRuntimeReadinessV1 ready = runtimeReadiness(
+                publicationId,
+                "READINESS-READY-" + publicationId,
+                BoundaryRuleRuntimeReadinessStatusV1.READY,
+                "",
+                "",
+                boundaryTime.plusSeconds(3),
+                "CATALOG-READY",
+                "revision-ready");
+        var readyRule = runtimeReadinessReceiptService.apply(ready, Checksums.sha256(ready.toByteArray()));
+        var replayedRule = runtimeReadinessReceiptService.apply(ready, Checksums.sha256(ready.toByteArray()));
+
+        assertThat(readyRule.runtimeReadinessStatus()).isEqualTo("READY");
+        assertThat(readyRule.runtimeReadinessReasonCode()).isNull();
+        assertThat(readyRule.runtimeReadinessDetail()).isNull();
+        assertThat(readyRule.runtimePointCatalogEventId()).isEqualTo("CATALOG-READY");
+        assertThat(readyRule.runtimePointCatalogSourceRevision()).isEqualTo("revision-ready");
+        assertThat(readyRule.publicationRevision()).isEqualTo(3);
+        assertThat(replayedRule.publicationRevision()).isEqualTo(3);
+
+        String viewerToken = token(
+                tenantId, List.of("BPI_VIEWER"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        mockMvc.perform(get("/bpi/v1/rules/{id}", ruleId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.applicationStatus").value("WAITING"))
+                .andExpect(jsonPath("$.data.runtimeReadinessStatus").value("READY"))
+                .andExpect(jsonPath("$.data.runtimeReadinessDeploymentId").value("flink-acceptance-a"))
+                .andExpect(jsonPath("$.data.runtimePointCatalogEventId").value("CATALOG-READY"))
+                .andExpect(jsonPath("$.data.runtimePointCatalogSourceRevision").value("revision-ready"));
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_inbox_events
+                 WHERE tenant_id = ? AND source = 'bpi.boundary.rule-runtime-readiness.v1'
+                """, Integer.class, tenantId)).isEqualTo(3);
+        assertThat(jdbc.queryForList("""
+                SELECT action || '|' || before_revision || '|' || after_revision
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ? AND action LIKE 'RULE_RUNTIME_%'
+                 ORDER BY after_revision
+                """, String.class, tenantId, publicationId))
+                .containsExactly("RULE_RUNTIME_DEGRADED|1|2", "RULE_RUNTIME_READY|2|3");
+    }
+
     private BoundaryRuleApplicationV1 application(
             UUID publicationId,
             String eventId,
@@ -590,6 +678,35 @@ class BpiRulePostgresAcceptanceTest {
                 .setDetail(detail)
                 .setObservedAtMs(observedAt.toEpochMilli())
                 .putHeaders("trace_id", "TRACE-APPLICATION-" + publicationId)
+                .build();
+    }
+
+    private BoundaryRuleRuntimeReadinessV1 runtimeReadiness(
+            UUID publicationId,
+            String eventId,
+            BoundaryRuleRuntimeReadinessStatusV1 status,
+            String reasonCode,
+            String detail,
+            Instant observedAt,
+            String pointCatalogEventId,
+            String pointCatalogSourceRevision) {
+        return BoundaryRuleRuntimeReadinessV1.newBuilder()
+                .setEventId(eventId)
+                .setPublicationEventId(publicationId.toString())
+                .setTenantId(tenantId)
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-S07-01")
+                .setRuleCode("RULE-S07-START")
+                .setRuleVersion("1.2.0")
+                .setChecksum("r".repeat(64))
+                .setDeploymentId("flink-acceptance-a")
+                .setStatus(status)
+                .setReasonCode(reasonCode)
+                .setDetail(detail)
+                .setObservedAtMs(observedAt.toEpochMilli())
+                .setPointCatalogEventId(pointCatalogEventId)
+                .setPointCatalogSourceRevision(pointCatalogSourceRevision)
+                .putHeaders("trace_id", "TRACE-READINESS-" + publicationId)
                 .build();
     }
 

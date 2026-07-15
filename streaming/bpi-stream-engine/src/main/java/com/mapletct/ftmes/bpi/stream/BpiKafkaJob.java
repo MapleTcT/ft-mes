@@ -128,7 +128,7 @@ public final class BpiKafkaJob {
                 BoundaryRuleRoutingBroadcastFunction.RUNTIME_RULE_STATUS);
         SingleOutputStreamOperator<BoundaryStreamInput> routedInputs = contextual
                 .connect(routeControls)
-                .process(new BoundaryRuleRoutingBroadcastFunction())
+                .process(new BoundaryRuleRoutingBroadcastFunction(config.deploymentId()))
                 .name("Route points through indexed published bindings")
                 .uid("bpi-boundary-indexed-routing-v1");
         SingleOutputStreamOperator<BoundaryStreamInput> routed = routedInputs
@@ -138,6 +138,11 @@ public final class BpiKafkaJob {
 
         DataStream<byte[]> ruleUpdates = routedInputs
                 .getSideOutput(BoundaryRuleRoutingBroadcastFunction.RULE_UPDATES);
+        routedInputs
+                .getSideOutput(BoundaryRuleRoutingBroadcastFunction.RUNTIME_READINESS)
+                .sinkTo(BpiKafkaIO.ruleRuntimeReadinessSink(config))
+                .name("Kafka exactly-once rule runtime-readiness sink")
+                .uid("bpi-kafka-rule-runtime-readiness-sink-v1");
         BroadcastStream<byte[]> evaluatorRules = ruleUpdates.broadcast(
                 BoundaryKeyedBroadcastFunction.RULES);
 

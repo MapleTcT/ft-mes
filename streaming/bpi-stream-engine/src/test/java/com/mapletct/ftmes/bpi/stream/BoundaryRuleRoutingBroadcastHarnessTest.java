@@ -4,6 +4,8 @@ import com.mapletct.ftmes.bpi.contract.v1.BoundaryConditionOperatorV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceClassV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceConditionV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
@@ -159,6 +161,41 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
             assertEquals(
                     "POINT_CATALOG_RUNTIME_MISSING",
                     harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES).peek().getValue().code());
+            BoundaryRuleRuntimeReadinessV1 receipt = runtimeReadiness(harness).get(0);
+            assertEquals(BoundaryRuleRuntimeReadinessStatusV1.DEGRADED, receipt.getStatus());
+            assertEquals("POINT_CATALOG_RUNTIME_MISSING", receipt.getReasonCode());
+            assertEquals("", receipt.getPointCatalogEventId());
+        }
+    }
+
+    @Test
+    void readinessReceiptEmitsOnlyWhenStatusOrReasonChanges() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(10)));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(20)));
+            catalog(harness, readyCatalog("TENANT-A", false, "CAL-1", T0.plusSeconds(30)));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-2", T0.plusSeconds(40)));
+
+            List<BoundaryRuleRuntimeReadinessV1> receipts = runtimeReadiness(harness);
+            assertEquals(
+                    List.of(
+                            BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
+                            BoundaryRuleRuntimeReadinessStatusV1.READY,
+                            BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
+                            BoundaryRuleRuntimeReadinessStatusV1.DEGRADED),
+                    receipts.stream().map(BoundaryRuleRuntimeReadinessV1::getStatus).toList());
+            assertEquals(
+                    List.of(
+                            "POINT_CATALOG_RUNTIME_MISSING",
+                            "",
+                            "POINT_DEVICE_NOT_ACTIVE",
+                            "POINT_CALIBRATION_VERSION_MISMATCH"),
+                    receipts.stream().map(BoundaryRuleRuntimeReadinessV1::getReasonCode).toList());
+            assertEquals(
+                    "CATALOG-TENANT-A-" + T0.plusSeconds(40).toEpochMilli(),
+                    receipts.get(3).getPointCatalogEventId());
         }
     }
 
@@ -392,6 +429,22 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
         return output.stream()
                 .map(StreamRecord::getValue)
                 .map(BoundaryRuleUpdateCodec::decode)
+                .toList();
+    }
+
+    private static List<BoundaryRuleRuntimeReadinessV1> runtimeReadiness(
+            BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness) {
+        var output = harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.RUNTIME_READINESS);
+        if (output == null) return List.of();
+        return output.stream()
+                .map(StreamRecord::getValue)
+                .map(bytes -> {
+                    try {
+                        return BoundaryRuleRuntimeReadinessV1.parseFrom(bytes);
+                    } catch (com.google.protobuf.InvalidProtocolBufferException error) {
+                        throw new IllegalStateException(error);
+                    }
+                })
                 .toList();
     }
 }

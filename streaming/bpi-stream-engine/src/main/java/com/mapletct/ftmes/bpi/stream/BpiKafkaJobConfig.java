@@ -17,6 +17,7 @@ public record BpiKafkaJobConfig(
         String contextTopic,
         String ruleTopic,
         String ruleApplicationTopic,
+        String ruleRuntimeReadinessTopic,
         String candidateTopic,
         String dataQualityTopic,
         Duration checkpointInterval,
@@ -42,12 +43,13 @@ public record BpiKafkaJobConfig(
         topic(contextTopic, "contextTopic");
         topic(ruleTopic, "ruleTopic");
         topic(ruleApplicationTopic, "ruleApplicationTopic");
+        topic(ruleRuntimeReadinessTopic, "ruleRuntimeReadinessTopic");
         topic(candidateTopic, "candidateTopic");
         topic(dataQualityTopic, "dataQualityTopic");
         Set<String> topics = new HashSet<>(List.of(
                 telemetryTopic, pointCatalogTopic, contextTopic, ruleTopic, ruleApplicationTopic,
-                candidateTopic, dataQualityTopic));
-        if (topics.size() != 7) {
+                ruleRuntimeReadinessTopic, candidateTopic, dataQualityTopic));
+        if (topics.size() != 8) {
             throw new IllegalArgumentException("BPI Kafka topics must be distinct");
         }
         positive(checkpointInterval, "checkpointInterval");
@@ -93,6 +95,7 @@ public record BpiKafkaJobConfig(
                 value(values, "context-topic", "mes.production.context.v1"),
                 value(values, "rule-topic", "bpi.boundary.rule-publication.v1"),
                 value(values, "rule-application-topic", "bpi.boundary.rule-application.v1"),
+                value(values, "rule-runtime-readiness-topic", "bpi.boundary.rule-runtime-readiness.v1"),
                 value(values, "candidate-topic", "bpi.batch.candidate.v1"),
                 value(values, "data-quality-topic", "bpi.data-quality.v1"),
                 millis(values, "checkpoint-interval-ms", 30_000),
@@ -128,6 +131,7 @@ public record BpiKafkaJobConfig(
         copy(environment, result, "BPI_CONTEXT_TOPIC", "context-topic");
         copy(environment, result, "BPI_RULE_TOPIC", "rule-topic");
         copy(environment, result, "BPI_RULE_APPLICATION_TOPIC", "rule-application-topic");
+        copy(environment, result, "BPI_RULE_RUNTIME_READINESS_TOPIC", "rule-runtime-readiness-topic");
         copy(environment, result, "BPI_CANDIDATE_TOPIC", "candidate-topic");
         copy(environment, result, "BPI_DATA_QUALITY_TOPIC", "data-quality-topic");
         copy(environment, result, "BPI_CHECKPOINT_INTERVAL_MS", "checkpoint-interval-ms");

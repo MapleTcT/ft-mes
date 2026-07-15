@@ -43,6 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
         "bpi.rule-application-kafka.bootstrap-servers=${spring.embedded.kafka.brokers}",
         "bpi.rule-application-kafka.topic=bpi.boundary.rule-application.v1",
         "bpi.rule-application-kafka.dlq-topic=bpi.boundary.rule-application.dlq.v1",
+        "bpi.rule-application-kafka.runtime-readiness-topic=bpi.boundary.rule-runtime-readiness.v1",
+        "bpi.rule-application-kafka.runtime-readiness-dlq-topic=bpi.boundary.rule-runtime-readiness.dlq.v1",
         "bpi.rule-application-kafka.group-id=bpi-rule-application-acceptance",
         "bpi.rule-application-kafka.client-id=bpi-rule-application-acceptance",
         "bpi.rule-application-kafka.allowed-tenant-ids=*",
@@ -57,7 +59,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         partitions = 1,
         topics = {
                 "bpi.boundary.rule-application.v1",
-                "bpi.boundary.rule-application.dlq.v1"
+                "bpi.boundary.rule-application.dlq.v1",
+                "bpi.boundary.rule-runtime-readiness.v1",
+                "bpi.boundary.rule-runtime-readiness.dlq.v1"
         },
         brokerProperties = {
                 "transaction.state.log.replication.factor=1",
@@ -134,7 +138,7 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
     void committedReceiptSurvivesRestartAndPoisonRecordReachesDlq() throws Exception {
         MessageListenerContainer listener = listenerRegistry.getListenerContainer(LISTENER_ID);
         assertThat(listener).isNotNull();
-        ContainerTestUtils.waitForAssignment(listener, 1);
+        ContainerTestUtils.waitForAssignment(listener, 2);
 
         BoundaryRuleApplicationV1 rejected = application(
                 "REJECTED-" + UUID.randomUUID(),
@@ -154,7 +158,7 @@ class BpiRuleApplicationKafkaPostgresAcceptanceTest {
             stop(listener);
             sendTransaction(producer, record(rejected), true);
             listener.start();
-            ContainerTestUtils.waitForAssignment(listener, 1);
+            ContainerTestUtils.waitForAssignment(listener, 2);
             awaitStableState(
                     "REJECTED|flink-rule-app-a|2|RULE_WINDOW_EXCEEDS_STATE_TTL", 1, 1);
 

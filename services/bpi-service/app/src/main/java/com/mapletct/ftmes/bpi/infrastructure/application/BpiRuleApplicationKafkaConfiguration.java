@@ -57,7 +57,11 @@ public class BpiRuleApplicationKafkaConfiguration {
             @Qualifier("bpiRuleApplicationKafkaTemplate") KafkaTemplate<byte[], byte[]> template) {
         DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
                 template,
-                (record, error) -> new TopicPartition(properties.dlqTopic(), record.partition()));
+                (record, error) -> new TopicPartition(
+                        properties.runtimeReadinessTopic().equals(record.topic())
+                                ? properties.runtimeReadinessDlqTopic()
+                                : properties.dlqTopic(),
+                        record.partition()));
         recoverer.setFailIfSendResultIsError(true);
         recoverer.setWaitForSendResultTimeout(Duration.ofSeconds(30));
         DefaultErrorHandler handler = new DefaultErrorHandler(
@@ -65,6 +69,7 @@ public class BpiRuleApplicationKafkaConfiguration {
                 new FixedBackOff(properties.retryBackoff().toMillis(), properties.maxAttempts() - 1L));
         handler.addNotRetryableExceptions(
                 RuleApplicationKafkaRecordRejectedException.class,
+                RuleRuntimeReadinessKafkaRecordRejectedException.class,
                 BpiValidationException.class);
         handler.setCommitRecovered(true);
         return handler;

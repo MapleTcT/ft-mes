@@ -19,6 +19,8 @@ public record BpiRuleApplicationKafkaProperties(
         @NotBlank String bootstrapServers,
         @NotBlank String topic,
         @NotBlank String dlqTopic,
+        @NotBlank String runtimeReadinessTopic,
+        @NotBlank String runtimeReadinessDlqTopic,
         @NotBlank String groupId,
         @NotBlank String clientId,
         @NotEmpty Set<String> allowedTenantIds,
@@ -30,8 +32,10 @@ public record BpiRuleApplicationKafkaProperties(
         @Min(1024) @Max(1048576) int maxPayloadBytes) {
 
     public BpiRuleApplicationKafkaProperties {
-        if (topic != null && topic.equals(dlqTopic)) {
-            throw new IllegalArgumentException("Rule application source and DLQ topics must differ.");
+        if (topic != null && dlqTopic != null && runtimeReadinessTopic != null
+                && runtimeReadinessDlqTopic != null
+                && Set.of(topic, dlqTopic, runtimeReadinessTopic, runtimeReadinessDlqTopic).size() != 4) {
+            throw new IllegalArgumentException("Rule application and runtime-readiness topics must be distinct.");
         }
         allowedTenantIds = normalizedScope(allowedTenantIds, "tenant");
         allowedPlantIds = normalizedScope(allowedPlantIds, "plant");
