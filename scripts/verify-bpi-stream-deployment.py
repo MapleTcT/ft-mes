@@ -276,6 +276,21 @@ def main() -> int:
         if marker not in joint_replay:
             failures.append(f"BPI joint replay is missing safety marker: {marker}")
 
+    joint_seed = (
+        ROOT / "deploy/bpi-runtime/sql/joint-acceptance-seed.sql"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BEGIN;",
+        "disabled_feature_flag_guard",
+        "AND NOT enabled",
+        "WHERE NOT EXISTS",
+        "existing.flag_key = required.required_flag",
+        "'productId', :'product_id'",
+        "COMMIT;",
+    ):
+        if marker not in joint_seed:
+            failures.append(f"BPI joint seed is missing non-overwrite marker: {marker}")
+
     deactivation = (
         ROOT / "deploy/bpi-streaming/scripts/run-rule-deactivation.sh"
     ).read_text(encoding="utf-8")
@@ -297,11 +312,45 @@ def main() -> int:
         "created_by = :'marker'",
         "\\set order_id 'MO-' :marker",
         "order_id = :'order_id'",
+        "runtime_readiness_event_id",
         "remaining",
         "COMMIT;",
     ):
         if marker not in cleanup:
             failures.append(f"BPI joint cleanup is missing scope marker: {marker}")
+
+    joint_browser = (
+        ROOT / "deploy/bpi-runtime/scripts/browser-joint-acceptance.js"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        'new Set(["publish", "confirm", "read", "rule-read"])',
+        "BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS",
+        "BPI_ACCEPTANCE_EXPECTED_PUBLISH_STATUS",
+        "BPI_ACCEPTANCE_EXPECTED_PUBLISH_DETAIL",
+        "BPI_ACCEPTANCE_EXPECTED_PUBLISH_TOAST",
+        "publishResponsePromise",
+        "rule publication returned",
+        "publication toast exposed backend implementation details",
+        "publicationBlocked",
+        "expectedConsoleErrors",
+        "captureExpectedRuntime",
+        "runtimeReadinessText",
+        "consoleErrors",
+        "requestFailures",
+    ):
+        if marker not in joint_browser:
+            failures.append(f"BPI joint browser acceptance is missing marker: {marker}")
+
+    joint_verify = (
+        ROOT / "deploy/bpi-runtime/sql/joint-acceptance-verify.sql"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "runtime_readiness_status",
+        "runtime_readiness_reason_code",
+        "runtime_point_catalog_source_revision",
+    ):
+        if marker not in joint_verify:
+            failures.append(f"BPI joint verification SQL is missing runtime marker: {marker}")
 
     productization_browser = (
         ROOT / "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js"

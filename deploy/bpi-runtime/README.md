@@ -93,10 +93,18 @@ intentionally unsupported.
 The target browser/Kafka/Flink/PostgreSQL chain is reproducible with these marker-scoped assets:
 
 - `sql/joint-acceptance-seed.sql` creates only the topology, rule, golden boundary, history points,
-  and line flags required by one acceptance run. It refuses to overwrite existing line flags.
-- `scripts/browser-joint-acceptance.js` runs the real `publish`, `confirm`, and post-cleanup `read`
-  browser phases. Credentials are supplied only through the process environment and are never
-  written to its report.
+  and missing line flags required by one acceptance run. Existing enabled flags are preserved;
+  an existing disabled required flag blocks the seed instead of being overwritten.
+- `scripts/browser-joint-acceptance.js` runs the real `publish`, `confirm`, post-cleanup `read`, and
+  target-runtime `rule-read` browser phases. Set `BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS` to require
+  the exact `READY`, `DEGRADED`, or `INACTIVE` state in the rule drawer. Credentials are supplied
+  only through the process environment and are never written to its report.
+  A source-readiness gate can be verified without weakening it by setting
+  `BPI_ACCEPTANCE_EXPECTED_PUBLISH_STATUS=422` and an exact
+  `BPI_ACCEPTANCE_EXPECTED_PUBLISH_DETAIL`. Set `BPI_ACCEPTANCE_EXPECTED_PUBLISH_TOAST` as well to
+  require the deployed page to render the matching business-facing message; the browser report then
+  records both the rejected POST and the visible toast and treats only that matching fail-closed
+  result as expected.
 - `sql/joint-acceptance-verify.sql` reads rule, outbox/application, candidate, batch, evidence,
   state-event, and audit state from PostgreSQL.
 - `sql/joint-acceptance-cleanup.sql` removes only rows linked to the exact marker in one transaction.

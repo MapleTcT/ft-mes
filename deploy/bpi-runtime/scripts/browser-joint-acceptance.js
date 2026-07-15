@@ -15,16 +15,34 @@ const ruleCode = process.env.BPI_ACCEPTANCE_RULE_CODE || "";
 const goldenSetId = process.env.BPI_ACCEPTANCE_GOLDEN_SET_ID || "";
 const boundaryTime = process.env.BPI_ACCEPTANCE_BOUNDARY_TIME || "";
 const orderId = process.env.BPI_ACCEPTANCE_ORDER_ID || `MO-${marker}`;
+const expectedRuntimeStatus = (process.env.BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS || "")
+  .trim()
+  .toUpperCase();
+const expectedPublishStatus = Number(process.env.BPI_ACCEPTANCE_EXPECTED_PUBLISH_STATUS || 200);
+const expectedPublishDetail = process.env.BPI_ACCEPTANCE_EXPECTED_PUBLISH_DETAIL || "";
+const expectedPublishToast = process.env.BPI_ACCEPTANCE_EXPECTED_PUBLISH_TOAST || "";
 const outputPath = path.resolve(process.env.BPI_BROWSER_REPORT || `/tmp/bpi-joint-browser-${action}.json`);
 const screenshotPath = path.resolve(process.env.BPI_BROWSER_SCREENSHOT || `/tmp/bpi-joint-browser-${action}.png`);
 const headless = process.env.BPI_HEADLESS !== "false";
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 120_000);
 
-if (!new Set(["publish", "confirm", "read"]).has(action)) {
-  throw new Error("BPI_BROWSER_ACTION must be publish, confirm or read");
+if (!new Set(["publish", "confirm", "read", "rule-read"]).has(action)) {
+  throw new Error("BPI_BROWSER_ACTION must be publish, confirm, read or rule-read");
 }
 if (action === "publish" && (!ruleCode || !goldenSetId || !boundaryTime)) {
   throw new Error("publish requires rule code, golden set ID and boundary time");
+}
+if (expectedRuntimeStatus && !new Set(["READY", "DEGRADED", "INACTIVE"]).has(expectedRuntimeStatus)) {
+  throw new Error("BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS must be READY, DEGRADED or INACTIVE");
+}
+if (!Number.isInteger(expectedPublishStatus) || expectedPublishStatus < 200 || expectedPublishStatus > 599) {
+  throw new Error("BPI_ACCEPTANCE_EXPECTED_PUBLISH_STATUS must be an HTTP status from 200 to 599");
+}
+if (expectedPublishStatus !== 200 && expectedRuntimeStatus) {
+  throw new Error("a blocked publication cannot assert a runtime status");
+}
+if (action === "rule-read" && (!ruleCode || !expectedRuntimeStatus)) {
+  throw new Error("rule-read requires a rule code and expected runtime status");
 }
 
 function required(key) {
@@ -109,7 +127,37 @@ async function publishRule(page, evidence) {
   await page.getByText("历史回放通过，可提交发布", { exact: true }).waitFor({ timeout: timeoutMs });
   await page.getByRole("button", { name: "发布规则版本" }).click();
   await page.locator("#confirm-reason").fill(`历史 marker ${marker} 已回放通过并完成受控发布复核`);
+  const publishResponsePromise = page.waitForResponse(
+    (response) => response.url().includes(`/bpi-api/rules/${evidence.ruleId}/publish`)
+      && response.request().method() === "POST",
+  );
   await page.locator("#confirm-submit").click();
+  const publishResponse = await publishResponsePromise;
+  const publishBody = (await publishResponse.text()).slice(0, 2_000);
+  evidence.publicationHttpStatus = publishResponse.status();
+  if (publishResponse.status() !== expectedPublishStatus) {
+    throw new Error(`rule publication returned ${publishResponse.status()}: ${publishBody}`);
+  }
+  if (expectedPublishStatus !== 200) {
+    if (expectedPublishDetail && !publishBody.includes(expectedPublishDetail)) {
+      throw new Error(`publication rejection did not include expected detail: ${publishBody}`);
+    }
+    const toast = page.locator("#toast");
+    await toast.waitFor({ state: "visible", timeout: timeoutMs });
+    evidence.publicationToast = (await toast.textContent() || "").trim();
+    if (expectedPublishToast && !evidence.publicationToast.includes(expectedPublishToast)) {
+      throw new Error(`publication toast did not include expected business message: ${evidence.publicationToast}`);
+    }
+    if (expectedPublishToast
+      && (/Rule publication requires/.test(evidence.publicationToast)
+        || /POINT_[A-Z_]+/.test(evidence.publicationToast))) {
+      throw new Error(`publication toast exposed backend implementation details: ${evidence.publicationToast}`);
+    }
+    evidence.publicationBlocked = true;
+    evidence.publicationResponse = publishBody;
+    await page.screenshot({ path: screenshotPath, fullPage: true });
+    return;
+  }
   await page.getByText(new RegExp(`规则 ${escapeRegExp(ruleCode)}@1 已提交发布`)).waitFor({ timeout: timeoutMs });
 
   const deadline = Date.now() + timeoutMs;
@@ -121,11 +169,45 @@ async function publishRule(page, evidence) {
     if (await page.getByText("Flink 已应用", { exact: true }).count()) {
       evidence.applicationStatus = "APPLIED";
       evidence.ruleState = "PUBLISHED";
+      if (!expectedRuntimeStatus || await captureExpectedRuntime(page, evidence)) {
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        return;
+      }
+    }
+  }
+  throw new Error(expectedRuntimeStatus
+    ? `Flink application and runtime ${expectedRuntimeStatus} did not become visible before timeout`
+    : "Flink application receipt did not become visible before timeout");
+}
+
+async function captureExpectedRuntime(page, evidence) {
+  const statusText = `运行时 ${expectedRuntimeStatus}`;
+  if (!await page.getByText(statusText, { exact: true }).count()) return false;
+  const trace = page.locator("#detail-drawer .runtime-readiness-trace");
+  await trace.waitFor({ timeout: timeoutMs });
+  evidence.runtimeReadinessStatus = expectedRuntimeStatus;
+  evidence.runtimeReadinessText = (await trace.innerText()).slice(0, 2_000);
+  return true;
+}
+
+async function readRuleRuntime(page, evidence) {
+  await page.goto(`${bpiBaseUrl}/#/rules`, { waitUntil: "networkidle", timeout: timeoutMs });
+  await page.getByRole("heading", { name: "规则与拓扑" }).waitFor({ timeout: timeoutMs });
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ruleRow = page.locator("[data-rule-id]").filter({ hasText: ruleCode });
+    if (await ruleRow.count() !== 1) throw new Error(`expected one rule row for ${ruleCode}`);
+    evidence.ruleId = await ruleRow.getAttribute("data-rule-id");
+    await ruleRow.click();
+    if (await captureExpectedRuntime(page, evidence)) {
+      evidence.ruleState = "PUBLISHED";
       await page.screenshot({ path: screenshotPath, fullPage: true });
       return;
     }
+    await page.waitForTimeout(2_000);
+    await page.reload({ waitUntil: "networkidle", timeout: timeoutMs });
   }
-  throw new Error("Flink application receipt did not become visible before timeout");
+  throw new Error(`runtime ${expectedRuntimeStatus} did not become visible before timeout`);
 }
 
 async function confirmCandidate(page, evidence) {
@@ -170,12 +252,17 @@ async function main() {
     action,
     marker,
     orderId,
+    expectedRuntimeStatus: expectedRuntimeStatus || null,
+    expectedPublishStatus,
+    expectedPublishDetail: expectedPublishDetail || null,
+    expectedPublishToast: expectedPublishToast || null,
     adpBaseUrl,
     bpiBaseUrl,
     loginStatus: null,
     page: {},
     requests: [],
     consoleErrors: [],
+    expectedConsoleErrors: [],
     pageErrors: [],
     requestFailures: [],
     evidence: {},
@@ -211,7 +298,15 @@ async function main() {
     const page = await context.newPage();
     page.setDefaultTimeout(timeoutMs);
     page.on("console", (message) => {
-      if (message.type() === "error") report.consoleErrors.push(message.text());
+      if (message.type() !== "error") return;
+      const expectedPublicationRejection = action === "publish"
+        && expectedPublishStatus >= 400
+        && message.text().includes(`status of ${expectedPublishStatus}`);
+      if (expectedPublicationRejection) {
+        report.expectedConsoleErrors.push(message.text());
+        return;
+      }
+      report.consoleErrors.push(message.text());
     });
     page.on("pageerror", (error) => report.pageErrors.push(error.message));
     page.on("requestfailed", (failed) => {
@@ -237,6 +332,7 @@ async function main() {
 
     if (action === "publish") await publishRule(page, report.evidence);
     else if (action === "confirm") await confirmCandidate(page, report.evidence);
+    else if (action === "rule-read") await readRuleRuntime(page, report.evidence);
     else await readOverview(page, report.evidence);
     report.page = { url: page.url(), title: await page.title() };
     if (report.consoleErrors.length || report.pageErrors.length || report.requestFailures.length) {

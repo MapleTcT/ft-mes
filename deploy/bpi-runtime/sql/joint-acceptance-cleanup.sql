@@ -10,7 +10,8 @@ CREATE TEMP TABLE bpi_joint_acceptance_ids ON COMMIT DROP AS
 SELECT r.id AS rule_id,
        t.id AS topology_id,
        o.id AS outbox_id,
-       o.application_event_id
+       o.application_event_id,
+       o.runtime_readiness_event_id
   FROM bpi.bpi_rule_versions r
   JOIN bpi.bpi_topology_versions t ON t.id = r.topology_version_id
   LEFT JOIN bpi.bpi_outbox_events o
@@ -77,9 +78,15 @@ DELETE FROM bpi.bpi_inbox_events
    AND (
         idempotency_key IN (SELECT candidate_key::text FROM bpi_joint_candidate_ids)
      OR event_id IN (
-            SELECT application_event_id
-              FROM bpi_joint_acceptance_ids
-             WHERE application_event_id IS NOT NULL
+            SELECT event_id
+              FROM (
+                    SELECT application_event_id AS event_id
+                      FROM bpi_joint_acceptance_ids
+                    UNION ALL
+                    SELECT runtime_readiness_event_id AS event_id
+                      FROM bpi_joint_acceptance_ids
+                   ) acceptance_events
+             WHERE event_id IS NOT NULL
         )
      OR (
             source = 'bpi.boundary.rule-application.v1'

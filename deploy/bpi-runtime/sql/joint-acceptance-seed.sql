@@ -1,5 +1,7 @@
 \set ON_ERROR_STOP on
 
+BEGIN;
+
 SELECT 1 / CASE WHEN EXISTS (
     SELECT 1
       FROM bpi.bpi_feature_flags
@@ -7,7 +9,8 @@ SELECT 1 / CASE WHEN EXISTS (
        AND scope_type = 'LINE'
        AND scope_key = :'line_id'
        AND flag_key IN ('bpi.rule-management', 'bpi.commands')
-) THEN 0 ELSE 1 END AS existing_feature_flag_guard;
+       AND NOT enabled
+) THEN 0 ELSE 1 END AS disabled_feature_flag_guard;
 
 INSERT INTO bpi.bpi_topology_versions
     (id, tenant_id, topology_code, version, state, checksum, definition,
@@ -28,6 +31,7 @@ VALUES (
         'bindings', jsonb_build_array(
             jsonb_build_object(
                 'signal', 'flow.instant',
+                'productId', :'product_id',
                 'deviceId', :'device_id',
                 'propertyId', 'flow.instant',
                 'expectedUnit', 't/h',
@@ -35,6 +39,7 @@ VALUES (
             ),
             jsonb_build_object(
                 'signal', 'pump.running',
+                'productId', :'product_id',
                 'deviceId', :'device_id',
                 'propertyId', 'pump.running',
                 'expectedUnit', 'bool',
@@ -99,11 +104,26 @@ VALUES (
 
 INSERT INTO bpi.bpi_feature_flags
     (id, tenant_id, scope_type, scope_key, flag_key, enabled, revision, updated_by)
-VALUES
-    (md5(:'marker' || ':flag:rule')::uuid, :'tenant_id', 'LINE', :'line_id',
-     'bpi.rule-management', true, 1, :'marker'),
-    (md5(:'marker' || ':flag:commands')::uuid, :'tenant_id', 'LINE', :'line_id',
-     'bpi.commands', true, 1, :'marker');
+SELECT md5(:'marker' || flag_suffix)::uuid,
+       :'tenant_id',
+       'LINE',
+       :'line_id',
+       required_flag,
+       true,
+       1,
+       :'marker'
+  FROM (VALUES
+        ('bpi.rule-management', ':flag:rule'),
+        ('bpi.commands', ':flag:commands')
+       ) required(required_flag, flag_suffix)
+ WHERE NOT EXISTS (
+        SELECT 1
+          FROM bpi.bpi_feature_flags existing
+         WHERE existing.tenant_id = :'tenant_id'
+           AND existing.scope_type = 'LINE'
+           AND existing.scope_key = :'line_id'
+           AND existing.flag_key = required.required_flag
+       );
 
 INSERT INTO bpi.bpi_rule_golden_boundaries
     (id, tenant_id, plant_id, line_id, golden_set_id, boundary_type,
@@ -132,7 +152,7 @@ VALUES (
     :'plant_id',
     :'line_id',
     'GW-BPI-ACCEPTANCE',
-    'PRODUCT-BPI-ACCEPTANCE',
+    :'product_id',
     :'device_id',
     :'marker' || '-HISTORY-EVENT',
     :'marker' || '-HISTORY-MESSAGE',
@@ -177,3 +197,5 @@ SELECT json_build_object(
     'goldenSetId', :'golden_set_id',
     'boundaryTime', :'boundary_time'
 );
+
+COMMIT;

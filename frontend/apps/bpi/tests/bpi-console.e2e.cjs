@@ -272,7 +272,7 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   await page.getByText('点位快照已导入：0/1 就绪').waitFor();
   await page.getByText('未就绪液位点', { exact: true }).waitFor();
   await page.getByText('BLOCKED', { exact: true }).waitFor();
-  await page.getByText('设备未注册、设备未激活、属性不存在、单位缺失、标定未验证、来源序列缺失', { exact: true }).waitFor();
+  await page.getByText('设备未注册、设备未激活、设备属性不可用、单位缺失、标定未验证、来源序列未启用', { exact: true }).waitFor();
   const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
   assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
   assert.equal(current.data.snapshot.readyPointCount, 0);
@@ -499,5 +499,45 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-application-applied.png', fullPage: true });
   assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('process engineer sees business wording when point readiness blocks publication', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/rules`, { waitUntil: 'networkidle' });
+
+  await page.locator('[data-rule-id]').click();
+  await page.getByRole('button', { name: '运行历史回放' }).click();
+  await page.getByRole('button', { name: '开始回放' }).click();
+  await page.getByText('历史回放通过，可提交发布').waitFor();
+  await page.route('**/bpi-api/rules/*/publish', async (route) => {
+    await route.fulfill({
+      status: 422,
+      contentType: 'application/problem+json',
+      body: JSON.stringify({
+        title: 'Validation failed',
+        status: 422,
+        detail: 'Rule publication requires current READY point catalog bindings: POINT_CALIBRATION_NOT_VERIFIED, POINT_CATALOG_BINDING_NOT_FOUND, POINT_DEVICE_NOT_ACTIVE, POINT_DEVICE_NOT_REGISTERED, POINT_PROPERTY_NOT_AVAILABLE, POINT_SOURCE_SEQUENCE_DISABLED, POINT_UNIT_MISSING.',
+        traceId: 'ADP_E2E_POINT_READINESS_BLOCKED',
+      }),
+    });
+  });
+
+  await page.getByRole('button', { name: '发布规则版本' }).click();
+  await page.locator('#confirm-reason').fill('验证点位准入失败时的业务提示');
+  await page.getByRole('button', { name: '确认发布' }).click();
+
+  const toast = page.locator('#toast');
+  await toast.getByText(/规则未发布：当前点位未通过运行准入/).waitFor();
+  const message = await toast.textContent();
+  assert.match(message, /设备未注册/);
+  assert.match(message, /点位目录中找不到规则绑定/);
+  assert.doesNotMatch(message, /Rule publication|POINT_[A-Z_]+/);
+  assert.equal(await page.locator('#confirm-dialog').getAttribute('open'), '');
+  assert.deepEqual(errors.filter((item) => !item.includes('422')), []);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-publication-blocked.png', fullPage: true });
   await page.close();
 });

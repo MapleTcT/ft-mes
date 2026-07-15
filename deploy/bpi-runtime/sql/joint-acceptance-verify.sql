@@ -13,7 +13,14 @@ WITH scoped AS (
            o.status AS publication_status,
            o.application_status,
            o.application_event_id,
-           o.application_deployment_id
+           o.application_deployment_id,
+           o.runtime_readiness_status,
+           o.runtime_readiness_event_id,
+           o.runtime_readiness_deployment_id,
+           o.runtime_readiness_reason_code,
+           o.runtime_readiness_detail,
+           o.runtime_point_catalog_event_id,
+           o.runtime_point_catalog_source_revision
       FROM bpi.bpi_rule_versions r
       LEFT JOIN bpi.bpi_outbox_events o
         ON o.tenant_id = r.tenant_id

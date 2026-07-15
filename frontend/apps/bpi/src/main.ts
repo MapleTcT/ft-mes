@@ -608,15 +608,38 @@ function ruleConditions(rule: RuleVersion): Array<Record<string, unknown>> {
 }
 
 function pointIssueLabel(code: string): string {
+  const normalized = code.startsWith('POINT_') ? code.slice('POINT_'.length) : code;
   const labels: Record<string, string> = {
     DEVICE_NOT_REGISTERED: '设备未注册',
     DEVICE_NOT_ACTIVE: '设备未激活',
-    PROPERTY_NOT_AVAILABLE: '属性不存在',
+    PROPERTY_NOT_AVAILABLE: '设备属性不可用',
     UNIT_MISSING: '单位缺失',
+    UNIT_MISMATCH: '单位与规则要求不一致',
     CALIBRATION_NOT_VERIFIED: '标定未验证',
-    SOURCE_SEQUENCE_DISABLED: '来源序列缺失',
+    SOURCE_SEQUENCE_DISABLED: '来源序列未启用',
+    CATALOG_BINDING_NOT_FOUND: '点位目录中找不到规则绑定',
+    CATALOG_SNAPSHOT_MISSING: '当前产线没有点位目录快照',
   };
-  return labels[code] || code;
+  return labels[normalized] || code;
+}
+
+function rulePublicationProblemMessage(error: ApiProblem): string {
+  const prefix = 'Rule publication requires current READY point catalog bindings:';
+  const detail = error.problem.detail.trim();
+  if (error.problem.status !== 422 || !detail.startsWith(prefix)) return error.message;
+
+  const codes = detail
+    .slice(prefix.length)
+    .replace(/\.$/, '')
+    .split(',')
+    .map((code) => code.trim())
+    .filter(Boolean);
+  const labels = codes.map(pointIssueLabel);
+  const unknownCount = labels.filter((label, index) => label === codes[index]).length;
+  const knownLabels = labels.filter((label, index) => label !== codes[index]);
+  if (unknownCount > 0) knownLabels.push(`其他点位准入问题 ${unknownCount} 项`);
+  const reasons = knownLabels.length > 0 ? `（${knownLabels.join('、')}）` : '';
+  return `规则未发布：当前点位未通过运行准入${reasons}。请先在点位目录修复后重新校验。`;
 }
 
 function renderPoints(): void {
@@ -1132,6 +1155,8 @@ async function handleRulePublish(): Promise<void> {
     if (error instanceof ApiProblem && error.problem.status === 409) {
       showToast(`规则已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
       await openRule(rule.id);
+    } else if (error instanceof ApiProblem) {
+      showToast(rulePublicationProblemMessage(error), true);
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
