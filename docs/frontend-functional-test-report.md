@@ -436,9 +436,14 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 任务生成 | 同上 | 按计划生成任务和任务明细 | `POST .../createTaskEdit/submit` | 真实页面会话内提交成功 | HTTP 200，任务 `patrolTask_20260716_009` 和 pending 明细落库 | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | PASS | EamMs 有 createTaskEdit 无 DataGrid 的非阻断 WARN |
 | PATROL 任务查询 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList` | 点击真实“查询”并定位 marker 行 | `POST .../potrolTaskList-query` | 虚拟表格显示目标任务；无 console/page/request error | HTTP 200，返回目标任务和状态 | 只读 | PASS | 页面默认“待办”是原产品语义，普通查询必须点击“查询” |
 | PATROL 任务取消 | `/msService/PATROL/patrolTask/potrolTask/batchChangeList` | 选择目标行，在状态弹窗选择“已取消”，保存后重开任务列表 | `GET .../taskStateUpdate`、`POST .../potrolTaskList-query` | 状态弹窗、保存和“已取消”复显全部正常；5 张截图生成；浏览器错误为 0 | HTTP 200/SUCCESS；状态、备注和 version 更新 | `mp_potrol_tasks` | PASS | 任务下发/执行/完成需按真实状态机另测 |
+| PATROL 录入标准新增 | `/msService/PATROL/inputStandard/inputStandard/inputStanList` | 点击“新增”，选择字符/录入并保存唯一 marker | `POST .../inputStanEdit/submit` | 表单联动和保存正常，列表出现 marker；console/page/request error 均为 0 | HTTP 200，返回 `id=6675974928974672`；PostgreSQL `version=1/state=true/valid=true` | `mp_input_standards` | PASS | 已恢复该编辑页缺失的真实 `body.js/body-es5.js`，不再返回 `void 0` |
+| PATROL 录入标准修改 | 同上 | 选择 marker 行，修改名称和备注并保存 | `POST .../inputStanEdit/submit` | 编辑页回显、保存和列表刷新正常 | PostgreSQL 名称/备注更新，`version 1 -> 2` | `mp_input_standards` | PASS | 无 |
+| PATROL 录入标准停用/启用 | 同上 | 依次点击“停用”“启用” | `GET .../updateItemState?itemState=0/1&tableType=inputStand` | 两次成功提示和列表状态复显正常 | PostgreSQL `state true -> false -> true` | `mp_input_standards` | PASS | 无 |
+| PATROL 录入标准删除 | 同上 | 点击“删除”，通过关联检查并确认 | `GET .../checkRelationWorkItem`、`GET .../deleteInputStandard` | 删除确认和列表刷新正常，marker 不再可见 | PostgreSQL 软删除为 `valid=false` | `mp_input_standards` | PASS | 验收 marker 已退场，无有效测试数据残留 |
 
-本节只证明计划和任务状态链通过。输入标准 CRUD、路线完整 CRUD、现场执行结果、异常处置和统计页
-仍是后续验收项。
+本节已证明计划生成任务、任务状态变更和输入标准 CRUD 通过。路线完整 CRUD、现场执行结果、异常处置和统计页
+仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放命令：
+`make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
 
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 

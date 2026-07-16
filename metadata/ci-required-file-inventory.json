@@ -915,6 +915,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/inputStandard/inputStandard/inputStanEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/patrolMonit/patrol-monit-fallback.html",
       "state": "tracked",
       "tracked": true
@@ -2733,6 +2745,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3214,6 +3232,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test-patrol-monitor-fallback.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test-patrol-static-assets.js",
       "state": "tracked",
       "tracked": true
     },
@@ -4702,6 +4726,12 @@
     {
       "ignored": false,
       "path": "metadata/oracle-replacement-status.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-input-standard-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6872,7 +6902,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 512
+      "tracked": 516
     },
     "docs": {
       "tracked": 90
@@ -6881,7 +6911,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 111
+      "tracked": 112
     },
     "package.json": {
       "tracked": 1
@@ -6905,8 +6935,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1141,
-    "tracked": 1141,
+    "totalFiles": 1146,
+    "tracked": 1146,
     "untracked": 0
   },
   "untrackedByDirectory": []

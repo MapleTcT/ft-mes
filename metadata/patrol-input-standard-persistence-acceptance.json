@@ -1,0 +1,753 @@
+{
+  "generatedAt": "2026-07-16T16:55:23.484Z",
+  "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "route": "/msService/PATROL/inputStandard/inputStandard/inputStanList",
+    "database": "PostgreSQL",
+    "table": "public.mp_input_standards",
+    "backendEntry": "PATROLInputStandardController/PATROLPublicItemController -> PATROLInputStandardServiceImpl/PATROLPublicItemServiceImpl -> JPA/native SQL"
+  },
+  "summary": {
+    "status": "PASS",
+    "assertions": 16,
+    "pass": 16,
+    "fail": 0
+  },
+  "assertions": [
+    {
+      "name": "marker is unique before test",
+      "pass": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "input-standard body asset is restored",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "bytes": 2222,
+        "head": "\"use strict\";\n\nfunction editOrValueChange(valType, editType, operateField) {\n  v"
+      }
+    },
+    {
+      "name": "input-standard list page loads",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": "标准编码\n\n标准名称\n\n值类型\n\n编辑方式\n\n启用\n\n查 询\n清 空\n新增\n修改\n删除\n启用\n停用\n导入\n序号\n标准编码\n标准名称\n值类型\n编辑方式\n单位\n小数位\n候选值\n启用\n备注\n1\nADP_E2E_20260716164047_PATROL_INPUT\nADP_E2E_20260716164047_PATROL_INPUT_NAME\n字符\n录入\nADP_E2E_20260716164047_PATROL_INPUT_REMARK\n2\nM-RJY-1-003\n数字录入\n数字\n录入\n2\n3\nM-RJY-1-002\n是否\n字符\n是否\n是,否\n4\nM-RJY-1-001\n字符录入\n字符\n录入\n共 4 项\n1"
+      }
+    },
+    {
+      "name": "editOrValueChange is callable in add dialog",
+      "pass": true,
+      "detail": "function"
+    },
+    {
+      "name": "add API succeeds",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675974928974672,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "add",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675974928974672,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    {
+      "name": "add is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6675974928974672,
+        "version": 1,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_NAME",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "modify API succeeds",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&id=6675974928974672",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675974928974672,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675974928974672,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    {
+      "name": "modify is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "stop is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": false,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "run is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "delete relation check succeeds",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/checkRelationWorkItem?standerdIds=6675974928974672",
+        "text": "{\"code\":200,\"data\":{\"checkResult\":false},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "checkResult": false
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    {
+      "name": "delete is persisted and removed from list",
+      "pass": true,
+      "detail": {
+        "deleted": {
+          "id": 6675974928974672,
+          "version": 2,
+          "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+          "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+          "valType": "PATROL_valueType/char",
+          "editType": "PATROL_editType/input",
+          "state": true,
+          "valid": false,
+          "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+          "cid": 1000
+        },
+        "markerVisibleAfterDelete": 0
+      }
+    },
+    {
+      "name": "no visible runtime error",
+      "pass": true,
+      "detail": "标准编码\n\n标准名称\n\n值类型\n\n编辑方式\n\n启用\n\n查 询\n清 空\n新增\n修改\n删除\n启用\n停用\n导入\n序号\n标准编码\n标准名称\n值类型\n编辑方式\n单位\n小数位\n候选值\n启用\n备注\n1\nADP_E2E_20260716164047_PATROL_INPUT\nADP_E2E_20260716164047_PATROL_INPUT_NAME\n字符\n录入\nADP_E2E_20260716164047_PATROL_INPUT_REMARK\n2\nM-RJY-1-003\n数字录入\n数字\n录入\n2\n3\nM-RJY-1-002\n是否\n字符\n是否\n是,否\n4\nM-RJY-1-001\n字符录入\n字符\n录入\n共 4 项\n1\n提示\n删除成功！"
+    },
+    {
+      "name": "no browser console error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no page error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no PATROL request failure",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "operations": [
+    {
+      "operation": "新增录入标准",
+      "ui": "/msService/PATROL/inputStandard/inputStandard/inputStanList -> 新增录入标准",
+      "api": "/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit",
+      "method": "POST",
+      "payload": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575356531546\":null},\"dgDeletedIds\":{\"dg1575356531546\":null},\"inputStandard\":{\"code\":\"ADP_E2E_20260716165523_PATROL_INPUT\",\"name\":\"ADP_E2E_20260716165523_PATROL_INPUT_NAME\",\"valType\":{\"id\":\"PATROL_valueType/char\"},\"editType\":{\"id\":\"PATROL_editType/input\"},\"unitID\":{\"id\":\"\",\"code\":\"\",\"name\":\"\"},\"decimalPlace\":\"\",\"state\":true,\"remark\":\"ADP_E2E_20260716165523_PATROL_INPUT_REMARK\",\"positionLayRec\":\"1\",\"createPositionId\":1},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"viewCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\"}",
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675974928974672,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "add",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675974928974672,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'valType', val_type,\n  'editType', edit_type,\n  'state', state,\n  'valid', valid,\n  'remark', remark,\n  'cid', cid\n) from public.mp_input_standards where code='ADP_E2E_20260716165523_PATROL_INPUT' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6675974928974672,
+        "version": 1,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_NAME",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "修改录入标准",
+      "ui": "/msService/PATROL/inputStandard/inputStandard/inputStanList -> 修改录入标准",
+      "api": "/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit",
+      "method": "POST",
+      "payload": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575356531546\":null},\"dgDeletedIds\":{\"dg1575356531546\":null},\"inputStandard\":{\"code\":\"ADP_E2E_20260716165523_PATROL_INPUT\",\"name\":\"ADP_E2E_20260716165523_PATROL_INPUT_UPDATED\",\"valType\":{\"id\":\"PATROL_valueType/char\"},\"editType\":{\"id\":\"PATROL_editType/input\"},\"unitID\":{\"id\":\"\",\"code\":\"\",\"name\":\"\"},\"decimalPlace\":\"\",\"state\":true,\"remark\":\"ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK\",\"version\":1},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"viewCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\"}",
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&id=6675974928974672",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675974928974672,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675974928974672,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'valType', val_type,\n  'editType', edit_type,\n  'state', state,\n  'valid', valid,\n  'remark', remark,\n  'cid', cid\n) from public.mp_input_standards where code='ADP_E2E_20260716165523_PATROL_INPUT' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "停用录入标准",
+      "ui": "/msService/PATROL/inputStandard/inputStandard/inputStanList -> 停用录入标准",
+      "api": "/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=0&tableType=inputStand",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=0&tableType=inputStand",
+        "text": "{\"code\":200,\"data\":{\"dealFlag\":true},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "dealFlag": true
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'valType', val_type,\n  'editType', edit_type,\n  'state', state,\n  'valid', valid,\n  'remark', remark,\n  'cid', cid\n) from public.mp_input_standards where code='ADP_E2E_20260716165523_PATROL_INPUT' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": false,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "启用录入标准",
+      "ui": "/msService/PATROL/inputStandard/inputStandard/inputStanList -> 启用录入标准",
+      "api": "/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=1&tableType=inputStand",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=1&tableType=inputStand",
+        "text": "{\"code\":200,\"data\":{\"dealFlag\":true},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "dealFlag": true
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'valType', val_type,\n  'editType', edit_type,\n  'state', state,\n  'valid', valid,\n  'remark', remark,\n  'cid', cid\n) from public.mp_input_standards where code='ADP_E2E_20260716165523_PATROL_INPUT' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": true,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "删除录入标准",
+      "ui": "/msService/PATROL/inputStandard/inputStandard/inputStanList -> 删除录入标准",
+      "api": "/msService/PATROL/inputStandard/inputStandard/deleteInputStandard?standerdIds=6675974928974672",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/deleteInputStandard?standerdIds=6675974928974672",
+        "text": "{\"code\":200,\"data\":\"Success\",\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": "Success",
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'valType', val_type,\n  'editType', edit_type,\n  'state', state,\n  'valid', valid,\n  'remark', remark,\n  'cid', cid\n) from public.mp_input_standards where code='ADP_E2E_20260716165523_PATROL_INPUT' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6675974928974672,
+        "version": 2,
+        "code": "ADP_E2E_20260716165523_PATROL_INPUT",
+        "name": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED",
+        "valType": "PATROL_valueType/char",
+        "editType": "PATROL_editType/input",
+        "state": true,
+        "valid": false,
+        "remark": "ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK",
+        "cid": 1000,
+        "markerVisibleAfterDelete": 0
+      },
+      "status": "PASS"
+    }
+  ],
+  "evidence": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanList/i18n-value.js?0.9843687351330628",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&viewCode=PATROL_1.0.0_inputStandard_inputStanList&entityCode=PATROL_1.0.0_inputStandard&iscrosscompany=false&openType=dialog&buttonCode=PATROL_1.0.0_inputStandard_inputStanList_BUTTON_add&iscallback=true",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/i18n-value.js?0.9072234871234461",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js?v=0.5782691510448587",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/editStates?viewCode=PATROL_1.0.0_inputStandard_inputStanEdit",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data-dg1575356531546?datagridCode=PATROL_1.0.0_inputStandard_inputStanEditdg1575356531546&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\",\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8",
+        "postData": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575356531546\":null},\"dgDeletedIds\":{\"dg1575356531546\":null},\"inputStandard\":{\"code\":\"ADP_E2E_20260716165523_PATROL_INPUT\",\"name\":\"ADP_E2E_20260716165523_PATROL_INPUT_NAME\",\"valType\":{\"id\":\"PATROL_valueType/char\"},\"editType\":{\"id\":\"PATROL_editType/input\"},\"unitID\":{\"id\":\"\",\"code\":\"\",\"name\":\"\"},\"decimalPlace\":\"\",\"state\":true,\"remark\":\"ADP_E2E_20260716165523_PATROL_INPUT_REMARK\",\"positionLayRec\":\"1\",\"createPositionId\":1},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"viewCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&viewCode=PATROL_1.0.0_inputStandard_inputStanList&entityCode=PATROL_1.0.0_inputStandard&iscrosscompany=false&openType=dialog&buttonCode=PATROL_1.0.0_inputStandard_inputStanList_BUTTON_modify&id=6675974928974672&iscallback=true",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/i18n-value.js?0.9797702860380018",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/editStates?viewCode=PATROL_1.0.0_inputStandard_inputStanEdit&id=6675974928974672",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data/6675974928974672",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js?v=0.7922847927381317",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675974928974672&type=PATROL_inputStandard_InputStandard&viewCode=PATROL_1.0.0_inputStandard_inputStanEdit",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data-dg1575356531546?datagridCode=PATROL_1.0.0_inputStandard_inputStanEditdg1575356531546&id=6675974928974672",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\",\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&id=6675974928974672",
+        "postData": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575356531546\":null},\"dgDeletedIds\":{\"dg1575356531546\":null},\"inputStandard\":{\"code\":\"ADP_E2E_20260716165523_PATROL_INPUT\",\"name\":\"ADP_E2E_20260716165523_PATROL_INPUT_UPDATED\",\"valType\":{\"id\":\"PATROL_valueType/char\"},\"editType\":{\"id\":\"PATROL_editType/input\"},\"unitID\":{\"id\":\"\",\"code\":\"\",\"name\":\"\"},\"decimalPlace\":\"\",\"state\":true,\"remark\":\"ADP_E2E_20260716165523_PATROL_INPUT_UPDATED_REMARK\",\"version\":1},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"viewCode\":\"PATROL_1.0.0_inputStandard_inputStanEdit\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=0&tableType=inputStand",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=1&tableType=inputStand",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/checkRelationWorkItem?standerdIds=6675974928974672",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/deleteInputStandard?standerdIds=6675974928974672",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_inputStandard_inputStanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      }
+    ],
+    "responses": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanList/i18n-value.js?0.9843687351330628",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&viewCode=PATROL_1.0.0_inputStandard_inputStanList&entityCode=PATROL_1.0.0_inputStandard&iscrosscompany=false&openType=dialog&buttonCode=PATROL_1.0.0_inputStandard_inputStanList_BUTTON_add&iscallback=true",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/i18n-value.js?0.9072234871234461",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js?v=0.5782691510448587",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/editStates?viewCode=PATROL_1.0.0_inputStandard_inputStanEdit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data-dg1575356531546?datagridCode=PATROL_1.0.0_inputStandard_inputStanEditdg1575356531546&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9hZGRfYWRkX1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&viewCode=PATROL_1.0.0_inputStandard_inputStanList&entityCode=PATROL_1.0.0_inputStandard&iscrosscompany=false&openType=dialog&buttonCode=PATROL_1.0.0_inputStandard_inputStanList_BUTTON_modify&id=6675974928974672&iscallback=true",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/i18n-value.js?0.9797702860380018",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js?v=0.7922847927381317",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/editStates?viewCode=PATROL_1.0.0_inputStandard_inputStanEdit&id=6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data/6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675974928974672&type=PATROL_inputStandard_InputStandard&viewCode=PATROL_1.0.0_inputStandard_inputStanEdit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/data-dg1575356531546?datagridCode=PATROL_1.0.0_inputStandard_inputStanEditdg1575356531546&id=6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit?__pc__=aW5wdXRTdGFuTGlzdF9tb2RpZnlfbW9kaWZ5X1BBVFJPTF8xLjAuMF9pbnB1dFN0YW5kYXJkX2lucHV0U3Rhbkxpc3R8&id=6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=0&tableType=inputStand",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6675974928974672&itemState=1&tableType=inputStand",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/checkRelationWorkItem?standerdIds=6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/deleteInputStandard?standerdIds=6675974928974672",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList-query",
+        "status": 200
+      }
+    ],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "screenshots": [
+      "/tmp/adp-patrol-input-standard-20260716165523/01-input-standard-add.png",
+      "/tmp/adp-patrol-input-standard-20260716165523/02-input-standard-modify.png",
+      "/tmp/adp-patrol-input-standard-20260716165523/03-input-standard-after-delete.png"
+    ]
+  },
+  "error": null,
+  "repoCommit": "WORKTREE",
+  "database": "PostgreSQL"
+}

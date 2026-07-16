@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T15:54:22Z",
+  "generatedAt": "2026-07-16T16:55:23.484Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
@@ -41,8 +41,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 142,
-    "pass": 137,
+    "testedFeatures": 147,
+    "pass": 142,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3081,6 +3081,91 @@
       "verificationSql": "SELECT id,table_no,task_state,remark,version,valid FROM mp_potrol_tasks WHERE id=6675852717278032;",
       "status": "PASS",
       "evidence": "Response was 200/SUCCESS; PostgreSQL returned task_state=PATROL_taskState/cancelled, marker remark, version=1, valid=true; the task list then displayed 已取消 with zero browser errors.",
+      "issues": []
+    },
+    {
+      "module": "PATROL录入标准",
+      "route": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+      "operation": "通过真实新增表单创建字符/录入型录入标准",
+      "api": "POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLInputStandardController -> PATROLInputStandardServiceImpl -> JPA",
+      "tables": [
+        "mp_input_standards"
+      ],
+      "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+      "verificationSql": "SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM public.mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL returned id=6675974928974672, version=1, state=true and valid=true.",
+      "issues": []
+    },
+    {
+      "module": "PATROL录入标准",
+      "route": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+      "operation": "选择marker行并修改名称和备注",
+      "api": "POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLInputStandardController -> PATROLInputStandardServiceImpl -> JPA optimistic version update",
+      "tables": [
+        "mp_input_standards"
+      ],
+      "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+      "verificationSql": "SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM public.mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL returned updated name/remark and version=2.",
+      "issues": []
+    },
+    {
+      "module": "PATROL录入标准",
+      "route": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+      "operation": "从列表停用录入标准",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=inputStand",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update",
+      "tables": [
+        "mp_input_standards"
+      ],
+      "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+      "verificationSql": "SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM public.mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL state changed from true to false.",
+      "issues": []
+    },
+    {
+      "module": "PATROL录入标准",
+      "route": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+      "operation": "从列表重新启用录入标准",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=inputStand",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update",
+      "tables": [
+        "mp_input_standards"
+      ],
+      "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+      "verificationSql": "SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM public.mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL state changed from false to true.",
+      "issues": []
+    },
+    {
+      "module": "PATROL录入标准",
+      "route": "http://10.11.100.17:18080/msService/PATROL/inputStandard/inputStandard/inputStanList",
+      "operation": "通过关联检查和确认框软删除录入标准",
+      "api": "GET /msService/PATROL/inputStandard/inputStandard/checkRelationWorkItem; GET /msService/PATROL/inputStandard/inputStandard/deleteInputStandard",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLInputStandardController -> PATROLInputStandardServiceImpl.deleteInputID -> native update",
+      "tables": [
+        "mp_input_standards"
+      ],
+      "marker": "ADP_E2E_20260716165523_PATROL_INPUT",
+      "verificationSql": "SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM public.mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL valid=false and the refreshed page contained zero marker rows.",
       "issues": []
     }
   ],

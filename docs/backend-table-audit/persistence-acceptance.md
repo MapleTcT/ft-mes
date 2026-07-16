@@ -439,10 +439,19 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 从计划生成任务 | `potrolPlanList` | `POST /msService/PATROL/patrolPlan/createTask/createTaskEdit/submit` | `PATROLCreateTaskController -> PATROLPatrolPlanServiceImpl -> 任务/明细插入` | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | 查询 generation `6675852713018192`、task `6675852717278032`、detail `6675852722815824`，核对 plan/route/valid/version/state | 三层记录全部存在；计划关联不一致数 0，明细生命周期空值数 0 | PASS |
 | 查询生成任务 | `potrolTaskList` | `POST /msService/PATROL/patrolTask/potrolTask/potrolTaskList-query` | `PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl` | 只读 | 将 API 返回 id/tableNo/state 与上述 PostgreSQL marker 行比对 | HTTP 200，页面和 API 均出现 `patrolTask_20260716_009` | PASS |
 | 批量取消任务并复显 | `batchChangeList -> patrolStateEdit` | `GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate` | `PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate` | `mp_potrol_tasks` | `SELECT id,table_no,task_state,remark,version,valid FROM mp_potrol_tasks WHERE id=6675852717278032;` | `PATROL_taskState/cancelled`、marker remark、`version=1`、`valid=true`；再次查询页面显示“已取消” | PASS |
+| 新增录入标准 | `inputStanList -> inputStanEdit` | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | `PATROLInputStandardController -> PATROLInputStandardServiceImpl -> JPA` | `mp_input_standards` | `SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';` | `id=6675974928974672`、`version=1`、字符/录入、`state=true`、`valid=true` | PASS |
+| 修改录入标准 | 同上 | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | 同上 | `mp_input_standards` | 同 marker SQL，核对名称、备注和 version | 名称和备注更新为 `_UPDATED`，`version=2` | PASS |
+| 停用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=inputStand` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=false` | PASS |
+| 启用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=inputStand` | 同上 | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=true` | PASS |
+| 删除录入标准 | `inputStanList` | `GET .../checkRelationWorkItem`；`GET .../deleteInputStandard` | `PATROLInputStandardController -> PATROLInputStandardServiceImpl.deleteInputID -> native update` | `mp_input_standards` | 同 marker SQL，核对 `valid`，并在页面重新查询 marker | HTTP 200/Success，`valid=false`，页面 marker 数 0 | PASS |
 
 机器记录：`metadata/patrol-module-recovery-acceptance.json`。可重放脚本：
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。验收过程中 console error、page error 和
 PATROL request failure 均为 0。
+
+输入标准机器记录：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放脚本：
+`deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js`。完整浏览器 CRUD 为 16/16 PASS，
+修改、启停和软删除均由 PostgreSQL 直接查询确认；console error、page error 和 PATROL request failure 均为 0。
 
 ## BPI 规则发布失败重新入队验收（2026-07-13）
 
