@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T16:55:23.484Z",
+  "generatedAt": "2026-07-16T18:08:53.420Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-12T02:02:43.004Z",
+    "generatedAt": "2026-07-16T18:08:53.420Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -38,11 +38,17 @@
       "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
       "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
       "evidence": "metadata/bpi-point-catalog-kafka-sync-acceptance.json"
+    },
+    "patrolRoute": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json",
+      "cleanup": "valid=false; visible rows=0; interrupted markers valid=false"
     }
   },
   "summary": {
-    "testedFeatures": 147,
-    "pass": 142,
+    "testedFeatures": 152,
+    "pass": 147,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3167,6 +3173,91 @@
       "status": "PASS",
       "evidence": "metadata/patrol-input-standard-persistence-acceptance.json. Real browser CRUD acceptance passed 16/16; console/page/request failures were zero. PostgreSQL valid=false and the refreshed page contained zero marker rows.",
       "issues": []
+    },
+    {
+      "module": "PATROL巡检路线",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkGroupController/PATROLPublicItemController -> PATROLWorkGroupServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkGroupDao/JPA",
+      "tables": [
+        "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM public.mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "通过真实新增表单创建设备巡检路线",
+      "api": "POST /msService/PATROL/patrolRoute/workGroup/workGroupEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json. Real browser CRUD acceptance passed 15/15; PostgreSQL returned id=6676117469119312, version=1, is_run=true and valid=true; browser console/page/request failures were zero."
+    },
+    {
+      "module": "PATROL巡检路线",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkGroupController/PATROLPublicItemController -> PATROLWorkGroupServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkGroupDao/JPA",
+      "tables": [
+        "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM public.mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "选择marker路线并修改名称和备注",
+      "api": "POST /msService/PATROL/patrolRoute/workGroup/workGroupEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json. PostgreSQL returned updated name/remark and version=2; the refreshed page rendered the marker."
+    },
+    {
+      "module": "PATROL巡检路线",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkGroupController/PATROLPublicItemController -> PATROLWorkGroupServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkGroupDao/JPA",
+      "tables": [
+        "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM public.mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从路线列表停用设备巡检路线",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workRoute",
+      "method": "GET",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json. HTTP 200/dealFlag=true and PostgreSQL is_run changed from true to false."
+    },
+    {
+      "module": "PATROL巡检路线",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkGroupController/PATROLPublicItemController -> PATROLWorkGroupServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkGroupDao/JPA",
+      "tables": [
+        "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM public.mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从路线列表重新启用设备巡检路线",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workRoute",
+      "method": "GET",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json. HTTP 200/dealFlag=true and PostgreSQL is_run changed from false to true."
+    },
+    {
+      "module": "PATROL巡检路线",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkGroupController/PATROLPublicItemController -> PATROLWorkGroupServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkGroupDao/JPA",
+      "tables": [
+        "mp_work_groups"
+      ],
+      "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM public.mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "通过关联计划检查和确认框软删除巡检路线",
+      "api": "POST /msService/PATROL/patrolRoute/workGroup/checkRelationPlan; GET /msService/PATROL/patrolRoute/workGroup/deleteWorkGroups",
+      "method": "POST/GET",
+      "evidence": "metadata/patrol-route-persistence-acceptance.json. Relation check and delete returned HTTP 200; PostgreSQL valid=false and the refreshed page contained zero marker rows. Interrupted-run markers were also removed through the same real UI action and verified valid=false."
     }
   ],
   "evidence": [

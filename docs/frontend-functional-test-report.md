@@ -440,10 +440,17 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 录入标准修改 | 同上 | 选择 marker 行，修改名称和备注并保存 | `POST .../inputStanEdit/submit` | 编辑页回显、保存和列表刷新正常 | PostgreSQL 名称/备注更新，`version 1 -> 2` | `mp_input_standards` | PASS | 无 |
 | PATROL 录入标准停用/启用 | 同上 | 依次点击“停用”“启用” | `GET .../updateItemState?itemState=0/1&tableType=inputStand` | 两次成功提示和列表状态复显正常 | PostgreSQL `state true -> false -> true` | `mp_input_standards` | PASS | 无 |
 | PATROL 录入标准删除 | 同上 | 点击“删除”，通过关联检查并确认 | `GET .../checkRelationWorkItem`、`GET .../deleteInputStandard` | 删除确认和列表刷新正常，marker 不再可见 | PostgreSQL 软删除为 `valid=false` | `mp_input_standards` | PASS | 验收 marker 已退场，无有效测试数据残留 |
+| PATROL 巡检路线新增 | `/msService/PATROL/patrolRoute/workGroup/workGroupList` | 点击“新增”，填写唯一编码、名称、类型和备注后保存 | `POST .../workGroupEdit/submit` | 编辑弹窗、保存和列表回显正常；原始 `ec.print.template.*` 已显示为中文；console/page/request error 均为 0 | HTTP 200，返回 `id=6676117469119312`；PostgreSQL `version=1/is_run=true/valid=true` | `mp_work_groups` | PASS | 已恢复该页“更多”菜单缺失的真实动作绑定和精确 `body.js/body-es5.js` 静态入口 |
+| PATROL 巡检路线修改 | 同上 | 激活 marker 行、勾选并修改名称和备注 | `POST .../workGroupEdit/submit` | 编辑回显、保存及刷新后复显正常 | PostgreSQL 名称/备注更新，`version 1 -> 2` | `mp_work_groups` | PASS | 无 |
+| PATROL 巡检路线停用 | 同上 | 从“更多”点击“停用” | `GET .../updateItemState?itemState=0&tableType=workRoute` | 成功提示后刷新列表，marker 仍可重新选中 | HTTP 200/dealFlag=true；PostgreSQL `is_run true -> false` | `mp_work_groups` | PASS | 无 |
+| PATROL 巡检路线启用 | 同上 | 刷新后重新激活、勾选 marker，从“更多”点击“启用” | `GET .../updateItemState?itemState=1&tableType=workRoute` | 成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_groups` | PASS | 无 |
+| PATROL 巡检路线删除 | 同上 | 点击“删除”，通过关联计划检查和确认框 | `POST .../checkRelationPlan`、`GET .../deleteWorkGroups` | 两个请求均 200，刷新后 marker 为 0 行 | PostgreSQL 软删除为 `valid=false` | `mp_work_groups` | PASS | 成功 marker 及本轮中断 marker 均已通过真实页面删除，无有效测试数据残留 |
 
-本节已证明计划生成任务、任务状态变更和输入标准 CRUD 通过。路线完整 CRUD、现场执行结果、异常处置和统计页
-仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放命令：
-`make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
+本节已证明计划生成任务、任务状态变更、输入标准 CRUD 和路线完整 CRUD 通过。现场执行结果、异常处置和统计页
+仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线机器证据：
+`metadata/patrol-route-persistence-acceptance.json`。可重放命令：
+`make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17` 和
+`make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
 
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 

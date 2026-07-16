@@ -16,6 +16,28 @@ const assetRoot = path.join(
 );
 const nginxPath = path.join(dockerRoot, "nginx", "adp.conf");
 const nginx = fs.readFileSync(nginxPath, "utf8");
+const i18nPath = path.join(dockerRoot, "assets", "module-static", "PATROL", "i18n-value.js");
+const i18n = fs.readFileSync(i18nPath, "utf8");
+const routeAssetRoot = path.join(
+  dockerRoot,
+  "assets",
+  "module-static",
+  "PATROL",
+  "patrolRoute",
+  "workGroup",
+  "workGroupList"
+);
+
+for (const [key, value] of [
+  ["ec.print.template.delete", "删除"],
+  ["ec.print.template.Stop", "停用"],
+  ["ec.print.template.import", "导入"],
+]) {
+  assert(
+    i18n.includes(`window.InternationalResource["${key}"] = "${value}";`),
+    `PATROL compatibility i18n must translate ${key}`
+  );
+}
 
 for (const fileName of ["body.js", "body-es5.js"]) {
   const assetPath = path.join(assetRoot, fileName);
@@ -34,6 +56,21 @@ for (const fileName of ["body.js", "body-es5.js"]) {
   new Function(source);
 }
 
+for (const fileName of ["body.js", "body-es5.js"]) {
+  const assetPath = path.join(routeAssetRoot, fileName);
+  assert(fs.existsSync(assetPath), `PATROL route compatibility asset must exist: ${fileName}`);
+}
+const routeBody = fs.readFileSync(path.join(routeAssetRoot, "body.js"), "utf8");
+for (const marker of [
+  "__ADP_PATROL_ROUTE_ACTIONS_INSTALLED__",
+  "updateItemState",
+  "checkRelationPlan",
+  "deleteWorkGroups",
+  "deleteWorkAreas",
+]) {
+  assert(routeBody.includes(marker), `PATROL route body must implement ${marker}`);
+}
+
 const exactRouteIndex = nginx.indexOf(
   "location = /greenDill/static/PATROL/inputStandard/inputStandard/inputStanEdit/body.js"
 );
@@ -45,6 +82,18 @@ assert(placeholderRouteIndex >= 0, "generic body-script fallback must exist");
 assert(
   exactRouteIndex < placeholderRouteIndex,
   "PATROL input-standard exact routes must precede the generic body-script fallback"
+);
+const patrolRouteBodyIndex = nginx.indexOf(
+  "location = /greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js"
+);
+assert(patrolRouteBodyIndex >= 0, "nginx must expose the PATROL route compatibility body script");
+assert(
+  patrolRouteBodyIndex < placeholderRouteIndex,
+  "PATROL route exact routes must precede the generic body-script fallback"
+);
+assert(
+  nginx.includes("alias /usr/share/nginx/module-static/PATROL/i18n-value.js;"),
+  "PATROL page i18n routes must use the compatibility bundle"
 );
 
 console.log("PATROL static asset acceptance: PASS");

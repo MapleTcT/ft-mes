@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T17:00:07+00:00",
-  "repoCommit": "546cbe372af2b129de69a03bb7026a219654cb7c",
+  "generatedAt": "2026-07-16T18:17:44+00:00",
+  "repoCommit": "9aa4caee4c96769bab0373993b7cfb06cf3cf998",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 347,
-    "totalBytes": 54721038,
+    "totalFiles": 349,
+    "totalBytes": 54734729,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -14,16 +14,16 @@
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 26,
-      "runtime-static-override": 62
+      "runtime-static-override": 64
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 13773,
+      "nginx-runtime-config": 14513,
       "postgres-init-sql": 53958346,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
       "runtime-script": 239723,
-      "runtime-static-override": 354767
+      "runtime-static-override": 367718
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 13553,
-      "sha256": "b0acdc0f9eac0564caac8d976972444191b8eb3c827e584e321061dd5427f655"
+      "sizeBytes": 14293,
+      "sha256": "418fd1d64391dca0c69e4af6a94a0c8935942d779a84ee9d62afe9e5d8ed15da"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1749,8 +1749,8 @@
     {
       "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",
       "category": "runtime-static-override",
-      "sizeBytes": 116693,
-      "sha256": "1895c4d80e9fd45354011192db9c06e4a5eb61d2f8c52546d48707b2671eb472"
+      "sizeBytes": 116898,
+      "sha256": "4fdf5fbd154ead72bb03bb089c9264c376bf809d045bc206543e46211725fed6"
     },
     {
       "path": "deploy/docker/assets/module-static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js",
@@ -1771,10 +1771,22 @@
       "sha256": "806111e7bb0f675e882c24a1d8db7485cab1f93b95129f71c89d41e77e923187"
     },
     {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 271,
+      "sha256": "e5421af70b639bc3fc704059682f9ea2b3d18a0d1024cbf03f4184fbeded4d45"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 12363,
+      "sha256": "339f874ed1e474ec6361681fdb6a054bf1fc2795af6c6d1b168f60fc40176571"
+    },
+    {
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
       "category": "runtime-static-override",
-      "sizeBytes": 1025,
-      "sha256": "840429a364b2c9696d77b53cebbb35b607fb3f44928eb9bdbdc21857ee62b762"
+      "sizeBytes": 1137,
+      "sha256": "f3c0226f398967418988152e61ee32a5120200c0422fc87f521701f79322c255"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html",

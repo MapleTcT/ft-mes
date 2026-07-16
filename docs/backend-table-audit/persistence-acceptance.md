@@ -444,6 +444,11 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 停用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=inputStand` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=false` | PASS |
 | 启用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=inputStand` | 同上 | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=true` | PASS |
 | 删除录入标准 | `inputStanList` | `GET .../checkRelationWorkItem`；`GET .../deleteInputStandard` | `PATROLInputStandardController -> PATROLInputStandardServiceImpl.deleteInputID -> native update` | `mp_input_standards` | 同 marker SQL，核对 `valid`，并在页面重新查询 marker | HTTP 200/Success，`valid=false`，页面 marker 数 0 | PASS |
+| 新增巡检路线 | `workGroupList -> workGroupEdit` | `POST /msService/PATROL/patrolRoute/workGroup/workGroupEdit/submit` | `PATROLWorkGroupController -> PATROLWorkGroupServiceImpl -> PATROLWorkGroupDao/JPA` | `mp_work_groups` | `SELECT id,version,code,name,is_run,valid,patrol_type,dept,remark,cid FROM mp_work_groups WHERE code='ADP_E2E_20260716180853_PATROL_ROUTE';` | `id=6676117469119312`、`version=1`、设备巡检、`is_run=true`、`valid=true` | PASS |
+| 修改巡检路线 | 同上 | `POST /msService/PATROL/patrolRoute/workGroup/workGroupEdit/submit` | 同上 | `mp_work_groups` | 同 marker SQL，核对名称、备注和 version | 名称和备注更新为 `_UPDATED`，`version=2` | PASS |
+| 停用巡检路线 | `workGroupList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workRoute` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_work_groups` | 同 marker SQL，核对 `is_run` | HTTP 200/dealFlag=true，`is_run=false` | PASS |
+| 启用巡检路线 | `workGroupList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workRoute` | 同上 | `mp_work_groups` | 同 marker SQL，核对 `is_run` | HTTP 200/dealFlag=true，`is_run=true` | PASS |
+| 删除巡检路线 | `workGroupList` | `POST .../checkRelationPlan`；`GET .../deleteWorkGroups` | `PATROLWorkGroupController -> PATROLWorkGroupServiceImpl.deleteWorkGroup -> JPA/native update` | `mp_work_groups` | 同 marker SQL，核对 `valid`，并在刷新页面查询 marker | 两个请求均 HTTP 200，`valid=false`，页面 marker 数 0；中断 marker 也已使用同一 UI 动作清理 | PASS |
 
 机器记录：`metadata/patrol-module-recovery-acceptance.json`。可重放脚本：
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。验收过程中 console error、page error 和
@@ -452,6 +457,10 @@ PATROL request failure 均为 0。
 输入标准机器记录：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放脚本：
 `deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js`。完整浏览器 CRUD 为 16/16 PASS，
 修改、启停和软删除均由 PostgreSQL 直接查询确认；console error、page error 和 PATROL request failure 均为 0。
+
+路线机器记录：`metadata/patrol-route-persistence-acceptance.json`；可重放脚本：
+`deploy/docker/scripts/adp-patrol-route-persistence-acceptance.js`。完整浏览器 CRUD 为 15/15 PASS，新增、修改、
+停用、启用和软删除均由 PostgreSQL 直接查询确认；console error、page error 和 PATROL request failure 均为 0。
 
 ## BPI 规则发布失败重新入队验收（2026-07-13）
 
