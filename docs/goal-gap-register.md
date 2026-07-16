@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-16T19:12:36+00:00` |
-| Repo Commit | `813f92ac963ac7639394b6c25dd66ffc6e75519e` |
+| Generated At | `2026-07-16T20:18:27+00:00` |
+| Repo Commit | `28dd28ba37d77549ea0015e67a7c095bb081a27d` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -35,7 +35,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-015` | `PARTIAL` | Keycloak/JWT 链路 | 测试环境 Keycloak/JWT runtime smoke 已完成，但生产 realm export/import、用户迁移、client secret 轮换、生产 JWT 同步后的登录 smoke 和数据库备份恢复演练未完成。 | 用 production-keycloak-source-export / production-keycloak-target-export 生成 source/target realm inventory。 |
 | `G-016` | `PARTIAL` | PostgreSQL 运行与迁移治理 | 生产数据迁移脚本、增量方案和 rehearsal 报告尚未完成。 | 用 deploy/database/production-migration 预检生产副本，补全量/增量迁移脚本。 |
 | `G-017` | `PARTIAL` | runtime patch | 测试环境 WOM 核心补丁回退和 material/WMS 部署回退手册已完成；生产签名 patch 包、生产 Nacos diff 和全栈生产回切演练仍未补。 | 用 metadata/runtime-patch-manifest.json 对比签名生产 patch 包 manifest。 |
-| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；ProcessAnalysis 已闭合。 | 保持 material/WMS、ProcessAnalysis、PATROL 录入标准、路线和区域 CRUD 回归，继续 PATROL 巡检项配置、现场执行/完成、异常与统计，以及产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
+| `G-018` | `PARTIAL` | 业务模块完整测试用例 | 剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；ProcessAnalysis 已闭合。 | 保持 material/WMS、ProcessAnalysis、PATROL 录入标准、路线、区域和巡检项 CRUD 回归，继续 PATROL 现场执行/完成、异常与统计，以及产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
 | `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、Flyway V12 点位准入门禁和 JetLinks 自动点位目录同步已在目标环境通过；独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、Flyway V13 落表和前端状态列已在本地多层验收通过，但尚未完成目标 V13 部署、Flink savepoint/历史规则新版本迁移与回滚。版本比较、业务审批流、受控退休和产品级回退也尚未实现。 | 把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。 |

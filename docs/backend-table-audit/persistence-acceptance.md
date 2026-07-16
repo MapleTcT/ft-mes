@@ -454,6 +454,11 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 停用巡检区域 | `workGroupList` 区域工具栏 | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workArea` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_work_areas` | 同 marker SQL，核对 `is_run` | HTTP 200/dealFlag=true，`is_run=false` | PASS |
 | 启用巡检区域 | `workGroupList` 区域工具栏 | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workArea` | 同上 | `mp_work_areas` | 同 marker SQL，核对 `is_run` | HTTP 200/dealFlag=true，`is_run=true` | PASS |
 | 删除巡检区域 | `workGroupList` 区域工具栏 | `GET /msService/PATROL/patrolRoute/workArea/deleteWorkAreas` | `PATROLWorkAreaController -> PATROLWorkAreaServiceImpl.deleteWorkArea -> JPA/native update` | `mp_work_areas` | 同 marker SQL，核对 `valid`，并重新加载路线/区域列表 | HTTP 200，`valid=false`，页面 marker 不再出现；种子路线和种子区域保持有效 | PASS |
+| 新增巡检项 | `workGroupList -> 巡检项配置` | `POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit` | `PATROLWorkAreaController/PATROLWorkItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl -> PATROLWorkItemDao/JPA` | `mp_work_items` | `SELECT id,version,content,part,claim,default_val,input_standard_id,is_auto_judge,normal_range,lower_limit,upper_limit,is_phone,is_run,valid,sort,item_number,route_id,work_id,remark,cid FROM mp_work_items WHERE item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM';` | `id=6676355477095248`、`version=0`、`is_run=true`、`valid=true`，录入标准、范围、路线/区域外键和 cid 正确 | PASS |
+| 修改巡检项 | 同上 | `POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit` | 同上 | `mp_work_items` | 同 marker SQL，核对内容、备注、拍照标志和 version | 内容/备注更新为 `_UPDATED`，`is_phone=false`、`version=1`，外键和范围保持不变 | PASS |
+| 停用巡检项 | `workGroupList` 巡检项工具栏 | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workItem` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_work_items` | 同 marker SQL，核对 `is_run` | HTTP 200/dealFlag=true，`is_run=false` | PASS |
+| 启用巡检项 | `workGroupList` 巡检项工具栏 | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workItem` | 同上 | `mp_work_items` | 同 marker SQL，核对 `is_run` | 真实 `#btn-start` 发起 HTTP 200/dealFlag=true，`is_run=true` | PASS |
+| 删除巡检项 | `workItemPtEdit` 删行并保存 | `GET /msService/PATROL/patrolRoute/workItem/deleteWorkItems`；`POST .../workItemPtEdit/submit` | `PATROLWorkItemController.deleteWorkItems -> PATROLWorkItemServiceImpl.deleteWorkItems`；父区域保存链 | `mp_work_items` | 同 marker SQL，核对 `valid`，并重新加载路线/区域/巡检项 | 两个请求均 HTTP 200，`valid=false`，种子路线、区域和巡检项保持有效 | PASS |
 
 机器记录：`metadata/patrol-module-recovery-acceptance.json`。可重放脚本：
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。验收过程中 console error、page error 和
@@ -471,6 +476,11 @@ PATROL request failure 均为 0。
 `deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js`。区域编辑器增行、删行、上移、下移和完整 CRUD 为
 21/21 PASS，新增、修改、停用、启用和软删除均由 PostgreSQL 直接查询确认；种子路线/区域未破坏，
 console error、page error 和 PATROL request failure 均为 0。
+
+巡检项机器记录：`metadata/patrol-item-persistence-acceptance.json`；可重放脚本：
+`deploy/docker/scripts/adp-patrol-item-persistence-acceptance.js`。巡检项编辑器增行、插行、上移、下移、删行和完整 CRUD 为
+21/21 PASS，新增、修改、停用、启用和软删除均由 PostgreSQL 直接查询确认；关键工艺字段、录入标准、路线/区域外键、
+种子路线/区域/巡检项和浏览器错误均完成核验。
 
 ## BPI 规则发布失败重新入队验收（2026-07-13）
 

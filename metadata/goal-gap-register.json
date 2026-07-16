@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T19:12:36+00:00",
-  "repoCommit": "813f92ac963ac7639394b6c25dd66ffc6e75519e",
+  "generatedAt": "2026-07-16T20:18:27+00:00",
+  "repoCommit": "28dd28ba37d77549ea0015e67a7c095bb081a27d",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -394,7 +394,7 @@
         "production module test matrix has 43 cases: 39 PASS, 4 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 4 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 7 unresolved backlog items across production BLOCKED cases, persistence FAIL/BLOCKED rows, WOM visible manual create/import scope, public produceTaskCreated explicit-disabled product decision blocker, and WOM QR runtime endpoint 404.",
-        "persistence acceptance ledger has 157 tested features: 152 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE",
+        "persistence acceptance ledger has 162 tested features: 157 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "production export readiness smoke was refreshed on the current address at 2026-06-22T11:24:47.554Z: API base=http://100.99.133.43:18080, browser base=http://222.88.185.146:18080; it has 5 BLOCKED targets and 1 READY target, pagePass=6, visibleExportActions=1, runtimeExportActions=1, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=1 and targetExportMatches=4. All 6 target pages are reachable. WTS work-permit now has a visible/runtime export action and real browser download WTS_workPermitList.xls, 200/OLE_XLS/8704. Remaining blocker is backend query-export file mode or target export hook coverage on WOM/RM/QCS. Evidence: metadata/production-export-readiness-smoke.json.",
         "2026-06-21 production module browser/API smoke and marker persistence evidence added to docs/frontend-functional-test-report.md, docs/backend-table-audit/persistence-acceptance.md, and metadata/persistence-acceptance.json latestRevalidation.",
@@ -405,13 +405,14 @@
         "PATROL shared inspection plan save, task generation, real list query and batch cancellation are PASS after migrations 178-185 were reapplied on 10.11.100.17; marker ADP_E2E_20260716155413_PATROL has 22/22 assertions, PostgreSQL read-back and cancelled-state browser re-render with zero console/page/request errors.",
         "PATROL input-standard real browser CRUD is PASS with marker ADP_E2E_20260716165523_PATROL_INPUT: add/modify/stop/run/delete passed 16/16, PostgreSQL mp_input_standards confirmed version 1->2, state true->false->true and valid=false soft delete, with zero console/page/request failures.",
         "PATROL route real browser CRUD is PASS with marker ADP_E2E_20260716180853_PATROL_ROUTE: add/modify/stop/run/delete passed 15/15, PostgreSQL mp_work_groups confirmed version 1->2, is_run true->false->true and valid=false soft delete, raw menu i18n keys were removed, and browser console/page/request failures were zero.",
-        "PATROL area real browser CRUD is PASS with marker ADP_E2E_20260716190100_PATROL_AREA: editor add/delete/move-up/move-down plus add/modify/stop/run/delete passed 21/21, PostgreSQL mp_work_areas confirmed version 0->1, is_run true->false->true, valid=false soft delete, correct route FK/sort/cid, preserved seed route/area, and zero console/page/request failures."
+        "PATROL area real browser CRUD is PASS with marker ADP_E2E_20260716190100_PATROL_AREA: editor add/delete/move-up/move-down plus add/modify/stop/run/delete passed 21/21, PostgreSQL mp_work_areas confirmed version 0->1, is_run true->false->true, valid=false soft delete, correct route FK/sort/cid, preserved seed route/area, and zero console/page/request failures.",
+        "PATROL item real browser CRUD is PASS with marker ADP_E2E_20260716200952_PATROL_ITEM: editor add/insert/delete/move-up/move-down plus add/modify/stop/run/delete passed 21/21, PostgreSQL mp_work_items confirmed all critical process fields, input-standard and route/area foreign keys, version 0->1, is_run true->false->true and valid=false soft delete; raw menu i18n keys and the start/run action-code mismatch were fixed, seed route/area/item stayed valid, and browser errors were zero."
       ],
       "blockingIssues": [
         "剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；ProcessAnalysis 已闭合。"
       ],
       "nextActions": [
-        "保持 material/WMS、ProcessAnalysis、PATROL 录入标准、路线和区域 CRUD 回归，继续 PATROL 巡检项配置、现场执行/完成、异常与统计，以及产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
+        "保持 material/WMS、ProcessAnalysis、PATROL 录入标准、路线、区域和巡检项 CRUD 回归，继续 PATROL 现场执行/完成、异常与统计，以及产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
       ],
       "artifacts": [
         "docs/production-module-functional-test-cases.md",
@@ -448,7 +449,9 @@
         "metadata/patrol-route-persistence-acceptance.json",
         "deploy/docker/scripts/adp-patrol-route-persistence-acceptance.js",
         "metadata/patrol-area-persistence-acceptance.json",
-        "deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js"
+        "deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js",
+        "metadata/patrol-item-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-patrol-item-persistence-acceptance.js"
       ]
     },
     {
@@ -458,7 +461,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 157 tested features: 152 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check cross-check the coverage.",
+        "metadata/persistence-acceptance.json currently has 162 tested features: 157 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and toolbar action blockers with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED; make production-module-backlog-check and make project-goal-acceptance-check cross-check the coverage.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
         "metadata/production-module-backlog.json covers those unresolved persistence rows with 7 backlog items, 0 FAIL_BACKLOG and 7 BLOCKED",
         "metadata/postgres-migration-inventory.json currently has 185 scripts, highRiskStatementCount=0, watchStatementCount=71, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",

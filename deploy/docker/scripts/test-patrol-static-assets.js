@@ -36,11 +36,23 @@ const areaEditorAssetRoot = path.join(
   "workGroup",
   "workAreaPtEdit"
 );
+const itemEditorAssetRoot = path.join(
+  dockerRoot,
+  "assets",
+  "module-static",
+  "PATROL",
+  "patrolRoute",
+  "workArea",
+  "workItemPtEdit"
+);
 
 for (const [key, value] of [
   ["ec.print.template.delete", "删除"],
   ["ec.print.template.Stop", "停用"],
   ["ec.print.template.import", "导入"],
+  ["ec.view.button.insertRow", "插行"],
+  ["ec.view.button.moveRowUp", "上移"],
+  ["ec.view.button.moveRowDown", "下移"],
 ]) {
   assert(
     i18n.includes(`window.InternationalResource["${key}"] = "${value}";`),
@@ -76,8 +88,34 @@ for (const marker of [
   "checkRelationPlan",
   "deleteWorkGroups",
   "deleteWorkAreas",
+  'updateState(ITEM_GRID, "workItem", 1',
+  'updateState(ITEM_GRID, "workItem", 0',
+  'buttonId === "btn-start"',
+  "#btn-start",
 ]) {
   assert(routeBody.includes(marker), `PATROL route body must implement ${marker}`);
+}
+
+for (const fileName of ["body.js", "body-es5.js"]) {
+  const assetPath = path.join(itemEditorAssetRoot, fileName);
+  assert(fs.existsSync(assetPath), `PATROL item-editor compatibility asset must exist: ${fileName}`);
+  new Function(fs.readFileSync(assetPath, "utf8"));
+}
+const itemEditorBody = fs.readFileSync(path.join(itemEditorAssetRoot, "body.js"), "utf8");
+for (const marker of [
+  "__ADP_PATROL_ITEM_EDITOR_ACTIONS_INSTALLED__",
+  "addLine()",
+  "insertLine(rowIndex)",
+  "deleteLine(indexes.join",
+  "moveUpLine()",
+  "moveDownLine()",
+  'setValueByKey(rowIndex, "workId.id", context.areaId)',
+  'setValueByKey(rowIndex, "routeId.id", context.routeId)',
+  "deleteWorkItems?workItemIds=",
+  "PATROL_patrolRoute_workArea_onsave",
+  "closeMenuAfterCurrentClick",
+]) {
+  assert(itemEditorBody.includes(marker), `PATROL item editor body must implement ${marker}`);
 }
 assert(
     routeBody.includes("event.stopImmediatePropagation()") &&
@@ -140,6 +178,21 @@ assert(
       '<script src="/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js"></script>'
     ),
   "PATROL area-editor HTML must load the compatibility body script"
+);
+const patrolItemEditorBodyIndex = nginx.indexOf(
+  "location = /greenDill/static/PATROL/patrolRoute/workArea/workItemPtEdit/body.js"
+);
+assert(patrolItemEditorBodyIndex >= 0, "nginx must expose the PATROL item-editor body script");
+assert(
+  patrolItemEditorBodyIndex < placeholderRouteIndex,
+  "PATROL item-editor exact routes must precede the generic body-script fallback"
+);
+assert(
+  nginx.includes("location = /msService/PATROL/patrolRoute/workArea/workItemPtEdit {") &&
+    nginx.includes(
+      '<script src="/greenDill/static/PATROL/patrolRoute/workArea/workItemPtEdit/body.js"></script>'
+    ),
+  "PATROL item-editor HTML must load the compatibility body script"
 );
 assert(
   nginx.includes("alias /usr/share/nginx/module-static/PATROL/i18n-value.js;"),

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T19:01:00.292Z",
+  "generatedAt": "2026-07-16T20:09:52.643Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-16T19:01:00.292Z",
+    "generatedAt": "2026-07-16T20:09:52.643Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -50,11 +50,17 @@
       "marker": "ADP_E2E_20260716190100_PATROL_AREA",
       "evidence": "metadata/patrol-area-persistence-acceptance.json",
       "cleanup": "valid=false; visible rows=0; interrupted markers valid=false; seed route/area valid=true"
+    },
+    "patrolItem": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json",
+      "cleanup": "valid=false; visible rows=0; failed-run markers valid=false; seed route/area/item valid=true"
     }
   },
   "summary": {
-    "testedFeatures": 157,
-    "pass": 152,
+    "testedFeatures": 162,
+    "pass": 157,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3349,6 +3355,91 @@
       "api": "GET /msService/PATROL/patrolRoute/workArea/deleteWorkAreas",
       "method": "GET",
       "evidence": "metadata/patrol-area-persistence-acceptance.json. HTTP 200, PostgreSQL valid=false, refreshed area list contained zero marker rows, and the seed route/area remained valid."
+    },
+    {
+      "module": "PATROL巡检项",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLWorkItemController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkItemDao/JPA",
+      "tables": [
+        "mp_work_items"
+      ],
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'content', content,\n  'part', part,\n  'claim', claim,\n  'defaultVal', default_val,\n  'inputStandardId', input_standard_id,\n  'isAutoJudge', is_auto_judge,\n  'normalRange', normal_range,\n  'lowerLimit', lower_limit,\n  'upperLimit', upper_limit,\n  'isPhone', is_phone,\n  'isPass', is_pass,\n  'isConclusionModify', is_conclusion_modify,\n  'isRun', is_run,\n  'valid', valid,\n  'sort', sort,\n  'itemNumber', item_number,\n  'routeId', route_id,\n  'workId', work_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_items where item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM' order by id desc limit 1;",
+      "status": "PASS",
+      "issues": [],
+      "operation": "在巡检项配置弹窗验证增行、插行、移动、删行后新增唯一marker",
+      "api": "POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json. Real editor row controls and add passed 21/21 acceptance; PostgreSQL confirmed all critical fields, input standard, route/area foreign keys, cid, is_run=true and valid=true."
+    },
+    {
+      "module": "PATROL巡检项",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLWorkItemController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkItemDao/JPA",
+      "tables": [
+        "mp_work_items"
+      ],
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'content', content,\n  'part', part,\n  'claim', claim,\n  'defaultVal', default_val,\n  'inputStandardId', input_standard_id,\n  'isAutoJudge', is_auto_judge,\n  'normalRange', normal_range,\n  'lowerLimit', lower_limit,\n  'upperLimit', upper_limit,\n  'isPhone', is_phone,\n  'isPass', is_pass,\n  'isConclusionModify', is_conclusion_modify,\n  'isRun', is_run,\n  'valid', valid,\n  'sort', sort,\n  'itemNumber', item_number,\n  'routeId', route_id,\n  'workId', work_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_items where item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM' order by id desc limit 1;",
+      "status": "PASS",
+      "issues": [],
+      "operation": "重新打开巡检项配置并修改内容、备注和拍照标志",
+      "api": "POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json. PostgreSQL confirmed content/remark update, is_phone true->false, version 0->1, and unchanged input-standard/range/foreign-key fields."
+    },
+    {
+      "module": "PATROL巡检项",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLWorkItemController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkItemDao/JPA",
+      "tables": [
+        "mp_work_items"
+      ],
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'content', content,\n  'part', part,\n  'claim', claim,\n  'defaultVal', default_val,\n  'inputStandardId', input_standard_id,\n  'isAutoJudge', is_auto_judge,\n  'normalRange', normal_range,\n  'lowerLimit', lower_limit,\n  'upperLimit', upper_limit,\n  'isPhone', is_phone,\n  'isPass', is_pass,\n  'isConclusionModify', is_conclusion_modify,\n  'isRun', is_run,\n  'valid', valid,\n  'sort', sort,\n  'itemNumber', item_number,\n  'routeId', route_id,\n  'workId', work_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_items where item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM' order by id desc limit 1;",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从巡检项工具栏停用marker",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workItem",
+      "method": "GET",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json. HTTP 200/dealFlag=true and PostgreSQL is_run changed from true to false."
+    },
+    {
+      "module": "PATROL巡检项",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLWorkItemController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkItemDao/JPA",
+      "tables": [
+        "mp_work_items"
+      ],
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'content', content,\n  'part', part,\n  'claim', claim,\n  'defaultVal', default_val,\n  'inputStandardId', input_standard_id,\n  'isAutoJudge', is_auto_judge,\n  'normalRange', normal_range,\n  'lowerLimit', lower_limit,\n  'upperLimit', upper_limit,\n  'isPhone', is_phone,\n  'isPass', is_pass,\n  'isConclusionModify', is_conclusion_modify,\n  'isRun', is_run,\n  'valid', valid,\n  'sort', sort,\n  'itemNumber', item_number,\n  'routeId', route_id,\n  'workId', work_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_items where item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM' order by id desc limit 1;",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从巡检项工具栏重新启用marker",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workItem",
+      "method": "GET",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json. The real #btn-start action returned HTTP 200/dealFlag=true and PostgreSQL is_run changed from false to true."
+    },
+    {
+      "module": "PATROL巡检项",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLWorkItemController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLWorkItemServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkItemDao/JPA",
+      "tables": [
+        "mp_work_items"
+      ],
+      "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'content', content,\n  'part', part,\n  'claim', claim,\n  'defaultVal', default_val,\n  'inputStandardId', input_standard_id,\n  'isAutoJudge', is_auto_judge,\n  'normalRange', normal_range,\n  'lowerLimit', lower_limit,\n  'upperLimit', upper_limit,\n  'isPhone', is_phone,\n  'isPass', is_pass,\n  'isConclusionModify', is_conclusion_modify,\n  'isRun', is_run,\n  'valid', valid,\n  'sort', sort,\n  'itemNumber', item_number,\n  'routeId', route_id,\n  'workId', work_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_items where item_number='TAG_ADP_E2E_20260716200952_PATROL_ITEM' order by id desc limit 1;",
+      "status": "PASS",
+      "issues": [],
+      "operation": "在巡检项编辑器删行并保存，完成业务软删除",
+      "api": "GET /msService/PATROL/patrolRoute/workItem/deleteWorkItems; POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit",
+      "method": "GET/POST",
+      "evidence": "metadata/patrol-item-persistence-acceptance.json. Delete and parent-save requests returned HTTP 200; PostgreSQL valid=false and the seed route, area and item remained valid."
     }
   ],
   "evidence": [

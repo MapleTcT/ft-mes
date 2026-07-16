@@ -389,13 +389,33 @@
     }
   }
 
+  function itemAction(buttonId) {
+    if (buttonId === "btn-start" || buttonId === "btn-run") {
+      updateState(ITEM_GRID, "workItem", 1, {
+        type: "post",
+        url:
+          "/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=" +
+          ITEM_GRID,
+      });
+    } else if (buttonId === "btn-stop") {
+      updateState(ITEM_GRID, "workItem", 0, {
+        type: "post",
+        url:
+          "/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=" +
+          ITEM_GRID,
+      });
+    }
+  }
+
   document.addEventListener(
     "click",
     function onPatrolMoreAction(event) {
       var target = event.target;
       var button =
         target && target.closest
-          ? target.closest("#btn-delete, #btn-workAreaSet, #btn-workItemSet, #btn-run, #btn-stop")
+          ? target.closest(
+              "#btn-delete, #btn-workAreaSet, #btn-workItemSet, #btn-run, #btn-start, #btn-stop"
+            )
           : null;
       if (!button) {
         return;
@@ -404,7 +424,8 @@
       var title = toolbarTitle(button);
       var routeTitle = text("PATROL.patrolRoute.WorkGroup").replace(/\s/g, "");
       var areaTitle = text("PATROL.patrolRoute.WorkArea").replace(/\s/g, "");
-      if (title !== routeTitle && title !== areaTitle) {
+      var itemTitle = text("PATROL.patrolRoute.WorkItem").replace(/\s/g, "");
+      if (title !== routeTitle && title !== areaTitle && title !== itemTitle) {
         return;
       }
 
@@ -413,8 +434,10 @@
       closeMoreMenu(button);
       if (title === routeTitle) {
         routeAction(button.id);
-      } else {
+      } else if (title === areaTitle) {
         areaAction(button.id);
+      } else {
+        itemAction(button.id);
       }
     },
     true

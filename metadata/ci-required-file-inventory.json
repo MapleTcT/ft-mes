@@ -933,6 +933,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workArea/workItemPtEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workArea/workItemPtEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body-es5.js",
       "state": "tracked",
       "tracked": true
@@ -2776,6 +2788,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-item-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -4774,6 +4792,12 @@
     {
       "ignored": false,
       "path": "metadata/patrol-input-standard-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-item-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6950,7 +6974,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 522
+      "tracked": 525
     },
     "docs": {
       "tracked": 90
@@ -6959,7 +6983,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 114
+      "tracked": 115
     },
     "package.json": {
       "tracked": 1
@@ -6983,8 +7007,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1154,
-    "tracked": 1154,
+    "totalFiles": 1158,
+    "tracked": 1158,
     "untracked": 0
   },
   "untrackedByDirectory": []

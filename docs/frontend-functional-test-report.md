@@ -450,13 +450,19 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 巡检区域停用 | 同上 | 选择区域 marker，从区域“更多”点击“停用” | `GET .../updateItemState?itemState=0&tableType=workArea` | 成功提示后可重新加载和选择 marker | HTTP 200/dealFlag=true；PostgreSQL `is_run true -> false` | `mp_work_areas` | PASS | 无 |
 | PATROL 巡检区域启用 | 同上 | 重新加载路线和区域，从区域“更多”点击“启用” | `GET .../updateItemState?itemState=1&tableType=workArea` | 成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_areas` | PASS | 无 |
 | PATROL 巡检区域删除 | 同上 | 选择区域 marker，点击“删除”并确认 | `GET .../deleteWorkAreas` | 删除请求 200，刷新后 marker 不再出现 | PostgreSQL 软删除为 `valid=false`；种子路线和种子区域仍为 `valid=true` | `mp_work_areas` | PASS | 本轮中断 marker 均由同一业务删除 API 清理，无有效测试数据残留 |
+| PATROL 巡检项新增 | `/msService/PATROL/patrolRoute/workGroup/workGroupList` -> “巡检项配置” | 选择种子路线/区域，打开巡检项编辑器；验证增行、插行、上移、下移、删行，填写唯一 marker、录入标准、自动判定、正常范围和上下限后保存 | `POST .../workItemPtEdit/submit` | “更多”菜单显示“插行/上移/下移”而非原始 i18n key，5 个行操作均生效，保存后主列表出现 marker；浏览器错误为 0 | HTTP 200；PostgreSQL `id=6676355477095248/version=0/is_run=true/valid=true/input_standard_id=1002`，路线/区域外键、范围和业务字段全部正确 | `mp_work_items` | PASS | 已恢复巡检项编辑器事件脚本、精确静态入口和缺失的公共国际化键 |
+| PATROL 巡检项修改 | 同上 | 重新打开巡检项配置，修改 marker 内容、备注和拍照标志后保存 | `POST .../workItemPtEdit/submit` | 已有巡检项及录入标准正确回显，保存和列表刷新正常 | PostgreSQL 内容/备注更新，`is_phone true -> false`、`version 0 -> 1`，外键和范围保持不变 | `mp_work_items` | PASS | 无 |
+| PATROL 巡检项停用 | 同上 | 选择巡检项 marker，点击“停用” | `GET .../updateItemState?itemState=0&tableType=workItem` | 成功提示后重新加载仍可定位 marker | HTTP 200/dealFlag=true；PostgreSQL `is_run true -> false` | `mp_work_items` | PASS | 无 |
+| PATROL 巡检项启用 | 同上 | 重新加载路线/区域并选中 marker，点击“启用” | `GET .../updateItemState?itemState=1&tableType=workItem` | 真实 `#btn-start` 按钮正确触发，成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_items` | PASS | 修复了把巡检项 `start` 操作码误当作路线/区域 `run` 操作码的问题 |
+| PATROL 巡检项删除 | 同上 | 在巡检项编辑器选择 marker，点击“删行”并保存 | `GET .../deleteWorkItems`、`POST .../workItemPtEdit/submit` | 行先从编辑器移除，软删除和父表保存均返回 200，刷新后 marker 不再出现 | PostgreSQL `valid=false`；种子路线、区域和巡检项继续有效 | `mp_work_items` | PASS | 失败轮次均由同一业务软删除 API 清理，无有效测试数据残留 |
 
-本节已证明计划生成任务、任务状态变更、输入标准、路线和区域完整 CRUD 通过。巡检项配置、现场执行结果、异常处置和统计页
-仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线和区域机器证据：
-`metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`。可重放命令：
+本节已证明计划生成任务、任务状态变更、输入标准、路线、区域和巡检项完整 CRUD 通过。现场执行结果、异常处置和统计页
+仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线、区域和巡检项机器证据：
+`metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`、`metadata/patrol-item-persistence-acceptance.json`。可重放命令：
 `make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17` 和
 `make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
-`make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
+`make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
+`make acceptance-patrol-item-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
 
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 
