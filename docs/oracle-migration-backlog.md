@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-15T07:53:16+00:00`。
-- Repo Commit：`7e3fcf185c09e53a3eca763302d9183eda291461`。
-- 总引用数：`987`。
+- Generated At：`2026-07-16T16:29:48+00:00`。
+- Repo Commit：`299b0c8dd3993a819a58bf589d7b39bcbbfea580`。
+- 总引用数：`1564`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -24,8 +24,8 @@
 | java-row-index-noise | 25 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
-| postgres-compat-reference | 6 | PostgreSQL compatibility SQL may mention Oracle as source context. |
-| postgres-conversion-tooling | 35 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
+| postgres-compat-reference | 574 | PostgreSQL compatibility SQL may mention Oracle as source context. |
+| postgres-conversion-tooling | 44 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
 | tooling-or-audit-code | 269 | Tooling may mention Oracle to generate or check migration audit outputs. |
@@ -34,6 +34,7 @@
 
 | File | Findings |
 | --- | --- |
+| deploy/docker/postgres/init/184-patrol-ui-runtime-metadata.sql | 560 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/oracle/rbac_1.sql | 61 |
 | scripts/generate-oracle-replacement-status.py | 52 |
 | scripts/generate-oracle-migration-audit.py | 49 |
@@ -51,9 +52,9 @@
 | docs/sustainable-development.md | 15 |
 | Makefile | 14 |
 | scripts/verify-sustainable-repo.py | 14 |
+| deploy/docker/scripts/audit-postgres-mappings.py | 13 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mariadb/systemconfig_1.sql | 12 |
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |
-| deploy/docker/scripts/audit-postgres-mappings.py | 12 |
 | docs/backend-module-promotion-guide.md | 12 |
 | backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql | 11 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTaskServiceImpl.java | 9 |
@@ -63,7 +64,6 @@
 | docs/backend-module-dependency-inventory.md | 9 |
 | services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java | 9 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml | 8 |
-| backend/modules/com/supcon/supfusion/i18n-service/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/service/impl/I18nResourceServiceImpl.java | 8 |
 
 ## 优先 Backlog 样例
 

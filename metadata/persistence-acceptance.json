@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-15T07:26:47Z",
+  "generatedAt": "2026-07-16T15:54:22Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_SYSTEMCONFIG_ENTITY_MODEL_PASS_WTS_CLOSE_AND_STOP_PASS_KNOWN_STATIC_LINK_RISK",
+  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
     "generatedAt": "2026-07-12T02:02:43.004Z",
     "coreFlow": {
@@ -41,8 +41,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 138,
-    "pass": 133,
+    "testedFeatures": 142,
+    "pass": 137,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3011,9 +3011,85 @@
       "issues": [
         "The target pilot device still has no reviewed device or gateway source epoch and sequence, so target source readiness remains BLOCKED."
       ]
+    },
+    {
+      "module": "PATROL巡检计划",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+      "operation": "真实页面上下文新增单次巡检计划并绑定执行人员",
+      "api": "POST /msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPatrolPlanController -> PATROLPatrolPlanServiceImpl -> JPA/association persistence",
+      "tables": [
+        "mp_patrol_plans",
+        "mp_plan_staffs"
+      ],
+      "marker": "ADP_E2E_20260716155413_PATROL",
+      "verificationSql": "Query mp_patrol_plans id=6675852707251024 and mp_plan_staffs where patrol_plan=6675852707251024 and staff_id=1; verify plan code marker and one valid staff association.",
+      "status": "PASS",
+      "evidence": "metadata/patrol-module-recovery-acceptance.json and /tmp/adp-patrol-task-persistence-post-idempotency.json. After reapplying migrations 178-185, API returned 200 with plan id 6675852707251024; PostgreSQL plan and staff relation both passed.",
+      "issues": []
+    },
+    {
+      "module": "PATROL巡检任务生成",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+      "operation": "从真实计划生成巡检任务和明细",
+      "api": "POST /msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLCreateTaskController -> PATROLPatrolPlanServiceImpl -> task/detail inserts",
+      "tables": [
+        "mp_create_tasks",
+        "mp_potrol_tasks",
+        "mp_task_details"
+      ],
+      "marker": "ADP_E2E_20260716155413_PATROL",
+      "verificationSql": "Query mp_create_tasks id=6675852713018192, mp_potrol_tasks id=6675852717278032 and mp_task_details id=6675852722815824; verify valid/version/state, route and plan associations.",
+      "status": "PASS",
+      "evidence": "metadata/patrol-module-recovery-acceptance.json and /tmp/adp-patrol-task-persistence-post-idempotency.json. Task patrolTask_20260716_009 and pending detail were persisted with zero association mismatches.",
+      "issues": [
+        "EamMs emits a non-blocking cache warning for createTaskEdit having no DataGrid metadata; the write transaction and read-back passed."
+      ]
+    },
+    {
+      "module": "PATROL巡检任务查询",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+      "operation": "点击真实查询按钮并在虚拟表格中定位生成任务",
+      "api": "POST /msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl query path",
+      "tables": [],
+      "marker": "ADP_E2E_20260716155413_PATROL",
+      "verificationSql": "Read path only; compare API task id/tableNo/state with the marker rows already verified in PostgreSQL.",
+      "status": "PASS",
+      "evidence": "The API returned task 6675852717278032/patrolTask_20260716_009 and the real page rendered the row. Console errors, page errors and PATROL request failures were all zero.",
+      "issues": []
+    },
+    {
+      "module": "PATROL巡检任务状态变更",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/batchChangeList",
+      "operation": "选择真实任务行，在批量变更弹窗将未下发任务改为已取消并再次查询复显",
+      "api": "GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate -> mp_potrol_tasks update",
+      "tables": [
+        "mp_potrol_tasks"
+      ],
+      "marker": "ADP_E2E_20260716155413_PATROL",
+      "verificationSql": "SELECT id,table_no,task_state,remark,version,valid FROM mp_potrol_tasks WHERE id=6675852717278032;",
+      "status": "PASS",
+      "evidence": "Response was 200/SUCCESS; PostgreSQL returned task_state=PATROL_taskState/cancelled, marker remark, version=1, valid=true; the task list then displayed 已取消 with zero browser errors.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260716155413_PATROL",
+      "artifact": "metadata/patrol-module-recovery-acceptance.json",
+      "summary": "PATROL real browser plan save, task generation, list query, batch cancellation, PostgreSQL read-back and cancelled-state re-render passed on 10.11.100.17 with zero console/page/request errors."
+    },
     {
       "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
       "artifact": "metadata/bpi-point-catalog-kafka-sync-acceptance.json",

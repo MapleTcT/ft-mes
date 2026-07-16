@@ -32,7 +32,10 @@ class PatternSpec:
 
 
 PATTERNS = [
-    PatternSpec("oracle-rownum", re.compile(r"\brownum\b", re.IGNORECASE)),
+    # SQL keywords are conventionally all-lowercase or all-uppercase here. Keeping
+    # these two type/row-limit patterns case-aware avoids treating JavaScript
+    # identifiers such as rowNum and Number(...) as Oracle syntax.
+    PatternSpec("oracle-rownum", re.compile(r"\b(?:rownum|ROWNUM)\b")),
     PatternSpec("oracle-sysdate", re.compile(r"\bsysdate\b", re.IGNORECASE)),
     PatternSpec("oracle-systimestamp", re.compile(r"\bsystimestamp\b", re.IGNORECASE)),
     PatternSpec("oracle-to-date", re.compile(r"\bto_date\s*\(", re.IGNORECASE)),
@@ -41,7 +44,7 @@ PATTERNS = [
     PatternSpec("oracle-decode", re.compile(r"\bdecode\s*\(", re.IGNORECASE)),
     PatternSpec("oracle-dual", re.compile(r"\bfrom\s+dual\b|\bdual\b", re.IGNORECASE)),
     PatternSpec("oracle-varchar2", re.compile(r"\bvarchar2\s*\(", re.IGNORECASE)),
-    PatternSpec("oracle-number", re.compile(r"\bnumber\s*\(", re.IGNORECASE)),
+    PatternSpec("oracle-number", re.compile(r"\b(?:number|NUMBER)\s*\(")),
     PatternSpec("mysql-ifnull", re.compile(r"\bifnull\s*\(", re.IGNORECASE)),
     PatternSpec("mysql-date-format", re.compile(r"\bdate_format\s*\(", re.IGNORECASE)),
     PatternSpec("mysql-str-to-date", re.compile(r"\bstr_to_date\s*\(", re.IGNORECASE)),

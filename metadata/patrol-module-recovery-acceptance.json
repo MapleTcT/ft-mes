@@ -1,0 +1,191 @@
+{
+  "generatedAt": "2026-07-16T15:54:22.820Z",
+  "repoBaseCommit": "299b0c8dd3993a819a58bf589d7b39bcbbfea580",
+  "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
+  "runtimeBuildSourceCommit": "8971a8770452c2bb55261f330284cd3dd26824b1",
+  "moduleCode": "PATROL_1.0.0",
+  "projectVersion": "6.0.4.0",
+  "hostService": "EamMs",
+  "database": "PostgreSQL",
+  "targetHost": "10.11.100.17",
+  "targetAccessPolicy": "COMPANY_LAN",
+  "overallStatus": "TARGET_TASK_PERSISTENCE_PASS",
+  "source": {
+    "archive": "PATROL_6.0.4.0.zip",
+    "sha256": "1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394",
+    "files": 1113,
+    "javaFiles": 455,
+    "webFiles": 267,
+    "sqlFiles": 9,
+    "zipIntegrity": "PASS"
+  },
+  "build": {
+    "javaVersion": 8,
+    "status": "PASS",
+    "testSourceFiles": 0,
+    "artifacts": [
+      {
+        "name": "core",
+        "javaFiles": 149,
+        "sha256": "7cb79a90f0fc781e9063a534a1825cb48fff753b077db142eccc43eecdf66461"
+      },
+      {
+        "name": "api",
+        "javaFiles": 63,
+        "sha256": "718a0efc664e0f88ee0926616e540343f6c5e02f472ee1182a398ede02ef5a14"
+      },
+      {
+        "name": "service",
+        "javaFiles": 243,
+        "sha256": "ecddc8350d281a6255b4d55e0b0c5039a7addcbfc2d3ace23853079ad752aecd"
+      }
+    ]
+  },
+  "postgres": {
+    "status": "PASS",
+    "migrationFiles": [
+      "178-patrol-technical-tables.sql",
+      "179-patrol-runtime-metadata.sql",
+      "180-patrol-runtime-compat-and-seed.sql",
+      "181-patrol-menu-app-permissions.sql",
+      "182-patrol-workflow-runtime.sql",
+      "183-patrol-system-codes.sql",
+      "184-patrol-ui-runtime-metadata.sql",
+      "185-patrol-task-persistence-compat.sql"
+    ],
+    "acceptanceFile": "deploy/docker/postgres/verify/001-patrol-acceptance.sql",
+    "rollbackFile": "deploy/docker/postgres/rollback/001-disable-patrol.sql",
+    "counts": {
+      "entityTables": 37,
+      "runtimeModules": 1,
+      "runtimeEntities": 7,
+      "runtimeModels": 27,
+      "runtimeViews": 74,
+      "runtimeConditions": 79,
+      "runtimeSqlDefinitions": 209,
+      "fields": 1368,
+      "dataGrids": 23,
+      "buttons": 75,
+      "events": 699,
+      "systemCodeEntities": 19,
+      "systemCodeValues": 58,
+      "menus": 24,
+      "operations": 102,
+      "workflows": 2
+    },
+    "targetMigration": "PASS",
+    "targetVerification": "PASS",
+    "idempotency": "PASS",
+    "isolatedRollbackRehearsal": "PASS",
+    "targetRollbackRehearsal": "REQUIRES_EXPLICIT_CONFIRMATION"
+  },
+  "runtimePatch": {
+    "baselineJarSha256": "b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38",
+    "deployedJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
+    "deployedJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+    "deployment": "PASS",
+    "healthVerification": "PASS",
+    "nginxSyntax": "PASS",
+    "postgresContainerHealth": "PASS"
+  },
+  "functionalAcceptance": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260716155413_PATROL",
+    "report": "/tmp/adp-patrol-task-persistence-post-idempotency.json",
+    "script": "deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js",
+    "routes": [
+      "/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+      "/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+      "/msService/PATROL/patrolTask/potrolTask/batchChangeList",
+      "/msService/PATROL/patrolTask/potrolTask/patrolStateEdit"
+    ],
+    "ids": {
+      "routeId": 6675485506913104,
+      "areaId": 6675531420975952,
+      "workItemId": 6675549930308432,
+      "staffId": 1,
+      "planId": 6675852707251024,
+      "generationId": 6675852713018192,
+      "taskId": 6675852717278032,
+      "taskDetailId": 6675852722815824
+    },
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/msService/PATROL/patrolTask/potrolTask/taskStateUpdate",
+        "status": 200,
+        "result": "SUCCESS"
+      }
+    ],
+    "persistence": {
+      "planTable": "mp_patrol_plans",
+      "planStaffTable": "mp_plan_staffs",
+      "generationTable": "mp_create_tasks",
+      "taskTable": "mp_potrol_tasks",
+      "detailTable": "mp_task_details",
+      "tableNo": "patrolTask_20260716_009",
+      "taskState": "PATROL_taskState/cancelled",
+      "remark": "ADP_E2E_20260716155413_PATROL_CANCELLED_BY_UI",
+      "version": 1,
+      "valid": true,
+      "planAssociationMismatchCount": 0,
+      "detailLifecycleNullCount": 0
+    },
+    "assertions": {
+      "total": 22,
+      "passed": 22,
+      "failed": 0
+    },
+    "browserEvidence": {
+      "screenshotsGenerated": 5,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "patrolRequestFailures": 0
+    }
+  },
+  "coverage": {
+    "passed": [
+      "route-area-item prerequisite persistence",
+      "plan save",
+      "plan staff association",
+      "task generation",
+      "task list query",
+      "batch cancellation",
+      "task and detail PostgreSQL verification",
+      "cancelled state browser re-render"
+    ],
+    "remaining": [
+      "input standard CRUD",
+      "full route-area-item CRUD",
+      "task issue-run-complete lifecycle",
+      "inspection result entry",
+      "exception handling",
+      "statistics and monitor pages"
+    ],
+    "knownWarnings": [
+      "EamMs logs getDataGridsByViewCode missing PATROL_1.0.0_patrolPlan_createTaskEdit while task generation still succeeds"
+    ]
+  },
+  "energyModules": {
+    "status": "BLOCKED_MISSING_INDICATOR",
+    "missingArtifacts": [
+      "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.api:6.0.4.0",
+      "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.core:6.0.4.0"
+    ]
+  }
+}

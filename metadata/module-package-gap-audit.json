@@ -1,36 +1,43 @@
 {
-  "generatedAt": "2026-07-16T09:19:37+08:00",
-  "repoCommit": "aa9061e3417c1c53b03cfad035cdc8cfbdfaa7a2",
+  "generatedAt": "2026-07-16T23:54:22+08:00",
+  "repoCommit": "299b0c8dd3993a819a58bf589d7b39bcbbfea580",
+  "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "database": "PostgreSQL",
   "scope": {
     "packageRoots": [
       "/Users/zhangchu/Documents/MES包",
-      "/Users/zhangchu/Downloads/ADP"
+      "/Users/zhangchu/Downloads/ADP",
+      "/Users/zhangchu/Documents/supPlant-Patrol V6.0.4.0-210616-C",
+      "/Users/zhangchu/Documents/supEMS V6.0.4.0-210617-C"
     ],
     "recoveredSourceRoot": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules",
+    "newPackageIntakeRoot": "/Users/zhangchu/Documents/ADP/mes-modules-patrol-intake/modules",
     "sustainableSourceRoot": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules",
-    "runtimeHost": "100.99.133.43",
-    "runtimeAccessPolicy": "TAILSCALE_ONLY",
-    "inactiveInternalAddress": "10.11.100.17",
+    "runtimeHost": "10.11.100.17",
+    "runtimeAccessPolicy": "COMPANY_LAN",
+    "historicalTailscaleAddress": "100.99.133.43",
     "runtimeModuleRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server",
     "archiveScan": {
-      "zipFiles": 365,
+      "zipFiles": 370,
       "nestedZipFiles": 55,
       "nonZipHistoricalFiles": 2,
-      "targetModulePackageHits": 1
+      "targetModulePackageHits": 6
     }
   },
   "summary": {
-    "vendorSourceVersionDirectories": 40,
-    "uniqueVendorModuleCodes": 34,
+    "vendorSourceVersionDirectories": 45,
+    "uniqueVendorModuleCodes": 39,
     "registeredBizModules": 33,
     "runtimeModuleDirectories": 26,
     "nacosServiceCount": 91,
-    "missingFullStackModules": 2,
-    "missingDependencyPackages": 2,
+    "missingFullStackModules": 0,
+    "missingDependencyPackages": 3,
+    "sourceRecoveredDeploymentPending": 0,
+    "sourceRecoveredRuntimePartial": 1,
+    "sourceRecoveredDependencyBlocked": 4,
     "presentButNotDeployed": 1,
     "customReplacementModules": 2,
-    "overallStatus": "PARTIAL_MODULE_SET"
+    "overallStatus": "SOURCE_SET_EXPANDED_RUNTIME_PARTIAL"
   },
   "coreRuntimeServices": [
     {
@@ -83,30 +90,64 @@
     {
       "id": "PATROL",
       "domain": "shared-inspection",
-      "status": "MISSING_FULL_STACK",
+      "projectVersion": "6.0.4.0",
+      "moduleCode": "PATROL_1.0.0",
+      "status": "SOURCE_RECOVERED_RUNTIME_PARTIAL",
       "severity": "CRITICAL",
-      "packageFound": false,
-      "sourceFound": false,
-      "runtimeFound": false,
+      "packageFound": true,
+      "sourceFound": true,
+      "sourceBuild": "PASS",
+      "postgresCloneAcceptance": "PASS",
+      "postgresTargetAcceptance": "PASS",
+      "postgresIdempotency": "PASS",
+      "postgresRollbackRehearsal": "PASS",
+      "postgresTargetRollbackRehearsal": "REQUIRES_EXPLICIT_CONFIRMATION",
+      "runtimePatchStaged": true,
+      "runtimePatchDeployed": true,
+      "runtimeJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+      "runtimeFound": true,
       "registryFound": false,
       "serviceFound": false,
-      "menuFound": false,
-      "tablesFound": false,
+      "hostService": "EamMs",
+      "hostServiceFound": true,
+      "menuFound": true,
+      "tablesFound": "TARGET_POSTGRESQL",
+      "functionalAcceptance": {
+        "status": "PASS",
+        "marker": "ADP_E2E_20260716155413_PATROL",
+        "scope": "plan save, task generation, list query, batch cancellation, PostgreSQL verification, cancelled-state re-render",
+        "browserConsoleErrors": 0,
+        "pageErrors": 0,
+        "requestFailures": 0
+      },
+      "expectedCounts": {
+        "tables": 37,
+        "menus": 24,
+        "operations": 102,
+        "workflows": 2
+      },
       "referencesFound": [
         "EAM",
         "BaseSet",
         "TeamInfo"
       ],
-      "impact": "设备巡检和安环巡检共用核心缺失",
-      "nextAction": "取得原始 PATROL 包，或按设备与安环共用边界新建巡检域"
+      "impact": "设备巡检和安环巡检共用核心已部署，计划和任务状态链可用；其余执行、异常和统计功能仍需验收",
+      "nextAction": "继续完成输入标准、路线 CRUD、任务下发/执行/完成、异常、统计和经确认的目标回滚演练"
     },
     {
       "id": "EMS_SUP_EMS",
       "domain": "energy-management",
-      "status": "MISSING_FULL_STACK",
+      "status": "SOURCE_RECOVERED_BLOCKED_DEPENDENCY",
       "severity": "HIGH",
-      "packageFound": false,
-      "sourceFound": false,
+      "packageFound": true,
+      "sourceFound": true,
+      "modules": [
+        "supEMS_1.0.0",
+        "energyPlan_5.0.0.0",
+        "EnergyConBase_5.0.0.0",
+        "EnergyPred_5.0.0.0"
+      ],
+      "directIndicatorImportFiles": 81,
       "runtimeFound": false,
       "registryFound": false,
       "serviceFound": false,
@@ -120,8 +161,33 @@
           "hm_energy_nodes_di": 0
         }
       },
-      "impact": "只有能源节点层级骨架，没有完整计量、平衡、单耗、分析和告警业务",
-      "nextAction": "明确能源业务边界后补原包或单独建设能源模块"
+      "impact": "源码已恢复，但缺少 Indicator 6.0.4.0 api/core 且随包没有 PostgreSQL 初始化 SQL，无法安全构建部署",
+      "nextAction": "取得真实 Indicator 包后按依赖顺序构建，并完成四服务 PostgreSQL 迁移和功能验收"
+    },
+    {
+      "id": "Indicator_6.0.4.0",
+      "domain": "energy-indicator-dependency",
+      "status": "MISSING_DEPENDENCY",
+      "severity": "CRITICAL",
+      "packageFound": false,
+      "sourceFound": false,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": null,
+      "requiredBy": [
+        "supEMS_1.0.0",
+        "energyPlan_5.0.0.0",
+        "EnergyConBase_5.0.0.0",
+        "EnergyPred_5.0.0.0"
+      ],
+      "expectedArtifacts": [
+        "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.api:6.0.4.0",
+        "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.core:6.0.4.0"
+      ],
+      "impact": "四个 EMS 模块无法形成真实可运行构件",
+      "nextAction": "取得原版依赖，禁止通过空接口或伪造实体桩绕过"
     },
     {
       "id": "packConfigManag",
@@ -224,11 +290,14 @@
     "skippedPackageLedger": "mes-modules-source-repo/metadata/skipped-packages.json",
     "databaseRegistryTable": "mod_module_registry",
     "menuSnapshot": "/tmp/adp-current-menu-20260716.json",
-    "runtimeVerification": "read-only SSH, Docker, Nacos and PostgreSQL checks through 100.99.133.43"
+    "runtimeVerification": "read/write browser, API, Docker and PostgreSQL acceptance through 10.11.100.17",
+    "sourceIntakeReport": "mes-modules-patrol-intake/docs/recovered-patrol-energy-packages.md",
+    "patrolAcceptance": "docs/testing/patrol-module-recovery-acceptance.md"
   },
   "limitations": [
     "模块包、JAR、Nacos 服务或菜单存在不代表业务功能已通过验收",
     "本报告只判断当前已提供包、恢复源码和当前运行态的完整性，不替代真实页面、API、PostgreSQL marker 和回滚验收",
-    "PATROL、EMS、packConfigManag 和 SESGISConfig 的结论限定于本次扫描的两个原始包根目录"
+    "PATROL 当前只对计划和任务状态链给出目标 PASS，其余页面不能据此自动升级为可用",
+    "EMS 的阻断结论覆盖新增两条包目录以及 Documents、Downloads、恢复 Maven 库和目标运行包中的 Indicator 搜索"
   ]
 }

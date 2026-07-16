@@ -909,6 +909,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolMonit/patrol-monit-fallback.html",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html",
       "state": "tracked",
       "tracked": true
@@ -2529,6 +2547,54 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/178-patrol-technical-tables.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/179-patrol-runtime-metadata.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/180-patrol-runtime-compat-and-seed.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/181-patrol-menu-app-permissions.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/182-patrol-workflow-runtime.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/183-patrol-system-codes.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/184-patrol-ui-runtime-metadata.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/postgres/init/185-patrol-task-persistence-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -2662,6 +2728,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-organization-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -2925,6 +2997,24 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/generate-module-access-workflow-sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/generate-module-i18n-js.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/generate-module-system-code-sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/init-keycloak-realm.sh",
       "state": "tracked",
       "tracked": true
@@ -2938,6 +3028,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/patch-configuration-entity-model-runtime.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/patch-eam-patrol-runtime.py",
       "state": "tracked",
       "tracked": true
     },
@@ -2998,6 +3094,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/patch-orgmanagement-standalone-auth-tasks.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/patch-patrol-postgres-source.py",
       "state": "tracked",
       "tracked": true
     },
@@ -3106,6 +3208,48 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/sync-keycloak-jwt-public-key.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test-patrol-monitor-fallback.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_audit_postgres_mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_generate_business_view_runtime_sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_generate_module_access_workflow_sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_generate_module_i18n_js.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_generate_module_system_code_sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_patch_patrol_postgres_source.py",
       "state": "tracked",
       "tracked": true
     },
@@ -4089,6 +4233,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/patrol-module-recovery-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/wom-toolbar-action-coverage.md",
       "state": "tracked",
       "tracked": true
@@ -4552,6 +4702,24 @@
     {
       "ignored": false,
       "path": "metadata/oracle-replacement-status.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-module-recovery-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-runtime-patch-report.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-source-patch-report.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6704,16 +6872,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 488
+      "tracked": 512
     },
     "docs": {
-      "tracked": 89
+      "tracked": 90
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 108
+      "tracked": 111
     },
     "package.json": {
       "tracked": 1
@@ -6737,8 +6905,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1113,
-    "tracked": 1113,
+    "totalFiles": 1141,
+    "tracked": 1141,
     "untracked": 0
   },
   "untrackedByDirectory": []

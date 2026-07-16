@@ -431,6 +431,19 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 - WOM PostgreSQL LOB 兼容风险：真实生产请检和检查活动报工链路先后暴露 `qcs_table_types`、`WOMWaitPutRecord.remark`、`WOMProduceTask.remark`、`WOMProdTaskExelog.remark` 和 `WOMProCheckDetail.remark` 的 `@javax.persistence.Lob` 字段在 PostgreSQL `text` 非空值下会被驱动按 OID/CLOB 读取并报 `Bad value for type long`；已新增并应用 `112-qcs-table-types-lob-oid-compat.sql`、`115-wom-wait-put-records-lob-oid-compat.sql`、`116-wom-produce-task-lob-oid-compat.sql`、`147-wom-pro-check-details-lob-oid-compat.sql`，验收脚本也改为避开或使用 `lo_from_bytea` 写 marker CLOB 值。后续仍应对业务 LOB 字段做统一 PostgreSQL 兼容审计。
 - WOM 生产动作源地图：`metadata/production-module-source-action-map.json`
 
+## PATROL 共享巡检任务链（2026-07-16）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 新增巡检计划并绑定人员 | `potrolPlanList` | `POST /msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit` | `PATROLPatrolPlanController -> PATROLPatrolPlanServiceImpl -> JPA/关联保存` | `mp_patrol_plans`、`mp_plan_staffs` | 按 `planId=6675852707251024` 查询计划，并按 `patrol_plan/staff_id/valid` 查询关联 | 计划 code 为 marker，人员有效关联 1 条 | PASS |
+| 从计划生成任务 | `potrolPlanList` | `POST /msService/PATROL/patrolPlan/createTask/createTaskEdit/submit` | `PATROLCreateTaskController -> PATROLPatrolPlanServiceImpl -> 任务/明细插入` | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | 查询 generation `6675852713018192`、task `6675852717278032`、detail `6675852722815824`，核对 plan/route/valid/version/state | 三层记录全部存在；计划关联不一致数 0，明细生命周期空值数 0 | PASS |
+| 查询生成任务 | `potrolTaskList` | `POST /msService/PATROL/patrolTask/potrolTask/potrolTaskList-query` | `PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl` | 只读 | 将 API 返回 id/tableNo/state 与上述 PostgreSQL marker 行比对 | HTTP 200，页面和 API 均出现 `patrolTask_20260716_009` | PASS |
+| 批量取消任务并复显 | `batchChangeList -> patrolStateEdit` | `GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate` | `PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate` | `mp_potrol_tasks` | `SELECT id,table_no,task_state,remark,version,valid FROM mp_potrol_tasks WHERE id=6675852717278032;` | `PATROL_taskState/cancelled`、marker remark、`version=1`、`valid=true`；再次查询页面显示“已取消” | PASS |
+
+机器记录：`metadata/patrol-module-recovery-acceptance.json`。可重放脚本：
+`deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。验收过程中 console error、page error 和
+PATROL request failure 均为 0。
+
 ## BPI 规则发布失败重新入队验收（2026-07-13）
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |

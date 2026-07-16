@@ -58,6 +58,7 @@ AUTH_USER_PERSISTENCE_OUTPUT ?= /tmp/adp-auth-user-persistence-acceptance.json
 RBAC_PERMISSION_PERSISTENCE_OUTPUT ?= /tmp/adp-rbac-permission-persistence-acceptance.json
 SYSTEMCODE_PERSISTENCE_OUTPUT ?= /tmp/adp-systemcode-persistence-acceptance.json
 SYSTEMCONFIG_PERSISTENCE_OUTPUT ?= /tmp/adp-systemconfig-persistence-acceptance.json
+PATROL_TASK_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-task-persistence-acceptance.json
 SYSTEMCONFIG_BUILTINS_OUTPUT ?= metadata/systemconfig-builtins-readiness-smoke.json
 SYSTEMCONFIG_CONTROLLED_OUTPUT ?= metadata/systemconfig-controlled-runtime-config-acceptance.json
 SYSTEMCONFIG_CONTROLLED_TARGET_MODE ?= qcs
@@ -455,6 +456,20 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-minio-runtime-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-dependency-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-production-export-readiness-smoke.js
+	$(PYTHON) -m py_compile deploy/docker/scripts/generate-business-view-runtime-sql.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_business_view_runtime_sql.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/generate-module-access-workflow-sql.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_module_access_workflow_sql.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/generate-module-i18n-js.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_module_i18n_js.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/generate-module-system-code-sql.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_module_system_code_sql.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/patch-patrol-postgres-source.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_patrol_postgres_source.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-patrol-runtime.py
+	$(NODE) deploy/docker/scripts/test-patrol-monitor-fallback.js
+	$(PYTHON) -m py_compile deploy/docker/scripts/audit-postgres-mappings.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_audit_postgres_mappings.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-orgmanagement-rbac-permission-mapper.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-reactapi-ready.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-wts-runtime-compat.py
@@ -945,6 +960,10 @@ acceptance-systemcode-persistence:
 
 acceptance-systemconfig-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_PERSISTENCE_OUTPUT=$(SYSTEMCONFIG_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js
+
+.PHONY: acceptance-patrol-task-persistence
+acceptance-patrol-task-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_TASK_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
 smoke-systemconfig-builtins:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_BUILTINS_OUTPUT=$(SYSTEMCONFIG_BUILTINS_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-builtins-readiness-smoke.js

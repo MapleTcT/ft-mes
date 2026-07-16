@@ -424,6 +424,22 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 - QCS 受控配置回滚后报告合格链路当前复验：`metadata/qcs-report-chain-qualified-current.json`；Marker `ADP_E2E_20260621065620_QCS_REPORT_QUAL`；API/DB/SSH base 为 `http://100.99.133.43:18080`，浏览器大静态资源入口为 `http://222.88.185.146:18080`；真实 WOM 前端先调用 `POST /msService/WOM/produceTask/produceTask/createManuInspect` 创建制造请检，再通过 QCS 请检列表和报告编辑页上下文调用 `/QCS/inspect/inspect/bulkSubmit` 与 `/QCS/inspectReport/inspectReport/batchDealReports`；报告保存返回 `HTTP 200`，最终报告 `status=99/check_result=合格`，WOM 任务/待入库/执行日志回写 `已检/合格`，批次回写 `BaseSet_checkResult/qualified`，前端无 blocking console/network/page error。
 - QCS 受控配置回滚后报告不合格链路当前复验：`metadata/qcs-report-chain-unqualified-current.json`；Marker `ADP_E2E_20260621070426_QCS_UNQLF`；同一真实浏览器/API/DB 组合创建制造请检、生成报告、保存 `checkResult=不合格` 并两段提交生效；最终报告 `status=99/check_result=不合格/un_qlf_deal_flag=true`，WOM 任务/待入库/执行日志回写 `Checked/Unqualified`，批次回写 `BaseSet_checkResult/unqualified/is_available=false/active_batch_state_id=11003`，并自动生成 `qcs_un_qlf_deals.id=757556916282624`。
 
+## PATROL 共享巡检任务链（2026-07-16）
+
+目标：`http://10.11.100.17:18080`；marker：
+`ADP_E2E_20260716155413_PATROL`；该 marker 在重新应用 178-185 后生成；机器证据：
+`metadata/patrol-module-recovery-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| PATROL 巡检计划 | `/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList` | 真实页面上下文新增单次计划并绑定虚拟人员 | `POST .../patrolPlan/submit` | 计划页正常加载，保存返回成功；无 visible/console/page/network error | HTTP 200，返回 `planId=6675852707251024` | `mp_patrol_plans`、`mp_plan_staffs` | PASS | 计划下发/周期调度不在本动作范围 |
+| PATROL 任务生成 | 同上 | 按计划生成任务和任务明细 | `POST .../createTaskEdit/submit` | 真实页面会话内提交成功 | HTTP 200，任务 `patrolTask_20260716_009` 和 pending 明细落库 | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | PASS | EamMs 有 createTaskEdit 无 DataGrid 的非阻断 WARN |
+| PATROL 任务查询 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList` | 点击真实“查询”并定位 marker 行 | `POST .../potrolTaskList-query` | 虚拟表格显示目标任务；无 console/page/request error | HTTP 200，返回目标任务和状态 | 只读 | PASS | 页面默认“待办”是原产品语义，普通查询必须点击“查询” |
+| PATROL 任务取消 | `/msService/PATROL/patrolTask/potrolTask/batchChangeList` | 选择目标行，在状态弹窗选择“已取消”，保存后重开任务列表 | `GET .../taskStateUpdate`、`POST .../potrolTaskList-query` | 状态弹窗、保存和“已取消”复显全部正常；5 张截图生成；浏览器错误为 0 | HTTP 200/SUCCESS；状态、备注和 version 更新 | `mp_potrol_tasks` | PASS | 任务下发/执行/完成需按真实状态机另测 |
+
+本节只证明计划和任务状态链通过。输入标准 CRUD、路线完整 CRUD、现场执行结果、异常处置和统计页
+仍是后续验收项。
+
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 
 本节只验收新 BPI 操作台的交互、API 契约调用和响应式布局。浏览器测试连接 `simulation/bpi` 确定性模拟器，不把模拟数据计作 PostgreSQL 真实落库；独立 Java 17 服务的 PostgreSQL 证据见 `metadata/bpi-phase1-persistence-acceptance.json`。

@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`64`。
+- Watch 语句：`71`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -82,3 +82,10 @@
 | 173-wom-make-task-flow-runtime-metadata-sync.sql | 88 | delete | scoped-delete | Allowed only for scoped cleanup statements with an explicit WHERE clause; never for full-table cleanup. | DELETE FROM public.wf_task task USING current_flow WHERE task.deployment_id = current_flow.deployment_id AND task.code = 'TaskEvent_023irnk'; |
 | 176-wom-bpi-production-context-outbox.sql | 220 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_wom_bpi_production_context ON public.wom_produce_tasks; |
 | 177-wom-bpi-context-revision-clock-floor.sql | 17 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_wom_bpi_context_revision_clock_floor ON public.wom_bpi_context_revisions; |
+| 178-patrol-technical-tables.sql | 71 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_patrol_ensure_deal_info_table(text); |
+| 178-patrol-technical-tables.sql | 146 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_patrol_sync_input_standard_reference ON public.mp_input_standards_mc; |
+| 178-patrol-technical-tables.sql | 169 | drop-trigger | guarded-if-exists | Allowed only with IF EXISTS when replacing trigger definitions idempotently. | DROP TRIGGER IF EXISTS trg_patrol_sync_work_group_reference ON public.mp_work_groups_mc; |
+| 179-patrol-runtime-metadata.sql | 51 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (text, bigint); |
+| 179-patrol-runtime-metadata.sql | 54 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (bigint, text); |
+| 179-patrol-runtime-metadata.sql | 57 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (boolean, text); |
+| 179-patrol-runtime-metadata.sql | 60 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (text, boolean); |

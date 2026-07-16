@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -10,8 +9,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_HOST = "100.99.133.43"
-LEGACY_HOST = "10.11.100.17"
-LEGACY_RUNTIME_HOSTS = {"10.11.100.17", "222.88.185.146"}
+OFFICE_LAN_HOST = "10.11.100.17"
+RETIRED_RUNTIME_HOSTS = {"222.88.185.146"}
 EXPECTED_BASE_URL = f"http://{EXPECTED_HOST}:18080"
 EXPECTED_SECONDARY_URL = f"http://{EXPECTED_HOST}:18070"
 EXPECTED_BROWSER_BASE_URL = EXPECTED_BASE_URL
@@ -46,6 +45,9 @@ DOC_REQUIREMENTS = {
         EXPECTED_HOST,
         EXPECTED_BASE_URL,
         f"v6@{EXPECTED_HOST}",
+        OFFICE_LAN_HOST,
+        f"http://{OFFICE_LAN_HOST}:18080",
+        f"v6@{OFFICE_LAN_HOST}",
     ],
 }
 
@@ -96,13 +98,13 @@ def require_text(path: Path, fragments: list[str], failures: list[str]) -> None:
             fail(failures, f"{path.relative_to(ROOT)} missing required current-host text: {fragment}")
 
 
-def forbid_legacy_runtime_host(failures: list[str]) -> None:
+def forbid_retired_runtime_host(failures: list[str]) -> None:
     for base_path in RUNTIME_PATHS:
         for path in iter_files(base_path):
             text = read_text(path, failures)
-            for legacy_host in LEGACY_RUNTIME_HOSTS:
-                if legacy_host in text:
-                    fail(failures, f"{path.relative_to(ROOT)} still uses legacy runtime host {legacy_host}")
+            for retired_host in RETIRED_RUNTIME_HOSTS:
+                if retired_host in text:
+                    fail(failures, f"{path.relative_to(ROOT)} still uses retired runtime host {retired_host}")
 
 
 def check_makefile(failures: list[str]) -> None:
@@ -171,9 +173,9 @@ def read_json(path: Path, failures: list[str]) -> dict[str, Any]:
 
 def check_report_text(path: Path, failures: list[str]) -> None:
     text = read_text(path, failures)
-    for legacy_host in LEGACY_RUNTIME_HOSTS:
-        if legacy_host in text:
-            fail(failures, f"{path.relative_to(ROOT)} current smoke report still contains legacy host {legacy_host}")
+    for retired_host in RETIRED_RUNTIME_HOSTS:
+        if retired_host in text:
+            fail(failures, f"{path.relative_to(ROOT)} current smoke report still contains retired host {retired_host}")
     if EXPECTED_HOST not in text:
         fail(failures, f"{path.relative_to(ROOT)} current smoke report must mention {EXPECTED_HOST}")
 
@@ -264,20 +266,10 @@ def check_docs(failures: list[str]) -> None:
     for path, required in DOC_REQUIREMENTS.items():
         require_text(path, required, failures)
 
-    runtime_scope = read_text(ROOT / "docs/runtime-validation-scope.md", failures)
-    historical_note_pattern = re.compile(
-        rf"2026-06-15[^\n]*{re.escape(LEGACY_HOST)}[^\n]*2026-06-20[^\n]*{re.escape(EXPECTED_HOST)}"
-    )
-    if LEGACY_HOST in runtime_scope and not historical_note_pattern.search(runtime_scope):
-        fail(
-            failures,
-            "docs/runtime-validation-scope.md may mention the legacy host only as historical evidence paired with the current host",
-        )
-
 
 def main() -> int:
     failures: list[str] = []
-    forbid_legacy_runtime_host(failures)
+    forbid_retired_runtime_host(failures)
     check_makefile(failures)
     check_deploy_defaults(failures)
     check_runtime_reports(failures)

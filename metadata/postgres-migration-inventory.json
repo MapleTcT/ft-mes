@@ -1,43 +1,43 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 177,
+  "migrationCount": 185,
   "firstNumber": 1,
-  "lastNumber": 177,
+  "lastNumber": 185,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 64,
+  "watchStatementCount": 71,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 9326,
-    "create-function": 70,
-    "create-index": 870,
-    "create-table": 534,
-    "create-view": 107,
-    "insert": 3879,
-    "update": 3943
+    "alter-table": 10786,
+    "create-function": 84,
+    "create-index": 975,
+    "create-table": 568,
+    "create-view": 142,
+    "insert": 10999,
+    "update": 11061
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 174,
-    "do-block": 274,
-    "if-exists": 92,
-    "if-not-exists": 11289,
-    "on-conflict": 3841,
-    "to-regclass": 152,
-    "where-not-exists": 27
+    "create-or-replace": 223,
+    "do-block": 386,
+    "if-exists": 105,
+    "if-not-exists": 12904,
+    "on-conflict": 10940,
+    "to-regclass": 219,
+    "where-not-exists": 39
   },
   "tagTotals": {
-    "auth-rbac-org": 36,
+    "auth-rbac-org": 37,
     "business": 34,
-    "compatibility": 73,
-    "configuration": 41,
-    "general": 27,
+    "compatibility": 75,
+    "configuration": 42,
+    "general": 28,
     "notification": 9,
-    "platform": 49,
-    "workflow": 20
+    "platform": 54,
+    "workflow": 21
   },
   "migrations": [
     {
@@ -6657,6 +6657,345 @@
           "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
         }
       ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/178-patrol-technical-tables.sql",
+      "name": "178-patrol-technical-tables.sql",
+      "number": 178,
+      "slug": "patrol-technical-tables",
+      "validName": true,
+      "tags": [
+        "configuration"
+      ],
+      "lineCount": 195,
+      "sha256": "888067fbe1d4c900f7d6712456cba3db3a4d3c6a9d91ced42f9caa715222e31f",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 0,
+        "create-function": 3,
+        "create-index": 10,
+        "alter-table": 4,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 3,
+        "if-not-exists": 34,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 3,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 71,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_patrol_ensure_deal_info_table(text);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_patrol_ensure_deal_info_table(text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        },
+        {
+          "line": 146,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_patrol_sync_input_standard_reference",
+          "statement": "DROP TRIGGER IF EXISTS trg_patrol_sync_input_standard_reference ON public.mp_input_standards_mc;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        },
+        {
+          "line": 169,
+          "pattern": "drop-trigger",
+          "excerpt": "DROP TRIGGER IF EXISTS trg_patrol_sync_work_group_reference",
+          "statement": "DROP TRIGGER IF EXISTS trg_patrol_sync_work_group_reference ON public.mp_work_groups_mc;",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing trigger definitions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/179-patrol-runtime-metadata.sql",
+      "name": "179-patrol-runtime-metadata.sql",
+      "number": 179,
+      "slug": "patrol-runtime-metadata",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 92929,
+      "sha256": "d06bd132c0fd8a86f6eacad0409e556123490fc5d0518d5568773d8fe8d221f1",
+      "statementCounts": {
+        "create-table": 30,
+        "create-view": 35,
+        "create-function": 11,
+        "create-index": 88,
+        "alter-table": 1451,
+        "insert": 2486,
+        "update": 2486
+      },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 1572,
+        "on-conflict": 2486,
+        "do-block": 109,
+        "to-regclass": 65,
+        "create-or-replace": 46,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 51,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, bigint);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (text, bigint);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
+        },
+        {
+          "line": 54,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (bigint, text);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (bigint, text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
+        },
+        {
+          "line": 57,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (boolean, text);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (boolean, text);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
+        },
+        {
+          "line": 60,
+          "pattern": "drop-operator",
+          "excerpt": "DROP OPERATOR IF EXISTS public.= (text, boolean);",
+          "statement": "DROP OPERATOR IF EXISTS public.= (text, boolean);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/180-patrol-runtime-compat-and-seed.sql",
+      "name": "180-patrol-runtime-compat-and-seed.sql",
+      "number": 180,
+      "slug": "patrol-runtime-compat-and-seed",
+      "validName": true,
+      "tags": [
+        "platform",
+        "compatibility"
+      ],
+      "lineCount": 193,
+      "sha256": "69ae3b2fea981c6f88534cb435927948d59040cbc3d9a6422f37c4993d672de2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 4,
+        "insert": 3,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 2,
+        "on-conflict": 0,
+        "do-block": 2,
+        "to-regclass": 2,
+        "create-or-replace": 0,
+        "where-not-exists": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/181-patrol-menu-app-permissions.sql",
+      "name": "181-patrol-menu-app-permissions.sql",
+      "number": 181,
+      "slug": "patrol-menu-app-permissions",
+      "validName": true,
+      "tags": [
+        "platform",
+        "auth-rbac-org"
+      ],
+      "lineCount": 690,
+      "sha256": "842e0c81973a30688a945f7c1e86ef89f298376fccc32ea0493b476bca2019e7",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 0,
+        "insert": 10,
+        "update": 8
+      },
+      "idempotencySignals": {
+        "if-exists": 4,
+        "if-not-exists": 2,
+        "on-conflict": 1,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 4
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/182-patrol-workflow-runtime.sql",
+      "name": "182-patrol-workflow-runtime.sql",
+      "number": 182,
+      "slug": "patrol-workflow-runtime",
+      "validName": true,
+      "tags": [
+        "platform",
+        "workflow"
+      ],
+      "lineCount": 479,
+      "sha256": "4a477bc0312cfd9609dbea1db2a9bce9f8445a3818b82f6272b7b4fcb9f1d877",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 0,
+        "insert": 11,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 2,
+        "if-not-exists": 5,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/183-patrol-system-codes.sql",
+      "name": "183-patrol-system-codes.sql",
+      "number": 183,
+      "slug": "patrol-system-codes",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 147,
+      "sha256": "d6f7eefd2e500e707f7934b7404649a8ca97633012e390a8ad28335aa46a1051",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 2,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 2,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 2
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/184-patrol-ui-runtime-metadata.sql",
+      "name": "184-patrol-ui-runtime-metadata.sql",
+      "number": 184,
+      "slug": "patrol-ui-runtime-metadata",
+      "validName": true,
+      "tags": [
+        "platform"
+      ],
+      "lineCount": 118479,
+      "sha256": "dd4e2f1d88a229699fec02af957a0a793038eeae862a2b6a7ddbbc83423e2bd5",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 4608,
+        "update": 4608
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 4608,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/185-patrol-task-persistence-compat.sql",
+      "name": "185-patrol-task-persistence-compat.sql",
+      "number": 185,
+      "slug": "patrol-task-persistence-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 83,
+      "sha256": "428688e43fce48a3eae2f8a97e3d17f8b64b162da5837a0b3fc461a5b854feba",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 0,
+        "alter-table": 1,
+        "insert": 0,
+        "update": 5
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
       "unguardedStructuralStatements": []
     }
   ]

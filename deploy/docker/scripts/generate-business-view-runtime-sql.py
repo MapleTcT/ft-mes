@@ -11,6 +11,8 @@ the source module XMLs.
 from __future__ import annotations
 
 import argparse
+import base64
+import copy
 import json
 import re
 import sys
@@ -87,6 +89,9 @@ class FieldDef:
     column_type: str
     model_code: str
     fill: Optional[Dict[str, str]]
+    custom_section: bool = False
+    custom_model_code: str = ""
+    property_lay_rec: str = ""
 
 
 @dataclass
@@ -404,8 +409,11 @@ BOOLEAN_XML_KEYS = {
     "getrevisions",
     "hiderevision",
     "iscontrol",
+    "iscallback",
+    "isconfirm",
     "iscreatenew",
     "iscustom",
+    "iscustomfunc",
     "isgroup",
     "ishide",
     "ishidden",
@@ -436,6 +444,7 @@ BOOLEAN_XML_KEYS = {
     "showformathaschanged",
     "showrevision",
     "showtypehaschanged",
+    "useinmore",
 }
 
 
@@ -508,6 +517,74 @@ def sanitize_runtime_strings(value: Any) -> Any:
     return value
 
 
+def is_unmapped_custom_placeholder(value: Any) -> bool:
+    if not isinstance(value, dict):
+        return False
+    custom_section = value.get("customSection")
+    if not bool_text(str(custom_section or "false")):
+        return False
+    return not str(value.get("propertyCode") or value.get("fullPropertyCode") or "").strip()
+
+
+def scrub_unmapped_custom_placeholders(value: Any) -> Any:
+    """Remove tenant-only custom columns when their mapping rows are absent.
+
+    The module package contains visual placeholders for project custom fields,
+    while the concrete base_cp_* mapping rows belong to a tenant database and
+    are not shipped with the base module. Keeping those unresolved placeholders
+    makes the legacy layout service dereference a missing mapping.
+    """
+    if isinstance(value, list):
+        return [
+            scrub_unmapped_custom_placeholders(item)
+            for item in value
+            if not is_unmapped_custom_placeholder(item)
+        ]
+    if isinstance(value, dict):
+        result: Dict[str, Any] = {}
+        for key, child in value.items():
+            if is_unmapped_custom_placeholder(child):
+                continue
+            result[key] = scrub_unmapped_custom_placeholders(child)
+        return result
+    return value
+
+
+def normalize_packaged_runtime_payload(value: Any) -> Any:
+    """Normalize authoritative packaged JSON for the recovered runtime."""
+    value = scrub_unmapped_custom_placeholders(copy.deepcopy(value))
+    normalize_xml_scalar_types(value)
+
+    def visit(node: Any) -> None:
+        if isinstance(node, list):
+            for child in node:
+                visit(child)
+            return
+        if not isinstance(node, dict):
+            return
+
+        operation_code = str(node.get("buttonoperationcode") or "").strip()
+        if operation_code:
+            node["CODE"] = operation_code
+            if bool_text(str(node.get("ispermission") or "false")):
+                node["pc"] = button_power_code(operation_code)
+            show_name = str(node.get("showname") or node.get("name") or "").strip()
+            if show_name:
+                node["NAME"] = show_name
+            node["ICONCLS"] = "cui-btn-" + default_button_style(node)
+            node["USEINMORE"] = bool_text(
+                str(node.get("useInMore") if node.get("useInMore") is not None else node.get("USEINMORE") or "false")
+            )
+            node.setdefault("SEPARATENUM", "0")
+
+        for child in node.values():
+            visit(child)
+
+    visit(value)
+    sanitize_runtime_strings(value)
+    return value
+
+
 def reference_mne_type(url: str) -> str:
     if url.startswith("/organization/#/reference?type="):
         return url.rsplit("=", 1)[-1][:1].upper() + url.rsplit("=", 1)[-1][1:]
@@ -555,6 +632,12 @@ def canonical_button_onclick(funcname: str) -> str:
     if value.startswith("onclick="):
         return value.split("=", 1)[-1].strip().strip("'\"")
     return value
+
+
+def button_power_code(operation_code: str) -> str:
+    """Mirror OrchidUtils/BAPUrlBase64 for runtime button permission checks."""
+    encoded = base64.urlsafe_b64encode((operation_code + "|").encode("utf-8")).decode("ascii")
+    return "__pc__=" + encoded.replace("=", "_")
 
 
 def default_button_style(button: Dict[str, Any]) -> str:
@@ -608,6 +691,8 @@ def button_payload(button_item: ET.Element, views: Optional[Dict[str, "ViewDef"]
         result["ONCLICK"] = onclick
     if operation_code:
         result["CODE"] = operation_code
+        if bool_text(str(result.get("ispermission", "false"))):
+            result["pc"] = button_power_code(operation_code)
     if show_name:
         result["NAME"] = show_name
     result["ICONCLS"] = "cui-btn-" + button_style
@@ -675,6 +760,317 @@ def module_version_key(path: Path) -> Tuple[int, ...]:
         if version > best:
             best = version
     return best
+
+
+def load_packaged_view_json(modules_root: Path) -> Dict[str, Dict[str, Any]]:
+    """Load authoritative runtime_extra_view JSON exported with module packages."""
+    selected: Dict[str, Tuple[Tuple[int, ...], int, str, Dict[str, Any]]] = {}
+    for metadata_path in sorted(modules_root.rglob("metadata.json")):
+        if "target" in metadata_path.parts:
+            continue
+        try:
+            blocks = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            print(f"-- WARNING: skip invalid metadata JSON {metadata_path}: {error}", file=sys.stderr)
+            continue
+        if not isinstance(blocks, list):
+            continue
+        for block in blocks:
+            if not isinstance(block, dict) or str(block.get("tableName") or "").lower() != "runtime_extra_view":
+                continue
+            rows = block.get("metadata")
+            if not isinstance(rows, list):
+                continue
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                code = str(row.get("CODE") or row.get("code") or row.get("VIEW_CODE") or row.get("viewCode") or "").strip()
+                raw_payload = row.get("VIEW_JSON") if "VIEW_JSON" in row else row.get("viewJson")
+                if not code or raw_payload in (None, ""):
+                    continue
+                try:
+                    payload = json.loads(raw_payload) if isinstance(raw_payload, str) else copy.deepcopy(raw_payload)
+                except json.JSONDecodeError as error:
+                    print(
+                        f"-- WARNING: skip invalid runtime view JSON {code} from {metadata_path}: {error}",
+                        file=sys.stderr,
+                    )
+                    continue
+                if not isinstance(payload, dict):
+                    continue
+                try:
+                    row_version = int(row.get("VERSION") or row.get("version") or 0)
+                except (TypeError, ValueError):
+                    row_version = 0
+                candidate = (module_version_key(metadata_path), row_version, str(metadata_path), payload)
+                existing = selected.get(code)
+                if existing is None or candidate[:3] > existing[:3]:
+                    selected[code] = candidate
+    return {code: candidate[3] for code, candidate in selected.items()}
+
+
+@dataclass(frozen=True)
+class PackagedUiTableSpec:
+    runtime_table: str
+    product_table: str
+    columns: Tuple[str, ...]
+    boolean_columns: Tuple[str, ...] = ()
+    integer_columns: Tuple[str, ...] = ()
+    lob_columns: Tuple[str, ...] = ()
+    json_columns: Tuple[str, ...] = ()
+
+
+PACKAGED_UI_TABLE_SPECS: Tuple[PackagedUiTableSpec, ...] = (
+    PackagedUiTableSpec(
+        runtime_table="runtime_field",
+        product_table="ec_field",
+        columns=(
+            "code", "ec_env", "version", "modify_time", "valid", "entity_code", "module_code",
+            "layer_type", "proj_flag", "column_type", "full_property_code", "region_type",
+            "advqueryjson_code", "fastqueryjson_code", "datagrid_code", "config", "cell_code", "none",
+            "is_hidden", "lay_rec", "show_format", "show_type", "view_code", "property_code",
+            "display_name", "name", "field_key",
+        ),
+        boolean_columns=("valid", "proj_flag", "is_hidden"),
+        integer_columns=("version",),
+        lob_columns=("config",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_data_grid",
+        product_table="ec_data_grid",
+        columns=(
+            "code", "ec_env", "version", "modify_time", "valid", "entity_code", "module_code",
+            "data_grid_json", "proj_flag", "operate_name", "permission_code", "is_permission",
+            "data_grid_type", "full_config", "data_grid_name", "ex", "orgproperty_code",
+            "targetmodel_code", "config", "view_code", "name",
+        ),
+        boolean_columns=("valid", "proj_flag", "is_permission", "ex"),
+        integer_columns=("version", "data_grid_type"),
+        lob_columns=("data_grid_json", "full_config", "config"),
+        json_columns=("data_grid_json",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_button",
+        product_table="ec_button",
+        columns=(
+            "code", "ec_env", "version", "modify_time", "valid", "entity_code", "module_code",
+            "button_operation_code", "release_felid", "is_signature_config", "power_type", "role_id",
+            "position_id", "signer_id", "signature_type", "signature_enabled", "proj_flag", "is_published",
+            "button_align", "permission_code", "config", "script_code", "region_type", "datagrid_code",
+            "view_code", "cell_code", "display_name", "operate_url", "is_hide", "is_custom_func",
+            "is_callback", "is_permission", "is_use_more", "button_style", "confirm_content", "is_confirm",
+            "viewselect_code", "operate_type", "name", "signature_describle",
+        ),
+        boolean_columns=(
+            "valid", "is_signature_config", "signature_enabled", "proj_flag", "is_published", "is_hide",
+            "is_custom_func", "is_callback", "is_permission", "is_use_more", "is_confirm",
+        ),
+        integer_columns=("version",),
+        lob_columns=("config",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_event",
+        product_table="ec_event",
+        columns=(
+            "code", "ec_env", "version", "modify_time", "valid", "entity_code", "module_code",
+            "event_function_es5", "proj_flag", "section_code", "tab_code", "layout_code", "button_code",
+            "field_code", "event_function", "name",
+        ),
+        boolean_columns=("valid", "proj_flag"),
+        integer_columns=("version",),
+        lob_columns=("event_function_es5", "event_function"),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_extra_query_json",
+        product_table="ec_extra_query_json",
+        columns=("code", "ec_env", "version", "proj_flag", "query_config", "view_code"),
+        boolean_columns=("proj_flag",),
+        integer_columns=("version",),
+        lob_columns=("query_config",),
+        json_columns=("query_config",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_fast_query_json",
+        product_table="ec_fast_query_json",
+        columns=(
+            "code", "ec_env", "version", "targetmodel_code", "proj_flag", "layout_name", "query_config",
+            "view_code",
+        ),
+        boolean_columns=("proj_flag",),
+        integer_columns=("version",),
+        lob_columns=("query_config",),
+        json_columns=("query_config",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_adv_query_json",
+        product_table="ec_adv_query_json",
+        columns=(
+            "code", "ec_env", "version", "targetmodel_code", "proj_flag", "name", "layout_name",
+            "query_config", "view_code",
+        ),
+        boolean_columns=("proj_flag",),
+        integer_columns=("version",),
+        lob_columns=("query_config",),
+        json_columns=("query_config",),
+    ),
+    PackagedUiTableSpec(
+        runtime_table="runtime_validate",
+        product_table="ec_validate",
+        columns=(
+            "code", "ec_env", "version", "modify_time", "valid", "entity_code", "module_code",
+            "proj_flag", "field_code", "params", "type",
+        ),
+        boolean_columns=("valid", "proj_flag"),
+        integer_columns=("version",),
+        lob_columns=("params",),
+    ),
+)
+
+
+def load_packaged_ui_rows(modules_root: Path) -> Dict[str, List[Dict[str, Any]]]:
+    """Load authoritative executable page metadata from the newest package export."""
+    table_names = {spec.runtime_table for spec in PACKAGED_UI_TABLE_SPECS}
+    selected: Dict[Tuple[str, str], Tuple[Tuple[int, ...], int, str, Dict[str, Any]]] = {}
+    for metadata_path in sorted(modules_root.rglob("metadata.json")):
+        if "target" in metadata_path.parts:
+            continue
+        try:
+            blocks = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            print(f"-- WARNING: skip invalid metadata JSON {metadata_path}: {error}", file=sys.stderr)
+            continue
+        if not isinstance(blocks, list):
+            continue
+        for block in blocks:
+            if not isinstance(block, dict):
+                continue
+            table_name = str(block.get("tableName") or "").lower()
+            if table_name not in table_names or not isinstance(block.get("metadata"), list):
+                continue
+            for row in block["metadata"]:
+                if not isinstance(row, dict):
+                    continue
+                code = str(row.get("CODE") or row.get("code") or "").strip()
+                if not code:
+                    continue
+                try:
+                    row_version = int(row.get("VERSION") or row.get("version") or 0)
+                except (TypeError, ValueError):
+                    row_version = 0
+                candidate = (module_version_key(metadata_path), row_version, str(metadata_path), copy.deepcopy(row))
+                key = (table_name, code)
+                existing = selected.get(key)
+                if existing is None or candidate[:3] > existing[:3]:
+                    selected[key] = candidate
+
+    result: Dict[str, List[Dict[str, Any]]] = {table_name: [] for table_name in table_names}
+    for (table_name, _code), candidate in sorted(selected.items()):
+        result[table_name].append(candidate[3])
+    return result
+
+
+def packaged_row_matches_modules(row: Dict[str, Any], module_codes: Sequence[str]) -> bool:
+    if not module_codes:
+        return False
+    direct_module = str(row.get("MODULE_CODE") or row.get("module_code") or "").strip()
+    if direct_module in module_codes:
+        return True
+    identifiers = [
+        str(row.get(key) or "").strip()
+        for key in ("CODE", "code", "VIEW_CODE", "view_code", "ENTITY_CODE", "entity_code")
+    ]
+    return any(identifier == module_code or identifier.startswith(module_code + "_")
+               for module_code in module_codes for identifier in identifiers if identifier)
+
+
+def metadata_boolean(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y"}
+
+
+def normalize_packaged_json_text(value: Any) -> Any:
+    if value in (None, ""):
+        return value
+    try:
+        payload = json.loads(value) if isinstance(value, str) else copy.deepcopy(value)
+    except json.JSONDecodeError:
+        return value
+    return json.dumps(
+        normalize_packaged_runtime_payload(payload),
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+
+
+def packaged_metadata_value_sql(
+    column: str,
+    value: Any,
+    spec: PackagedUiTableSpec,
+    runtime: bool,
+) -> str:
+    if value is None:
+        return "NULL"
+    if column in spec.json_columns:
+        value = normalize_packaged_json_text(value)
+    if column == "modify_time":
+        if isinstance(value, (int, float)) or str(value).isdigit():
+            return f"to_timestamp({int(value)} / 1000.0)"
+        return sql_str(str(value))
+    if column in spec.boolean_columns:
+        boolean_value = metadata_boolean(value)
+        return sql_bool(boolean_value) if runtime else sql_bool_int(boolean_value)
+    if column in spec.integer_columns:
+        try:
+            return str(int(value))
+        except (TypeError, ValueError):
+            return "NULL"
+    literal = sql_str(str(value))
+    if runtime and column in spec.lob_columns:
+        return f"lo_from_bytea(0, convert_to({literal}, 'UTF8'))"
+    return literal
+
+
+def packaged_ui_row_sql(spec: PackagedUiTableSpec, row: Dict[str, Any], runtime: bool) -> str:
+    source = {str(key).lower(): value for key, value in row.items()}
+    source.setdefault("ec_env", "product")
+    source.setdefault("valid", 1)
+    source.setdefault("proj_flag", 0)
+    columns = [column for column in spec.columns if column in source]
+    table_name = spec.runtime_table if runtime else spec.product_table
+    values = [packaged_metadata_value_sql(column, source[column], spec, runtime) for column in columns]
+    updates = [column for column in columns if column != "code"]
+    return (
+        f"INSERT INTO public.{table_name} ({', '.join(columns)})\n"
+        f"VALUES ({', '.join(values)})\n"
+        "ON CONFLICT (code) DO UPDATE SET\n"
+        + ",\n".join(f"    {column} = EXCLUDED.{column}" for column in updates)
+        + ";"
+    )
+
+
+def generate_packaged_ui_runtime_sql(modules_root: Path, module_codes: Sequence[str]) -> str:
+    rows_by_table = load_packaged_ui_rows(modules_root)
+    lines = [
+        "-- Generated by deploy/docker/scripts/generate-business-view-runtime-sql.py --packaged-ui-runtime-only",
+        "-- Restores executable field/grid/button/event/query metadata into runtime and product layers.",
+        f"-- modules_root: {modules_root}",
+        f"-- requested_module_codes: {','.join(module_codes)}",
+        "",
+    ]
+    for spec in PACKAGED_UI_TABLE_SPECS:
+        rows = [
+            row for row in rows_by_table.get(spec.runtime_table, [])
+            if packaged_row_matches_modules(row, module_codes)
+        ]
+        lines.append(f"-- {spec.runtime_table}: {len(rows)} packaged rows")
+        for row in rows:
+            lines.append(packaged_ui_row_sql(spec, row, runtime=True))
+            lines.append(packaged_ui_row_sql(spec, row, runtime=False))
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def default_modules_root() -> Path:
@@ -771,7 +1167,10 @@ def parse_property(model: ET.Element, property_element: ET.Element, model_code: 
         model_code=model_code,
         description=direct_text(property_element, "description"),
         default_value=direct_text(property_element, "defaultValue"),
-        associated_property_code=direct_text(property_element, "associatedProperty"),
+        associated_property_code=(
+            direct_text(property_element.find("associatedProperty"), "code")
+            or direct_text(property_element, "associatedProperty")
+        ),
         fetch_mode=direct_text(property_element, "fetchMode"),
         sort=int_or_none(direct_text(property_element, "sort")),
         max_length=int_or_none(direct_text(property_element, "maxLength")),
@@ -961,6 +1360,19 @@ def parse_customer_condition(source: Path, condition_element: ET.Element) -> Opt
     )
 
 
+def infer_sql_data_grid_code(code: str, view_code: str, sql_type: Optional[int]) -> str:
+    if not code or not view_code or sql_type is None:
+        return ""
+    prefix = f"{view_code}_"
+    suffix = f"_{sql_type}"
+    if not code.startswith(prefix) or not code.endswith(suffix):
+        return ""
+    data_grid_suffix = code[len(prefix) : -len(suffix)]
+    if not re.fullmatch(r"dg\d+", data_grid_suffix):
+        return ""
+    return f"{view_code}{data_grid_suffix}"
+
+
 def parse_sql_def(source: Path, sql_element: ET.Element) -> Optional[SqlDef]:
     query_sql = direct_text(sql_element, "sql")
     sql_type = int_or_none(direct_text(sql_element, "type"))
@@ -972,6 +1384,8 @@ def parse_sql_def(source: Path, sql_element: ET.Element) -> Optional[SqlDef]:
         code = f"{target_code}_{sql_type}" if target_code and sql_type is not None else ""
     if not code or sql_type is None:
         return None
+    if not data_grid_code:
+        data_grid_code = infer_sql_data_grid_code(code, view_code, sql_type)
     return SqlDef(
         code=code,
         source=source,
@@ -1205,6 +1619,9 @@ def extract_fields(view: ViewDef) -> List[FieldDef]:
                 column_type=direct_text(field_source, "columnType", "TEXT") or "TEXT",
                 model_code=direct_text(field_source, "modelCode") or direct_text(field_source, "modelcode") or direct_text(item, "modelCode") or direct_text(item, "modelcode"),
                 fill=extract_fill(field_source) or extract_fill(item),
+                custom_section=bool_text(direct_text(field_source, "customSection") or direct_text(item, "customSection")),
+                custom_model_code=direct_text(field_source, "customModelCode") or direct_text(item, "customModelCode"),
+                property_lay_rec=direct_text(field_source, "propertyLayRec") or direct_text(item, "propertyLayRec"),
             )
             if key in seen:
                 existing_index = seen[key]
@@ -1257,13 +1674,37 @@ def field_json(field: FieldDef) -> Dict[str, object]:
     }
     if field.fill:
         result["fill"] = field.fill
+    if field.custom_section:
+        result["customSection"] = True
+        result["customModelCode"] = field.custom_model_code
+        result["propertyLayRec"] = field.property_lay_rec
     return result
 
 
 def data_grid_json(
     view: ViewDef, parent_code: Optional[str] = None, views: Optional[Dict[str, ViewDef]] = None
 ) -> Dict[str, object]:
-    fields = extract_fields(view)
+    # Project custom-property columns are placeholders whose concrete fields come
+    # from base_cp_model_mapping/base_cp_view_mapping. Recovered base packages do
+    # not carry those tenant mappings; emitting the placeholders makes the legacy
+    # layout service dereference a missing mapping and fail the whole page. Keep
+    # the real module fields and let tenant-specific columns be restored only when
+    # their mapping rows are available.
+    fields = [field for field in extract_fields(view) if not field.custom_section]
+    if not fields:
+        fields = [
+            FieldDef(
+                key="name",
+                namekey=view.display_name or view.title or view.code,
+                show_type="TEXTFIELD",
+                show_format="TEXT",
+                width=160,
+                hidden=False,
+                column_type="TEXT",
+                model_code=view.ass_model_code,
+                fill=None,
+            )
+        ]
     visible_fields = [field for field in fields if not field.hidden]
     main_display = "name"
     if not any(field.key == "name" for field in visible_fields):
@@ -1667,8 +2108,15 @@ def layout2_json(view: ViewDef, views: Dict[str, ViewDef]) -> Dict[str, object]:
     }
 
 
-def view_json(view: ViewDef, views: Dict[str, ViewDef]) -> str:
-    if view.show_type == "LAYOUT2":
+def view_json(
+    view: ViewDef,
+    views: Dict[str, ViewDef],
+    packaged_view_json: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> str:
+    packaged_payload = (packaged_view_json or {}).get(view.code)
+    if packaged_payload is not None:
+        payload = normalize_packaged_runtime_payload(packaged_payload)
+    elif view.show_type == "LAYOUT2":
         payload = layout2_json(view, views)
     elif view.view_type == "TREE":
         payload = {
@@ -2651,6 +3099,86 @@ def runtime_model_sql(model: ModelDef) -> str:
     )
 
 
+def ec_model_sql(model: ModelDef) -> str:
+    columns = (
+        "code, ec_env, version, create_time, modify_time, valid, is_error_sql, proj_flag, "
+        "is_config_special, special_auth_isandrel, is_mne_code, is_control, is_cache, "
+        "entity_class, is_extra_col, enable_data_audit, enable_operation_audit, enable_sync, "
+        "table_name, inherent_common_flag, ec_version, jpa_name, module_code, extends_model_code, "
+        "is_extends, type, data_type, is_main, entity_code, description, model_name, value_zh_cn, name"
+    )
+    values = [
+        sql_str(model.code),
+        sql_str(model.ec_env),
+        "0",
+        "CURRENT_TIMESTAMP",
+        "CURRENT_TIMESTAMP",
+        "1",
+        sql_int(model.is_error_sql),
+        sql_bool_int(model.proj_flag),
+        sql_bool_int(model.is_config_special),
+        sql_bool_int(model.special_auth_isandrel),
+        sql_bool_int(model.is_mne_code),
+        sql_bool_int(model.is_control),
+        sql_bool_int(model.is_cache),
+        sql_str(null_if_blank(model.entity_class)),
+        sql_bool_int(model.is_extra_col),
+        sql_bool_int(model.enable_data_audit),
+        sql_bool_int(model.enable_operation_audit),
+        sql_bool_int(model.enable_sync),
+        sql_str(null_if_blank(model.table_name)),
+        sql_bool_int(model.inherent_common_flag),
+        sql_str(null_if_blank(model.ec_version)),
+        sql_str(null_if_blank(model.jpa_name)),
+        sql_str(null_if_blank(model.module_code)),
+        sql_str(null_if_blank(model.extends_model_code)),
+        sql_bool_int(model.is_extends),
+        sql_int(model.model_type),
+        sql_int(model.data_type),
+        sql_bool_int(model.is_main),
+        sql_str(null_if_blank(model.entity_code)),
+        sql_str(null_if_blank(model.description)),
+        sql_str(null_if_blank(model.model_name)),
+        sql_str(null_if_blank(model.value_zh_cn)),
+        sql_str(null_if_blank(model.name)),
+    ]
+    return (
+        f"INSERT INTO public.ec_model ({columns})\n"
+        f"VALUES ({', '.join(values)})\n"
+        "ON CONFLICT (code) DO UPDATE SET\n"
+        "    ec_env = EXCLUDED.ec_env,\n"
+        "    modify_time = CURRENT_TIMESTAMP,\n"
+        "    valid = 1,\n"
+        "    is_error_sql = EXCLUDED.is_error_sql,\n"
+        "    proj_flag = EXCLUDED.proj_flag,\n"
+        "    is_config_special = EXCLUDED.is_config_special,\n"
+        "    special_auth_isandrel = EXCLUDED.special_auth_isandrel,\n"
+        "    is_mne_code = EXCLUDED.is_mne_code,\n"
+        "    is_control = EXCLUDED.is_control,\n"
+        "    is_cache = EXCLUDED.is_cache,\n"
+        "    entity_class = EXCLUDED.entity_class,\n"
+        "    is_extra_col = EXCLUDED.is_extra_col,\n"
+        "    enable_data_audit = EXCLUDED.enable_data_audit,\n"
+        "    enable_operation_audit = EXCLUDED.enable_operation_audit,\n"
+        "    enable_sync = EXCLUDED.enable_sync,\n"
+        "    table_name = EXCLUDED.table_name,\n"
+        "    inherent_common_flag = EXCLUDED.inherent_common_flag,\n"
+        "    ec_version = EXCLUDED.ec_version,\n"
+        "    jpa_name = EXCLUDED.jpa_name,\n"
+        "    module_code = EXCLUDED.module_code,\n"
+        "    extends_model_code = EXCLUDED.extends_model_code,\n"
+        "    is_extends = EXCLUDED.is_extends,\n"
+        "    type = EXCLUDED.type,\n"
+        "    data_type = EXCLUDED.data_type,\n"
+        "    is_main = EXCLUDED.is_main,\n"
+        "    entity_code = EXCLUDED.entity_code,\n"
+        "    description = EXCLUDED.description,\n"
+        "    model_name = EXCLUDED.model_name,\n"
+        "    value_zh_cn = EXCLUDED.value_zh_cn,\n"
+        "    name = EXCLUDED.name;"
+    )
+
+
 def runtime_property_sql(prop: PropertyDef) -> str:
     columns = (
         "code, ec_env, version, create_time, modify_time, valid, entity_code, module_code, "
@@ -2784,6 +3312,102 @@ def runtime_property_sql(prop: PropertyDef) -> str:
     )
 
 
+def ec_property_sql(prop: PropertyDef) -> str:
+    columns = (
+        "code, ec_env, version, create_time, modify_time, valid, entity_code, module_code, "
+        "only_leaf, is_group_object, proj_custom_in_use, proj_flag, sort, is_hidden, is_engine, "
+        "fetch_mode, associated_property_code, associated_type, is_custom, is_mne_whole_like_query, "
+        "column_name, senior_system_code, no_analyzer, is_main_associated, is_used_for_search, "
+        "stretch, pic_height, pic_width, is_bussiness_key, is_control, is_used_mne_code, "
+        "default_value, is_sensitive, is_main_display, is_used_for_list, model_code, description, "
+        "is_pk, is_ignore_audit, is_inherent, is_unique, multable, decimal_num, max_length, "
+        "nullable, is_index, field_type, format, type, display_name, name, "
+        "is_support_sup_and_sub, is_pic_support_multi_select, max_pic_num, org_column_name, "
+        "is_tree_system_code, show_width"
+    )
+    values = [
+        sql_str(prop.code),
+        sql_str(prop.ec_env),
+        "0",
+        "CURRENT_TIMESTAMP",
+        "CURRENT_TIMESTAMP",
+        "1",
+        sql_str(null_if_blank(prop.entity_code)),
+        sql_str(null_if_blank(prop.module_code)),
+        sql_bool_int(prop.only_leaf),
+        sql_bool_int(prop.is_group_object),
+        sql_bool_int(prop.proj_custom_in_use),
+        sql_bool_int(prop.proj_flag),
+        sql_int(prop.sort),
+        sql_bool_int(prop.is_hidden),
+        sql_bool_int(prop.is_engine),
+        sql_str(null_if_blank(prop.fetch_mode)),
+        sql_str(null_if_blank(prop.associated_property_code)),
+        sql_int(prop.associated_type),
+        sql_bool_int(prop.is_custom),
+        sql_bool_int(prop.is_mne_whole_like_query),
+        sql_str(null_if_blank(prop.column_name)),
+        sql_bool_int(prop.senior_system_code),
+        sql_bool_int(prop.no_analyzer),
+        sql_bool_int(prop.is_main_associated),
+        sql_bool_int(prop.is_used_for_search),
+        sql_bool_int(prop.stretch),
+        sql_str(null_if_blank(prop.pic_height)),
+        sql_str(null_if_blank(prop.pic_width)),
+        sql_bool_int(prop.is_bussiness_key),
+        sql_bool_int(prop.is_control),
+        sql_bool_int(prop.is_used_mne_code),
+        sql_str(null_if_blank(prop.default_value)),
+        sql_bool_int(prop.is_sensitive),
+        sql_bool_int(prop.is_main_display),
+        sql_bool_int(prop.is_used_for_list),
+        sql_str(prop.model_code),
+        sql_str(null_if_blank(prop.description)),
+        sql_bool_int(prop.is_pk),
+        sql_bool_int(prop.is_ignore_audit),
+        sql_bool_int(prop.is_inherent),
+        sql_bool_int(prop.is_unique),
+        sql_bool_int(prop.multable),
+        sql_int(prop.decimal_num),
+        sql_int(prop.max_length),
+        sql_bool_int(prop.nullable),
+        sql_bool_int(prop.is_index),
+        sql_str(null_if_blank(prop.field_type)),
+        sql_str(null_if_blank(prop.fmt)),
+        sql_str(null_if_blank(prop.prop_type)),
+        sql_str(null_if_blank(prop.display_name)),
+        sql_str(null_if_blank(prop.name)),
+        sql_bool_int(prop.is_support_sup_and_sub),
+        sql_bool_int(prop.is_pic_support_multi_select),
+        sql_int(prop.max_pic_num),
+        sql_str(null_if_blank(prop.org_column_name)),
+        sql_bool_int(prop.is_tree_system_code),
+        sql_int(prop.show_width),
+    ]
+    update_columns = (
+        "ec_env", "entity_code", "module_code", "only_leaf", "is_group_object",
+        "proj_custom_in_use", "proj_flag", "sort", "is_hidden", "is_engine", "fetch_mode",
+        "associated_property_code", "associated_type", "is_custom", "is_mne_whole_like_query",
+        "column_name", "senior_system_code", "no_analyzer", "is_main_associated",
+        "is_used_for_search", "stretch", "pic_height", "pic_width", "is_bussiness_key",
+        "is_control", "is_used_mne_code", "default_value", "is_sensitive", "is_main_display",
+        "is_used_for_list", "model_code", "description", "is_pk", "is_ignore_audit",
+        "is_inherent", "is_unique", "multable", "decimal_num", "max_length", "nullable",
+        "is_index", "field_type", "format", "type", "display_name", "name",
+        "is_support_sup_and_sub", "is_pic_support_multi_select", "max_pic_num",
+        "org_column_name", "is_tree_system_code", "show_width",
+    )
+    updates = ",\n".join(f"    {column} = EXCLUDED.{column}" for column in update_columns)
+    return (
+        f"INSERT INTO public.ec_property ({columns})\n"
+        f"VALUES ({', '.join(values)})\n"
+        "ON CONFLICT (code) DO UPDATE SET\n"
+        f"{updates},\n"
+        "    modify_time = CURRENT_TIMESTAMP,\n"
+        "    valid = 1;"
+    )
+
+
 def runtime_view_sql(view: ViewDef) -> str:
     columns = (
         "code, ec_env, version, create_time, modify_time, valid, type, show_type, title, "
@@ -2814,7 +3438,7 @@ def runtime_view_sql(view: ViewDef) -> str:
         sql_bool(view.mobile_enable_flag),
         sql_bool(view.move_flag),
         sql_str(view.code),
-        "false",
+        "0",
     ]
     return (
         f"INSERT INTO public.runtime_view ({columns})\n"
@@ -2840,12 +3464,110 @@ def runtime_view_sql(view: ViewDef) -> str:
         "    mobile_enable_flag = EXCLUDED.mobile_enable_flag,\n"
         "    move_flag = EXCLUDED.move_flag,\n"
         "    extra_view = EXCLUDED.extra_view,\n"
-        "    is_shadow = false;"
+        "    is_shadow = 0;"
     )
 
 
-def runtime_extra_view_sql(view: ViewDef, views: Dict[str, ViewDef]) -> str:
-    payload = view_json(view, views)
+def ec_view_sql(view: ViewDef) -> str:
+    columns = (
+        "code, ec_env, version, create_time, modify_time, valid, type, show_type, title, "
+        "display_name, name, url, module_code, entity_code, ass_model_code, has_attachment, "
+        "only_for_query, main_view, main_ref, mobile, mobile_enable_flag, move_flag, extra_view, is_shadow"
+    )
+    values = [
+        sql_str(view.code),
+        sql_str(view.ec_env),
+        "0",
+        "CURRENT_TIMESTAMP",
+        "CURRENT_TIMESTAMP",
+        "1",
+        sql_str(runtime_view_type(view)),
+        sql_str(view.show_type),
+        sql_str(view.title),
+        sql_str(view.display_name),
+        sql_str(view.name),
+        sql_str(view.url),
+        sql_str(view.module_code),
+        sql_str(view.entity_code),
+        sql_str(view.ass_model_code),
+        sql_bool_int(view.has_attachment),
+        sql_bool_int(view.only_for_query),
+        sql_bool_int(view.main_view),
+        sql_bool_int(view.main_ref),
+        sql_bool_int(view.mobile),
+        sql_bool_int(view.mobile_enable_flag),
+        sql_bool_int(view.move_flag),
+        sql_str(view.code),
+        "0",
+    ]
+    return (
+        f"INSERT INTO public.ec_view ({columns})\n"
+        f"VALUES ({', '.join(values)})\n"
+        "ON CONFLICT (code) DO UPDATE SET\n"
+        "    ec_env = EXCLUDED.ec_env,\n"
+        "    modify_time = CURRENT_TIMESTAMP,\n"
+        "    valid = 1,\n"
+        "    type = EXCLUDED.type,\n"
+        "    show_type = EXCLUDED.show_type,\n"
+        "    title = EXCLUDED.title,\n"
+        "    display_name = EXCLUDED.display_name,\n"
+        "    name = EXCLUDED.name,\n"
+        "    url = EXCLUDED.url,\n"
+        "    module_code = EXCLUDED.module_code,\n"
+        "    entity_code = EXCLUDED.entity_code,\n"
+        "    ass_model_code = EXCLUDED.ass_model_code,\n"
+        "    has_attachment = EXCLUDED.has_attachment,\n"
+        "    only_for_query = EXCLUDED.only_for_query,\n"
+        "    main_view = EXCLUDED.main_view,\n"
+        "    main_ref = EXCLUDED.main_ref,\n"
+        "    mobile = EXCLUDED.mobile,\n"
+        "    mobile_enable_flag = EXCLUDED.mobile_enable_flag,\n"
+        "    move_flag = EXCLUDED.move_flag,\n"
+        "    extra_view = EXCLUDED.extra_view,\n"
+        "    is_shadow = 0;"
+    )
+
+
+def action_view_routes(view: ViewDef) -> Tuple[str, ...]:
+    """Return the framework routes that resolve an HTTP action to a view code."""
+    url = (view.url or "").strip().rstrip("/")
+    if not url:
+        return ()
+    if url.startswith("/msService/"):
+        url = url[len("/msService"):]
+
+    routes = [url]
+    view_type = runtime_view_type(view).upper()
+    show_type = (view.show_type or "").upper()
+    if show_type != "LAYOUT2":
+        if view_type == "LIST":
+            routes.extend((f"{url}-query", f"{url}-getRequireData", f"{url}-pending"))
+        elif view_type == "REFERENCE":
+            routes.append(f"{url}-query")
+        elif view_type in {"TREE", "REFTREE"}:
+            routes.extend(f"{url}{suffix}" for suffix in ("Data", "FullData", "Drag", "Sort"))
+    return tuple(dict.fromkeys(routes))
+
+
+def action_view_sql(view: ViewDef) -> str:
+    statements = []
+    for action_url in action_view_routes(view):
+        statements.append(
+            "INSERT INTO public.action_view (action_url, view_name, view_code)\n"
+            f"VALUES ({sql_str(action_url)}, {sql_str(view.name)}, {sql_str(view.code)})\n"
+            "ON CONFLICT (action_url) DO UPDATE SET\n"
+            "    view_name = EXCLUDED.view_name,\n"
+            "    view_code = EXCLUDED.view_code;"
+        )
+    return "\n".join(statements)
+
+
+def runtime_extra_view_sql(
+    view: ViewDef,
+    views: Dict[str, ViewDef],
+    packaged_view_json: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> str:
+    payload = view_json(view, views, packaged_view_json)
     code = sql_str(view.code)
     ec_env = sql_str(view.ec_env)
     payload_literal = sql_str(payload)
@@ -2879,6 +3601,26 @@ def runtime_extra_view_sql(view: ViewDef, views: Dict[str, ViewDef]) -> str:
         "            proj_flag = COALESCE(public.runtime_extra_view.proj_flag, EXCLUDED.proj_flag);\n"
         "    END IF;\n"
         "END $$;"
+    )
+
+
+def ec_extra_view_sql(
+    view: ViewDef,
+    views: Dict[str, ViewDef],
+    packaged_view_json: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> str:
+    payload = sql_str(view_json(view, views, packaged_view_json))
+    code = sql_str(view.code)
+    ec_env = sql_str(view.ec_env)
+    return (
+        "INSERT INTO public.ec_extra_view (code, ec_env, version, view_code, view_json, proj_flag)\n"
+        f"VALUES ({code}, {ec_env}, 0, {code}, {payload}, 0)\n"
+        "ON CONFLICT (code) DO UPDATE SET\n"
+        "    ec_env = EXCLUDED.ec_env,\n"
+        "    version = GREATEST(COALESCE(public.ec_extra_view.version, 0), EXCLUDED.version),\n"
+        "    view_code = EXCLUDED.view_code,\n"
+        "    view_json = EXCLUDED.view_json,\n"
+        "    proj_flag = EXCLUDED.proj_flag;"
     )
 
 
@@ -3021,23 +3763,83 @@ def business_share_view_sql(models: Sequence[ModelDef]) -> List[str]:
     return lines
 
 
-def generate_sql(modules_root: Path, targets: Sequence[str]) -> str:
+def merge_defs_by_code(primary: Sequence[Any], extras: Iterable[Any]) -> List[Any]:
+    merged = list(primary)
+    seen = {item.code for item in merged}
+    for item in sorted(extras, key=lambda value: value.code):
+        if item.code in seen:
+            continue
+        merged.append(item)
+        seen.add(item.code)
+    return merged
+
+
+def module_target_views(
+    views: Dict[str, ViewDef], targets: Sequence[str], module_codes: Sequence[str]
+) -> Tuple[str, ...]:
+    selected = list(targets)
+    seen = set(selected)
+    requested_modules = set(module_codes)
+    for view in sorted(views.values(), key=lambda value: value.code):
+        if view.module_code not in requested_modules or view.code in seen:
+            continue
+        selected.append(view.code)
+        seen.add(view.code)
+    return tuple(selected)
+
+
+def generate_sql(
+    modules_root: Path, targets: Sequence[str], module_codes: Sequence[str] = ()
+) -> str:
     modules = load_modules(modules_root)
     views = load_views(modules_root)
     entities = load_entities(modules_root)
     models = load_models(modules_root)
     conditions = load_customer_conditions(modules_root)
     sql_defs = load_sql_defs(modules_root)
-    required = resolve_required_views(views, targets)
+    packaged_view_json = load_packaged_view_json(modules_root)
+    requested_modules = set(module_codes)
+    effective_targets = module_target_views(views, targets, module_codes)
+    required = resolve_required_views(views, effective_targets)
     required_models = resolve_required_models(models, required)
+    required_models = merge_defs_by_code(
+        required_models,
+        (model for model in models.values() if model.module_code in requested_modules),
+    )
     required_entities = resolve_required_entities(entities, required, required_models)
+    required_entities = merge_defs_by_code(
+        required_entities,
+        (entity for entity in entities.values() if entity.module_code in requested_modules),
+    )
     required_modules = resolve_required_modules(modules, required, required_models, required_entities)
+    required_modules = merge_defs_by_code(
+        required_modules,
+        (module for module in modules.values() if module.code in requested_modules),
+    )
     required_conditions = resolve_required_customer_conditions(conditions, required)
+    required_conditions = merge_defs_by_code(
+        required_conditions,
+        (condition for condition in conditions.values() if condition.module_code in requested_modules),
+    )
     required_sqls = resolve_required_sqls(sql_defs, required)
+    required_sqls = merge_defs_by_code(
+        required_sqls,
+        (
+            sql_def
+            for sql_def in sql_defs.values()
+            if any(
+                (sql_def.code or "").startswith(module_code + "_")
+                or (sql_def.view_code or "").startswith(module_code + "_")
+                or (sql_def.data_grid_code or "").startswith(module_code + "_")
+                for module_code in requested_modules
+            )
+        ),
+    )
     schema_models = resolve_business_schema_models(models, required_models, required_sqls)
     lines = emit_preamble()
     lines.append(f"-- modules_root: {modules_root}")
-    lines.append(f"-- target_view_count: {len(targets)}")
+    lines.append(f"-- target_view_count: {len(effective_targets)}")
+    lines.append(f"-- requested_module_codes: {','.join(module_codes)}")
     lines.append(f"-- emitted_view_count: {len(required)}")
     lines.append(f"-- emitted_module_count: {len(required_modules)}")
     lines.append(f"-- emitted_entity_count: {len(required_entities)}")
@@ -3045,6 +3847,7 @@ def generate_sql(modules_root: Path, targets: Sequence[str]) -> str:
     lines.append(f"-- emitted_customer_condition_count: {len(required_conditions)}")
     lines.append(f"-- emitted_sql_count: {len(required_sqls)}")
     lines.append(f"-- emitted_business_schema_model_count: {len(schema_models)}")
+    lines.append(f"-- packaged_runtime_view_count: {len(packaged_view_json)}")
     lines.append("")
     lines.extend(business_schema_sql(schema_models))
     lines.extend(business_share_view_sql(schema_models))
@@ -3061,8 +3864,10 @@ def generate_sql(modules_root: Path, targets: Sequence[str]) -> str:
     for model in required_models:
         lines.append(f"-- {model.code} from {model.source}")
         lines.append(runtime_model_sql(model))
+        lines.append(ec_model_sql(model))
         for prop in model.properties:
             lines.append(runtime_property_sql(prop))
+            lines.append(ec_property_sql(prop))
         lines.append("")
     for condition in required_conditions:
         source = condition.source or Path("<synthetic>")
@@ -3078,27 +3883,49 @@ def generate_sql(modules_root: Path, targets: Sequence[str]) -> str:
     for view in required:
         lines.append(f"-- {view.code} from {view.source}")
         lines.append(runtime_view_sql(view))
-        lines.append(runtime_extra_view_sql(view, views))
+        lines.append(ec_view_sql(view))
+        lines.append(action_view_sql(view))
+        lines.append(runtime_extra_view_sql(view, views, packaged_view_json))
+        lines.append(ec_extra_view_sql(view, views, packaged_view_json))
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
-def generate_runtime_extra_view_sql(modules_root: Path, targets: Sequence[str]) -> str:
+def generate_runtime_extra_view_sql(
+    modules_root: Path, targets: Sequence[str], module_codes: Sequence[str] = ()
+) -> str:
     views = load_views(modules_root)
-    required = resolve_required_views(views, targets)
+    packaged_view_json = load_packaged_view_json(modules_root)
+    effective_targets = module_target_views(views, targets, module_codes)
+    required = resolve_required_views(views, effective_targets)
     lines = [
         "-- Generated by deploy/docker/scripts/generate-business-view-runtime-sql.py --runtime-extra-view-only",
         "-- Restores runtime_extra_view.view_json for recovered action views without touching business data.",
         f"-- modules_root: {modules_root}",
-        f"-- target_view_count: {len(targets)}",
+        f"-- target_view_count: {len(effective_targets)}",
+        f"-- requested_module_codes: {','.join(module_codes)}",
         f"-- emitted_view_count: {len(required)}",
+        f"-- packaged_runtime_view_count: {len(packaged_view_json)}",
         "",
     ]
     for view in required:
         lines.append(f"-- {view.code} from {view.source}")
-        lines.append(runtime_extra_view_sql(view, views))
+        lines.append(runtime_extra_view_sql(view, views, packaged_view_json))
+        lines.append(ec_extra_view_sql(view, views, packaged_view_json))
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def strip_generated_line_trailing_whitespace(output: str) -> str:
+    """Keep embedded source readable without emitting patch-hostile line tails."""
+    lines = []
+    for raw_line in output.splitlines():
+        line = raw_line.rstrip(" \t")
+        indent = re.match(r"^[ \t]+", line)
+        if indent and " " in indent.group(0) and "\t" in indent.group(0):
+            line = indent.group(0).expandtabs(4) + line[indent.end() :]
+        lines.append(line)
+    return "\n".join(lines).rstrip("\n") + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -3116,9 +3943,20 @@ def parse_args() -> argparse.Namespace:
         help="Restrict generation to a target view code. Can be repeated.",
     )
     parser.add_argument(
+        "--module-code",
+        action="append",
+        dest="module_codes",
+        help="Generate complete runtime metadata and schema for a module code. Can be repeated.",
+    )
+    parser.add_argument(
         "--runtime-extra-view-only",
         action="store_true",
         help="Emit only runtime_extra_view.view_json upserts for the selected target view codes.",
+    )
+    parser.add_argument(
+        "--packaged-ui-runtime-only",
+        action="store_true",
+        help="Emit packaged field/grid/button/event/query metadata for the selected module codes.",
     )
     return parser.parse_args()
 
@@ -3129,11 +3967,21 @@ def main() -> int:
     if not modules_root.exists():
         print(f"Modules root does not exist: {modules_root}", file=sys.stderr)
         return 2
-    targets = tuple(args.targets or TARGET_VIEW_CODES)
-    if args.runtime_extra_view_only:
-        sys.stdout.write(generate_runtime_extra_view_sql(modules_root, targets))
+    module_codes = tuple(args.module_codes or ())
+    targets = tuple(args.targets or (() if module_codes else TARGET_VIEW_CODES))
+    if args.runtime_extra_view_only and args.packaged_ui_runtime_only:
+        print("Choose only one output mode.", file=sys.stderr)
+        return 2
+    if args.packaged_ui_runtime_only:
+        if not module_codes:
+            print("--packaged-ui-runtime-only requires at least one --module-code.", file=sys.stderr)
+            return 2
+        output = generate_packaged_ui_runtime_sql(modules_root, module_codes)
+    elif args.runtime_extra_view_only:
+        output = generate_runtime_extra_view_sql(modules_root, targets, module_codes)
     else:
-        sys.stdout.write(generate_sql(modules_root, targets))
+        output = generate_sql(modules_root, targets, module_codes)
+    sys.stdout.write(strip_generated_line_trailing_whitespace(output))
     return 0
 
 

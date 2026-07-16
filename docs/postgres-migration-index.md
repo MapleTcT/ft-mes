@@ -5,13 +5,13 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`177`。
-- 编号范围：`001` 到 `177`。
+- 脚本数量：`185`。
+- 编号范围：`001` 到 `185`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
 - 未保护结构语句：`0`。
-- 需关注语句：`64`。
+- 需关注语句：`71`。
 - 需关注语句安全问题：`0`。
 - 机器可读清单：`metadata/postgres-migration-inventory.json`。
 - 需关注语句说明：`docs/postgres-migration-watch-rationale.md`。
@@ -20,38 +20,38 @@
 
 | Tag | Count |
 | --- | --- |
-| auth-rbac-org | 36 |
+| auth-rbac-org | 37 |
 | business | 34 |
-| compatibility | 73 |
-| configuration | 41 |
-| general | 27 |
+| compatibility | 75 |
+| configuration | 42 |
+| general | 28 |
 | notification | 9 |
-| platform | 49 |
-| workflow | 20 |
+| platform | 54 |
+| workflow | 21 |
 
 ## 语句统计
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 9326 |
-| create-function | 70 |
-| create-index | 870 |
-| create-table | 534 |
-| create-view | 107 |
-| insert | 3879 |
-| update | 3943 |
+| alter-table | 10786 |
+| create-function | 84 |
+| create-index | 975 |
+| create-table | 568 |
+| create-view | 142 |
+| insert | 10999 |
+| update | 11061 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 174 |
-| do-block | 274 |
-| if-exists | 92 |
-| if-not-exists | 11289 |
-| on-conflict | 3841 |
-| to-regclass | 152 |
-| where-not-exists | 27 |
+| create-or-replace | 223 |
+| do-block | 386 |
+| if-exists | 105 |
+| if-not-exists | 12904 |
+| on-conflict | 10940 |
+| to-regclass | 219 |
+| where-not-exists | 39 |
 
 ## 脚本清单
 
@@ -234,6 +234,14 @@
 | 175 | 175-process-analysis-traceability.sql | general | 98 | create-table:1, create-index:10, insert:2, update:2 | 13 | - |
 | 176 | 176-wom-bpi-production-context-outbox.sql | general | 234 | create-table:4, create-function:1, create-index:4, insert:2, update:2 | 11 | watch:1 |
 | 177 | 177-wom-bpi-context-revision-clock-floor.sql | general | 33 | create-function:1, update:2 | 2 | watch:1 |
+| 178 | 178-patrol-technical-tables.sql | configuration | 195 | create-table:4, create-function:3, create-index:10, alter-table:4, update:2 | 40 | watch:3 |
+| 179 | 179-patrol-runtime-metadata.sql | platform | 92929 | create-table:30, create-view:35, create-function:11, create-index:88, alter-table:1451, insert:2486, update:2486 | 4282 | watch:4 |
+| 180 | 180-patrol-runtime-compat-and-seed.sql | platform, compatibility | 193 | create-index:2, alter-table:4, insert:3 | 9 | - |
+| 181 | 181-patrol-menu-app-permissions.sql | platform, auth-rbac-org | 690 | create-index:2, insert:10, update:8 | 11 | - |
+| 182 | 182-patrol-workflow-runtime.sql | platform, workflow | 479 | create-index:3, insert:11, update:5 | 12 | - |
+| 183 | 183-patrol-system-codes.sql | general | 147 | insert:2, update:4 | 4 | - |
+| 184 | 184-patrol-ui-runtime-metadata.sql | platform | 118479 | insert:4608, update:4608 | 4608 | - |
+| 185 | 185-patrol-task-persistence-compat.sql | compatibility | 83 | alter-table:1, update:5 | 1 | - |
 
 ## 规则
 

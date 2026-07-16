@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；当前目标数据库仍是 Flyway V12，JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。来源序列现已成为 READY 和拓扑发布的硬门槛，目标环境页面/API/PostgreSQL 已复验当前点位保持 0 READY。本地仓库进一步完成 Flyway V13，把控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 拆为独立回执，并通过 Flink checkpoint、真实 Kafka 消费、PostgreSQL 落库和 8 条浏览器 E2E；V13 尚未部署目标环境，不能替代 savepoint/历史规则迁移和目标 marker 验收。试点设备仍未注册/激活，产品 metadata、标定和来源序列未就绪，因此本轮结论仍是“同步控制链 PASS、数据源 BLOCKED”，不能发布为批次规则点位。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。局部测试通过不能解释为“系统已可投产”。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；当前目标数据库仍是 Flyway V12，JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。来源序列现已成为 READY 和拓扑发布的硬门槛，目标环境页面/API/PostgreSQL 已复验当前点位保持 0 READY。本地仓库进一步完成 Flyway V13，把控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 拆为独立回执，并通过 Flink checkpoint、真实 Kafka 消费、PostgreSQL 落库和 8 条浏览器 E2E；V13 尚未部署目标环境，不能替代 savepoint/历史规则迁移和目标 marker 验收。试点设备仍未注册/激活，产品 metadata、标定和来源序列未就绪，因此本轮结论仍是“同步控制链 PASS、数据源 BLOCKED”，不能发布为批次规则点位。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。PATROL 共享巡检已部署到目标 PostgreSQL/EamMs，真实页面完成“计划 -> 任务生成 -> 查询 -> 批量取消 -> 查库 -> 复显”闭环且浏览器错误为 0；输入标准、执行结果、异常处置和统计页仍待逐页验收。四个 EMS 源码包已恢复，但被缺失的 Indicator `6.0.4.0` 和 PostgreSQL 迁移阻断。局部测试通过不能解释为“系统已可投产”。
 
 ## 项目定位
 
@@ -21,11 +21,13 @@
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
+| PATROL 共享巡检 | `TARGET_TASK_CHAIN_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `97d3a265...e43d2ab`；幂等复跑后 marker `ADP_E2E_20260716155413_PATROL` 的真实任务状态链和落库复显 PASS | 继续闭合输入标准、完整路线 CRUD、任务下发/执行/完成、异常与统计；目标回滚需维护窗口确认 |
+| EMS 能源管理 | `BLOCKED_MISSING_INDICATOR` | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 四个源码包和依赖关系已恢复 | 取得 Indicator `6.0.4.0` api/core，补 PostgreSQL 迁移，逐服务构建与验收 |
 | BPI 产品链 | `PARTIAL` | 契约、目标环境 Flyway V12、点位准入硬门禁、`MapleTcT/iot@41239b4e` 自动目录、强制来源序列与 `30m` 运行时证据门禁、MES Kafka 消费落库、可审计拓扑/规则产品化、本地 V13 独立运行时回执、真实 PostgreSQL、Kafka/Flink、WOM production context 和影子批次确认均有可复验证据 | V13 尚未部署目标；当前试点点位仍 BLOCKED；真实设备点位的连续单调序列、IoT/MES 同 marker 候选/批次、连续影子运行、END 边界和 QCS/WMS 写回仍未完成 |
 | 目标测试环境 | `PASS_PHASE1_POINT_CATALOG_SYNC` | BPI 页面与真实 ADP 会话桥接、三 broker/十 topic Kafka、Flink/MinIO、JetLinks 自动点位目录、真实 WOM outbox/context join、受控遥测候选落库均已实测 | 该状态仍不是现场或生产 READY |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
-权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md)、[模块包缺口审计](docs/module-package-gap-audit.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。当前模块包审计确认共享巡检 `PATROL`、完整能源管理 `EMS/supEMS` 仍缺失，`packConfigManag`、`SESGISConfig` 是依赖缺口，WMS 与 ProcessAnalysis 已由可维护自研模块接续。README 是接手入口，不替代验收证据。
+权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md)、[模块包缺口审计](docs/module-package-gap-audit.md)、[PATROL 恢复验收](docs/testing/patrol-module-recovery-acceptance.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。当前模块包审计确认 PATROL 已从“部署中”进入“目标任务链 PASS、模块其余功能继续验收”；四个 EMS 源码包已恢复，但 `Indicator 6.0.4.0`、`packConfigManag`、`SESGISConfig` 仍是依赖缺口；WMS 与 ProcessAnalysis 已由可维护自研模块接续。README 是接手入口，不替代验收证据。
 
 ## 当前开发主线
 
@@ -93,14 +95,14 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 本地 MiniCluster、目标流处理集群、目标浏览器联合写链、JetLinks EventBus source marker 和 MES context outbox PostgreSQL 验收是相互独立的证据。目标环境 EventBus source 与 WOM context 两端均已真实执行，但尚未接入真实网关/协议设备点位，也未用同一 marker 汇合到 candidate/batch；不能把两个分段 PASS 升级为现场闭环。详细 marker、offset、目标表和清理结果分别记录在 MES 与 IoT 验收报告中。
 
-## 目标测试环境（更新至 2026-07-15）
+## 目标测试环境（更新至 2026-07-16）
 
-目标机使用 Tailscale 私网地址 `100.99.133.43`。既有 ADP/MES Compose 保持原样，BPI 使用两个独立 Compose project，避免覆盖旧服务：
+当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。下表中的 BPI 证据保留其 2026-07-15 验收时使用的 Tailscale 地址 `100.99.133.43`，本轮没有重新执行 BPI 联合链，不能把 PATROL 的新验收时间套用到旧 BPI 证据。既有 ADP/MES Compose 保持原样，BPI 使用两个独立 Compose project，避免覆盖旧服务：
 
 | 入口/运行面 | 地址或项目 | 当前结果 |
 |---|---|---|
-| 既有 ADP/MES | `http://100.99.133.43:18080` | 登录和会话来源；未因 BPI 部署被替换 |
-| BPI 操作台 | `http://100.99.133.43:18091` | 真实浏览器加载、概览 API `200`、无 console/page/network error |
+| 既有 ADP/MES + PATROL | `http://10.11.100.17:18080` | 当前公司内网入口；PATROL 计划、任务生成、查询、批量取消、查库与复显链 PASS |
+| BPI 操作台（历史验收入口） | `http://100.99.133.43:18091` | 2026-07-15 真实浏览器证据；本轮未复跑 |
 | BPI Java/PostgreSQL | `ft-mes-bpi-runtime` | Web、adapter、service、PostgreSQL 全部 healthy；Flyway V12、21 张 BPI 表 |
 | Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | 3 broker、10 topic、Flink job `RUNNING`、30/30 task、持续成功 checkpoint |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |

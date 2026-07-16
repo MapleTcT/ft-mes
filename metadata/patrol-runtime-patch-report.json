@@ -1,0 +1,28 @@
+{
+  "inputJar": "/tmp/adp-patrol-20260716/EamMs-1.0.0.pre-patrol.jar",
+  "inputSha256": "b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38",
+  "outputJar": "/tmp/adp-patrol-20260716/EamMs-1.0.0.patrol-postgres-queryfix2-20260716.jar",
+  "outputSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+  "deployedJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
+  "deployedSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+  "sourceCommit": "8971a8770452c2bb55261f330284cd3dd26824b1",
+  "currentSourceCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
+  "moduleCode": "PATROL_1.0.0",
+  "serviceAlias": "PATROL",
+  "versionStamp": "202607162221",
+  "inputEntryCount": 468,
+  "addedNestedJars": [
+    "BOOT-INF/lib/com.supcon.greendill.PATROL.core-6.0.4.0.jar",
+    "BOOT-INF/lib/com.supcon.greendill.PATROL.api-6.0.4.0.jar",
+    "BOOT-INF/lib/com.supcon.greendill.PATROL.service-6.0.4.0.jar"
+  ],
+  "artifactSha256": {
+    "com.supcon.greendill.PATROL.core-6.0.4.0.jar": "7cb79a90f0fc781e9063a534a1825cb48fff753b077db142eccc43eecdf66461",
+    "com.supcon.greendill.PATROL.api-6.0.4.0.jar": "718a0efc664e0f88ee0926616e540343f6c5e02f472ee1182a398ede02ef5a14",
+    "com.supcon.greendill.PATROL.service-6.0.4.0.jar": "ecddc8350d281a6255b4d55e0b0c5039a7addcbfc2d3ace23853079ad752aecd"
+  },
+  "zipIntegrity": "PASS",
+  "deployment": "PASS",
+  "runtimeAcceptanceMarker": "ADP_E2E_20260716155413_PATROL",
+  "status": "PASS"
+}

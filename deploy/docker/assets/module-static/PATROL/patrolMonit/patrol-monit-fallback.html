@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>巡检运行监控</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      color: #243042;
+      background: #f5f7fa;
+    }
+
+    * {
+      box-sizing: border-box;
+      letter-spacing: 0;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: #f5f7fa;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      padding: 0 24px;
+      border-bottom: 1px solid #dce3eb;
+      background: #fff;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    button {
+      min-width: 76px;
+      height: 34px;
+      border: 1px solid #2f78c4;
+      border-radius: 4px;
+      color: #fff;
+      background: #2f78c4;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .dependency-status {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 24px;
+      border-bottom: 1px solid #f1d59c;
+      color: #66460d;
+      background: #fff8e9;
+      font-size: 14px;
+      line-height: 22px;
+    }
+
+    .dependency-status strong {
+      flex: 0 0 auto;
+      font-weight: 600;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      border-bottom: 1px solid #dce3eb;
+      background: #fff;
+    }
+
+    .metric {
+      min-height: 88px;
+      padding: 17px 24px;
+      border-right: 1px solid #e6ebf0;
+    }
+
+    .metric:last-child {
+      border-right: 0;
+    }
+
+    .metric-label {
+      color: #667386;
+      font-size: 13px;
+    }
+
+    .metric-value {
+      margin-top: 8px;
+      font-size: 26px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .content {
+      padding: 18px 24px 28px;
+    }
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 40px;
+      margin-bottom: 8px;
+    }
+
+    .table-toolbar h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    #last-updated {
+      color: #7a8697;
+      font-size: 12px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid #dce3eb;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      height: 44px;
+      padding: 0 14px;
+      border-bottom: 1px solid #e6ebf0;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    th {
+      color: #556274;
+      background: #f7f9fb;
+      font-weight: 600;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: #f5f9fe;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-width: 64px;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 4px;
+      color: #475467;
+      background: #edf1f5;
+      font-size: 12px;
+    }
+
+    .status-running {
+      color: #176443;
+      background: #e5f5ed;
+    }
+
+    .status-overdue,
+    .status-cancelled {
+      color: #a13d3d;
+      background: #fae8e8;
+    }
+
+    .status-completed {
+      color: #285f9d;
+      background: #e6f0fb;
+    }
+
+    .empty {
+      height: 260px;
+      color: #7a8697;
+      text-align: center;
+    }
+
+    .error {
+      color: #b42318;
+    }
+
+    @media (max-width: 720px) {
+      .page-header,
+      .dependency-status,
+      .content {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .metric {
+        padding: 14px;
+        border-bottom: 1px solid #e6ebf0;
+      }
+
+      .metric:nth-child(2n) {
+        border-right: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>巡检运行监控</h1>
+    <button id="refresh" type="button">刷新</button>
+  </header>
+
+  <section class="dependency-status" role="status">
+    <strong>地图状态</strong>
+    <span>SESGISConfig 服务端包尚未提供，当前展示真实巡检路线和任务运行数据；地图定位与轨迹回放待依赖包补齐后恢复。</span>
+  </section>
+
+  <section class="metrics" aria-label="巡检运行摘要">
+    <div class="metric">
+      <div class="metric-label">巡检路线</div>
+      <div class="metric-value" id="route-count">-</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">任务总数</div>
+      <div class="metric-value" id="task-count">-</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">执行中</div>
+      <div class="metric-value" id="running-count">-</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">已超期</div>
+      <div class="metric-value" id="overdue-count">-</div>
+    </div>
+  </section>
+
+  <main class="content">
+    <div class="table-toolbar">
+      <h2>任务运行清单</h2>
+      <span id="last-updated"></span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 22%">任务编号</th>
+            <th style="width: 23%">巡检路线</th>
+            <th style="width: 15%">状态</th>
+            <th style="width: 20%">开始时间</th>
+            <th style="width: 20%">结束时间</th>
+          </tr>
+        </thead>
+        <tbody id="task-rows">
+          <tr><td class="empty" colspan="5">正在加载巡检数据...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STATE_LABELS = {
+        running: "执行中",
+        notIssued: "未下发",
+        issued: "已下发",
+        completed: "已完成",
+        cancelled: "已取消",
+        overdue: "已超期"
+      };
+
+      var refreshButton = document.getElementById("refresh");
+      var rows = document.getElementById("task-rows");
+      var requestedTaskId = new URLSearchParams(window.location.search).get("inspectionTaskId");
+
+      function findTokenInValue(value, depth) {
+        if (!value || depth > 3) {
+          return "";
+        }
+        if (typeof value === "string") {
+          if (/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value)) {
+            return value;
+          }
+          try {
+            return findTokenInValue(JSON.parse(value), depth + 1);
+          } catch (ignore) {
+            return "";
+          }
+        }
+        if (typeof value !== "object") {
+          return "";
+        }
+        var preferred = ["access_token", "accessToken", "id_token", "token"];
+        for (var i = 0; i < preferred.length; i += 1) {
+          if (typeof value[preferred[i]] === "string" && value[preferred[i]]) {
+            return value[preferred[i]].replace(/^Bearer\s+/i, "");
+          }
+        }
+        var keys = Object.keys(value);
+        for (var j = 0; j < keys.length; j += 1) {
+          var nested = findTokenInValue(value[keys[j]], depth + 1);
+          if (nested) {
+            return nested;
+          }
+        }
+        return "";
+      }
+
+      function findAccessToken() {
+        var windows = [window];
+        try {
+          if (window.top && window.top !== window) {
+            windows.push(window.top);
+          }
+        } catch (ignore) {
+          // Cross-origin parent windows are not expected, but cookies still apply.
+        }
+        for (var w = 0; w < windows.length; w += 1) {
+          var stores = [windows[w].localStorage, windows[w].sessionStorage];
+          for (var s = 0; s < stores.length; s += 1) {
+            var directKeys = ["ticket", "suposTicket", "SUPOS_TICKET", "token"];
+            for (var d = 0; d < directKeys.length; d += 1) {
+              var directToken = stores[s].getItem(directKeys[d]);
+              if (directToken && directToken.length > 20) {
+                return directToken.replace(/^Bearer\s+/i, "");
+              }
+            }
+            for (var i = 0; i < stores[s].length; i += 1) {
+              var token = findTokenInValue(stores[s].getItem(stores[s].key(i)), 0);
+              if (token) {
+                return token;
+              }
+            }
+          }
+        }
+        return "";
+      }
+
+      function fetchJson(url) {
+        var headers = { Accept: "application/json" };
+        var token = findAccessToken();
+        if (token) {
+          headers.Authorization = "Bearer " + token;
+        }
+        return fetch(url, {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: headers
+        }).then(function (response) {
+          if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+          }
+          return response.json();
+        });
+      }
+
+      function resultOf(payload) {
+        if (payload && Array.isArray(payload.result)) {
+          return payload.result;
+        }
+        if (payload && payload.data && Array.isArray(payload.data.result)) {
+          return payload.data.result;
+        }
+        return [];
+      }
+
+      function stateCode(task) {
+        var state = task && task.taskState;
+        var raw = state && typeof state === "object"
+          ? (state.id || state.code || state.value)
+          : state;
+        return String(raw || "").split("/").pop();
+      }
+
+      function stateLabel(task) {
+        var state = task && task.taskState;
+        var code = stateCode(task);
+        if (state && typeof state === "object") {
+          return state.valueName || state.name || state.value || STATE_LABELS[code] || code || "未知";
+        }
+        return STATE_LABELS[code] || code || "未知";
+      }
+
+      function routeName(task) {
+        var route = task && task.workRoute;
+        if (route && typeof route === "object") {
+          return route.name || route.code || "-";
+        }
+        return route || "-";
+      }
+
+      function formatTime(value) {
+        if (!value) {
+          return "-";
+        }
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return String(value);
+        }
+        return date.toLocaleString("zh-CN", { hour12: false });
+      }
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function renderTasks(tasks) {
+        var visible = requestedTaskId
+          ? tasks.filter(function (task) { return String(task.id) === String(requestedTaskId); })
+          : tasks;
+        if (!visible.length) {
+          rows.innerHTML = '<tr><td class="empty" colspan="5">暂无巡检任务数据</td></tr>';
+          return;
+        }
+        rows.innerHTML = visible.map(function (task) {
+          var code = stateCode(task);
+          return "<tr>" +
+            "<td title=\"" + escapeHtml(task.tableNo || task.id || "-") + "\">" + escapeHtml(task.tableNo || task.id || "-") + "</td>" +
+            "<td title=\"" + escapeHtml(routeName(task)) + "\">" + escapeHtml(routeName(task)) + "</td>" +
+            "<td><span class=\"status status-" + escapeHtml(code) + "\">" + escapeHtml(stateLabel(task)) + "</span></td>" +
+            "<td>" + escapeHtml(formatTime(task.startTime)) + "</td>" +
+            "<td>" + escapeHtml(formatTime(task.endTime)) + "</td>" +
+            "</tr>";
+        }).join("");
+      }
+
+      function setMetric(id, value) {
+        document.getElementById(id).textContent = String(value);
+      }
+
+      function load() {
+        refreshButton.disabled = true;
+        rows.innerHTML = '<tr><td class="empty" colspan="5">正在加载巡检数据...</td></tr>';
+        var taskUrl = "/msService/PATROL/patrolTask/potrolTask/selectData" +
+          "?includes=workRoute.name,taskState.id,taskState.value,startTime,endTime";
+        var routeUrl = "/msService/PATROL/patrolRoute/workGroup/selectData?includes=name";
+        return Promise.all([fetchJson(taskUrl), fetchJson(routeUrl)])
+          .then(function (payloads) {
+            var tasks = resultOf(payloads[0]);
+            var routes = resultOf(payloads[1]);
+            setMetric("route-count", routes.length);
+            setMetric("task-count", tasks.length);
+            setMetric("running-count", tasks.filter(function (task) { return stateCode(task) === "running"; }).length);
+            setMetric("overdue-count", tasks.filter(function (task) { return stateCode(task) === "overdue"; }).length);
+            renderTasks(tasks);
+            document.getElementById("last-updated").textContent =
+              "更新时间 " + new Date().toLocaleString("zh-CN", { hour12: false });
+            window.__PATROL_MONITOR_FALLBACK__ = {
+              status: "ready",
+              routes: routes.length,
+              tasks: tasks.length,
+              requestedTaskId: requestedTaskId
+            };
+          })
+          .catch(function (error) {
+            rows.innerHTML = '<tr><td class="empty error" colspan="5">巡检数据加载失败：' +
+              escapeHtml(error.message) + "</td></tr>";
+            window.__PATROL_MONITOR_FALLBACK__ = {
+              status: "error",
+              error: error.message
+            };
+          })
+          .finally(function () {
+            refreshButton.disabled = false;
+          });
+      }
+
+      refreshButton.addEventListener("click", load);
+      load();
+    }());
+  </script>
+</body>
+</html>

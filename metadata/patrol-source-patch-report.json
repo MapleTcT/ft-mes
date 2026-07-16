@@ -1,0 +1,13 @@
+{
+  "moduleRoot": "/Users/zhangchu/Documents/ADP/mes-modules-patrol-intake/modules/patrol/PATROL_6.0.4.0",
+  "sourceCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
+  "mode": "check",
+  "utilityChanged": false,
+  "replacementCount": 0,
+  "indentationFixCount": 0,
+  "taskGenerationFixCount": 0,
+  "patchedFileCount": 0,
+  "patchedFiles": [],
+  "helperReferenceCount": 103,
+  "status": "PASS"
+}

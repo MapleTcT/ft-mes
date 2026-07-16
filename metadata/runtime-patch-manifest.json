@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T13:17:54+00:00",
-  "repoCommit": "4969d343b7946e696eab9f5a0b630fb812b83e0c",
+  "generatedAt": "2026-07-16T16:30:29+00:00",
+  "repoCommit": "299b0c8dd3993a819a58bf589d7b39bcbbfea580",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 332,
-    "totalBytes": 24741087,
+    "totalFiles": 345,
+    "totalBytes": 54715822,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 177,
+      "postgres-init-sql": 185,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
-      "runtime-script": 24,
-      "runtime-static-override": 57
+      "runtime-script": 26,
+      "runtime-static-override": 60
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 10954,
-      "postgres-init-sql": 24139759,
+      "nginx-runtime-config": 13009,
+      "postgres-init-sql": 53958346,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
-      "runtime-script": 217121,
-      "runtime-static-override": 218824
+      "runtime-script": 239723,
+      "runtime-static-override": 350315
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 10734,
-      "sha256": "9254c3b347690218c06f89753cf35d515e1c08f2f413ae54b4654a1f463f0836"
+      "sizeBytes": 12789,
+      "sha256": "f511bab26e6bbdc3ca06fd5f07942f85e6598e5220a7f3a8cfbe3dfd52080c8d"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1375,6 +1375,54 @@
       "sha256": "b68b9950eb1c8fbe8e9f71bc73eed42d127b7d555d7fda466e760964f9cb4b0b"
     },
     {
+      "path": "deploy/docker/postgres/init/178-patrol-technical-tables.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 7559,
+      "sha256": "888067fbe1d4c900f7d6712456cba3db3a4d3c6a9d91ced42f9caa715222e31f"
+    },
+    {
+      "path": "deploy/docker/postgres/init/179-patrol-runtime-metadata.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 13332275,
+      "sha256": "d06bd132c0fd8a86f6eacad0409e556123490fc5d0518d5568773d8fe8d221f1"
+    },
+    {
+      "path": "deploy/docker/postgres/init/180-patrol-runtime-compat-and-seed.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 6644,
+      "sha256": "69ae3b2fea981c6f88534cb435927948d59040cbc3d9a6422f37c4993d672de2"
+    },
+    {
+      "path": "deploy/docker/postgres/init/181-patrol-menu-app-permissions.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 75636,
+      "sha256": "842e0c81973a30688a945f7c1e86ef89f298376fccc32ea0493b476bca2019e7"
+    },
+    {
+      "path": "deploy/docker/postgres/init/182-patrol-workflow-runtime.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 24378,
+      "sha256": "4a477bc0312cfd9609dbea1db2a9bce9f8445a3818b82f6272b7b4fcb9f1d877"
+    },
+    {
+      "path": "deploy/docker/postgres/init/183-patrol-system-codes.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 24797,
+      "sha256": "d6f7eefd2e500e707f7934b7404649a8ca97633012e390a8ad28335aa46a1051"
+    },
+    {
+      "path": "deploy/docker/postgres/init/184-patrol-ui-runtime-metadata.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 16344840,
+      "sha256": "dd4e2f1d88a229699fec02af957a0a793038eeae862a2b6a7ddbbc83423e2bd5"
+    },
+    {
+      "path": "deploy/docker/postgres/init/185-patrol-task-persistence-compat.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 2458,
+      "sha256": "428688e43fce48a3eae2f8a97e3d17f8b64b162da5837a0b3fc461a5b854feba"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1573,6 +1621,12 @@
       "sha256": "e270c32cf3f7c2ebbb2dc4ef5e4aaefea3dad754a0d74c81bb39f491eb179686"
     },
     {
+      "path": "deploy/docker/scripts/patch-eam-patrol-runtime.py",
+      "category": "runtime-script",
+      "sizeBytes": 10910,
+      "sha256": "d8b1e0d18647b8dcadbda74852dd1aa5c1aba67fbb382c8f4ee445d1e796786c"
+    },
+    {
       "path": "deploy/docker/scripts/patch-eam-reactapi-ready.py",
       "category": "runtime-script",
       "sizeBytes": 5534,
@@ -1633,6 +1687,12 @@
       "sha256": "29467c1dc300924779152c59aba12dcb01dfb3592c81dbb49fe4788da82fb653"
     },
     {
+      "path": "deploy/docker/scripts/patch-patrol-postgres-source.py",
+      "category": "runtime-script",
+      "sizeBytes": 11692,
+      "sha256": "8c5f5969981dce33370e54eefbd958b27233c69acee9f5d4f80ff8dac67abc11"
+    },
+    {
       "path": "deploy/docker/scripts/patch-postgres-runtime.py",
       "category": "runtime-script",
       "sizeBytes": 42267,
@@ -1685,6 +1745,24 @@
       "category": "runtime-script",
       "sizeBytes": 9124,
       "sha256": "10e97501621b82f3ba205a0ae25843af8607aa901f55837439cfca90c75a6145"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 116693,
+      "sha256": "1895c4d80e9fd45354011192db9c06e4a5eb61d2f8c52546d48707b2671eb472"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolMonit/patrol-monit-fallback.html",
+      "category": "runtime-static-override",
+      "sizeBytes": 13773,
+      "sha256": "806111e7bb0f675e882c24a1d8db7485cab1f93b95129f71c89d41e77e923187"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
+      "category": "runtime-static-override",
+      "sizeBytes": 1025,
+      "sha256": "840429a364b2c9696d77b53cebbb35b607fb3f44928eb9bdbdc21857ee62b762"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html",
