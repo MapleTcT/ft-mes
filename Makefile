@@ -59,6 +59,7 @@ RBAC_PERMISSION_PERSISTENCE_OUTPUT ?= /tmp/adp-rbac-permission-persistence-accep
 SYSTEMCODE_PERSISTENCE_OUTPUT ?= /tmp/adp-systemcode-persistence-acceptance.json
 SYSTEMCONFIG_PERSISTENCE_OUTPUT ?= /tmp/adp-systemconfig-persistence-acceptance.json
 PATROL_TASK_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-task-persistence-acceptance.json
+PATROL_EXECUTION_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-execution-persistence-acceptance.json
 PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-input-standard-persistence-acceptance.json
 PATROL_ROUTE_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-route-persistence-acceptance.json
 PATROL_AREA_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-area-persistence-acceptance.json
@@ -974,9 +975,12 @@ acceptance-systemcode-persistence:
 acceptance-systemconfig-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_PERSISTENCE_OUTPUT=$(SYSTEMCONFIG_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js
 
-.PHONY: acceptance-patrol-task-persistence
+.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence
 acceptance-patrol-task-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_TASK_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
+
+acceptance-patrol-execution-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_TASK_ACTION=complete ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_EXECUTION_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
 acceptance-patrol-input-standard-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT=$(PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-16T15:54:22.820Z",
-  "repoBaseCommit": "299b0c8dd3993a819a58bf589d7b39bcbbfea580",
+  "generatedAt": "2026-07-16T21:08:52.560Z",
+  "repoBaseCommit": "28d93d0673171efc2b47fc64b45dd5f43e66b0ad",
   "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "runtimeBuildSourceCommit": "8971a8770452c2bb55261f330284cd3dd26824b1",
   "moduleCode": "PATROL_1.0.0",
@@ -9,7 +9,7 @@
   "database": "PostgreSQL",
   "targetHost": "10.11.100.17",
   "targetAccessPolicy": "COMPANY_LAN",
-  "overallStatus": "TARGET_TASK_PERSISTENCE_PASS",
+  "overallStatus": "TARGET_EXECUTION_PERSISTENCE_PASS",
   "source": {
     "archive": "PATROL_6.0.4.0.zip",
     "sha256": "1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394",
@@ -158,22 +158,81 @@
       "patrolRequestFailures": 0
     }
   },
+  "executionAcceptance": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+    "report": "metadata/patrol-execution-persistence-acceptance.json",
+    "rawReport": "/tmp/adp-patrol-execution-persistence-sixth.json",
+    "script": "deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js",
+    "action": "complete",
+    "ids": {
+      "routeId": 6675485506913104,
+      "staffId": 1,
+      "planId": 6676470903063376,
+      "generationId": 6676470906078032,
+      "taskId": 6676470908830544,
+      "taskDetailId": 6676470914171728
+    },
+    "routes": [
+      "/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+      "/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+      "/msService/PATROL/patrolTask/potrolTask/enteringResultEdit"
+    ],
+    "persistence": {
+      "taskTable": "mp_potrol_tasks",
+      "detailTable": "mp_task_details",
+      "tableNo": "patrolTask_20260717_006",
+      "taskState": "PATROL_taskState/completed",
+      "taskVersion": 2,
+      "taskValid": true,
+      "concluse": "12.34",
+      "realValue": "PATROL_realValue/normal",
+      "detailVersion": 1,
+      "detailValid": true,
+      "planAssociationMismatchCount": 0,
+      "detailLifecycleNullCount": 0,
+      "detailCompletionNullCount": 0
+    },
+    "runtimeAsset": {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js",
+      "sha256": "5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360",
+      "blankResultRejected": true,
+      "status": "PASS"
+    },
+    "assertions": {
+      "total": 32,
+      "passed": 32,
+      "failed": 0
+    },
+    "browserEvidence": {
+      "screenshotsGenerated": 5,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "patrolRequestFailures": 0
+    },
+    "cancelRegression": {
+      "marker": "ADP_E2E_20260716210929_PATROL",
+      "report": "/tmp/adp-patrol-cancel-regression-after-execution.json",
+      "status": "PASS"
+    }
+  },
   "coverage": {
     "passed": [
       "route-area-item prerequisite persistence",
+      "input standard CRUD",
+      "full route-area-item CRUD",
       "plan save",
       "plan staff association",
       "task generation",
       "task list query",
       "batch cancellation",
-      "task and detail PostgreSQL verification",
-      "cancelled state browser re-render"
-    ],
-    "remaining": [
-      "input standard CRUD",
-      "full route-area-item CRUD",
       "task issue-run-complete lifecycle",
       "inspection result entry",
+      "task and detail PostgreSQL verification",
+      "cancelled state browser re-render",
+      "completed state browser re-render"
+    ],
+    "remaining": [
       "exception handling",
       "statistics and monitor pages"
     ],

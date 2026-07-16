@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T20:18:21+00:00",
-  "repoCommit": "28dd28ba37d77549ea0015e67a7c095bb081a27d",
+  "generatedAt": "2026-07-16T21:47:40+00:00",
+  "repoCommit": "28d93d0673171efc2b47fc64b45dd5f43e66b0ad",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 353,
-    "totalBytes": 54761465,
+    "totalFiles": 355,
+    "totalBytes": 54768045,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -14,16 +14,16 @@
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 26,
-      "runtime-static-override": 68
+      "runtime-static-override": 70
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 17225,
+      "nginx-runtime-config": 17985,
       "postgres-init-sql": 53958346,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
       "runtime-script": 239723,
-      "runtime-static-override": 391742
+      "runtime-static-override": 397562
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 17005,
-      "sha256": "e641bb35eda888b3c9bbf1ec3985ed6f72d5856eabdf874d512988f9947ec166"
+      "sizeBytes": 17765,
+      "sha256": "e7a55796d5b8caabd6d48d11ef9062287bdfad58f1e0d846bee0186d6735530a"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1805,6 +1805,18 @@
       "category": "runtime-static-override",
       "sizeBytes": 13512,
       "sha256": "8738c7863e0951b454a8e54e7d2486d2c66bffc710f77dbdf8ee474683bff67a"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2910,
+      "sha256": "5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2910,
+      "sha256": "5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360"
     },
     {
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",

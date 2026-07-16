@@ -426,9 +426,11 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 
 ## PATROL 共享巡检任务链（2026-07-16）
 
-目标：`http://10.11.100.17:18080`；marker：
-`ADP_E2E_20260716155413_PATROL`；该 marker 在重新应用 178-185 后生成；机器证据：
-`metadata/patrol-module-recovery-acceptance.json`。
+目标：`http://10.11.100.17:18080`；计划/取消基线 marker：
+`ADP_E2E_20260716155413_PATROL`；执行完成 marker：
+`ADP_E2E_20260716210839_PATROL_EXECUTION`。机器证据：
+`metadata/patrol-module-recovery-acceptance.json`、
+`metadata/patrol-execution-persistence-acceptance.json`。
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
@@ -436,6 +438,9 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 任务生成 | 同上 | 按计划生成任务和任务明细 | `POST .../createTaskEdit/submit` | 真实页面会话内提交成功 | HTTP 200，任务 `patrolTask_20260716_009` 和 pending 明细落库 | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | PASS | EamMs 有 createTaskEdit 无 DataGrid 的非阻断 WARN |
 | PATROL 任务查询 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList` | 点击真实“查询”并定位 marker 行 | `POST .../potrolTaskList-query` | 虚拟表格显示目标任务；无 console/page/request error | HTTP 200，返回目标任务和状态 | 只读 | PASS | 页面默认“待办”是原产品语义，普通查询必须点击“查询” |
 | PATROL 任务取消 | `/msService/PATROL/patrolTask/potrolTask/batchChangeList` | 选择目标行，在状态弹窗选择“已取消”，保存后重开任务列表 | `GET .../taskStateUpdate`、`POST .../potrolTaskList-query` | 状态弹窗、保存和“已取消”复显全部正常；5 张截图生成；浏览器错误为 0 | HTTP 200/SUCCESS；状态、备注和 version 更新 | `mp_potrol_tasks` | PASS | 任务下发/执行/完成需按真实状态机另测 |
+| PATROL 任务下发/执行 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList`、`/enteringResultList` | 对新生成任务依次执行“已下发”“执行中”，再进入结果录入列表 | `GET .../taskStateUpdate?changeState=.../issued`、`GET .../taskStateUpdate?changeState=.../running`、`POST .../enteringResultList-query` | 两次状态变更均成功，结果录入页显示 `patrolTask_20260717_006` 为“执行中”；浏览器错误为 0 | 三个请求均 HTTP 200；状态转换返回 `SUCCESS` | `mp_potrol_tasks` | PASS | 状态变更沿原产品 API 完成，没有直接修改数据库 |
+| PATROL 现场结果录入 | `/msService/PATROL/patrolTask/potrolTask/enteringResultList` -> `enteringResultEdit` | 选择真实任务行，打开编辑器，为明细填写结果 `12.34`、结论“正常”并保存 | `POST .../data-dg1584600022503`、`POST .../enteringResultEdit/submit?id=6676470908830544` | 明细、录入标准和判定脚本真实加载；保存返回成功；console/page/request failure 均为 0 | HTTP 200；任务和明细在同一业务保存链更新 | `mp_potrol_tasks`、`mp_task_details` | PASS | 已恢复 `enteringResultEdit/body.js/body-es5.js`，数字范围、比较符、空值和字符判定都有静态回归 |
+| PATROL 任务完成/复显 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList` | 保存结果后等待父列表刷新，再重开任务列表查询同一 marker | `POST .../enteringResultList-query`、`POST .../potrolTaskList-query` | 结果录入列表移除已完成任务，任务列表复显“已完成”；5 张截图完整生成 | PostgreSQL 确认任务状态、实际起止时间、完成人和明细结果/结论/完成人/完成时间全部落库 | `mp_potrol_tasks`、`mp_task_details` | PASS | 32/32 断言通过；取消分支另以 `ADP_E2E_20260716210929_PATROL` 回归 PASS |
 | PATROL 录入标准新增 | `/msService/PATROL/inputStandard/inputStandard/inputStanList` | 点击“新增”，选择字符/录入并保存唯一 marker | `POST .../inputStanEdit/submit` | 表单联动和保存正常，列表出现 marker；console/page/request error 均为 0 | HTTP 200，返回 `id=6675974928974672`；PostgreSQL `version=1/state=true/valid=true` | `mp_input_standards` | PASS | 已恢复该编辑页缺失的真实 `body.js/body-es5.js`，不再返回 `void 0` |
 | PATROL 录入标准修改 | 同上 | 选择 marker 行，修改名称和备注并保存 | `POST .../inputStanEdit/submit` | 编辑页回显、保存和列表刷新正常 | PostgreSQL 名称/备注更新，`version 1 -> 2` | `mp_input_standards` | PASS | 无 |
 | PATROL 录入标准停用/启用 | 同上 | 依次点击“停用”“启用” | `GET .../updateItemState?itemState=0/1&tableType=inputStand` | 两次成功提示和列表状态复显正常 | PostgreSQL `state true -> false -> true` | `mp_input_standards` | PASS | 无 |
@@ -456,9 +461,12 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 巡检项启用 | 同上 | 重新加载路线/区域并选中 marker，点击“启用” | `GET .../updateItemState?itemState=1&tableType=workItem` | 真实 `#btn-start` 按钮正确触发，成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_items` | PASS | 修复了把巡检项 `start` 操作码误当作路线/区域 `run` 操作码的问题 |
 | PATROL 巡检项删除 | 同上 | 在巡检项编辑器选择 marker，点击“删行”并保存 | `GET .../deleteWorkItems`、`POST .../workItemPtEdit/submit` | 行先从编辑器移除，软删除和父表保存均返回 200，刷新后 marker 不再出现 | PostgreSQL `valid=false`；种子路线、区域和巡检项继续有效 | `mp_work_items` | PASS | 失败轮次均由同一业务软删除 API 清理，无有效测试数据残留 |
 
-本节已证明计划生成任务、任务状态变更、输入标准、路线、区域和巡检项完整 CRUD 通过。现场执行结果、异常处置和统计页
-仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线、区域和巡检项机器证据：
+本节已证明计划生成任务、任务状态变更、输入标准、路线、区域和巡检项完整 CRUD，以及任务下发、执行、
+结果录入和完成回写通过。异常/隐患处置和统计页仍是后续验收项。执行链机器证据：
+`metadata/patrol-execution-persistence-acceptance.json`；输入标准机器证据：
+`metadata/patrol-input-standard-persistence-acceptance.json`；路线、区域和巡检项机器证据：
 `metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`、`metadata/patrol-item-persistence-acceptance.json`。可重放命令：
+`make acceptance-patrol-execution-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
 `make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17` 和
 `make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
 `make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、

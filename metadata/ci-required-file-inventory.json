@@ -969,6 +969,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
       "state": "tracked",
       "tracked": true
@@ -4791,6 +4803,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/patrol-execution-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/patrol-input-standard-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6974,7 +6992,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 525
+      "tracked": 527
     },
     "docs": {
       "tracked": 90
@@ -6983,7 +7001,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 115
+      "tracked": 116
     },
     "package.json": {
       "tracked": 1
@@ -7007,8 +7025,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1158,
-    "tracked": 1158,
+    "totalFiles": 1161,
+    "tracked": 1161,
     "untracked": 0
   },
   "untrackedByDirectory": []

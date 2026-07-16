@@ -3,6 +3,7 @@
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
 
 const dockerRoot = path.resolve(__dirname, "..");
 const assetRoot = path.join(
@@ -45,6 +46,15 @@ const itemEditorAssetRoot = path.join(
   "workArea",
   "workItemPtEdit"
 );
+const resultEditorAssetRoot = path.join(
+  dockerRoot,
+  "assets",
+  "module-static",
+  "PATROL",
+  "patrolTask",
+  "potrolTask",
+  "enteringResultEdit"
+);
 
 for (const [key, value] of [
   ["ec.print.template.delete", "删除"],
@@ -76,6 +86,39 @@ for (const fileName of ["body.js", "body-es5.js"]) {
 
   new Function(source);
 }
+
+for (const fileName of ["body.js", "body-es5.js"]) {
+  const assetPath = path.join(resultEditorAssetRoot, fileName);
+  const source = fs.readFileSync(assetPath, "utf8");
+  const requestPath = `/greenDill/static/PATROL/patrolTask/potrolTask/enteringResultEdit/${fileName}`;
+  const aliasPath = `/usr/share/nginx/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/${fileName}`;
+
+  assert(source.includes("__ADP_PATROL_RESULT_JUDGE_INSTALLED__"), `${fileName} must install judge once`);
+  assert(nginx.includes(`location = ${requestPath} {`), `${fileName} must have an exact Nginx route`);
+  assert(nginx.includes(`alias ${aliasPath};`), `${fileName} must map to the restored asset`);
+  new Function(source);
+}
+
+const resultJudgeSandbox = { window: {} };
+vm.runInNewContext(
+  fs.readFileSync(path.join(resultEditorAssetRoot, "body.js"), "utf8"),
+  resultJudgeSandbox
+);
+const judge = resultJudgeSandbox.window.judge;
+const numberType = { id: "PATROL_valueType/number" };
+const inputType = { id: "PATROL_editType/input" };
+assert.strictEqual(typeof judge, "function", "PATROL result editor must expose window.judge");
+assert.strictEqual(judge(numberType, inputType, "15", "10~20"), true, "numeric ranges must pass");
+assert.strictEqual(judge(numberType, inputType, "21", "10~20"), false, "numeric ranges must fail");
+assert.strictEqual(judge(numberType, inputType, "10", ">=10"), true, "ASCII operators must work");
+assert.strictEqual(judge(numberType, inputType, "9", "≥10"), false, "legacy operators must work");
+assert.strictEqual(judge(numberType, inputType, "5", "<0|>10"), false, "OR rules must fail cleanly");
+assert.strictEqual(judge(numberType, inputType, "11", "<0|>10"), true, "OR rules must pass");
+assert.strictEqual(judge(numberType, inputType, "not-a-number", ">0"), false, "invalid values must fail");
+assert.strictEqual(judge(numberType, inputType, "", "0~1"), false, "blank values must not become zero");
+assert.strictEqual(judge(numberType, inputType, null, "0~1"), false, "null values must not become zero");
+assert.strictEqual(judge(numberType, inputType, "1", null), false, "missing ranges must fail safely");
+assert.strictEqual(judge({ id: "PATROL_valueType/char" }, {}, " 正常 ", "正常"), true);
 
 for (const fileName of ["body.js", "body-es5.js"]) {
   const assetPath = path.join(routeAssetRoot, fileName);
@@ -163,6 +206,14 @@ assert(patrolRouteBodyIndex >= 0, "nginx must expose the PATROL route compatibil
 assert(
   patrolRouteBodyIndex < placeholderRouteIndex,
   "PATROL route exact routes must precede the generic body-script fallback"
+);
+const patrolResultEditorBodyIndex = nginx.indexOf(
+  "location = /greenDill/static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js"
+);
+assert(patrolResultEditorBodyIndex >= 0, "nginx must expose the PATROL result-editor body script");
+assert(
+  patrolResultEditorBodyIndex < placeholderRouteIndex,
+  "PATROL result-editor exact routes must precede the generic body-script fallback"
 );
 const patrolAreaEditorBodyIndex = nginx.indexOf(
   "location = /greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js"

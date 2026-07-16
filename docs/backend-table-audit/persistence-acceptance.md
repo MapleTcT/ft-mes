@@ -439,6 +439,9 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 从计划生成任务 | `potrolPlanList` | `POST /msService/PATROL/patrolPlan/createTask/createTaskEdit/submit` | `PATROLCreateTaskController -> PATROLPatrolPlanServiceImpl -> 任务/明细插入` | `mp_create_tasks`、`mp_potrol_tasks`、`mp_task_details` | 查询 generation `6675852713018192`、task `6675852717278032`、detail `6675852722815824`，核对 plan/route/valid/version/state | 三层记录全部存在；计划关联不一致数 0，明细生命周期空值数 0 | PASS |
 | 查询生成任务 | `potrolTaskList` | `POST /msService/PATROL/patrolTask/potrolTask/potrolTaskList-query` | `PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl` | 只读 | 将 API 返回 id/tableNo/state 与上述 PostgreSQL marker 行比对 | HTTP 200，页面和 API 均出现 `patrolTask_20260716_009` | PASS |
 | 批量取消任务并复显 | `batchChangeList -> patrolStateEdit` | `GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate` | `PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate` | `mp_potrol_tasks` | `SELECT id,table_no,task_state,remark,version,valid FROM mp_potrol_tasks WHERE id=6675852717278032;` | `PATROL_taskState/cancelled`、marker remark、`version=1`、`valid=true`；再次查询页面显示“已取消” | PASS |
+| 任务下发并进入执行中 | `potrolTaskList -> enteringResultList` | `GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/issued`；同端点切换 `running` | `PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate` | `mp_potrol_tasks` | 按计划编码 `ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN` 联查任务状态、备注、version 和 valid | 两次请求均 HTTP 200/SUCCESS；结果录入列表真实显示任务 `6676470908830544` 为“执行中” | PASS |
+| 保存现场巡检结果并完成任务 | `enteringResultList -> enteringResultEdit` | `POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676470908830544` | `PATROLPotrolTaskController.submit -> PATROLPotrolTaskServiceImpl.submit/savePotrolTask -> DataGridService/JPA` | `mp_potrol_tasks`、`mp_task_details` | `SELECT p.code,t.id,t.table_no,t.task_state,t.remark,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,t.valid,d.id,d.concluse,d.real_value,d.complete_user,d.complete_date,d.version,d.valid FROM mp_patrol_plans p JOIN mp_potrol_tasks t ON t.patrol_plan_id=p.id JOIN mp_task_details d ON d.patrol_task=t.id WHERE p.code='ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN';` | HTTP 200/success=true；任务为 `completed`、有实际起止时间和完成人、`version=2`；明细 `concluse=12.34`、`real_value=normal`、完成人/完成时间齐全、`version=1` | PASS |
+| 完成后父列表刷新和任务复显 | `enteringResultList`、`potrolTaskList` | `POST .../enteringResultList-query`；`POST .../potrolTaskList-query` | `PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl` | 只读核验上述两表 | 将接口返回状态和 PostgreSQL 同 marker 行逐字段比对 | 结果录入列表不再包含已完成任务，任务列表显示“已完成”；console/page/request failure 均为 0 | PASS |
 | 新增录入标准 | `inputStanList -> inputStanEdit` | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | `PATROLInputStandardController -> PATROLInputStandardServiceImpl -> JPA` | `mp_input_standards` | `SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';` | `id=6675974928974672`、`version=1`、字符/录入、`state=true`、`valid=true` | PASS |
 | 修改录入标准 | 同上 | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | 同上 | `mp_input_standards` | 同 marker SQL，核对名称、备注和 version | 名称和备注更新为 `_UPDATED`，`version=2` | PASS |
 | 停用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=inputStand` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=false` | PASS |
@@ -463,6 +466,12 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 机器记录：`metadata/patrol-module-recovery-acceptance.json`。可重放脚本：
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。验收过程中 console error、page error 和
 PATROL request failure 均为 0。
+
+现场执行机器记录：`metadata/patrol-execution-persistence-acceptance.json`。同一脚本使用
+`ADP_PATROL_TASK_ACTION=complete` 重放真实“计划 -> 生成任务 -> 下发 -> 执行 -> 录入结果 -> 完成 -> 页面复显”链路；
+marker `ADP_E2E_20260716210839_PATROL_EXECUTION` 为 32/32 PASS，任务/明细 PostgreSQL 字段和 5 张阶段截图齐全，
+console error、page error、request failure 均为 0。随后取消分支 marker
+`ADP_E2E_20260716210929_PATROL` 也独立回归 PASS。
 
 输入标准机器记录：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放脚本：
 `deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js`。完整浏览器 CRUD 为 16/16 PASS，

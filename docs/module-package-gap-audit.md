@@ -11,7 +11,7 @@
 
 当前并不是“所有业务模块都缺”。基础平台、生产、质量、设备和安环作业票的主体包已经进入源码仓库并在测试环境运行。新提供的 PATROL 与 EMS 原厂包也已经完成完整性扫描和源码接入。剩余边界分为五类：
 
-1. **源码恢复、已部署、继续验收**：共享巡检 `PATROL` 已完成 Java 8 构建、目标 PostgreSQL 迁移、EamMs 部署，并以真实页面/API/marker 闭合计划、任务生成、查询、取消和复显；其余执行与异常功能仍不能从这条通过链外推。
+1. **源码恢复、已部署、继续验收**：共享巡检 `PATROL` 已完成 Java 8 构建、目标 PostgreSQL 迁移、EamMs 部署，并以真实页面/API/marker 闭合输入标准、路线/区域/项目配置、计划、任务生成、查询、取消、下发、执行、结果录入、完成和复显；异常/隐患处置及统计仍不能从这些通过链外推。
 2. **源码恢复但被依赖阻断**：`supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 已恢复，但缺少真实 `Indicator 6.0.4.0` api/core，且没有 PostgreSQL 初始化 SQL。
 3. **其他依赖包缺失**：`packConfigManag`、`SESGISConfig`，分别影响较新 WOM 包和 WTS 地图能力。
 4. **包和源码存在但未部署**：`WOMmobile`，当前因版本冲突保留在源码仓库，不应误报为已上线。
@@ -41,9 +41,9 @@
 | 基础平台 | BaseSet、DataSet、DocManage、HierarchicalMod、TeamInfo 等 | 已注册并运行 | `PRESENT` | 仍需按页面/API/落库逐项验收，不能由模块存在推导全部功能可用 |
 | 生产制造 | WOM、RM、craftGraph | 已注册，核心服务 1/1 健康 | `PRESENT_PARTIAL` | WOM `6.1.3.4` 受 `packConfigManag` 缺包影响；当前运行版本不等于最新版完整能力 |
 | 质量管理 | LIMS 系列、QCS、Qualify | 已注册，QCS/LIMS 1/1 健康 | `PRESENT` | 当前以 QC/LIMS 为主，QA 产品能力仍需单独规划，不能从包名推导完整 QA |
-| 设备管理 | EAM、maintenance、SpareManage、OverhaulTicket、PATROL | EAM 健康；PATROL 由 EamMs 承载且任务状态链 PASS | `PRESENT_PARTIAL` | 设备主体和共用巡检任务链可用；现场执行、异常与统计仍需验收 |
+| 设备管理 | EAM、maintenance、SpareManage、OverhaulTicket、PATROL | EAM 健康；PATROL 由 EamMs 承载，配置、任务状态和现场结果链 PASS | `PRESENT_PARTIAL` | 设备主体和共用巡检执行链可用；异常/隐患与统计仍需验收 |
 | 安环作业票 | WTS、workAppointment、PATROL | WTS 健康；PATROL 安环巡检共享核心已部署 | `PRESENT_PARTIAL` | 作业票主体存在；GIS 仍缺 `SESGISConfig`；安环巡检入口需继续按同一 PATROL 数据域复验 |
-| 共享巡检 | `PATROL_6.0.4.0` | 目标 PostgreSQL/EamMs 已部署；幂等复跑后任务 marker `ADP_E2E_20260716155413_PATROL` PASS | `SOURCE_RECOVERED_RUNTIME_PARTIAL` | 37 表、7 实体、27 模型、74 视图、24 菜单、102 操作、2 工作流；计划/任务取消链 PASS，其余页面继续验收 |
+| 共享巡检 | `PATROL_6.0.4.0` | 目标 PostgreSQL/EamMs 已部署；任务取消及执行完成 marker 均 PASS | `SOURCE_RECOVERED_RUNTIME_PARTIAL` | 37 表、7 实体、27 模型、74 视图、24 菜单、102 操作、2 工作流；配置、计划、任务状态、结果录入和完成链 PASS，异常/隐患及统计继续验收 |
 | 能源管理 | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` | 四模块源码已恢复；无可部署构件 | `SOURCE_RECOVERED_BLOCKED_DEPENDENCY` | 81 个 Java 文件直接依赖缺失的 Indicator；随包 SQL 无 PostgreSQL 版本 |
 | 物料/WMS | 未发现原厂完整 WMS 包；已有 `material-wms` 自研源码 | `material` 1/1 健康，菜单可见 | `CUSTOM_REPLACEMENT_DEPLOYED` | `wms_batch_stocks=2`、`wms_inventory_transactions=4`、`wms_quality_results=2`、`wms_stock_documents=2` |
 | 生产过程追溯 | 原包未形成独立源码模块；已有 `process-analysis` 自研源码 | `ProcessAnalysis` 1/1 健康，菜单可见 | `CUSTOM_REPLACEMENT_DEPLOYED` | 已不属于缺包，但仍需纳入核心主流程真实 marker 验收 |
@@ -53,7 +53,7 @@
 
 | 模块/依赖 | 包 | 源码 | 运行目录/JAR | 注册/服务 | 菜单 | 表 | 状态 | 处理建议 |
 |---|---:|---:|---:|---:|---:|---:|---|---|
-| `PATROL_1.0.0` | 是 | 是 | 已部署 | EamMs 承载 | 24 菜单启用 | 37 表目标验收 | `SOURCE_RECOVERED_RUNTIME_PARTIAL` | 继续完成输入标准、路线 CRUD、任务执行、异常、统计和经确认的目标回滚演练 |
+| `PATROL_1.0.0` | 是 | 是 | 已部署 | EamMs 承载 | 24 菜单启用 | 37 表目标验收 | `SOURCE_RECOVERED_RUNTIME_PARTIAL` | 保持配置和任务执行完成回归；继续异常/隐患、统计和经确认的目标回滚演练 |
 | `supEMS` + 3 个能源子模块 | 是 | 是 | 否 | 否 | 包内存在 | PostgreSQL 未迁移 | `SOURCE_RECOVERED_BLOCKED_DEPENDENCY` | 先取得 Indicator `6.0.4.0` api/core，再按依赖顺序编译和迁移 |
 | `Indicator_6.0.4.0` | 否 | 否 | 否 | 否 | 否 | 未确认 | `MISSING_DEPENDENCY` | 禁止用空接口桩绕过；取得原包后重新执行四个 EMS reactor 构建 |
 | `packConfigManag` | 否 | 否 | 否 | 否 | 否 | 未确认 | `MISSING_DEPENDENCY` | 补齐与 WOM `6.1.3.4` 匹配的 `6.1.2.1/6.1.3.2` 包，之后重新做准入和编译 |
@@ -96,7 +96,7 @@
 ## 接入顺序
 
 1. **不阻断当前生产质量主线**：继续闭合“制造指令 -> 投料/报工 -> 请检 -> 质量处置 -> 完工入库 -> 批次追溯”。
-2. **扩大 PATROL 功能验收**：部署与计划/任务取消链已 PASS；继续完成输入标准、路线 CRUD、任务下发/执行/完成、异常、统计和经确认的目标回滚。
+2. **扩大 PATROL 功能验收**：部署、配置 CRUD、计划/任务取消、任务下发/执行、结果录入和完成链已 PASS；继续完成异常/隐患、统计和经确认的目标回滚。
 3. **补 Indicator 并恢复 EMS**：不得伪造依赖；四服务必须分别构建、迁移、健康检查和验收。
 4. **补 WOM 依赖**：取得 `packConfigManag` 后，在隔离环境验证 WOM 新版本，不直接覆盖现有运行版本。
 5. **补 WTS 地图依赖**：取得 `SESGISConfig` 后单独恢复 GIS 功能。

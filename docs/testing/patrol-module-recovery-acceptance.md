@@ -4,11 +4,11 @@
 - 原厂产品：`PATROL_1.0.0` / `6.0.4.0`
 - 当前源码接入提交：`mes-modules-patrol-intake@0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0`
 - 目标运行构件源码提交：`8971a8770452c2bb55261f330284cd3dd26824b1`
-- 主仓库验收基线：`299b0c8dd3993a819a58bf589d7b39bcbbfea580`
+- 主仓库执行链验收基线：`28d93d0673171efc2b47fc64b45dd5f43e66b0ad`
 - 承载服务：`EamMs`
 - 目标环境：`v6@10.11.100.17`
 - 默认数据库：PostgreSQL
-- 当前结论：`TARGET_TASK_PERSISTENCE_PASS`
+- 当前结论：`TARGET_EXECUTION_PERSISTENCE_PASS`
 
 机器可读记录见 [PATROL 恢复验收](../../metadata/patrol-module-recovery-acceptance.json)；可重放脚本见
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。
@@ -16,13 +16,14 @@
 ## 结论
 
 PATROL 原厂源码、PostgreSQL 迁移、运行元数据、菜单权限、工作流和运行 JAR 已部署到测试环境。
-真实浏览器已完成“新增计划 -> 生成任务 -> 普通查询 -> 批量取消 -> PostgreSQL 回读 -> 页面复显”
-闭环。重新应用 178-185 后，marker `ADP_E2E_20260716155413_PATROL` 的 22 项断言全部 PASS，浏览器 console、page error 和
-PATROL network failure 均为 0。
+真实浏览器先完成“新增计划 -> 生成任务 -> 普通查询 -> 批量取消 -> PostgreSQL 回读 -> 页面复显”
+闭环；随后又完成“新增计划 -> 生成任务 -> 下发 -> 执行 -> 录入结果 -> 完成 -> PostgreSQL 回读 -> 页面复显”
+闭环。执行 marker `ADP_E2E_20260716210839_PATROL_EXECUTION` 的 32 项断言全部 PASS，浏览器 console、page error、
+PATROL network failure 均为 0，取消分支也在其后独立回归 PASS。
 
-这证明共享巡检的计划/任务状态链在 PostgreSQL 上可用，也再次确认设备巡检、工艺巡检和安环巡检
-共用同一 PATROL 数据域。它不等于整个巡检产品已经全部验收：输入标准 CRUD、路线/区域/项目全量
-编辑、现场执行结果、异常处置和统计页面仍需继续逐页闭合。
+这证明共享巡检的输入标准、路线/区域/项目配置、计划/任务状态和现场执行结果链在 PostgreSQL 上可用，
+也再次确认设备巡检、工艺巡检和安环巡检共用同一 PATROL 数据域。它不等于整个巡检产品已经全部验收：
+异常/隐患处置和统计监控页面仍需继续逐页闭合。
 
 ## 来源与构建
 
@@ -75,7 +76,8 @@ PATROL network failure 均为 0。
 | EamMs | 容器运行，PATROL 请求真实命中 |
 | PostgreSQL | 容器 healthy |
 | Nginx | 配置 `nginx -t` PASS，兼容规则已热加载 |
-| 最近备份 | `/data/docker/adp-patrol-20260716/20260716233613-nginx-edit-list-fix` |
+| 最近备份 | `/data/docker/adp-patrol-20260717054457-result-blank-fix` |
+| 结果录入脚本 | `enteringResultEdit/body.js`、`body-es5.js`，目标与仓库 SHA-256 均为 `5c2f6653...b4a360`；空/null 结果不会再被转换为数值 0 |
 
 前端兼容规则只处理旧框架的两个无效错误日志：
 
@@ -98,6 +100,11 @@ PATROL 六种任务状态 `未下发/已下发/执行中/已超期/已完成/已
 | 批量取消 | `batchChangeList` 选择真实行；`GET .../taskStateUpdate` | `mp_potrol_tasks.id=6675852717278032` | PASS |
 | 任务明细默认值 | 生成任务事务 | `mp_task_details.id=6675852722815824` | PASS |
 | 取消后复显 | 再次点击真实“查询” | 同一行显示“已取消” | PASS |
+| 下发任务 | `GET .../taskStateUpdate?changeState=PATROL_taskState/issued` | `mp_potrol_tasks.id=6676470908830544` | PASS |
+| 进入执行中 | 同端点切换 `running`，打开 `enteringResultList` | 页面显示 `patrolTask_20260717_006` 为“执行中” | PASS |
+| 加载巡检明细 | `POST .../data-dg1584600022503` | `mp_task_details.id=6676470914171728` | PASS |
+| 录入结果并完成 | `POST .../enteringResultEdit/submit` | 任务和明细同时更新 | PASS |
+| 完成后复显 | 再次查询 `potrolTaskList` | 同一行显示“已完成” | PASS |
 
 状态变更返回：
 
@@ -125,6 +132,50 @@ valid=true
 - 5 张阶段截图均生成；最终报告为
   `/tmp/adp-patrol-task-persistence-post-idempotency.json`。
 
+## 现场执行与完成（2026-07-17）
+
+机器记录：`metadata/patrol-execution-persistence-acceptance.json`；可重放命令：
+
+```bash
+make acceptance-patrol-execution-persistence \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_SSH_HOST=10.11.100.17
+```
+
+真实页面使用 marker `ADP_E2E_20260716210839_PATROL_EXECUTION`，保存请求为：
+
+```text
+POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676470908830544
+HTTP 200, code=200, success=true, taskState=completed
+```
+
+PostgreSQL 直接查询确认：
+
+```text
+task.id=6676470908830544
+task.table_no=patrolTask_20260717_006
+task.task_state=PATROL_taskState/completed
+task.actual_start_time=2026-07-17 05:08:46
+task.actual_end_time=2026-07-17 05:08:47.501
+task.complete_staff=1
+task.version=2
+detail.id=6676470914171728
+detail.concluse=12.34
+detail.real_value=PATROL_realValue/normal
+detail.complete_user=1
+detail.complete_date=2026-07-17 05:08:47.501
+detail.version=1
+```
+
+结果编辑页此前请求到空 `body.js`，导致自动判定函数缺失。仓库现已恢复原产品判定语义，并补上空值、
+数字范围、全角/半角比较符、OR 规则、字符相等判断及空结果拒绝回归；目标 Nginx 以精确静态路由返回该脚本。
+浏览器 5 张阶段截图均生成，32/32 断言通过，console/page/request/screenshot failure 都为 0。
+
+测试脚本保留中断轮次的审计：前两次未完成任务使用真实 `taskStateUpdate` 取消，后三次业务已完成但因
+自动化时序/旧控件错误判为失败，其任务作为审计记录保留，没有直接删库。最终通过轮次将 SupSelect 的
+500ms 延迟布局纳入真实交互等待，且没有屏蔽任何浏览器错误。随后取消动作 marker
+`ADP_E2E_20260716210929_PATROL` 再次回归 PASS。
+
 ## 已恢复前置数据
 
 | 类型 | ID | Marker / 内容 | 状态 |
@@ -137,10 +188,11 @@ valid=true
 
 | 功能 | 当前状态 | 下一步 |
 |---|---|---|
-| 输入标准新增/编辑/删除 | PENDING | 真实页面 marker + `mp_input_standards` 回读 |
-| 路线/区域/项目完整 CRUD | PARTIAL | 补编辑、删除、关联变化和页面复显 |
-| 任务下发/执行/完成 | PENDING | 按原状态机走真实业务入口，不直接改库 |
-| 执行结果和异常处置 | PENDING | 验证明细结果、异常记录、任务完成回写 |
+| 输入标准新增/编辑/删除 | PASS | 保持真实页面和 PostgreSQL 回归 |
+| 路线/区域/项目完整 CRUD | PASS | 保持行操作、CRUD、关联和软删除回归 |
+| 任务下发/执行/完成 | PASS | 保持真实状态机和取消分支回归 |
+| 执行结果 | PASS | 保持任务/明细同 marker 落库和页面复显回归 |
+| 异常/隐患处置 | PENDING | 验证异常生成、处置、状态回写和跨模块关联 |
 | 统计和监控 | PENDING | 逐页清理 SQL/显示错误并核对聚合值 |
 | 目标机回滚演练 | REQUIRES_CONFIRMATION | 维护窗口内禁用、验证、重新应用 178-185 |
 

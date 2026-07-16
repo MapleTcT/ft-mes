@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-07-16T21:08:52.560Z",
+  "repoBaseCommit": "28d93d0673171efc2b47fc64b45dd5f43e66b0ad",
+  "database": "PostgreSQL",
+  "targetHost": "10.11.100.17",
+  "baseUrl": "http://10.11.100.17:18080",
+  "status": "PASS",
+  "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+  "action": "complete",
+  "assertions": {
+    "total": 32,
+    "passed": 32,
+    "failed": 0
+  },
+  "ids": {
+    "routeId": 6675485506913104,
+    "staffId": 1,
+    "planId": 6676470903063376,
+    "generationId": 6676470906078032,
+    "taskId": 6676470908830544,
+    "taskDetailId": 6676470914171728
+  },
+  "runtimeAsset": {
+    "source": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js",
+    "es5Source": "deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body-es5.js",
+    "sha256": "5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360",
+    "httpStatus": 200,
+    "bytes": 2910,
+    "judgeInstalled": true,
+    "blankResultRejected": true,
+    "nullResultRejected": true,
+    "liveVerifiedAt": "2026-07-16T21:46:47Z",
+    "nginxReload": "PASS_AFTER_CONTAINER_RECREATE",
+    "targetBackup": "/data/docker/adp-patrol-20260717054457-result-blank-fix"
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+      "status": 200,
+      "result": "planId=6676470903063376"
+    },
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+      "status": 200,
+      "result": "generationId=6676470906078032"
+    },
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "status": 200,
+      "result": "taskId=6676470908830544"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/issued",
+      "status": 200,
+      "result": "SUCCESS"
+    },
+    {
+      "method": "GET",
+      "path": "/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/running",
+      "status": 200,
+      "result": "SUCCESS"
+    },
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+      "status": 200,
+      "result": "running task visible"
+    },
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676470908830544",
+      "status": 200,
+      "result": "success=true; task completed"
+    },
+    {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "status": 200,
+      "result": "completed task visible"
+    }
+  ],
+  "backendTrace": {
+    "entry": "PATROLPotrolTaskController.submit",
+    "service": "PATROLPotrolTaskServiceImpl.submit -> savePotrolTask",
+    "persistence": "DataGridService and JPA",
+    "tables": [
+      "mp_patrol_plans",
+      "mp_plan_staffs",
+      "mp_create_tasks",
+      "mp_potrol_tasks",
+      "mp_task_details"
+    ]
+  },
+  "persistence": {
+    "plan": {
+      "id": 6676470903063376,
+      "code": "ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN",
+      "finishPlan": true,
+      "planCount": 1,
+      "valid": true
+    },
+    "task": {
+      "id": 6676470908830544,
+      "tableNo": "patrolTask_20260717_006",
+      "taskState": "PATROL_taskState/completed",
+      "remark": "ADP_E2E_20260716210839_PATROL_EXECUTION_RUNNING",
+      "actualStartTime": "2026-07-17T05:08:46",
+      "actualEndTime": "2026-07-17T05:08:47.501",
+      "completeStaff": 1,
+      "version": 2,
+      "valid": true
+    },
+    "detail": {
+      "id": 6676470914171728,
+      "patrolTask": 6676470908830544,
+      "content": "ADP_E2E_202607162116_PATROL_ITEM",
+      "concluse": "12.34",
+      "realValue": "PATROL_realValue/normal",
+      "completeUser": 1,
+      "completeDate": "2026-07-17T05:08:47.501",
+      "version": 1,
+      "valid": true
+    },
+    "planAssociationMismatchCount": 0,
+    "detailLifecycleNullCount": 0,
+    "detailCompletionNullCount": 0,
+    "directPsqlReadback": "PASS"
+  },
+  "verificationSql": "SELECT p.code,t.id,t.table_no,t.task_state,t.remark,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,t.valid,d.id AS detail_id,d.concluse,d.real_value,d.complete_user,d.complete_date,d.version AS detail_version,d.valid AS detail_valid FROM public.mp_patrol_plans p JOIN public.mp_potrol_tasks t ON t.patrol_plan_id=p.id JOIN public.mp_task_details d ON d.patrol_task=t.id WHERE p.code='ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN';",
+  "browserEvidence": {
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "screenshotFailures": 0,
+    "liveJudgeRegression": {
+      "blank": false,
+      "nullValue": false,
+      "zero": true,
+      "range": true,
+      "consoleErrors": 0,
+      "pageErrors": 0
+    },
+    "screenshots": [
+      "/tmp/adp-patrol-persistence-20260716210839/01-patrol-plan-list.png",
+      "/tmp/adp-patrol-persistence-20260716210839/02-patrol-task-list.png",
+      "/tmp/adp-patrol-persistence-20260716210839/03-patrol-entering-result-list.png",
+      "/tmp/adp-patrol-persistence-20260716210839/04-patrol-entering-result-before-save.png",
+      "/tmp/adp-patrol-persistence-20260716210839/05-patrol-task-completed.png"
+    ]
+  },
+  "cancelRegression": {
+    "report": "/tmp/adp-patrol-cancel-regression-after-execution.json",
+    "marker": "ADP_E2E_20260716210929_PATROL",
+    "planId": 6676472507810640,
+    "generationId": 6676472511513424,
+    "taskId": 6676472514757456,
+    "taskDetailId": 6676472521212752,
+    "status": "PASS"
+  },
+  "attemptHistory": [
+    {
+      "marker": "ADP_E2E_20260716210047_PATROL_EXECUTION",
+      "result": "INTERRUPTED_BEFORE_COMPLETION",
+      "cause": "test selected a nonexistent checkbox instead of the grid row API",
+      "cleanup": "task 6676455452459856 cancelled through taskStateUpdate with _ABORTED_SELECTION_FIX"
+    },
+    {
+      "marker": "ADP_E2E_20260716210345_PATROL_EXECUTION",
+      "result": "INTERRUPTED_BEFORE_COMPLETION",
+      "cause": "popup API readiness race",
+      "cleanup": "task 6676461242008400 cancelled through taskStateUpdate with _ABORTED_API_READY_FIX"
+    },
+    {
+      "marker": "ADP_E2E_20260716210434_PATROL_EXECUTION",
+      "result": "BUSINESS_COMPLETED_TEST_FAILED",
+      "cause": "parent navigation race and legacy vendor page errors",
+      "cleanup": "completed task retained as audit evidence"
+    },
+    {
+      "marker": "ADP_E2E_20260716210615_PATROL_EXECUTION",
+      "result": "BUSINESS_COMPLETED_TEST_FAILED",
+      "cause": "vendor select popup was closed before its delayed layout callback",
+      "cleanup": "completed task retained as audit evidence"
+    },
+    {
+      "marker": "ADP_E2E_20260716210734_PATROL_EXECUTION",
+      "result": "BUSINESS_COMPLETED_TEST_FAILED",
+      "cause": "vendor select popup was closed before its delayed layout callback",
+      "cleanup": "completed task retained as audit evidence"
+    }
+  ],
+  "replay": "make acceptance-patrol-execution-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17"
+}

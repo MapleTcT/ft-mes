@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T20:09:52.643Z",
+  "generatedAt": "2026-07-16T21:08:52.560Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_EXECUTION_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-16T20:09:52.643Z",
+    "generatedAt": "2026-07-16T21:08:52.560Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -56,11 +56,17 @@
       "marker": "ADP_E2E_20260716200952_PATROL_ITEM",
       "evidence": "metadata/patrol-item-persistence-acceptance.json",
       "cleanup": "valid=false; visible rows=0; failed-run markers valid=false; seed route/area/item valid=true"
+    },
+    "patrolExecution": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+      "evidence": "metadata/patrol-execution-persistence-acceptance.json",
+      "cancelRegression": "ADP_E2E_20260716210929_PATROL: PASS"
     }
   },
   "summary": {
-    "testedFeatures": 162,
-    "pass": 157,
+    "testedFeatures": 165,
+    "pass": 160,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3440,9 +3446,64 @@
       "api": "GET /msService/PATROL/patrolRoute/workItem/deleteWorkItems; POST /msService/PATROL/patrolRoute/workArea/workItemPtEdit/submit",
       "method": "GET/POST",
       "evidence": "metadata/patrol-item-persistence-acceptance.json. Delete and parent-save requests returned HTTP 200; PostgreSQL valid=false and the seed route, area and item remained valid."
+    },
+    {
+      "module": "PATROL巡检任务执行",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+      "operation": "对真实新生成任务依次执行已下发和执行中状态转换",
+      "api": "GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/issued; GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/running",
+      "method": "GET",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate",
+      "tables": [
+        "mp_potrol_tasks"
+      ],
+      "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+      "verificationSql": "SELECT p.code,t.id,t.table_no,t.task_state,t.remark,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,t.valid FROM public.mp_patrol_plans p JOIN public.mp_potrol_tasks t ON t.patrol_plan_id=p.id WHERE p.code='ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-execution-persistence-acceptance.json. Both state transitions returned HTTP 200/SUCCESS, and the real entering-result page rendered task 6676470908830544 as running with zero browser errors.",
+      "issues": []
+    },
+    {
+      "module": "PATROL巡检结果录入与完成",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+      "operation": "打开真实结果编辑器，填写结果12.34和正常结论并保存完成任务",
+      "api": "POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676470908830544",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPotrolTaskController.submit -> PATROLPotrolTaskServiceImpl.submit/savePotrolTask -> DataGridService/JPA",
+      "tables": [
+        "mp_potrol_tasks",
+        "mp_task_details"
+      ],
+      "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+      "verificationSql": "SELECT p.code,t.id,t.table_no,t.task_state,t.remark,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,t.valid,d.id AS detail_id,d.concluse,d.real_value,d.complete_user,d.complete_date,d.version AS detail_version,d.valid AS detail_valid FROM public.mp_patrol_plans p JOIN public.mp_potrol_tasks t ON t.patrol_plan_id=p.id JOIN public.mp_task_details d ON d.patrol_task=t.id WHERE p.code='ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-execution-persistence-acceptance.json. HTTP 200/success=true; PostgreSQL confirmed completed task, actual start/end, complete staff and version=2 plus detail concluse=12.34, real_value=normal, completion audit and version=1. All 32 assertions passed.",
+      "issues": []
+    },
+    {
+      "module": "PATROL巡检完成复显",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+      "operation": "保存后刷新父列表并重新查询任务，核对已完成状态",
+      "api": "POST /msService/PATROL/patrolTask/potrolTask/enteringResultList-query; POST /msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl query path",
+      "tables": [],
+      "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+      "verificationSql": "SELECT task_state,version,valid FROM public.mp_potrol_tasks WHERE id=6676470908830544;",
+      "status": "PASS",
+      "evidence": "metadata/patrol-execution-persistence-acceptance.json. The completed task left the entering-result list and reappeared as 已完成 in the task list; five screenshots were generated and console/page/request/screenshot failures were all zero.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
+      "artifact": "metadata/patrol-execution-persistence-acceptance.json",
+      "summary": "PATROL real browser issue, run, result entry, completion and completed-state re-render passed 32/32 on 10.11.100.17; PostgreSQL verified task and detail fields, cancel regression passed, and browser errors were zero."
+    },
     {
       "marker": "ADP_E2E_20260716155413_PATROL",
       "artifact": "metadata/patrol-module-recovery-acceptance.json",
