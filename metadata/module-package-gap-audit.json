@@ -1,0 +1,234 @@
+{
+  "generatedAt": "2026-07-16T09:19:37+08:00",
+  "repoCommit": "aa9061e3417c1c53b03cfad035cdc8cfbdfaa7a2",
+  "database": "PostgreSQL",
+  "scope": {
+    "packageRoots": [
+      "/Users/zhangchu/Documents/MES包",
+      "/Users/zhangchu/Downloads/ADP"
+    ],
+    "recoveredSourceRoot": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules",
+    "sustainableSourceRoot": "/Users/zhangchu/Documents/ADP/adp-core-flow-fix/backend/source-modules",
+    "runtimeHost": "100.99.133.43",
+    "runtimeAccessPolicy": "TAILSCALE_ONLY",
+    "inactiveInternalAddress": "10.11.100.17",
+    "runtimeModuleRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server",
+    "archiveScan": {
+      "zipFiles": 365,
+      "nestedZipFiles": 55,
+      "nonZipHistoricalFiles": 2,
+      "targetModulePackageHits": 1
+    }
+  },
+  "summary": {
+    "vendorSourceVersionDirectories": 40,
+    "uniqueVendorModuleCodes": 34,
+    "registeredBizModules": 33,
+    "runtimeModuleDirectories": 26,
+    "nacosServiceCount": 91,
+    "missingFullStackModules": 2,
+    "missingDependencyPackages": 2,
+    "presentButNotDeployed": 1,
+    "customReplacementModules": 2,
+    "overallStatus": "PARTIAL_MODULE_SET"
+  },
+  "coreRuntimeServices": [
+    {
+      "service": "WOM",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "RM",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "craftGraph",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "QCS",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "LIMS",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "EAM",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "WTS",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "material",
+      "instances": 1,
+      "healthy": 1
+    },
+    {
+      "service": "ProcessAnalysis",
+      "instances": 1,
+      "healthy": 1
+    }
+  ],
+  "items": [
+    {
+      "id": "PATROL",
+      "domain": "shared-inspection",
+      "status": "MISSING_FULL_STACK",
+      "severity": "CRITICAL",
+      "packageFound": false,
+      "sourceFound": false,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": false,
+      "referencesFound": [
+        "EAM",
+        "BaseSet",
+        "TeamInfo"
+      ],
+      "impact": "设备巡检和安环巡检共用核心缺失",
+      "nextAction": "取得原始 PATROL 包，或按设备与安环共用边界新建巡检域"
+    },
+    {
+      "id": "EMS_SUP_EMS",
+      "domain": "energy-management",
+      "status": "MISSING_FULL_STACK",
+      "severity": "HIGH",
+      "packageFound": false,
+      "sourceFound": false,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": false,
+      "scaffolding": {
+        "menuRoute": "/msService/HierarchicalMod/energyNode/energyNode/energyNodeList",
+        "tables": {
+          "hm_energy_nets": 0,
+          "hm_energy_nodes": 0,
+          "hm_energy_nodes_di": 0
+        }
+      },
+      "impact": "只有能源节点层级骨架，没有完整计量、平衡、单耗、分析和告警业务",
+      "nextAction": "明确能源业务边界后补原包或单独建设能源模块"
+    },
+    {
+      "id": "packConfigManag",
+      "domain": "production-packaging",
+      "status": "MISSING_DEPENDENCY",
+      "severity": "HIGH",
+      "packageFound": false,
+      "sourceFound": false,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": null,
+      "requiredBy": [
+        "WOM_6.1.3.4"
+      ],
+      "expectedVersions": [
+        "6.1.2.1",
+        "6.1.3.2"
+      ],
+      "impact": "较新 WOM 包不能作为完整版本接入，打印/包装链存在依赖缺口",
+      "nextAction": "取得匹配依赖后重新执行模块准入、编译和隔离部署验收"
+    },
+    {
+      "id": "SESGISConfig",
+      "domain": "safety-gis",
+      "status": "MISSING_DEPENDENCY",
+      "severity": "MEDIUM",
+      "packageFound": false,
+      "sourceFound": false,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": null,
+      "requiredBy": [
+        "WTS",
+        "EAM"
+      ],
+      "impact": "作业地图/GIS 能力不完整",
+      "nextAction": "取得服务端包后复验 WTS 地图页面、API 和 PostgreSQL 数据"
+    },
+    {
+      "id": "WOMmobile_5.0.0.0",
+      "projectVersion": "6.1.2.2",
+      "domain": "mobile-production",
+      "status": "PRESENT_NOT_DEPLOYED",
+      "severity": "MEDIUM",
+      "packageFound": true,
+      "sourceFound": true,
+      "runtimeFound": false,
+      "registryFound": false,
+      "serviceFound": false,
+      "menuFound": false,
+      "tablesFound": null,
+      "reason": "与当前 WOM/基础平台版本冲突，已记录跳过",
+      "nextAction": "建立版本矩阵并在隔离环境做兼容、认证、API 和落库验收"
+    },
+    {
+      "id": "material-wms",
+      "domain": "material-wms",
+      "status": "CUSTOM_REPLACEMENT_DEPLOYED",
+      "severity": "INFO",
+      "packageFound": false,
+      "sourceFound": true,
+      "runtimeFound": true,
+      "registryFound": false,
+      "serviceFound": true,
+      "menuFound": true,
+      "menuRoutes": [
+        "/msService/material/wms"
+      ],
+      "tables": {
+        "wms_batch_stocks": 2,
+        "wms_inventory_transactions": 4,
+        "wms_quality_results": 2,
+        "wms_stock_documents": 2
+      },
+      "nextAction": "继续闭合请检、质量处置、完工入库、库存事务和批次追溯"
+    },
+    {
+      "id": "process-analysis",
+      "domain": "production-traceability",
+      "status": "CUSTOM_REPLACEMENT_DEPLOYED",
+      "severity": "INFO",
+      "packageFound": false,
+      "sourceFound": true,
+      "runtimeFound": true,
+      "registryFound": false,
+      "serviceFound": true,
+      "menuFound": true,
+      "menuRoutes": [
+        "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut"
+      ],
+      "nextAction": "继续验证跨 WOM、QCS、WMS 的同一批次 marker 和反向追溯"
+    }
+  ],
+  "evidence": {
+    "packageScanner": "mes-modules-source-repo/scripts/find-missing-module-packages.py",
+    "skippedPackageLedger": "mes-modules-source-repo/metadata/skipped-packages.json",
+    "databaseRegistryTable": "mod_module_registry",
+    "menuSnapshot": "/tmp/adp-current-menu-20260716.json",
+    "runtimeVerification": "read-only SSH, Docker, Nacos and PostgreSQL checks through 100.99.133.43"
+  },
+  "limitations": [
+    "模块包、JAR、Nacos 服务或菜单存在不代表业务功能已通过验收",
+    "本报告只判断当前已提供包、恢复源码和当前运行态的完整性，不替代真实页面、API、PostgreSQL marker 和回滚验收",
+    "PATROL、EMS、packConfigManag 和 SESGISConfig 的结论限定于本次扫描的两个原始包根目录"
+  ]
+}

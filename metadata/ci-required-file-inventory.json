@@ -3777,6 +3777,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/module-package-gap-audit.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/oracle-migration-backlog.md",
       "state": "tracked",
       "tracked": true
@@ -4522,6 +4528,12 @@
     {
       "ignored": false,
       "path": "metadata/module-intake-latest-basic-modules.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/module-package-gap-audit.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6695,13 +6707,13 @@
       "tracked": 488
     },
     "docs": {
-      "tracked": 88
+      "tracked": 89
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 107
+      "tracked": 108
     },
     "package.json": {
       "tracked": 1
@@ -6725,8 +6737,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1111,
-    "tracked": 1111,
+    "totalFiles": 1113,
+    "tracked": 1113,
     "untracked": 0
   },
   "untrackedByDirectory": []
