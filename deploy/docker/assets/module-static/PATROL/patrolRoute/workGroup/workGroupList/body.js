@@ -345,6 +345,16 @@
     return titleElement ? titleElement.textContent.replace(/\s/g, "") : "";
   }
 
+  function closeMoreMenu(button) {
+    var moreButton = button.closest("#btn-more");
+    if (moreButton) {
+      var menuTrigger = moreButton.querySelector(".sup-datagrid-button-item");
+      window.setTimeout(function closeMenuAfterCurrentClick() {
+        (menuTrigger || moreButton).click();
+      }, 0);
+    }
+  }
+
   function routeAction(buttonId) {
     if (buttonId === "btn-delete") {
       deleteRoute();
@@ -399,6 +409,8 @@
       }
 
       event.preventDefault();
+      event.stopImmediatePropagation();
+      closeMoreMenu(button);
       if (title === routeTitle) {
         routeAction(button.id);
       } else {

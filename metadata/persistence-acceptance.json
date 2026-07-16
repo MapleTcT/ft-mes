@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T18:08:53.420Z",
+  "generatedAt": "2026-07-16T19:01:00.292Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_TASK_CHAIN_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-16T18:08:53.420Z",
+    "generatedAt": "2026-07-16T19:01:00.292Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -44,11 +44,17 @@
       "marker": "ADP_E2E_20260716180853_PATROL_ROUTE",
       "evidence": "metadata/patrol-route-persistence-acceptance.json",
       "cleanup": "valid=false; visible rows=0; interrupted markers valid=false"
+    },
+    "patrolArea": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json",
+      "cleanup": "valid=false; visible rows=0; interrupted markers valid=false; seed route/area valid=true"
     }
   },
   "summary": {
-    "testedFeatures": 152,
-    "pass": 147,
+    "testedFeatures": 157,
+    "pass": 152,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3258,6 +3264,91 @@
       "api": "POST /msService/PATROL/patrolRoute/workGroup/checkRelationPlan; GET /msService/PATROL/patrolRoute/workGroup/deleteWorkGroups",
       "method": "POST/GET",
       "evidence": "metadata/patrol-route-persistence-acceptance.json. Relation check and delete returned HTTP 200; PostgreSQL valid=false and the refreshed page contained zero marker rows. Interrupted-run markers were also removed through the same real UI action and verified valid=false."
+    },
+    {
+      "module": "PATROL巡检区域",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA",
+      "tables": [
+        "mp_work_areas"
+      ],
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,is_device,sign_code,sort,work_group_id,remark,cid FROM public.mp_work_areas WHERE code='ADP_E2E_20260716190100_PATROL_AREA';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "在区域设置弹窗点击增行，填写唯一marker，并验证上移、下移、删行后保存",
+      "api": "POST /msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json. Real browser row controls and add passed 21/21 acceptance; PostgreSQL returned id=6676220033221456, version=0, is_run=true, valid=true, sort=1, route FK and cid=1000."
+    },
+    {
+      "module": "PATROL巡检区域",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA",
+      "tables": [
+        "mp_work_areas"
+      ],
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,is_device,sign_code,sort,work_group_id,remark,cid FROM public.mp_work_areas WHERE code='ADP_E2E_20260716190100_PATROL_AREA';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "重新打开区域设置并修改marker名称和备注",
+      "api": "POST /msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit",
+      "method": "POST",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json. PostgreSQL returned updated name/remark, version=1, and unchanged work_group_id."
+    },
+    {
+      "module": "PATROL巡检区域",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA",
+      "tables": [
+        "mp_work_areas"
+      ],
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,is_device,sign_code,sort,work_group_id,remark,cid FROM public.mp_work_areas WHERE code='ADP_E2E_20260716190100_PATROL_AREA';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从区域工具栏停用marker区域",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=workArea",
+      "method": "GET",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json. HTTP 200/dealFlag=true and PostgreSQL is_run changed from true to false."
+    },
+    {
+      "module": "PATROL巡检区域",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA",
+      "tables": [
+        "mp_work_areas"
+      ],
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,is_device,sign_code,sort,work_group_id,remark,cid FROM public.mp_work_areas WHERE code='ADP_E2E_20260716190100_PATROL_AREA';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "从区域工具栏重新启用marker区域",
+      "api": "GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=1&tableType=workArea",
+      "method": "GET",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json. HTTP 200/dealFlag=true and PostgreSQL is_run changed from false to true."
+    },
+    {
+      "module": "PATROL巡检区域",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA",
+      "tables": [
+        "mp_work_areas"
+      ],
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "verificationSql": "SELECT id,version,code,name,is_run,valid,is_device,sign_code,sort,work_group_id,remark,cid FROM public.mp_work_areas WHERE code='ADP_E2E_20260716190100_PATROL_AREA';",
+      "status": "PASS",
+      "issues": [],
+      "operation": "通过确认框软删除marker区域并重新加载路线区域列表",
+      "api": "GET /msService/PATROL/patrolRoute/workArea/deleteWorkAreas",
+      "method": "GET",
+      "evidence": "metadata/patrol-area-persistence-acceptance.json. HTTP 200, PostgreSQL valid=false, refreshed area list contained zero marker rows, and the seed route/area remained valid."
     }
   ],
   "evidence": [
@@ -3300,6 +3391,11 @@
       "marker": "ADP_E2E_20260620123813_ORGPOSROLE",
       "artifact": "/tmp/adp-organization-position-role-persistence-1009913343-current.json",
       "summary": "Current-address organization position-role acceptance passed through public browser routes /auth/#/role and /organization/#/organizationmanage, API base 100.99.133.43, and PostgreSQL verification on org_position_role/base_roleposition. POST inserted relation id 6601858752856592, GET returned 200, DELETE cleared both table/view, and cleanup soft-deleted test position and role."
+    },
+    {
+      "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+      "artifact": "metadata/patrol-area-persistence-acceptance.json",
+      "summary": "PATROL real browser area editor row actions and add/modify/stop/run/delete passed 21/21 on 10.11.100.17; PostgreSQL mp_work_areas verified every state transition, soft deletion and seed preservation with zero console/page/request errors."
     }
   ]
 }

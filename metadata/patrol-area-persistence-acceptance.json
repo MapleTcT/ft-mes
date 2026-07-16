@@ -1,0 +1,1916 @@
+{
+  "generatedAt": "2026-07-16T19:01:00.292Z",
+  "repoCommit": "WORKTREE",
+  "database": "PostgreSQL",
+  "marker": "ADP_E2E_20260716190100_PATROL_AREA",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "route": "/msService/PATROL/patrolRoute/workGroup/workGroupList",
+    "database": "PostgreSQL",
+    "table": "public.mp_work_areas",
+    "routeCode": "ADP_E2E_202607162045_PATROL_ROUTE",
+    "seedAreaCode": "ADP_E2E_202607162112_PATROL_AREA",
+    "backendEntry": "PATROLWorkAreaController/PATROLPublicItemController -> PATROLWorkAreaServiceImpl/PATROLPublicItemServiceImpl -> PATROLWorkAreaDao/JPA"
+  },
+  "summary": {
+    "status": "PASS",
+    "assertions": 21,
+    "pass": 21,
+    "fail": 0
+  },
+  "assertions": [
+    {
+      "name": "marker is unique before test",
+      "pass": true,
+      "detail": {
+        "count": 0
+      }
+    },
+    {
+      "name": "seed route and seed area are available",
+      "pass": true,
+      "detail": {
+        "seedRouteBefore": {
+          "id": 6675485506913104,
+          "version": 2,
+          "code": "ADP_E2E_202607162045_PATROL_ROUTE",
+          "name": "ADP_E2E_202607162045_PATROL_ROUTE_UPDATED",
+          "valid": true,
+          "cid": 1000
+        },
+        "seedAreaBefore": {
+          "id": 6675531420975952,
+          "version": 1,
+          "code": "ADP_E2E_202607162112_PATROL_AREA",
+          "name": "ADP_E2E_202607162112_PATROL_AREA",
+          "isRun": true,
+          "valid": true,
+          "isDevice": false,
+          "deviceId": null,
+          "isSign": null,
+          "signCode": "SIGN_ADP_E2E_202607162112_PATROL_AREA",
+          "sort": 0,
+          "workGroupId": 6675485506913104,
+          "remark": "ADP_E2E_202607162112_PATROL_AREA persistence acceptance",
+          "cid": 1000
+        }
+      }
+    },
+    {
+      "name": "patrol route and area page loads",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "body": "巡检路线编码\n\n巡检路线名称\n\n启用\n\n查 询\n清 空\n巡检路线\n新增\n修改\n更多\n序号\n部门名称\n编码\n名称\n巡检类型\n启用\n备注\n1\n虚拟部门\nADP_E2E_202607162045_PATROL_ROUTE\nADP_E2E_202607162045_PATROL_ROUTE_UPDATED\n设备巡检\nADP_E2E_202607162045_PATROL_ROUTE update persistence acceptance\n共 1 项\n1\n巡检区域\n新增\n修改\n更多\n序号\n编码\n名称\n签到编码\n是否设备\n设备\n启用\n备注\n共 0 项\n0\n巡检项\n启用\n停用\n序号\n设备编码\n设备名称\n部位\n要求\n内容\n值类型\n编辑方式\n候选值\n小数位\n默认值\n单位\n自动判定\n正常范围\n上限值\n下限值\n测温\n测振\n拍照\n允许跳过\n结论修改\n逻辑位号\n采集数据误差对标\n误差报警上限\n启用\n备注\n共 0 项\n0"
+      }
+    },
+    {
+      "name": "area editor menu uses Chinese business labels",
+      "pass": true,
+      "detail": "增行\n删行\n上移\n下移"
+    },
+    {
+      "name": "area editor add-row click adds exactly one row",
+      "pass": true,
+      "detail": {
+        "before": 1,
+        "after": 2
+      }
+    },
+    {
+      "name": "new area row accepts required business fields",
+      "pass": true,
+      "detail": {
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_REMARK",
+        "edited": true,
+        "isRun": true,
+        "isDevice": false,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_NAME",
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "workGroupId": {
+          "id": "6675485506913104"
+        },
+        "device": {
+          "name": null
+        },
+        "key": "4.870428942112537_2000",
+        "rowIndex": 1,
+        "sort": 1,
+        "currClickColKey": "888"
+      }
+    },
+    {
+      "name": "area editor move and delete row actions work",
+      "pass": true,
+      "detail": {
+        "addResult": {
+          "before": 2,
+          "after": 3
+        },
+        "scratch": {
+          "rowIndex": 2,
+          "key": "509.2034996674217_3000",
+          "index": 2
+        },
+        "afterUp": 1,
+        "afterDown": 2,
+        "afterDelete": {
+          "count": 2,
+          "scratchPresent": false
+        }
+      }
+    },
+    {
+      "name": "add area API succeeds",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675485506913104,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675485506913104,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    {
+      "name": "add area is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6676220033221456,
+        "version": 0,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_NAME",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "existing area row accepts modifications",
+      "pass": true,
+      "detail": {
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "edited": true,
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "attrMap": null,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "device": null,
+        "id": 6676220033221456,
+        "isDevice": false,
+        "isRun": true,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "version": 0,
+        "workGroupId": {
+          "attrMap": null,
+          "id": 6675485506913104
+        },
+        "needCheck": true,
+        "rowIndex": 1,
+        "currClickColKey": "888",
+        "key": 6676220033221456,
+        "code_attr": {
+          "readonly": true,
+          "bindEvent": {}
+        }
+      }
+    },
+    {
+      "name": "modify area API succeeds",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675485506913104,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675485506913104,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    {
+      "name": "modify area is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "area more-menu uses Chinese business labels",
+      "pass": true,
+      "detail": "删除\n巡检项设置\n启用\n停用"
+    },
+    {
+      "name": "stop area is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": false,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "run area is persisted in PostgreSQL",
+      "pass": true,
+      "detail": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      }
+    },
+    {
+      "name": "delete area is persisted and removed from list",
+      "pass": true,
+      "detail": {
+        "deleted": {
+          "id": 6676220033221456,
+          "version": 1,
+          "code": "ADP_E2E_20260716190100_PATROL_AREA",
+          "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+          "isRun": true,
+          "valid": false,
+          "isDevice": false,
+          "deviceId": null,
+          "isSign": false,
+          "signCode": "SIGN_20260716190100",
+          "sort": 1,
+          "workGroupId": 6675485506913104,
+          "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+          "cid": 1000
+        },
+        "markerVisibleAfterDelete": false
+      }
+    },
+    {
+      "name": "seed route and seed area remain intact",
+      "pass": true,
+      "detail": {
+        "seedRouteBefore": {
+          "id": 6675485506913104,
+          "version": 2,
+          "code": "ADP_E2E_202607162045_PATROL_ROUTE",
+          "name": "ADP_E2E_202607162045_PATROL_ROUTE_UPDATED",
+          "valid": true,
+          "cid": 1000
+        },
+        "seedRouteAfter": {
+          "id": 6675485506913104,
+          "version": 2,
+          "code": "ADP_E2E_202607162045_PATROL_ROUTE",
+          "name": "ADP_E2E_202607162045_PATROL_ROUTE_UPDATED",
+          "valid": true,
+          "cid": 1000
+        },
+        "seedAreaBefore": {
+          "id": 6675531420975952,
+          "version": 1,
+          "code": "ADP_E2E_202607162112_PATROL_AREA",
+          "name": "ADP_E2E_202607162112_PATROL_AREA",
+          "isRun": true,
+          "valid": true,
+          "isDevice": false,
+          "deviceId": null,
+          "isSign": null,
+          "signCode": "SIGN_ADP_E2E_202607162112_PATROL_AREA",
+          "sort": 0,
+          "workGroupId": 6675485506913104,
+          "remark": "ADP_E2E_202607162112_PATROL_AREA persistence acceptance",
+          "cid": 1000
+        },
+        "seedAreaAfter": {
+          "id": 6675531420975952,
+          "version": 1,
+          "code": "ADP_E2E_202607162112_PATROL_AREA",
+          "name": "ADP_E2E_202607162112_PATROL_AREA",
+          "isRun": true,
+          "valid": true,
+          "isDevice": false,
+          "deviceId": null,
+          "isSign": null,
+          "signCode": "SIGN_ADP_E2E_202607162112_PATROL_AREA",
+          "sort": 0,
+          "workGroupId": 6675485506913104,
+          "remark": "ADP_E2E_202607162112_PATROL_AREA persistence acceptance",
+          "cid": 1000
+        }
+      }
+    },
+    {
+      "name": "no visible runtime or raw i18n error",
+      "pass": true,
+      "detail": "巡检路线编码\n\n巡检路线名称\n\n启用\n\n查 询\n清 空\n巡检路线\n新增\n修改\n更多\n序号\n部门名称\n编码\n名称\n巡检类型\n启用\n备注\n1\n虚拟部门\nADP_E2E_202607162045_PATROL_ROUTE\nADP_E2E_202607162045_PATROL_ROUTE_UPDATED\n设备巡检\nADP_E2E_202607162045_PATROL_ROUTE update persistence acceptance\n共 1 项\n1\n巡检区域\n新增\n修改\n更多\n序号\n编码\n名称\n签到编码\n是否设备\n设备\n启用\n备注\n1\nADP_E2E_202607162112_PATROL_AREA\nADP_E2E_202607162112_PATROL_AREA\nSIGN_ADP_E2E_202607162112_PATROL_AREA\nADP_E2E_202607162112_PATROL_AREA persistence acceptance\n共 1 项\n1\n巡检项\n启用\n停用\n序号\n设备编码\n设备名称\n部位\n要求\n内容\n值类型\n编辑方式\n候选值\n小数位\n默认值\n单位\n自动判定\n正常范围\n上限值\n下限值\n测温\n测振\n拍照\n允许跳过\n结论修改\n逻辑位号\n采集数据误差对标\n误差报警上限\n启用\n备注\n1\n泵房A\n运行状态正常\nADP_E2E_202607162116_PATROL_ITEM\n数字\n录入\n2\nTAG_ADP_E2E_202607162116_PATROL_ITEM\nADP_E2E_202607162116_PATROL_ITEM persistence acceptance\n共 1 项\n1"
+    },
+    {
+      "name": "no browser console error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no page error",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no PATROL request failure",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "operations": [
+    {
+      "operation": "新增巡检区域",
+      "ui": "/msService/PATROL/patrolRoute/workGroup/workGroupList -> 新增巡检区域",
+      "api": "/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit",
+      "method": "POST",
+      "payload": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575630363211\":\"[{\\\"remark\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_REMARK\\\",\\\"isRun\\\":true,\\\"isDevice\\\":false,\\\"isSign\\\":false,\\\"signCode\\\":\\\"SIGN_20260716190100\\\",\\\"name\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_NAME\\\",\\\"code\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA\\\",\\\"workGroupId\\\":{\\\"id\\\":\\\"6675485506913104\\\"},\\\"device\\\":{\\\"id\\\":null},\\\"sort\\\":1}]\"},\"dgDeletedIds\":{\"dg1575630363211\":null},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"workGroup\":{\"version\":2},\"viewCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\"}",
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675485506913104,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675485506913104,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'isRun', is_run,\n  'valid', valid,\n  'isDevice', is_device,\n  'deviceId', device,\n  'isSign', is_sign,\n  'signCode', sign_code,\n  'sort', sort,\n  'workGroupId', work_group_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_areas where code='ADP_E2E_20260716190100_PATROL_AREA' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6676220033221456,
+        "version": 0,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_NAME",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "修改巡检区域",
+      "ui": "/msService/PATROL/patrolRoute/workGroup/workGroupList -> 修改巡检区域",
+      "api": "/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit",
+      "method": "POST",
+      "payload": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575630363211\":\"[{\\\"remark\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK\\\",\\\"name\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_UPDATED\\\",\\\"code\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA\\\",\\\"device\\\":null,\\\"id\\\":\\\"6676220033221456\\\",\\\"isDevice\\\":false,\\\"isRun\\\":true,\\\"isSign\\\":false,\\\"signCode\\\":\\\"SIGN_20260716190100\\\",\\\"sort\\\":1,\\\"version\\\":0,\\\"workGroupId\\\":{\\\"id\\\":6675485506913104}}]\"},\"dgDeletedIds\":{\"dg1575630363211\":null},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"workGroup\":{\"version\":2},\"viewCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\"}",
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "text": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6675485506913104,\"tableInfoId\":null},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "edit",
+            "dealSuccessFlag": true,
+            "viewselect": null,
+            "operateType": "save",
+            "id": 6675485506913104,
+            "tableInfoId": null
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'isRun', is_run,\n  'valid', valid,\n  'isDevice', is_device,\n  'deviceId', device,\n  'isSign', is_sign,\n  'signCode', sign_code,\n  'sort', sort,\n  'workGroupId', work_group_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_areas where code='ADP_E2E_20260716190100_PATROL_AREA' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "停用巡检区域",
+      "ui": "/msService/PATROL/patrolRoute/workGroup/workGroupList -> 停用巡检区域",
+      "api": "/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=0&tableType=workArea",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=0&tableType=workArea",
+        "text": "{\"code\":200,\"data\":{\"dealFlag\":true},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "dealFlag": true
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'isRun', is_run,\n  'valid', valid,\n  'isDevice', is_device,\n  'deviceId', device,\n  'isSign', is_sign,\n  'signCode', sign_code,\n  'sort', sort,\n  'workGroupId', work_group_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_areas where code='ADP_E2E_20260716190100_PATROL_AREA' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": false,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "启用巡检区域",
+      "ui": "/msService/PATROL/patrolRoute/workGroup/workGroupList -> 启用巡检区域",
+      "api": "/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=1&tableType=workArea",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=1&tableType=workArea",
+        "text": "{\"code\":200,\"data\":{\"dealFlag\":true},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "dealFlag": true
+          },
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'isRun', is_run,\n  'valid', valid,\n  'isDevice', is_device,\n  'deviceId', device,\n  'isSign', is_sign,\n  'signCode', sign_code,\n  'sort', sort,\n  'workGroupId', work_group_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_areas where code='ADP_E2E_20260716190100_PATROL_AREA' order by id desc limit 1;",
+      "dbResult": {
+        "id": 6676220033221456,
+        "version": 1,
+        "code": "ADP_E2E_20260716190100_PATROL_AREA",
+        "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+        "isRun": true,
+        "valid": true,
+        "isDevice": false,
+        "deviceId": null,
+        "isSign": false,
+        "signCode": "SIGN_20260716190100",
+        "sort": 1,
+        "workGroupId": 6675485506913104,
+        "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+        "cid": 1000
+      },
+      "status": "PASS"
+    },
+    {
+      "operation": "删除巡检区域",
+      "ui": "/msService/PATROL/patrolRoute/workGroup/workGroupList -> 删除巡检区域",
+      "api": "/msService/PATROL/patrolRoute/workArea/deleteWorkAreas?workAreaIds=6676220033221456",
+      "method": "GET",
+      "payload": null,
+      "response": {
+        "status": 200,
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/deleteWorkAreas?workAreaIds=6676220033221456",
+        "text": "{\"code\":200,\"data\":\"SUCCESS\",\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": "SUCCESS",
+          "message": "操作成功"
+        }
+      },
+      "verificationSql": "select json_build_object(\n  'id', id,\n  'version', version,\n  'code', code,\n  'name', name,\n  'isRun', is_run,\n  'valid', valid,\n  'isDevice', is_device,\n  'deviceId', device,\n  'isSign', is_sign,\n  'signCode', sign_code,\n  'sort', sort,\n  'workGroupId', work_group_id,\n  'remark', remark,\n  'cid', cid\n) from public.mp_work_areas where code='ADP_E2E_20260716190100_PATROL_AREA' order by id desc limit 1;",
+      "dbResult": {
+        "deleted": {
+          "id": 6676220033221456,
+          "version": 1,
+          "code": "ADP_E2E_20260716190100_PATROL_AREA",
+          "name": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED",
+          "isRun": true,
+          "valid": false,
+          "isDevice": false,
+          "deviceId": null,
+          "isSign": false,
+          "signCode": "SIGN_20260716190100",
+          "sort": 1,
+          "workGroupId": 6675485506913104,
+          "remark": "ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK",
+          "cid": 1000
+        },
+        "markerVisibleAfterDelete": false
+      },
+      "status": "PASS"
+    }
+  ],
+  "evidence": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.27323082500551243",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.04903497276598623",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.7213245602135546",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.42100879606262653",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&entityCode=PATROL_1.0.0_patrolRoute&iscrosscompany=false&openType=dialog&id=6675485506913104&openType=dialog&viewCode=PATROL_1.0.0_patrolRoute_workGroupList&IdName=newDialog&isDailogAPI=true",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/i18n-value.js?0.8022075883647457",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&id=6675485506913104",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data/6675485506913104",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675485506913104&type=PATROL_patrolRoute_WorkGroup&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575630363211?datagridCode=PATROL_1.0.0_patrolRoute_workAreaPtEditdg1575630363211&id=6675485506913104",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\",\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "postData": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575630363211\":\"[{\\\"remark\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_REMARK\\\",\\\"isRun\\\":true,\\\"isDevice\\\":false,\\\"isSign\\\":false,\\\"signCode\\\":\\\"SIGN_20260716190100\\\",\\\"name\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_NAME\\\",\\\"code\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA\\\",\\\"workGroupId\\\":{\\\"id\\\":\\\"6675485506913104\\\"},\\\"device\\\":{\\\"id\\\":null},\\\"sort\\\":1}]\"},\"dgDeletedIds\":{\"dg1575630363211\":null},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"workGroup\":{\"version\":2},\"viewCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.2715297249768036",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.5197551751496547",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&entityCode=PATROL_1.0.0_patrolRoute&iscrosscompany=false&openType=dialog&id=6675485506913104&openType=dialog&viewCode=PATROL_1.0.0_patrolRoute_workGroupList&IdName=newDialog&isDailogAPI=true",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/i18n-value.js?0.01214435498903299",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&id=6675485506913104",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data/6675485506913104",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675485506913104&type=PATROL_patrolRoute_WorkGroup&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575630363211?datagridCode=PATROL_1.0.0_patrolRoute_workAreaPtEditdg1575630363211&id=6675485506913104",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\",\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "postData": "{\"workFlowVar\":{},\"operateType\":\"save\",\"dgList\":{\"dg1575630363211\":\"[{\\\"remark\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_UPDATED_REMARK\\\",\\\"name\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA_UPDATED\\\",\\\"code\\\":\\\"ADP_E2E_20260716190100_PATROL_AREA\\\",\\\"device\\\":null,\\\"id\\\":\\\"6676220033221456\\\",\\\"isDevice\\\":false,\\\"isRun\\\":true,\\\"isSign\\\":false,\\\"signCode\\\":\\\"SIGN_20260716190100\\\",\\\"sort\\\":1,\\\"version\\\":0,\\\"workGroupId\\\":{\\\"id\\\":6675485506913104}}]\"},\"dgDeletedIds\":{\"dg1575630363211\":null},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"workGroup\":{\"version\":2},\"viewCode\":\"PATROL_1.0.0_patrolRoute_workAreaPtEdit\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.5195597824156101",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.48730946982012746",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=0&tableType=workArea",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.3102056601391484",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.6426514035419209",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=1&tableType=workArea",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.050109329380354284",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.3429456373398482",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/deleteWorkAreas?workAreaIds=6676220033221456",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.06053259635635799",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.2751796139388828",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "postData": "{\"classifyCodes\":\"\",\"datagridCode\":\"PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664\",\"pageNo\":1,\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolRoute_workGroupList\",\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "postData": "{\"customCondition\":{\"ruoteId\":6675485506913104},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      }
+    ],
+    "responses": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.27323082500551243",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.04903497276598623",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.7213245602135546",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.42100879606262653",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&entityCode=PATROL_1.0.0_patrolRoute&iscrosscompany=false&openType=dialog&id=6675485506913104&openType=dialog&viewCode=PATROL_1.0.0_patrolRoute_workGroupList&IdName=newDialog&isDailogAPI=true",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/i18n-value.js?0.8022075883647457",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data/6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675485506913104&type=PATROL_patrolRoute_WorkGroup&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575630363211?datagridCode=PATROL_1.0.0_patrolRoute_workAreaPtEditdg1575630363211&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.2715297249768036",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.5197551751496547",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&entityCode=PATROL_1.0.0_patrolRoute&iscrosscompany=false&openType=dialog&id=6675485506913104&openType=dialog&viewCode=PATROL_1.0.0_patrolRoute_workGroupList&IdName=newDialog&isDailogAPI=true",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/i18n-value.js?0.01214435498903299",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data/6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6675485506913104&type=PATROL_patrolRoute_WorkGroup&viewCode=PATROL_1.0.0_patrolRoute_workAreaPtEdit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575630363211?datagridCode=PATROL_1.0.0_patrolRoute_workAreaPtEditdg1575630363211&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workAreaPtEdit/submit?__pc__=d29ya0dyb3VwTGlzdF93b3JrQXJlYVNldF9hZGRfUEFUUk9MXzEuMC4wX3BhdHJvbFJvdXRlX3dvcmtHcm91cExpc3R8&id=6675485506913104",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.5195597824156101",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.48730946982012746",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=0&tableType=workArea",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.3102056601391484",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.6426514035419209",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/publicItem/publicItem/updateItemState?itemIds=6676220033221456&itemState=1&tableType=workArea",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.050109329380354284",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.3429456373398482",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/deleteWorkAreas?workAreaIds=6676220033221456",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/workGroupList",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/i18n-value.js?0.06053259635635799",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js?v=0.2751796139388828",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/editStates?viewCode=PATROL_1.0.0_patrolRoute_workGroupList",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/data-dg1575506219664?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506219664&id=-1",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workArea/data-dg1575506226708?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575506226708",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workItem/data-dg1575507309041?datagridCode=PATROL_1.0.0_patrolRoute_workGroupListdg1575507309041",
+        "status": 200
+      }
+    ],
+    "consoleErrors": [],
+    "consoleWarnings": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "screenshots": [
+      "/tmp/adp-patrol-area-20260716190100/01-patrol-area-add.png",
+      "/tmp/adp-patrol-area-20260716190100/02-patrol-area-modify.png",
+      "/tmp/adp-patrol-area-20260716190100/03-patrol-area-after-delete.png"
+    ],
+    "fallbackCleanup": null
+  },
+  "error": null
+}

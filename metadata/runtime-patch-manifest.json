@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T18:17:44+00:00",
-  "repoCommit": "9aa4caee4c96769bab0373993b7cfb06cf3cf998",
+  "generatedAt": "2026-07-16T19:08:47+00:00",
+  "repoCommit": "813f92ac963ac7639394b6c25dd66ffc6e75519e",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 349,
-    "totalBytes": 54734729,
+    "totalFiles": 351,
+    "totalBytes": 54739465,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -14,16 +14,16 @@
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 26,
-      "runtime-static-override": 64
+      "runtime-static-override": 66
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 14513,
+      "nginx-runtime-config": 15872,
       "postgres-init-sql": 53958346,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
       "runtime-script": 239723,
-      "runtime-static-override": 367718
+      "runtime-static-override": 371095
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 14293,
-      "sha256": "418fd1d64391dca0c69e4af6a94a0c8935942d779a84ee9d62afe9e5d8ed15da"
+      "sizeBytes": 15652,
+      "sha256": "dce7f722e18869705fb071842118465e5ed0e8b00f20148b5d84c7b5a21839fc"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1771,6 +1771,18 @@
       "sha256": "806111e7bb0f675e882c24a1d8db7485cab1f93b95129f71c89d41e77e923187"
     },
     {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 277,
+      "sha256": "95d6bbc613726fbc2b6bcbecb17d5b2dea176d03deb726393dd849d63345e291"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2712,
+      "sha256": "9c8cba7dffb06a3a9165d94fdf3829f443abb9e502424a2b0c2225ce10f78ba3"
+    },
+    {
       "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js",
       "category": "runtime-static-override",
       "sizeBytes": 271,
@@ -1779,8 +1791,8 @@
     {
       "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body.js",
       "category": "runtime-static-override",
-      "sizeBytes": 12363,
-      "sha256": "339f874ed1e474ec6361681fdb6a054bf1fc2795af6c6d1b168f60fc40176571"
+      "sizeBytes": 12751,
+      "sha256": "50487e02a1c14a5c927f23bf42bd6d5b0d22fd6beb879b02d5c56b325d324d8d"
     },
     {
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",

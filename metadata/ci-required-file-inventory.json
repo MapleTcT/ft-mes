@@ -933,6 +933,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body-es5.js",
       "state": "tracked",
       "tracked": true
@@ -2752,6 +2764,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-organization-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -4744,6 +4762,12 @@
     {
       "ignored": false,
       "path": "metadata/oracle-replacement-status.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-area-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6926,7 +6950,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 519
+      "tracked": 522
     },
     "docs": {
       "tracked": 90
@@ -6935,7 +6959,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 113
+      "tracked": 114
     },
     "package.json": {
       "tracked": 1
@@ -6959,8 +6983,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1150,
-    "tracked": 1150,
+    "totalFiles": 1154,
+    "tracked": 1154,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -445,12 +445,18 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 巡检路线停用 | 同上 | 从“更多”点击“停用” | `GET .../updateItemState?itemState=0&tableType=workRoute` | 成功提示后刷新列表，marker 仍可重新选中 | HTTP 200/dealFlag=true；PostgreSQL `is_run true -> false` | `mp_work_groups` | PASS | 无 |
 | PATROL 巡检路线启用 | 同上 | 刷新后重新激活、勾选 marker，从“更多”点击“启用” | `GET .../updateItemState?itemState=1&tableType=workRoute` | 成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_groups` | PASS | 无 |
 | PATROL 巡检路线删除 | 同上 | 点击“删除”，通过关联计划检查和确认框 | `POST .../checkRelationPlan`、`GET .../deleteWorkGroups` | 两个请求均 200，刷新后 marker 为 0 行 | PostgreSQL 软删除为 `valid=false` | `mp_work_groups` | PASS | 成功 marker 及本轮中断 marker 均已通过真实页面删除，无有效测试数据残留 |
+| PATROL 巡检区域新增 | `/msService/PATROL/patrolRoute/workGroup/workGroupList` -> “巡检区域设置” | 选择种子路线，在区域编辑器点击“增行”，填写编码、名称、签到码和备注；另验证上移、下移、删行后保存 | `POST .../workAreaPtEdit/submit` | 菜单自动收起，4 个行操作均生效，保存后主列表出现 marker；console/page/request error 均为 0 | HTTP 200；PostgreSQL `id=6676220033221456/version=0/is_run=true/valid=true/sort=1/work_group_id=6675485506913104` | `mp_work_areas` | PASS | 已恢复区域编辑器缺失的增行、删行、上移、下移事件绑定和精确静态入口 |
+| PATROL 巡检区域修改 | 同上 | 重新打开区域设置，修改 marker 名称和备注后保存 | `POST .../workAreaPtEdit/submit` | 已有区域正确回显，保存和列表刷新正常 | PostgreSQL 名称/备注更新，`version 0 -> 1`，路线外键保持不变 | `mp_work_areas` | PASS | 无 |
+| PATROL 巡检区域停用 | 同上 | 选择区域 marker，从区域“更多”点击“停用” | `GET .../updateItemState?itemState=0&tableType=workArea` | 成功提示后可重新加载和选择 marker | HTTP 200/dealFlag=true；PostgreSQL `is_run true -> false` | `mp_work_areas` | PASS | 无 |
+| PATROL 巡检区域启用 | 同上 | 重新加载路线和区域，从区域“更多”点击“启用” | `GET .../updateItemState?itemState=1&tableType=workArea` | 成功提示和列表复显正常 | HTTP 200/dealFlag=true；PostgreSQL `is_run false -> true` | `mp_work_areas` | PASS | 无 |
+| PATROL 巡检区域删除 | 同上 | 选择区域 marker，点击“删除”并确认 | `GET .../deleteWorkAreas` | 删除请求 200，刷新后 marker 不再出现 | PostgreSQL 软删除为 `valid=false`；种子路线和种子区域仍为 `valid=true` | `mp_work_areas` | PASS | 本轮中断 marker 均由同一业务删除 API 清理，无有效测试数据残留 |
 
-本节已证明计划生成任务、任务状态变更、输入标准 CRUD 和路线完整 CRUD 通过。现场执行结果、异常处置和统计页
-仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线机器证据：
-`metadata/patrol-route-persistence-acceptance.json`。可重放命令：
+本节已证明计划生成任务、任务状态变更、输入标准、路线和区域完整 CRUD 通过。巡检项配置、现场执行结果、异常处置和统计页
+仍是后续验收项。输入标准机器证据：`metadata/patrol-input-standard-persistence-acceptance.json`；路线和区域机器证据：
+`metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`。可重放命令：
 `make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17` 和
-`make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
+`make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
+`make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
 
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 
