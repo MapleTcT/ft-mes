@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-17T12:04:48.223Z",
+  "generatedAt": "2026-07-17T14:10:28Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_RM_WEB_FORMULA_EDITOR_PASS_AND_EXISTING_PRODUCT_SCOPE_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-16T21:08:52.560Z",
+    "generatedAt": "2026-07-17T14:10:28Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -94,13 +94,19 @@
       "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
       "evidence": "metadata/rm-web-formula-editor-acceptance.json",
       "assertions": "visible Web editor; PostgreSQL references; create; replay; two updates; failed delivery; acknowledged retry; six-table readback; bigint-safe API identifiers; desktop/mobile; cleanup"
+    },
+    "womQualityQuantity": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260717141017_WOM_BAD_QTY",
+      "evidence": "metadata/wom-quality-quantity-persistence-acceptance.json",
+      "assertions": "visible WOM/QCS entries; 10 reported / 2 bad / 8 good; WMS PARTIAL 8 available / 2 hold; idempotent retry; reversal to QUALIFIED 10 / 0; cleanup 0 / 0 / 0"
     }
   },
   "summary": {
     "testedFeatures": 171,
-    "pass": 167,
+    "pass": 168,
     "fail": 0,
-    "blocked": 2,
+    "blocked": 1,
     "notApplicable": 2
   },
   "items": [
@@ -1033,25 +1039,30 @@
     },
     {
       "module": "生产模块-WOM/QCS",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit",
-      "operation": "独立不良数量登记产品范围验收",
-      "api": "No dedicated bad-quantity endpoint recovered; current accepted product behavior uses QCS inspection quantity/result, unqualified treatment and WOM quality state backfill.",
-      "method": "NOT_RECOVERED",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/WOM/quality-quantity/page",
+      "operation": "独立不良数量登记、WMS 分配与冲销",
+      "api": "POST /msService/WOM/quality-quantity/reports; POST /msService/material/foreign/foreign/checkProdResult; POST /msService/WOM/quality-quantity/reports/{id}/reverse",
+      "method": "POST",
       "requiresPersistence": true,
-      "backendEntry": "No standalone bad-quantity controller/service/DAO path was recovered. Material WMS completion inbound and inventory write-back are accepted in a separate PASS item.",
+      "backendEntry": "WomQualityQuantityController -> WomQualityQuantityService -> WomQualityQuantityRepository -> MaterialWmsClient -> MaterialWmsController.applyQualityAllocation -> MaterialInventoryService.applyQualityAllocation",
       "tables": [
         "qcs_inspects",
-        "qcs_inspect_reports",
-        "qcs_un_qlf_deals",
-        "wom_produce_tasks",
-        "no dedicated numeric bad-quantity table/column recovered"
+        "wom_mat_outpt_records",
+        "wom_quality_quantity_reports",
+        "wom_quality_quantity_events",
+        "wms_quality_allocations",
+        "wms_quality_allocation_events",
+        "wms_stock_documents",
+        "wms_stock_document_lines",
+        "wms_batch_stocks",
+        "wms_inventory_transactions"
       ],
-      "marker": "",
-      "verificationSql": "See metadata/wom-bad-quantity-analysis.json for the PostgreSQL information_schema audit; it found result/treatment fields but no standalone numeric bad-quantity target.",
-      "status": "BLOCKED",
-      "evidence": "Current QCS/WOM result and treatment flows are accepted. This item is only a product-scope decision for a separate bad-quantity feature. Material WMS is not part of this blocker. 专项分析：docs/backend-table-audit/wom-bad-quantity-analysis.md。",
+      "marker": "ADP_E2E_20260717141017_WOM_BAD_QTY",
+      "verificationSql": "Join wom_quality_quantity_reports/events to WOM task/output and wms_quality_allocations/events to source_line_id; query wms_stock_document_lines and wms_batch_stocks after report, inbound, quality, retry and reverse. Expected quality state PARTIAL with reported=10/good=8/bad=2/available=8/hold=2, then REVERSED/QUALIFIED with available=10/hold=0; cleanup task/report/document counts must be 0.",
+      "status": "PASS",
+      "evidence": "Real browser on http://10.11.100.17:18080 rendered visible 不良数量 entries in WOM and QCS with no console/page/request errors. API persisted a report against exact task/output and linked QCS inspect; PostgreSQL and WMS states matched 10/2/8. Same request replay did not add rows/events, reversal restored inventory, and cleanup left zero marker rows. Evidence: metadata/wom-quality-quantity-persistence-acceptance.json; raw run: /tmp/adp-wom-bad-quantity-20260717141017/acceptance.json.",
       "issues": [
-        "A product decision or later package must define the standalone bad-quantity field, route and PostgreSQL target before marker acceptance."
+        "Physical scrap/rework disposition is a later business action and was not inferred from quantity registration."
       ]
     },
     {

@@ -103,10 +103,15 @@ def source_status(data: dict[str, Any]) -> str | None:
     summary = as_dict(data.get("summary"))
     if isinstance(summary.get("status"), str):
         return summary["status"]
-    for key in ("blockers", "blockedCases", "blockedDependencies", "blocked"):
-        value = summary.get(key)
-        if isinstance(value, int) and value > 0:
-            return "BLOCKED"
+    blocker_counts = [
+        summary[key]
+        for key in ("blockers", "blockedCases", "blockedDependencies", "blocked")
+        if isinstance(summary.get(key), int)
+    ]
+    if any(value > 0 for value in blocker_counts):
+        return "BLOCKED"
+    if blocker_counts:
+        return "PASS"
     if isinstance(data.get("overallStatus"), str):
         return data["overallStatus"]
     if data.get("ok") is True:

@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>不良数量登记</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --brand: #1769d2;
+      --brand-hover: #0f58b7;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --line: #d9e0e8;
+      --line-soft: #e9edf2;
+      --surface: #ffffff;
+      --surface-alt: #f6f8fa;
+      --danger: #c43d4b;
+      --warning: #9a6700;
+      --success: #16794a;
+      --hold: #a14f11;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background: var(--surface-alt);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button, input, select, textarea { font: inherit; letter-spacing: 0; }
+    button, select { cursor: pointer; }
+    button:disabled, select:disabled { cursor: not-allowed; opacity: .55; }
+
+    .topbar {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 24px;
+      color: #fff;
+      background: #1f6fd1;
+      border-bottom: 1px solid #155cb3;
+    }
+    .topbar h1 { margin: 0; font-size: 20px; font-weight: 650; }
+    .summary { display: flex; align-items: center; gap: 18px; white-space: nowrap; }
+    .summary-item { display: grid; grid-template-columns: auto auto; gap: 6px; align-items: baseline; }
+    .summary-item span { color: rgba(255,255,255,.78); font-size: 12px; }
+    .summary-item strong { font-size: 18px; font-variant-numeric: tabular-nums; }
+
+    main { max-width: 1600px; margin: 0 auto; padding: 16px 20px 28px; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: #fbfcfd;
+    }
+    .section-title h2 { margin: 0; font-size: 15px; font-weight: 650; }
+    .selection-state { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.4fr) minmax(260px, 1.4fr) minmax(120px, .7fr) minmax(120px, .7fr);
+      gap: 12px;
+      padding: 14px;
+    }
+    .field { min-width: 0; }
+    .field.wide { grid-column: span 2; }
+    label { display: block; margin-bottom: 6px; color: #465469; font-size: 12px; font-weight: 600; }
+    .required::before { content: "*"; color: var(--danger); margin-right: 3px; }
+    input, select, textarea {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 10px;
+      outline: none;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(23,105,210,.12); }
+    input[readonly] { background: #f3f5f7; color: #526174; }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--line-soft);
+    }
+    .btn {
+      min-height: 34px;
+      border: 1px solid #b8c4d1;
+      border-radius: 4px;
+      padding: 6px 14px;
+      background: #fff;
+      color: #334155;
+      font-weight: 600;
+    }
+    .btn:hover { border-color: #8292a5; background: #f8fafc; }
+    .btn-primary { border-color: var(--brand); background: var(--brand); color: #fff; }
+    .btn-primary:hover { border-color: var(--brand-hover); background: var(--brand-hover); }
+    .btn-danger { border-color: #dca2a8; color: var(--danger); }
+    .btn-small { min-height: 28px; padding: 3px 9px; font-size: 12px; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+    .toolbar input { width: min(420px, 60vw); }
+    .toolbar-spacer { flex: 1; }
+    .table-wrap { overflow: auto; min-height: 240px; }
+    table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid var(--line-soft); padding: 9px 10px; text-align: left; vertical-align: middle; }
+    th { position: sticky; top: 0; z-index: 1; background: #f3f6f9; color: #475569; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    td { color: #334155; }
+    tbody tr:hover { background: #f8fbff; }
+    .number { text-align: right; font-variant-numeric: tabular-nums; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; overflow-wrap: anywhere; }
+    .empty { padding: 58px 16px; text-align: center; color: var(--muted); }
+    .row-actions { display: flex; gap: 6px; white-space: nowrap; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      border-radius: 3px;
+      padding: 2px 7px;
+      font-size: 12px;
+      font-weight: 650;
+      background: #edf1f5;
+      color: #526174;
+      white-space: nowrap;
+    }
+    .status.ok { color: var(--success); background: #e7f6ee; }
+    .status.warn { color: var(--warning); background: #fff4d6; }
+    .status.bad { color: var(--danger); background: #fdebed; }
+    .status.hold { color: var(--hold); background: #fff0e3; }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      top: 76px;
+      z-index: 20;
+      max-width: min(440px, calc(100vw - 40px));
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--brand);
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(15,23,42,.18);
+      padding: 12px 14px;
+      display: none;
+      overflow-wrap: anywhere;
+    }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.show { display: block; }
+
+    dialog { border: 1px solid var(--line); border-radius: 6px; padding: 0; width: min(480px, calc(100vw - 32px)); color: var(--ink); }
+    dialog::backdrop { background: rgba(15,23,42,.42); }
+    .dialog-head { padding: 13px 16px; border-bottom: 1px solid var(--line-soft); font-size: 16px; font-weight: 650; }
+    .dialog-body { padding: 16px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line-soft); background: #fbfcfd; }
+
+    @media (max-width: 900px) {
+      .topbar { align-items: flex-start; padding: 10px 14px; }
+      .summary { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+      main { padding: 10px; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .field.wide { grid-column: span 2; }
+    }
+    @media (max-width: 560px) {
+      .topbar { display: block; }
+      .summary { margin-top: 8px; justify-content: flex-start; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.wide { grid-column: span 1; }
+      .actions, .toolbar { flex-wrap: wrap; }
+      .toolbar input { width: 100%; }
+      .toolbar-spacer { display: none; }
+      .btn { flex: 1 1 auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <h1>不良数量登记</h1>
+    <div class="summary" aria-label="登记汇总">
+      <div class="summary-item"><span>报工数量</span><strong id="sumReported">0</strong></div>
+      <div class="summary-item"><span>不良数量</span><strong id="sumBad">0</strong></div>
+      <div class="summary-item"><span>待同步</span><strong id="sumPending">0</strong></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="section-title">
+        <h2>登记</h2>
+        <span class="selection-state" id="selectionState">未选择产出记录</span>
+      </div>
+      <form id="reportForm">
+        <div class="form-grid">
+          <div class="field wide">
+            <label class="required" for="taskSelect">制造任务</label>
+            <select id="taskSelect" required><option value="">请选择制造任务</option></select>
+          </div>
+          <div class="field wide">
+            <label class="required" for="outputSelect">报工产出</label>
+            <select id="outputSelect" required disabled><option value="">请先选择制造任务</option></select>
+          </div>
+          <div class="field">
+            <label for="reportedQuantity">报工数量</label>
+            <input id="reportedQuantity" readonly value="0">
+          </div>
+          <div class="field">
+            <label class="required" for="badQuantity">不良数量</label>
+            <input id="badQuantity" type="number" min="0.000001" step="0.000001" required>
+          </div>
+          <div class="field">
+            <label for="goodQuantity">良品数量</label>
+            <input id="goodQuantity" readonly value="0">
+          </div>
+          <div class="field">
+            <label for="unitCode">单位</label>
+            <input id="unitCode" maxlength="64" placeholder="kg">
+          </div>
+          <div class="field">
+            <label class="required" for="reasonCode">原因分类</label>
+            <select id="reasonCode" required>
+              <option value="">请选择</option>
+              <option value="PROCESS_DEFECT">工艺异常</option>
+              <option value="MATERIAL_DEFECT">原料异常</option>
+              <option value="EQUIPMENT_DEFECT">设备异常</option>
+              <option value="OPERATION_DEFECT">操作异常</option>
+              <option value="OTHER">其他</option>
+            </select>
+          </div>
+          <div class="field wide">
+            <label for="reasonText">原因说明</label>
+            <textarea id="reasonText" maxlength="1000"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="reset">清空</button>
+          <button class="btn btn-primary" id="submitButton" type="submit">确认登记</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="section">
+      <div class="section-title"><h2>登记记录</h2></div>
+      <div class="toolbar">
+        <input id="keyword" type="search" placeholder="任务号、批次或原因">
+        <button class="btn" id="searchButton" type="button">查询</button>
+        <button class="btn" id="clearSearchButton" type="button">清空</button>
+        <span class="toolbar-spacer"></span>
+        <button class="btn" id="refreshButton" type="button" title="刷新登记记录">刷新</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>任务号</th>
+              <th>生产批次</th>
+              <th>产出记录</th>
+              <th class="number">报工数量</th>
+              <th class="number">良品数量</th>
+              <th class="number">不良数量</th>
+              <th>原因</th>
+              <th>登记状态</th>
+              <th>WMS同步</th>
+              <th>QCS关联</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="reportRows"></tbody>
+        </table>
+        <div class="empty" id="emptyState">暂无登记记录</div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="reverseDialog">
+    <div class="dialog-head">冲销不良数量登记</div>
+    <div class="dialog-body">
+      <label class="required" for="reverseReason">冲销原因</label>
+      <textarea id="reverseReason" maxlength="1000"></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn" id="cancelReverse" type="button">取消</button>
+      <button class="btn btn-danger" id="confirmReverse" type="button">确认冲销</button>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var apiBase = "/msService/WOM/quality-quantity";
+      var state = { tasks: [], outputs: [], reports: [], reversing: null };
+      var el = function (id) { return document.getElementById(id); };
+
+      function text(value) {
+        return value === null || value === undefined ? "" : String(value);
+      }
+
+      function escapeHtml(value) {
+        return text(value).replace(/[&<>"']/g, function (character) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[character];
+        });
+      }
+
+      function number(value) {
+        var parsed = Number(value || 0);
+        return Number.isFinite(parsed) ? parsed : 0;
+      }
+
+      function formatQuantity(value) {
+        return number(value).toLocaleString("zh-CN", { maximumFractionDigits: 6 });
+      }
+
+      function showToast(message, error) {
+        var toast = el("toast");
+        toast.textContent = message;
+        toast.className = "toast show" + (error ? " error" : "");
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(function () { toast.className = "toast"; }, 4200);
+      }
+
+      function request(path, options) {
+        return fetch(apiBase + path, Object.assign({
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "X-Tenant-Id": "default" }
+        }, options || {})).then(function (response) {
+          return response.json().catch(function () { return null; }).then(function (body) {
+            if (!response.ok || !body || body.code !== 200) {
+              throw new Error((body && (body.message || body.msg)) || ("HTTP " + response.status));
+            }
+            return body.data;
+          });
+        });
+      }
+
+      function currentTask() {
+        return state.tasks.find(function (item) { return text(item.id) === el("taskSelect").value; });
+      }
+
+      function currentOutput() {
+        return state.outputs.find(function (item) { return text(item.id) === el("outputSelect").value; });
+      }
+
+      function renderTasks() {
+        var selected = el("taskSelect").value;
+        el("taskSelect").innerHTML = '<option value="">请选择制造任务</option>' + state.tasks.map(function (item) {
+          var label = (item.task_no || "未编号") + " / " + (item.batch_no || "无批次")
+            + " / 已报工 " + formatQuantity(item.reported_quantity);
+          return '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(label) + "</option>";
+        }).join("");
+        if (state.tasks.some(function (item) { return text(item.id) === selected; })) {
+          el("taskSelect").value = selected;
+        }
+      }
+
+      function renderOutputs() {
+        var select = el("outputSelect");
+        select.disabled = !el("taskSelect").value;
+        select.innerHTML = '<option value="">请选择报工产出</option>' + state.outputs.map(function (item) {
+          var occupied = item.active_report_id ? " / 已登记" : "";
+          var label = (item.output_no || item.id) + " / " + (item.mat_batch_num || item.produce_batch_num || "无批次")
+            + " / " + formatQuantity(item.authoritative_quantity) + occupied;
+          return '<option value="' + escapeHtml(item.id) + '"' + (item.active_report_id ? " disabled" : "") + ">"
+            + escapeHtml(label) + "</option>";
+        }).join("");
+      }
+
+      function updateQuantities() {
+        var output = currentOutput();
+        var reported = output ? number(output.authoritative_quantity) : 0;
+        var bad = number(el("badQuantity").value);
+        el("reportedQuantity").value = formatQuantity(reported);
+        el("goodQuantity").value = formatQuantity(Math.max(0, reported - bad));
+        var task = currentTask();
+        el("selectionState").textContent = output
+          ? ((task && task.task_no) || "制造任务") + " / " + (output.mat_batch_num || output.produce_batch_num || output.id)
+          : "未选择产出记录";
+      }
+
+      function statusBadge(value, kind) {
+        return '<span class="status ' + kind + '">' + escapeHtml(value) + "</span>";
+      }
+
+      function reportStatus(report) {
+        if (report.status === "REVERSED") { return statusBadge("已冲销", ""); }
+        if (report.status === "REVERSAL_PENDING") { return statusBadge("冲销中", "warn"); }
+        return statusBadge("已确认", "ok");
+      }
+
+      function syncStatus(report) {
+        if (report.wms_sync_state === "APPLIED") { return statusBadge("已应用", "ok"); }
+        if (report.wms_sync_state === "FAILED") { return statusBadge("同步失败", "bad"); }
+        return statusBadge("待同步", "hold");
+      }
+
+      function renderReports() {
+        var rows = el("reportRows");
+        el("emptyState").style.display = state.reports.length ? "none" : "block";
+        rows.innerHTML = state.reports.map(function (report) {
+          var qcs = report.qcs_inspect_id ? statusBadge("已关联", "ok") : statusBadge("未关联", "warn");
+          var actions = [];
+          if (report.wms_sync_state !== "APPLIED" && report.status !== "REVERSED") {
+            actions.push('<button class="btn btn-small" data-action="retry" data-id="' + escapeHtml(report.id) + '">重试</button>');
+          }
+          if (!report.qcs_inspect_id && report.status !== "REVERSED") {
+            actions.push('<button class="btn btn-small" data-action="link" data-id="' + escapeHtml(report.id)
+              + '" data-version="' + escapeHtml(report.version) + '">关联质检</button>');
+          }
+          if (report.status === "CONFIRMED") {
+            actions.push('<button class="btn btn-small btn-danger" data-action="reverse" data-id="' + escapeHtml(report.id)
+              + '" data-version="' + escapeHtml(report.version) + '">冲销</button>');
+          }
+          return "<tr>"
+            + "<td>" + escapeHtml(report.task_no || "") + "</td>"
+            + "<td class=\"mono\">" + escapeHtml(report.batch_no || "") + "</td>"
+            + "<td class=\"mono\">" + escapeHtml(report.source_output_id) + "</td>"
+            + "<td class=\"number\">" + formatQuantity(report.reported_quantity) + "</td>"
+            + "<td class=\"number\">" + formatQuantity(report.good_quantity) + "</td>"
+            + "<td class=\"number\">" + formatQuantity(report.bad_quantity) + "</td>"
+            + "<td>" + escapeHtml(report.reason_text || report.reason_code || "") + "</td>"
+            + "<td>" + reportStatus(report) + "</td>"
+            + "<td title=\"" + escapeHtml(report.wms_sync_message || "") + "\">" + syncStatus(report) + "</td>"
+            + "<td>" + qcs + "</td>"
+            + '<td><div class="row-actions">' + actions.join("") + "</div></td>"
+            + "</tr>";
+        }).join("");
+
+        var active = state.reports.filter(function (item) { return item.status !== "REVERSED"; });
+        el("sumReported").textContent = formatQuantity(active.reduce(function (sum, item) { return sum + number(item.reported_quantity); }, 0));
+        el("sumBad").textContent = formatQuantity(active.reduce(function (sum, item) { return sum + number(item.bad_quantity); }, 0));
+        el("sumPending").textContent = String(active.filter(function (item) { return item.wms_sync_state !== "APPLIED"; }).length);
+      }
+
+      function loadTasks() {
+        return request("/tasks?size=100&keyword=" + encodeURIComponent(el("keyword").value || ""))
+          .then(function (data) { state.tasks = data.items || []; renderTasks(); });
+      }
+
+      function loadOutputs() {
+        var taskId = el("taskSelect").value;
+        state.outputs = [];
+        renderOutputs();
+        updateQuantities();
+        if (!taskId) { return Promise.resolve(); }
+        return request("/tasks/" + encodeURIComponent(taskId) + "/outputs")
+          .then(function (data) { state.outputs = data || []; renderOutputs(); });
+      }
+
+      function loadReports() {
+        var query = "?size=100&keyword=" + encodeURIComponent(el("keyword").value || "");
+        return request("/reports" + query).then(function (data) {
+          state.reports = data.items || [];
+          renderReports();
+        });
+      }
+
+      function refreshAll() {
+        return Promise.all([loadTasks(), loadReports()]).catch(function (error) {
+          showToast(error.message, true);
+        });
+      }
+
+      el("taskSelect").addEventListener("change", function () {
+        loadOutputs().catch(function (error) { showToast(error.message, true); });
+      });
+      el("outputSelect").addEventListener("change", updateQuantities);
+      el("badQuantity").addEventListener("input", updateQuantities);
+
+      el("reportForm").addEventListener("reset", function () {
+        window.setTimeout(function () {
+          state.outputs = [];
+          renderOutputs();
+          updateQuantities();
+        }, 0);
+      });
+
+      el("reportForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var output = currentOutput();
+        var reported = output ? number(output.authoritative_quantity) : 0;
+        var bad = number(el("badQuantity").value);
+        if (!output || bad <= 0 || bad > reported) {
+          showToast("请选择产出记录，并确认不良数量大于 0 且不超过报工数量", true);
+          return;
+        }
+        var button = el("submitButton");
+        button.disabled = true;
+        var payload = {
+          requestId: "WOM_BAD_" + Date.now() + "_" + Math.random().toString(16).slice(2),
+          taskId: el("taskSelect").value,
+          sourceOutputId: el("outputSelect").value,
+          badQuantity: bad,
+          unitCode: el("unitCode").value,
+          reasonCode: el("reasonCode").value,
+          reasonText: el("reasonText").value
+        };
+        request("/reports", { method: "POST", body: JSON.stringify(payload) })
+          .then(function (report) {
+            showToast(report.wms_sync_state === "APPLIED" ? "登记已确认并同步 WMS" : "登记已确认，WMS 等待重试", report.wms_sync_state === "FAILED");
+            el("reportForm").reset();
+            return refreshAll();
+          })
+          .catch(function (error) { showToast(error.message, true); })
+          .then(function () { button.disabled = false; });
+      });
+
+      el("reportRows").addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-action]");
+        if (!button) { return; }
+        var action = button.getAttribute("data-action");
+        var id = button.getAttribute("data-id");
+        button.disabled = true;
+        if (action === "reverse") {
+          state.reversing = { id: id, version: Number(button.getAttribute("data-version")) };
+          el("reverseReason").value = "";
+          el("reverseDialog").showModal();
+          button.disabled = false;
+          return;
+        }
+        var path = action === "retry"
+          ? "/reports/" + encodeURIComponent(id) + "/retry"
+          : "/reports/" + encodeURIComponent(id) + "/link-quality?version=" + encodeURIComponent(button.getAttribute("data-version"));
+        request(path, { method: "POST", body: "{}" })
+          .then(function () { showToast(action === "retry" ? "同步已重试" : "已关联最新质检记录"); return loadReports(); })
+          .catch(function (error) { showToast(error.message, true); })
+          .then(function () { button.disabled = false; });
+      });
+
+      el("cancelReverse").addEventListener("click", function () { el("reverseDialog").close(); });
+      el("confirmReverse").addEventListener("click", function () {
+        var reason = el("reverseReason").value.trim();
+        if (!state.reversing || !reason) { showToast("请输入冲销原因", true); return; }
+        var current = state.reversing;
+        el("confirmReverse").disabled = true;
+        request("/reports/" + encodeURIComponent(current.id) + "/reverse", {
+          method: "POST",
+          body: JSON.stringify({ version: current.version, reason: reason })
+        }).then(function () {
+          el("reverseDialog").close();
+          showToast("登记已冲销，库存数量分配已恢复");
+          return refreshAll();
+        }).catch(function (error) {
+          showToast(error.message, true);
+        }).then(function () { el("confirmReverse").disabled = false; });
+      });
+
+      el("searchButton").addEventListener("click", refreshAll);
+      el("clearSearchButton").addEventListener("click", function () { el("keyword").value = ""; refreshAll(); });
+      el("refreshButton").addEventListener("click", refreshAll);
+      el("keyword").addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); refreshAll(); } });
+
+      var searchParams = new URLSearchParams(window.location.search);
+      var initialTaskId = searchParams.get("taskId");
+      var initialInspectId = searchParams.get("inspectId");
+
+      function resolveInitialTaskId() {
+        if (initialTaskId || !initialInspectId) {
+          return Promise.resolve(initialTaskId);
+        }
+        return request("/quality-context/" + encodeURIComponent(initialInspectId))
+          .then(function (context) { return text(context.task_id); });
+      }
+
+      refreshAll().then(resolveInitialTaskId).then(function (taskId) {
+        if (!taskId) { return; }
+        if (!state.tasks.some(function (item) { return text(item.id) === taskId; })) {
+          throw new Error("当前检验申请关联的制造任务不在可用任务列表中");
+        }
+        el("taskSelect").value = taskId;
+        return loadOutputs();
+      }).catch(function (error) {
+        showToast(error.message, true);
+      });
+    }());
+  </script>
+</body>
+</html>

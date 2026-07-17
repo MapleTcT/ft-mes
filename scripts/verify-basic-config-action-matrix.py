@@ -97,6 +97,7 @@ CONTROLLED_RUNTIME_CONFIG_CONTRACTS = {
         "required_before": {"business-owner-approval", "dedicated-marker", "rollback-plan", "qcs-report-regression"},
         "required_pass_cases": {
             "PROD-018",
+            "PROD-019",
             "PROD-031",
             "PROD-032",
             "PROD-033",
@@ -110,7 +111,7 @@ CONTROLLED_RUNTIME_CONFIG_CONTRACTS = {
             "PROD-041",
             "PROD-042",
         },
-        "blocked_impact_cases": {"PROD-019"},
+        "blocked_impact_cases": set(),
         "required_tables": {"systemconfig_config_info", "systemconfig_config_version"},
         "minimum_fragments": {"ADP_E2E", "PostgreSQL", "QCS", "rollback"},
     },

@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`190`。
-- 编号范围：`001` 到 `190`。
+- 脚本数量：`191`。
+- 编号范围：`001` 到 `191`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 76 |
 | configuration | 42 |
-| general | 32 |
+| general | 33 |
 | notification | 9 |
 | platform | 54 |
 | workflow | 21 |
@@ -33,25 +33,25 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10797 |
-| create-function | 87 |
-| create-index | 987 |
-| create-table | 574 |
+| alter-table | 10813 |
+| create-function | 88 |
+| create-index | 996 |
+| create-table | 578 |
 | create-view | 142 |
-| insert | 11010 |
-| update | 11091 |
+| insert | 11011 |
+| update | 11095 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
-| create-or-replace | 226 |
+| create-or-replace | 227 |
 | do-block | 392 |
-| if-exists | 108 |
-| if-not-exists | 12998 |
+| if-exists | 113 |
+| if-not-exists | 13016 |
 | on-conflict | 10949 |
 | to-regclass | 219 |
-| where-not-exists | 43 |
+| where-not-exists | 44 |
 
 ## 脚本清单
 
@@ -247,6 +247,7 @@
 | 188 | 188-wom-print-qrcode.sql | general | 132 | create-table:2, create-index:2, alter-table:8, insert:1, update:2 | 13 | - |
 | 189 | 189-wom-manual-task-entry.sql | general | 243 | create-table:1, create-function:1, create-index:4, insert:2, update:5 | 10 | watch:1 |
 | 190 | 190-rm-web-formula-editor.sql | general | 195 | create-table:3, create-function:1, create-index:4, update:2 | 13 | watch:1 |
+| 191 | 191-wom-quality-quantity-reporting.sql | general | 482 | create-table:4, create-function:1, create-index:9, alter-table:16, insert:1, update:4 | 25 | - |
 
 ## 规则
 

@@ -49,6 +49,7 @@ make ci
 | `rm-formula-editor` | 原运行逻辑的源码化替代 | Web 配方、工序、活动、修订与 Batch/DCS 投递边界。 |
 | `wom-print` | 自研恢复模块 | 包装二维码和打印状态。 |
 | `wom-production-entry` | 自研恢复模块 | 可见制造指令新建、幂等和流程提交入口。 |
+| `wom-quality-reporting` | 自研恢复模块 | WOM/QCS 独立不良数量、WMS 合格/冻结数量分配、幂等与冲销事件账本。 |
 
 ## 提升原则
 

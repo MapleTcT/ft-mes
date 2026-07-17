@@ -2,10 +2,13 @@ package com.mapletct.ftmes.materialwms.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mapletct.ftmes.materialwms.api.QualityAllocationRequest;
 import com.mapletct.ftmes.materialwms.api.StockDocumentLineRequest;
 import com.mapletct.ftmes.materialwms.api.StockDocumentRequest;
 import com.mapletct.ftmes.materialwms.domain.DocumentType;
 import com.mapletct.ftmes.materialwms.domain.MaterialWmsBusinessException;
+import com.mapletct.ftmes.materialwms.domain.QualityAllocationAction;
+import com.mapletct.ftmes.materialwms.domain.QualityAllocationResult;
 import com.mapletct.ftmes.materialwms.domain.QualityStatus;
 import com.mapletct.ftmes.materialwms.domain.QualityUpdateResult;
 import com.mapletct.ftmes.materialwms.domain.StockDocumentResult;
@@ -64,17 +67,24 @@ public class MaterialInventoryService {
         }
 
         int appliedLines = 0;
+        QualityStatus appliedStatus = requestedStatus;
         List<Map<String, Object>> lines = repository.lockInboundLinesBySource(tenantId, normalizedSourceLineId);
         for (Map<String, Object> line : lines) {
             QualityStatus lineStatus = QualityStatus.valueOf(String.valueOf(line.get("quality_status")));
-            if (lineStatus == requestedStatus) {
+            BigDecimal quantity = decimal(line.get("quantity"));
+            BigDecimal goodQuantity = decimalOrDefault(line.get("good_quantity"), quantity);
+            BigDecimal badQuantity = decimalOrDefault(line.get("bad_quantity"), ZERO);
+            QualityStatus targetStatus = requestedStatus == QualityStatus.QUALIFIED
+                && badQuantity.compareTo(ZERO) > 0
+                ? QualityStatus.PARTIAL : requestedStatus;
+            if (lineStatus == targetStatus) {
+                appliedStatus = targetStatus;
                 continue;
             }
-            BigDecimal quantity = decimal(line.get("quantity"));
-            BigDecimal availableDelta = bucketAvailable(requestedStatus).subtract(bucketAvailable(lineStatus))
-                .multiply(quantity);
-            BigDecimal holdDelta = bucketHold(requestedStatus).subtract(bucketHold(lineStatus))
-                .multiply(quantity);
+            BigDecimal previousAvailable = availableQuantity(lineStatus, quantity, goodQuantity);
+            BigDecimal targetAvailable = availableQuantity(targetStatus, quantity, goodQuantity);
+            BigDecimal availableDelta = targetAvailable.subtract(previousAvailable);
+            BigDecimal holdDelta = availableDelta.negate();
             Map<String, Object> balance = repository.adjustStock(
                 tenantId,
                 string(line.get("warehouse_code")),
@@ -88,7 +98,7 @@ public class MaterialInventoryService {
             );
             long lineId = number(line.get("id")).longValue();
             long documentId = number(line.get("document_id")).longValue();
-            repository.updateLineQuality(lineId, requestedStatus);
+            repository.updateLineQuality(lineId, targetStatus);
             repository.insertTransaction(
                 tenantId,
                 "QUALITY:" + normalizedSourceLineId + ":" + revision,
@@ -109,8 +119,106 @@ public class MaterialInventoryService {
             );
             repository.refreshDocumentQuality(documentId);
             appliedLines++;
+            appliedStatus = targetStatus;
         }
-        return new QualityUpdateResult(normalizedSourceLineId, requestedStatus, appliedLines, revision);
+        return new QualityUpdateResult(normalizedSourceLineId, appliedStatus, appliedLines, revision);
+    }
+
+    @Transactional
+    public QualityAllocationResult applyQualityAllocation(
+            String tenantId, QualityAllocationRequest request) {
+        QualityAllocationAction action = validateAllocationRequest(request);
+        String sourceLineId = request.getSourceLineId().trim();
+        String eventKey = action.name() + ":" + request.getRequestId().trim();
+        if (repository.allocationEventExists(tenantId, eventKey)) {
+            Map<String, Object> allocation = repository.lockAllocation(tenantId, sourceLineId);
+            if (allocation == null) {
+                throw new MaterialWmsBusinessException(409, "分配事件存在但当前分配记录不存在");
+            }
+            if (!sameAllocation(allocation, request)) {
+                throw new MaterialWmsBusinessException(409, "requestId 已被不同分配内容使用");
+            }
+            return allocationResult(allocation, 0, true);
+        }
+
+        Map<String, Object> allocation = repository.lockAllocation(tenantId, sourceLineId);
+        if (repository.allocationEventExists(tenantId, eventKey)) {
+            if (allocation == null) {
+                throw new MaterialWmsBusinessException(409, "分配事件存在但当前分配记录不存在");
+            }
+            if (!sameAllocation(allocation, request)) {
+                throw new MaterialWmsBusinessException(409, "requestId 已被不同分配内容使用");
+            }
+            return allocationResult(allocation, 0, true);
+        }
+        if (action == QualityAllocationAction.APPLY) {
+            boolean newlyCreated = false;
+            if (allocation == null) {
+                newlyCreated = repository.insertAllocationIfAbsent(
+                    tenantId,
+                    sourceLineId,
+                    request.getTaskId().trim(),
+                    request.getQualityReportId().trim(),
+                    request.getTotalQuantity(),
+                    request.getGoodQuantity(),
+                    request.getBadQuantity()
+                );
+                allocation = repository.lockAllocation(tenantId, sourceLineId);
+            }
+            if (allocation == null) {
+                throw new MaterialWmsBusinessException(500, "不良数量分配创建后无法读取");
+            }
+            String currentStatus = string(allocation.get("status"));
+            boolean sameAllocation = sameAllocation(allocation, request);
+            if ("ACTIVE".equals(currentStatus) && !sameAllocation) {
+                throw new MaterialWmsBusinessException(409, "该产出记录已有生效的不良数量登记，请先冲销");
+            }
+            if ("ACTIVE".equals(currentStatus) && sameAllocation && !newlyCreated) {
+                repository.insertAllocationEvent(
+                    tenantId, eventKey, number(allocation.get("id")).longValue(),
+                    action.name(), request.getQualityReportId().trim(), json(request));
+                return allocationResult(allocation, 0, true);
+            }
+            if (!newlyCreated) {
+                repository.updateAllocation(
+                    number(allocation.get("id")).longValue(),
+                    number(allocation.get("version")).longValue(),
+                    request.getTaskId().trim(),
+                    request.getQualityReportId().trim(),
+                    request.getTotalQuantity(),
+                    request.getGoodQuantity(),
+                    request.getBadQuantity(),
+                    "ACTIVE"
+                );
+            }
+        } else {
+            if (allocation == null || "REVERSED".equals(string(allocation.get("status")))) {
+                throw new MaterialWmsBusinessException(409, "该产出记录不存在可冲销的不良数量分配");
+            }
+            if (!sameAllocation(allocation, request)) {
+                throw new MaterialWmsBusinessException(409, "冲销数据与当前生效分配不一致");
+            }
+        }
+
+        allocation = repository.lockAllocation(tenantId, sourceLineId);
+        int appliedLines = applyAllocationToInboundLines(tenantId, eventKey, action, request);
+        if (action == QualityAllocationAction.REVERSE) {
+            repository.updateAllocation(
+                number(allocation.get("id")).longValue(),
+                number(allocation.get("version")).longValue(),
+                string(allocation.get("task_id")),
+                string(allocation.get("quality_report_id")),
+                decimal(allocation.get("total_quantity")),
+                decimal(allocation.get("good_quantity")),
+                decimal(allocation.get("bad_quantity")),
+                "REVERSED"
+            );
+        }
+        repository.insertAllocationEvent(
+            tenantId, eventKey, number(allocation.get("id")).longValue(),
+            action.name(), request.getQualityReportId().trim(), json(request));
+        allocation = repository.lockAllocation(tenantId, sourceLineId);
+        return allocationResult(allocation, appliedLines, false);
     }
 
     @Transactional(readOnly = true)
@@ -172,9 +280,21 @@ public class MaterialInventoryService {
                 verifyIdempotentLine(existingLine, request, line);
                 continue;
             }
+            BigDecimal goodQuantity = line.getQuantity();
+            BigDecimal badQuantity = ZERO;
+            Map<String, Object> allocation = documentType == DocumentType.COMPLETION_INBOUND
+                ? repository.findActiveAllocation(tenantId, sourceLineId) : null;
+            if (allocation != null) {
+                verifyAllocationQuantity(allocation, line.getQuantity());
+                goodQuantity = decimal(allocation.get("good_quantity"));
+                badQuantity = decimal(allocation.get("bad_quantity"));
+            }
             QualityStatus qualityStatus = documentType == DocumentType.PRODUCTION_ISSUE
                 ? QualityStatus.QUALIFIED
                 : resolveInitialQuality(tenantId, sourceLineId, line.getCheckResult());
+            if (qualityStatus == QualityStatus.QUALIFIED && badQuantity.compareTo(ZERO) > 0) {
+                qualityStatus = QualityStatus.PARTIAL;
+            }
             LocalDate productionDate = parseDate(line.getProductionDate(), "productionDate", false);
             boolean lineInserted = repository.insertLineIfAbsent(
                 documentId,
@@ -185,6 +305,8 @@ public class MaterialInventoryService {
                 warehouseCode,
                 line,
                 qualityStatus,
+                goodQuantity,
+                badQuantity,
                 productionDate
             );
             Map<String, Object> persistedLine = repository.findLineBySource(
@@ -213,8 +335,8 @@ public class MaterialInventoryService {
                 availableDelta = line.getQuantity().negate();
                 holdDelta = ZERO;
             } else {
-                availableDelta = qualityStatus == QualityStatus.QUALIFIED ? line.getQuantity() : ZERO;
-                holdDelta = qualityStatus == QualityStatus.QUALIFIED ? ZERO : line.getQuantity();
+                availableDelta = availableQuantity(qualityStatus, line.getQuantity(), goodQuantity);
+                holdDelta = line.getQuantity().subtract(availableDelta);
             }
             Map<String, Object> balance = repository.adjustStock(
                 tenantId,
@@ -304,7 +426,7 @@ public class MaterialInventoryService {
         }
     }
 
-    private String json(StockDocumentRequest request) {
+    private String json(Object request) {
         try {
             return objectMapper.writeValueAsString(request);
         } catch (JsonProcessingException exception) {
@@ -335,12 +457,141 @@ public class MaterialInventoryService {
         return normalized;
     }
 
-    private static BigDecimal bucketAvailable(QualityStatus status) {
-        return status == QualityStatus.QUALIFIED ? BigDecimal.ONE : ZERO;
+    private QualityAllocationAction validateAllocationRequest(QualityAllocationRequest request) {
+        if (request == null) {
+            throw new MaterialWmsBusinessException(400, "请求体不能为空");
+        }
+        required(request.getRequestId(), "requestId");
+        required(request.getQualityReportId(), "qualityReportId");
+        required(request.getTaskId(), "taskId");
+        required(request.getSourceLineId(), "sourceLineId");
+        if (request.getTotalQuantity() == null || request.getTotalQuantity().compareTo(ZERO) <= 0) {
+            throw new MaterialWmsBusinessException(400, "totalQuantity 必须大于 0");
+        }
+        if (request.getGoodQuantity() == null || request.getGoodQuantity().compareTo(ZERO) < 0) {
+            throw new MaterialWmsBusinessException(400, "goodQuantity 不能小于 0");
+        }
+        if (request.getBadQuantity() == null || request.getBadQuantity().compareTo(ZERO) <= 0) {
+            throw new MaterialWmsBusinessException(400, "badQuantity 必须大于 0");
+        }
+        if (request.getGoodQuantity().add(request.getBadQuantity())
+                .compareTo(request.getTotalQuantity()) != 0) {
+            throw new MaterialWmsBusinessException(400, "totalQuantity 必须等于 goodQuantity + badQuantity");
+        }
+        return QualityAllocationAction.from(request.getAction());
     }
 
-    private static BigDecimal bucketHold(QualityStatus status) {
-        return status == QualityStatus.QUALIFIED ? ZERO : BigDecimal.ONE;
+    private int applyAllocationToInboundLines(
+            String tenantId,
+            String eventKey,
+            QualityAllocationAction action,
+            QualityAllocationRequest request) {
+        int appliedLines = 0;
+        List<Map<String, Object>> lines = repository.lockInboundLinesBySource(
+            tenantId, request.getSourceLineId().trim());
+        for (Map<String, Object> line : lines) {
+            BigDecimal totalQuantity = decimal(line.get("quantity"));
+            if (totalQuantity.compareTo(request.getTotalQuantity()) != 0) {
+                throw new MaterialWmsBusinessException(409, "不良数量登记与已入库数量不一致");
+            }
+            BigDecimal previousGood = decimalOrDefault(line.get("good_quantity"), totalQuantity);
+            BigDecimal targetGood = action == QualityAllocationAction.APPLY
+                ? request.getGoodQuantity() : totalQuantity;
+            BigDecimal targetBad = action == QualityAllocationAction.APPLY
+                ? request.getBadQuantity() : ZERO;
+            QualityStatus previousStatus = QualityStatus.valueOf(string(line.get("quality_status")));
+            QualityStatus targetStatus = allocationTargetStatus(previousStatus, targetBad);
+            BigDecimal previousAvailable = availableQuantity(previousStatus, totalQuantity, previousGood);
+            BigDecimal targetAvailable = availableQuantity(targetStatus, totalQuantity, targetGood);
+            BigDecimal availableDelta = targetAvailable.subtract(previousAvailable);
+            BigDecimal holdDelta = availableDelta.negate();
+            Map<String, Object> balance = repository.adjustStock(
+                tenantId,
+                string(line.get("warehouse_code")),
+                string(line.get("location_code")),
+                string(line.get("material_code")),
+                string(line.get("batch_no")),
+                string(line.get("production_batch_no")),
+                ZERO,
+                availableDelta,
+                holdDelta
+            );
+            long lineId = number(line.get("id")).longValue();
+            long documentId = number(line.get("document_id")).longValue();
+            repository.updateLineAllocation(
+                lineId, totalQuantity, targetGood, targetBad, targetStatus);
+            repository.insertTransaction(
+                tenantId,
+                "QUALITY_ALLOCATION:" + eventKey + ":" + lineId,
+                action == QualityAllocationAction.APPLY
+                    ? "QUALITY_ALLOCATION_HOLD" : "QUALITY_ALLOCATION_RELEASE",
+                documentId,
+                lineId,
+                string(line.get("source_document_id")),
+                request.getSourceLineId().trim(),
+                string(line.get("warehouse_code")),
+                string(line.get("location_code")),
+                string(line.get("material_code")),
+                string(line.get("batch_no")),
+                string(line.get("production_batch_no")),
+                ZERO,
+                availableDelta,
+                holdDelta,
+                balance
+            );
+            repository.refreshDocumentQuality(documentId);
+            appliedLines++;
+        }
+        return appliedLines;
+    }
+
+    private static QualityStatus allocationTargetStatus(
+            QualityStatus currentStatus, BigDecimal badQuantity) {
+        if (currentStatus == QualityStatus.PENDING || currentStatus == QualityStatus.UNQUALIFIED) {
+            return currentStatus;
+        }
+        return badQuantity.compareTo(ZERO) > 0 ? QualityStatus.PARTIAL : QualityStatus.QUALIFIED;
+    }
+
+    private static BigDecimal availableQuantity(
+            QualityStatus status, BigDecimal totalQuantity, BigDecimal goodQuantity) {
+        if (status == QualityStatus.QUALIFIED) {
+            return totalQuantity;
+        }
+        if (status == QualityStatus.PARTIAL) {
+            return goodQuantity;
+        }
+        return ZERO;
+    }
+
+    private static void verifyAllocationQuantity(
+            Map<String, Object> allocation, BigDecimal lineQuantity) {
+        if (decimal(allocation.get("total_quantity")).compareTo(lineQuantity) != 0) {
+            throw new MaterialWmsBusinessException(409, "生效的不良数量登记与完工入库数量不一致");
+        }
+    }
+
+    private static boolean sameAllocation(
+            Map<String, Object> allocation, QualityAllocationRequest request) {
+        return string(allocation.get("task_id")).equals(request.getTaskId().trim())
+            && string(allocation.get("quality_report_id")).equals(request.getQualityReportId().trim())
+            && decimal(allocation.get("total_quantity")).compareTo(request.getTotalQuantity()) == 0
+            && decimal(allocation.get("good_quantity")).compareTo(request.getGoodQuantity()) == 0
+            && decimal(allocation.get("bad_quantity")).compareTo(request.getBadQuantity()) == 0;
+    }
+
+    private static QualityAllocationResult allocationResult(
+            Map<String, Object> allocation, int appliedLines, boolean idempotent) {
+        return new QualityAllocationResult(
+            string(allocation.get("source_line_id")),
+            string(allocation.get("quality_report_id")),
+            string(allocation.get("status")),
+            decimal(allocation.get("total_quantity")),
+            decimal(allocation.get("good_quantity")),
+            decimal(allocation.get("bad_quantity")),
+            appliedLines,
+            idempotent
+        );
     }
 
     private static String required(String value, String field) {
@@ -367,6 +618,10 @@ public class MaterialInventoryService {
             return (BigDecimal) value;
         }
         return new BigDecimal(String.valueOf(value));
+    }
+
+    private static BigDecimal decimalOrDefault(Object value, BigDecimal defaultValue) {
+        return value == null ? defaultValue : decimal(value);
     }
 
     private static String string(Object value) {

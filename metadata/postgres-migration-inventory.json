@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 190,
+  "migrationCount": 191,
   "firstNumber": 1,
-  "lastNumber": 190,
+  "lastNumber": 191,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,29 +12,29 @@
   "watchStatementCount": 73,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10797,
-    "create-function": 87,
-    "create-index": 987,
-    "create-table": 574,
+    "alter-table": 10813,
+    "create-function": 88,
+    "create-index": 996,
+    "create-table": 578,
     "create-view": 142,
-    "insert": 11010,
-    "update": 11091
+    "insert": 11011,
+    "update": 11095
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 226,
+    "create-or-replace": 227,
     "do-block": 392,
-    "if-exists": 108,
-    "if-not-exists": 12998,
+    "if-exists": 113,
+    "if-not-exists": 13016,
     "on-conflict": 10949,
     "to-regclass": 219,
-    "where-not-exists": 43
+    "where-not-exists": 44
   },
   "tagTotals": {
     "auth-rbac-org": 37,
     "business": 34,
     "compatibility": 76,
     "configuration": 42,
-    "general": 32,
+    "general": 33,
     "notification": 9,
     "platform": 54,
     "workflow": 21
@@ -7183,6 +7183,39 @@
           "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
         }
       ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/191-wom-quality-quantity-reporting.sql",
+      "name": "191-wom-quality-quantity-reporting.sql",
+      "number": 191,
+      "slug": "wom-quality-quantity-reporting",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 482,
+      "sha256": "01f221af0d6e4a3921e654eca282599116d34052ed3e0fad0a0b3d3e4baf441c",
+      "statementCounts": {
+        "create-table": 4,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 9,
+        "alter-table": 16,
+        "insert": 1,
+        "update": 4
+      },
+      "idempotencySignals": {
+        "if-exists": 5,
+        "if-not-exists": 18,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
       "unguardedStructuralStatements": []
     }
   ]

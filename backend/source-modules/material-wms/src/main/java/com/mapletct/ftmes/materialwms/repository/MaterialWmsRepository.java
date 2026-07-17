@@ -86,16 +86,19 @@ public class MaterialWmsRepository {
             String warehouseCode,
             StockDocumentLineRequest line,
             QualityStatus qualityStatus,
+            BigDecimal goodQuantity,
+            BigDecimal badQuantity,
             LocalDate productionDate) {
         String sql = "INSERT INTO wms_stock_document_lines ("
             + "document_id, tenant_id, document_type, line_no, source_line_id, material_code, "
             + "batch_no, production_batch_no, warehouse_code, location_code, quantity, "
-            + "production_date, quality_status, memo"
-            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "reported_quantity, good_quantity, bad_quantity, production_date, quality_status, memo"
+            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Object[] args = {
             documentId, tenantId, type.name(), lineNo, sourceLineId, line.getGoodCode(),
             normalizeDimension(line.getBatchText()), normalizeDimension(line.getProductionBatchNo()),
             warehouseCode, normalizeDimension(line.getPlaceSetCode()), line.getQuantity(),
+            line.getQuantity(), goodQuantity, badQuantity,
             productionDate == null ? null : Date.valueOf(productionDate), qualityStatus.name(), line.getMemo()
         };
         if (isPostgres()) {
@@ -117,6 +120,105 @@ public class MaterialWmsRepository {
             tenantId, type.name(), sourceLineId
         );
         return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public Map<String, Object> findActiveAllocation(String tenantId, String sourceLineId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+            "SELECT * FROM wms_quality_allocations "
+                + "WHERE tenant_id = ? AND source_system = 'WOM' AND source_line_id = ? "
+                + "AND status = 'ACTIVE'",
+            tenantId, sourceLineId
+        );
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public Map<String, Object> lockAllocation(String tenantId, String sourceLineId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+            "SELECT * FROM wms_quality_allocations "
+                + "WHERE tenant_id = ? AND source_system = 'WOM' AND source_line_id = ? FOR UPDATE",
+            tenantId, sourceLineId
+        );
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public boolean insertAllocationIfAbsent(
+            String tenantId,
+            String sourceLineId,
+            String taskId,
+            String qualityReportId,
+            BigDecimal totalQuantity,
+            BigDecimal goodQuantity,
+            BigDecimal badQuantity) {
+        String sql = "INSERT INTO wms_quality_allocations ("
+            + "tenant_id, source_system, source_line_id, task_id, quality_report_id, "
+            + "total_quantity, good_quantity, bad_quantity, status"
+            + ") VALUES (?, 'WOM', ?, ?, ?, ?, ?, ?, 'ACTIVE')";
+        Object[] args = {
+            tenantId, sourceLineId, taskId, qualityReportId,
+            totalQuantity, goodQuantity, badQuantity
+        };
+        if (isPostgres()) {
+            return jdbc.update(sql + " ON CONFLICT (tenant_id, source_system, source_line_id) DO NOTHING", args) == 1;
+        }
+        try {
+            jdbc.update(sql, args);
+            return true;
+        } catch (DuplicateKeyException ignored) {
+            return false;
+        }
+    }
+
+    public long updateAllocation(
+            long allocationId,
+            long currentVersion,
+            String taskId,
+            String qualityReportId,
+            BigDecimal totalQuantity,
+            BigDecimal goodQuantity,
+            BigDecimal badQuantity,
+            String status) {
+        long nextVersion = currentVersion + 1;
+        int updated = jdbc.update(
+            "UPDATE wms_quality_allocations SET task_id = ?, quality_report_id = ?, "
+                + "total_quantity = ?, good_quantity = ?, bad_quantity = ?, status = ?, "
+                + "version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND version = ?",
+            taskId, qualityReportId, totalQuantity, goodQuantity, badQuantity, status,
+            nextVersion, allocationId, currentVersion
+        );
+        if (updated != 1) {
+            throw new MaterialWmsBusinessException(409, "不良数量分配并发更新冲突，请重试");
+        }
+        return nextVersion;
+    }
+
+    public boolean allocationEventExists(String tenantId, String eventKey) {
+        Long count = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM wms_quality_allocation_events WHERE tenant_id = ? AND event_key = ?",
+            Long.class, tenantId, eventKey
+        );
+        return count != null && count.longValue() > 0;
+    }
+
+    public void insertAllocationEvent(
+            String tenantId,
+            String eventKey,
+            long allocationId,
+            String eventType,
+            String qualityReportId,
+            String payload) {
+        String sql = "INSERT INTO wms_quality_allocation_events ("
+            + "tenant_id, event_key, allocation_id, event_type, quality_report_id, payload"
+            + ") VALUES (?, ?, ?, ?, ?, ?)";
+        Object[] args = {tenantId, eventKey, allocationId, eventType, qualityReportId, payload};
+        if (isPostgres()) {
+            jdbc.update(sql + " ON CONFLICT (tenant_id, event_key) DO NOTHING", args);
+            return;
+        }
+        try {
+            jdbc.update(sql, args);
+        } catch (DuplicateKeyException ignored) {
+            // Event uniqueness keeps retries idempotent.
+        }
     }
 
     public int nextLineNo(long documentId) {
@@ -304,6 +406,19 @@ public class MaterialWmsRepository {
         );
     }
 
+    public void updateLineAllocation(
+            long lineId,
+            BigDecimal reportedQuantity,
+            BigDecimal goodQuantity,
+            BigDecimal badQuantity,
+            QualityStatus qualityStatus) {
+        jdbc.update(
+            "UPDATE wms_stock_document_lines SET reported_quantity = ?, good_quantity = ?, "
+                + "bad_quantity = ?, quality_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            reportedQuantity, goodQuantity, badQuantity, qualityStatus.name(), lineId
+        );
+    }
+
     public void refreshDocumentQuality(long documentId) {
         List<Map<String, Object>> rows = jdbc.queryForList(
             "SELECT quality_status, COUNT(*) AS item_count FROM wms_stock_document_lines "
@@ -319,11 +434,18 @@ public class MaterialWmsRepository {
             }
             if (lineStatus == QualityStatus.PENDING) {
                 status = QualityStatus.PENDING;
+                continue;
+            }
+            if (lineStatus == QualityStatus.PARTIAL && status == QualityStatus.QUALIFIED) {
+                status = QualityStatus.PARTIAL;
             }
         }
         jdbc.update(
-            "UPDATE wms_stock_documents SET quality_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            status.name(), documentId
+            "UPDATE wms_stock_documents SET quality_status = ?, "
+                + "quantity_allocation_state = CASE WHEN EXISTS ("
+                + "SELECT 1 FROM wms_stock_document_lines WHERE document_id = ? AND bad_quantity > 0"
+                + ") THEN 'ACTIVE' ELSE 'NONE' END, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            status.name(), documentId, documentId
         );
     }
 

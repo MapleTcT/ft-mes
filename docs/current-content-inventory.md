@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`62` 个。
+- Docker Compose 服务：`63` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -130,6 +130,7 @@
 | WOMMs | business-runtime | bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar |
 | wom-print | business-runtime | bap-server/module-Server/WOMPrint/manual/wom-print.jar |
 | wom-production-entry | business-runtime | bap-server/module-Server/WOMProductionEntry/manual/wom-production-entry.jar |
+| wom-quality-reporting | business-runtime | bap-server/module-Server/WOMQualityReporting/manual/wom-quality-reporting.jar |
 | material | business-runtime | bap-server/module-Server/material/manual/material-wms.jar |
 | ProcessAnalysis | business-runtime | bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar |
 | bpi-migrate | support-runtime | - |

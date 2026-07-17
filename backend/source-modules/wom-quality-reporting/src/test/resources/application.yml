@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:wom_quality;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    initialization-mode: always
+    schema: classpath:schema.sql
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+    service-registry:
+      auto-registration:
+        enabled: false
+
+wom:
+  quality:
+    wms-url: http://unused/material/wms/quality-allocations
+    sync-delay-ms: 99999999
+
+management:
+  health:
+    defaults:
+      enabled: false

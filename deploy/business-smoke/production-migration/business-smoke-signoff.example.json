@@ -227,25 +227,19 @@
     {
       "id": "BUS-SIGNOFF-001",
       "severity": "BLOCKER",
-      "description": "Standalone bad-quantity scope still prevents production signoff; RM Web editing, material/WMS completion inbound, ProcessAnalysis traceability and production list export are accepted, while plant Batch/DCS acknowledgement remains a separate cutover prerequisite.",
-      "source": "metadata/production-module-blockers.json",
-      "blockerCaseIds": [
-        "PROD-019",
-        "PROD-021"
-      ],
+      "description": "Production function blockers are clear, including independent bad-quantity reporting; plant Batch/DCS acknowledgement and signed production evidence remain cutover prerequisites.",
+      "source": "metadata/production-migration-readiness.json",
       "owner": "production-business-owner",
       "riskAcceptance": "TBD",
-      "nextAction": "Execute remaining real frontend write actions and attach PostgreSQL evidence."
+      "nextAction": "Run the plant Batch/DCS cutover rehearsal and attach signed acknowledgement, rollback and PostgreSQL evidence."
     },
     {
       "id": "BUS-SIGNOFF-002",
       "severity": "BLOCKER",
-      "description": "Production module backlog still contains unresolved action-level gaps: public produceTaskCreated product scope and standalone bad-quantity product scope. The WOM QR-code runtime endpoint, visible WOM manual production-task entry and RM Web formula editor are closed and are no longer part of this blocker.",
+      "description": "Production module backlog contains one unresolved action-level gap: the public produceTaskCreated product scope. WOM QR-code, visible manual production-task entry, RM Web formula editing and independent bad-quantity reporting are closed and are no longer part of this blocker.",
       "source": "metadata/production-module-backlog.json",
       "backlogItemIds": [
-        "PROD-ACTION-007",
-        "PROD-019",
-        "PROD-021"
+        "PROD-ACTION-007"
       ],
       "owner": "production-business-owner",
       "riskAcceptance": "TBD",

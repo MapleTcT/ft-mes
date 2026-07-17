@@ -205,16 +205,19 @@
         "metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
         "metadata/qcs-report-chain-qualified-current.json",
         "metadata/qcs-report-chain-unqualified-current.json",
-        "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js"
+        "deploy/docker/scripts/adp-qcs-report-chain-persistence-acceptance.js",
+        "metadata/wom-quality-quantity-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-wom-quality-quantity-persistence-acceptance.js"
       ],
       "remainingGaps": [
-        "QCS reportShowIndexRange 已完成专用 marker 保存、详情/按模块回读、PostgreSQL before/after 和立即回滚验收；配置回滚后 WOM checkoutBill 质量活动、WOM 制造请检、QCS 报告保存/合格生效回写、不合格生效回写并自动生成不合格处理单均已用当前地址复跑 PASS。该配置仍属于高风险运行配置，后续任何写操作仍必须专用 marker、回滚和业务回归。"
+        "QCS reportShowIndexRange 已完成专用 marker 保存、详情/按模块回读、PostgreSQL before/after 和立即回滚验收；配置回滚后 WOM checkoutBill 质量活动、WOM 制造请检、QCS 报告保存/合格生效回写、不合格生效回写并自动生成不合格处理单，以及 WOM/QCS/WMS 独立不良数量分配与冲销均已用当前地址复跑 PASS。该配置仍属于高风险运行配置，后续任何写操作仍必须专用 marker、回滚和业务回归。"
       ],
       "acceptanceContract": {
         "targetActionId": "builtin-qcs-runtime-config",
         "scope": "change QCS runtime configuration through the real systemconfig page with a dedicated marker, then re-run the accepted QCS production chain.",
         "requiredProductionCaseIds": [
           "PROD-018",
+          "PROD-019",
           "PROD-031",
           "PROD-032",
           "PROD-033",
@@ -228,9 +231,7 @@
           "PROD-041",
           "PROD-042"
         ],
-        "blockedImpactCaseIds": [
-          "PROD-019"
-        ],
+        "blockedImpactCaseIds": [],
         "requiredTables": [
           "systemconfig_config_info",
           "systemconfig_config_version"
@@ -262,14 +263,16 @@
           "make basic-config-action-matrix-check",
           "make acceptance-wom-manu-inspect-persistence ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 WOM_MANU_INSPECT_PERSISTENCE_OUTPUT=metadata/qcs-runtime-config-wom-manu-inspect-regression.json",
           "make acceptance-qcs-report-chain-persistence QCS_REPORT_CHAIN_MODE=qualified ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-qualified-current.json",
-          "make acceptance-qcs-report-chain-persistence QCS_REPORT_CHAIN_MODE=unqualified ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-unqualified-current.json"
+          "make acceptance-qcs-report-chain-persistence QCS_REPORT_CHAIN_MODE=unqualified ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 QCS_REPORT_CHAIN_PERSISTENCE_OUTPUT=metadata/qcs-report-chain-unqualified-current.json",
+          "make acceptance-wom-quality-quantity-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080"
         ],
         "currentGaps": [
           "Dedicated QCS runtime config marker evidence exists for reportShowIndexRange save/read/rollback.",
           "WOM checkoutBill quality-active inspection generation was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621055313_WOM_CHECKOUTBILL.",
           "WOM createManuInspect manufacturing-inspection creation was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621061644_WOM_MANU_INSPECT.",
           "QCS report save/effective qualified chain was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621065620_QCS_REPORT_QUAL.",
-          "QCS report save/effective unqualified chain was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621070426_QCS_UNQLF; qcs_un_qlf_deals auto treatment row 757556916282624 was generated."
+          "QCS report save/effective unqualified chain was rerun after the controlled config rollback and passed with marker ADP_E2E_20260621070426_QCS_UNQLF; qcs_un_qlf_deals auto treatment row 757556916282624 was generated.",
+          "Independent bad-quantity reporting is now a required PASS regression: marker ADP_E2E_20260717141017_WOM_BAD_QTY proved visible WOM/QCS entries, QCS linkage, WMS available/hold allocation, idempotency, reversal and PostgreSQL cleanup."
         ]
       }
     },

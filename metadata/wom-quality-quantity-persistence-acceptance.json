@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-07-17T15:03:08.893Z",
+  "repoCommit": "WORKTREE",
+  "database": "PostgreSQL",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "service": "wom-quality-reporting"
+  },
+  "status": "PASS",
+  "marker": "ADP_E2E_20260717150308_WOM_BAD_QTY",
+  "request": {
+    "taskId": "9000006817485041",
+    "sourceOutputId": "755693916899561",
+    "qcsInspectId": "764215030581481",
+    "reportedQuantity": 10,
+    "badQuantity": 2,
+    "goodQuantity": 8,
+    "unitCode": "kg"
+  },
+  "checks": {
+    "afterReport": {
+      "reports": 1,
+      "reportEvents": 2,
+      "allocationStatus": "ACTIVE",
+      "wmsSyncState": "APPLIED"
+    },
+    "afterInbound": {
+      "qualityStatus": "PENDING",
+      "onHand": 10,
+      "available": 0,
+      "hold": 10
+    },
+    "afterQuality": {
+      "qualityStatus": "PARTIAL",
+      "goodQuantity": 8,
+      "badQuantity": 2,
+      "available": 8,
+      "hold": 2
+    },
+    "afterIdempotentRetry": {
+      "reports": 1,
+      "reportEvents": 2,
+      "allocations": 1,
+      "allocationEvents": 1
+    },
+    "afterReverse": {
+      "reportStatus": "REVERSED",
+      "reportEvents": 4,
+      "allocationStatus": "REVERSED",
+      "allocationEvents": 2,
+      "qualityStatus": "QUALIFIED",
+      "available": 10,
+      "hold": 0
+    },
+    "afterCleanup": {
+      "tasks": 0,
+      "reports": 0,
+      "documents": 0
+    }
+  },
+  "browser": {
+    "operationalPageStatus": 200,
+    "qcsContextStatus": 200,
+    "womLegacyEntry": "不良数量",
+    "qcsLegacyEntry": "不良数量",
+    "markerVisible": true,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "badResponses": 0,
+    "screenshots": [
+      "/tmp/adp-wom-bad-quantity-20260717150308/wom-bad-quantity.png",
+      "/tmp/adp-wom-bad-quantity-20260717150308/qcs-bad-quantity-context.png",
+      "/tmp/adp-wom-bad-quantity-20260717150308/wom-bad-quantity-entry.png",
+      "/tmp/adp-wom-bad-quantity-20260717150308/qcs-bad-quantity-entry.png"
+    ]
+  },
+  "api": [
+    "GET /msService/WOM/quality-quantity/quality-context/{inspectId}",
+    "POST /msService/WOM/quality-quantity/reports",
+    "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
+    "POST /msService/material/foreign/foreign/checkProdResult",
+    "POST /msService/WOM/quality-quantity/reports/{id}/reverse"
+  ],
+  "tables": [
+    "wom_quality_quantity_reports",
+    "wom_quality_quantity_events",
+    "wms_quality_allocations",
+    "wms_quality_allocation_events",
+    "wms_stock_documents",
+    "wms_stock_document_lines",
+    "wms_batch_stocks",
+    "wms_inventory_transactions"
+  ],
+  "rawEvidence": "/tmp/adp-wom-bad-quantity-20260717150308/acceptance.json",
+  "issues": []
+}

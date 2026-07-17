@@ -34,6 +34,8 @@ public class MaterialWmsIntegrationTest {
 
     @Before
     public void cleanDatabase() {
+        jdbc.update("DELETE FROM wms_quality_allocation_events");
+        jdbc.update("DELETE FROM wms_quality_allocations");
         jdbc.update("DELETE FROM wms_inventory_transactions");
         jdbc.update("DELETE FROM wms_stock_document_lines");
         jdbc.update("DELETE FROM wms_stock_documents");
@@ -153,6 +155,81 @@ public class MaterialWmsIntegrationTest {
     }
 
     @Test
+    public void badQuantityAllocationKeepsOnlyGoodQuantityAvailableAndCanBeReversed() throws Exception {
+        String allocation = allocationJson("APPLY", "ALLOC-1", "REPORT-1", "LINE-ALLOC", "10", "8", "2");
+        mockMvc.perform(post("/material/wms/quality-allocations")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON).content(allocation))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.pendingInbound").value(true));
+
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(inboundJson("IN-ALLOC", "LINE-ALLOC", "10")))
+            .andExpect(status().isOk());
+        assertStock("10.000000", "0.000000", "10.000000");
+
+        mockMvc.perform(post("/material/foreign/foreign/checkProdResult")
+                .header("X-Tenant-Id", "COMP")
+                .param("srcId", "LINE-ALLOC")
+                .param("checkResult", "BaseSet_checkResult/qualified"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.qualityStatus").value("PARTIAL"));
+        assertStock("10.000000", "8.000000", "2.000000");
+        assertEquals(new BigDecimal("8.000000"), jdbc.queryForObject(
+            "SELECT good_quantity FROM wms_stock_document_lines", BigDecimal.class));
+        assertEquals(new BigDecimal("2.000000"), jdbc.queryForObject(
+            "SELECT bad_quantity FROM wms_stock_document_lines", BigDecimal.class));
+
+        mockMvc.perform(post("/material/wms/quality-allocations")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON).content(allocation))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.idempotent").value(true));
+        assertStock("10.000000", "8.000000", "2.000000");
+
+        String reversal = allocationJson("REVERSE", "REVERSE-1", "REPORT-1", "LINE-ALLOC", "10", "8", "2");
+        mockMvc.perform(post("/material/wms/quality-allocations")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON).content(reversal))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.status").value("REVERSED"));
+        assertStock("10.000000", "10.000000", "0.000000");
+        assertEquals("QUALIFIED", jdbc.queryForObject(
+            "SELECT quality_status FROM wms_stock_document_lines", String.class));
+        assertEquals(2L, count("wms_quality_allocation_events"));
+    }
+
+    @Test
+    public void allocationAfterQualifiedInboundMovesOnlyBadQuantityBackToHold() throws Exception {
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(inboundJson("IN-ALLOC-LATE", "LINE-ALLOC-LATE", "10")))
+            .andExpect(status().isOk());
+        mockMvc.perform(post("/material/foreign/foreign/checkProdResult")
+                .header("X-Tenant-Id", "COMP")
+                .param("srcId", "LINE-ALLOC-LATE")
+                .param("checkResult", "BaseSet_checkResult/qualified"))
+            .andExpect(status().isOk());
+        assertStock("10.000000", "10.000000", "0.000000");
+
+        mockMvc.perform(post("/material/wms/quality-allocations")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(allocationJson(
+                    "APPLY", "ALLOC-LATE", "REPORT-LATE", "LINE-ALLOC-LATE", "10", "7", "3")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.appliedLines").value(1));
+
+        assertStock("10.000000", "7.000000", "3.000000");
+        assertEquals("PARTIAL", jdbc.queryForObject(
+            "SELECT quality_status FROM wms_stock_document_lines", String.class));
+        assertEquals("PARTIAL", jdbc.queryForObject(
+            "SELECT quality_status FROM wms_stock_documents", String.class));
+    }
+
+    @Test
     public void insufficientStockRollsBackWholeIssueDocument() throws Exception {
         String issue = "{"
             + "\"srcId\":\"ADP_TEST_OUT_MISSING\",\"companyCode\":\"COMP\","
@@ -184,6 +261,22 @@ public class MaterialWmsIntegrationTest {
             + "\"comeType\":\"produceIn\",\"redBlue\":\"blue\",\"detailList\":[{"
             + "\"srcPartId\":\"" + sourceLineId + "\",\"goodCode\":\"MAT\",\"batchText\":\"BATCH\","
             + "\"produceBatchNum\":\"PB\",\"placeSetCode\":\"LOC\",\"quantity\":" + quantity + "}]}";
+    }
+
+    private String allocationJson(
+            String action,
+            String requestId,
+            String reportId,
+            String sourceLineId,
+            String total,
+            String good,
+            String bad) {
+        return "{"
+            + "\"requestId\":\"" + requestId + "\",\"action\":\"" + action + "\","
+            + "\"qualityReportId\":\"" + reportId + "\",\"taskId\":\"TASK-1\","
+            + "\"sourceLineId\":\"" + sourceLineId + "\","
+            + "\"totalQuantity\":" + total + ",\"goodQuantity\":" + good + ","
+            + "\"badQuantity\":" + bad + "}";
     }
 
     private long count(String table) {

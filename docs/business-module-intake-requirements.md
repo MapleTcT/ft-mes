@@ -1,18 +1,18 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 3 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 1 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
 make business-module-intake-requirements-check
 ```
 
-material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
-`PROD-019` 和 `PROD-021` 已收敛为独立不良数量的产品范围决定。
+material/WMS、ProcessAnalysis 与独立不良数量均已完成，不再是待接入服务包或产品范围决定；
+当前只保留 public `produceTaskCreated` 的支持/废弃决定。
 
 | 类型 | 数量 | 涉及项 |
 |---|---:|---|
-| 产品范围决定 | 3 | `PROD-ACTION-007`、`PROD-019`、`PROD-021` |
+| 产品范围决定 | 1 | `PROD-ACTION-007` |
 | 缺 runtime endpoint | 0 | 无 |
 | 外部客户端 | 0 | 无 |
 | 缺服务包 | 0 | 无 |
@@ -33,8 +33,6 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 | ID | 类型 | 下一步 |
 |---|---|---|
 | `PROD-ACTION-007` | 产品范围决定 | 明确 public `produceTaskCreated` 是废弃还是恢复 |
-| `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
-| `PROD-021` | 产品范围决定 | 保持报工和 material 回归，仅决策独立不良数量范围 |
 
 `PROD-022` 完工入库已由 material/WMS marker 验收转为 PASS，证据为
 `metadata/material-wms-persistence-acceptance.json`，不再出现在接入需求中。
@@ -48,6 +46,11 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 `Web编辑`，marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成创建、
 幂等、两次修订、失败重试、六表 PostgreSQL 回读和清理。现场 Batch/DCS endpoint
 及签字是生产切换前置，不再作为业务模块接入缺口。
+
+`PROD-019` 与 `PROD-021` 已由 `backend/source-modules/wom-quality-reporting`、
+迁移 `191-wom-quality-quantity-reporting.sql` 和 marker
+`ADP_E2E_20260717141017_WOM_BAD_QTY` 闭合：WOM/QCS 可见入口、QCS 关联、
+WMS 合格/冻结数量分配、幂等、冲销和 PostgreSQL 清理均已通过。
 
 ## 本轮关闭
 

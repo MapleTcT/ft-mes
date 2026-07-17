@@ -26,5 +26,6 @@
         <module>rm-formula-editor</module>
         <module>wom-print</module>
         <module>wom-production-entry</module>
+        <module>wom-quality-reporting</module>
     </modules>
 </project>

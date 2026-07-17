@@ -81,7 +81,7 @@ make entity-model-config-crud-readiness-check
 质量检验配置、`RM.ocd.RM`、`BaseSet.ocd.BaseSet` 会影响已经验收通过的生产主流程，不能用普通系统配置 smoke 直接改值。`metadata/basic-config-action-matrix.json`
 已经为这三个 `CONTROLLED_MARKER_REQUIRED` 动作记录 `acceptanceContract`，并由 `make basic-config-action-matrix-check` 交叉读取 `metadata/production-module-test-cases.json`：
 
-- QCS 运行配置变更前必须准备专用 `ADP_E2E` marker、回滚方案和 QCS 报告链路回归，并要求 `PROD-018/031/032/033/034/035/036/037/038/039/040/041/042` 当前保持 `PASS`；`PROD-019` 仍作为 material/坏品数量边界 blocker 单独跟踪。
+- QCS 运行配置变更前必须准备专用 `ADP_E2E` marker、回滚方案和 QCS 报告链路回归，并要求 `PROD-018/019/031/032/033/034/035/036/037/038/039/040/041/042` 当前保持 `PASS`；其中 `PROD-019` 必须复验 WOM/QCS 可见入口、QCS 关联、WMS 合格/冻结数量分配、幂等、冲销和 PostgreSQL 清理。
 - RM 运行配置变更前必须准备专用 marker、回滚方案和 RM 配方回归，并要求 `PROD-008/009/010/043` 当前保持 `PASS`；真实现场 Batch/DCS endpoint/secret 只能在切换审批和脱敏证据下配置。
 - BaseSet 运行配置变更前必须准备专用 marker、回滚方案和 WOM/QCS/material 回归，并要求 `PROD-001/002/003/004/022/031/035/036` 当前保持 `PASS`。
 

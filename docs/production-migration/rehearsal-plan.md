@@ -8,8 +8,8 @@ It does not mark the system ready for production.
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-17T12:58:51+00:00` |
-| Repo Commit | `b47b9e1d39cbe680c3f37d3ef66c101a35276823` |
+| Generated At | `2026-07-17T14:38:08+00:00` |
+| Repo Commit | `a04671b6efeea02c7cfdd140c0cd20a583163b4d` |
 | Database Target | `PostgreSQL` |
 | Status | `REHEARSAL_BLOCKED` |
 | Test SSH Host | `100.99.133.43` |
@@ -18,8 +18,8 @@ It does not mark the system ready for production.
 | Ready To Rehearse | `0` |
 | Planned | `8` |
 | Blocked | `1` |
-| Production Blockers | `2` |
-| Production Backlog Items | `3` |
+| Production Blockers | `0` |
+| Production Backlog Items | `1` |
 
 ## Source Evidence Freshness
 
@@ -29,15 +29,15 @@ It does not mark the system ready for production.
 | `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `2026-07-10T08:46:19Z` | `CANDIDATE_FOUND` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=0, candidateDependencies=2, filesVisited=58932, nestedArchivesScanned=2139 |
 | `coreFlowAcceptance` | `metadata/core-flow-acceptance-20260710.json` | `2026-07-10T08:40:11.239Z` | `PASS` | blocked=0, environmentSmoke=9/9 PASS, fail=0, pass=13, platformSmoke=6/6 PASS, postgresMapperAudit=0 error / 0 warning, postgresRuntimeSmoke=8/8 PASS |
 | `coreFlowRuntimeRollback` | `metadata/core-flow-runtime-rollback-rehearsal.json` | `2026-07-10T03:46:38.472Z` | `PASS` | None |
-| `cutoverGate` | `metadata/production-cutover-gate.json` | `2026-07-17T12:58:50+00:00` | `NOT_READY_FOR_PRODUCTION_CUTOVER` | blocked=1, notStarted=0, planned=8, productionBacklogItems=3, productionBlockers=2, ready=0, totalGates=9 |
+| `cutoverGate` | `metadata/production-cutover-gate.json` | `2026-07-17T14:37:58+00:00` | `NOT_READY_FOR_PRODUCTION_CUTOVER` | blocked=1, notStarted=0, planned=8, productionBacklogItems=1, productionBlockers=0, ready=0, totalGates=9 |
 | `keycloakJwtSmoke` | `metadata/keycloak-jwt-runtime-smoke.json` | `2026-06-21T00:09:24.536Z` | `PASS` | checks=19, clientScopes=10, expectedClients=2, fail=0, gatewayMenuTargets=374, keycloakPublicKeySha256Prefix=9e9cea84527f841b, nacosHealthyKeycloakHosts=2, nacosJwtSha256Prefix=9e9cea84527f841b, pass=19, status=PASS, suposMappers=17 |
-| `migrationReadiness` | `metadata/production-migration-readiness.json` | `2026-07-17T12:58:50+00:00` | `NOT_READY_FOR_PRODUCTION_MIGRATION` | blocked=1, notStarted=0, planned=8, ready=0, totalTracks=9 |
+| `migrationReadiness` | `metadata/production-migration-readiness.json` | `2026-07-17T14:37:58+00:00` | `NOT_READY_FOR_PRODUCTION_MIGRATION` | blocked=1, notStarted=0, planned=8, ready=0, totalTracks=9 |
 | `minioRuntimeSmoke` | `metadata/minio-runtime-smoke.json` | `2026-06-21T00:09:14.970Z` | `PASS` | bucketCount=2, bucketsWithObjects=2, fail=0, inspectedBucketCount=2, pass=8, status=PASS, totalChecks=8, totalObjects=31, totalSizeBytes=104285 |
 | `nacosConfigSmoke` | `metadata/nacos-config-drift-smoke.json` | `2026-06-21T00:09:15.729Z` | `PASS` | criticalChecks=20, criticalFail=0, criticalPass=20, dataIds=44, drifted=27, exactMatches=17, expectedServices=18, failedServices=0, healthyServices=18, missingLocal=0, missingRemote=0, nacosServiceCount=91, oracleResidueFiles=0, remoteFetched=44, status=PASS |
 | `platformValidationSmoke` | `metadata/platform-validation-smoke.json` | `2026-06-21T12:13:01.954Z` | `PASS` | baseUrl=http://100.99.133.43:18080, browserBaseUrl=http://100.99.133.43:18080, failed=0, ok=True, passed=6, total=6 |
 | `postgresRuntimeSmoke` | `metadata/postgres-runtime-smoke.json` | `2026-06-21T00:09:10.911Z` | `PASS` | databaseSizeBytes=590593383, expectedColumns=15, expectedIndexes=8, expectedTables=32, fail=0, missingExpectedTables=0, pass=8, presentExpectedColumns=15, presentExpectedIndexes=8, presentExpectedTables=32, publicTableCount=1474, publicViewCount=150, status=PASS, totalChecks=8 |
-| `productionBacklog` | `metadata/production-module-backlog.json` | `2026-07-17T12:04:48.223Z` | `BLOCKED` | blocked=3, failBacklog=0, totalItems=3 |
-| `productionBlockers` | `metadata/production-module-blockers.json` | `2026-07-17T12:04:48.223Z` | `BLOCKED` | blockedCases=2, blockers=2 |
+| `productionBacklog` | `metadata/production-module-backlog.json` | `2026-07-17T14:10:28Z` | `BLOCKED` | blocked=1, failBacklog=0, totalItems=1 |
+| `productionBlockers` | `metadata/production-module-blockers.json` | `2026-07-17T14:10:28Z` | `PASS` | blockedCases=0, blockers=0 |
 | `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `2026-07-17T04:53:37.777Z` | `READY` | actionRequired=0, blocked=0, pagePass=6, ready=6, runtimeExportActions=6, targets=6, verifiedDataExports=6, visibleExportActions=6 |
 | `testEnvironmentSmoke` | `metadata/test-environment-smoke.json` | `2026-06-21T01:28:43.256Z` | `PASS` | baseUrl=http://100.99.133.43:18080, expectedContainerCount=6, fail=0, pass=9, runningExpectedContainers=6, sshHost=100.99.133.43, totalChecks=9 |
 
@@ -53,7 +53,7 @@ It does not mark the system ready for production.
 | `nacos-runtime-patch` | `PLANNED` | `PLANNED` | `PLANNED` | `make runtime-patch-manifest-check`<br>`make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host`<br>`make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json` | 当前仓库已有 runtime patch checksum manifest，但测试环境 runtime patch 仍是运行包兼容层。<br>deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json 只是 PLANNED 结构模板；make production-nacos-runtime-patch-ready-check 必须使用真实生产或 rehearsal evidence，模板会被 strict-ready 拒绝。<br>make runtime-smoke-reports-check 只能校验已提交的测试环境 Nacos drift smoke 报告结构、group prod/service 健康和 secret hygiene，不替代生产 Nacos export/diff、签名 patch 包或回退演练。<br>测试环境 Nacos drift smoke 已经证明 100.99.133.43 运行态 group prod 可取、关键 PostgreSQL/JWT/Nacos 配置通过且关键服务健康注册通过，但生产 Nacos export/diff、签名 patch 包、升级策略和回退演练证据未形成。<br>Production Nacos export/diff, strict Nacos/runtime patch evidence, signed patch package and rollback rehearsal are missing. |
 | `ports-domain-tls` | `PLANNED` | `PLANNED` | `PLANNED` | `make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json` | 已有 network/TLS evidence 模板、strict READY 校验器和 100.99.133.43 测试环境 HTTP/SSH/Docker smoke，但缺真实生产域名、证书、反向代理、防火墙/安全组、HSTS、证书续期和外部 HTTPS smoke 证据。<br>make runtime-smoke-reports-check 只能校验已提交的测试环境入口 smoke 报告结构、HTTP/SSH/Docker PASS 状态和 secret hygiene，不替代生产域名/TLS 证据。<br>Production domain, TLS certificate, proxy and firewall evidence are missing. |
 | `security-hardening` | `PLANNED` | `PLANNED` | `PLANNED` | `make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json` | 测试账号和测试配置不能直接进入生产。<br>缺生产账号轮换、测试账号清理、密钥管理、数据库账号拆分、镜像扫描、容器运行用户、审计日志和告警证据。<br>Production hardening evidence is missing. |
-| `business-smoke-signoff` | `BLOCKED` | `BLOCKED` | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | 剩余 2 条生产用例仍 BLOCKED：PROD-019/PROD-021 独立不良数量产品范围确认；RM Web 配方编辑已 PASS，现场 Batch/DCS 投递确认作为切换前置单独验收。<br>business smoke signoff READY 校验必须覆盖 metadata/production-module-blockers.json 的每个 PROD-* 阻断 case；未解决 case 需要逐项签署结构化风险接受，riskAcceptance 必须包含 decision=ACCEPTED、acceptedBy、signedAt 和真实 evidence。<br>business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。<br>business smoke signoff is blocked by unresolved product-scope items, plant Batch/DCS cutover acknowledgement and the absence of signed production evidence; material/ProcessAnalysis/QR/visible WOM manual entry/RM Web editing are no longer dependency blockers.<br>业务负责人尚未基于真实主流程签字。<br>Production module blocker ledger still contains 2 BLOCKED cases and production backlog still contains 3 unresolved items; plant Batch/DCS acknowledgement and signed production business-smoke evidence are not available. |
+| `business-smoke-signoff` | `BLOCKED` | `BLOCKED` | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | 生产测试矩阵已 44/44 PASS，独立不良数量不再是阻断项；现场 Batch/DCS 投递确认仍作为切换前置单独验收。<br>business smoke signoff READY 校验继续覆盖 metadata/production-module-blockers.json；当前无 PROD-* 阻断 case，未来新出现的未解决 case 仍需逐项解决或签署结构化风险接受。<br>business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。<br>business smoke signoff is blocked by the remaining public produceTaskCreated product-scope item, plant Batch/DCS cutover acknowledgement and the absence of signed production evidence; material/ProcessAnalysis/QR/visible WOM manual entry/RM Web editing/independent bad-quantity reporting are no longer dependency blockers.<br>业务负责人尚未基于真实主流程签字。<br>Production module blocker ledger is clear, but the production backlog still contains 1 unresolved public produceTaskCreated product-scope item; plant Batch/DCS acknowledgement and signed production business-smoke evidence are not available. |
 
 ## Required Source Ledgers
 

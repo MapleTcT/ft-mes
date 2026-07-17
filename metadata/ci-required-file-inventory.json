@@ -249,6 +249,12 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/QualityAllocationRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/api/StockDocumentLineRequest.java",
       "state": "tracked",
       "tracked": true
@@ -268,6 +274,18 @@
     {
       "ignored": false,
       "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/MaterialWmsBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/QualityAllocationAction.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/domain/QualityAllocationResult.java",
       "state": "tracked",
       "tracked": true
     },
@@ -873,6 +891,108 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/WomQualityReportingApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/api/BadQuantityCreateRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/api/BadQuantityReverseRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/api/WomQualityController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/api/WomQualityExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/domain/WomQualityBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/integration/MaterialWmsClient.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/repository/WomQualityRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/service/WomQualityService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/service/WomQualitySyncScheduler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/java/com/mapletct/ftmes/womquality/support/RequestContext.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/test/java/com/mapletct/ftmes/womquality/WomQualityReportingIntegrationTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-quality-reporting/src/test/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-api/README.md",
       "state": "tracked",
       "tracked": true
@@ -1348,6 +1468,18 @@
     {
       "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body.js",
       "state": "tracked",
       "tracked": true
     },
@@ -3069,6 +3201,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/191-wom-quality-quantity-reporting.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3406,6 +3544,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-qrcode-route-probe.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-quality-quantity-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5631,6 +5775,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-quality-quantity-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-toolbar-action-coverage.json",
       "state": "tracked",
       "tracked": true
@@ -7550,13 +7700,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 140
+      "tracked": 160
     },
     "contracts": {
       "tracked": 19
     },
     "deploy": {
-      "tracked": 546
+      "tracked": 550
     },
     "docs": {
       "tracked": 90
@@ -7565,7 +7715,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 130
+      "tracked": 131
     },
     "package.json": {
       "tracked": 1
@@ -7589,8 +7739,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1255,
-    "tracked": 1255,
+    "totalFiles": 1280,
+    "tracked": 1280,
     "untracked": 0
   },
   "untrackedByDirectory": []

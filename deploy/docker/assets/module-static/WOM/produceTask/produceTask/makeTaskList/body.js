@@ -10,6 +10,7 @@
     multiSelection: "只可以进行单批次查看！",
     waitForRun: "未执行的指令单，请重新选择！",
     manualEntryUnavailable: "制造指令新增页面未部署或暂不可用！",
+    badQuantityUnavailable: "不良数量登记页面未部署或暂不可用！",
     processUnavailable: "生产过程追溯服务未部署或暂不可用！",
     qrcodeUnavailable: "二维码生成页面未部署或暂不可用！"
   };
@@ -325,6 +326,27 @@
   }
 
   window.adpOpenWomManualTaskCreate = openManualTaskCreate;
+
+  function openBadQuantityReport(event) {
+    if (event) {
+      stopToolbarEvent(event);
+    }
+    patchRememberedRows();
+    var row = selectedOne();
+    if (!row) {
+      return false;
+    }
+    var opened = window.open(
+      "/msService/WOM/quality-quantity/page?taskId=" + encodeURIComponent(row.id || ""),
+      "_blank"
+    );
+    if (!opened) {
+      showWarning(messages.badQuantityUnavailable);
+    }
+    return false;
+  }
+
+  window.adpOpenWomBadQuantityReport = openBadQuantityReport;
 
   function systemCodeId(value) {
     if (!value) {
@@ -755,6 +777,18 @@
     button.parentNode.replaceChild(replacement, button);
   }
 
+  function installBadQuantityButton() {
+    var button = document.getElementById("btn-badQuantityReport");
+    if (!button || button.getAttribute("data-adp-wom-bad-quantity") === "true") {
+      return;
+    }
+    var replacement = button.cloneNode(true);
+    replacement.removeAttribute("onclick");
+    replacement.setAttribute("data-adp-wom-bad-quantity", "true");
+    replacement.addEventListener("click", openBadQuantityReport, true);
+    button.parentNode.replaceChild(replacement, button);
+  }
+
   function openQrCodeDialog(row) {
     if (!window.ReactAPI || typeof window.ReactAPI.createDialog !== "function") {
       showWarning(messages.qrcodeUnavailable);
@@ -843,7 +877,7 @@
         target &&
         target.closest &&
         target.closest(
-          "#btn-startTask, #btn-pauseTask, #btn-recoveryTask, #btn-stopTask, #btn-earlyPutIn, #btn-manuInspect, #btn-prodprocessView, #btn-generateCode"
+          "#btn-startTask, #btn-pauseTask, #btn-recoveryTask, #btn-stopTask, #btn-earlyPutIn, #btn-manuInspect, #btn-badQuantityReport, #btn-prodprocessView, #btn-generateCode"
         );
       if (!button) {
         return;
@@ -885,11 +919,13 @@
 
   installUnavailableDependencyButtons();
   installManualCreateButton();
+  installBadQuantityButton();
   installProcessTraceButton();
   installQrCodeButton();
   window.setInterval(function installDependencyButtons() {
     installUnavailableDependencyButtons();
     installManualCreateButton();
+    installBadQuantityButton();
     installProcessTraceButton();
     installQrCodeButton();
   }, 500);

@@ -41,7 +41,7 @@ make production-rehearsal-plan-check
 `metadata/production-export-readiness-smoke.json`。只要迁移 readiness 不是
 `READY_FOR_PRODUCTION_MIGRATION`，或生产模块 blocker/backlog 仍大于 0，总闸门必须保持
 `NOT_READY_FOR_PRODUCTION_CUTOVER`。当前该报告记录 9 个切换前 gate：
-8 个 `PLANNED`、1 个 `BLOCKED`，生产 blocker 为 3 个、生产 backlog 为 4 个；
+8 个 `PLANNED`、1 个 `BLOCKED`，生产模块 blocker 为 0 个、产品 backlog 为 1 个；
 material/ProcessAnalysis 依赖和生产列表导出已经 READY，WOM 二维码与可见手工新建指令单也已闭合，但剩余产品范围、
 外部 Batch 客户端和真实生产业务签字仍必须作为切换前置风险保留。
 
@@ -76,7 +76,7 @@ make production-source-evidence-refresh-check
 | Nacos / runtime patch 生产化 | PLANNED | `docs/production-migration/nacos-runtime-patch-runbook.md`；`metadata/runtime-patch-manifest.json`；`docs/production-migration/runtime-patch-manifest.md`；`deploy/nacos/production-migration/` 已提供 Nacos/runtime patch evidence manifest 和 strict-ready 校验器；已有 render Nacos config、runtime patch 入口和测试环境 Nacos drift smoke，`metadata/nacos-config-drift-smoke.json` 显示 44 个远端 dataId 全部可取、20 个关键检查 PASS、Oracle 残留 0、18/18 个关键服务 healthy；`make runtime-smoke-reports-check` 会离线校验该报告的 group `prod`、服务健康和 secret hygiene | 缺生产配置差异清单、真实 Nacos/runtime patch evidence、签名 patch 包、升级策略和回退演练 |
 | 端口 / 域名 / TLS | PLANNED | `docs/production-migration/network-tls-checklist.md`；`deploy/network/production-migration/` 已提供 network/TLS evidence 模板和 READY 校验器；`metadata/test-environment-smoke.json` 已验证当前 `100.99.133.43` 测试入口 HTTP/SSH/Docker 9/9 PASS；`make runtime-smoke-reports-check` 会离线校验该测试入口报告 | 缺真实生产域名、证书、反向代理、HSTS、端口收敛、防火墙/安全组和证书续期策略证据 |
 | 安全加固 | PLANNED | `docs/production-migration/security-hardening-checklist.md`；`deploy/security/production-migration/` 已提供 security hardening evidence 模板和 READY 校验器 | 缺真实账号密码轮换、测试账号清理、最小权限、网络边界、镜像扫描、密钥管理、审计日志和告警策略执行证据 |
-| 业务 smoke 签字 | BLOCKED | 平台和 53 个业务页面 smoke 有证据；生产模块测试矩阵当前 44 条，`41 PASS / 3 BLOCKED / 0 NOT_RUN`，44 条 route smoke 全部 PASS。material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码与可见手工新建指令单均已完成真实页面/API/PostgreSQL 或文件响应验收；二维码浏览器和 API/PostgreSQL 分别 10/10 PASS，手工新建为 9/9 PASS。`metadata/business-dependency-readiness-smoke.json` 证明 material-service 与 process-analysis 为 2/2 READY；`metadata/production-module-blockers.json` 记录 3 个生产 blocker；`metadata/production-module-backlog.json` 记录 4 个 active backlog，覆盖 public `produceTaskCreated` 产品决定、独立不良数量范围和外部 Batch 客户端；`deploy/business-smoke/production-migration/` 已提供 business smoke signoff evidence 模板和 READY 校验器 | 剩余 3 条生产用例、public `produceTaskCreated` 产品决定、独立不良数量范围、外部 Batch 客户端和真实生产业务签字尚未闭合，不能切换生产 |
+| 业务 smoke 签字 | BLOCKED | 平台和 53 个业务页面 smoke 有证据；生产模块测试矩阵当前 44 条，`44 PASS / 0 BLOCKED / 0 NOT_RUN`，44 条 route smoke 全部 PASS。material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单和独立不良数量均已完成真实页面/API/PostgreSQL 或文件响应验收；二维码浏览器和 API/PostgreSQL 分别 10/10 PASS，手工新建为 9/9 PASS，不良数量 marker `ADP_E2E_20260717141017_WOM_BAD_QTY` 已证明 WOM/QCS 双入口、10/2/8 数量分配、幂等、冲销和清理。`metadata/business-dependency-readiness-smoke.json` 证明 material-service 与 process-analysis 为 2/2 READY；`metadata/production-module-blockers.json` 当前为 0 个生产模块 blocker；`metadata/production-module-backlog.json` 仅保留 1 个 public `produceTaskCreated` 产品决定；`deploy/business-smoke/production-migration/` 已提供 business smoke 签字证据模板和 READY 校验器 | public `produceTaskCreated` 产品决定、现场 Batch/DCS 端点联调和真实生产业务签字尚未闭合，不能切换生产 |
 
 ## 轨道 READY 复验命令
 

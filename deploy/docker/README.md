@@ -129,6 +129,26 @@ docker compose --env-file deploy/docker/.env \
 
 The final recreate is mandatory: it restores the production-safe external-adapter configuration after retry-contract testing.
 
+## WOM/QCS Bad Quantity
+
+`wom-quality-reporting` adds an authenticated `不良数量` entry to the WOM task list and QCS inspection report page. A record is bound to the exact WOM task/output row and writes PostgreSQL event ledgers before updating Material WMS allocation state. A report of `10` with bad quantity `2` releases only `8` after quality approval and keeps `2` on hold; reversal restores all `10` as available.
+
+The same `adp-mes-newbase` Compose project is used for deployment and acceptance:
+
+```bash
+make wom-quality-reporting-test
+make wom-quality-reporting-stage-runtime
+docker compose --env-file deploy/docker/.env \
+  -f deploy/docker/docker-compose.yml \
+  up -d --no-deps --force-recreate wom-quality-reporting nginx
+make acceptance-wom-quality-quantity-persistence \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 \
+  ADP_SSH_HOST=10.11.100.17
+```
+
+The acceptance command verifies both legacy entry buttons, captures browser/API evidence, queries PostgreSQL after report/inbound/quality/retry/reversal, and asserts zero marker residue after cleanup.
+
 ## PostgreSQL Note
 
 The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and uses `prepare-runtime-patches.sh` to inject PostgreSQL DBP classes, generated `postgresql` mapper directories, recovered-package runtime fixes, and the current EAM static-page compatibility patch. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; any remaining failures should be fixed from that report and container logs.

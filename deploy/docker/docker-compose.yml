@@ -456,6 +456,17 @@ services:
       JAVA_OPTS: ${WOM_PRODUCTION_ENTRY_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMProductionEntry/manual/wom-production-entry.jar"]
 
+  wom-quality-reporting:
+    <<: *java-service
+    environment:
+      <<: *app-env
+      WOM_QUALITY_PORT: "8080"
+      WOM_QUALITY_TENANT_ID: ${WOM_QUALITY_TENANT_ID:-default}
+      WOM_QUALITY_WMS_URL: ${WOM_QUALITY_WMS_URL:-http://material:8080/material/wms/quality-allocations}
+      WOM_QUALITY_SYNC_DELAY_MS: ${WOM_QUALITY_SYNC_DELAY_MS:-30000}
+      JAVA_OPTS: ${WOM_QUALITY_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMQualityReporting/manual/wom-quality-reporting.jar"]
+
   material:
     <<: *java-service
     environment:
@@ -673,6 +684,7 @@ services:
       - rm-formula-editor
       - wom-print
       - wom-production-entry
+      - wom-quality-reporting
 
 volumes:
   postgres-data:

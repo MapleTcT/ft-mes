@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T12:04:48.223Z",
+  "generatedAt": "2026-07-17T14:10:28Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -17,7 +17,8 @@
     "metadata/wom-qrcode-persistence-acceptance.json",
     "metadata/wom-qrcode-browser-acceptance.json",
     "metadata/wom-manual-task-entry-acceptance.json",
-    "metadata/rm-web-formula-editor-acceptance.json"
+    "metadata/rm-web-formula-editor-acceptance.json",
+    "metadata/wom-quality-quantity-persistence-acceptance.json"
   ],
   "latestCoreFlowEvidence": {
     "generatedAt": "2026-07-10T07:25:00Z",
@@ -61,19 +62,41 @@
         "docs/frontend-functional-test-report.md",
         "docs/backend-table-audit/persistence-acceptance.md"
       ]
+    },
+    {
+      "id": "PROD-019",
+      "status": "PASS",
+      "closedAt": "2026-07-17T14:10:28Z",
+      "reason": "A visible WOM/QCS bad-quantity entry, maintained source module, PostgreSQL event ledgers and Material WMS allocation contract are implemented and marker-accepted.",
+      "evidenceRefs": [
+        "metadata/wom-quality-quantity-persistence-acceptance.json",
+        "metadata/production-module-test-cases.json",
+        "docs/backend-table-audit/wom-bad-quantity-analysis.md"
+      ]
+    },
+    {
+      "id": "PROD-021",
+      "status": "PASS",
+      "closedAt": "2026-07-17T14:10:28Z",
+      "reason": "The remaining report-work bad-quantity gap is closed by authoritative WOM output quantity, separate good/bad persistence, WMS allocation, idempotency and reversal acceptance.",
+      "evidenceRefs": [
+        "metadata/wom-quality-quantity-persistence-acceptance.json",
+        "metadata/production-module-test-cases.json",
+        "docs/backend-table-audit/persistence-acceptance.md"
+      ]
     }
   ],
   "summary": {
-    "totalItems": 3,
+    "totalItems": 1,
     "failBacklog": 0,
-    "blocked": 3,
+    "blocked": 1,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 3,
+    "moduleBacklog": 1,
     "missingServicePackage": 0,
     "externalClientRequired": 0,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
-    "productScopeConfirmation": 3,
+    "productScopeConfirmation": 1,
     "falseSuccessApi": 0,
     "missingRuntimeEndpoint": 0
   },
@@ -135,102 +158,6 @@
         "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%';",
         "evidence": "metadata/wom-public-produce-task-created-noop-probe.json"
       }
-    },
-    {
-      "id": "PROD-019",
-      "title": "Standalone QCS bad-quantity registration requires product scope decision",
-      "status": "BLOCKED",
-      "category": "product-scope-confirmation",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [
-        "PROD-019"
-      ],
-      "persistenceCoverage": [
-        {
-          "status": "BLOCKED",
-          "module": "生产模块-WOM/QCS",
-          "operation": "独立不良数量登记产品范围验收",
-          "api": "No dedicated bad-quantity endpoint recovered; current accepted product behavior uses QCS inspection quantity/result, unqualified treatment and WOM quality state backfill."
-        }
-      ],
-      "evidenceRefs": [
-        "metadata/production-module-blockers.json",
-        "metadata/production-module-test-cases.json",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md",
-        "metadata/wom-bad-quantity-analysis.json",
-        "docs/backend-table-audit/wom-bad-quantity-analysis.md",
-        "metadata/material-wms-persistence-acceptance.json"
-      ],
-      "recheckCommands": [
-        "make persistence-acceptance-check",
-        "manual: confirm standalone bad-quantity product scope; if required, execute a unique ADP_E2E marker and query its PostgreSQL target"
-      ],
-      "passCriteria": [
-        "Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.",
-        "If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested.",
-        "If not required, the decision is recorded and the case is closed without inventing a field or table.",
-        "Material WMS completion inbound and inventory write-back remain PASS regression coverage."
-      ],
-      "nextActions": [
-        "Obtain the standalone bad-quantity product decision and, only if required, its route/field/table implementation."
-      ],
-      "nonSolutions": [
-        "Do not invent a bad-quantity column or UI from inference.",
-        "Do not reopen the accepted material WMS inventory boundary."
-      ]
-    },
-    {
-      "id": "PROD-021",
-      "title": "Full report-work only awaits standalone bad-quantity scope decision",
-      "status": "BLOCKED",
-      "category": "product-scope-confirmation",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [
-        "PROD-021"
-      ],
-      "persistenceCoverage": [
-        {
-          "status": "BLOCKED",
-          "module": "生产模块-WOM/QCS",
-          "operation": "独立不良数量登记产品范围验收",
-          "api": "No dedicated bad-quantity endpoint recovered; current accepted product behavior uses QCS inspection quantity/result, unqualified treatment and WOM quality state backfill."
-        }
-      ],
-      "evidenceRefs": [
-        "metadata/production-module-blockers.json",
-        "metadata/production-module-test-cases.json",
-        "metadata/business-dependency-readiness-smoke.json",
-        "metadata/business-dependency-package-scan.json",
-        "metadata/material-service-dependency-analysis.json",
-        "docs/backend-table-audit/material-service-dependency-analysis.md",
-        "metadata/wom-bad-quantity-analysis.json",
-        "docs/backend-table-audit/wom-bad-quantity-analysis.md",
-        "metadata/material-wms-persistence-acceptance.json"
-      ],
-      "recheckCommands": [
-        "make persistence-acceptance-check",
-        "manual: confirm standalone bad-quantity product scope; if required, execute a unique ADP_E2E marker and query its PostgreSQL target"
-      ],
-      "passCriteria": [
-        "Product owner confirms whether standalone bad quantity exists beyond QCS inspection quantity/result and unqualified treatment.",
-        "If required, a real frontend field, endpoint, backend path and PostgreSQL numeric target are supplied and marker-tested.",
-        "If not required, the decision is recorded and the case is closed without inventing a field or table.",
-        "Material WMS completion inbound and inventory write-back remain PASS regression coverage."
-      ],
-      "nextActions": [
-        "Obtain the standalone bad-quantity product decision and, only if required, its route/field/table implementation."
-      ],
-      "nonSolutions": [
-        "Do not invent a bad-quantity column or UI from inference.",
-        "Do not reopen the accepted material WMS inventory boundary."
-      ]
     }
   ]
 }

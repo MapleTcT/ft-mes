@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T12:04:48Z",
+  "generatedAt": "2026-07-17T14:10:28Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
-  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_RM_WEB_FORMULA_EDITOR_ACCEPTED_AND_REMAINING_PRODUCT_SCOPE_BLOCKERS_REFINED",
+  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_WOM_QCS_BAD_QUANTITY_AND_WMS_ALLOCATION_ACCEPTED",
   "evidence": {
     "baseUrl": "http://10.11.100.17:18080; ssh/db/log host 10.11.100.17",
     "businessDependencyReadinessSmoke": "metadata/business-dependency-readiness-smoke.json; 2026-06-20 re-runnable smoke status BLOCKED for material-service and process-analysis on 100.99.133.43",
@@ -78,13 +78,14 @@
     "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED.",
     "womQrCodePersistence": "metadata/wom-qrcode-persistence-acceptance.json; 2026-07-17 API/PostgreSQL acceptance passed 10/10 with two generated rows, idempotency, conflict handling, PNG rendering, print-state backfill and cleanup.",
     "womQrCodeBrowser": "metadata/wom-qrcode-browser-acceptance.json; real makeTaskList SupDataGrid selection and normal mouse click passed 10/10, rendered two 320x320 QR images and produced zero browser/network errors; screenshot /tmp/wom-qrcode-browser-acceptance.png.",
-    "rmWebFormulaEditor": "metadata/rm-web-formula-editor-acceptance.json; marker ADP_E2E_20260717120436_RM_WEB_FORMULA passed visible Web editor create, idempotent replay, two optimistic updates, isolated fail-first delivery/retry, six-table PostgreSQL readback, desktop/mobile browser checks and zero-row cleanup."
+    "rmWebFormulaEditor": "metadata/rm-web-formula-editor-acceptance.json; marker ADP_E2E_20260717120436_RM_WEB_FORMULA passed visible Web editor create, idempotent replay, two optimistic updates, isolated fail-first delivery/retry, six-table PostgreSQL readback, desktop/mobile browser checks and zero-row cleanup.",
+    "womQualityQuantity": "metadata/wom-quality-quantity-persistence-acceptance.json; marker ADP_E2E_20260717141017_WOM_BAD_QTY passed WOM/QCS visible entry, report 10/bad 2/good 8, WMS allocation, quality release, idempotent retry, reversal and zero-row cleanup."
   },
   "summary": {
     "totalCases": 44,
-    "pass": 42,
+    "pass": 44,
     "fail": 0,
-    "blocked": 2,
+    "blocked": 0,
     "notRun": 0,
     "requiresPersistence": 32,
     "routeSmokePass": 44
@@ -1265,42 +1266,39 @@
     {
       "id": "PROD-019",
       "domain": "质量联动",
-      "name": "QCS 不良数范围确认（库存回写已验收）",
-      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit; WOM/库存回写",
+      "name": "QCS/WOM 独立不良数量登记与库存回写",
+      "route": "/msService/QCS/inspectReport/inspectReport/manuInspReportEdit; /msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/quality-quantity/page",
       "operationType": "create-update-status",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "No dedicated bad-quantity endpoint recovered in current QCS/WOM package; see metadata/wom-bad-quantity-analysis.json",
+        "GET /msService/WOM/quality-quantity/quality-context/{inspectId}",
+        "POST /msService/WOM/quality-quantity/reports",
+        "POST /msService/WOM/quality-quantity/reports/{id}/retry",
+        "POST /msService/WOM/quality-quantity/reports/{id}/reverse",
         "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
-        "POST /msService/material/foreign/foreign/checkProdResult",
-        "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
+        "POST /msService/material/foreign/foreign/checkProdResult"
       ],
-      "backendTraceStatus": "qcs-wom-backfill-pass-material-wms-pass-no-dedicated-bad-quantity-entry",
+      "backendTraceStatus": "wom-quality-reporting-to-material-wms-allocation-pass",
       "targetTables": [
         "qcs_inspects",
-        "qcs_inspect_reports",
-        "qcs_report_coms",
-        "qcs_un_qlf_deals",
-        "wom_produce_tasks",
-        "wom_wait_put_records",
-        "wom_produce_task_exelog",
-        "baseset_batch_infos",
-        "no dedicated bad quantity table/column found in current QCS/WOM schema audit",
+        "wom_mat_outpt_records",
+        "wom_quality_quantity_reports",
+        "wom_quality_quantity_events",
+        "wms_quality_allocations",
+        "wms_quality_allocation_events",
         "wms_stock_documents",
         "wms_stock_document_lines",
         "wms_batch_stocks",
-        "wms_inventory_transactions",
-        "wms_quality_results"
+        "wms_inventory_transactions"
       ],
-      "verificationSql": "Standalone bad-quantity schema audit remains documented in metadata/wom-bad-quantity-analysis.json. Material WMS is separately accepted by metadata/material-wms-persistence-acceptance.json using marker ADP_E2E_20260710074612_MATERIAL_WMS; completion inbound produced onHand=10/hold=10, quality release produced available=10/hold=0, production issue produced onHand=7/available=7, and cleanup returned all five WMS tables to zero marker rows.",
-      "evidence": "QCS qualified/unqualified judgement and WOM state backfill remain accepted. The material/WMS boundary is now PASS: a real gateway marker executed completion inbound, idempotent retry, qualified quality release and production issue; PostgreSQL before/after/cleanup proof is stored in metadata/material-wms-persistence-acceptance.json. This case remains BLOCKED only because the recovered product has no standalone bad-quantity field, route or numeric target column.",
+      "verificationSql": "For marker ADP_E2E_20260717141017_WOM_BAD_QTY, join wom_quality_quantity_reports/events to WOM task/output, wms_quality_allocations/events to source_line_id, and wms_stock_document_lines/batch_stocks to the completion document. After quality: reported=10, good=8, bad=2, quality_status=PARTIAL, available=8, hold=2. After reversal: report/allocation=REVERSED, quality_status=QUALIFIED, available=10, hold=0. Cleanup counts tasks/reports/documents=0.",
+      "evidence": "Real browser and API/PostgreSQL acceptance on http://10.11.100.17:18080 used marker ADP_E2E_20260717141017_WOM_BAD_QTY. WOM and QCS legacy pages both exposed the visible 不良数量 entry; the same QCS inspect resolved to task 9000006817485041. POST report persisted 10 reported / 2 bad / 8 good, created immutable WOM and WMS allocation events, and quality release exposed only 8 while holding 2. Idempotent replay created no duplicates. Reversal restored all 10 and cleanup left zero marker rows. Evidence: metadata/wom-quality-quantity-persistence-acceptance.json.",
       "issues": [
-        "No dedicated bad-quantity frontend route, runtime button, source endpoint, or PostgreSQL numeric target column was recovered in current QCS/WOM packages.",
-        "Material completion inbound, quality release and inventory issue are accepted separately and must not be counted as this blocker."
+        "Physical disposition or scrap posting remains a later operation; this acceptance covers quantity registration, quality allocation, inventory availability and reversal."
       ],
-      "nextAction": "Obtain a product decision or later business package that defines the standalone bad-quantity field, route and PostgreSQL target; otherwise formally mark it out of scope.",
+      "nextAction": "Keep the marker acceptance in regression and extend it when a physical scrap/rework disposition workflow is introduced.",
       "coverageTags": [
         "quality",
         "status-flow",
@@ -1350,22 +1348,24 @@
     {
       "id": "PROD-021",
       "domain": "报工",
-      "name": "完整工序报工、产量及不良数范围确认",
-      "route": "",
+      "name": "完整工序报工、产量及独立不良数量",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/quality-quantity/page",
       "operationType": "create-update",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
         "POST /msService/WOM/produceTask/taskProcess/start/{id}; POST /msService/WOM/produceTask/taskProcess/end/{id}",
         "POST /msService/WOM/produceTask/produceTask/addOutputByOutPutDetails",
         "POST /msService/WOM/procReport/putinDetail/remainMaterialView/save",
         "GET /msService/WOM/produceTask/produceTask/endActive?activeId=8388184063665795",
+        "POST /msService/WOM/quality-quantity/reports",
+        "POST /msService/WOM/quality-quantity/reports/{id}/reverse",
         "POST /msService/public/material/produceInSingles/produceInSingl/generateProductInSingle",
         "POST /msService/material/foreign/foreign/checkProdResult",
         "POST /msService/public/material/produceOutSingle/produceOutSing/generateProduceOutSing"
       ],
-      "backendTraceStatus": "report-work-pass-material-wms-pass-no-dedicated-bad-quantity-entry",
+      "backendTraceStatus": "report-work-and-bad-quantity-ledgers-pass",
       "targetTables": [
         "WOM_PROC_REPORTS",
         "WOM_TASK_ACTIVES",
@@ -1375,23 +1375,23 @@
         "WOM_MAT_CONSUM_RECODS",
         "WOM_PRO_CHECK_DETAILS",
         "WOM_CHECK_RECORDS",
-        "QCS_INSPECTS.quantity",
-        "QCS_INSPECT_REPORTS.check_result/un_qlf_deal_flag",
-        "QCS_UN_QLF_DEALS",
-        "no dedicated bad quantity table/column found in current QCS/WOM schema audit",
+        "wom_mat_outpt_records",
+        "wom_quality_quantity_reports",
+        "wom_quality_quantity_events",
+        "wms_quality_allocations",
+        "wms_quality_allocation_events",
         "wms_stock_documents",
         "wms_stock_document_lines",
         "wms_batch_stocks",
         "wms_inventory_transactions",
         "wms_quality_results"
       ],
-      "verificationSql": "Existing WOM report-work marker SQL remains valid. Material WMS verification is recorded in metadata/material-wms-persistence-acceptance.json for marker ADP_E2E_20260710074612_MATERIAL_WMS. Standalone bad-quantity schema audit remains in metadata/wom-bad-quantity-analysis.json.",
-      "evidence": "Process/activity report-work, input/output details, inspection and quality handling remain PASS. The material boundary is also PASS through real gateway and PostgreSQL marker acceptance in metadata/material-wms-persistence-acceptance.json. The only unresolved part of this composite case is whether the product requires a separate bad-quantity registration beyond QCS inspection quantity/result and unqualified treatment.",
+      "verificationSql": "Existing WOM report-work marker SQL remains valid. For marker ADP_E2E_20260717141017_WOM_BAD_QTY, wom_mat_outpt_records.report_num=10 was authoritative; wom_quality_quantity_reports persisted reported=10/good=8/bad=2, WMS changed from PENDING 0/10 to PARTIAL 8/2, retry row/event counts stayed stable, reversal restored QUALIFIED 10/0, and cleanup returned marker counts to zero.",
+      "evidence": "Process/activity report-work, input/output details, inspection and quality handling remain PASS. The standalone bad-quantity extension now closes the remaining report-work gap through a visible WOM entry and maintained source module. Marker ADP_E2E_20260717141017_WOM_BAD_QTY proved browser/API/PostgreSQL/WMS states, idempotent retry, reversal and cleanup; see metadata/wom-quality-quantity-persistence-acceptance.json.",
       "issues": [
-        "No independent bad-quantity field, frontend route, runtime button, source endpoint, or PostgreSQL numeric target table was recovered.",
-        "Material completion inbound and inventory write-back are accepted and are no longer blockers for report-work."
+        "The legacy WOM report operation remains the source of reported quantity; the new endpoint deliberately rejects client attempts to redefine that total."
       ],
-      "nextAction": "Confirm standalone bad-quantity scope. If required, provide its field/route/table contract and run a new marker case; otherwise close the scope decision.",
+      "nextAction": "Keep existing WOM report-work and WOM/QCS bad-quantity marker suites together after datasource, WMS or workflow changes.",
       "coverageTags": [
         "report-work",
         "execution",
@@ -1700,7 +1700,7 @@
   "statusNotes": {
     "workAppointmentRenderFix": "2026-06-19: WorkAppointment list static route now renders through nginx alias/static HTML. 148-runtime-visible-business-buttons.sql restores add/delete; 149-workappointment-i18n-resource-fixups.sql seeds resources; updated 148 namekey values make the legacy list render Chinese 新增/删除. Public browser click of 新增 opens workPlanEdit without console/page/request failures. Save/delete persistence remains PASS through browser page-context; full visible-form save, adjust/cancel, and approval remain pending.",
     "currentTestAddress": "2026-06-19: Current office SSH/DB host is 100.99.133.43. Browser QA may use http://222.88.185.146:18080 for the same environment because direct Tailscale large static bundle loading is too slow from the current network.",
-    "qcsUnqualifiedDealway": "2026-06-19: QCS degradedRelease/让步放行 treatment decisioning accepted with marker ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE, and return/拒收 accepted with marker ADP_E2E_20260619_QCS_RETURN_1. Bad quantity and inventory/inbound write-back remain separate blocked paths.",
+    "qcsUnqualifiedDealway": "2026-06-19: QCS degradedRelease/让步放行 treatment decisioning accepted with marker ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE, and return/拒收 accepted with marker ADP_E2E_20260619_QCS_RETURN_1. Independent bad quantity and WMS availability allocation were accepted separately on 2026-07-17.",
     "rmBatchFormula": "2026-07-17: Batch formula import, batch/sync create, batch/delete cleanup, old edit/view rendering and the maintained Web editor are accepted. PROD-010 passed three consecutive browser/API/PostgreSQL runs without IE ActiveX or localhost:4433. Real plant Batch/DCS delivery acknowledgement remains a production cutover prerequisite, not a page-edit blocker.",
     "rmBatchFormulaUiEntryProbe": "The 2026-06-20 probe established that the recovered runtime only exposed download/import and delegated editing to an external IE11 ActiveX/WebSocket client. That historical blocker was superseded on 2026-07-17 by the authenticated /msService/RM/formula/editor entry backed by source module rm-formula-editor and migration 190; evidence is metadata/rm-web-formula-editor-acceptance.json.",
     "runtimeVisibleBusinessButtons": "2026-06-19: 148-runtime-visible-business-buttons.sql patched runtime_extra_view/ec_extra_view and baseService was restarted. 150-craftgraph-visible-modify-button.sql then restored craftGraph visible 修改. layoutJson now returns WTS 新增/修改, craftGraph 新增/修改/删除, and WorkAppointment 新增/删除 buttons with Chinese namekey values. craftGraph visible create/update/delete is PASS; WorkAppointment and WTS full workflow clicks remain pending.",
@@ -1710,10 +1710,11 @@
     "businessDependencies": "2026-07-10: material-service and process-analysis both have maintained source modules, healthy Nacos services, reachable compatibility endpoints and marker acceptance. Current metadata/business-dependency-readiness-smoke.json status is READY.",
     "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json.",
     "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence.",
-    "womQrCode": "2026-07-17: the maintained wom-print source module, PostgreSQL migration 188, Nginx route and makeTaskList toolbar integration are deployed. Real browser marker ADP-WOM-UI-E2E-20260717084656-55303 passed 10/10, API marker ADP-WOM-E2E-20260717084642-55397 passed 10/10 including replay-safe print-state backfill, and cleanup restored zero marker rows. Physical printer dispatch remains outside the no-printer test configuration."
+    "womQrCode": "2026-07-17: the maintained wom-print source module, PostgreSQL migration 188, Nginx route and makeTaskList toolbar integration are deployed. Real browser marker ADP-WOM-UI-E2E-20260717084656-55303 passed 10/10, API marker ADP-WOM-E2E-20260717084642-55397 passed 10/10 including replay-safe print-state backfill, and cleanup restored zero marker rows. Physical printer dispatch remains outside the no-printer test configuration.",
+    "womQualityQuantity": "2026-07-17: migration 191 plus wom-quality-reporting and material-wms allocation support close PROD-019/021. Marker ADP_E2E_20260717141017_WOM_BAD_QTY proved visible WOM/QCS entries, 10/2/8 persistence, PARTIAL availability 8/hold 2, idempotency, reversal to 10/0 and zero-row cleanup."
   },
   "latestRevalidation": {
-    "generatedAt": "2026-07-17T12:04:48.223Z",
+    "generatedAt": "2026-07-17T14:10:28Z",
     "database": "PostgreSQL",
     "coreFlow": {
       "status": "PASS",
@@ -1755,6 +1756,12 @@
       "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
       "evidence": "metadata/rm-web-formula-editor-acceptance.json",
       "cleanup": "formula/process/activity marker counts=0"
+    },
+    "womQualityQuantity": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260717141017_WOM_BAD_QTY",
+      "evidence": "metadata/wom-quality-quantity-persistence-acceptance.json",
+      "cleanup": "task/report/document marker counts=0"
     }
   }
 }

@@ -152,6 +152,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: rehearse-core-flow-runtime-rollback
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
+.PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
 .PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
 
 help:
@@ -246,6 +247,9 @@ help:
 	@printf '%s\n' '  make rm-formula-editor-stage-runtime Copy the RM Web formula editor JAR into the Docker runtime tree'
 	@printf '%s\n' '  make acceptance-rm-web-formula-editor-persistence Run visible RM browser/API/PostgreSQL/retry acceptance'
 	@printf '%s\n' '  make rm-web-formula-editor-acceptance-check Validate committed RM Web editor acceptance evidence'
+	@printf '%s\n' '  make wom-quality-reporting-test Run WOM/QCS bad-quantity integration tests'
+	@printf '%s\n' '  make wom-quality-reporting-stage-runtime Copy the WOM/QCS bad-quantity JAR into the Docker runtime tree'
+	@printf '%s\n' '  make acceptance-wom-quality-quantity-persistence Run browser/API/PostgreSQL bad-quantity marker acceptance'
 	@printf '%s\n' '  make wom-print-test         Run WOM QR generation and print-state tests'
 	@printf '%s\n' '  make wom-print-package      Build the executable WOM print JAR'
 	@printf '%s\n' '  make wom-print-stage-runtime Copy the WOM print JAR into the Docker runtime tree'
@@ -840,6 +844,19 @@ wom-production-entry-stage-runtime: wom-production-entry-package
 
 acceptance-wom-production-entry-persistence:
 	$(NODE) deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js
+
+wom-quality-reporting-test:
+	$(MVN) -pl backend/source-modules/wom-quality-reporting -am test
+
+wom-quality-reporting-package:
+	$(MVN) -pl backend/source-modules/wom-quality-reporting -am package -DskipTests
+
+wom-quality-reporting-stage-runtime: wom-quality-reporting-package
+	mkdir -p runtime/bap-server/module-Server/WOMQualityReporting/manual
+	cp backend/source-modules/wom-quality-reporting/target/wom-quality-reporting-0.1.0-SNAPSHOT.jar runtime/bap-server/module-Server/WOMQualityReporting/manual/wom-quality-reporting.jar
+
+acceptance-wom-quality-quantity-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) $(NODE) deploy/docker/scripts/adp-wom-quality-quantity-persistence-acceptance.js
 
 module-intake-check:
 	@test -n "$(INTAKE)" || { echo "INTAKE is required, e.g. make module-intake-check INTAKE=/path/to/package-or-dir"; exit 2; }

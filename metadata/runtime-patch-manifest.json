@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T12:58:04+00:00",
-  "repoCommit": "b47b9e1d39cbe680c3f37d3ef66c101a35276823",
+  "generatedAt": "2026-07-17T14:37:31+00:00",
+  "repoCommit": "a04671b6efeea02c7cfdd140c0cd20a583163b4d",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 363,
-    "totalBytes": 54954639,
+    "totalFiles": 366,
+    "totalBytes": 54981521,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 190,
+      "postgres-init-sql": 191,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 26,
-      "runtime-static-override": 73
+      "runtime-static-override": 75
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 24275,
-      "postgres-init-sql": 54056853,
+      "nginx-runtime-config": 25715,
+      "postgres-init-sql": 54075329,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82246,
       "runtime-script": 274780,
-      "runtime-static-override": 444144
+      "runtime-static-override": 451110
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 24055,
-      "sha256": "bb9f2c890a5d3e67675a2e45223d15c7212cc28300ef4dd421a9aed89a6ed7a9"
+      "sizeBytes": 25495,
+      "sha256": "893def0b8aaf5dc3d0173b80b3caf151617779e64c05773d14a3dc66bc9a8ff4"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1453,6 +1453,12 @@
       "sha256": "6c5340498a0d140b2d0832f6b33067d3d703ba5748aeaaf37ea950ef0797d279"
     },
     {
+      "path": "deploy/docker/postgres/init/191-wom-quality-quantity-reporting.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 18476,
+      "sha256": "01f221af0d6e4a3921e654eca282599116d34052ed3e0fad0a0b3d3e4baf441c"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1867,6 +1873,18 @@
       "sha256": "979853ad29cd2c294e85673b6767204a26f423b769e4dea8fa9b206f21a74d3f"
     },
     {
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body-es5.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2316,
+      "sha256": "0189856d00ceb55cf960ea686b525df2ae5b9a940b23f308c50b7189b07ac8e7"
+    },
+    {
+      "path": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body.js",
+      "category": "runtime-static-override",
+      "sizeBytes": 2316,
+      "sha256": "996a9e9f9598c09a4aab72cd5c7646f6b4cdca848ea9bbe97c65353ddb0915a7"
+    },
+    {
       "path": "deploy/docker/assets/module-static/RM/formula/editor.html",
       "category": "runtime-static-override",
       "sizeBytes": 29772,
@@ -1893,14 +1911,14 @@
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
       "category": "runtime-static-override",
-      "sizeBytes": 29922,
-      "sha256": "2578c4486e65b457fa2b8047e461ee9e115348a52273bd1f073f27a9b6d2b5ff"
+      "sizeBytes": 31089,
+      "sha256": "d8c1e648ed44ddcccbbd83621443051db48016d02add38254ba6967b63cb5470"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
       "category": "runtime-static-override",
-      "sizeBytes": 29922,
-      "sha256": "2578c4486e65b457fa2b8047e461ee9e115348a52273bd1f073f27a9b6d2b5ff"
+      "sizeBytes": 31089,
+      "sha256": "d8c1e648ed44ddcccbbd83621443051db48016d02add38254ba6967b63cb5470"
     },
     {
       "path": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",

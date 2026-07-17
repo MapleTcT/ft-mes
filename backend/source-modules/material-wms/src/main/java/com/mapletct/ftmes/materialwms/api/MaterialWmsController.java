@@ -64,6 +64,17 @@ public class MaterialWmsController {
             tenantResolver.resolve(servletRequest, null), sourceLineId, checkResult).toMap());
     }
 
+    @PostMapping({
+        "/material/wms/quality-allocations",
+        "/public/material/wms/quality-allocations"
+    })
+    public LegacyResult<Map<String, Object>> applyQualityAllocation(
+            HttpServletRequest servletRequest,
+            @RequestBody QualityAllocationRequest request) {
+        return LegacyResult.success(inventoryService.applyQualityAllocation(
+            tenantResolver.resolve(servletRequest, null), request).toMap());
+    }
+
     @GetMapping(value = "/material/wms", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<Resource> operationalPage() {
         return ResponseEntity.ok()

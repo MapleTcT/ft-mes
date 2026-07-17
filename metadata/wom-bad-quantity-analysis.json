@@ -1,138 +1,79 @@
 {
-  "generatedAt": "2026-06-20T00:00:00+08:00",
-  "repoCommit": "1c06d331de47644110a73be7f439fbf3ecfa3461",
+  "generatedAt": "2026-07-17T14:10:28Z",
+  "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "host": "100.99.133.43",
-  "status": "NO_DEDICATED_BAD_QUANTITY_ENTRY_FOUND",
+  "host": "10.11.100.17",
+  "status": "IMPLEMENTED_AND_ACCEPTED",
   "summary": {
-    "sourceHits": 4,
-    "runtimeViews": 6,
-    "explicitBadColumns": 4,
-    "acceptedQcsWomPaths": 5,
-    "remainingBlockers": 2
+    "historicalRecoveredEntryCount": 0,
+    "maintainedFrontendEntries": 2,
+    "maintainedApiActions": 4,
+    "ledgerTables": 4,
+    "acceptedCases": 2,
+    "remainingBlockers": 0
   },
-  "sourceEvidence": [
-    {
-      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/core/src/main/java/com/supcon/orchid/QCS/entities/QCSUnQlfDeal.java",
-      "lines": "120-151",
-      "finding": "QCSUnQlfDeal stores report/material/batch/reason/dealer fields, not a numeric bad quantity."
-    },
-    {
-      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/service/src/main/java/com/supcon/orchid/QCS/controllers/QCSUnQlfDealController.java",
-      "lines": "727-740, 1766-1769",
-      "finding": "Controller exposes treatment save/submit and public createUnQlfDeal; no standalone bad quantity endpoint was found."
-    },
-    {
-      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/lims/QCS_6.1.3.5/service/src/main/java/com/supcon/orchid/QCS/services/impl/QCSUnQlfDealServiceImpl.java",
-      "lines": "8275-8534",
-      "finding": "createUnQlfDealForOtherModule creates a treatment document from an effective unqualified inspection report and workflow config."
-    },
-    {
-      "file": "/Users/zhangchu/Documents/ADP/mes-modules-source-repo/modules/wom/WOM_6.1.3.4/service/src/main/java/com/supcon/orchid/WOM/services/impl/WOMQCSServiceImpl.java",
-      "lines": "848-898",
-      "finding": "Unqualified pass-check returns needRejectReport=1; a code comment still marks bad product treatment as a follow-up path."
-    }
-  ],
-  "runtimeEvidence": [
-    {
-      "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportList",
-      "label": "产品检验报告列表",
-      "status": "present"
-    },
-    {
-      "viewCode": "QCS_5.0.0.0_inspectReport_manuInspReportEdit",
-      "label": "产品检验报告编辑",
-      "status": "present"
-    },
-    {
-      "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList",
-      "label": "产品不合格品处理列表",
-      "status": "present-query-delete-no-add-button"
-    },
-    {
-      "viewCode": "QCS_5.0.0.0_unQlfDeal_manuUnQlfDealEdit",
-      "label": "产品不合格品处理编辑",
-      "status": "present-no-quantity-field-in-runtime-json"
-    }
-  ],
-  "databaseEvidence": {
-    "explicitBadColumnSql": "select table_name,column_name,data_type from information_schema.columns where table_schema='public' and (table_name like 'qcs_%' or table_name like 'wom_%') and (lower(column_name) like '%bad%' or lower(column_name) like '%defect%' or lower(column_name) like '%scrap%' or lower(column_name) like '%unqualified%' or lower(column_name) like '%unqlf%' or lower(column_name) like '%un_qlf%') order by table_name, ordinal_position;",
-    "explicitBadColumnRows": [
-      {
-        "table": "qcs_inspect_reports",
-        "column": "un_qlf_deal_flag",
-        "type": "boolean"
-      },
-      {
-        "table": "qcs_table_types",
-        "column": "un_qlf_code_rule",
-        "type": "oid"
-      },
-      {
-        "table": "qcs_table_types",
-        "column": "un_qlf_code_rule_text_backup",
-        "type": "text"
-      },
-      {
-        "table": "qcs_un_qlf_deals",
-        "column": "un_qlf_reason",
-        "type": "character varying"
-      }
+  "historicalFinding": {
+    "status": "NO_DEDICATED_BAD_QUANTITY_ENTRY_FOUND_IN_RECOVERED_PACKAGE",
+    "meaning": "The recovered QCS/WOM package had inspection result and unqualified-treatment state, but no standalone numeric bad-quantity field, route or table. The product gap was closed with maintained source rather than by pretending a legacy field existed."
+  },
+  "implementation": {
+    "module": "backend/source-modules/wom-quality-reporting",
+    "migration": "deploy/docker/postgres/init/191-wom-quality-quantity-reporting.sql",
+    "womEntry": "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
+    "qcsEntry": "deploy/docker/assets/module-static/QCS/inspectReport/inspectReport/manuInspReportEdit/body.js",
+    "page": "/msService/WOM/quality-quantity/page",
+    "api": [
+      "POST /msService/WOM/quality-quantity/reports",
+      "POST /msService/WOM/quality-quantity/reports/{id}/retry",
+      "POST /msService/WOM/quality-quantity/reports/{id}/reverse",
+      "POST /msService/WOM/quality-quantity/reports/{id}/link-quality"
     ],
-    "quantityAndResultColumns": [
-      "qcs_inspects.quantity",
-      "qcs_inspect_reports.check_result",
-      "qcs_inspect_reports.un_qlf_deal_flag",
-      "qcs_report_coms.check_result",
-      "wom_produce_tasks.finish_num",
-      "wom_produce_tasks.check_result",
-      "wom_produce_tasks.rejects_deal_id",
-      "wom_produce_task_exelog.finish_num",
-      "wom_produce_task_exelog.check_result",
-      "wom_produce_task_exelog.rejects_deal_id",
-      "baseset_batch_infos.check_result",
-      "baseset_batch_infos.is_available",
-      "baseset_batch_infos.active_batch_state_id",
-      "baseset_batch_infos.rejects_deal_id"
+    "businessRules": [
+      "The selected wom_mat_outpt_records row is the authoritative reported quantity.",
+      "good_quantity = reported_quantity - bad_quantity.",
+      "A requestId and request hash make same-payload retries idempotent and reject conflicting replays.",
+      "Create and reverse actions append immutable WOM and WMS allocation events.",
+      "QCS context resolves through qcs_inspects.source_id to the exact WOM task.",
+      "WMS quality release exposes only the good quantity and keeps bad quantity on hold.",
+      "Reversal restores the allocation and inventory availability without deleting audit events."
     ]
   },
-  "acceptedEvidence": [
-    {
-      "marker": "ADP_E2E_20260618_UNQLF_AUTO_DEAL_3",
-      "status": "PASS",
-      "meaning": "QCS unqualified report effective state automatically generated qcs_un_qlf_deals and pending task."
-    },
-    {
-      "marker": "ADP_E2E_20260618_UNQLF_DEAL_EFFECT",
-      "status": "PASS",
-      "meaning": "QCS unqualified treatment effective state backfilled WOM rejects_deal_id."
-    },
-    {
-      "marker": "ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE",
-      "status": "PASS",
-      "meaning": "degradedRelease treatment decision persisted and backfilled WOM/batch state."
-    },
-    {
-      "marker": "ADP_E2E_20260619_QCS_RETURN_1",
-      "status": "PASS",
-      "meaning": "return treatment decision persisted and backfilled WOM/batch state."
-    },
-    {
-      "marker": "ADP_E2E_20260619_QCSBAD",
-      "status": "PASS",
-      "meaning": "Direct unqualified syncInspectReport backfilled WOM task/exelog/wait and batch availability."
-    }
+  "tables": [
+    "wom_quality_quantity_reports",
+    "wom_quality_quantity_events",
+    "wms_quality_allocations",
+    "wms_quality_allocation_events",
+    "wms_stock_document_lines.reported_quantity/good_quantity/bad_quantity",
+    "wms_batch_stocks",
+    "wms_inventory_transactions"
   ],
-  "remainingBlockers": [
-    {
-      "blocker": "standaloneBadQuantity",
-      "status": "BLOCKED",
-      "reason": "No recovered frontend route, runtime button, source endpoint, or PostgreSQL table column maps to an independent bad quantity registration action."
+  "acceptance": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260717141017_WOM_BAD_QTY",
+    "evidence": "metadata/wom-quality-quantity-persistence-acceptance.json",
+    "rawEvidence": "/tmp/adp-wom-bad-quantity-20260717141017/acceptance.json",
+    "result": {
+      "reported": 10,
+      "bad": 2,
+      "good": 8,
+      "afterQuality": "PARTIAL; available=8; hold=2",
+      "afterRetry": "one report, one allocation, no duplicate events",
+      "afterReverse": "QUALIFIED; available=10; hold=0",
+      "afterCleanup": "task/report/document marker counts=0"
     },
-    {
-      "blocker": "inventoryStockIn",
-      "status": "BLOCKED",
-      "reason": "material tenant service is absent from current deployment, so checkProdResult and generateProduceOutSing return 503."
+    "browser": {
+      "womEntry": "visible 不良数量",
+      "qcsEntry": "visible 不良数量",
+      "operationalPage": 200,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "badResponses": 0
     }
-  ]
+  },
+  "closedProductionCases": [
+    "PROD-019",
+    "PROD-021"
+  ],
+  "remainingBlockers": []
 }

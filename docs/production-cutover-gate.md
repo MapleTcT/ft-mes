@@ -9,14 +9,14 @@ It is a no-cutover control surface, not a production approval.
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-17T12:58:50+00:00` |
-| Repo Commit | `b47b9e1d39cbe680c3f37d3ef66c101a35276823` |
+| Generated At | `2026-07-17T14:37:58+00:00` |
+| Repo Commit | `a04671b6efeea02c7cfdd140c0cd20a583163b4d` |
 | Database | `PostgreSQL` |
 | Status | `NOT_READY_FOR_PRODUCTION_CUTOVER` |
 | Gates | `9` |
 | Ready / Planned / Blocked / Not Started | `0 / 8 / 1 / 0` |
-| Production Blockers | `2` |
-| Production Backlog Items | `3` |
+| Production Blockers | `0` |
+| Production Backlog Items | `1` |
 
 ## Release Rule
 
@@ -34,7 +34,7 @@ Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_
 | nacos-runtime-patch | `PLANNED` | `make runtime-patch-manifest-check`<br>`make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host`<br>`make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json` | Production Nacos export/diff, strict Nacos/runtime patch evidence, signed patch package and rollback rehearsal are missing. |
 | ports-domain-tls | `PLANNED` | `make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json` | Production domain, TLS certificate, proxy and firewall evidence are missing. |
 | security-hardening | `PLANNED` | `make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json` | Production hardening evidence is missing. |
-| business-smoke-signoff | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | Production module blocker ledger still contains 2 BLOCKED cases and production backlog still contains 3 unresolved items; plant Batch/DCS acknowledgement and signed production business-smoke evidence are not available. |
+| business-smoke-signoff | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | Production module blocker ledger is clear, but the production backlog still contains 1 unresolved public produceTaskCreated product-scope item; plant Batch/DCS acknowledgement and signed production business-smoke evidence are not available. |
 
 ## Source Evidence
 
@@ -47,8 +47,8 @@ Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_
 | `nacosConfigSmoke` | `metadata/nacos-config-drift-smoke.json` | `PASS` | criticalChecks=20, criticalFail=0, criticalPass=20, dataIds=44, drifted=27, exactMatches=17, expectedServices=18, failedServices=0, healthyServices=18, missingLocal=0, missingRemote=0, nacosServiceCount=91, oracleResidueFiles=0, remoteFetched=44, status=PASS |
 | `keycloakJwtSmoke` | `metadata/keycloak-jwt-runtime-smoke.json` | `PASS` | checks=19, clientScopes=10, expectedClients=2, fail=0, gatewayMenuTargets=374, keycloakPublicKeySha256Prefix=9e9cea84527f841b, nacosHealthyKeycloakHosts=2, nacosJwtSha256Prefix=9e9cea84527f841b, pass=19, status=PASS, suposMappers=17 |
 | `minioRuntimeSmoke` | `metadata/minio-runtime-smoke.json` | `PASS` | bucketCount=2, bucketsWithObjects=2, fail=0, inspectedBucketCount=2, pass=8, status=PASS, totalChecks=8, totalObjects=31, totalSizeBytes=104285 |
-| `productionBlockers` | `metadata/production-module-blockers.json` | `BLOCKED` | blockedCases=2, blockers=2 |
-| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=3, failBacklog=0, totalItems=3 |
+| `productionBlockers` | `metadata/production-module-blockers.json` | `PASS` | blockedCases=0, blockers=0 |
+| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=1, failBacklog=0, totalItems=1 |
 | `businessDependencyReadiness` | `metadata/business-dependency-readiness-smoke.json` | `READY` | baseUrl=http://100.99.133.43:18080, blocked=0, dependencies=2, ready=2, sshHost=100.99.133.43 |
 | `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `CANDIDATE_FOUND` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=0, candidateDependencies=2, filesVisited=58932, nestedArchivesScanned=2139 |
 | `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `READY` | actionRequired=0, blocked=0, pagePass=6, ready=6, runtimeExportActions=6, targets=6, verifiedDataExports=6, visibleExportActions=6 |

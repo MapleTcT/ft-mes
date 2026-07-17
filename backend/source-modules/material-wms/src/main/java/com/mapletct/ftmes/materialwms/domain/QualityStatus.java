@@ -5,6 +5,7 @@ import java.util.Locale;
 public enum QualityStatus {
     PENDING,
     QUALIFIED,
+    PARTIAL,
     UNQUALIFIED;
 
     public static QualityStatus fromLegacy(String value) {
