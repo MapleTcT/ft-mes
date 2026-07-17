@@ -4,7 +4,9 @@
 const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
-const { chromium, request } = require("playwright");
+
+let chromium;
+let request;
 
 const repoRoot = path.resolve(__dirname, "../../..");
 
@@ -1332,6 +1334,8 @@ function buildProbeFailureEvidence(target, errorMessage, genericExportFramework)
 }
 
 async function main() {
+  ({ chromium, request } = require("playwright"));
+
   ensureDir(outputPath);
 
   const api = await request.newContext({ ignoreHTTPSErrors: true });
