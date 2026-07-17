@@ -650,6 +650,133 @@
     return false;
   }
 
+  function openProcessTrace(row) {
+    var batchNo = row && row.produceBatchNum;
+    var productNo = row && row.productId && row.productId.code;
+    var availability = syncGet(
+      "/msService/ProcessAnalysis/analysisParam/analysisParam/isProdprocessView",
+      { batchNo: batchNo }
+    );
+    var responseBody = availability.body || {};
+    var responseData = responseBody.data || {};
+    if (!availability.ok || responseBody.code !== 200) {
+      showWarning(messages.processUnavailable);
+      return;
+    }
+    if (responseData.dealRes !== true) {
+      showWarning("该批次不存在已统计的活动记录！");
+      return;
+    }
+
+    var operationCode = "ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut_self";
+    var opened = false;
+    function openWithPowerCode(result) {
+      if (opened) {
+        return;
+      }
+      opened = true;
+      var responseMap = (result && result.data) || result || {};
+      var powerCode = responseMap[operationCode] || "";
+      var url =
+        "/msService/ProcessAnalysis/processAnalysis/exelogSecond/processBatchViewOut" +
+        "?__pc__=" + encodeURIComponent(powerCode) +
+        "&workFlowMenuCode=ProcessAnalysis_1.0.0_processAnalysis_processBatchViewOut" +
+        "&openType=page" +
+        "&batchNo=" + encodeURIComponent(batchNo || "") +
+        "&productNo=" + encodeURIComponent(productNo || "");
+      window.open(url);
+    }
+
+    if (window.ReactAPI && typeof window.ReactAPI.getPowerCode === "function") {
+      var immediateResult = window.ReactAPI.getPowerCode(operationCode, openWithPowerCode);
+      if (immediateResult && typeof immediateResult === "object") {
+        openWithPowerCode(immediateResult);
+      }
+      window.setTimeout(function openWithoutRegisteredPowerCode() {
+        openWithPowerCode({});
+      }, 1500);
+      return;
+    }
+    openWithPowerCode({});
+  }
+
+  function installProcessTraceButton() {
+    if (!dependencyEnabled("processTrace")) {
+      return;
+    }
+    var button = document.getElementById("btn-prodprocessView");
+    if (!button || button.getAttribute("data-adp-wom-process-trace") === "true") {
+      return;
+    }
+    var replacement = button.cloneNode(true);
+    replacement.removeAttribute("onclick");
+    replacement.setAttribute("data-adp-wom-process-trace", "true");
+    replacement.addEventListener(
+      "click",
+      function openSelectedProcessTrace(event) {
+        patchRememberedRows();
+        var row = selectedOne();
+        if (row && !processTraceUnavailable()) {
+          openProcessTrace(row);
+        }
+        stopToolbarEvent(event);
+      },
+      true
+    );
+    button.parentNode.replaceChild(replacement, button);
+  }
+
+  function openQrCodeDialog(row) {
+    if (!window.ReactAPI || typeof window.ReactAPI.createDialog !== "function") {
+      showWarning(messages.qrcodeUnavailable);
+      return;
+    }
+    var product = (row && row.productId) || {};
+    var line = (row && row.lineId) || {};
+    var query = [
+      "taskId=" + encodeURIComponent((row && row.id) || ""),
+      "taskNo=" + encodeURIComponent((row && row.tableNo) || ""),
+      "batchNo=" + encodeURIComponent((row && row.produceBatchNum) || ""),
+      "productCode=" + encodeURIComponent(product.code || ""),
+      "productName=" + encodeURIComponent(product.name || ""),
+      "lineId=" + encodeURIComponent(line.id || "")
+    ].join("&");
+    window.ReactAPI.createDialog("womQrDialog", {
+      title: "二维码生成",
+      url: "/msService/WOM/printManage/printDate/generateCode?" + query,
+      isRef: false,
+      width: "620px",
+      height: "610px",
+      buttons: []
+    });
+  }
+
+  function installQrCodeButton() {
+    if (!dependencyEnabled("qrcode")) {
+      return;
+    }
+    var button = document.getElementById("btn-generateCode");
+    if (!button || button.getAttribute("data-adp-wom-qrcode") === "true") {
+      return;
+    }
+    var replacement = button.cloneNode(true);
+    replacement.removeAttribute("onclick");
+    replacement.setAttribute("data-adp-wom-qrcode", "true");
+    replacement.addEventListener(
+      "click",
+      function openSelectedQrCodeDialog(event) {
+        patchRememberedRows();
+        var row = selectedOne();
+        if (row && !qrcodeUnavailable()) {
+          openQrCodeDialog(row);
+        }
+        stopToolbarEvent(event);
+      },
+      true
+    );
+    button.parentNode.replaceChild(replacement, button);
+  }
+
   function replaceUnavailableDependencyButton(buttonId, guard) {
     var button = document.getElementById(buttonId);
     if (!button || button.getAttribute("data-adp-wom-dependency-guard") === "true") {
@@ -718,5 +845,11 @@
   );
 
   installUnavailableDependencyButtons();
-  window.setInterval(installUnavailableDependencyButtons, 500);
+  installProcessTraceButton();
+  installQrCodeButton();
+  window.setInterval(function installDependencyButtons() {
+    installUnavailableDependencyButtons();
+    installProcessTraceButton();
+    installQrCodeButton();
+  }, 500);
 })();

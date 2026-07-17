@@ -241,12 +241,11 @@
     {
       "id": "BUS-SIGNOFF-002",
       "severity": "BLOCKER",
-      "description": "Production module backlog still contains unresolved action-level gaps, including visible WOM manual create/import scope, public produceTaskCreated false-success behavior and the WOM QR-code runtime endpoint gap.",
+      "description": "Production module backlog still contains unresolved action-level gaps: visible WOM manual create/import scope, public produceTaskCreated product scope, external Batch client integration, and standalone bad-quantity product scope. The WOM QR-code runtime endpoint is closed and is no longer part of this blocker.",
       "source": "metadata/production-module-backlog.json",
       "backlogItemIds": [
         "PROD-ACTION-006",
         "PROD-ACTION-007",
-        "PROD-ACTION-008",
         "PROD-010",
         "PROD-019",
         "PROD-021"

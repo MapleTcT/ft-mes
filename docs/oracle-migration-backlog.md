@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-17T06:02:52+00:00`。
-- Repo Commit：`83cc542992ecb75b23f211d8341e3bfd5c1b3ee3`。
-- 总引用数：`1564`。
+- Generated At：`2026-07-17T09:00:23+00:00`。
+- Repo Commit：`7d233f3ea722ba627f6f08da3c3072bac5ecb7eb`。
+- 总引用数：`1568`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -19,14 +19,14 @@
 | --- | --- | --- |
 | allowed-legacy-contract | 6 | Oracle is explicit legacy compatibility, not the default runtime path. |
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
-| documentation-or-workflow | 185 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
+| documentation-or-workflow | 186 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
-| java-row-index-noise | 25 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
+| java-row-index-noise | 41 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 574 | PostgreSQL compatibility SQL may mention Oracle as source context. |
 | postgres-conversion-tooling | 44 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
-| recovered-source-backlog | 266 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
+| recovered-source-backlog | 253 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
 | tooling-or-audit-code | 269 | Tooling may mention Oracle to generate or check migration audit outputs. |
 
@@ -130,7 +130,6 @@
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/service/impl/ViewServiceImpl.java | 292 | recovered-source-backlog | oracle-keyword | } else if (viewDao.getDBType() == IBaseDao.DBTYPE.ORACLE) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/DbUtils.java | 77 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/DbUtils.java | 78 | recovered-source-backlog | oracle-keyword | dbName = "oracle"; |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/DbUtils.java | 142 | recovered-source-backlog | rownum | public T mapRow(ResultSet rs, int rowNum) throws SQLException { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 25 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 33 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 45 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
@@ -149,6 +148,7 @@
 | backend/modules/com/supcon/supfusion/custom/propertye/custom-property-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/dao/config/MybatisPlusConfig.java | 48 | recovered-source-backlog | oracle-keyword | paginationInterceptor.setDbType(DbType.ORACLE); |
 | backend/modules/com/supcon/supfusion/custom/propertye/custom-property-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/custon/property/dao/entity/Model.java | 69 | recovered-source-backlog | oracle-keyword | private String viewSql; // sql模型数据库视图语句 oracle;sqlserver;... |
 | backend/modules/com/supcon/supfusion/file-server-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/dao/mapper/oracle/DocumentDao.xml | 347 | legacy-oracle-sql-resource | from-dual | FROM DUAL |
+| backend/modules/com/supcon/supfusion/file-server-dao/1.0.0-SNAPSHOT/com/supcon/supfusion/file/server/dao/mapper/oracle/DocumentDownloadInfoDao.xml | 39 | legacy-oracle-sql-resource | rownum | rownum seq, |
 
 ## 处理规则
 

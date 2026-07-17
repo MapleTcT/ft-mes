@@ -1,5 +1,24 @@
 # 后端落库验收报告
 
+## 2026-07-17 WOM 包装二维码生成与打印状态回填
+
+本轮使用真实 `makeTaskList` 页面选中 SupDataGrid 制造任务行，再以普通鼠标点击
+`生成二维码` 打开业务页。浏览器输入生产日期、有效期和数量后提交正式接口，服务端
+生成可解码 PNG 并写入 PostgreSQL；API 专项同时覆盖请求幂等、冲突拒绝、打印状态
+回填、记录查询和 marker 定向清理。物理打印机未接入测试环境，因此不把外设出纸
+冒充本轮验收范围。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 页面选择任务并生成二维码 | WOM `makeTaskList` 的 `生成二维码` 按钮 | `GET /msService/WOM/printManage/printDate/generateCode`；`POST /msService/WOM/printManage/generateQrCode` | `WomPrintController -> WomQrCodeService -> WomPrintRepository` | `wom_qrcode_daily_sequences`、`wom_package_qrcodes` | marker `ADP-WOM-UI-E2E-20260717084656-55303`；真实行选择和普通鼠标点击后生成 `99122900001/00002` 两条记录，两张 `320x320` PNG 完整加载；console/page/network 目标错误均为 0；定向清理后 marker 行为 0 | PASS |
+| 服务端序列、幂等和内容契约 | 同上；API 专项复验 | `POST /msService/WOM/printManage/generateQrCode` | `WomQrCodeService.generate -> WomPrintRepository.lockRequest/nextSequence/insert` | 同上 | marker `ADP-WOM-E2E-20260717084642-55397`；同一请求重放仍为 2 行，不同参数复用 requestId 返回业务码 `409` 且不增行；编码规则为 `yyMMdd + 5 位日序号`，detail 为 `批次,唯一码,物料,生产日期,有效期,G0001` | PASS |
+| 二维码 PNG 输出 | 生成结果列表 | `GET /msService/WOM/printManage/qrcode/{qrCode}.png` | `WomPrintController.qrCodePng -> WomQrCodeService.renderPng` | 只读 `wom_package_qrcodes` | HTTP 200，PNG 签名 `89504e470d0a1a0a`，服务端返回 893 字节有效图片 | PASS |
+| 打印状态回填和记录查询 | 二维码业务页 | `POST /msService/WOM/printManage/backfill-printInfo`；`GET /msService/WOM/printManage/records` | `WomPrintController -> WomQrCodeService -> WomPrintRepository` | `wom_package_qrcodes` | 同一成功回调连续重放 2 次后仍为 `is_print=true/print_count=1/printed_at` 非空；任务记录查询返回 marker 两行；清理后 0 行且日序列恢复到验收前状态 | PASS |
+
+机器证据：`metadata/wom-qrcode-browser-acceptance.json`、
+`metadata/wom-qrcode-persistence-acceptance.json`。可复验入口：
+`make acceptance-wom-qrcode-browser` 和 `make acceptance-wom-qrcode-persistence`。
+
 ## 2026-07-15 BPI V13 规则运行时就绪回执
 
 本轮在隔离 PostgreSQL 16.13 上从空库应用 Flyway V1-V13，并通过 Embedded Kafka 3.8.1

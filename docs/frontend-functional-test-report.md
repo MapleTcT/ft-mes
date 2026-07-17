@@ -480,6 +480,20 @@ SESH 治理模块，不能由本次兼容记录外推；统计页仍是后续验
 `make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
 `make acceptance-patrol-item-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`。
 
+## WOM 二维码生成验收（2026-07-17）
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| WOM 制造二维码 | `/msService/WOM/produceTask/produceTask/makeTaskList` -> `/msService/WOM/printManage/printDate/generateCode` | 在真实 SupDataGrid 选中任务，正常鼠标点击“生成二维码”，填写生产日期、有效期和数量 2 后提交 | `GET taskContext/{taskId}`；`POST generateQrCode`；`GET qrcode/{code}.png`；`GET records/{taskId}` | 对话框带出准确任务、批次和物料；两张 `320x320` 二维码完整渲染；console/page/request/target-network error 均为 0 | HTTP 200/code 200；PostgreSQL 写入 2 条 `yyMMdd+5位序号`；清理后 marker 行为 0，日序列恢复 | `wom_qrcode_daily_sequences`、`wom_package_qrcodes` | PASS | marker `ADP-WOM-UI-E2E-20260717084656-55303`；证据 `metadata/wom-qrcode-browser-acceptance.json`、`/tmp/wom-qrcode-browser-acceptance.png` |
+| WOM 二维码幂等与打印状态 | 同上 | 重放相同请求、提交冲突 payload、读取 PNG、回填打印状态并查询任务记录 | `POST generateQrCode`；`GET qrcode/{code}.png`；`POST backfill-printInfo`；`GET records/{taskId}` | 页面和 API 均返回可用结果，无空白二维码 | API/PostgreSQL `10/10`：重复请求不增行，冲突返回 code 409 且不增行，PNG 签名有效，`is_print=true/print_count=1`，清理和序列恢复通过 | `wom_qrcode_daily_sequences`、`wom_package_qrcodes` | PASS | 当前无打印机配置，`startPrint` 物理出纸为 NOT_APPLICABLE；证据 `metadata/wom-qrcode-persistence-acceptance.json` |
+
+可重放命令：
+
+```bash
+make acceptance-wom-qrcode-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17
+make acceptance-wom-qrcode-browser ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17
+```
+
 ## BPI Phase 1 操作台浏览器验收（2026-07-12）
 
 本节只验收新 BPI 操作台的交互、API 契约调用和响应式布局。浏览器测试连接 `simulation/bpi` 确定性模拟器，不把模拟数据计作 PostgreSQL 真实落库；独立 Java 17 服务的 PostgreSQL 证据见 `metadata/bpi-phase1-persistence-acceptance.json`。
@@ -562,7 +576,7 @@ marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。
 - 基础配置中的系统编码字典项/字典值 CRUD，以及系统配置 app 目录/配置项新增、配置值更新读取、删除清理已完成真实前端和 PostgreSQL 落库验收；系统配置内置目录已补只读列表/详情/页面/PG 元数据 smoke，QCS 单项运行配置已补保存/回读/回滚和配置回滚后完整报告链路复验证据；RM/BaseSet 后续运行配置、PostgreSQL 物理模型表自动创建、Nacos/Keycloak 生产配置链路和其他配置类页面仍需继续形成专项验收记录。
-- 生产模块当前已有 API/layout 与页面可达性 smoke，WOM 动作页渲染、列表动作、制造指令、报工、请检、QCS 合格/不合格处理、完工入库、ProcessAnalysis 追溯和 6 个生产列表导出均已完成真实前端与 PostgreSQL/文件响应验收。剩余项是独立不良数量产品范围、二维码 runtime endpoint 和外部 Batch 客户端，不再包含 ProcessAnalysis、WMS 或列表导出缺口。
+- 生产模块当前已有 API/layout 与页面可达性 smoke，WOM 动作页渲染、列表动作、制造指令、报工、请检、二维码生成与打印状态回填、QCS 合格/不合格处理、完工入库、ProcessAnalysis 追溯和 6 个生产列表导出均已完成真实前端与 PostgreSQL/文件响应验收。剩余项是独立不良数量产品范围和外部 Batch 客户端，不再包含二维码、ProcessAnalysis、WMS 或列表导出缺口。
 - 生产列表页仍存在 `ec.common.tableNo` 这类 i18n key 外露的显示问题；本轮未把它作为落库阻断项处理，后续需要补 i18n/resource 专项修复和复验。
 
 ## 记录要求

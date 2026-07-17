@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 2,
+  "reportKind": "wom-qrcode-persistence-acceptance",
+  "generatedAt": "2026-07-17T08:46:42.444Z",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "dbSshTarget": "v6@10.11.100.17",
+  "marker": "ADP-WOM-E2E-20260717084642-55397",
+  "task": {
+    "id": "8991075113025740",
+    "tableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+    "batchNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+    "productCode": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+    "productName": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material"
+  },
+  "login": {
+    "username": "admin",
+    "status": 200,
+    "tokenCaptured": true
+  },
+  "requestContract": {
+    "method": "POST",
+    "endpoint": "/msService/WOM/printManage/generateQrCode",
+    "uniqueCodeRule": "yyMMdd + five-digit PostgreSQL transaction-locked daily sequence",
+    "detailRule": "batch,uniqueCode,materialCode,manufactureDate,expiryDate,G0001",
+    "targetTables": [
+      "public.wom_qrcode_daily_sequences",
+      "public.wom_package_qrcodes"
+    ]
+  },
+  "verificationSql": [
+    "SELECT request_id, request_hash, sequence_no, task_id, qr_code, qr_content, detail, is_print, print_count, printed_at FROM public.wom_package_qrcodes WHERE tenant_id = 'default' AND request_id = :marker ORDER BY sequence_no;",
+    "SELECT last_sequence FROM public.wom_qrcode_daily_sequences WHERE tenant_id = 'default' AND manufacture_date = :manufactureDate;"
+  ],
+  "beforeSequence": {
+    "existed": false,
+    "lastSequence": null
+  },
+  "rowsAfterGenerate": [
+    [
+      "ADP-WOM-E2E-20260717084642-55397",
+      "c0c410dae7fcd216a13a18bc56fbab7ed668d2561853ab31e0c3d7a8520959e8",
+      "1",
+      "8991075113025740",
+      "99123000001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "false",
+      "0",
+      ""
+    ],
+    [
+      "ADP-WOM-E2E-20260717084642-55397",
+      "c0c410dae7fcd216a13a18bc56fbab7ed668d2561853ab31e0c3d7a8520959e8",
+      "2",
+      "8991075113025740",
+      "99123000002",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "false",
+      "0",
+      ""
+    ]
+  ],
+  "rowsAfterBackfill": [
+    [
+      "ADP-WOM-E2E-20260717084642-55397",
+      "c0c410dae7fcd216a13a18bc56fbab7ed668d2561853ab31e0c3d7a8520959e8",
+      "1",
+      "8991075113025740",
+      "99123000001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "true",
+      "1",
+      "2026-07-17 16:46:47.60439"
+    ],
+    [
+      "ADP-WOM-E2E-20260717084642-55397",
+      "c0c410dae7fcd216a13a18bc56fbab7ed668d2561853ab31e0c3d7a8520959e8",
+      "2",
+      "8991075113025740",
+      "99123000002",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+      "false",
+      "0",
+      ""
+    ]
+  ],
+  "rowsAfterCleanup": 0,
+  "endpointEvidence": [
+    {
+      "method": "GET",
+      "url": "/msService/WOM/printManage/printDate/generateCode",
+      "httpStatus": 200,
+      "contentType": "text/html;charset=UTF-8",
+      "responseBodyExcerpt": "<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>二维码生成</title>\n  <style>\n    * { box-sizing: border-box; }\n    html, body { margin: 0; min-height: 100%; background: #f4f6f8; color: #253044; }\n    body "
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/generateQrCode",
+      "requestPayload": {
+        "taskId": "8991075113025740",
+        "manuDate": "2099-12-30",
+        "approveDate": "2100-12-30",
+        "printCount": 2,
+        "requestId": "ADP-WOM-E2E-20260717084642-55397"
+      },
+      "httpStatus": 200,
+      "responseCode": 200,
+      "responseMessage": "success",
+      "data": [
+        "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+        "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001"
+      ],
+      "responseBodyExcerpt": "{\"code\":200,\"data\":[\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001\",\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001\"],\"message\":\"success\",\"msg\":\"success\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/generateQrCode",
+      "requestPayload": {
+        "taskId": "8991075113025740",
+        "manuDate": "2099-12-30",
+        "approveDate": "2100-12-30",
+        "printCount": 2,
+        "requestId": "ADP-WOM-E2E-20260717084642-55397"
+      },
+      "httpStatus": 200,
+      "responseCode": 200,
+      "responseMessage": "success",
+      "data": [
+        "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+        "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001"
+      ],
+      "responseBodyExcerpt": "{\"code\":200,\"data\":[\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001\",\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001\"],\"message\":\"success\",\"msg\":\"success\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/generateQrCode",
+      "requestPayload": {
+        "taskId": "8991075113025740",
+        "manuDate": "2099-12-30",
+        "approveDate": "2100-12-30",
+        "printCount": 1,
+        "requestId": "ADP-WOM-E2E-20260717084642-55397"
+      },
+      "httpStatus": 200,
+      "responseCode": 409,
+      "responseMessage": "requestId 已被不同参数使用",
+      "data": null,
+      "responseBodyExcerpt": "{\"code\":409,\"data\":null,\"message\":\"requestId 已被不同参数使用\",\"msg\":\"requestId 已被不同参数使用\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/msService/WOM/printManage/qrcode/99123000001.png?size=256",
+      "httpStatus": 200,
+      "contentType": "image/png",
+      "byteLength": 893,
+      "pngSignature": "89504e470d0a1a0a"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/backfill-printInfo",
+      "requestPayload": [
+        {
+          "isPrint": 1,
+          "detail": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001"
+        }
+      ],
+      "httpStatus": 200,
+      "responseCode": 200,
+      "responseMessage": "success",
+      "data": {
+        "requested": 1,
+        "updated": 1,
+        "missing": 0
+      },
+      "responseBodyExcerpt": "{\"code\":200,\"data\":{\"requested\":1,\"updated\":1,\"missing\":0},\"message\":\"success\",\"msg\":\"success\"}"
+    },
+    {
+      "method": "POST",
+      "url": "/msService/WOM/printManage/backfill-printInfo",
+      "requestPayload": [
+        {
+          "isPrint": 1,
+          "detail": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001"
+        }
+      ],
+      "httpStatus": 200,
+      "responseCode": 200,
+      "responseMessage": "success",
+      "data": {
+        "requested": 1,
+        "updated": 1,
+        "missing": 0
+      },
+      "responseBodyExcerpt": "{\"code\":200,\"data\":{\"requested\":1,\"updated\":1,\"missing\":0},\"message\":\"success\",\"msg\":\"success\"}"
+    },
+    {
+      "method": "GET",
+      "url": "/msService/WOM/printManage/records?taskId=8991075113025740&limit=100",
+      "requestPayload": null,
+      "httpStatus": 200,
+      "responseCode": 200,
+      "responseMessage": "success",
+      "data": [
+        {
+          "id": 24,
+          "requestId": "ADP-WOM-E2E-20260717084642-55397",
+          "sequenceNo": 2,
+          "taskId": 8991075113025740,
+          "taskTableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+          "produceBatchNum": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "productCode": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+          "productName": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material",
+          "manufactureDate": "2099-12-30",
+          "expiryDate": "2100-12-30",
+          "qrCode": "99123000002",
+          "qrContent": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+          "detail": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+          "isPrint": false,
+          "printCount": 0,
+          "createdAt": "2026-07-17T08:46:44.907+0000",
+          "printedAt": null
+        },
+        {
+          "id": 23,
+          "requestId": "ADP-WOM-E2E-20260717084642-55397",
+          "sequenceNo": 1,
+          "taskId": 8991075113025740,
+          "taskTableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+          "produceBatchNum": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "productCode": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+          "productName": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material",
+          "manufactureDate": "2099-12-30",
+          "expiryDate": "2100-12-30",
+          "qrCode": "99123000001",
+          "qrContent": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+          "detail": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001",
+          "isPrint": true,
+          "printCount": 1,
+          "createdAt": "2026-07-17T08:46:44.907+0000",
+          "printedAt": "2026-07-17T08:46:47.604+0000"
+        },
+        {
+          "id": 2,
+          "requestId": "ADP_E2E_WOM_QR_1783958091196",
+          "sequenceNo": 1,
+          "taskId": 8991075113025740,
+          "taskTableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+          "produceBatchNum": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "productCode": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+          "productName": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material",
+          "manufactureDate": "2026-07-13",
+          "expiryDate": "2028-07-12",
+          "qrCode": "FTMES-20260713-88e811906b9a-0001",
+          "qrContent": "FTMES|task=8991075113025740|batch=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH|product=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT|serial=FTMES-20260713-88e811906b9a-0001|manu=2026-07-13|expiry=2028-07-12",
+          "detail": "FTMES-20260713-88e811906b9a-0001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,FTMES|task=8991075113025740|batch=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH|product=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT|serial=FTMES-20260713-88e811906b9a-0001|manu=2026-07-13|expiry=2028-07-12",
+          "isPrint": true,
+          "printCount": 1,
+          "createdAt": "2026-07-13T15:54:53.235+0000",
+          "printedAt": "2026-07-13T15:54:53.517+0000"
+        },
+        {
+          "id": 1,
+          "requestId": "ADP_E2E_WOM_QR_1783958000316",
+          "sequenceNo": 1,
+          "taskId": 8991075113025740,
+          "taskTableNo": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN",
+          "produceBatchNum": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH",
+          "productCode": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT",
+          "productName": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL material",
+          "manufactureDate": "2026-07-13",
+          "expiryDate": "2028-07-12",
+          "qrCode": "FTMES-20260713-5c71075edbd6-0001",
+          "qrContent": "FTMES|task=8991075113025740|batch=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH|product=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT|serial=FTMES-20260713-5c71075edbd6-0001|manu=2026-07-13|expiry=2028-07-12",
+          "detail": "FTMES-20260713-5c71075edbd6-0001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,FTMES|task=8991075113025740|batch=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH|product=ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT|serial=FTMES-20260713-5c71075edbd6-0001|manu=2026-07-13|expiry=2028-07-12",
+          "isPrint": true,
+          "printCount": 1,
+          "createdAt": "2026-07-13T15:53:21.800+0000",
+          "printedAt": "2026-07-13T15:53:22.167+0000"
+        }
+      ],
+      "responseBodyExcerpt": "{\"code\":200,\"data\":[{\"id\":24,\"requestId\":\"ADP-WOM-E2E-20260717084642-55397\",\"sequenceNo\":2,\"taskId\":8991075113025740,\"taskTableNo\":\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_TASK_TN\",\"produceBatchNum\":\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH\",\"productCode\":\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT\",\"productName\":\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL material\",\"manufactureDate\":\"2099-12-30\",\"expiryDate\":\"2100-12-30\",\"qrCode\":\"99123000002\",\"qrContent\":\"ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001\",\"det"
+    }
+  ],
+  "serviceJar": {
+    "path": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMPrint/manual/wom-print.jar",
+    "exists": true,
+    "sha256": "8ab1b94aff228c642932d05c6468e2a1629c180c74aef0c21b03f6ff14d59f25",
+    "controllerCount": 1,
+    "serviceCount": 1,
+    "pageCount": 1
+  },
+  "checks": [
+    {
+      "name": "QR generation page",
+      "status": "PASS",
+      "evidence": "HTTP 200, content-type=text/html;charset=UTF-8"
+    },
+    {
+      "name": "Generate API response",
+      "status": "PASS",
+      "evidence": "HTTP 200, code=200, rows=2"
+    },
+    {
+      "name": "Legacy QR detail contract",
+      "status": "PASS",
+      "evidence": "ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000001,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001 ; ADP_E2E_20260710023850_WOM_CHECKOUTBILL_BATCH,99123000002,ADP_E2E_20260710023850_WOM_CHECKOUTBILL_MAT,2099-12-30,2100-12-30,G0001"
+    },
+    {
+      "name": "PostgreSQL insert",
+      "status": "PASS",
+      "evidence": "wom_package_qrcodes rows=2, qr_content equals detail"
+    },
+    {
+      "name": "Request idempotency",
+      "status": "PASS",
+      "evidence": "repeat code=200, rows remain 2"
+    },
+    {
+      "name": "Idempotency conflict",
+      "status": "PASS",
+      "evidence": "HTTP 200, code=409, persisted rows=2"
+    },
+    {
+      "name": "Server-side QR PNG",
+      "status": "PASS",
+      "evidence": "HTTP 200, bytes=893, signature=89504e470d0a1a0a"
+    },
+    {
+      "name": "Print-state backfill",
+      "status": "PASS",
+      "evidence": "first code=200, replay code=200, is_print=true, print_count after replay=1"
+    },
+    {
+      "name": "Task record query",
+      "status": "PASS",
+      "evidence": "code=200, marker rows=2"
+    },
+    {
+      "name": "Marker cleanup and sequence restore",
+      "status": "PASS",
+      "evidence": "remaining marker rows=0, prior sequence={\"existed\":false,\"lastSequence\":null}"
+    }
+  ],
+  "summary": {
+    "status": "PASS",
+    "pass": 10,
+    "fail": 0,
+    "generatedRows": 2,
+    "markerRowsAfterCleanup": 0
+  },
+  "issues": [],
+  "conclusion": "WOM QR generation, legacy payload, idempotency, conflict handling, PNG rendering, replay-safe print-state backfill, task query, marker cleanup, and sequence restore all passed against PostgreSQL."
+}

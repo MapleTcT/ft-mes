@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T04:53:37.777Z",
+  "generatedAt": "2026-07-17T07:55:36Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -13,7 +13,9 @@
     "metadata/wom-public-produce-task-created-analysis.json",
     "metadata/wom-public-produce-task-created-noop-probe.json",
     "metadata/core-flow-acceptance-20260710.json",
-    "metadata/core-flow-runtime-rollback-rehearsal.json"
+    "metadata/core-flow-runtime-rollback-rehearsal.json",
+    "metadata/wom-qrcode-persistence-acceptance.json",
+    "metadata/wom-qrcode-browser-acceptance.json"
   ],
   "latestCoreFlowEvidence": {
     "generatedAt": "2026-07-10T07:25:00Z",
@@ -22,19 +24,32 @@
     "processAnalysisStatus": "PASS",
     "processAnalysisEvidence": "metadata/process-analysis-persistence-acceptance.json"
   },
+  "closedItems": [
+    {
+      "id": "PROD-ACTION-008",
+      "status": "PASS",
+      "closedAt": "2026-07-17T07:41:25.887Z",
+      "reason": "Maintained wom-print source, PostgreSQL schema, normal gateway route and real makeTaskList toolbar flow are now implemented and accepted.",
+      "evidenceRefs": [
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-qrcode-route-probe.json"
+      ]
+    }
+  ],
   "summary": {
-    "totalItems": 6,
+    "totalItems": 5,
     "failBacklog": 0,
-    "blocked": 6,
+    "blocked": 5,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 6,
+    "moduleBacklog": 5,
     "missingServicePackage": 0,
     "externalClientRequired": 1,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
     "productScopeConfirmation": 4,
     "falseSuccessApi": 0,
-    "missingRuntimeEndpoint": 1
+    "missingRuntimeEndpoint": 0
   },
   "items": [
     {
@@ -137,101 +152,6 @@
         "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%';",
         "evidence": "metadata/wom-public-produce-task-created-noop-probe.json"
       }
-    },
-    {
-      "id": "PROD-ACTION-008",
-      "title": "WOM makeTaskList QR code generation endpoint is missing",
-      "status": "BLOCKED",
-      "category": "missing-runtime-endpoint",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [],
-      "womToolbarActionIds": [
-        "generate-qrcode"
-      ],
-      "persistenceCoverage": [],
-      "evidenceRefs": [
-        "metadata/wom-toolbar-action-coverage.json",
-        "docs/wom-toolbar-action-coverage.md",
-        "metadata/wom-qrcode-route-probe.json",
-        "docs/frontend-functional-test-report.md"
-      ],
-      "recheckCommands": [
-        "make probe-wom-qrcode-route",
-        "make wom-toolbar-action-coverage-check",
-        "manual: after the WOM printManage QR endpoint/package is restored, click 生成二维码 from the real makeTaskList toolbar with a marker WOM task and capture generateQrCode/startPrint/backfill-printInfo requests plus PostgreSQL QR/print table evidence where applicable"
-      ],
-      "passCriteria": [
-        "The real WOM makeTaskList 生成二维码 toolbar action no longer calls missing 404 printManage endpoints.",
-        "The recovered WOM package or source module exposes /WOM/printManage/generateQrCode and any required print/backfill endpoints through the normal gateway path.",
-        "A real browser click captures request payload, response body and visible success/failure feedback without raw i18n keys.",
-        "If the flow persists QR or print metadata, PostgreSQL marker queries prove target table writes; if it only returns a file/print command, persistence is explicitly marked NOT_APPLICABLE with file/print evidence.",
-        "Printer and QR type configuration prerequisites are documented and seeded through normal configuration paths rather than direct ad hoc database writes."
-      ],
-      "nextActions": [
-        "Recover or implement the WOM printManage QR endpoint/package that matches the existing toolbar target.",
-        "Confirm required printer, QR type and package configuration prerequisites.",
-        "Rerun make probe-wom-qrcode-route and the real browser toolbar click smoke.",
-        "Update wom-toolbar-action-coverage and persistence/file-response acceptance assets before reclassifying the action."
-      ],
-      "nonSolutions": [
-        "Do not count the QR dialog shell opening as PASS while generateCode/generateQrCode still returns 404.",
-        "Do not seed printer rows alone and call the flow complete without the missing WOM endpoint implementation.",
-        "Do not classify this as a PostgreSQL compatibility gap unless a real restored endpoint reaches a missing table, column, type cast or Oracle dialect issue."
-      ],
-      "latestProbe": {
-        "generatedAt": "2026-06-22T01:27:49.172Z",
-        "baseUrl": "http://100.99.133.43:18080",
-        "status": "BLOCKED",
-        "allEndpoints404": true,
-        "noServiceJarMatches": true,
-        "missingPrinterConfig": true,
-        "selectedTask": {
-          "id": "9000005838388864",
-          "tableNo": "ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_TASK_TN",
-          "taskRunState": "WOM_runState/runing",
-          "status": "99"
-        },
-        "tableCounts": {
-          "public.baseset_printers": 0,
-          "public.baseset_qr_code_types": 0,
-          "public.baseset_qr_detail_infos": 0,
-          "public.printer_register": 8
-        },
-        "endpointProbes": [
-          {
-            "method": "GET",
-            "url": "/msService/WOM/printManage/printDate/generateCode",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          },
-          {
-            "method": "POST",
-            "url": "/msService/WOM/printManage/generateQrCode",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          },
-          {
-            "method": "POST",
-            "url": "/msService/WOM/printManage/backfill-printInfo",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          }
-        ],
-        "serviceJarScan": {
-          "checked": true,
-          "outerJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
-          "classMatchCount": 0,
-          "stringMatchCount": 0
-        }
-      },
-      "latestEvidenceNotes": [
-        "2026-06-22 09:27 reran make probe-wom-qrcode-route against http://100.99.133.43:18080: GET printDate/generateCode, POST generateQrCode and POST backfill-printInfo all returned HTTP 404/code 404; remote WOMMs service jar scan still found 0 printManage/generateQrCode/backfill-printInfo/QrCode class or string matches; PostgreSQL table counts remained baseset_printers=0, baseset_qr_code_types=0, baseset_qr_detail_infos=0 and printer_register=8."
-      ]
     },
     {
       "id": "PROD-010",

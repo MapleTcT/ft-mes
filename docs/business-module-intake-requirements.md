@@ -1,6 +1,6 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 6 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 5 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
@@ -13,7 +13,7 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 | 类型 | 数量 | 涉及项 |
 |---|---:|---|
 | 产品范围决定 | 4 | `PROD-ACTION-006`、`PROD-ACTION-007`、`PROD-019`、`PROD-021` |
-| 缺 runtime endpoint | 1 | `PROD-ACTION-008` |
+| 缺 runtime endpoint | 0 | 无 |
 | 外部客户端 | 1 | `PROD-010` |
 | 缺服务包 | 0 | 无 |
 | 缺导出实现 | 0 | 无 |
@@ -34,7 +34,6 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 |---|---|---|
 | `PROD-ACTION-006` | 产品范围决定 | 明确 WOM 手工创建/导入是否属于支持范围 |
 | `PROD-ACTION-007` | 产品范围决定 | 明确 public `produceTaskCreated` 是废弃还是恢复 |
-| `PROD-ACTION-008` | runtime endpoint | 恢复 WOM `printManage/generateQrCode`，真实点击不再 `404` |
 | `PROD-010` | 外部客户端 | 通过 Batch 客户端/ActiveX/WebSocket 打开真实编辑链 |
 | `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
 | `PROD-021` | 产品范围决定 | 保持报工和 material 回归，仅决策独立不良数量范围 |
@@ -46,3 +45,12 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 `PROD-023` 生产列表导出已在 `http://10.11.100.17:18080` 完成 6/6
 真实浏览器、运行时元数据、后端 file/workbook 响应和 sourceAudit 验收，状态
 `READY`，证据为 `metadata/production-export-readiness-smoke.json`。
+
+## 本轮关闭
+
+`PROD-ACTION-008` 已于 2026-07-17 关闭：`wom-print` 源码模块、PostgreSQL
+迁移和网关路由已部署，真实 `makeTaskList` 鼠标点击生成两张二维码，浏览器检查
+`10/10`、API/PostgreSQL 检查 `10/10`，marker 清理后为 0。证据：
+`metadata/wom-qrcode-browser-acceptance.json`、
+`metadata/wom-qrcode-persistence-acceptance.json`。当前没有打印机配置，因此物理出纸
+为 `NOT_APPLICABLE`，不影响二维码生成和打印状态回填的 PASS 结论。

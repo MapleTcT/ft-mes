@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T04:56:55+00:00",
-  "repoCommit": "2a55462bc4241537762cd1df170a66298bcf5136",
+  "generatedAt": "2026-07-17T08:30:04+00:00",
+  "repoCommit": "7d233f3ea722ba627f6f08da3c3072bac5ecb7eb",
   "database": "PostgreSQL",
   "status": "REHEARSAL_BLOCKED",
   "environment": {
@@ -31,7 +31,7 @@
   "sourceEvidence": {
     "migrationReadiness": {
       "path": "metadata/production-migration-readiness.json",
-      "generatedAt": "2026-07-17T04:56:55+00:00",
+      "generatedAt": "2026-07-17T08:30:04+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
       "metrics": {
         "totalTracks": 9,
@@ -43,7 +43,7 @@
     },
     "cutoverGate": {
       "path": "metadata/production-cutover-gate.json",
-      "generatedAt": "2026-07-17T04:56:55+00:00",
+      "generatedAt": "2026-07-17T08:30:04+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
       "metrics": {
         "totalGates": 9,
@@ -52,7 +52,7 @@
         "blocked": 1,
         "notStarted": 0,
         "productionBlockers": 3,
-        "productionBacklogItems": 6
+        "productionBacklogItems": 5
       }
     },
     "productionBlockers": {
@@ -66,11 +66,11 @@
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-07-17T04:53:37.777Z",
+      "generatedAt": "2026-07-17T07:55:36Z",
       "status": "BLOCKED",
       "metrics": {
-        "totalItems": 6,
-        "blocked": 6,
+        "totalItems": 5,
+        "blocked": 5,
         "failBacklog": 0
       }
     },
@@ -246,7 +246,7 @@
     "blocked": 1,
     "notStarted": 0,
     "productionBlockers": 3,
-    "productionBacklogItems": 6
+    "productionBacklogItems": 5
   },
   "tracks": [
     {
@@ -693,11 +693,12 @@
       "cutoverGateStatus": "BLOCKED",
       "currentEvidence": [
         "平台和 53 个业务页面 smoke 有证据。",
-        "生产模块测试矩阵当前 43 条，37 PASS / 6 BLOCKED / 0 NOT_RUN，其中 41 条 route smoke PASS。",
-        "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
-        "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis remain BLOCKED on 100.99.133.43: no healthy Nacos dependency instances, authenticated dependency endpoints return 503, and ProcessAnalysis PostgreSQL/runtime/menu metadata is absent.",
-        "metadata/production-module-blockers.json records the 6 unresolved production blocker cases and is now a required business smoke signoff gate.",
-        "metadata/production-module-backlog.json records 9 unresolved production backlog items, including public produceTaskCreated explicit-disabled product decision blocker, visible WOM manual-create/import scope, and WOM makeTaskList QR runtime endpoint 404, and is now a required business smoke signoff gate.",
+        "生产模块测试矩阵当前 44 条，41 PASS / 3 BLOCKED / 0 NOT_RUN，44 条 route smoke 全部 PASS。",
+        "WOM 状态流转、报工、备料、请检、二维码生成与打印状态回填，QCS 报告和不合格处置，material/WMS 入库/质检释放/领料，ProcessAnalysis 追溯，WTS/WAPS、RM、craftGraph 和生产列表导出已形成真实前端/API/PostgreSQL 或文件响应证据。",
+        "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis are 2/2 READY with healthy instances, 2xx compatibility endpoints and runtime/menu/table evidence.",
+        "metadata/production-module-blockers.json records the 3 unresolved production blocker cases and is a required business smoke signoff gate.",
+        "metadata/production-module-backlog.json records 5 unresolved production backlog items covering product-scope decisions and the external Batch client; public produceTaskCreated explicit-disabled and visible WOM manual-create/import scope remain explicit signoff items, while WOM QR is closed.",
+        "metadata/wom-qrcode-browser-acceptance.json and metadata/wom-qrcode-persistence-acceptance.json prove 10/10 real-click and 10/10 API/PostgreSQL acceptance with marker cleanup to zero.",
         "docs/production-migration/business-smoke-signoff-template.md 已建立。",
         "deploy/business-smoke/production-migration/README.md",
         "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
@@ -717,17 +718,17 @@
         "make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json"
       ],
       "blockingIssues": [
-        "剩余 6 条生产用例仍 BLOCKED：RM 批量配方显式编辑入口、物料服务/库存入库、ProcessAnalysis 追溯、完整报工中的独立不良数/库存边界、生产相关导出入口，以及可见手工创建入口仍缺真实 marker 或业务包证据。",
+        "剩余 3 条生产用例仍 BLOCKED：RM 外部 Batch 客户端显式编辑，以及 PROD-019/PROD-021 独立不良数量产品范围确认。",
         "business smoke signoff READY 校验必须覆盖 metadata/production-module-blockers.json 的每个 PROD-* 阻断 case；未解决 case 需要逐项签署结构化风险接受，riskAcceptance 必须包含 decision=ACCEPTED、acceptedBy、signedAt 和真实 evidence。",
         "business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。",
-        "business smoke signoff is blocked by production action persistence gaps and missing material/ProcessAnalysis external dependencies.",
+        "business smoke signoff is blocked by unresolved product-scope/external-client items and the absence of signed production evidence; material/ProcessAnalysis/QR are no longer dependency blockers.",
         "业务负责人尚未基于真实主流程签字。",
-        "Production module blocker ledger still contains 6 BLOCKED cases and production backlog still contains 9 unresolved items."
+        "Production module blocker ledger still contains 3 BLOCKED cases and production backlog still contains 5 unresolved items; signed production business-smoke evidence is not available."
       ],
       "nextActions": [
-        "补齐外部 Batch 客户端、物料/库存、ProcessAnalysis 等业务包和入口。",
-        "After deploying material/ProcessAnalysis packages, rerun make smoke-business-dependencies before marker acceptance/signoff.",
-        "从真实前端执行剩余 6 条 BLOCKED 用例并查 PostgreSQL。",
+        "接入外部 Batch 客户端并完成 RM 显式编辑真实验收。",
+        "明确独立不良数量产品范围；若属于范围，补入口、字段和 marker 落库验收，否则形成签字风险接受。",
+        "从真实前端执行剩余 3 条 BLOCKED 用例并查 PostgreSQL。",
         "把结果填入业务 smoke 签字模板。",
         "用 make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json 校验真实生产业务签字 evidence。"
       ],
@@ -742,6 +743,8 @@
         "metadata/production-module-blockers.json",
         "docs/production-module-backlog.md",
         "metadata/production-module-backlog.json",
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
         "metadata/business-dependency-package-scan.json",
         "metadata/production-export-readiness-smoke.json",
         "metadata/platform-validation-smoke.json",

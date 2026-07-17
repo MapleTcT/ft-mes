@@ -422,6 +422,15 @@ services:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar"]
 
+  wom-print:
+    <<: *java-service
+    environment:
+      <<: *app-env
+      WOM_PRINT_PORT: "8080"
+      WOM_PRINT_TENANT_ID: ${WOM_PRINT_TENANT_ID:-default}
+      JAVA_OPTS: ${WOM_PRINT_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMPrint/manual/wom-print.jar"]
+
   material:
     <<: *java-service
     environment:
@@ -636,6 +645,7 @@ services:
     depends_on:
       - gateway
       - rm-export-compat
+      - wom-print
 
 volumes:
   postgres-data:

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>二维码生成</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #f4f6f8; color: #253044; }
+    body { font-family: Arial, "Microsoft YaHei", sans-serif; font-size: 14px; letter-spacing: 0; }
+    button, input, select { font: inherit; letter-spacing: 0; }
+    main { min-width: 320px; padding: 16px 18px 20px; }
+    .status {
+      display: none;
+      margin-bottom: 12px;
+      padding: 9px 12px;
+      border: 1px solid #b8d4ef;
+      border-left: 4px solid #2878c7;
+      border-radius: 4px;
+      background: #eef6fd;
+      color: #24547e;
+      line-height: 1.5;
+    }
+    .status.visible { display: block; }
+    .status.error { border-color: #e5b8b8; border-left-color: #c83f49; background: #fff1f1; color: #8d2730; }
+    .status.success { border-color: #a9d7c0; border-left-color: #21865b; background: #edf9f3; color: #176343; }
+    .section-title { margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #1f2a3d; }
+    .context {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 16px;
+      margin-bottom: 15px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #dce2e8;
+    }
+    .context-item { min-width: 0; }
+    .context-label { display: block; margin-bottom: 3px; color: #6d7888; font-size: 12px; }
+    .context-value { display: block; overflow: hidden; color: #283447; text-overflow: ellipsis; white-space: nowrap; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 6px; color: #4c586a; }
+    .required::before { content: "*"; margin-right: 3px; color: #c43b43; }
+    input, select {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #cbd3dc;
+      border-radius: 4px;
+      background: #fff;
+      color: #273346;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #2a7fd0; box-shadow: 0 0 0 2px rgba(42, 127, 208, 0.13); }
+    input:disabled, select:disabled { background: #eef1f4; color: #7b8491; cursor: not-allowed; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    button {
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid #2a7fd0;
+      border-radius: 4px;
+      background: #fff;
+      color: #226eb4;
+      cursor: pointer;
+    }
+    button.primary { background: #2a7fd0; color: #fff; }
+    button.print { border-color: #2b8762; background: #2b8762; color: #fff; }
+    button.quiet { margin-left: auto; border-color: #c4ccd5; color: #596577; }
+    button:hover:not(:disabled) { filter: brightness(0.96); }
+    button:disabled { border-color: #c9d0d8; background: #e7ebef; color: #949da8; cursor: not-allowed; }
+    .results { display: none; margin-top: 18px; padding-top: 14px; border-top: 1px solid #dce2e8; }
+    .results.visible { display: block; }
+    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .result-count { color: #667284; font-size: 12px; }
+    .qr-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .qr-item { min-width: 0; padding: 10px; border: 1px solid #d8dee5; border-radius: 6px; background: #fff; }
+    .qr-item img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
+    .qr-code { margin-top: 7px; color: #1f2b3c; font-family: Menlo, Consolas, monospace; text-align: center; }
+    .qr-meta { margin-top: 4px; overflow: hidden; color: #687486; font-size: 12px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+    .qr-download { display: block; margin-top: 7px; color: #2674ba; text-align: center; text-decoration: none; }
+    .history { margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { padding: 8px 9px; border: 1px solid #dce2e8; text-align: left; }
+    th { background: #eef2f5; color: #4c5869; font-weight: 600; }
+    td { color: #374356; }
+    .printed { color: #1d7a53; }
+    .unprinted { color: #9a661a; }
+    @media (max-width: 560px) {
+      main { padding: 12px; }
+      .context, .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      button.quiet { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+
+  <section aria-labelledby="task-title">
+    <h1 id="task-title" class="section-title">制造指令</h1>
+    <div class="context">
+      <div class="context-item"><span class="context-label">指令单号</span><span id="taskNo" class="context-value">-</span></div>
+      <div class="context-item"><span class="context-label">生产批号</span><span id="batchNo" class="context-value">-</span></div>
+      <div class="context-item"><span class="context-label">物料编码</span><span id="productCode" class="context-value">-</span></div>
+      <div class="context-item"><span class="context-label">物料名称</span><span id="productName" class="context-value">-</span></div>
+    </div>
+  </section>
+
+  <form id="generateForm" novalidate>
+    <div class="form-grid">
+      <div class="field">
+        <label class="required" for="manufactureDate">生产日期</label>
+        <input id="manufactureDate" type="date" required>
+      </div>
+      <div class="field">
+        <label class="required" for="expiryDate">有效期</label>
+        <input id="expiryDate" type="date" required>
+      </div>
+      <div class="field full">
+        <label for="printer">打印机</label>
+        <select id="printer"><option value="">仅生成二维码，不发送打印</option></select>
+      </div>
+      <div class="field">
+        <label class="required" for="printCount">生成数量</label>
+        <input id="printCount" type="number" min="1" max="10000" step="1" value="1" required>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="generateButton" type="submit" class="primary">生成二维码</button>
+      <button id="printButton" type="button" class="print" disabled>生成并打印</button>
+      <button id="newBatchButton" type="button" class="quiet">新一批</button>
+    </div>
+  </form>
+
+  <section id="results" class="results" aria-labelledby="result-title">
+    <div class="result-head">
+      <h2 id="result-title" class="section-title">本批二维码</h2>
+      <span id="resultCount" class="result-count"></span>
+    </div>
+    <div id="qrList" class="qr-list"></div>
+    <div class="history">
+      <h2 class="section-title">最近生成记录</h2>
+      <table>
+        <thead><tr><th>唯一码</th><th>生产日期</th><th>打印状态</th></tr></thead>
+        <tbody id="historyBody"><tr><td colspan="3">暂无记录</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var basePath = "/msService/WOM/printManage";
+  var params = new URLSearchParams(window.location.search || "");
+  var taskId = params.get("taskId") || "";
+  var printers = [];
+  var currentDetails = [];
+  var currentRequestId = "";
+  var currentFingerprint = "";
+  var busy = false;
+
+  var status = document.getElementById("status");
+  var form = document.getElementById("generateForm");
+  var manufactureDate = document.getElementById("manufactureDate");
+  var expiryDate = document.getElementById("expiryDate");
+  var printer = document.getElementById("printer");
+  var printCount = document.getElementById("printCount");
+  var generateButton = document.getElementById("generateButton");
+  var printButton = document.getElementById("printButton");
+  var newBatchButton = document.getElementById("newBatchButton");
+
+  function showStatus(message, type) {
+    status.className = "status visible" + (type ? " " + type : "");
+    status.textContent = message;
+  }
+
+  function clearStatus() {
+    status.className = "status";
+    status.textContent = "";
+  }
+
+  function requestJson(url, options) {
+    var config = options || {};
+    config.credentials = "same-origin";
+    config.headers = config.headers || {};
+    if (config.body && !config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
+    }
+    return fetch(url, config).then(function (response) {
+      return response.text().then(function (text) {
+        var body;
+        try {
+          body = text ? JSON.parse(text) : {};
+        } catch (_error) {
+          throw new Error("服务返回了无法识别的数据");
+        }
+        if (!response.ok || body.code !== 200) {
+          throw new Error(body.message || body.msg || ("请求失败：" + response.status));
+        }
+        return body.data;
+      });
+    });
+  }
+
+  function setBusy(value, label) {
+    busy = value;
+    generateButton.disabled = value;
+    printButton.disabled = value || !printer.value;
+    newBatchButton.disabled = value;
+    generateButton.textContent = value ? (label || "处理中...") : "生成二维码";
+  }
+
+  function selectedPrinter() {
+    var selectedId = printer.value;
+    for (var index = 0; index < printers.length; index += 1) {
+      if (String(printers[index].id) === selectedId) {
+        return printers[index];
+      }
+    }
+    return null;
+  }
+
+  function fingerprint() {
+    return [taskId, manufactureDate.value, expiryDate.value, printer.value, printCount.value].join("|");
+  }
+
+  function newRequestId() {
+    return "ADP-WOM-" + Date.now() + "-" + Math.random().toString(16).slice(2, 10);
+  }
+
+  function ensureRequestId() {
+    var nextFingerprint = fingerprint();
+    if (!currentRequestId || currentFingerprint !== nextFingerprint) {
+      currentRequestId = newRequestId();
+      currentFingerprint = nextFingerprint;
+      currentDetails = [];
+    }
+    return currentRequestId;
+  }
+
+  function resetGeneration() {
+    currentRequestId = "";
+    currentFingerprint = "";
+    currentDetails = [];
+    document.getElementById("qrList").innerHTML = "";
+    document.getElementById("results").className = "results";
+    clearStatus();
+  }
+
+  function validate() {
+    var count = Number(printCount.value);
+    if (!taskId) {
+      throw new Error("未取得制造指令 ID");
+    }
+    if (!manufactureDate.value) {
+      throw new Error("请选择生产日期");
+    }
+    if (!expiryDate.value) {
+      throw new Error("请选择有效期");
+    }
+    if (expiryDate.value < manufactureDate.value) {
+      throw new Error("有效期不能早于生产日期");
+    }
+    if (!Number.isInteger(count) || count < 1 || count > 10000) {
+      throw new Error("生成数量必须为 1 到 10000 的整数");
+    }
+    return count;
+  }
+
+  function parseDetail(detail) {
+    var fields = String(detail || "").split(",");
+    return {
+      batchNo: fields[0] || "",
+      qrCode: fields[1] || "",
+      productCode: fields[2] || "",
+      manufactureDate: fields[3] || "",
+      expiryDate: fields[4] || ""
+    };
+  }
+
+  function renderDetails(details) {
+    currentDetails = details || [];
+    var list = document.getElementById("qrList");
+    list.innerHTML = "";
+    currentDetails.forEach(function (detail) {
+      var item = parseDetail(detail);
+      var card = document.createElement("article");
+      card.className = "qr-item";
+
+      var image = document.createElement("img");
+      image.alt = "二维码 " + item.qrCode;
+      image.src = basePath + "/qrcode/" + encodeURIComponent(item.qrCode) + ".png?size=320";
+      card.appendChild(image);
+
+      var code = document.createElement("div");
+      code.className = "qr-code";
+      code.textContent = item.qrCode;
+      card.appendChild(code);
+
+      var meta = document.createElement("div");
+      meta.className = "qr-meta";
+      meta.textContent = item.batchNo + " / " + item.productCode;
+      meta.title = meta.textContent;
+      card.appendChild(meta);
+
+      var download = document.createElement("a");
+      download.className = "qr-download";
+      download.href = image.src;
+      download.download = item.qrCode + ".png";
+      download.textContent = "下载 PNG";
+      card.appendChild(download);
+      list.appendChild(card);
+    });
+    document.getElementById("resultCount").textContent = "共 " + currentDetails.length + " 个";
+    document.getElementById("results").className = "results visible";
+  }
+
+  function loadRecords() {
+    if (!taskId) {
+      return Promise.resolve();
+    }
+    return requestJson(basePath + "/records?taskId=" + encodeURIComponent(taskId) + "&limit=20")
+      .then(function (records) {
+        var body = document.getElementById("historyBody");
+        body.innerHTML = "";
+        if (!records || !records.length) {
+          body.innerHTML = '<tr><td colspan="3">暂无记录</td></tr>';
+          return;
+        }
+        records.forEach(function (record) {
+          var row = document.createElement("tr");
+          var statusClass = record.isPrint ? "printed" : "unprinted";
+          var statusText = record.isPrint ? ("已打印 " + (record.printCount || 1) + " 次") : "未打印";
+          row.innerHTML = "<td></td><td></td><td class=\"" + statusClass + "\"></td>";
+          row.children[0].textContent = record.qrCode || "";
+          row.children[1].textContent = record.manufactureDate || "";
+          row.children[2].textContent = statusText;
+          body.appendChild(row);
+        });
+      });
+  }
+
+  function backfillPrintResult(copiedDetails, printResult) {
+    var resultMap = printResult || {};
+    var rows = copiedDetails.map(function (copiedDetail, index) {
+      var resultText = String(resultMap[copiedDetail] || "");
+      return {
+        detail: currentDetails[index],
+        isPrint: resultText.indexOf("OK") !== -1 ? 1 : 0
+      };
+    });
+    return requestJson(basePath + "/backfill-printInfo", {
+      method: "POST",
+      body: JSON.stringify(rows)
+    });
+  }
+
+  function sendToPrinter() {
+    var selected = selectedPrinter();
+    if (!selected) {
+      return Promise.reject(new Error("请选择打印机"));
+    }
+    var copiedDetails = currentDetails.map(function (detail) {
+      var fields = detail.split(",");
+      return '"' + detail + '" "' + (fields[0] || "") + '" "' + (fields[3] || "") + '"';
+    });
+    return requestJson("/msService/packConfigManag/packMessage/printLog/startPrint", {
+      method: "POST",
+      body: JSON.stringify({ host: selected.aimHost, port: selected.port, printInfo: copiedDetails })
+    }).then(function (printResult) {
+      return backfillPrintResult(copiedDetails, printResult);
+    });
+  }
+
+  function generate(shouldPrint) {
+    if (busy) {
+      return;
+    }
+    var count;
+    try {
+      count = validate();
+      if (shouldPrint && !selectedPrinter()) {
+        throw new Error("请选择打印机后再执行生成并打印");
+      }
+    } catch (error) {
+      showStatus(error.message, "error");
+      return;
+    }
+    clearStatus();
+    setBusy(true, shouldPrint ? "生成并打印中..." : "生成中...");
+    var payload = {
+      taskId: taskId,
+      manuDate: manufactureDate.value,
+      approveDate: expiryDate.value,
+      printCount: count,
+      requestId: ensureRequestId()
+    };
+    if (printer.value) {
+      payload.printId = Number(printer.value);
+    }
+    requestJson(basePath + "/generateQrCode", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }).then(function (details) {
+      renderDetails(details);
+      if (shouldPrint) {
+        return sendToPrinter().then(function (result) {
+          showStatus("二维码生成并打印完成，已回填 " + result.updated + " 条记录", "success");
+        });
+      }
+      showStatus("二维码生成完成", "success");
+      return null;
+    }).then(loadRecords).catch(function (error) {
+      showStatus(error.message || "操作失败", "error");
+      if (currentDetails.length) {
+        loadRecords();
+      }
+    }).finally(function () {
+      setBusy(false);
+    });
+  }
+
+  function loadTask() {
+    document.getElementById("taskNo").textContent = params.get("taskNo") || "-";
+    document.getElementById("batchNo").textContent = params.get("batchNo") || "-";
+    document.getElementById("productCode").textContent = params.get("productCode") || "-";
+    document.getElementById("productName").textContent = params.get("productName") || "-";
+    if (!taskId) {
+      showStatus("未取得制造指令 ID，无法生成二维码", "error");
+      form.querySelectorAll("input, select, button").forEach(function (item) { item.disabled = true; });
+      return Promise.resolve();
+    }
+    return requestJson(basePath + "/taskContext?taskId=" + encodeURIComponent(taskId)).then(function (context) {
+      document.getElementById("taskNo").textContent = context.taskNo || "-";
+      document.getElementById("batchNo").textContent = context.produceBatchNum || "-";
+      document.getElementById("productCode").textContent = context.productCode || "-";
+      document.getElementById("productName").textContent = context.productName || "-";
+      manufactureDate.value = context.manufactureDate || "";
+      expiryDate.value = context.expiryDate || context.manufactureDate || "";
+    });
+  }
+
+  function loadPrinters() {
+    return requestJson(basePath + "/printers").then(function (items) {
+      printers = items || [];
+      printers.forEach(function (item) {
+        var option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.printName + " (" + item.aimHost + ":" + item.port + ")";
+        printer.appendChild(option);
+      });
+      printButton.disabled = !printer.value;
+    });
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    generate(false);
+  });
+  printButton.addEventListener("click", function () { generate(true); });
+  newBatchButton.addEventListener("click", resetGeneration);
+  printer.addEventListener("change", function () {
+    printButton.disabled = busy || !printer.value;
+    resetGeneration();
+  });
+  printCount.addEventListener("change", resetGeneration);
+  expiryDate.addEventListener("change", resetGeneration);
+  manufactureDate.addEventListener("change", function () {
+    resetGeneration();
+    if (!taskId || !manufactureDate.value) {
+      return;
+    }
+    requestJson(
+      basePath + "/calculateTermOfValidity?taskId=" + encodeURIComponent(taskId)
+        + "&manuDate=" + encodeURIComponent(manufactureDate.value)
+    ).then(function (value) {
+      expiryDate.value = value || manufactureDate.value;
+    }).catch(function (error) {
+      showStatus(error.message, "error");
+    });
+  });
+
+  Promise.all([loadTask(), loadPrinters()])
+    .then(loadRecords)
+    .catch(function (error) { showStatus(error.message || "页面初始化失败", "error"); });
+})();
+</script>
+</body>
+</html>

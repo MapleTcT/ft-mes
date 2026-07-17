@@ -13,6 +13,8 @@ REPORT_PATH = ROOT / "metadata/wom-toolbar-action-coverage.json"
 DOC_PATH = ROOT / "docs/wom-toolbar-action-coverage.md"
 PRODUCTION_MATRIX_PATH = ROOT / "metadata/production-module-test-cases.json"
 ROW_SMOKE_PATH = ROOT / "metadata/wom-toolbar-row-smoke.json"
+QR_BROWSER_PATH = ROOT / "metadata/wom-qrcode-browser-acceptance.json"
+QR_PERSISTENCE_PATH = ROOT / "metadata/wom-qrcode-persistence-acceptance.json"
 STATIC_SCRIPT_REQUIREMENTS = {
     "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js": [
         "WOM.custom.randon1575958246066",
@@ -347,9 +349,11 @@ def check_row_smoke_alignment(
     if i18n.get("hasRawWomCustom") is not False or i18n.get("hasTableNoKey") is not False:
         fail(failures, "row smoke must prove raw WOM/custom table i18n keys are not visible")
 
-    # The committed row smoke predates ProcessAnalysis recovery and remains historical
-    # evidence. Current traceability acceptance is checked through the action ledger.
-    check_known_blocker(row_smoke, "qrcode", "二维码生成页面未部署或暂不可用！", failures)
+    # The committed row smoke predates ProcessAnalysis and QR recovery. Keep checking
+    # its historical blocker only while the current action ledger is still blocked.
+    actions_by_id = {str(action.get("id")): action for action in actions}
+    if as_dict(actions_by_id.get("generate-qrcode")).get("acceptanceStatus") == "BLOCKED":
+        check_known_blocker(row_smoke, "qrcode", "二维码生成页面未部署或暂不可用！", failures)
 
     persistence = as_dict(row_smoke.get("persistence"))
     if task_id and task_id not in json.dumps(persistence, ensure_ascii=False):
@@ -363,10 +367,9 @@ def check_row_smoke_alignment(
         if row_ref not in as_list(action.get("externalEvidenceRefs")):
             fail(failures, f"{action_id} externalEvidenceRefs must include {row_ref}")
         action_text = json.dumps(action, ensure_ascii=False)
-        if action_id != "process-traceability" and marker and marker not in action_text:
+        if action_id not in {"process-traceability", "generate-qrcode"} and marker and marker not in action_text:
             fail(failures, f"{action_id} must mention latest row smoke marker {marker}")
 
-    actions_by_id = {str(action.get("id")): action for action in actions}
     for action_id in ("start", "hold", "restart"):
         action = actions_by_id.get(action_id)
         if not action:
@@ -375,6 +378,99 @@ def check_row_smoke_alignment(
             fail(failures, f"{action_id}.marker must match latest row smoke marker")
         if task_id and task_id not in str(action.get("verificationSql", "")):
             fail(failures, f"{action_id}.verificationSql must query latest row smoke taskId")
+
+
+def check_qrcode_acceptance(
+    report: dict[str, Any],
+    actions: list[dict[str, Any]],
+    browser: dict[str, Any],
+    persistence: dict[str, Any],
+    failures: list[str],
+) -> None:
+    action = next((item for item in actions if item.get("id") == "generate-qrcode"), None)
+    if not action or action.get("acceptanceStatus") != "PASS":
+        return
+
+    expected_refs = {
+        str(QR_BROWSER_PATH.relative_to(ROOT)),
+        str(QR_PERSISTENCE_PATH.relative_to(ROOT)),
+    }
+    source_refs = {str(ref) for ref in as_list(action.get("sourceEvidenceRefs"))}
+    missing_refs = sorted(expected_refs - source_refs)
+    if missing_refs:
+        fail(failures, "generate-qrcode PASS missing source evidence: " + ", ".join(missing_refs))
+    source_reports = {str(ref) for ref in as_list(report.get("sourceReports"))}
+    missing_reports = sorted(expected_refs - source_reports)
+    if missing_reports:
+        fail(failures, "coverage sourceReports missing QR acceptance: " + ", ".join(missing_reports))
+
+    expected_kinds = {
+        "browser": "wom-qrcode-browser-persistence-acceptance",
+        "persistence": "wom-qrcode-persistence-acceptance",
+    }
+    for label, evidence in (("browser", browser), ("persistence", persistence)):
+        if evidence.get("reportKind") != expected_kinds[label]:
+            fail(failures, f"QR {label} reportKind must be {expected_kinds[label]}")
+        if evidence.get("database") != "PostgreSQL":
+            fail(failures, f"QR {label} acceptance database must remain PostgreSQL")
+        summary = as_dict(evidence.get("summary"))
+        checks = as_list(evidence.get("checks"))
+        if summary.get("status") != "PASS" or summary.get("fail") != 0:
+            fail(failures, f"QR {label} acceptance must be PASS with zero failures")
+        if summary.get("pass") != len(checks) or not checks:
+            fail(failures, f"QR {label} acceptance summary.pass must match non-empty checks")
+        if summary.get("generatedRows") != 2 or summary.get("markerRowsAfterCleanup") != 0:
+            fail(failures, f"QR {label} acceptance must prove two generated rows and cleanup to zero")
+        if any(as_dict(check).get("status") != "PASS" for check in checks):
+            fail(failures, f"QR {label} acceptance contains a non-PASS check")
+        if as_list(evidence.get("issues")):
+            fail(failures, f"QR {label} acceptance must not retain unresolved issues")
+
+    if browser.get("status") != "PASS":
+        fail(failures, "QR browser acceptance top-level status must be PASS")
+    task_list = as_dict(browser.get("taskList"))
+    selection = as_dict(task_list.get("selection"))
+    dom_click = as_dict(task_list.get("domClick"))
+    if selection.get("ok") is not True or selection.get("selectedCount") != 1:
+        fail(failures, "QR browser acceptance must prove one real WOM row was selected")
+    if dom_click.get("attempted") is not True or dom_click.get("ok") is not True:
+        fail(failures, "QR browser acceptance must prove the toolbar was activated by a DOM mouse click")
+    submission = as_dict(browser.get("submission"))
+    images = as_list(submission.get("images"))
+    if submission.get("httpStatus") != 200 or submission.get("responseCode") != 200 or submission.get("qrCards") != 2:
+        fail(failures, "QR browser acceptance must prove a successful two-code submission")
+    if len(images) != 2 or any(
+        as_dict(item).get("complete") is not True
+        or as_dict(item).get("naturalWidth") != 320
+        or as_dict(item).get("naturalHeight") != 320
+        for item in images
+    ):
+        fail(failures, "QR browser acceptance must prove two complete 320x320 PNG images")
+    for key in ("failedResponses", "requestFailures", "pageErrors", "console"):
+        if as_list(browser.get(key)):
+            fail(failures, f"QR browser acceptance {key} must be empty")
+    if len(as_list(browser.get("databaseRows"))) != 2 or browser.get("rowsAfterCleanup") != 0:
+        fail(failures, "QR browser acceptance must prove two PostgreSQL rows and cleanup to zero")
+
+    endpoint_text = json.dumps(persistence.get("endpointEvidence"), ensure_ascii=False).lower()
+    for fragment in ("generateqrcode", "qrcode/", "backfill-printinfo", "records"):
+        if fragment not in endpoint_text:
+            fail(failures, f"QR persistence acceptance missing endpoint evidence: {fragment}")
+    generated_rows = as_list(persistence.get("rowsAfterGenerate"))
+    backfilled_rows = as_list(persistence.get("rowsAfterBackfill"))
+    backfill_calls = [
+        as_dict(item)
+        for item in as_list(persistence.get("endpointEvidence"))
+        if as_dict(item).get("url") == "/msService/WOM/printManage/backfill-printInfo"
+    ]
+    if len(backfill_calls) < 2 or any(item.get("responseCode") != 200 for item in backfill_calls[-2:]):
+        fail(failures, "QR persistence acceptance must replay the same print-state callback successfully")
+    if len(generated_rows) != 2 or len(backfilled_rows) != 2:
+        fail(failures, "QR persistence acceptance must retain two generated and two backfill verification rows")
+    if not any(len(row) >= 9 and str(row[7]).lower() == "true" and str(row[8]) == "1" for row in backfilled_rows if isinstance(row, list)):
+        fail(failures, "QR persistence acceptance must prove replay-safe is_print=true and print_count=1")
+    if persistence.get("rowsAfterCleanup") != 0:
+        fail(failures, "QR persistence acceptance marker rows must be zero after cleanup")
 
 
 def check_static_script_guards(failures: list[str]) -> None:
@@ -394,6 +490,8 @@ def check_report(
     report: dict[str, Any],
     production_cases: dict[str, dict[str, Any]],
     row_smoke: dict[str, Any],
+    qr_browser: dict[str, Any],
+    qr_persistence: dict[str, Any],
     failures: list[str],
 ) -> None:
     missing = sorted(REQUIRED_TOP_LEVEL_KEYS - set(report))
@@ -413,6 +511,8 @@ def check_report(
         "metadata/production-module-test-cases.json",
         "metadata/persistence-acceptance.json",
         "metadata/wom-toolbar-row-smoke.json",
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
     ):
         if source_report not in as_list(report.get("sourceReports")):
             fail(failures, f"sourceReports missing {source_report}")
@@ -475,6 +575,7 @@ def check_report(
             fail(failures, f"summary.{key} expected {expected}, got {summary.get(key)!r}")
 
     check_row_smoke_alignment(report, actions, row_smoke, failures)
+    check_qrcode_acceptance(report, actions, qr_browser, qr_persistence, failures)
     check_static_script_guards(failures)
     check_doc(actions, failures)
 
@@ -484,8 +585,17 @@ def main() -> int:
     report = read_json(REPORT_PATH, failures)
     matrix = read_json(PRODUCTION_MATRIX_PATH, failures)
     row_smoke = read_json(ROW_SMOKE_PATH, failures)
-    if report and matrix and row_smoke:
-        check_report(report, production_cases_by_id(matrix, failures), row_smoke, failures)
+    qr_browser = read_json(QR_BROWSER_PATH, failures)
+    qr_persistence = read_json(QR_PERSISTENCE_PATH, failures)
+    if report and matrix and row_smoke and qr_browser and qr_persistence:
+        check_report(
+            report,
+            production_cases_by_id(matrix, failures),
+            row_smoke,
+            qr_browser,
+            qr_persistence,
+            failures,
+        )
 
     if failures:
         print(f"WOM toolbar action coverage verification failed: {len(failures)} issue(s).", file=sys.stderr)

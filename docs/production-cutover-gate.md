@@ -9,14 +9,14 @@ It is a no-cutover control surface, not a production approval.
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-17T04:56:55+00:00` |
-| Repo Commit | `2a55462bc4241537762cd1df170a66298bcf5136` |
+| Generated At | `2026-07-17T08:30:04+00:00` |
+| Repo Commit | `7d233f3ea722ba627f6f08da3c3072bac5ecb7eb` |
 | Database | `PostgreSQL` |
 | Status | `NOT_READY_FOR_PRODUCTION_CUTOVER` |
 | Gates | `9` |
 | Ready / Planned / Blocked / Not Started | `0 / 8 / 1 / 0` |
 | Production Blockers | `3` |
-| Production Backlog Items | `6` |
+| Production Backlog Items | `5` |
 
 ## Release Rule
 
@@ -34,7 +34,7 @@ Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_
 | nacos-runtime-patch | `PLANNED` | `make runtime-patch-manifest-check`<br>`make smoke-nacos-config ADP_SSH_HOST=/production-or-rehearsal-host`<br>`make production-nacos-runtime-patch-ready-check NACOS_RUNTIME_PATCH_EVIDENCE=/secure/path/adp-nacos-runtime-patch-evidence.json` | Production Nacos export/diff, strict Nacos/runtime patch evidence, signed patch package and rollback rehearsal are missing. |
 | ports-domain-tls | `PLANNED` | `make production-network-tls-ready-check NETWORK_TLS_PLAN=/secure/path/adp-network-tls-plan.json` | Production domain, TLS certificate, proxy and firewall evidence are missing. |
 | security-hardening | `PLANNED` | `make production-security-hardening-ready-check SECURITY_HARDENING_PLAN=/secure/path/adp-security-hardening-plan.json` | Production hardening evidence is missing. |
-| business-smoke-signoff | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | Production module blocker ledger still contains 6 BLOCKED cases and production backlog still contains 9 unresolved items. |
+| business-smoke-signoff | `BLOCKED` | `make business-package-scan`<br>`make smoke-business-dependencies ADP_BASE_URL=/production-or-rehearsal-url`<br>`make smoke-production-export-readiness ADP_BASE_URL=/production-or-rehearsal-url`<br>`make production-business-smoke-signoff-ready-check BUSINESS_SMOKE_SIGNOFF=/secure/path/adp-business-smoke-signoff.json` | Production module blocker ledger still contains 3 BLOCKED cases and production backlog still contains 5 unresolved items; signed production business-smoke evidence is not available. |
 
 ## Source Evidence
 
@@ -48,7 +48,7 @@ Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_
 | `keycloakJwtSmoke` | `metadata/keycloak-jwt-runtime-smoke.json` | `PASS` | checks=19, clientScopes=10, expectedClients=2, fail=0, gatewayMenuTargets=374, keycloakPublicKeySha256Prefix=9e9cea84527f841b, nacosHealthyKeycloakHosts=2, nacosJwtSha256Prefix=9e9cea84527f841b, pass=19, status=PASS, suposMappers=17 |
 | `minioRuntimeSmoke` | `metadata/minio-runtime-smoke.json` | `PASS` | bucketCount=2, bucketsWithObjects=2, fail=0, inspectedBucketCount=2, pass=8, status=PASS, totalChecks=8, totalObjects=31, totalSizeBytes=104285 |
 | `productionBlockers` | `metadata/production-module-blockers.json` | `BLOCKED` | blockedCases=3, blockers=3 |
-| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=6, failBacklog=0, totalItems=6 |
+| `productionBacklog` | `metadata/production-module-backlog.json` | `BLOCKED` | blocked=5, failBacklog=0, totalItems=5 |
 | `businessDependencyReadiness` | `metadata/business-dependency-readiness-smoke.json` | `READY` | baseUrl=http://100.99.133.43:18080, blocked=0, dependencies=2, ready=2, sshHost=100.99.133.43 |
 | `businessPackageScan` | `metadata/business-dependency-package-scan.json` | `CANDIDATE_FOUND` | archiveEntriesScanned=429984, archivesScanned=1142, blockedDependencies=0, candidateDependencies=2, filesVisited=58932, nestedArchivesScanned=2139 |
 | `productionExportReadiness` | `metadata/production-export-readiness-smoke.json` | `READY` | actionRequired=0, blocked=0, pagePass=6, ready=6, runtimeExportActions=6, targets=6, verifiedDataExports=6, visibleExportActions=6 |

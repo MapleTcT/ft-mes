@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-17T00:30:44.547Z",
+  "generatedAt": "2026-07-17T07:55:36Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_HIDDEN_DANGER_PASS_AND_EXISTING_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QRCODE_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
     "generatedAt": "2026-07-16T21:08:52.560Z",
     "coreFlow": {
@@ -70,11 +70,23 @@
       "riskId": 6676868002956112,
       "assertions": "45/45",
       "eamRiskSource": "巡检"
+    },
+    "womQrCodeBrowser": {
+      "status": "PASS",
+      "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+      "evidence": "metadata/wom-qrcode-browser-acceptance.json",
+      "cleanup": "marker rows=0; daily sequence restored"
+    },
+    "womQrCodeApi": {
+      "status": "PASS",
+      "marker": "ADP-WOM-E2E-20260717084642-55397",
+      "evidence": "metadata/wom-qrcode-persistence-acceptance.json",
+      "assertions": "10/10; generatedRows=2; markerRowsAfterCleanup=0"
     }
   },
   "summary": {
-    "testedFeatures": 168,
-    "pass": 163,
+    "testedFeatures": 170,
+    "pass": 165,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3559,9 +3571,59 @@
       "status": "PASS",
       "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json. EAM datagrid returned HTTP 200 and rendered PATROL-RISK-6676868002956112; riskSource was translated to 巡检, the risk content matched the abnormal detail, and console/page/request failures were zero.",
       "issues": []
+    },
+    {
+      "module": "WOM二维码生成",
+      "route": "http://10.11.100.17:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "operation": "真实选中制造任务并点击生成二维码，填写日期和数量后生成并渲染二维码",
+      "api": "GET /msService/WOM/printManage/printDate/generateCode; GET /msService/WOM/printManage/taskContext/{taskId}; POST /msService/WOM/printManage/generateQrCode; GET /msService/WOM/printManage/qrcode/{code}.png; GET /msService/WOM/printManage/records/{taskId}",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "WomPrintManageController -> WomQrCodeService -> WomQrCodeRepository -> PostgreSQL transaction/advisory lock",
+      "tables": [
+        "wom_qrcode_daily_sequences",
+        "wom_package_qrcodes",
+        "wom_produce_tasks",
+        "baseset_materials"
+      ],
+      "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+      "verificationSql": "SELECT request_id, sequence_no, task_id, qr_code, detail, is_print, print_count, created_at FROM public.wom_package_qrcodes WHERE tenant_id='default' AND request_id='ADP-WOM-UI-E2E-20260717084656-55303' ORDER BY sequence_no; SELECT last_sequence FROM public.wom_qrcode_daily_sequences WHERE tenant_id='default' AND manufacture_date=DATE '2099-12-29';",
+      "status": "PASS",
+      "evidence": "metadata/wom-qrcode-browser-acceptance.json and /tmp/wom-qrcode-browser-acceptance.png. A normal toolbar mouse click opened the dialog, exact task/batch/material context was carried, POST returned HTTP 200/code=200, two complete 320x320 QR images rendered, PostgreSQL persisted two exact rows, browser errors were zero, and marker cleanup returned zero rows with sequence restored.",
+      "issues": []
+    },
+    {
+      "module": "WOM二维码幂等与打印状态回填",
+      "route": "http://10.11.100.17:18080/msService/WOM/printManage/printDate/generateCode",
+      "operation": "生成两张二维码，重复请求验证幂等，冲突请求拒绝，读取PNG并回填打印状态",
+      "api": "POST /msService/WOM/printManage/generateQrCode; GET /msService/WOM/printManage/qrcode/{code}.png; POST /msService/WOM/printManage/backfill-printInfo; GET /msService/WOM/printManage/records/{taskId}",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "WomPrintManageController -> WomQrCodeService.generate/backfillPrintInfo -> WomQrCodeRepository advisory lock, row lock and update",
+      "tables": [
+        "wom_qrcode_daily_sequences",
+        "wom_package_qrcodes"
+      ],
+      "marker": "ADP-WOM-E2E-20260717084642-55397",
+      "verificationSql": "SELECT request_id, request_hash, sequence_no, task_id, qr_code, qr_content, detail, is_print, print_count, printed_at FROM public.wom_package_qrcodes WHERE tenant_id='default' AND request_id='ADP-WOM-E2E-20260717084642-55397' ORDER BY sequence_no; SELECT last_sequence FROM public.wom_qrcode_daily_sequences WHERE tenant_id='default' AND manufacture_date=DATE '2099-12-30';",
+      "status": "PASS",
+      "evidence": "metadata/wom-qrcode-persistence-acceptance.json. API/PostgreSQL acceptance passed 10/10: rows=2, legacy detail contract exact, duplicate request stayed at two rows, conflicting payload returned code=409 without extra writes, PNG signature was valid, backfill set is_print=true and print_count=1, records query returned two rows, and cleanup restored marker rows=0 and the prior sequence state.",
+      "issues": [
+        "Physical printer dispatch is NOT_APPLICABLE in the current no-printer configuration; this item proves the persisted print-state contract, not paper output."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+      "artifact": "metadata/wom-qrcode-browser-acceptance.json",
+      "summary": "Real makeTaskList row selection and normal toolbar click passed 10/10, rendered two 320x320 QR images, persisted two PostgreSQL rows, produced zero browser/network errors and cleaned marker rows back to zero."
+    },
+    {
+      "marker": "ADP-WOM-E2E-20260717084642-55397",
+      "artifact": "metadata/wom-qrcode-persistence-acceptance.json",
+      "summary": "WOM QR generate, idempotency, conflict handling, PNG rendering, print-state backfill, record query, PostgreSQL verification and sequence-safe cleanup passed 10/10."
+    },
     {
       "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
       "artifact": "metadata/patrol-execution-persistence-acceptance.json",

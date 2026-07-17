@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T04:56:55+00:00",
-  "repoCommit": "2a55462bc4241537762cd1df170a66298bcf5136",
+  "generatedAt": "2026-07-17T08:30:04+00:00",
+  "repoCommit": "7d233f3ea722ba627f6f08da3c3072bac5ecb7eb",
   "database": "PostgreSQL",
   "status": "NOT_READY_FOR_PRODUCTION_CUTOVER",
   "sourceLedgers": {
@@ -28,7 +28,7 @@
     "blocked": 1,
     "notStarted": 0,
     "productionBlockers": 3,
-    "productionBacklogItems": 6
+    "productionBacklogItems": 5
   },
   "gates": [
     {
@@ -214,14 +214,14 @@
         "platform, organization, RBAC, menu/todo, base configuration and production module smoke evidence is signed",
         "write actions have PostgreSQL before/after marker evidence"
       ],
-      "blockingReason": "Production module blocker ledger still contains 6 BLOCKED cases and production backlog still contains 9 unresolved items."
+      "blockingReason": "Production module blocker ledger still contains 3 BLOCKED cases and production backlog still contains 5 unresolved items; signed production business-smoke evidence is not available."
     }
   ],
   "releaseRule": "Do not cut over production while this report status is NOT_READY_FOR_PRODUCTION_CUTOVER. A READY_FOR_PRODUCTION_CUTOVER status requires every gate to be READY, productionBlockers=0, productionBacklogItems=0, strict business smoke signoff, and real evidence paths instead of example templates.",
   "sourceEvidence": {
     "migrationReadiness": {
       "path": "metadata/production-migration-readiness.json",
-      "generatedAt": "2026-07-17T04:56:55+00:00",
+      "generatedAt": "2026-07-17T08:30:04+00:00",
       "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
       "metrics": {
         "totalTracks": 9,
@@ -346,11 +346,11 @@
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-07-17T04:53:37.777Z",
+      "generatedAt": "2026-07-17T07:55:36Z",
       "status": "BLOCKED",
       "metrics": {
-        "totalItems": 6,
-        "blocked": 6,
+        "totalItems": 5,
+        "blocked": 5,
         "failBacklog": 0
       }
     },

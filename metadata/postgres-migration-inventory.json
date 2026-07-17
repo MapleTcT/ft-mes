@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 187,
+  "migrationCount": 188,
   "firstNumber": 1,
-  "lastNumber": 187,
+  "lastNumber": 188,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,20 +12,20 @@
   "watchStatementCount": 71,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10789,
+    "alter-table": 10797,
     "create-function": 85,
-    "create-index": 977,
-    "create-table": 568,
+    "create-index": 979,
+    "create-table": 570,
     "create-view": 142,
-    "insert": 11007,
-    "update": 11082
+    "insert": 11008,
+    "update": 11084
   },
   "idempotencySignalTotals": {
     "create-or-replace": 224,
-    "do-block": 391,
+    "do-block": 392,
     "if-exists": 106,
-    "if-not-exists": 12970,
-    "on-conflict": 10947,
+    "if-not-exists": 12981,
+    "on-conflict": 10948,
     "to-regclass": 219,
     "where-not-exists": 42
   },
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 76,
     "configuration": 42,
-    "general": 29,
+    "general": 30,
     "notification": 9,
     "platform": 54,
     "workflow": 21
@@ -7058,6 +7058,39 @@
         "do-block": 0,
         "to-regclass": 0,
         "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
+      "name": "188-wom-print-qrcode.sql",
+      "number": 188,
+      "slug": "wom-print-qrcode",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 132,
+      "sha256": "2338142d2ac651d98ecb03a7bdc2864ace941aa9eeeb7927642feee241721f38",
+      "statementCounts": {
+        "create-table": 2,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 8,
+        "insert": 1,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 11,
+        "on-conflict": 1,
+        "do-block": 1,
+        "to-regclass": 0,
+        "create-or-replace": 0,
         "where-not-exists": 0
       },
       "highRiskStatements": [],

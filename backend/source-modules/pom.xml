@@ -23,5 +23,6 @@
         <module>material-wms</module>
         <module>mes-production-context-outbox</module>
         <module>process-analysis</module>
+        <module>wom-print</module>
     </modules>
 </project>

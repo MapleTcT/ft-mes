@@ -144,7 +144,7 @@ def check_doc(expected_ids: set[str], failures: list[str]) -> None:
         "NOT_APPLICABLE",
         "material",
         "ProcessAnalysis",
-        "PROD-ACTION-008",
+        "metadata/wom-qrcode-browser-acceptance.json",
     ):
         if fragment not in text:
             fail(failures, f"business module intake document missing required text: {fragment}")
@@ -291,9 +291,29 @@ def check_cross_refs(
         if not isinstance(verified_exports, int) or verified_exports != targets:
             fail(failures, "closed PROD-023 expects every production export target to have a verified data workbook")
 
-    toolbar_text = text_blob(wom_toolbar)
-    if "generate-qrcode" not in toolbar_text or "blocked" not in toolbar_text:
-        fail(failures, "PROD-ACTION-008 intake requirement expects WOM toolbar coverage to retain blocked generate-qrcode evidence")
+    qr_action = next(
+        (
+            item
+            for item in as_list(wom_toolbar.get("actions"))
+            if isinstance(item, dict) and item.get("id") == "generate-qrcode"
+        ),
+        None,
+    )
+    if qr_action is None:
+        fail(failures, "WOM toolbar coverage must include generate-qrcode")
+    elif "PROD-ACTION-008" in requirements:
+        if qr_action.get("acceptanceStatus") != "BLOCKED":
+            fail(failures, "active PROD-ACTION-008 requires generate-qrcode to remain BLOCKED")
+    else:
+        if qr_action.get("acceptanceStatus") != "PASS":
+            fail(failures, "closed PROD-ACTION-008 requires generate-qrcode PASS")
+        qr_refs = {str(ref) for ref in as_list(qr_action.get("sourceEvidenceRefs"))}
+        for required_ref in (
+            "metadata/wom-qrcode-browser-acceptance.json",
+            "metadata/wom-qrcode-persistence-acceptance.json",
+        ):
+            if required_ref not in qr_refs:
+                fail(failures, f"closed PROD-ACTION-008 missing current QR evidence: {required_ref}")
 
     for item_id, item in requirements.items():
         backlog_item = backlog_items.get(item_id, {})
@@ -348,6 +368,8 @@ def check_report(data: dict[str, Any], failures: list[str]) -> None:
         "metadata/business-dependency-contracts.json",
         "metadata/production-export-gap-breakdown.json",
         "metadata/wom-toolbar-action-coverage.json",
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
     ):
         if required_report not in as_list(data.get("sourceReports")):
             fail(failures, f"sourceReports missing {required_report}")

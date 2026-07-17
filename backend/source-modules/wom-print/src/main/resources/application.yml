@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: WOMPrint
+  datasource:
+    url: jdbc:postgresql://${SUPOS_SYSTEM_DB_HOST:postgres}:${SUPOS_SYSTEM_DB_PORT:5432}/${SUPOS_SYSTEM_DB_NAME:adp}
+    username: ${SUPOS_SYSTEM_DB_USERNAME:adp}
+    password: ${SUPOS_SYSTEM_DB_PASSWORD:adp123456}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${WOM_PRINT_DB_POOL_SIZE:10}
+      minimum-idle: 1
+      connection-timeout: 10000
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+        group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+        username: ${SUPOS_NACOS_USERNAME:nacos}
+        password: ${SUPOS_NACOS_PASSWORD:nacos}
+        metadata:
+          supfusion.tenantid: ${WOM_PRINT_TENANT_ID:default}
+          k8s.service.name: WOMPrint
+          secure: "false"
+
+server:
+  port: ${WOM_PRINT_PORT:8080}
+
+wom-print:
+  default-tenant: ${WOM_PRINT_TENANT_ID:default}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.mapletct.ftmes.womprint: INFO

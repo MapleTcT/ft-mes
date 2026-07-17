@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`187`。
-- 编号范围：`001` 到 `187`。
+- 脚本数量：`188`。
+- 编号范围：`001` 到 `188`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 76 |
 | configuration | 42 |
-| general | 29 |
+| general | 30 |
 | notification | 9 |
 | platform | 54 |
 | workflow | 21 |
@@ -33,23 +33,23 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10789 |
+| alter-table | 10797 |
 | create-function | 85 |
-| create-index | 977 |
-| create-table | 568 |
+| create-index | 979 |
+| create-table | 570 |
 | create-view | 142 |
-| insert | 11007 |
-| update | 11082 |
+| insert | 11008 |
+| update | 11084 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 224 |
-| do-block | 391 |
+| do-block | 392 |
 | if-exists | 106 |
-| if-not-exists | 12970 |
-| on-conflict | 10947 |
+| if-not-exists | 12981 |
+| on-conflict | 10948 |
 | to-regclass | 219 |
 | where-not-exists | 42 |
 
@@ -244,6 +244,7 @@
 | 185 | 185-patrol-task-persistence-compat.sql | compatibility | 83 | alter-table:1, update:5 | 1 | - |
 | 186 | 186-patrol-hidden-danger-eam-risk-compat.sql | compatibility | 709 | create-index:2, alter-table:3, insert:8, update:15 | 81 | - |
 | 187 | 187-production-list-export-capability.sql | general | 228 | create-function:1, update:6 | 2 | - |
+| 188 | 188-wom-print-qrcode.sql | general | 132 | create-table:2, create-index:2, alter-table:8, insert:1, update:2 | 13 | - |
 
 ## 规则
 

@@ -519,6 +519,120 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/wom-print/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/WomPrintApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/GenerateQrCodeRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/PrintBackfillRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/WomPrintController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/WomPrintExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/GenerationResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/PrinterConfig.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/QrCodeRecord.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/RequestSummary.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/TaskContext.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/domain/WomPrintBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/repository/WomPrintRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/service/WomQrCodeService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/support/TenantResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-print/src/test/java/com/mapletct/ftmes/womprint/service/WomQrCodeServiceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-api/README.md",
       "state": "tracked",
       "tracked": true
@@ -2691,6 +2805,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3004,6 +3124,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-public-produce-task-created-noop-probe.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5163,6 +5289,18 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-qrcode-browser-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-qrcode-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-qrcode-route-probe.json",
       "state": "tracked",
       "tracked": true
@@ -7082,13 +7220,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 81
+      "tracked": 100
     },
     "contracts": {
       "tracked": 19
     },
     "deploy": {
-      "tracked": 539
+      "tracked": 541
     },
     "docs": {
       "tracked": 90
@@ -7097,7 +7235,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 119
+      "tracked": 121
     },
     "package.json": {
       "tracked": 1
@@ -7121,8 +7259,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1177,
-    "tracked": 1177,
+    "totalFiles": 1200,
+    "tracked": 1200,
     "untracked": 0
   },
   "untrackedByDirectory": []

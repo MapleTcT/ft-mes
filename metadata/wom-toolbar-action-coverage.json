@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "reportKind": "wom-toolbar-action-coverage",
-  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "generatedAt": "2026-07-17T07:55:36Z",
   "database": "PostgreSQL",
   "module": "WOM",
   "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
@@ -10,7 +10,9 @@
     "metadata/persistence-acceptance.json",
     "metadata/business-dependency-readiness-smoke.json",
     "metadata/test-environment-static-bundle-link-smoke.json",
-    "metadata/wom-toolbar-row-smoke.json"
+    "metadata/wom-toolbar-row-smoke.json",
+    "metadata/wom-qrcode-persistence-acceptance.json",
+    "metadata/wom-qrcode-browser-acceptance.json"
   ],
   "runtimeButtonEvidence": {
     "runtimeSql": "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
@@ -76,6 +78,12 @@
     },
     "latestToolbarRowSmokeProcessAnalysisStatus": "GUARDED_WITHOUT_REQUEST",
     "latestToolbarRowSmokeQrStatus": "GUARDED_WITHOUT_REQUEST",
+    "latestQrPersistenceEvidence": "metadata/wom-qrcode-persistence-acceptance.json",
+    "latestQrPersistenceStatus": "PASS",
+    "latestQrBrowserEvidence": "metadata/wom-qrcode-browser-acceptance.json",
+    "latestQrBrowserStatus": "PASS",
+    "latestQrBrowserMarker": "ADP-WOM-UI-E2E-20260717084656-55303",
+    "latestQrBrowserScreenshot": "/tmp/wom-qrcode-browser-acceptance.png",
     "latestToolbarGuardGeneratedAt": "2026-06-22T13:21:24.930Z",
     "latestToolbarGuardMarker": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART",
     "latestToolbarGuardTaskId": "9000006343993284",
@@ -522,13 +530,13 @@
   },
   "summary": {
     "totalActions": 8,
-    "pass": 7,
-    "blocked": 1,
+    "pass": 8,
+    "blocked": 0,
     "notVerified": 0,
     "notApplicable": 0,
     "requiresPersistence": 7,
-    "persistencePass": 6,
-    "directNormalClickPass": 4,
+    "persistencePass": 7,
+    "directNormalClickPass": 5,
     "pageContextRuntimeEventPass": 3
   },
   "actions": [
@@ -1066,131 +1074,69 @@
       "label": "生成二维码",
       "buttonCode": "makeTaskList_generateCode_add_WOM_1.0.0_produceTask_makeTaskList",
       "apiEndpoints": [
+        "GET /msService/WOM/printManage/printDate/generateCode",
+      "GET /msService/WOM/printManage/taskContext?taskId={taskId}",
         "POST /msService/WOM/printManage/generateQrCode",
-        "POST /msService/packConfigManag/packMessage/printLog/startPrint",
+        "GET /msService/WOM/printManage/qrcode/{code}.png",
+      "GET /msService/WOM/printManage/records?taskId={taskId}",
         "POST /msService/WOM/printManage/backfill-printInfo"
       ],
       "requiresPersistence": true,
-      "acceptanceStatus": "BLOCKED",
-      "clickEvidence": "DEPENDENCY_BLOCKED",
-      "productionCaseIds": [],
-      "targetTables": [],
-      "marker": "ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART",
-      "verificationSql": "select 'baseset_printers', count(*) from public.baseset_printers; select 'baseset_qr_code_types', count(*) from public.baseset_qr_code_types; select 'baseset_qr_detail_infos', count(*) from public.baseset_qr_detail_infos; select 'printer_register', count(*) from public.printer_register;",
+      "acceptanceStatus": "PASS",
+      "clickEvidence": "NORMAL_MOUSE_CLICK",
+      "productionCaseIds": [
+        "PROD-044"
+      ],
+      "targetTables": [
+        "wom_qrcode_daily_sequences",
+        "wom_package_qrcodes"
+      ],
+      "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+      "verificationSql": "SELECT request_id, sequence_no, task_id, qr_code, detail, is_print, print_count, created_at FROM public.wom_package_qrcodes WHERE tenant_id = 'default' AND request_id = 'ADP-WOM-UI-E2E-20260717084656-55303' ORDER BY sequence_no; SELECT last_sequence FROM public.wom_qrcode_daily_sequences WHERE tenant_id = 'default' AND manufacture_date = DATE '2099-12-29';",
       "sourceEvidenceRefs": [
-        "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
-        "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js",
+        "backend/source-modules/wom-print/pom.xml",
+      "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/api/WomPrintController.java",
+      "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/service/WomQrCodeService.java",
+      "backend/source-modules/wom-print/src/main/java/com/mapletct/ftmes/womprint/repository/WomPrintRepository.java",
+        "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
         "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body.js",
         "deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskList/body-es5.js",
         "deploy/docker/nginx/adp.conf",
         "deploy/docker/scripts/adp-wom-qrcode-route-probe.js",
-        "metadata/wom-qrcode-route-probe.json"
+        "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
+        "metadata/wom-qrcode-route-probe.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-qrcode-browser-acceptance.json"
       ],
       "externalEvidenceRefs": [
-        "/tmp/adp-wom-toolbar-clicks-20260621094954/evidence.json",
-        "/tmp/adp-wom-toolbar-row-clicks-202606211843.json",
-        "/tmp/adp-wom-toolbar-guard-current.png",
         "metadata/wom-toolbar-row-smoke.json",
-        "/tmp/adp-wom-toolbar-row-smoke.png",
-        "/tmp/adp-wom-toolbar-row-smoke-after-selection-fix.png",
-        "metadata/test-environment-static-bundle-link-smoke.json",
-        "/tmp/adp-wom-toolbar-row-smoke-public-fresh.png",
-        "/tmp/adp-wom-toolbar-guard-final2.json",
-        "/tmp/adp-wom-toolbar-guard-final2.png",
-        "/tmp/adp-wom-toolbar-row-smoke-seed.json",
-        "metadata/wom-toolbar-row-smoke.png"
+        "metadata/wom-qrcode-route-probe.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "/tmp/wom-qrcode-browser-acceptance.png"
       ],
       "recheckCommands": [
-        "make probe-wom-qrcode-route",
-        "manual: after the WOM printManage QR implementation/package is restored, seed or select a marker WOM task, printer config, production date, expiry date and print count; click 生成二维码; capture /WOM/printManage/generateQrCode request and query the package QR code tables",
-        "manual: if print is required, also capture /packConfigManag/packMessage/printLog/startPrint and /WOM/printManage/backfill-printInfo",
-        "make smoke-wom-toolbar-row"
+        "make acceptance-wom-qrcode-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17",
+        "make acceptance-wom-qrcode-browser ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17",
+        "make wom-toolbar-action-coverage-check"
       ],
       "issues": [
-        "2026-06-21 route probe on http://100.99.133.43:18080 returned HTTP 404 for GET /msService/WOM/printManage/printDate/generateCode, POST /msService/WOM/printManage/generateQrCode and POST /msService/WOM/printManage/backfill-printInfo.",
-        "Runtime WOM service jar scan found 0 class matches and 0 string matches for printManage/generateQrCode/backfill-printInfo/QrCode, so the current WOMMs package does not expose the button target implementation.",
-        "PostgreSQL currently has 0 rows in baseset_printers, baseset_qr_code_types and baseset_qr_detail_infos, while printer_register has 8 platform registrations; printer seed data alone cannot close the missing endpoint blocker.",
-        "The flow still depends on printer/package configuration and optional print backfill after the missing WOM endpoint implementation is restored, so it must not be counted as a PASS from list-button visibility alone.",
-        "2026-06-21 direct mouse click opened the 二维码生成 dialog shell, but the target GET /msService/WOM/printManage/printDate/generateCode still returned HTTP 404, so the actual generate/print/backfill business chain remains blocked. 2026-06-21 18:46 direct row-click smoke clicked 生成二维码; GET /msService/WOM/printManage/printDate/generateCode returned HTTP 404.",
-        "2026-06-21 19:50 applied WOM makeTaskList body.js/body-es5.js and nginx aliases on the test server; the toolbar now guards the missing printManage generateCode page with a Chinese prompt instead of opening the empty QR dialog. The real QR generation/backfill chain remains BLOCKED until the WOM printManage implementation/package exists.",
-        "2026-06-21 20:56 make smoke-wom-toolbar-row clicked 生成二维码 on marker 9000005465147155; the page showed the Chinese guard message and captured WOM printManage generateCode HTTP 404, so the QR chain remains BLOCKED by the missing printManage implementation.",
-        "2026-06-21 21:36 selection-restore regression smoke kept the marker row selected across refresh, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard message.",
-        "2026-06-21 22:50 public-ingress make smoke-wom-toolbar-row used marker ADP_E2E_20260621144811_WOMSTART_HOLD_RESTART, kept the marker row selected, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard. 100.99 direct browser entry failed earlier because core static bundles hit ERR_CONTENT_LENGTH_MISMATCH over Tailscale DERP, so that direct-entry failure is tracked separately in metadata/test-environment-static-bundle-link-smoke.json.",
-        "2026-06-21 23:20 public-ingress make smoke-wom-toolbar-row kept marker 9000005551587839 selected, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and kept the action BLOCKED by the missing printManage implementation.",
-        "2026-06-21 23:54 strengthened row smoke kept marker 9000005571592916 selected, clicked 生成二维码, captured WOM printManage generateCode HTTP 404, and showed the Chinese dependency guard; action remains BLOCKED by the missing printManage implementation.",
-        "2026-06-22 00:12 reran make smoke-wom-toolbar-row after the user reported the whole toolbar row was broken. Marker ADP_E2E_20260621160953_WOMSTART_HOLD_RESTART/taskId=9000005581932827 used real browser clicks: dropdown opened with 暂无数据, 查询/仅查待办 returned HTTP 200, 清空 clicked, 开始/提前放料/请检 showed translated Chinese prompts with no raw WOM.custom/ec.common keys, 保持/重启 returned HTTP 200, 结束 opened findProcReportIdByTaskId=200 and outPutCommonTaskEdit=200, and PostgreSQL read task_run_state=WOM_runState/runing/version=5 plus proc_report_id=757690414802176. ProcessAnalysis and printManage were still backend service/package blockers at that point; 2026-06-22 01:51 guard evidence now proves current toolbar clicks no longer emit those missing requests.",
-        "2026-06-22 01:51 after disabling stale gzip_static for makeTaskList body.js/body-es5.js, the real toolbar click is guarded before the missing printManage page request: no /WOM/printManage request is emitted, the page shows 二维码生成页面未部署或暂不可用！, and the QR chain remains BLOCKED by the missing WOM printManage implementation proven by metadata/wom-qrcode-route-probe.json.",
-        "2026-06-22 03:20 focused browser probe confirmed the guard still works after the i18n race fix: clicking 生成二维码 shows 二维码生成页面未部署或暂不可用！ and emits no /WOM/printManage request.",
-        "2026-06-22 04:32 latest row smoke marker ADP_E2E_20260621203121_WOMSTART_HOLD_RESTART/taskId=9000005738810447 clicked 生成二维码 and observed the front-end guard message 二维码生成页面未部署或暂不可用！; guardedWithoutRequest=true, dependencyStatus=BLOCKED, and the remaining blocker is missing WOM printManage QR endpoint/package rather than a new PostgreSQL SQL gap.",
-        "2026-06-22 06:27 current real-browser row smoke marker ADP_E2E_20260621222639_WOMSTART_HOLD_RESTART/taskId=9000005807992985 reran the whole screenshot toolbar row from http://100.99.133.43:18080. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757783033844992. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 06:45 current real-browser row smoke marker ADP_E2E_20260621224453_WOMSTART_HOLD_RESTART/taskId=9000005818934762 reran the whole screenshot toolbar row after adding DOM-level visible-text i18n fallback. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757787465209088. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 07:17 current real-browser row smoke marker ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART/taskId=9000005838388864 reran the whole screenshot toolbar row after extending i18n-value fallback to parent/top-window toast containers and seeding zh_CN/zh_HK platform i18n resources. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=9 and wom_wait_put_records.proc_report_id=757795467318528. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 07:17 row smoke kept 生成二维码 guarded without emitting a WOM printManage request; the remaining blocker is still missing WOM printManage QR endpoint/package and print/backfill chain.",
-        "2026-06-22 09:27 make probe-wom-qrcode-route reran against http://100.99.133.43:18080: GET /msService/WOM/printManage/printDate/generateCode, POST /msService/WOM/printManage/generateQrCode and POST /msService/WOM/printManage/backfill-printInfo all returned HTTP 404/code 404; WOM service jar scan still found 0 class matches and 0 string matches for printManage/generateQrCode/backfill-printInfo/QrCode.",
-        "2026-06-22 11:46 current real-browser row smoke marker ADP_E2E_20260622034601_WOMSTART_HOLD_RESTART/taskId=9000005999612340 reran the whole screenshot toolbar row. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757861477770496. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 12:17 current real-browser row smoke marker ADP_E2E_20260622041648_WOMSTART_HOLD_RESTART/taskId=9000006018080331 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006018080331 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757869040162048. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 12:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 14:38 latest real-browser row smoke marker ADP_E2E_20260622043703_WOMSTART_HOLD_RESTART/taskId=9000006030233192 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006030233192 task_run_state=WOM_runState/runing/version=11 and wom_wait_put_records.proc_report_id=757874014926080. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 15:03 latest real-browser row smoke marker ADP_E2E_20260622070250_WOMSTART_HOLD_RESTART/taskId=9000006117708778 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006117708778 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757909853611264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 15:51 current real-browser row smoke marker ADP_E2E_20260622075108_WOMSTART_HOLD_RESTART/taskId=9000006146683024 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43 after the WOM controller parameter-name runtime patch. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006146683024 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757921718166784. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 18:31 latest real-browser row smoke marker ADP_E2E_20260622103057_WOMSTART_HOLD_RESTART/taskId=9000006242571780 reran the screenshot toolbar row after adding the no-selection guard. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006242571780 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 18:32:40.682 and wom_wait_put_records.id=9000006242571781 proc_report_id=757960994657536/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 21:21 latest real-browser row smoke marker ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART/taskId=9000006343993284 generatedAt=2026-06-22T13:21:24.930Z reran the screenshot toolbar row. After clearing SupDataGrid selection, 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码 all clicked normally but were stopped before any row action request and showed 请先选择一条指令单！ with no raw WOM.custom/ec.common key. The selected-marker flow still passed: 查询/仅查待办 HTTP 200, 清空 clicked, 保持 returned WOM_runState/iskeep, 重启 returned WOM_runState/runing, 结束 opened the real 指令单完工报工 page, PostgreSQL read wom_produce_tasks.id=9000006343993284 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 21:22:13.457 and wom_wait_put_records.proc_report_id=758002551887104/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+        "Physical printer dispatch through /packConfigManag/packMessage/printLog/startPrint is not applicable in the current no-printer test configuration; QR generation, PNG rendering, PostgreSQL persistence and print-state backfill are accepted independently."
       ],
-      "latestRouteProbe": {
-        "generatedAt": "2026-06-22T01:27:49.172Z",
-        "baseUrl": "http://100.99.133.43:18080",
-        "status": "BLOCKED",
-        "allEndpoints404": true,
-        "noServiceJarMatches": true,
-        "missingPrinterConfig": true,
-        "selectedTask": {
-          "id": "9000005838388864",
-          "tableNo": "ADP_E2E_20260621231718_WOMSTART_HOLD_RESTART_TASK_TN",
-          "taskRunState": "WOM_runState/runing",
-          "status": "99"
-        },
-        "tableCounts": {
-          "public.baseset_printers": 0,
-          "public.baseset_qr_code_types": 0,
-          "public.baseset_qr_detail_infos": 0,
-          "public.printer_register": 8
-        },
-        "endpointProbes": [
-          {
-            "method": "GET",
-            "url": "/msService/WOM/printManage/printDate/generateCode",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          },
-          {
-            "method": "POST",
-            "url": "/msService/WOM/printManage/generateQrCode",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          },
-          {
-            "method": "POST",
-            "url": "/msService/WOM/printManage/backfill-printInfo",
-            "httpStatus": 404,
-            "responseCode": 404,
-            "responseMessage": "404 没找到请求"
-          }
-        ],
-        "serviceJarScan": {
-          "checked": true,
-          "outerJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar",
-          "classMatchCount": 0,
-          "stringMatchCount": 0
-        }
+      "latestAcceptance": {
+        "generatedAt": "2026-07-17T08:46:56.106Z",
+        "baseUrl": "http://10.11.100.17:18080",
+        "status": "PASS",
+        "browserChecks": "10/10",
+        "apiPersistenceChecks": "10/10",
+        "generatedRows": 2,
+        "markerRowsAfterCleanup": 0,
+        "qrImages": "2 x 320x320",
+        "frontendErrors": 0
       },
       "evidenceNotes": [
-        "2026-06-22 16:32 current real-browser row smoke marker ADP_E2E_20260622083104_WOMSTART_HOLD_RESTART/taskId=9000006170646946 reran the whole screenshot toolbar row via public browser ingress while API/DB stayed on 100.99.133.43. The top dropdown opened with 暂无数据; 查询 and 仅查待办 returned HTTP 200; 清空 clicked; 开始/提前放料/请检 showed translated Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page. PostgreSQL read final wom_produce_tasks.id=9000006170646946 task_run_state=WOM_runState/runing/version=5 and wom_wait_put_records.proc_report_id=757931527595264. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 17:34 latest real-browser row smoke marker ADP_E2E_20260622093058_WOMSTART_HOLD_RESTART/taskId=9000006206582444 reran the screenshot toolbar row via public browser ingress. The left filter now displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.task_run_state=WOM_runState/runing and wom_wait_put_records.exe_state=WOM_runState/runing/proc_report_id=757946251162880. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request.",
-        "2026-06-22 17:50 latest real-browser row smoke marker ADP_E2E_20260622094817_WOMSTART_HOLD_RESTART/taskId=9000006216972059 reran the screenshot toolbar row with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. The left filter displays 全部, emptySelectFallbackApplied=true and dropdownVisible=false instead of opening an empty 暂无数据 menu; 查询/仅查待办 returned HTTP 200 and 清空 was clickable; 开始/提前放料/请检 showed Chinese business prompts with no raw WOM.custom/ec.common keys; 保持 returned WOM_runState/iskeep and 重启 returned WOM_runState/runing; 结束 opened the real 指令单完工报工 page with the marker batch fields visible. PostgreSQL read final wom_produce_tasks.id=9000006216972059 task_run_state=WOM_runState/runing/status=99/version=5/modify_time=2026-06-22 17:50:00.404 and wom_wait_put_records.id=9000006216972060 exe_state=WOM_runState/runing/proc_report_id=757950510773504/batch_sync_status=WOM_BatchSyncStatus/done. 生产过程追溯 and 生成二维码 stayed guarded with Chinese dependency messages and no missing-service request."
+        "2026-07-17 a real SupDataGrid row selection and normal toolbar mouse click opened the QR dialog, carried task/batch/material context, submitted two QR codes, rendered two 320x320 PNG images, and produced no console, page, request or target-network errors.",
+        "PostgreSQL wom_package_qrcodes persisted two marker rows using a transaction-locked yyMMdd+five-digit sequence; repeat request idempotency, conflict handling, replay-safe print-state backfill, marker cleanup and sequence restoration all passed."
       ]
     }
   ]

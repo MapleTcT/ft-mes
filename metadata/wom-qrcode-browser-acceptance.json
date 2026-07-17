@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "reportKind": "wom-qrcode-browser-persistence-acceptance",
+  "generatedAt": "2026-07-17T08:46:56.106Z",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "browserBaseUrl": "http://10.11.100.17:18080",
+  "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+  "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+  "task": {
+    "id": "9000006817484040",
+    "tableNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN",
+    "batchNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH",
+    "productCode": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT",
+    "productName": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material",
+    "taskRunState": "WOM_runState/runing"
+  },
+  "manufactureDate": "2099-12-29",
+  "expiryDate": "2100-12-29",
+  "beforeSequence": {
+    "existed": false,
+    "lastSequence": null
+  },
+  "login": {
+    "username": "admin",
+    "status": 200,
+    "tokenCaptured": true
+  },
+  "taskList": {
+    "navigationStatus": 200,
+    "refreshStatus": 200,
+    "task": {
+      "id": "9000006817484040",
+      "tableNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN",
+      "batchNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH",
+      "productCode": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT",
+      "productName": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material",
+      "taskRunState": "WOM_runState/runing"
+    },
+    "selection": {
+      "ok": true,
+      "rowIndex": 0,
+      "selectedCount": 1,
+      "selectedId": "9000006817484040",
+      "tableNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN",
+      "batchNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH",
+      "task": {
+        "id": "9000006817484040",
+        "tableNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN",
+        "batchNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH",
+        "productCode": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT",
+        "productName": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material",
+        "taskRunState": "WOM_runState/runing"
+      }
+    },
+    "domClick": {
+      "attempted": true,
+      "ok": true
+    }
+  },
+  "dialog": {
+    "status": 200,
+    "url": "http://10.11.100.17:18080/msService/WOM/printManage/printDate/generateCode?taskId=9000006817484040&taskNo=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN&batchNo=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH&productCode=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT&productName=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART%20material&lineId=&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=womQrDialog&isDailogAPI=true",
+    "title": "二维码生成",
+    "context": {
+      "taskNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN",
+      "batchNo": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH",
+      "productCode": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT",
+      "productName": "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material"
+    }
+  },
+  "submission": {
+    "payload": {
+      "taskId": "9000006817484040",
+      "manuDate": "2099-12-29",
+      "approveDate": "2100-12-29",
+      "printCount": 2,
+      "requestId": "ADP-WOM-UI-E2E-20260717084656-55303"
+    },
+    "httpStatus": 200,
+    "responseCode": 200,
+    "responseData": [
+      "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH,99122900001,ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT,2099-12-29,2100-12-29,G0001",
+      "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH,99122900002,ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT,2099-12-29,2100-12-29,G0001"
+    ],
+    "statusText": "二维码生成完成",
+    "resultCount": "共 2 个",
+    "qrCards": 2,
+    "images": [
+      {
+        "src": "http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900001.png?size=320",
+        "complete": true,
+        "naturalWidth": 320,
+        "naturalHeight": 320
+      },
+      {
+        "src": "http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900002.png?size=320",
+        "complete": true,
+        "naturalWidth": 320,
+        "naturalHeight": 320
+      }
+    ]
+  },
+  "databaseRows": [
+    [
+      "ADP-WOM-UI-E2E-20260717084656-55303",
+      "1",
+      "9000006817484040",
+      "99122900001",
+      "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH,99122900001,ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT,2099-12-29,2100-12-29,G0001",
+      "false",
+      "0",
+      "2026-07-17 16:47:01.881612"
+    ],
+    [
+      "ADP-WOM-UI-E2E-20260717084656-55303",
+      "2",
+      "9000006817484040",
+      "99122900002",
+      "ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH,99122900002,ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT,2099-12-29,2100-12-29,G0001",
+      "false",
+      "0",
+      "2026-07-17 16:47:01.881612"
+    ]
+  ],
+  "rowsAfterCleanup": 0,
+  "checks": [
+    {
+      "name": "WOM task selected",
+      "status": "PASS",
+      "evidence": "{\"ok\":true,\"rowIndex\":0,\"selectedCount\":1,\"selectedId\":\"9000006817484040\",\"tableNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN\",\"batchNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH\",\"task\":{\"id\":\"9000006817484040\",\"tableNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN\",\"batchNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH\",\"productCode\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT\",\"productName\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material\",\"taskRunState\":\"WOM_runState/runing\"}}"
+    },
+    {
+      "name": "QR dialog opened from toolbar",
+      "status": "PASS",
+      "evidence": "HTTP 200, title=二维码生成"
+    },
+    {
+      "name": "Task context carried into dialog",
+      "status": "PASS",
+      "evidence": "{\"taskNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN\",\"batchNo\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH\",\"productCode\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT\",\"productName\":\"ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART material\"}"
+    },
+    {
+      "name": "Browser submit contract",
+      "status": "PASS",
+      "evidence": "{\"taskId\":\"9000006817484040\",\"manuDate\":\"2099-12-29\",\"approveDate\":\"2100-12-29\",\"printCount\":2,\"requestId\":\"ADP-WOM-UI-E2E-20260717084656-55303\"}"
+    },
+    {
+      "name": "Browser generate response",
+      "status": "PASS",
+      "evidence": "HTTP 200, code=200"
+    },
+    {
+      "name": "QR visual render",
+      "status": "PASS",
+      "evidence": "[{\"src\":\"http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900001.png?size=320\",\"complete\":true,\"naturalWidth\":320,\"naturalHeight\":320},{\"src\":\"http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900002.png?size=320\",\"complete\":true,\"naturalWidth\":320,\"naturalHeight\":320}]"
+    },
+    {
+      "name": "PostgreSQL browser persistence",
+      "status": "PASS",
+      "evidence": "wom_package_qrcodes rows=2"
+    },
+    {
+      "name": "Frontend target network clean",
+      "status": "PASS",
+      "evidence": "failedResponses=[], requestFailures=[]"
+    },
+    {
+      "name": "Frontend runtime clean",
+      "status": "PASS",
+      "evidence": "pageErrors=[], consoleWarningsOrErrors=0"
+    },
+    {
+      "name": "Marker cleanup and sequence restore",
+      "status": "PASS",
+      "evidence": "remaining rows=0, prior sequence={\"existed\":false,\"lastSequence\":null}"
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/produceTask/makeTaskList",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/i18n-value.js?0.8476289726939202",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/greenDill/static/WOM/produceTask/produceTask/makeTaskList/body-es5.js?v=0.36426341924366556",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/view/layoutJson?viewCode=WOM_1.0.0_produceTask_makeTaskList&menuCode=WOM_1.0.0_produceTask_makeTaskList&entityCode=WOM_1.0.0_produceTask&isEs5=true",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/baseService/workbench/getDataGirdCookie?dataGridCookieType=DataGrid_compat_WOM_1.0.0_produceTask_makeTaskList_query",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/produceTask/makeTaskList-pending",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/printDate/generateCode?taskId=9000006817484040&taskNo=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_TASK_TN&batchNo=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_BATCH&productCode=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART_MAT&productName=ADP_E2E_20260623022908_WOMSTART_HOLD_RESTART%20material&lineId=&openType=dialog&viewCode=WOM_1.0.0_produceTask_makeTaskList&IdName=womQrDialog&isDailogAPI=true",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/printers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/taskContext?taskId=9000006817484040",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/records?taskId=9000006817484040&limit=20",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/calculateTermOfValidity?taskId=9000006817484040&manuDate=2099-12-29",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/generateQrCode",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/records?taskId=9000006817484040&limit=20",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900001.png?size=320",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://10.11.100.17:18080/msService/WOM/printManage/qrcode/99122900002.png?size=320",
+      "status": 200
+    }
+  ],
+  "failedResponses": [],
+  "requestFailures": [],
+  "console": [],
+  "pageErrors": [],
+  "screenshot": "/tmp/wom-qrcode-browser-acceptance.png",
+  "status": "PASS",
+  "issues": [],
+  "summary": {
+    "status": "PASS",
+    "pass": 10,
+    "fail": 0,
+    "generatedRows": 2,
+    "markerRowsAfterCleanup": 0
+  },
+  "verificationSql": "SELECT request_id, sequence_no, task_id, qr_code, detail, is_print, print_count, created_at FROM public.wom_package_qrcodes WHERE tenant_id = 'default' AND request_id = :marker ORDER BY sequence_no;"
+}

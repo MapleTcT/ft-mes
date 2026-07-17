@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T04:53:37.777Z",
+  "generatedAt": "2026-07-17T07:55:36Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -75,16 +75,18 @@
     "coreFlowAcceptance20260710": "metadata/core-flow-acceptance-20260710.json",
     "coreFlowRegression20260712": "metadata/core-flow-regression-20260712.json; current runtime environment 9/9, platform 6/6, PostgreSQL 8/8, business dependencies 2/2 READY, QCS qualified/unqualified, material WMS and ProcessAnalysis all PASS with marker cleanup.",
     "coreFlowRuntimeRollbackRehearsal": "metadata/core-flow-runtime-rollback-rehearsal.json; marker ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK; rollback and restore each completed a distinct WOM Spring Boot start, Nacos healthy registration and page HTTP 200; post-restore manufacturing-order and toolbar markers passed.",
-    "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED."
+    "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED.",
+    "womQrCodePersistence": "metadata/wom-qrcode-persistence-acceptance.json; 2026-07-17 API/PostgreSQL acceptance passed 10/10 with two generated rows, idempotency, conflict handling, PNG rendering, print-state backfill and cleanup.",
+    "womQrCodeBrowser": "metadata/wom-qrcode-browser-acceptance.json; real makeTaskList SupDataGrid selection and normal mouse click passed 10/10, rendered two 320x320 QR images and produced zero browser/network errors; screenshot /tmp/wom-qrcode-browser-acceptance.png."
   },
   "summary": {
-    "totalCases": 43,
-    "pass": 40,
+    "totalCases": 44,
+    "pass": 41,
     "fail": 0,
     "blocked": 3,
     "notRun": 0,
-    "requiresPersistence": 31,
-    "routeSmokePass": 43
+    "requiresPersistence": 32,
+    "routeSmokePass": 44
   },
   "requiredCoverageTags": [
     "master-data",
@@ -1661,6 +1663,46 @@
         "postgres",
         "frontend-e2e"
       ]
+    },
+    {
+      "id": "PROD-044",
+      "domain": "生产执行",
+      "name": "WOM 制造指令生成二维码并回填打印状态",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/WOM/printManage/printDate/generateCode",
+      "operationType": "generate-qrcode-and-print-state-backfill",
+      "requiresPersistence": true,
+      "routeSmokeStatus": "PASS",
+      "acceptanceStatus": "PASS",
+      "apiEndpoints": [
+        "GET /msService/WOM/printManage/printDate/generateCode",
+        "GET /msService/WOM/printManage/taskContext/{taskId}",
+        "GET /msService/WOM/printManage/printers",
+        "POST /msService/WOM/printManage/generateQrCode",
+        "GET /msService/WOM/printManage/qrcode/{code}.png",
+        "GET /msService/WOM/printManage/records/{taskId}",
+        "POST /msService/WOM/printManage/backfill-printInfo"
+      ],
+      "backendTraceStatus": "TRACED",
+      "targetTables": [
+        "wom_qrcode_daily_sequences",
+        "wom_package_qrcodes",
+        "wom_produce_tasks",
+        "baseset_materials",
+        "baseset_printers"
+      ],
+      "verificationSql": "SELECT request_id, request_hash, sequence_no, task_id, qr_code, qr_content, detail, is_print, print_count, printed_at FROM public.wom_package_qrcodes WHERE tenant_id='default' AND request_id='ADP-WOM-UI-E2E-20260717084656-55303' ORDER BY sequence_no; SELECT last_sequence FROM public.wom_qrcode_daily_sequences WHERE tenant_id='default' AND manufacture_date=DATE '2099-12-29';",
+      "evidence": "Real browser selected WOM task 9000006817484040 in SupDataGrid, clicked the visible 生成二维码 toolbar action, opened the QR dialog with exact task/batch/material context, submitted manufacture date 2099-12-29, expiry date 2100-12-29 and count 2, then rendered two complete 320x320 QR PNG images with zero console/page/request/network errors. PostgreSQL persisted two wom_package_qrcodes marker rows with 99122900001/99122900002, exact legacy detail payload and cleanup back to zero. API acceptance separately proved request idempotency, conflict rejection without extra rows, PNG signature, print-state backfill is_print=true/print_count=1, task record query and daily-sequence restoration. Evidence: metadata/wom-qrcode-browser-acceptance.json, metadata/wom-qrcode-persistence-acceptance.json, metadata/wom-qrcode-route-probe.json and /tmp/wom-qrcode-browser-acceptance.png.",
+      "issues": [
+        "Physical printer dispatch through /packConfigManag/packMessage/printLog/startPrint was NOT_APPLICABLE because the current test configuration has no printer rows; QR generation and print-state backfill were accepted without pretending physical output occurred."
+      ],
+      "nextAction": "Keep browser/API/PostgreSQL marker acceptance as regression coverage; add a separate physical-printer acceptance only when a test printer is configured.",
+      "coverageTags": [
+        "execution",
+        "traceability",
+        "persistence",
+        "postgres",
+        "frontend-e2e"
+      ]
     }
   ],
   "statusNotes": {
@@ -1675,7 +1717,8 @@
     "womRejectMaterial": "2026-06-20: PROD-007 moved to PASS based on existing real browser/page-context plus PostgreSQL evidence for prePareReject, materiaReject, and batchReject main flows. Material-service stock-in/inventory is PASS under PROD-022 and remains regression coverage.",
     "businessDependencies": "2026-07-10: material-service and process-analysis both have maintained source modules, healthy Nacos services, reachable compatibility endpoints and marker acceptance. Current metadata/business-dependency-readiness-smoke.json status is READY.",
     "coreFlowAcceptance20260710": "Manufacturing generation/submit/rollback, WOM toolbar clicks, report-work, QCS qualified/unqualified backfill and reject draft/delete were revalidated on 10.11.100.17. See metadata/core-flow-acceptance-20260710.json.",
-    "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence."
+    "coreFlowRuntimeRollbackRehearsal": "2026-07-10 test-environment rollback restored the pre-coreflow WOM JAR/static files, waited for a new Started WOMMsApplication log and Nacos healthy registration, restored the patched artifacts, and repeated the same readiness checks. Post-restore environment smoke was 9/9 PASS; manufacturing marker ADP_E2E_20260710035033_WOM_MANUFACTURING_ORDER and toolbar marker ADP_E2E_20260710035100_WOMSTART_HOLD_RESTART passed with controlled cleanup. This is not production full-stack rollback evidence.",
+    "womQrCode": "2026-07-17: the maintained wom-print source module, PostgreSQL migration 188, Nginx route and makeTaskList toolbar integration are deployed. Real browser marker ADP-WOM-UI-E2E-20260717084656-55303 passed 10/10, API marker ADP-WOM-E2E-20260717084642-55397 passed 10/10 including replay-safe print-state backfill, and cleanup restored zero marker rows. Physical printer dispatch remains outside the no-printer test configuration."
   },
   "latestRevalidation": {
     "generatedAt": "2026-07-12T02:02:43.004Z",
@@ -1703,6 +1746,12 @@
       "status": "PASS",
       "marker": "ADP_E2E_20260712020150_PROCESS_ANALYSIS",
       "evidence": "metadata/core-flow-regression-20260712.json"
+    },
+    "womQrCode": {
+      "status": "PASS",
+      "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
+      "evidence": "metadata/wom-qrcode-browser-acceptance.json; metadata/wom-qrcode-persistence-acceptance.json",
+      "cleanup": "marker rows=0; daily sequence restored"
     }
   }
 }

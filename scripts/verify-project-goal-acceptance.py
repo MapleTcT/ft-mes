@@ -32,6 +32,8 @@ MINIO_RUNTIME_SMOKE_PATH = ROOT / "metadata/minio-runtime-smoke.json"
 RUNTIME_PATCH_MANIFEST_PATH = ROOT / "metadata/runtime-patch-manifest.json"
 WOM_TOOLBAR_ROW_SMOKE_PATH = ROOT / "metadata/wom-toolbar-row-smoke.json"
 WOM_TOOLBAR_ACTION_COVERAGE_PATH = ROOT / "metadata/wom-toolbar-action-coverage.json"
+WOM_QRCODE_BROWSER_PATH = ROOT / "metadata/wom-qrcode-browser-acceptance.json"
+WOM_QRCODE_PERSISTENCE_PATH = ROOT / "metadata/wom-qrcode-persistence-acceptance.json"
 CI_REQUIRED_FILE_INVENTORY_PATH = ROOT / "metadata/ci-required-file-inventory.json"
 ORACLE_REPLACEMENT_STATUS_PATH = ROOT / "metadata/oracle-replacement-status.json"
 ORACLE_MIGRATION_AUDIT_PATH = ROOT / "metadata/oracle-migration-audit.json"
@@ -460,6 +462,43 @@ def check_wom_toolbar_evidence_text(
             fail(failures, f"{item_id} currentEvidence must include latest WOM toolbar row smoke value: {fragment}")
 
 
+def check_wom_qrcode_goal_evidence(
+    item_id: str,
+    item: dict[str, Any],
+    action_coverage: dict[str, Any],
+    browser: dict[str, Any],
+    persistence: dict[str, Any],
+    failures: list[str],
+) -> None:
+    action = next(
+        (
+            action
+            for action in as_list(action_coverage.get("actions"))
+            if isinstance(action, dict) and action.get("id") == "generate-qrcode"
+        ),
+        None,
+    )
+    if action is None or action.get("acceptanceStatus") != "PASS":
+        fail(failures, f"{item_id} requires generate-qrcode PASS in WOM toolbar coverage")
+        return
+    for label, report in (("browser", browser), ("persistence", persistence)):
+        summary = report.get("summary")
+        if not isinstance(summary, dict) or summary.get("status") != "PASS" or summary.get("fail") != 0:
+            fail(failures, f"{item_id} requires current WOM QR {label} acceptance PASS")
+        elif summary.get("generatedRows") != 2 or summary.get("markerRowsAfterCleanup") != 0:
+            fail(failures, f"{item_id} WOM QR {label} evidence must prove two rows and cleanup to zero")
+    evidence_text = item_evidence_text(item)
+    for fragment in (
+        "metadata/wom-qrcode-browser-acceptance.json",
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        str(browser.get("marker") or ""),
+        str(persistence.get("marker") or ""),
+        "10/10",
+    ):
+        if fragment and fragment not in evidence_text:
+            fail(failures, f"{item_id} currentEvidence must include current WOM QR value: {fragment}")
+
+
 def oracle_status_by_id(oracle_status: dict[str, Any]) -> dict[str, str]:
     result: dict[str, str] = {}
     for item in as_list(oracle_status.get("checks")):
@@ -863,6 +902,8 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
     persistence = read_json_file(PERSISTENCE_ACCEPTANCE_PATH, failures, "persistence acceptance report")
     row_smoke = read_json_file(WOM_TOOLBAR_ROW_SMOKE_PATH, failures, "WOM toolbar row smoke report")
     action_coverage = read_json_file(WOM_TOOLBAR_ACTION_COVERAGE_PATH, failures, "WOM toolbar action coverage report")
+    qr_browser = read_json_file(WOM_QRCODE_BROWSER_PATH, failures, "WOM QR browser acceptance report")
+    qr_persistence = read_json_file(WOM_QRCODE_PERSISTENCE_PATH, failures, "WOM QR persistence acceptance report")
     if row_smoke:
         check_doc_wom_toolbar_row_evidence(row_smoke, failures)
     if not matrix:
@@ -910,6 +951,11 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
                 "metadata/wom-toolbar-action-coverage.json",
                 "metadata/wom-toolbar-row-smoke.json",
                 "scripts/verify-wom-toolbar-action-coverage.py",
+                "backend/source-modules/wom-print/pom.xml",
+                "metadata/wom-qrcode-browser-acceptance.json",
+                "metadata/wom-qrcode-persistence-acceptance.json",
+                "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
+                "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
             },
             failures,
         )
@@ -925,6 +971,8 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
             check_export_evidence_text("G-013", g013, export_readiness, failures)
         if row_smoke:
             check_wom_toolbar_evidence_text("G-013", g013, row_smoke, action_coverage, failures)
+        if qr_browser and qr_persistence and action_coverage:
+            check_wom_qrcode_goal_evidence("G-013", g013, action_coverage, qr_browser, qr_persistence, failures)
 
     if blockers:
         blocker_summary = blockers.get("summary")
@@ -957,6 +1005,11 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
                 "metadata/wom-toolbar-action-coverage.json",
                 "metadata/wom-toolbar-row-smoke.json",
                 "scripts/verify-wom-toolbar-action-coverage.py",
+                "backend/source-modules/wom-print/pom.xml",
+                "metadata/wom-qrcode-browser-acceptance.json",
+                "metadata/wom-qrcode-persistence-acceptance.json",
+                "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
+                "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
             },
             failures,
         )
@@ -968,6 +1021,8 @@ def check_production_alignment(items_by_id: dict[str, dict[str, Any]], failures:
             check_export_evidence_text("G-018", g018, export_readiness, failures)
         if row_smoke:
             check_wom_toolbar_evidence_text("G-018", g018, row_smoke, action_coverage, failures)
+        if qr_browser and qr_persistence and action_coverage:
+            check_wom_qrcode_goal_evidence("G-018", g018, action_coverage, qr_browser, qr_persistence, failures)
 
     if dependency_contracts:
         if dependency_contracts.get("database") != "PostgreSQL":

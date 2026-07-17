@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T04:53:37.777Z",
+  "generatedAt": "2026-07-17T07:55:36Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -14,21 +14,34 @@
     "metadata/business-dependency-package-scan.json",
     "metadata/production-export-gap-breakdown.json",
     "metadata/wom-toolbar-action-coverage.json",
-    "metadata/wom-qrcode-route-probe.json"
+    "metadata/wom-qrcode-route-probe.json",
+    "metadata/wom-qrcode-persistence-acceptance.json",
+    "metadata/wom-qrcode-browser-acceptance.json"
+  ],
+  "closedRequirements": [
+    {
+      "id": "PROD-ACTION-008",
+      "status": "PASS",
+      "closedAt": "2026-07-17T07:41:25.887Z",
+      "evidenceRefs": [
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-qrcode-browser-acceptance.json"
+      ]
+    }
   ],
   "summary": {
-    "requirements": 6,
-    "blocked": 6,
+    "requirements": 5,
+    "blocked": 5,
     "productDecision": 4,
-    "runtimeEndpointRecovery": 1,
+    "runtimeEndpointRecovery": 0,
     "externalClientAdapter": 1,
     "servicePackage": 0,
     "servicePackageAndScopeDecision": 0,
     "exportImplementation": 0,
     "postgresCompatibilityGap": 0,
-    "requiresRealBrowserProof": 5,
-    "requiresPostgreSQLProof": 6,
-    "requiresFileResponseProof": 1
+    "requiresRealBrowserProof": 4,
+    "requiresPostgreSQLProof": 5,
+    "requiresFileResponseProof": 0
   },
   "requirements": [
     {
@@ -143,67 +156,6 @@
         "metadata/wom-public-produce-task-created-analysis.json",
         "metadata/wom-public-produce-task-created-noop-probe.json",
         "docs/backend-table-audit/wom-public-produce-task-created-analysis.md"
-      ]
-    },
-    {
-      "id": "PROD-ACTION-008",
-      "title": "WOM makeTaskList QR code generation endpoint is missing",
-      "status": "BLOCKED",
-      "category": "missing-runtime-endpoint",
-      "sourceBacklogId": "PROD-ACTION-008",
-      "linkedBlockerCases": [],
-      "requiredIntakeType": "runtime-endpoint-recovery",
-      "dependencyContractIds": [],
-      "requiredPackages": [
-        "WOM printManage / QR endpoint package or source module"
-      ],
-      "packageSearchTerms": [
-        "printManage",
-        "generateQrCode",
-        "generateCode",
-        "backfill-printInfo",
-        "QrCode"
-      ],
-      "frontendEntrypoints": [
-        "WOM_1.0.0_produceTask_makeTaskList toolbar action generate-qrcode"
-      ],
-      "apiEndpoints": [
-        "GET /msService/WOM/printManage/printDate/generateCode",
-        "POST /msService/WOM/printManage/generateQrCode",
-        "POST /msService/WOM/printManage/backfill-printInfo"
-      ],
-      "persistenceExpectation": "REQUIRED_IF_QR_METADATA_PERSISTS",
-      "targetTables": [
-        "baseset_printers",
-        "baseset_qr_code_types",
-        "baseset_qr_detail_infos",
-        "confirmed QR/print metadata table from recovered endpoint"
-      ],
-      "requiredEvidence": [
-        "real-browser toolbar click from makeTaskList",
-        "endpoint probes no longer return HTTP 404",
-        "request payload, response body and visible Chinese user feedback",
-        "PostgreSQL marker proof if QR or print metadata is persisted, otherwise NOT_APPLICABLE file/print evidence"
-      ],
-      "recheckCommands": [
-        "make probe-wom-qrcode-route",
-        "make wom-toolbar-action-coverage-check",
-        "make smoke-wom-toolbar-row ADP_BASE_URL=http://222.88.185.146:18080"
-      ],
-      "passCriteria": [
-        "The toolbar no longer calls missing 404 printManage endpoints.",
-        "A recovered WOM endpoint/package handles generateQrCode through the normal gateway path.",
-        "The browser flow records usable QR/file/print or PostgreSQL metadata evidence."
-      ],
-      "nonSolutions": [
-        "Do not count opening the QR dialog shell as PASS while endpoints still return 404.",
-        "Do not seed printer rows alone without the missing endpoint implementation."
-      ],
-      "sourceEvidenceRefs": [
-        "metadata/production-module-backlog.json",
-        "metadata/wom-toolbar-action-coverage.json",
-        "docs/wom-toolbar-action-coverage.md",
-        "metadata/wom-qrcode-route-probe.json"
       ]
     },
     {
