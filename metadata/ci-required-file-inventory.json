@@ -5301,6 +5301,12 @@
     },
     {
       "ignored": false,
+      "path": "scripts/test_generate_ci_required_file_inventory.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "scripts/verify-backend-table-audit-handoff.py",
       "state": "tracked",
       "tracked": true
@@ -7100,7 +7106,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 51
+      "tracked": 52
     },
     "services": {
       "tracked": 167
@@ -7115,8 +7121,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1176,
-    "tracked": 1176,
+    "totalFiles": 1177,
+    "tracked": 1177,
     "untracked": 0
   },
   "untrackedByDirectory": []

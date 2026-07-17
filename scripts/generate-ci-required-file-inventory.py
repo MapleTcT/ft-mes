@@ -198,6 +198,10 @@ def is_inside_metadata_noise(path: Path) -> bool:
     return len(parts) >= 2 and parts[0] == "metadata" and parts[1] in {"tmp", "tools"}
 
 
+def is_generated_reference(path_value: str) -> bool:
+    return "target" in Path(path_value).parts
+
+
 def is_ignored(path: Path) -> bool:
     return git_bool(["check-ignore", "-q"], path)
 
@@ -273,6 +277,8 @@ def referenced_candidates(report_path: Path) -> tuple[set[Path], set[str]]:
         for match in PATH_RE.finditer(text):
             raw = match.group(1).rstrip(TRAILING_PUNCTUATION)
             if any(marker in raw for marker in ("*", "$", "{", "}")):
+                continue
+            if is_generated_reference(raw):
                 continue
             if raw.endswith("/.env"):
                 continue

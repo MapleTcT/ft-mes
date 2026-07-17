@@ -432,6 +432,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile scripts/verify-module-intake-precheck.py
 	$(PYTHON) -m py_compile scripts/verify-module-intake-candidate-report.py
 	$(PYTHON) -m py_compile scripts/generate-ci-required-file-inventory.py
+	$(PYTHON) -m unittest scripts/test_generate_ci_required_file_inventory.py
 	$(NODE) --check deploy/docker/scripts/adp-platform-api-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-menu-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-home-todo-smoke.js
