@@ -1,6 +1,6 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 5 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 4 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
@@ -12,7 +12,7 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 
 | 类型 | 数量 | 涉及项 |
 |---|---:|---|
-| 产品范围决定 | 4 | `PROD-ACTION-006`、`PROD-ACTION-007`、`PROD-019`、`PROD-021` |
+| 产品范围决定 | 3 | `PROD-ACTION-007`、`PROD-019`、`PROD-021` |
 | 缺 runtime endpoint | 0 | 无 |
 | 外部客户端 | 1 | `PROD-010` |
 | 缺服务包 | 0 | 无 |
@@ -32,7 +32,6 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 
 | ID | 类型 | 下一步 |
 |---|---|---|
-| `PROD-ACTION-006` | 产品范围决定 | 明确 WOM 手工创建/导入是否属于支持范围 |
 | `PROD-ACTION-007` | 产品范围决定 | 明确 public `produceTaskCreated` 是废弃还是恢复 |
 | `PROD-010` | 外部客户端 | 通过 Batch 客户端/ActiveX/WebSocket 打开真实编辑链 |
 | `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
@@ -47,6 +46,12 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 `READY`，证据为 `metadata/production-export-readiness-smoke.json`。
 
 ## 本轮关闭
+
+`PROD-ACTION-006` 已于 2026-07-17 关闭：`wom-production-entry` 源码模块、
+PostgreSQL 请求账本、网关路由和 `makeTaskList` 可见按钮已部署。真实浏览器完成
+创建、同请求幂等、重复批号拒绝、部分唯一并发保护、待办打开、提交生效、软删除回滚和清理 9/9 验收；证据为
+`metadata/wom-manual-task-entry-acceptance.json` 和
+`metadata/wom-manual-task-entry-*.png`。
 
 `PROD-ACTION-008` 已于 2026-07-17 关闭：`wom-print` 源码模块、PostgreSQL
 迁移和网关路由已部署，真实 `makeTaskList` 鼠标点击生成两张二维码，浏览器检查

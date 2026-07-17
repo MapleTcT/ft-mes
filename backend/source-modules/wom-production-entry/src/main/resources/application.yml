@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: WOMProductionEntry
+  datasource:
+    url: jdbc:postgresql://${SUPOS_SYSTEM_DB_HOST:postgres}:${SUPOS_SYSTEM_DB_PORT:5432}/${SUPOS_SYSTEM_DB_NAME:adp}
+    username: ${SUPOS_SYSTEM_DB_USERNAME:adp}
+    password: ${SUPOS_SYSTEM_DB_PASSWORD:adp123456}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${WOM_PRODUCTION_ENTRY_DB_POOL_SIZE:8}
+      minimum-idle: 1
+      connection-timeout: 10000
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+        group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+        username: ${SUPOS_NACOS_USERNAME:nacos}
+        password: ${SUPOS_NACOS_PASSWORD:nacos}
+        metadata:
+          supfusion.tenantid: ${WOM_PRODUCTION_ENTRY_TENANT_ID:default}
+          k8s.service.name: WOMProductionEntry
+          secure: "false"
+
+server:
+  port: ${WOM_PRODUCTION_ENTRY_PORT:8080}
+
+wom-production-entry:
+  default-tenant: ${WOM_PRODUCTION_ENTRY_TENANT_ID:default}
+  upstream-base-url: ${WOM_PRODUCTION_ENTRY_UPSTREAM_BASE_URL:http://gateway:8008}
+  result-poll-attempts: ${WOM_PRODUCTION_ENTRY_RESULT_POLL_ATTEMPTS:15}
+  result-poll-interval-ms: ${WOM_PRODUCTION_ENTRY_RESULT_POLL_INTERVAL_MS:200}
+  processing-timeout-seconds: ${WOM_PRODUCTION_ENTRY_PROCESSING_TIMEOUT_SECONDS:120}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.mapletct.ftmes.womentry: INFO

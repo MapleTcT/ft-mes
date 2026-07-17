@@ -804,6 +804,19 @@ wom-print-stage-runtime: wom-print-package
 	mkdir -p runtime/bap-server/module-Server/WOMPrint/manual
 	cp backend/source-modules/wom-print/target/wom-print-0.1.0-SNAPSHOT.jar runtime/bap-server/module-Server/WOMPrint/manual/wom-print.jar
 
+wom-production-entry-test:
+	$(MVN) -pl backend/source-modules/wom-production-entry -am test
+
+wom-production-entry-package:
+	$(MVN) -pl backend/source-modules/wom-production-entry -am package -DskipTests
+
+wom-production-entry-stage-runtime: wom-production-entry-package
+	mkdir -p runtime/bap-server/module-Server/WOMProductionEntry/manual
+	cp backend/source-modules/wom-production-entry/target/wom-production-entry-0.1.0-SNAPSHOT.jar runtime/bap-server/module-Server/WOMProductionEntry/manual/wom-production-entry.jar
+
+acceptance-wom-production-entry-persistence:
+	$(NODE) deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js
+
 module-intake-check:
 	@test -n "$(INTAKE)" || { echo "INTAKE is required, e.g. make module-intake-check INTAKE=/path/to/package-or-dir"; exit 2; }
 	$(PYTHON) scripts/precheck-module-intake.py "$(INTAKE)" --report "$(INTAKE_REPORT)"

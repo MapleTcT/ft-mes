@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T08:19:25Z",
-  "generatedFromCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
+  "generatedAt": "2026-07-17T10:10:30Z",
+  "generatedFromCommit": "WORKTREE",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -36,7 +36,7 @@
         "make ci passed on 2026-06-15 after commit d13b817",
         "make sustainable-check now validates generated-artifact ignore rules and blocks tracked __pycache__, pyc, target, node_modules, dist, class and log artifacts except narrow runtime patch class allowlist with adjacent source.",
         "make ci now includes runtime-smoke-reports-check so committed runtime smoke reports are checked for schema, PASS status, current host, expected checks, and secret hygiene.",
-        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1200 CI/governance/runtime assets, 1200 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, PATROL shared-inspection recovery, execution, report and gather-data runtime acceptance assets, all maintainable source modules, WOM QR source/migration/browser/persistence acceptance, BPI event/API contracts, Java 17/PostgreSQL shadow service, Java 8 authentication adapter, MES production context outbox, BPI operator console browser acceptance, deterministic simulation acceptance, point-catalog automatic synchronization, telemetry replay staging and persistence acceptance, event-time boundary rule runtime acceptance, Java 17/Flink stream replay, keyed broadcast operator and checkpoint recovery acceptance, rich Protobuf candidate persistence and confirmation acceptance, Kafka candidate consumer/DLQ/PostgreSQL acceptance, transactional rule-publication outbox/PostgreSQL/Kafka acceptance, failed-publication administrator retry/audit acceptance, rule-application Kafka/PostgreSQL restart/replay/DLQ acceptance, Kafka 4.2/Flink MiniCluster checkpoint/restart acceptance and truthful publication/application status, guarded Kafka/Flink/PostgreSQL marker replay harness, target browser/Kafka/Flink/PostgreSQL same-marker acceptance, typed rule deactivation, marker-scoped cleanup, IoT signal to Protobuf/confirmation/PostgreSQL cross-module runtime acceptance, versioned watermark/lateness/timeout rule semantics acceptance, rule-publication Protobuf/AsyncAPI contract, point-in-time production-context resolution, keyed dual-input context wait, Kafka metadata decode, checkpointed rule lifecycle, scoped indexed routing, stable UIDs, candidate/data-quality/rule-application three transactional sinks, deployable shaded job, isolated Kafka/Flink Compose, isolated BPI runtime Compose, target-environment acceptance, capacity preflight, cluster smoke and marker-scoped read-committed replay acceptance, topology/rule productization and PostgreSQL acceptance, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, ProcessAnalysis acceptance assets, core runtime rollback rehearsal, core-flow regression evidence, production rehearsal verifier, and verifier assets are tracked.",
+        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1228 CI/governance/runtime assets, 1228 tracked, 0 untracked, and 0 missing references after the required deployment, smoke, PostgreSQL init SQL, PATROL shared-inspection recovery, execution, report and gather-data runtime acceptance assets, all maintainable source modules, WOM QR and visible manual production-entry source/migration/browser/persistence acceptance, BPI event/API contracts, Java 17/PostgreSQL shadow service, Java 8 authentication adapter, MES production context outbox, BPI operator console browser acceptance, deterministic simulation acceptance, point-catalog automatic synchronization, telemetry replay staging and persistence acceptance, event-time boundary rule runtime acceptance, Java 17/Flink stream replay, keyed broadcast operator and checkpoint recovery acceptance, rich Protobuf candidate persistence and confirmation acceptance, Kafka candidate consumer/DLQ/PostgreSQL acceptance, transactional rule-publication outbox/PostgreSQL/Kafka acceptance, failed-publication administrator retry/audit acceptance, rule-application Kafka/PostgreSQL restart/replay/DLQ acceptance, Kafka 4.2/Flink MiniCluster checkpoint/restart acceptance and truthful publication/application status, guarded Kafka/Flink/PostgreSQL marker replay harness, target browser/Kafka/Flink/PostgreSQL same-marker acceptance, typed rule deactivation, marker-scoped cleanup, IoT signal to Protobuf/confirmation/PostgreSQL cross-module runtime acceptance, versioned watermark/lateness/timeout rule semantics acceptance, rule-publication Protobuf/AsyncAPI contract, point-in-time production-context resolution, keyed dual-input context wait, Kafka metadata decode, checkpointed rule lifecycle, scoped indexed routing, stable UIDs, candidate/data-quality/rule-application three transactional sinks, deployable shaded job, isolated Kafka/Flink Compose, isolated BPI runtime Compose, target-environment acceptance, capacity preflight, cluster smoke and marker-scoped read-committed replay acceptance, topology/rule productization and PostgreSQL acceptance, production migration, production cutover gate, production rehearsal plan, runtime static override, Nginx config, Nacos template, runtime patch, blocker/backlog, business module intake requirements, objective gap register, backend table-audit handoff verifier, WOM toolbar coverage, WOM toolbar screenshot evidence, ProcessAnalysis acceptance assets, core runtime rollback rehearsal, core-flow regression evidence, production rehearsal verifier, and verifier assets are tracked.",
         "make ci now includes goal-gap-register-check; metadata/goal-gap-register.json and docs/goal-gap-register.md are generated from the project goal ledger, production blockers, backlog, dependency readiness, export readiness and production migration ledgers so open gaps cannot be hidden by localized PASS evidence.",
         "make ci-required-file-strict-check now passes and scripts/verify-project-goal-acceptance.py rejects G-001 READY if the strict inventory is not clean or if the inventory generator/report artifacts are not tracked."
       ],
@@ -89,7 +89,7 @@
         "docs/module-intake-latest-basic-modules.md"
       ],
       "currentEvidence": [
-        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1568, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 1568 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. PATROL generated runtime-metadata references are classified as postgres-compat-reference; Java rowNum callback/index identifiers and JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
+        "Docker/POM default to PostgreSQL and Oracle is restricted to legacy/profile/backlog paths; metadata/oracle-replacement-status.json summary: blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1573, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0. metadata/oracle-migration-audit.json currently has 1573 classified references, 0 unclassified references, and generation fails if a new unclassified Oracle reference appears. PATROL generated runtime-metadata references are classified as postgres-compat-reference; Java rowNum callback/index identifiers and JavaScript rowNum/Number identifiers are classified as non-SQL noise without masking real SQL rownum/NUMBER findings.",
         "Nacos source/rendered runtime config is now checked by metadata/oracle-replacement-status.json runtime-config-no-oracle-defaults: 88 config files and 1620 active config lines scanned, active Oracle-like default lines=0.",
         "auth_user.error_count compatibility gap found by auth user unlock acceptance is covered by deploy/docker/postgres/init/073-auth-user-lock-status-compat.sql",
         "rbac_roleuser.valid default compatibility gap found by RBAC role-user acceptance is covered by deploy/docker/postgres/init/074-rbac-roleuser-valid-default.sql",
@@ -105,7 +105,7 @@
       "nextActions": [
         "逐模块把 Oracle SQL、ojdbc 和方言差异迁移到 PostgreSQL 或保留在显式 legacy 路径。"
       ],
-      "evidence": "Docker/POM default PostgreSQL; Nacos source/rendered runtime configs scan 88 files and 1620 active lines with active Oracle-like defaults=0; Oracle is legacy/profile/backlog only; Oracle replacement summary has blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1568, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0; Oracle audit currently has 1568 classified references and 0 unclassified references; PATROL generated runtime-metadata references are classified as postgres-compat-reference, Java rowNum callback/index identifiers and JavaScript rowNum/Number false positives are classified as non-SQL noise, and real SQL dialects remain blocked; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and role-to-user inheritance sync; 079 covers WOM_WAIT_PUT_RECORDS/wom_wait_put_records for updateTaskState; 101 covers WOM output-detail finish_num sync; 104/105/106 cover WOM process start/end PostgreSQL compatibility. 新业务包准入报告现在包含 scanPolicy/scanCoverage，真实最新基础模块复扫证明嵌套 zip/jar 路径可追溯，同时仍阻断 7z 和 jdbc:oracle:thin 默认路径。",
+      "evidence": "Docker/POM default PostgreSQL; Nacos source/rendered runtime configs scan 88 files and 1620 active lines with active Oracle-like defaults=0; Oracle is legacy/profile/backlog only; Oracle replacement summary has blockingIssueCount=0, runtimeConfigActiveOracleLineCount=0, directOracleDependencyCount=2, oracleBacklogReferenceCount=1573, postgresMigrationHighRiskCount=0, postgresMapperAuditErrorCount=0; Oracle audit currently has 1573 classified references and 0 unclassified references; PATROL generated runtime-metadata references are classified as postgres-compat-reference, Java rowNum callback/index identifiers and JavaScript rowNum/Number false positives are classified as non-SQL noise, and real SQL dialects remain blocked; 073 covers auth_user.error_count; 074 covers rbac_roleuser.valid default; 075 covers RBAC data resource permission tables and role-to-user inheritance sync; 079 covers WOM_WAIT_PUT_RECORDS/wom_wait_put_records for updateTaskState; 101 covers WOM output-detail finish_num sync; 104/105/106 cover WOM process start/end PostgreSQL compatibility. 新业务包准入报告现在包含 scanPolicy/scanCoverage，真实最新基础模块复扫证明嵌套 zip/jar 路径可追溯，同时仍阻断 7z 和 jdbc:oracle:thin 默认路径。",
       "gap": "Oracle backlog still has references and must be migrated module by module."
     },
     {
@@ -406,12 +406,16 @@
         "metadata/wom-qrcode-browser-acceptance.json",
         "metadata/wom-qrcode-persistence-acceptance.json",
         "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
-        "deploy/docker/postgres/init/188-wom-print-qrcode.sql"
+        "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
+        "backend/source-modules/wom-production-entry/pom.xml",
+        "metadata/wom-manual-task-entry-acceptance.json",
+        "deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js",
+        "deploy/docker/postgres/init/189-wom-manual-task-entry.sql"
       ],
       "currentEvidence": [
         "生产模块测试矩阵共 44 条，当前 41 PASS / 3 BLOCKED / 0 NOT_RUN，44 条 route smoke 全部 PASS。",
         "metadata/production-module-blockers.json tracks all 3 BLOCKED production cases and cross-checks current readiness, package scan and export evidence.",
-        "metadata/production-module-backlog.json tracks 5 unresolved production backlog items; material/WMS completion inbound, ProcessAnalysis, production list export and WOM QR generation are no longer in the active backlog.",
+        "metadata/production-module-backlog.json tracks 4 unresolved production backlog items; material/WMS completion inbound, ProcessAnalysis, production list export, WOM QR generation and the visible WOM manual production-task entry are no longer in the active backlog.",
         "动作源码地图登记 15 个 source action，12 个已具备 marker 落库条件。",
         "WOM 状态流转、无明细 stop、产出/投入明细报工、提前放料、下推备料需求、工序开始结束、活动开始结束、简易活动报工、生产请检、备料退料，QCS 报告生成/编辑/结果保存/合格/不合格处置/降级放行/退回/检验放行，WTS 正常关闭/停工，WAPS 工作计划创建/调整/取消/审批，RM 导入/批量同步/删除，craftGraph 创建/更新/删除已形成真实前端/API 和 PostgreSQL 证据。",
         "投入明细 wom_mat_consum_recods=0 已解释为当前人工投料源码路径行为。",
@@ -423,16 +427,17 @@
         "material-wms is implemented from source, deployed as healthy Nacos prod@@material, and marker ADP_E2E_20260710074612_MATERIAL_WMS passed completion inbound, idempotency, quality release, production issue, browser rendering and PostgreSQL cleanup.",
         "business dependency package scan has maintained source candidates for both material-service and process-analysis; dependency contracts are 2 READY / 0 BLOCKED with 8 endpoint probes.",
         "metadata/business-dependency-readiness-smoke.json is READY: material and ProcessAnalysis each have a healthy instance, all required compatibility endpoints are 2xx, and runtime/menu/table evidence is present.",
-        "2026-07-17 WOM 二维码源码模块和运行端点已闭合：metadata/wom-qrcode-browser-acceptance.json marker ADP-WOM-UI-E2E-20260717084656-55303 通过真实 SupDataGrid 行选择和普通鼠标点击生成两张 320x320 PNG，10/10 PASS；metadata/wom-qrcode-persistence-acceptance.json marker ADP-WOM-E2E-20260717084642-55397 通过日序列、幂等、冲突拒绝、PNG、记录查询、打印成功回调重放不重复计数和 PostgreSQL marker 清理，10/10 PASS。"
+        "2026-07-17 WOM 二维码源码模块和运行端点已闭合：metadata/wom-qrcode-browser-acceptance.json marker ADP-WOM-UI-E2E-20260717084656-55303 通过真实 SupDataGrid 行选择和普通鼠标点击生成两张 320x320 PNG，10/10 PASS；metadata/wom-qrcode-persistence-acceptance.json marker ADP-WOM-E2E-20260717084642-55397 通过日序列、幂等、冲突拒绝、PNG、记录查询、打印成功回调重放不重复计数和 PostgreSQL marker 清理，10/10 PASS。",
+        "2026-07-17 WOM 可见手工新建指令单已由 backend/source-modules/wom-production-entry 实现并部署：marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY 通过真实列表按钮、创建表单、产品/配方/产线/单位 PostgreSQL 参照、创建、同 requestId 幂等重放、不同 requestId 同批次拒绝、待办打开、提交、软删除和清理，metadata/wom-manual-task-entry-acceptance.json 为 9/9 PASS；迁移 189 以 partial unique index 保护活动批次并发占用。"
       ],
       "blockingIssues": [
-        "剩余 3 条生产用例仍 BLOCKED：RM 外部 Batch 客户端和 PROD-019/PROD-021 独立不良数量范围确认。material/WMS 完工入库、ProcessAnalysis 追溯、生产列表导出与 WOM 二维码均已 PASS。"
+        "剩余 3 条生产用例仍 BLOCKED：RM 外部 Batch 客户端和 PROD-019/PROD-021 独立不良数量范围确认。material/WMS 完工入库、ProcessAnalysis 追溯、生产列表导出、WOM 二维码和可见手工新建指令单均已 PASS；public produceTaskCreated 仍作为独立产品范围 backlog，不影响已验收的受控可见入口。"
       ],
       "nextActions": [
-        "保持制造-质量-material/WMS-ProcessAnalysis、生产列表导出与 WOM 二维码回归；完成独立不良数量范围产品决定和外部 Batch 客户端验收。"
+        "保持制造-质量-material/WMS-ProcessAnalysis、生产列表导出、WOM 二维码和可见手工新建指令单回归；完成 public produceTaskCreated、独立不良数量范围的产品决定和外部 Batch 客户端验收。"
       ],
-      "evidence": "生产模块测试矩阵 44 条，当前 41 PASS / 3 BLOCKED / 0 NOT_RUN；WOM、QCS、WTS、WAPS、RM、craftGraph、material/WMS、ProcessAnalysis、生产列表导出和 WOM 二维码已覆盖真实前端/API/PostgreSQL 或文件响应证据。最新导出报告为 READY/6-of-6，二维码浏览器与 API/PostgreSQL 验收均为 10/10 PASS；工具栏 8 个动作当前全部 PASS。",
-      "gap": "剩余 3 条生产用例仍缺产品决定或外部客户端；material/WMS、ProcessAnalysis、生产列表导出和 WOM 二维码已闭合。"
+      "evidence": "生产模块测试矩阵 44 条，当前 41 PASS / 3 BLOCKED / 0 NOT_RUN；WOM、QCS、WTS、WAPS、RM、craftGraph、material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码和可见手工新建指令单已覆盖真实前端/API/PostgreSQL 或文件响应证据。最新导出报告为 READY/6-of-6，二维码浏览器与 API/PostgreSQL 验收均为 10/10 PASS，手工新建指令单为 9/9 PASS；工具栏 8 个动作当前全部 PASS。",
+      "gap": "剩余 3 条生产用例仍缺产品决定或外部客户端；public produceTaskCreated 仍待产品范围决定；material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码和可见手工新建指令单已闭合。"
     },
     {
       "id": "G-014",
@@ -629,14 +634,18 @@
         "metadata/wom-qrcode-browser-acceptance.json",
         "metadata/wom-qrcode-persistence-acceptance.json",
         "deploy/docker/scripts/adp-wom-qrcode-browser-acceptance.js",
-        "deploy/docker/postgres/init/188-wom-print-qrcode.sql"
+        "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
+        "backend/source-modules/wom-production-entry/pom.xml",
+        "metadata/wom-manual-task-entry-acceptance.json",
+        "deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js",
+        "deploy/docker/postgres/init/189-wom-manual-task-entry.sql"
       ],
       "currentEvidence": [
         "53 business pages have API/layout and browser smoke evidence",
         "production module test matrix has 44 cases: 41 PASS, 3 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks the exact 3 BLOCKED cases from the production test matrix.",
-        "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 5 unresolved backlog items across production BLOCKED cases, WOM visible manual create/import scope and public produceTaskCreated explicit-disabled product decision blocker; WOM QR is closed.",
-        "persistence acceptance ledger has 170 tested features: 165 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE",
+        "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 4 unresolved backlog items across the 3 production BLOCKED cases and the public produceTaskCreated explicit-disabled product decision blocker; WOM QR and the visible WOM manual production-task entry are closed.",
+        "persistence acceptance ledger has 170 tested features: 166 PASS, 0 FAIL, 2 BLOCKED, 2 NOT_APPLICABLE",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "production export readiness smoke was refreshed at 2026-07-17T04:53:37.777Z: API base 和 browser base 均为 http://10.11.100.17:18080; pagePass=6, visibleExportActions=6, runtimeExportActions=6, nonEmptyDownloads=1, backendQueryExportWorkbooks=6, backendQueryExportErrors=0, verifiedDataExports=6 and targetExportMatches=10. All 6 targets are READY with real browser file responses; RM returns RM_batchFormulaList.xlsx and reconciles 231 valid PostgreSQL rows to 232 worksheet rows including the header. Evidence: metadata/production-export-readiness-smoke.json.",
         "2026-06-21 production module browser/API smoke and marker persistence evidence added to docs/frontend-functional-test-report.md, docs/backend-table-audit/persistence-acceptance.md, and metadata/persistence-acceptance.json latestRevalidation.",
@@ -653,13 +662,14 @@
         "PATROL hidden-danger real browser/API/PostgreSQL acceptance is PASS with marker ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER: abnormal result completion, real grid selection and confirmation, idempotent createHiddenDanger, mp_task_details to ses_hrm_riskhandles linkage, EAM risk-ledger re-render and SESHRM source translation passed 45/45; 8 screenshots were generated and browser errors were zero. This is a PATROL_COMPATIBILITY_PENDING handoff, not a claim that the absent SESH rectification/review/closure workflow exists.",
         "PATROL report/monitor real browser/API/PostgreSQL acceptance generated at 2026-07-17T03:26:33.871Z is PASS: 8 pages produced 7 PASS and 1 NOT_APPLICABLE, while 23 aggregate checks produced 22 PASS and 1 NOT_APPLICABLE with zero browser errors. Direct database reconciliation confirmed result summary 16, abnormal results 12, task overview 22, hidden dangers linked/pending/closed 6/6/0, task completion 16/22, abnormal detail rate 12/16 and monitor routes/tasks 1/28. Gather-error analysis is N/A because the database has 0 enabled error-benchmark items and 0 eligible gather_data details; route/task monitor fallback is accepted, while GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package.",
         "PATROL gather-data runtime acceptance generated at 2026-07-17T03:21:40.266Z is PASS_WITH_EXTERNAL_DATA_BLOCKER on 10.11.100.17: five real Kafka messages advanced topic and consumer offsets 20->25 with lag 0; four malformed input classes were isolated; simulated login/current context reached the real TagManagement history endpoint; the 24-hour request window and mp_task_details target identity were verified. tmm_tags has 0 rows and the endpoint returned values=[], so gather_data truthfully remains null and median persistence is blocked only by missing external tag metadata/history.",
-        "metadata/wom-qrcode-browser-acceptance.json marker ADP-WOM-UI-E2E-20260717084656-55303 and metadata/wom-qrcode-persistence-acceptance.json marker ADP-WOM-E2E-20260717084642-55397 both passed 10/10: real toolbar DOM click, exact task context, two complete PNGs, two PostgreSQL rows, idempotency/conflict handling, replay-safe print-state backfill and marker cleanup to zero."
+        "metadata/wom-qrcode-browser-acceptance.json marker ADP-WOM-UI-E2E-20260717084656-55303 and metadata/wom-qrcode-persistence-acceptance.json marker ADP-WOM-E2E-20260717084642-55397 both passed 10/10: real toolbar DOM click, exact task context, two complete PNGs, two PostgreSQL rows, idempotency/conflict handling, replay-safe print-state backfill and marker cleanup to zero.",
+        "metadata/wom-manual-task-entry-acceptance.json marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY passed 9/9: visible list entry, desktop/mobile form rendering, PostgreSQL-backed option references, create, same-request replay, duplicate-batch rejection, partial unique active-batch index verification, pending open, submit, soft delete and marker cleanup, with zero browser errors."
       ],
       "blockingIssues": [
-        "剩余 3 条生产用例、独立不良数量等产品范围项和业务负责人签字未完成；生产列表导出与 WOM 二维码已 PASS。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
+        "剩余 3 条生产用例、public produceTaskCreated 和独立不良数量等产品范围项及业务负责人签字未完成；生产列表导出、WOM 二维码和可见手工新建指令单已 PASS。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
       ],
       "nextActions": [
-        "保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续产品范围和外部客户端验收，并补齐 before/after SQL 和业务签字。"
+        "保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续产品范围和外部客户端验收，并补齐 before/after SQL 和业务签字。"
       ]
     },
     {
@@ -684,22 +694,25 @@
         "scripts/verify-module-intake-candidate-report.py",
         "metadata/module-intake-latest-basic-modules.json",
         "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
-        "deploy/docker/postgres/init/188-wom-print-qrcode.sql"
+        "deploy/docker/postgres/init/188-wom-print-qrcode.sql",
+        "deploy/docker/postgres/init/189-wom-manual-task-entry.sql",
+        "backend/source-modules/wom-production-entry/pom.xml",
+        "metadata/wom-manual-task-entry-acceptance.json"
       ],
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 170 tested features: 165 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 5 active backlog items, 0 FAIL_BACKLOG and 5 BLOCKED.",
-        "metadata/postgres-migration-inventory.json currently has 188 scripts, highRiskStatementCount=0, watchStatementCount=71, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
+        "metadata/persistence-acceptance.json currently has 170 tested features: 166 PASS, 0 FAIL, 2 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 4 active backlog items, 0 FAIL_BACKLOG and 4 BLOCKED.",
+        "metadata/postgres-migration-inventory.json currently has 189 scripts, highRiskStatementCount=0, watchStatementCount=72, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
-        "metadata/persistence-acceptance.json currently has 0 FAIL and 3 BLOCKED rows",
-        "metadata/production-module-backlog.json covers those unresolved persistence rows with 5 backlog items, 0 FAIL_BACKLOG and 5 BLOCKED",
-        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 71 watch statements and 0 watch safety issues.",
+        "metadata/persistence-acceptance.json currently has 0 FAIL and 2 BLOCKED rows",
+        "metadata/production-module-backlog.json covers those unresolved persistence rows with 4 backlog items, 0 FAIL_BACKLOG and 4 BLOCKED",
+        "docs/postgres-migration-watch-rationale.md is generated from the PostgreSQL init inventory and records current watch statements; the current inventory has 72 watch statements and 0 watch safety issues.",
         "RBAC role-user acceptance found HTTP 200 with rbac_roleuser.valid=false and closed it with idempotent PostgreSQL SQL 074-rbac-roleuser-valid-default.sql",
         "WOM production action tracing found missing WOM_WAIT_PUT_RECORDS and closed it with idempotent PostgreSQL SQL 079-wom-wait-put-records-table.sql plus remote schema readback; WOM process start/end later closed RM_PROCESS_ACTIVES, convert(proc_sort,int), and process wait actual_end_time compatibility through SQL 104/105/106.",
         "WOM outPutCommonTaskEdit layoutJson/cache blocker was closed with 084/085 and remote baseService cache restart before persistence acceptance",
         "2026-07-17 ProcessAnalysis and WOM printManage QR are maintained source modules with marker acceptance; QR persistence uses the idempotent 188 migration and is no longer a runtime endpoint backlog.",
         "真实候选包准入报告 metadata/module-intake-latest-basic-modules.json 现在记录 scanPolicy/scanCoverage：2026-06-22 复扫 /Users/zhangchu/Documents/MES包/最新基础模块 为 report-only，fileCount=13996、nestedFileCount=13990、maxArchiveDepthSeen=2、textScanned=9784/9806、textSkippedLarge=22、unsupportedArchiveCount=1；3 个阻断项仍是 1 个 7z 不可检查包和 DataSet DbUtils.java 两处 jdbc:oracle:thin，由 make module-intake-candidate-report-check 和 make module-intake-precheck-regression-check 校验。",
-        "2026-07-17 material/WMS, ProcessAnalysis and WOM QR are resolved by source modules and PostgreSQL marker acceptance; active backlog now contains only product-scope and external-client items."
+        "2026-07-17 material/WMS, ProcessAnalysis, WOM QR and the visible WOM manual production-task entry are resolved by source modules and PostgreSQL marker acceptance; migration 189 adds the idempotency request ledger and partial unique active-batch guard; active backlog now contains only product-scope and external-client items."
       ],
       "blockingIssues": [
         "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
@@ -707,7 +720,7 @@
       "nextActions": [
         "每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。"
       ],
-      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 170 tested features: 165 PASS, 0 FAIL, 3 BLOCKED, 2 NOT_APPLICABLE, and metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 5 active backlog items, 0 FAIL_BACKLOG and 5 BLOCKED; PostgreSQL migration inventory has 188 scripts, highRiskStatementCount=0, watchStatementCount=71, watchSafetyIssueCount=0; PATROL migrations 178-186 cover shared inspection recovery, while migration 188 adds transaction-safe WOM QR daily sequence and package-code persistence. material/WMS, ProcessAnalysis and WOM QR are maintained source modules with marker acceptance."
+      "evidence": "Oracle/PostgreSQL audit, init SQL, persistence acceptance, production backlog, and migration inventory are in CI; metadata/persistence-acceptance.json currently has 170 tested features: 166 PASS, 0 FAIL, 2 BLOCKED, 2 NOT_APPLICABLE, and metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 4 active backlog items, 0 FAIL_BACKLOG and 4 BLOCKED; PostgreSQL migration inventory has 189 scripts, highRiskStatementCount=0, watchStatementCount=72, watchSafetyIssueCount=0; PATROL migrations 178-186 cover shared inspection recovery, migration 188 adds transaction-safe WOM QR daily sequence and package-code persistence, and migration 189 adds the WOM manual-entry request ledger plus partial unique active-batch guard. material/WMS, ProcessAnalysis, WOM QR and WOM manual entry are maintained source modules with marker acceptance."
     },
     {
       "id": "G-020",
@@ -787,8 +800,8 @@
       ],
       "currentEvidence": [
         "production migration templates and readiness gate exist",
-        "metadata/production-cutover-gate.json and docs/production-cutover-gate.md are the production cutover gate: current status NOT_READY_FOR_PRODUCTION_CUTOVER, 9 gates tracked, 8 PLANNED, 1 BLOCKED, productionBlockers=3, productionBacklogItems=5, and make production-cutover-gate-check cross-checks metadata/production-migration-readiness.json, metadata/production-module-blockers.json, metadata/production-module-backlog.json, metadata/business-dependency-readiness-smoke.json, metadata/business-dependency-package-scan.json, and metadata/production-export-readiness-smoke.json while also checking the generated human-readable gate stays in sync.",
-        "metadata/production-rehearsal-plan.json and docs/production-migration/rehearsal-plan.md are generated from readiness, cutover, runtime smoke and production blocker/backlog ledgers; scripts/verify-production-rehearsal-plan.py now validates the generated plan structure, 9-track coverage, sourceEvidence freshness, command fragments, secret hygiene, and READY evidence rules; current status is REHEARSAL_BLOCKED with 9 tracks, 8 PLANNED, 1 BLOCKED, productionBlockers=3 and productionBacklogItems=5.",
+        "metadata/production-cutover-gate.json and docs/production-cutover-gate.md are the production cutover gate: current status NOT_READY_FOR_PRODUCTION_CUTOVER, 9 gates tracked, 8 PLANNED, 1 BLOCKED, productionBlockers=3, productionBacklogItems=4, and make production-cutover-gate-check cross-checks metadata/production-migration-readiness.json, metadata/production-module-blockers.json, metadata/production-module-backlog.json, metadata/business-dependency-readiness-smoke.json, metadata/business-dependency-package-scan.json, and metadata/production-export-readiness-smoke.json while also checking the generated human-readable gate stays in sync.",
+        "metadata/production-rehearsal-plan.json and docs/production-migration/rehearsal-plan.md are generated from readiness, cutover, runtime smoke and production blocker/backlog ledgers; scripts/verify-production-rehearsal-plan.py now validates the generated plan structure, 9-track coverage, sourceEvidence freshness, command fragments, secret hygiene, and READY evidence rules; current status is REHEARSAL_BLOCKED with 9 tracks, 8 PLANNED, 1 BLOCKED, productionBlockers=3 and productionBacklogItems=4.",
         "database source/target inventory plus row-count and checksum comparison tooling exists; metadata/postgres-runtime-smoke.json verifies the current 100.99.133.43 PostgreSQL runtime with 8/8 PASS but production data migration rehearsal remains missing",
         "MinIO bucket/object inventory, migration evidence manifest and strict READY validator exist; metadata/minio-runtime-smoke.json verifies the current 100.99.133.43 test MinIO runtime with 8/8 PASS, 2 buckets and 31 objects; make production-minio-migration-ready-check requires source/target inventories, object comparison, migration dry-run, sample downloads, runtime smoke and rollback/source-read fallback evidence.",
         "Keycloak source/target realm inventory, comparison tooling, migration evidence manifest and strict READY validator exist; make production-keycloak-migration-ready-check requires source/target realm inventory, comparison review, database backup/restore rehearsal, secret rotation, JWT/Nacos sync, auth smoke and rollback evidence.",
@@ -802,8 +815,8 @@
         "business smoke signoff evidence template and strict READY validator exist",
         "make production-evidence-ready-gate-regression-check is in CI and verifies rollback/license/network/security/business smoke/MinIO migration/Keycloak migration template evidence, production migration readiness template evidence, cutover gate template evidence, and 100.99.133.43 test-environment evidence are rejected before READY.",
         "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis are 2/2 READY maintained source dependencies; current ledger status is READY with zero blocked dependencies.",
-        "metadata/production-module-backlog.json confirms 5 unresolved production backlog items, including 0 FAIL_BACKLOG and 5 BLOCKED items. The WOM QR runtime endpoint is closed with real browser/API/PostgreSQL acceptance and is no longer part of the production backlog.",
-        "business smoke signoff validator now cross-checks metadata/production-module-blockers.json, metadata/production-module-backlog.json, and metadata/production-export-gap-breakdown.json; READY requires coverage of all 3 production blocker cases, all 5 backlog items, and every unresolved export target id, or explicit structured riskAcceptance per unresolved item with decision=ACCEPTED, acceptedBy, signedAt and real evidence."
+        "metadata/production-module-backlog.json confirms 4 unresolved production backlog items, including 0 FAIL_BACKLOG and 4 BLOCKED items. The WOM QR runtime endpoint and visible WOM manual production-task entry are closed with real browser/API/PostgreSQL acceptance and are no longer part of the production backlog.",
+        "business smoke signoff validator now cross-checks metadata/production-module-blockers.json, metadata/production-module-backlog.json, and metadata/production-export-gap-breakdown.json; READY requires coverage of all 3 production blocker cases, all 4 backlog items, and every unresolved export target id, or explicit structured riskAcceptance per unresolved item with decision=ACCEPTED, acceptedBy, signedAt and real evidence."
       ],
       "blockingIssues": [
         "production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION.",

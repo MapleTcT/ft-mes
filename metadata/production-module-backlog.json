@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T07:55:36Z",
+  "generatedAt": "2026-07-17T09:51:20Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -15,7 +15,8 @@
     "metadata/core-flow-acceptance-20260710.json",
     "metadata/core-flow-runtime-rollback-rehearsal.json",
     "metadata/wom-qrcode-persistence-acceptance.json",
-    "metadata/wom-qrcode-browser-acceptance.json"
+    "metadata/wom-qrcode-browser-acceptance.json",
+    "metadata/wom-manual-task-entry-acceptance.json"
   ],
   "latestCoreFlowEvidence": {
     "generatedAt": "2026-07-10T07:25:00Z",
@@ -35,66 +36,35 @@
         "metadata/wom-qrcode-browser-acceptance.json",
         "metadata/wom-qrcode-route-probe.json"
       ]
+    },
+    {
+      "id": "PROD-ACTION-006",
+      "status": "PASS",
+      "closedAt": "2026-07-17T09:51:20.544Z",
+      "reason": "A maintained WOM manual-entry module, visible makeTaskList button, PostgreSQL option query, partial unique active-batch guard and real create/idempotency/duplicate-batch/submit/rollback flow are implemented and accepted 9/9.",
+      "evidenceRefs": [
+        "metadata/wom-manual-task-entry-acceptance.json",
+        "metadata/persistence-acceptance.json",
+        "docs/frontend-functional-test-report.md",
+        "docs/backend-table-audit/persistence-acceptance.md"
+      ]
     }
   ],
   "summary": {
-    "totalItems": 5,
+    "totalItems": 4,
     "failBacklog": 0,
-    "blocked": 5,
+    "blocked": 4,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 5,
+    "moduleBacklog": 4,
     "missingServicePackage": 0,
     "externalClientRequired": 1,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
-    "productScopeConfirmation": 4,
+    "productScopeConfirmation": 3,
     "falseSuccessApi": 0,
     "missingRuntimeEndpoint": 0
   },
   "items": [
-    {
-      "id": "PROD-ACTION-006",
-      "title": "WOM visible manual production-task create or import entry is not exposed",
-      "status": "BLOCKED",
-      "category": "product-scope-confirmation",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [],
-      "persistenceCoverage": [
-        {
-          "status": "BLOCKED",
-          "module": "生产模块",
-          "operation": "定位新建生产工单或制造任务可见入口",
-          "api": "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only from current visible UI); source-mapped but not UI-triggered manual endpoints: POST /makeTaskEdit/save, POST /makeTaskEdit/submit, GET /importMainXls, GET /downloadXls; accepted daily-plan create endpoint recorded separately: POST /produceTaskCreated2"
-        }
-      ],
-      "evidenceRefs": [
-        "metadata/persistence-acceptance.json",
-        "docs/backend-table-audit/persistence-acceptance.md",
-        "docs/frontend-functional-test-report.md",
-        "docs/production-module-functional-test-cases.md"
-      ],
-      "recheckCommands": [
-        "make discover-production-actions ADP_BROWSER_BASE_URL=http://222.88.185.146:18080",
-        "manual: after product decision, either expose a real create/import entry and run marker persistence, or mark the visible manual-create entry out of scope with documented product evidence"
-      ],
-      "passCriteria": [
-        "Product owner confirms whether visible manual create/import is in scope, or whether produceTaskCreated2/day-plan generation is the only supported creation path.",
-        "If in scope, runtime/menu/button metadata exposes a real create/import entry without bypassing the product flow.",
-        "A browser/API marker action writes wom_produce_tasks and required workflow tables, with PostgreSQL verification.",
-        "If out of scope, persistence acceptance is reclassified with explicit product evidence and does not hide the public produceTaskCreated no-op."
-      ],
-      "nextActions": [
-        "Confirm the intended product entry for manufacturing task creation.",
-        "If manual create/import is required, recover the missing menu/button/runtime entry and capture payload.",
-        "If daily-plan generation is intended, document the scope decision and keep produceTaskCreated2 as the accepted creation path."
-      ],
-      "nonSolutions": [
-        "Do not mark the visible manual create entry PASS from produceTaskCreated2 alone.",
-        "Do not expose a fake save button without a product-confirmed payload and PostgreSQL marker proof."
-      ]
-    },
     {
       "id": "PROD-ACTION-007",
       "title": "public produceTaskCreated explicitly disabled pending product decision",

@@ -587,9 +587,9 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 60,
+    "composeServiceCount": 61,
     "composeServiceKindCounts": {
-      "business-runtime": 17,
+      "business-runtime": 18,
       "infrastructure": 11,
       "platform-runtime": 28,
       "support-runtime": 4
@@ -808,6 +808,11 @@
       {
         "service": "wom-print",
         "jarPath": "bap-server/module-Server/WOMPrint/manual/wom-print.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "wom-production-entry",
+        "jarPath": "bap-server/module-Server/WOMProductionEntry/manual/wom-production-entry.jar",
         "kind": "business-runtime"
       },
       {

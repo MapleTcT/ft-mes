@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17T10:10:30.564Z",
+  "repoCommit": "WORKTREE",
+  "database": "PostgreSQL",
+  "baseUrl": "http://10.11.100.17:18080",
+  "dbSshTarget": "v6@10.11.100.17",
+  "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+  "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+  "entryRoute": "/msService/WOM/produceTask/manual-entry/page",
+  "status": "PASS",
+  "frontend": {
+    "console": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "screenshots": {
+      "list": "metadata/wom-manual-task-entry-list.png",
+      "mobile": "metadata/wom-manual-task-entry-form-mobile.png",
+      "form": "metadata/wom-manual-task-entry-form.png",
+      "result": "metadata/wom-manual-task-entry-result.png",
+      "pending": "metadata/wom-manual-task-entry-pending.png"
+    },
+    "list": {
+      "status": 200,
+      "title": "制造指令单",
+      "buttonText": "新建指令单",
+      "patched": "true"
+    },
+    "entry": {
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/manual-entry/page",
+      "title": "新建制造指令",
+      "optionCount": 2,
+      "selectedOption": "0"
+    },
+    "mobile": {
+      "viewportWidth": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    },
+    "result": {
+      "message": "制造指令已创建并进入编辑待办",
+      "taskId": "766803299030272",
+      "tableNo": "produceTask_20260717_005",
+      "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY"
+    },
+    "pending": {
+      "url": "http://10.11.100.17:18080/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512",
+      "title": "制造指令单",
+      "markerVisibleInForm": true,
+      "visibleInputCount": 14
+    }
+  },
+  "operations": {
+    "create": {
+      "method": "POST",
+      "api": "/msService/WOM/produceTask/manual-entry/create",
+      "payload": {
+        "requestId": "WOM-MANUAL-1784283036118-70e6ffe6",
+        "productCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_MAT",
+        "formulaCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_FORM",
+        "workLineId": 8991071330917351,
+        "planNum": 2.5,
+        "planStartDate": "2026-07-17 18:10:35",
+        "planEndDate": "2026-07-17 19:10:35",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "needPack": false
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"requestId\":\"WOM-MANUAL-1784283036118-70e6ffe6\",\"idempotent\":false,\"task\":{\"taskId\":766803299030272,\"version\":1,\"tableNo\":\"produceTask_20260717_005\",\"batchCode\":\"ADP_E2E_20260717101030_WOM_MANUAL_ENTRY\",\"status\":88,\"valid\":true,\"pendingId\":766803301012736,\"pendingOpenUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512\",\"activityName\":\"TaskEvent_0il1mab\"}},\"message\":\"处理成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "requestId": "WOM-MANUAL-1784283036118-70e6ffe6",
+            "idempotent": false,
+            "task": {
+              "taskId": 766803299030272,
+              "version": 1,
+              "tableNo": "produceTask_20260717_005",
+              "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+              "status": 88,
+              "valid": true,
+              "pendingId": 766803301012736,
+              "pendingOpenUrl": "/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512",
+              "activityName": "TaskEvent_0il1mab"
+            }
+          },
+          "message": "处理成功"
+        }
+      }
+    },
+    "idempotentReplay": {
+      "method": "POST",
+      "api": "/msService/WOM/produceTask/manual-entry/create",
+      "payload": {
+        "requestId": "WOM-MANUAL-1784283036118-70e6ffe6",
+        "productCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_MAT",
+        "formulaCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_FORM",
+        "workLineId": 8991071330917351,
+        "planNum": 2.5,
+        "planStartDate": "2026-07-17 18:10:35",
+        "planEndDate": "2026-07-17 19:10:35",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "needPack": false
+      },
+      "response": {
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":200,\"data\":{\"requestId\":\"WOM-MANUAL-1784283036118-70e6ffe6\",\"idempotent\":true,\"task\":{\"taskId\":766803299030272,\"version\":1,\"tableNo\":\"produceTask_20260717_005\",\"batchCode\":\"ADP_E2E_20260717101030_WOM_MANUAL_ENTRY\",\"status\":88,\"valid\":true,\"pendingId\":766803301012736,\"pendingOpenUrl\":\"/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512\",\"activityName\":\"TaskEvent_0il1mab\"}},\"message\":\"处理成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "requestId": "WOM-MANUAL-1784283036118-70e6ffe6",
+            "idempotent": true,
+            "task": {
+              "taskId": 766803299030272,
+              "version": 1,
+              "tableNo": "produceTask_20260717_005",
+              "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+              "status": 88,
+              "valid": true,
+              "pendingId": 766803301012736,
+              "pendingOpenUrl": "/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512",
+              "activityName": "TaskEvent_0il1mab"
+            }
+          },
+          "message": "处理成功"
+        }
+      },
+      "taskCountSql": "SELECT count(*) FROM public.wom_produce_tasks WHERE produce_batch_num = 'ADP_E2E_20260717101030_WOM_MANUAL_ENTRY';",
+      "taskCountRaw": "1"
+    },
+    "conflictingBatchRequest": {
+      "method": "POST",
+      "api": "/msService/WOM/produceTask/manual-entry/create",
+      "payload": {
+        "requestId": "WOM-MANUAL-1784283036118-70e6ffe6-BATCH-CONFLICT",
+        "productCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_MAT",
+        "formulaCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_FORM",
+        "workLineId": 8991071330917351,
+        "planNum": 2.5,
+        "planStartDate": "2026-07-17 18:10:35",
+        "planEndDate": "2026-07-17 19:10:35",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "needPack": false
+      },
+      "response": {
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":409,\"data\":null,\"message\":\"生产批号已存在，请更换批号\"}",
+        "json": {
+          "code": 409,
+          "data": null,
+          "message": "生产批号已存在，请更换批号"
+        }
+      },
+      "taskCountRaw": "1",
+      "requestCountSql": "SELECT count(*) FROM public.wom_manual_task_requests\nWHERE request_id = 'WOM-MANUAL-1784283036118-70e6ffe6-BATCH-CONFLICT';",
+      "requestCountRaw": "0"
+    },
+    "submit": {
+      "method": "POST",
+      "api": "/msService/WOM/produceTask/produceTask/makeTaskEdit/submit?id=766803299030272",
+      "payload": {
+        "id": 766803299030272,
+        "produceTask": {
+          "id": 766803299030272,
+          "version": 1,
+          "remark": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY_SUBMITTED"
+        },
+        "viewCode": "WOM_1.0.0_produceTask_makeTaskEdit",
+        "operateType": "submit",
+        "deploymentId": "6579611732672512",
+        "linkId": "766803299050752",
+        "pendingId": 766803301012736,
+        "activityName": "TaskEvent_0il1mab",
+        "pendingActivityType": "4",
+        "webSignetFlag": false,
+        "superEdit": false,
+        "files_staffId": "1",
+        "uploadFileFormMap": [],
+        "dgList": {},
+        "dgDeletedIds": {},
+        "workFlowVar": {
+          "outcome": "SequenceFlow_0vcn8hp",
+          "outcomeType": "normal",
+          "outcomeDes": "生效",
+          "outcomeDesZhCn": "生效",
+          "outcomeMap": [
+            {
+              "outcome": "SequenceFlow_0vcn8hp",
+              "dec": "生效",
+              "type": "normal",
+              "assignUser": ""
+            }
+          ],
+          "deploymentId": "6579611732672512",
+          "entityCode": "WOM_1.0.0_produceTask"
+        }
+      },
+      "response": {
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":200,\"data\":{\"success\":true,\"operateType\":\"submit\",\"id\":766803299030272,\"tableInfoId\":766803299050752},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "success": true,
+            "operateType": "submit",
+            "id": 766803299030272,
+            "tableInfoId": 766803299050752
+          },
+          "message": "操作成功"
+        }
+      }
+    },
+    "rollback": {
+      "method": "POST",
+      "api": "/msService/WOM/produceTask/produceTask/delete",
+      "payload": {
+        "ids": "766803299030272@3"
+      },
+      "response": {
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":200,\"data\":{\"operate\":\"delete\",\"dealSuccessFlag\":true,\"operateType\":\"delete\"},\"message\":\"操作成功\"}",
+        "json": {
+          "code": 200,
+          "data": {
+            "operate": "delete",
+            "dealSuccessFlag": true,
+            "operateType": "delete"
+          },
+          "message": "操作成功"
+        }
+      }
+    }
+  },
+  "persistence": {
+    "batchConcurrencyGuard": {
+      "sql": "SELECT indexdef\nFROM pg_indexes\nWHERE schemaname = 'public'\n  AND tablename = 'wom_manual_task_requests'\n  AND indexname = 'uq_wom_manual_task_requests_active_batch';",
+      "raw": "CREATE UNIQUE INDEX uq_wom_manual_task_requests_active_batch ON public.wom_manual_task_requests USING btree (lower(TRIM(BOTH FROM batch_code))) WHERE ((status)::text = ANY ((ARRAY['PROCESSING'::character varying, 'SUCCESS'::character varying])::text[]))"
+    },
+    "afterCreate": {
+      "taskSql": "SELECT id, version, valid, status, table_info_id, table_no, deployment_id,\n       process_key, produce_batch_num, product_id, formula_id, line_id,\n       plan_num, plan_start_time, plan_end_time\nFROM public.wom_produce_tasks\nWHERE produce_batch_num = 'ADP_E2E_20260717101030_WOM_MANUAL_ENTRY'\nORDER BY create_time DESC NULLS LAST, id DESC;",
+      "taskRaw": "766803299030272|1|t|88|766803299050752|produceTask_20260717_005|6579611732672512|makeTaskFlow|ADP_E2E_20260717101030_WOM_MANUAL_ENTRY|8991071330917338|8991071330917339|8991071330917351|2.500000|2026-07-17 18:10:35|2026-07-17 19:10:35",
+      "task": {
+        "id": "766803299030272",
+        "version": "1",
+        "valid": "t",
+        "status": "88",
+        "tableInfoId": "766803299050752",
+        "tableNo": "produceTask_20260717_005",
+        "deploymentId": "6579611732672512",
+        "processKey": "makeTaskFlow",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "productId": "8991071330917338",
+        "formulaId": "8991071330917339",
+        "lineId": "8991071330917351",
+        "planNum": "2.500000",
+        "planStartTime": "2026-07-17 18:10:35",
+        "planEndTime": "2026-07-17 19:10:35"
+      },
+      "pendingSql": "SELECT id, activity_name, activity_type, deployment_id, table_info_id,\n       COALESCE(open_url, ''), task_status\nFROM public.wfm_task_pending\nWHERE model_id = 766803299030272 AND task_status = 88\nORDER BY create_time DESC NULLS LAST, id DESC;",
+      "pendingRaw": "766803301012736|TaskEvent_0il1mab|task|6579611732672512|766803299050752|/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512|88",
+      "pending": {
+        "id": "766803301012736",
+        "activityName": "TaskEvent_0il1mab",
+        "activityType": "task",
+        "deploymentId": "6579611732672512",
+        "tableInfoId": "766803299050752",
+        "openUrl": "/msService/WOM/produceTask/produceTask/makeTaskEdit?pendingId=766803301012736&__pc__=VGFza0V2ZW50XzBpbDFtYWJ8bWFrZVRhc2tGbG93&tableInfoId=766803299050752&entityCode=WOM_1.0.0_produceTask&id=766803299030272&deploymentId=6579611732672512",
+        "taskStatus": "88"
+      },
+      "requestSql": "SELECT tenant_id, request_id, request_hash, batch_code, status,\n       COALESCE(task_id::text, ''), payload_json->>'productCode',\n       payload_json->>'formulaCode', payload_json->>'workLineId'\nFROM public.wom_manual_task_requests\nWHERE batch_code = 'ADP_E2E_20260717101030_WOM_MANUAL_ENTRY'\nORDER BY created_at DESC;",
+      "requestRaw": "default|WOM-MANUAL-1784283036118-70e6ffe6|777ddca622c5f1361f3119eeb86bc5d239d17e3130d9eb776937cd0c87a9cda7|ADP_E2E_20260717101030_WOM_MANUAL_ENTRY|SUCCESS|766803299030272|ADP_E2E_20260618200829_WOM_CHECKOUTBILL_MAT|ADP_E2E_20260618200829_WOM_CHECKOUTBILL_FORM|8991071330917351",
+      "request": {
+        "tenantId": "default",
+        "requestId": "WOM-MANUAL-1784283036118-70e6ffe6",
+        "requestHash": "777ddca622c5f1361f3119eeb86bc5d239d17e3130d9eb776937cd0c87a9cda7",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "status": "SUCCESS",
+        "taskId": "766803299030272",
+        "productCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_MAT",
+        "formulaCode": "ADP_E2E_20260618200829_WOM_CHECKOUTBILL_FORM",
+        "lineId": "8991071330917351"
+      }
+    },
+    "afterSubmit": {
+      "taskSql": "SELECT id, version, valid, status, table_info_id, table_no, deployment_id,\n       process_key, produce_batch_num, product_id, formula_id, line_id,\n       plan_num, plan_start_time, plan_end_time\nFROM public.wom_produce_tasks WHERE id = 766803299030272;",
+      "taskRaw": "766803299030272|3|t|99|766803299050752|produceTask_20260717_005|6579611732672512|makeTaskFlow|ADP_E2E_20260717101030_WOM_MANUAL_ENTRY|8991071330917338|8991071330917339|8991071330917351|2.500000|2026-07-17 18:10:35|2026-07-17 19:10:35",
+      "task": {
+        "id": "766803299030272",
+        "version": "3",
+        "valid": "t",
+        "status": "99",
+        "tableInfoId": "766803299050752",
+        "tableNo": "produceTask_20260717_005",
+        "deploymentId": "6579611732672512",
+        "processKey": "makeTaskFlow",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "productId": "8991071330917338",
+        "formulaId": "8991071330917339",
+        "lineId": "8991071330917351",
+        "planNum": "2.500000",
+        "planStartTime": "2026-07-17 18:10:35",
+        "planEndTime": "2026-07-17 19:10:35"
+      },
+      "pendingSql": "SELECT id, activity_name, activity_type, deployment_id, table_info_id,\n       COALESCE(open_url, ''), task_status\nFROM public.wfm_task_pending\nWHERE model_id = 766803299030272 AND task_status = 88\nORDER BY create_time DESC NULLS LAST, id DESC;",
+      "pendingRaw": "",
+      "dealRaw": "SequenceFlow_0vcn8hp|生效|NORMAL"
+    },
+    "afterRollback": {
+      "sql": "SELECT id, version, valid, status, table_info_id, table_no, deployment_id,\n       process_key, produce_batch_num, product_id, formula_id, line_id,\n       plan_num, plan_start_time, plan_end_time\nFROM public.wom_produce_tasks WHERE id = 766803299030272;",
+      "raw": "766803299030272|4|f|99|766803299050752|produceTask_20260717_005|6579611732672512|makeTaskFlow|ADP_E2E_20260717101030_WOM_MANUAL_ENTRY|8991071330917338|8991071330917339|8991071330917351|2.500000|2026-07-17 18:10:35|2026-07-17 19:10:35",
+      "task": {
+        "id": "766803299030272",
+        "version": "4",
+        "valid": "f",
+        "status": "99",
+        "tableInfoId": "766803299050752",
+        "tableNo": "produceTask_20260717_005",
+        "deploymentId": "6579611732672512",
+        "processKey": "makeTaskFlow",
+        "batchCode": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+        "productId": "8991071330917338",
+        "formulaId": "8991071330917339",
+        "lineId": "8991071330917351",
+        "planNum": "2.500000",
+        "planStartTime": "2026-07-17 18:10:35",
+        "planEndTime": "2026-07-17 19:10:35"
+      }
+    },
+    "requestCleanup": {
+      "sql": "DELETE FROM public.wom_manual_task_requests\nWHERE tenant_id = 'default' AND request_id = 'WOM-MANUAL-1784283036118-70e6ffe6';\nSELECT count(*) FROM public.wom_manual_task_requests\nWHERE tenant_id = 'default' AND request_id = 'WOM-MANUAL-1784283036118-70e6ffe6';",
+      "raw": "DELETE 1\n0"
+    }
+  },
+  "issues": [],
+  "login": {
+    "status": 200,
+    "authenticated": true
+  },
+  "summary": {
+    "testedFeatures": 9,
+    "pass": 9,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  }
+}

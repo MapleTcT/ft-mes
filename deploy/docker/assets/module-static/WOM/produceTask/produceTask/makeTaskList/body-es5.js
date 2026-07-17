@@ -9,6 +9,7 @@
     noSelection: "请先选择一条指令单！",
     multiSelection: "只可以进行单批次查看！",
     waitForRun: "未执行的指令单，请重新选择！",
+    manualEntryUnavailable: "制造指令新增页面未部署或暂不可用！",
     processUnavailable: "生产过程追溯服务未部署或暂不可用！",
     qrcodeUnavailable: "二维码生成页面未部署或暂不可用！"
   };
@@ -308,6 +309,22 @@
     }
     window.alert(message);
   }
+
+  function openManualTaskCreate(event) {
+    if (event) {
+      stopToolbarEvent(event);
+    }
+    var opened = window.open(
+      "/msService/WOM/produceTask/manual-entry/page",
+      "_blank"
+    );
+    if (!opened) {
+      showWarning(messages.manualEntryUnavailable);
+    }
+    return false;
+  }
+
+  window.adpOpenWomManualTaskCreate = openManualTaskCreate;
 
   function systemCodeId(value) {
     if (!value) {
@@ -726,6 +743,18 @@
     button.parentNode.replaceChild(replacement, button);
   }
 
+  function installManualCreateButton() {
+    var button = document.getElementById("btn-manualCreateTask");
+    if (!button || button.getAttribute("data-adp-wom-manual-create") === "true") {
+      return;
+    }
+    var replacement = button.cloneNode(true);
+    replacement.removeAttribute("onclick");
+    replacement.setAttribute("data-adp-wom-manual-create", "true");
+    replacement.addEventListener("click", openManualTaskCreate, true);
+    button.parentNode.replaceChild(replacement, button);
+  }
+
   function openQrCodeDialog(row) {
     if (!window.ReactAPI || typeof window.ReactAPI.createDialog !== "function") {
       showWarning(messages.qrcodeUnavailable);
@@ -844,11 +873,23 @@
     true
   );
 
+  window.addEventListener("message", function refreshAfterManualCreate(event) {
+    if (
+      event.origin === window.location.origin &&
+      event.data &&
+      event.data.type === "adp-wom-manual-task-created"
+    ) {
+      refreshGridLater();
+    }
+  });
+
   installUnavailableDependencyButtons();
+  installManualCreateButton();
   installProcessTraceButton();
   installQrCodeButton();
   window.setInterval(function installDependencyButtons() {
     installUnavailableDependencyButtons();
+    installManualCreateButton();
     installProcessTraceButton();
     installQrCodeButton();
   }, 500);

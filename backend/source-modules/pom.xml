@@ -24,5 +24,6 @@
         <module>mes-production-context-outbox</module>
         <module>process-analysis</module>
         <module>wom-print</module>
+        <module>wom-production-entry</module>
     </modules>
 </project>

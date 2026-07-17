@@ -11,7 +11,7 @@
 
 ## 摘要
 
-- Watch 语句：`71`。
+- Watch 语句：`72`。
 - Watch 安全问题：`0`。
 
 ## 语句清单
@@ -89,3 +89,4 @@
 | 179-patrol-runtime-metadata.sql | 54 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (bigint, text); |
 | 179-patrol-runtime-metadata.sql | 57 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (boolean, text); |
 | 179-patrol-runtime-metadata.sql | 60 | drop-operator | guarded-if-exists | Allowed only with IF EXISTS when replacing PostgreSQL compatibility operators idempotently. | DROP OPERATOR IF EXISTS public.= (text, boolean); |
+| 189-wom-manual-task-entry.sql | 243 | drop-function | guarded-if-exists | Allowed only with IF EXISTS when replacing compatibility helper functions idempotently. | DROP FUNCTION IF EXISTS public.adp_add_wom_manual_task_button(jsonb); |

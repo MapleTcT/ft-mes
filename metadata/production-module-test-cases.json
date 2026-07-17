@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T07:55:36Z",
+  "generatedAt": "2026-07-17T10:10:30Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -146,10 +146,10 @@
       "routeSmokeStatus": "PASS",
       "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; visible manual create button still absent)",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only; visible manual entry is accepted separately under PROD-004)",
         "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2"
       ],
-      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_DAILY_PLAN_CREATE_VISIBLE_BUTTON_GAP",
+      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_DAILY_PLAN_CREATE",
       "targetTables": [
         "baseset_wf_custom_configs",
         "wf_deployment",
@@ -167,13 +167,11 @@
         "jbpm4_execution"
       ],
       "verificationSql": "select 'task', id, table_no, produce_batch_num, task_type, task_run_state, status, valid, product_id, formula_id, line_id, plan_num, table_info_id, deployment_id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%' order by id; select 'di', id, main_obj, staff, table_info_id, activity_name, process_key, process_version, outcome from public.wom_produce_tasks_di where main_obj in (select id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%') order by id; select 'active_count', count(*) from public.wom_task_actives where task_id=757036685264128; select 'quality_count', count(*) from public.wom_task_qualities where task_id=757036685264128; select 'batch_info', id, batch_num, material_id, is_available, source_type from public.baseset_batch_infos where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'batch_deal', id, batch_num, deal_table_id, amount, table_state from public.baseset_batch_deals where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'pending', id, table_info_id, process_key, process_id, activity_name, open_url from public.wfm_task_pending where table_info_id=757036685276416; select flow_key, activity_code, flow_version, flow_permission_type, type_id, unlimited_power from public.rbac_flow_permission where flow_key='makeTaskFlow'; select dbid_, id_, state_, procdefid_::text from public.jbpm4_execution where procdefid_::text like 'makeTaskFlow%' order by dbid_ desc limit 3;",
-      "evidence": "Marker ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6. After applying deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql, 162-wom-task-material-quality-tables.sql, 163-wom-make-task-flow-jbpm-definition.sql, and 164-wom-produce-task-deal-info-table.sql on test host 100.99.133.43, authenticated POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 returned HTTP 200 with code=200 and message 生成指令单成功. Request payload used existing product/formula/work-line samples and batchCode ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. PostgreSQL verified wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true/deployment_id=6579611732672512; wom_produce_tasks_di wrote TaskEvent_0il1mab/makeTaskFlow/1; active_count=1; quality_count=1; baseset_batch_infos and baseset_batch_deals were inserted for the marker batch; wfm_task_pending.id=757036687533312 points to makeTaskEdit; rbac_flow_permission rows exist for TaskEvent_0il1mab and TaskEvent_023irnk; jbpm4_execution has active-root makeTaskFlow-1. Real browser proof through public ingress http://222.88.185.146:18080 opened the generated makeTaskEdit pending URL with navigationStatus=200, title 制造指令单, and no console/page/request failures; DOM value proof shows edit_form_produceTask.produceBatchNum=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. Evidence JSON: /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json. Visible makeTaskList manual 新增/创建 remains absent: browser discovery still only saw query POST /makeTaskList-pending and state/report/inspection buttons. Therefore the accepted product shape for this case is the recovered daily-plan generation path, with visible manual entry restoration tracked as residual UX/product work.",
+      "evidence": "Marker ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6. After applying deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql, 162-wom-task-material-quality-tables.sql, 163-wom-make-task-flow-jbpm-definition.sql, and 164-wom-produce-task-deal-info-table.sql on test host 100.99.133.43, authenticated POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 returned HTTP 200 with code=200 and message 生成指令单成功. Request payload used existing product/formula/work-line samples and batchCode ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. PostgreSQL verified wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true/deployment_id=6579611732672512; wom_produce_tasks_di wrote TaskEvent_0il1mab/makeTaskFlow/1; active_count=1; quality_count=1; baseset_batch_infos and baseset_batch_deals were inserted for the marker batch; wfm_task_pending.id=757036687533312 points to makeTaskEdit; rbac_flow_permission rows exist for TaskEvent_0il1mab and TaskEvent_023irnk; jbpm4_execution has active-root makeTaskFlow-1. Real browser proof through public ingress http://222.88.185.146:18080 opened the generated makeTaskEdit pending URL with navigationStatus=200, title 制造指令单, and no console/page/request failures; DOM value proof shows edit_form_produceTask.produceBatchNum=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. Evidence JSON: /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json. This case remains the recovered daily-plan generation baseline. The visible makeTaskList manual entry is now independently accepted under PROD-004 with marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY; public /produceTaskCreated remains explicitly disabled and is not accepted by this case.",
       "issues": [
-        "Visible WOM makeTaskList manual 新增/创建 button is still absent; users cannot manually create from the list without a direct daily-plan/API/integration entry.",
-        "Public /produceTaskCreated 已显式禁用并返回 code=400，不作为创建证据。",
-        "If product requires hand-created manufacturing tasks, recover the runtime button or import template and run a separate marker persistence test."
+        "Public /produceTaskCreated 已显式禁用并返回 code=400，不作为创建证据；受控创建证据来自 produceTaskCreated2，列表可见入口由 PROD-004 验收。"
       ],
-      "nextAction": "Restore or document the user-facing create/import entry. If the intended product entry is upstream daily-plan integration, add product documentation for produceTaskCreated2 payload ownership and keep the current persistence acceptance as the baseline.",
+      "nextAction": "Keep the daily-plan produceTaskCreated2 path and the visible PROD-004 manual-entry path as separate regression baselines; resolve public produceTaskCreated only through PROD-ACTION-007 product-contract decision.",
       "coverageTags": [
         "work-order",
         "master-data",
@@ -470,28 +468,23 @@
       "id": "PROD-004",
       "domain": "指令",
       "name": "制造指令单生成或维护",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskEdit; /msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/produceTask/prepareMakeTaskList",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /msService/WOM/produceTask/manual-entry/page; /msService/WOM/produceTask/produceTask/makeTaskEdit; /msService/WOM/produceTask/produceTask/prepareMakeTaskList",
       "operationType": "create",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
       "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "GET /msService/WOM/produceTask/produceTask/makeTaskEdit",
-        "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/save",
+        "GET /msService/WOM/produceTask/manual-entry/page",
+        "GET /msService/WOM/produceTask/manual-entry/options",
+        "POST /msService/WOM/produceTask/manual-entry/create",
         "POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit",
+        "POST /msService/WOM/produceTask/produceTask/delete",
         "POST /msService/WOM/produceTask/produceTask/produceTaskCreated2",
-        "POST /public/WOM/produceTask/produceTask/produceTaskCreated",
-        "GET /msService/WOM/produceTask/produceTask/importMainXls",
-        "GET /msService/WOM/produceTask/produceTask/downloadXls"
+        "POST /public/WOM/produceTask/produceTask/produceTaskCreated"
       ],
-      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_DAILY_PLAN_CREATE",
+      "backendTraceStatus": "TRACED_AND_PERSISTED_VIA_VISIBLE_MANUAL_ENTRY",
       "targetTables": [
-        "baseset_wf_custom_configs",
-        "wf_deployment",
-        "jbpm4_deployment",
-        "jbpm4_deployprop",
-        "jbpm4_lob",
-        "rbac_flow_permission",
+        "wom_manual_task_requests",
         "wom_produce_tasks",
         "wom_produce_tasks_di",
         "wom_task_actives",
@@ -499,16 +492,15 @@
         "baseset_batch_infos",
         "baseset_batch_deals",
         "wfm_task_pending",
+        "wf_deal_info",
         "jbpm4_execution"
       ],
-      "verificationSql": "select 'task', id, table_no, produce_batch_num, task_type, task_run_state, status, valid, product_id, formula_id, line_id, plan_num, table_info_id, deployment_id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%' order by id; select 'di', id, main_obj, staff, table_info_id, activity_name, process_key, process_version, outcome from public.wom_produce_tasks_di where main_obj in (select id from public.wom_produce_tasks where coalesce(produce_batch_num::text,'') like '%ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6%') order by id; select 'active_count', count(*) from public.wom_task_actives where task_id=757036685264128; select 'quality_count', count(*) from public.wom_task_qualities where task_id=757036685264128; select 'batch_info', id, batch_num, material_id, is_available, source_type from public.baseset_batch_infos where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'batch_deal', id, batch_num, deal_table_id, amount, table_state from public.baseset_batch_deals where batch_num='ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH'; select 'pending', id, table_info_id, process_key, process_id, activity_name, open_url from public.wfm_task_pending where table_info_id=757036685276416; select flow_key, activity_code, flow_version, flow_permission_type, type_id, unlimited_power from public.rbac_flow_permission where flow_key='makeTaskFlow'; select dbid_, id_, state_, procdefid_::text from public.jbpm4_execution where procdefid_::text like 'makeTaskFlow%' order by dbid_ desc limit 3;",
-      "evidence": "Marker ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6. After applying deploy/docker/postgres/init/161-wom-make-task-flow-workflow-config.sql, 162-wom-task-material-quality-tables.sql, 163-wom-make-task-flow-jbpm-definition.sql, and 164-wom-produce-task-deal-info-table.sql on test host 100.99.133.43, authenticated POST /msService/WOM/produceTask/produceTask/produceTaskCreated2 returned HTTP 200 with code=200 and message 生成指令单成功. Request payload used existing product/formula/work-line samples and batchCode ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. PostgreSQL verified wom_produce_tasks.id=757036685264128/table_no=produceTask_20260620_001/produce_batch_num=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH/status=88/valid=true/deployment_id=6579611732672512; wom_produce_tasks_di wrote TaskEvent_0il1mab/makeTaskFlow/1; active_count=1; quality_count=1; baseset_batch_infos and baseset_batch_deals were inserted for the marker batch; wfm_task_pending.id=757036687533312 points to makeTaskEdit; rbac_flow_permission rows exist for TaskEvent_0il1mab and TaskEvent_023irnk; jbpm4_execution has active-root makeTaskFlow-1. Real browser proof through public ingress http://222.88.185.146:18080 opened the generated makeTaskEdit pending URL with navigationStatus=200, title 制造指令单, and no console/page/request failures; DOM value proof shows edit_form_produceTask.produceBatchNum=ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6_BATCH. Evidence JSON: /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json; /tmp/adp-produceTaskCreated2-ui-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6-dom-values.json. makeTaskEdit route rendering is also verified for the generated pending URL, not only a blank direct edit page. Public /produceTaskCreated 已显式禁用并返回 code=400，visible list save/import buttons remain absent, so those are not counted as accepted creation channels.",
+      "verificationSql": "SELECT id,version,valid,status,table_info_id,table_no,deployment_id,process_key,produce_batch_num,product_id,formula_id,line_id,plan_num,plan_start_time,plan_end_time FROM public.wom_produce_tasks WHERE produce_batch_num=$$ADP_E2E_20260717101030_WOM_MANUAL_ENTRY$$; SELECT indexdef FROM pg_indexes WHERE schemaname=$$public$$ AND tablename=$$wom_manual_task_requests$$ AND indexname=$$uq_wom_manual_task_requests_active_batch$$; SELECT count(*) FROM public.wom_produce_tasks WHERE produce_batch_num=$$ADP_E2E_20260717101030_WOM_MANUAL_ENTRY$$; SELECT id,activity_name,task_status,open_url FROM public.wfm_task_pending WHERE model_id=766803299030272; SELECT tenant_id,request_id,batch_code,status,task_id FROM public.wom_manual_task_requests WHERE batch_code=$$ADP_E2E_20260717101030_WOM_MANUAL_ENTRY$$; SELECT outcome,outcome_des,outcome_type FROM public.wf_deal_info WHERE table_info_id=766803299050752 ORDER BY id DESC;",
+    "evidence": "Visible manual-entry path accepted on 2026-07-17. Real browser opened WOM makeTaskList, clicked #btn-manualCreateTask with text 新建指令单, loaded PostgreSQL-backed product/formula/line options, and submitted marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY through POST /msService/WOM/produceTask/manual-entry/create. HTTP 200 returned task 766803299030272/produceTask_20260717_005 and pending 766803301012736. PostgreSQL proved status=88/valid=true, the SUCCESS request ledger and workflow pending; identical request replay returned idempotent=true with task count still 1. A different requestId for the same batch returned business code 409, task count stayed 1 and no conflict ledger row was created; the runtime database exposes a partial unique PROCESSING/SUCCESS normalized-batch index. The generated makeTaskEdit pending rendered the marker, submit changed status to 99 and removed the active pending with wf_deal_info outcome 生效, then application delete set valid=false/version=4 and request-ledger cleanup returned 0. Browser console/page/request failures were empty, and the 390px mobile page had no horizontal overflow. Durable evidence: metadata/wom-manual-task-entry-acceptance.json plus metadata/wom-manual-task-entry-*.png. The older produceTaskCreated2 daily-plan evidence remains valid; public /produceTaskCreated remains explicitly disabled, is not accepted by this PASS case, and is tracked independently as PROD-ACTION-007.",
       "issues": [
-        "The generated makeTaskEdit pending page loads and shows marker values, but the list still lacks a visible save/import/create entry.",
-        "Public /produceTaskCreated 已显式禁用，最新 probe 返回 code=400 且查库为 0，仍需产品确认是否恢复。",
-        "Need follow-up UI/product decision for manual maintenance path if users are expected to edit/save manufacturing orders from the list."
+        "Public /produceTaskCreated remains explicitly disabled pending its separate product-contract decision; it is not used by the accepted visible manual-entry path."
       ],
-      "nextAction": "Use produceTaskCreated2 as the accepted daily-plan generation baseline. Separately recover visible manual save/import buttons or document that manufacturing instructions are generated upstream only.",
+      "nextAction": "Keep the visible manual-entry regression in release acceptance and separately resolve PROD-ACTION-007 without changing the accepted manual-entry contract.",
       "coverageTags": [
         "instruction",
         "persistence",
@@ -1752,6 +1744,11 @@
       "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
       "evidence": "metadata/wom-qrcode-browser-acceptance.json; metadata/wom-qrcode-persistence-acceptance.json",
       "cleanup": "marker rows=0; daily sequence restored"
+    },
+    "womManualTaskEntry": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+      "evidence": "metadata/wom-manual-task-entry-acceptance.json"
     }
   }
 }

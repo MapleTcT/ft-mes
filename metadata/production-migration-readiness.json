@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T08:30:04+00:00",
-  "repoCommit": "7d233f3ea722ba627f6f08da3c3072bac5ecb7eb",
+  "generatedAt": "2026-07-17T10:22:51+00:00",
+  "repoCommit": "2c48f06c07d77108ecc4f933a6ee10a86980b788",
   "database": "PostgreSQL",
   "status": "NOT_READY_FOR_PRODUCTION_MIGRATION",
   "summary": {
@@ -448,11 +448,12 @@
       "currentEvidence": [
         "平台和 53 个业务页面 smoke 有证据。",
         "生产模块测试矩阵当前 44 条，41 PASS / 3 BLOCKED / 0 NOT_RUN，44 条 route smoke 全部 PASS。",
-        "WOM 状态流转、报工、备料、请检、二维码生成与打印状态回填，QCS 报告和不合格处置，material/WMS 入库/质检释放/领料，ProcessAnalysis 追溯，WTS/WAPS、RM、craftGraph 和生产列表导出已形成真实前端/API/PostgreSQL 或文件响应证据。",
+        "WOM 可见手工新建指令单、状态流转、报工、备料、请检、二维码生成与打印状态回填，QCS 报告和不合格处置，material/WMS 入库/质检释放/领料，ProcessAnalysis 追溯，WTS/WAPS、RM、craftGraph 和生产列表导出已形成真实前端/API/PostgreSQL 或文件响应证据。",
         "metadata/business-dependency-readiness-smoke.json confirms material-service and process-analysis are 2/2 READY with healthy instances, 2xx compatibility endpoints and runtime/menu/table evidence.",
         "metadata/production-module-blockers.json records the 3 unresolved production blocker cases and is a required business smoke signoff gate.",
-        "metadata/production-module-backlog.json records 5 unresolved production backlog items covering product-scope decisions and the external Batch client; public produceTaskCreated explicit-disabled and visible WOM manual-create/import scope remain explicit signoff items, while WOM QR is closed.",
+        "metadata/production-module-backlog.json records 4 unresolved production backlog items covering product-scope decisions and the external Batch client; public produceTaskCreated remains an explicit signoff item, while WOM QR and the visible WOM manual production-task entry are closed.",
         "metadata/wom-qrcode-browser-acceptance.json and metadata/wom-qrcode-persistence-acceptance.json prove 10/10 real-click and 10/10 API/PostgreSQL acceptance with marker cleanup to zero.",
+        "metadata/wom-manual-task-entry-acceptance.json proves 9/9 visible-entry, create, idempotency, duplicate-batch guard, pending, submit, soft-delete and cleanup acceptance with marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY.",
         "docs/production-migration/business-smoke-signoff-template.md 已建立。",
         "deploy/business-smoke/production-migration/README.md",
         "deploy/business-smoke/production-migration/business-smoke-signoff.example.json",
@@ -469,7 +470,7 @@
         "剩余 3 条生产用例仍 BLOCKED：RM 外部 Batch 客户端显式编辑，以及 PROD-019/PROD-021 独立不良数量产品范围确认。",
         "business smoke signoff READY 校验必须覆盖 metadata/production-module-blockers.json 的每个 PROD-* 阻断 case；未解决 case 需要逐项签署结构化风险接受，riskAcceptance 必须包含 decision=ACCEPTED、acceptedBy、signedAt 和真实 evidence。",
         "business smoke signoff READY 校验必须覆盖 metadata/production-module-backlog.json 的每个未闭合 backlog item；public produceTaskCreated 这类 HTTP 200 但不落库的假成功不能被生产签字遗漏。",
-        "business smoke signoff is blocked by unresolved product-scope/external-client items and the absence of signed production evidence; material/ProcessAnalysis/QR are no longer dependency blockers.",
+        "business smoke signoff is blocked by unresolved product-scope/external-client items and the absence of signed production evidence; material/ProcessAnalysis/QR/visible WOM manual entry are no longer dependency blockers.",
         "业务负责人尚未基于真实主流程签字。"
       ],
       "nextActions": [
@@ -491,7 +492,8 @@
         "docs/production-module-backlog.md",
         "metadata/production-module-backlog.json",
         "metadata/wom-qrcode-browser-acceptance.json",
-        "metadata/wom-qrcode-persistence-acceptance.json"
+        "metadata/wom-qrcode-persistence-acceptance.json",
+        "metadata/wom-manual-task-entry-acceptance.json"
       ],
       "readyEvidenceCommands": [
         "make business-package-scan",
@@ -617,11 +619,11 @@
     },
     "productionBacklog": {
       "path": "metadata/production-module-backlog.json",
-      "generatedAt": "2026-07-17T07:55:36Z",
+      "generatedAt": "2026-07-17T09:51:20Z",
       "status": "BLOCKED",
       "metrics": {
-        "totalItems": 5,
-        "blocked": 5,
+        "totalItems": 4,
+        "blocked": 4,
         "failBacklog": 0
       }
     },

@@ -21,6 +21,7 @@
 |---|---|---|---|
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
+| WOM 可见新建指令单 | `PASS` | `wom-production-entry` 源码模块、列表入口、PostgreSQL 参照、迁移 189、marker `ADP_E2E_20260717101030_WOM_MANUAL_ENTRY` 的 9/9 浏览器/API/落库验收 | public `produceTaskCreated` 是否开放仍需产品范围决定；不影响受控可见入口 |
 | PATROL 共享巡检 | `TARGET_HIDDEN_DANGER_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `af01d6a7...97f753`；异常隐患 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，明细关联、幂等和 EAM 来源“巡检”复显均有证据 | 继续统计监控；完整隐患治理需真实 SESH；目标回滚需维护窗口确认 |
 | EMS 能源管理 | `BLOCKED_MISSING_INDICATOR` | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 四个源码包和依赖关系已恢复 | 取得 Indicator `6.0.4.0` api/core，补 PostgreSQL 迁移，逐服务构建与验收 |
 | BPI 产品链 | `PARTIAL` | 契约、目标环境 Flyway V12、点位准入硬门禁、`MapleTcT/iot@41239b4e` 自动目录、强制来源序列与 `30m` 运行时证据门禁、MES Kafka 消费落库、可审计拓扑/规则产品化、本地 V13 独立运行时回执、真实 PostgreSQL、Kafka/Flink、WOM production context 和影子批次确认均有可复验证据 | V13 尚未部署目标；当前试点点位仍 BLOCKED；真实设备点位的连续单调序列、IoT/MES 同 marker 候选/批次、连续影子运行、END 边界和 QCS/WMS 写回仍未完成 |

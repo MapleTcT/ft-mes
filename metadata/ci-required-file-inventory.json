@@ -633,6 +633,126 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/WomProductionEntryApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/api/CreateInstructionRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/api/WomProductionEntryController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/api/WomProductionEntryExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/config/RestClientConfig.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/domain/CreateInstructionResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/domain/ManualTaskRequestRecord.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/domain/ProductionOption.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/domain/TaskResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/domain/WomEntryBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/repository/WomProductionEntryRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/service/WomProductionEntryService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/service/WomUpstreamClient.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/support/RequestAuthContext.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/java/com/mapletct/ftmes/womentry/support/TenantResolver.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/wom-production-entry/src/test/java/com/mapletct/ftmes/womentry/service/WomProductionEntryServiceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-api/README.md",
       "state": "tracked",
       "tracked": true
@@ -2811,6 +2931,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/189-wom-manual-task-entry.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3106,6 +3232,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-wom-manu-inspect-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-wom-manual-task-entry-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5277,6 +5409,42 @@
     },
     {
       "ignored": false,
+      "path": "metadata/wom-manual-task-entry-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-task-entry-form-mobile.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-task-entry-form.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-task-entry-list.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-task-entry-pending.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/wom-manual-task-entry-result.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/wom-public-produce-task-created-analysis.json",
       "state": "tracked",
       "tracked": true
@@ -7220,13 +7388,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 100
+      "tracked": 120
     },
     "contracts": {
       "tracked": 19
     },
     "deploy": {
-      "tracked": 541
+      "tracked": 543
     },
     "docs": {
       "tracked": 90
@@ -7235,7 +7403,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 121
+      "tracked": 127
     },
     "package.json": {
       "tracked": 1
@@ -7259,8 +7427,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1200,
-    "tracked": 1200,
+    "totalFiles": 1228,
+    "tracked": 1228,
     "untracked": 0
   },
   "untrackedByDirectory": []

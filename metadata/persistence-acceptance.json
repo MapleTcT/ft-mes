@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-17T07:55:36Z",
+  "generatedAt": "2026-07-17T10:10:30Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QRCODE_PASS_AND_EXISTING_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_MANUAL_ENTRY_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
     "generatedAt": "2026-07-16T21:08:52.560Z",
     "coreFlow": {
@@ -82,13 +82,19 @@
       "marker": "ADP-WOM-E2E-20260717084642-55397",
       "evidence": "metadata/wom-qrcode-persistence-acceptance.json",
       "assertions": "10/10; generatedRows=2; markerRowsAfterCleanup=0"
+    },
+    "womManualTaskEntry": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+      "evidence": "metadata/wom-manual-task-entry-acceptance.json",
+      "assertions": "9/9; visible list entry; create; same-request replay; duplicate-batch rejection; PostgreSQL partial unique concurrency guard; pending render; submit; soft-delete rollback; request-ledger cleanup"
     }
   },
   "summary": {
     "testedFeatures": 170,
-    "pass": 165,
+    "pass": 166,
     "fail": 0,
-    "blocked": 3,
+    "blocked": 2,
     "notApplicable": 2
   },
   "items": [
@@ -594,29 +600,30 @@
       "issues": []
     },
     {
-      "module": "生产模块",
-      "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
-      "operation": "定位新建生产工单或制造任务可见入口",
-      "api": "POST /msService/WOM/produceTask/produceTask/makeTaskList-pending (query only from current visible UI); source-mapped but not UI-triggered manual endpoints: POST /makeTaskEdit/save, POST /makeTaskEdit/submit, GET /importMainXls, GET /downloadXls; accepted daily-plan create endpoint recorded separately: POST /produceTaskCreated2",
-      "method": "POST/GET",
+      "module": "生产模块-WOM",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList -> /msService/WOM/produceTask/manual-entry/page",
+      "operation": "从制造指令单列表手工新建、幂等重放、提交生效并回滚制造指令",
+      "api": "POST /msService/WOM/produceTask/manual-entry/create; POST /msService/WOM/produceTask/produceTask/makeTaskEdit/submit; POST /msService/WOM/produceTask/produceTask/delete",
+      "method": "POST",
       "requiresPersistence": true,
-      "backendEntry": "Visible UI has not entered a manual create write chain: current route exposes list/query and state/report/inspection buttons, but no visible create/save/import action. Source trace maps WOMProduceTaskController.save/submit/importMainXls/downloadXls plus produceTaskCreated2/public produceTaskCreated; produceTaskCreated2 is accepted separately as a daily-plan generation path, while public produceTaskCreated remains a no-op.",
+      "backendEntry": "WomProductionEntryController.create -> WomProductionEntryService -> WomUpstreamClient -> WOMProduceTaskController.produceTaskCreated2 -> WOMFormCreatServiceImpl.creatProduceTask -> workflow start/pending; submit/delete continue through recovered WOM controller/service",
       "tables": [
-        "runtime_view",
-        "rbac_menuinfo",
-        "runtime_button",
-        "wom_produce_tasks"
+        "wom_manual_task_requests",
+        "wom_produce_tasks",
+        "wom_produce_tasks_di",
+        "wom_task_actives",
+        "wom_task_qualities",
+        "baseset_batch_infos",
+        "baseset_batch_deals",
+        "wfm_task_pending",
+        "wf_deal_info",
+        "jbpm4_execution"
       ],
-      "marker": "",
-      "verificationSql": "select code, url, type, open_type from runtime_view where code in ('WOM_1.0.0_produceTask_makeTaskEdit','WOM_1.0.0_produceTask_makeTaskList','WOM_1.0.0_produceTask_prepareMakeTaskList'); select code, name, url, action_url, route from rbac_menuinfo where coalesce(url::text,'') ilike '%WOM/produceTask/produceTask%' or coalesce(action_url::text,'') ilike '%WOM/produceTask/produceTask%' or coalesce(route::text,'') ilike '%WOM/produceTask/produceTask%'; select count(*) from runtime_button where view_code ilike '%WOM_1.0.0_produceTask%' and (coalesce(code::text,'') ilike any(array['%add%','%new%','%create%','%save%','%import%','%download%']) or coalesce(name::text,'') ~ '(新增|新建|添加|创建|保存|导入|下载)' or coalesce(display_name::text,'') ~ '(新增|新建|添加|创建|保存|导入|下载)' or coalesce(operate_url::text,'') ilike any(array['%save%','%import%','%download%','%create%']));",
-      "status": "BLOCKED",
-      "evidence": "2026-06-20 revalidation after address switch: SSH/DB/container host is 100.99.133.43; curl to http://100.99.133.43:18080/ plus WOM makeTaskList/makeTaskEdit returned HTTP 200. Real browser evidence used public ingress http://222.88.185.146:18080 for the same deployment because direct Playwright navigation to 100.99.133.43 timed out before domcontentloaded. Browser discovery opened WOM makeTaskList and makeTaskEdit with navigationStatus=200, targetsWithErrors=0, visible/network/console/page/request errors all 0, and potentialWriteRequests=0. makeTaskList only sent query POST /msService/WOM/produceTask/produceTask/makeTaskList-pending; SQL 078 restored action buttons 开始/保持/重启/结束/提前放料/请检/生产过程追溯/生成二维码, but no safe 新增/新建/添加/创建 button was present. makeTaskEdit with entityCode/viewCode loaded scripts, editStates, layoutJson, systemCodeJson, and 17 visible form controls, but no visible save/create/submit button was available in the direct page. Remote read-only verification on 100.99.133.43 confirmed runtime_view contains makeTaskEdit, makeTaskList, and prepareMakeTaskList; rbac_menuinfo exposes only makeTaskList and prepareMakeTaskList menu entries; runtime_button has no add/new/create/save/import/download-like buttons for WOM produceTask views. Source trace in WOMProduceTaskController exposes makeTaskEdit/save, makeTaskEdit/submit, importMainXls, downloadXls, produceTaskCreated2, and public produceTaskCreated endpoints, but none has a captured UI payload suitable for marker persistence. Reports: /tmp/adp-production-action-discovery-public-current/production-action-discovery.json; /tmp/adp-production-action-discovery-public-edit-entity-current/production-action-discovery.json; /tmp/adp-wom-button-visibility-20260615180122/wom-button-visibility.json. Follow-up ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6: direct daily-plan create via produceTaskCreated2 now passes and persists, but this does not restore the user-visible manual 新增/创建 button on makeTaskList. See item route /msService/WOM/produceTask/produceTask/produceTaskCreated2 and evidence /tmp/adp-produceTaskCreated2-persistence-ADP_E2E_20260619195003_PRODUCE_CREATED2_FIX6.json.",
-      "issues": [
-        "Current WOM makeTaskList route still appears to be a pending-task/list page, not a visible manual create entry for production work orders.",
-        "List action buttons are restored, but they are state/report/inspection/trace actions rather than a manual create entry.",
-        "Daily-plan generation through produceTaskCreated2 is now accepted separately; this item remains blocked only for the visible manual create/import entry.",
-        "Need product decision to expose the real visible create/import entry or document that daily-plan generation is the intended product entry."
-      ]
+      "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
+      "verificationSql": "SELECT id,version,valid,status,table_info_id,table_no,deployment_id,process_key,produce_batch_num,product_id,formula_id,line_id,plan_num,plan_start_time,plan_end_time FROM public.wom_produce_tasks WHERE produce_batch_num=$$ADP_E2E_20260717101030_WOM_MANUAL_ENTRY$$; SELECT indexdef FROM pg_indexes WHERE schemaname=$$public$$ AND tablename=$$wom_manual_task_requests$$ AND indexname=$$uq_wom_manual_task_requests_active_batch$$; SELECT id,activity_name,task_status,open_url FROM public.wfm_task_pending WHERE model_id=766803299030272 AND task_status=88; SELECT tenant_id,request_id,batch_code,status,task_id FROM public.wom_manual_task_requests WHERE batch_code=$$ADP_E2E_20260717101030_WOM_MANUAL_ENTRY$$; SELECT outcome,outcome_des,outcome_type FROM public.wf_deal_info WHERE table_info_id=766803299050752 ORDER BY id DESC;",
+      "status": "PASS",
+      "evidence": "Real browser clicked visible #btn-manualCreateTask on makeTaskList, opened the maintained manual-entry page, selected a PostgreSQL-backed product/formula/line combination and created marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY. POST /manual-entry/create returned HTTP 200 and task 766803299030272/produceTask_20260717_005; PostgreSQL confirmed task status=88/valid=true, makeTaskFlow pending 766803301012736 and SUCCESS request ledger. Same-request replay returned idempotent=true and task count remained 1. A different requestId with the same batch returned business code 409, task count stayed 1 and no conflict ledger row was inserted; pg_indexes confirmed the partial unique PROCESSING/SUCCESS batch guard. The generated pending page rendered the marker; submit changed status to 99 and cleared active pending with wf_deal_info outcome 生效. WOM delete then set valid=false/version=4, and request-ledger cleanup returned 0. Browser console/page/request failures were empty; desktop and 390px mobile had no horizontal overflow. Evidence: metadata/wom-manual-task-entry-acceptance.json and five metadata/wom-manual-task-entry-*.png screenshots.",
+      "issues": []
     },
     {
       "module": "生产模块-WOM",
