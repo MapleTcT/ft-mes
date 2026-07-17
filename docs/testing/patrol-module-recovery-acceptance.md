@@ -8,7 +8,7 @@
 - 承载服务：`EamMs`
 - 目标环境：`v6@10.11.100.17`
 - 默认数据库：PostgreSQL
-- 当前结论：`TARGET_REPORT_STATISTICS_PASS_MONITOR_FALLBACK`
+- 当前结论：`TARGET_GATHER_RUNTIME_PASS_EXTERNAL_TAG_DATA_BLOCKED`
 
 机器可读记录见 [PATROL 恢复验收](../../metadata/patrol-module-recovery-acceptance.json)；可重放脚本见
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。
@@ -38,9 +38,9 @@ failure 均为 0，取消分支也在其后独立回归 PASS。
 | 原始包 | `PATROL_6.0.4.0.zip` | PASS |
 | 原包 SHA-256 | `1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394` | PASS |
 | 完整性 | 1113 文件、455 Java、267 Web、9 SQL | PASS |
-| PATROL core | `d95814b7debcf9af9a155150787cfd247d4f6c1dc8164c6ccc103276ca802221` | PASS |
-| PATROL api | `8cbb3382bd65fe214e3fc674108b2def45bce084e5a6c06845e1da0123c44bc1` | PASS |
-| PATROL service | `f9ab3be78b52c0d0b3c4ef344ab82fa9ab3526ffa0ab60cab0460ac8e01f473d` | PASS |
+| PATROL core | `f56950e06b3bc4ac40d887287044d0f2824231384c3bb03bfb2070695e3f7293` | PASS |
+| PATROL api | `ebff69b088e31d17aef534584ab33750ab9a2b96e24b001653ecb655c0fc4be1` | PASS |
+| PATROL service | `e2cb13cbdf8a10bd8d0335b78a6fa12b9d22dca513c81079da73164e514f939a` | PASS |
 
 模块仍以 Java 8 构建；供应商包没有测试源码，因此构建 PASS 只证明编译和依赖解析，业务结论来自
 下面的真实页面/API/PostgreSQL 验收。
@@ -83,13 +83,13 @@ failure 均为 0，取消分支也在其后独立回归 PASS。
 | 检查项 | 结果 |
 |---|---|
 | 部署 JAR | `runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar` |
-| 部署 SHA-256 | `99e5c346448595db8cecf5aafb2523a0dd9c1816ae6f80f6fa22f1abc89ad0aa` |
+| 部署 SHA-256 | `78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979` |
 | 基线 JAR SHA-256 | `b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38` |
 | EamMs | 容器运行，PATROL 请求真实命中 |
 | PostgreSQL | 容器 healthy |
 | Nginx | 配置 `nginx -t` PASS，兼容规则已热加载 |
-| 回滚 JAR | `/data/docker/adp-patrol-report-20260717/EamMs-1.0.0.pre-report-pending-af01d6a.jar`，SHA-256 `af01d6a7...f753` |
-| 冷启动 | `396.38s` 后完成 `Started EamMsApplication`，PATROL 注册成功 |
+| 回滚 JAR | `/data/docker/adp-patrol-gather-20260717-1025/EamMs-1.0.0.pre-simlogin-7c0ebd.jar`，SHA-256 `7c0ebd70...d7284` |
+| 冷启动 | `404.544s` 后完成 `Started EamMsApplication`，PATROL Kafka 分区重新分配 |
 | 结果录入脚本 | `enteringResultEdit/body.js`、`body-es5.js`，目标与仓库 SHA-256 均为 `5c2f6653...b4a360`；空/null 结果不会再被转换为数值 0 |
 
 前端兼容规则只处理旧框架的两个无效错误日志：
@@ -99,6 +99,10 @@ failure 均为 0，取消分支也在其后独立回归 PASS。
 
 PATROL 六种任务状态 `未下发/已下发/执行中/已超期/已完成/已取消` 已由真实系统编码 API 返回，
 没有用前端降噪掩盖缺失字典。
+
+构建阶段曾有一个未进入最终候选的手工 `zip -u` 包把 Spring Boot 嵌套 JAR 压缩，EamMs 随即重启失败；
+已按哈希回滚到 `99e5c346...ad0aa` 并恢复。最终包改由受控脚本生成，强制检查外层/内层 CRC、重复条目和
+嵌套 JAR 的 `ZIP_STORED`，再从已启动的 `7c0ebd70...d7284` 基线生成。该过程没有修改 PostgreSQL 业务数据。
 
 ## 真实页面与落库
 
@@ -267,6 +271,34 @@ make acceptance-patrol-report \
 `gather_data` 和人工结论的可分析明细，因此该页不能造数冒充 PASS。监控页已证明路线/任务聚合和降级提示可用；
 真实地图定位与轨迹回放继续由缺失的 `SESGISConfig` 服务包阻断。
 
+## Kafka 采集与测点计算链（2026-07-17）
+
+机器记录：`metadata/patrol-gather-data-runtime-acceptance.json`；可重放命令：
+
+```bash
+make acceptance-patrol-gather-data \
+  ADP_SSH_HOST=10.11.100.17 \
+  PATROL_GATHER_EXPECTED_EAM_SHA256=78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979
+```
+
+验收向真实 `topic.kafka.PATROL.gatherData` 写入 5 条带唯一 marker 的消息，并读取同一消费者组、EamMs 日志和
+PostgreSQL。消费前后 topic/consumer offset 为 `20 -> 25`，最终 lag 为 0；空数据、非法任务 ID、非法工作项列表和
+非法工作项 ID 四类消息均被隔离，合法已完成任务继续调用 TagManagement：
+
+| 检查项 | 证据 | 结果 |
+|---|---|---|
+| 运行构件 | 部署/期望 SHA-256 均为 `78cac278...a47979`，容器 `running`、restart 0 | PASS |
+| Kafka 绑定 | `topic.kafka.PATROL.gatherData-0` 已分配，offset `20 -> 25`，lag 0 | PASS |
+| 消息健壮性 | 4 类异常输入均有独立 guard 日志，未触发外层消费者失败 | PASS |
+| 模拟登录 | 首轮出现公钥回退与 `authenticated user admin`；重放复用消费线程上下文且无登录失败 | PASS |
+| 请求时间窗 | `2026-07-17 08:30:05` 到 `08:31:05`，使用 `HH` 24 小时制 | PASS |
+| TagManagement | 请求真实测点 `TAG_ADP_E2E_202607162116_PATROL_ITEM`，返回 `result=false/values=[]` | PASS_WITH_EXTERNAL_DATA_BLOCKER |
+| PostgreSQL | `tmm_tags` 总数/匹配数均为 0；`mp_task_details.id=6676867603743568` 身份不变、`gather_data` 仍为 null | BLOCKED_BY_EXTERNAL_DATA |
+
+因此技术链结论是 `PASS_WITH_EXTERNAL_DATA_BLOCKER`：消费者、认证、模块发现、Feign 请求、异常隔离和待写入行定位均
+已通过；中位数值不能落库的唯一真实原因是测试环境没有测点元数据/历史值。模拟登录失败日志现只记录响应字段名，
+机器报告也明确声明 `tokenValuesCaptured=false`，不再把 JWT 写入可交接证据。
+
 ## 已恢复前置数据
 
 | 类型 | ID | Marker / 内容 | 状态 |
@@ -287,6 +319,7 @@ make acceptance-patrol-report \
 | 隐患整改/复查/销项 | BLOCKED_SESH_NOT_INSTALLED | 若纳入目标，取得真实 SESH 包并验收完整状态机；不得用待治理兼容记录冒充 |
 | 统计报表与异常概览 | PASS | 保持 7 个真实页面和 22 项 API/PostgreSQL 聚合对账回归 |
 | 采集数据误差分析 | NOT_APPLICABLE_NO_ERROR_BENCHMARK_ITEM | 配置真实误差基准巡检项，产生非空 `gather_data` 后复验图表数值 |
+| Kafka 采集与测点计算链 | PASS_WITH_EXTERNAL_DATA_BLOCKER | 接入至少一个启用且有历史值的真实 TagManagement 测点，复验中位数写入 `mp_task_details.gather_data` |
 | 监控路线/任务降级视图 | PASS_WITH_FALLBACK | 保持路线/任务 API 与 PostgreSQL 聚合对账 |
 | GIS 定位与轨迹回放 | BLOCKED_SESGISCONFIG_NOT_INSTALLED | 取得真实 SESGISConfig 服务包后恢复地图、定位和轨迹回放并做浏览器验收 |
 | 目标机回滚演练 | REQUIRES_CONFIRMATION | 维护窗口内禁用、验证、重新应用 PATROL 迁移；共享 EAM/SESH 兼容数据不做破坏性删除 |

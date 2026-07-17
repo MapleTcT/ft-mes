@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T02:01:25+00:00",
-  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
+  "generatedAt": "2026-07-17T03:29:58+00:00",
+  "repoCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
     "totalFiles": 358,
-    "totalBytes": 54862005,
+    "totalBytes": 54875417,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -21,8 +21,8 @@
       "nginx-runtime-config": 20399,
       "postgres-init-sql": 54024175,
       "runtime-binary-patch": 29988,
-      "runtime-patch-source": 82088,
-      "runtime-script": 260340,
+      "runtime-patch-source": 82246,
+      "runtime-script": 273594,
       "runtime-static-override": 402662
     }
   },
@@ -1503,8 +1503,8 @@
     {
       "path": "deploy/docker/patches/foundation-simulated-login-serverport/src/com/supcon/orchid/foundation/internal/services/SimulatedLoginService.java",
       "category": "runtime-patch-source",
-      "sizeBytes": 9185,
-      "sha256": "f120ff9c3da36d4328b146ed78f7ea783291b9d92c4bec4833aa9c3ca22c8c54"
+      "sizeBytes": 9343,
+      "sha256": "fa8f4c01d81208bad143a795c52083c824412588a474f23613ee2df14d4453a8"
     },
     {
       "path": "deploy/docker/patches/kafka-jaas-noop/src/main/java/org/springframework/kafka/security/jaas/KafkaJaasLoginModuleInitializer.java",
@@ -1695,8 +1695,8 @@
     {
       "path": "deploy/docker/scripts/patch-patrol-postgres-source.py",
       "category": "runtime-script",
-      "sizeBytes": 31208,
-      "sha256": "8409e27b051ce50dc9cd4860724710d131090d2569097a6b02d53a0e6d8941f3"
+      "sizeBytes": 44462,
+      "sha256": "38f9e41e553e6a6ddb754049ce12bb6cca770dc40c8a0594132db57f216f74e0"
     },
     {
       "path": "deploy/docker/scripts/patch-postgres-runtime.py",

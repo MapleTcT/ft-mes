@@ -126,6 +126,7 @@ REQUIRED_PATHS = [
     "metadata/postgres-migration-inventory.json",
     "metadata/persistence-acceptance.json",
     "metadata/patrol-report-acceptance.json",
+    "metadata/patrol-gather-data-runtime-acceptance.json",
     "metadata/bpi-phase1-persistence-acceptance.json",
     "metadata/bpi-telemetry-persistence-acceptance.json",
     "metadata/bpi-candidate-protobuf-persistence-acceptance.json",

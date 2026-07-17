@@ -29,6 +29,10 @@ PATROL_REPORT_CUSTOM_RELATIVE_PATH = Path(
     "service/src/main/custom/com/supcon/orchid/PATROL/services/impl/"
     "PatrolReportServiceImpl.java"
 )
+PATROL_GATHER_DATA_CONSUMER_RELATIVE_PATH = Path(
+    "service/src/main/java/com/supcon/orchid/PATROL/mobileInterface/consumer/"
+    "PATROLCreateCalcGatherDataService.java"
+)
 UTILITY_METHOD_MARKER = b"public static String normalizeIdentifierQuotes"
 UTILITY_IMPORT = b"import com.supcon.orchid.db.DbUtils;"
 UTILITY_IMPORT_ANCHOR = b"import com.supcon.orchid.foundation.entities.Company;"
@@ -333,6 +337,169 @@ REPORT_PENDING_REPLACEMENTS = (
         b'Integer total = (Integer) map.get("total");\n                    String riskMode = (String) map.get("riskMode");\n                    if ("PATROL_COMPATIBILITY_PENDING".equals(riskMode)) {\n                        pending = pending.add(new BigDecimal(total));\n                        continue;\n                    }\n                    if (status==PatrolConstant.flowStatus.FLOW_VALID',
     ),
 )
+GATHER_DATA_REPLACEMENTS = (
+    (
+        b'import java.math.BigDecimal;',
+        b'import java.math.BigDecimal;\nimport java.nio.charset.StandardCharsets;',
+    ),
+    (
+        b'public void CreateCalcGatherData(Message<String> value)',
+        b'public void CreateCalcGatherData(Message<?> value)',
+    ),
+    (
+        b'String jsonString = value.getPayload();',
+        b'Object payload = value.getPayload();\n'
+        b'                String jsonString = null;\n'
+        b'                if (payload instanceof byte[]) {\n'
+        b'                    jsonString = new String((byte[]) payload, StandardCharsets.UTF_8);\n'
+        b'                } else if (payload instanceof String) {\n'
+        b'                    jsonString = (String) payload;\n'
+        b'                } else if (payload != null) {\n'
+        b'                    jsonString = JSON.toJSONString(payload);\n'
+        b'                }',
+    ),
+    (
+        b'PATROLKafkaMessageDTO<List<Map<String, Object>>> messageData = JSONObject.parseObject(jsonString,new TypeReference<PATROLKafkaMessageDTO<List<Map<String, Object>>>>(){});\n'
+        b'                    List<Map<String, Object>> workItemTaskIds = messageData.getData();',
+        b'PATROLKafkaMessageDTO<List<Map<String, Object>>> messageData = JSONObject.parseObject(jsonString,new TypeReference<PATROLKafkaMessageDTO<List<Map<String, Object>>>>(){});\n'
+        b'                    if (messageData == null || ObjectUtils.isEmpty(messageData.getData())) {\n'
+        b'                        logger.warn("Ignore empty PATROL gather-data message");\n'
+        b'                        return;\n'
+        b'                    }\n'
+        b'                    List<Map<String, Object>> workItemTaskIds = messageData.getData();',
+    ),
+    (
+        b"if (workItemTaskIds.size() > 0) {",
+        b"if (!ObjectUtils.isEmpty(workItemTaskIds)) {",
+    ),
+    (
+        b'new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")',
+        b'new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")',
+    ),
+    (
+        b'Long taskId = Long.parseLong(String.valueOf(map.get("taskId")));\n'
+        b'                                JSONArray workItemIds = JSON.parseArray(String.valueOf(map.get("workItemIds")));\n'
+        b'                                workItemIds.forEach(workItemId -> {',
+        b'if (map == null || map.get("taskId") == null || map.get("workItemIds") == null) {\n'
+        b'                                    logger.warn("Ignore PATROL gather-data message with missing task or work-item ids");\n'
+        b'                                    return;\n'
+        b'                                }\n'
+        b'                                Long taskId;\n'
+        b'                                try {\n'
+        b'                                    taskId = Long.parseLong(String.valueOf(map.get("taskId")));\n'
+        b'                                } catch (NumberFormatException error) {\n'
+        b'                                    logger.warn("Ignore PATROL gather-data message with an invalid task id", error);\n'
+        b'                                    return;\n'
+        b'                                }\n'
+        b'                                JSONArray workItemIds;\n'
+        b'                                try {\n'
+        b'                                    workItemIds = JSON.parseArray(String.valueOf(map.get("workItemIds")));\n'
+        b'                                } catch (Exception error) {\n'
+        b'                                    logger.warn("Ignore PATROL gather-data message with an invalid work-item list", error);\n'
+        b'                                    return;\n'
+        b'                                }\n'
+        b'                                if (ObjectUtils.isEmpty(workItemIds)) {\n'
+        b'                                    logger.warn("Ignore PATROL gather-data message with an empty work-item list");\n'
+        b'                                    return;\n'
+        b'                                }\n'
+        b'                                workItemIds.forEach(workItemId -> {',
+    ),
+    (
+        b'long aLong = Long.parseLong(String.valueOf(workItemId));\n'
+        b'                                    dc.add(Restrictions.eq("workItemId.id", aLong));',
+        b'long aLong;\n'
+        b'                                    try {\n'
+        b'                                        aLong = Long.parseLong(String.valueOf(workItemId));\n'
+        b'                                    } catch (NumberFormatException error) {\n'
+        b'                                        logger.warn("Ignore PATROL gather-data message with an invalid work-item id", error);\n'
+        b'                                        return;\n'
+        b'                                    }\n'
+        b'                                    dc.add(Restrictions.eq("workItemId.id", aLong));',
+    ),
+    (
+        b'PATROLTaskDetail taskDetail = taskDetails.get(0);\n'
+        b'                                        //\xe6\x9f\xa5\xe8\xaf\xa2\xe5\xbc\x80\xe5\xa7\x8b\xe6\x97\xb6\xe9\x97\xb4  \xe5\xae\x8c\xe6\x88\x90\xe6\x97\xb6\xe9\x97\xb4 -30\xe7\xa7\x92\n'
+        b'                                        Calendar calendar = Calendar.getInstance();\n'
+        b'                                        calendar.setTime(taskDetail.getCompleteDate());',
+        b'PATROLTaskDetail taskDetail = taskDetails.get(0);\n'
+        b'                                        if (taskDetail.getCompleteDate() == null\n'
+        b'                                                || StringUtils.isBlank(taskDetail.getItemNumber())) {\n'
+        b'                                            logger.warn("Skip PATROL gather-data lookup without completion time or tag name, detailId="\n'
+        b'                                                    + taskDetail.getId());\n'
+        b'                                            return;\n'
+        b'                                        }\n'
+        b'                                        //\xe6\x9f\xa5\xe8\xaf\xa2\xe5\xbc\x80\xe5\xa7\x8b\xe6\x97\xb6\xe9\x97\xb4  \xe5\xae\x8c\xe6\x88\x90\xe6\x97\xb6\xe9\x97\xb4 -30\xe7\xa7\x92\n'
+        b'                                        Calendar calendar = Calendar.getInstance();\n'
+        b'                                        calendar.setTime(taskDetail.getCompleteDate());',
+    ),
+    (
+        b'JSONObject response = JSON.parseObject(result);\n'
+        b'                                            JSONObject data = response.getJSONObject("data");\n'
+        b'                                            JSONArray values = data.getJSONArray("values");\n'
+        b'                                            if (!ObjectUtils.isEmpty(values)) {\n'
+        b'                                                List<Double> doubles = values.parallelStream().map(o -> ((JSONObject) o).getDouble("value")).collect(Collectors.toList());\n'
+        b'                                                //\xe8\xae\xa1\xe7\xae\x97\xe4\xb8\xad\xe4\xbd\x8d\xe6\x95\xb0\n'
+        b'                                                Double median = calcMedian(doubles);\n'
+        b'                                                //\xe4\xbf\x9d\xe5\xad\x98\xe4\xb8\xad\xe4\xbd\x8d\xe6\x95\xb0\n'
+        b'                                                taskDetail.setGatherData(new BigDecimal(median));\n'
+        b'                                                //\xe4\xbf\x9d\xe5\xad\x98\xe5\xae\x9e\xe4\xbd\x93\n'
+        b'                                                taskDetailService.mergeTaskDetail(taskDetail, null);\n'
+        b'                                            }',
+        b'JSONObject response;\n'
+        b'                                            try {\n'
+        b'                                                response = JSON.parseObject(result);\n'
+        b'                                            } catch (Exception error) {\n'
+        b'                                                logger.warn("Ignore malformed TagManagement history response", error);\n'
+        b'                                                return;\n'
+        b'                                            }\n'
+        b'                                            JSONObject data = response == null ? null : response.getJSONObject("data");\n'
+        b'                                            JSONArray values = data == null ? null : data.getJSONArray("values");\n'
+        b'                                            if (!ObjectUtils.isEmpty(values)) {\n'
+        b'                                                List<Double> doubles = values.parallelStream()\n'
+        b'                                                        .filter(JSONObject.class::isInstance)\n'
+        b'                                                        .map(o -> ((JSONObject) o).getDouble("value"))\n'
+        b'                                                        .filter(Objects::nonNull)\n'
+        b'                                                        .filter(sample -> !sample.isNaN() && !sample.isInfinite())\n'
+        b'                                                        .collect(Collectors.toList());\n'
+        b'                                                //\xe8\xae\xa1\xe7\xae\x97\xe4\xb8\xad\xe4\xbd\x8d\xe6\x95\xb0\n'
+        b'                                                Double median = calcMedian(doubles);\n'
+        b'                                                if (median != null) {\n'
+        b'                                                    //\xe4\xbf\x9d\xe5\xad\x98\xe4\xb8\xad\xe4\xbd\x8d\xe6\x95\xb0\n'
+        b'                                                    taskDetail.setGatherData(BigDecimal.valueOf(median));\n'
+        b'                                                    //\xe4\xbf\x9d\xe5\xad\x98\xe5\xae\x9e\xe4\xbd\x93\n'
+        b'                                                    taskDetailService.mergeTaskDetail(taskDetail, null);\n'
+        b'                                                }\n'
+        b'                                            }',
+    ),
+    (
+        b'private Double calcMedian(List<Double> data) {\n'
+        b'        //\xe6\x8e\x92\xe5\xba\x8f\n'
+        b'        Collections.sort(data);\n'
+        b'        //\xe5\x8f\x96\xe4\xb8\xad\xe4\xbd\x8d\n'
+        b'        int size = data.size();\n'
+        b'        //\xe5\xa6\x82\xe6\x9e\x9c\xe6\x98\xaf\xe5\x81\xb6\xe6\x95\xb0 \xe5\x8f\x96\xe4\xb8\xad\xe9\x97\xb4\xe4\xb8\xa4\xe4\xb8\xaa\xe6\x95\xb0\xe7\x9a\x84\xe5\xb9\xb3\xe5\x9d\x87\xe5\x80\xbc\n'
+        b'        if (size % 2 == 0) {\n'
+        b'            Double double1 = data.get(size / 2);\n'
+        b'            Double double2 = data.get((size / 2) - 1);\n'
+        b'            return (double1 + double2) / 2;\n'
+        b'        } else {\n'
+        b'            int index = (int) Math.ceil(size / 2.0);\n'
+        b'            return data.get(index);\n'
+        b'        }\n'
+        b'    }',
+        b'private Double calcMedian(List<Double> data) {\n'
+        b'        if (ObjectUtils.isEmpty(data)) {\n'
+        b'            return null;\n'
+        b'        }\n'
+        b'        Collections.sort(data);\n'
+        b'        int size = data.size();\n'
+        b'        if (size % 2 == 0) {\n'
+        b'            return (data.get(size / 2) + data.get((size / 2) - 1)) / 2;\n'
+        b'        }\n'
+        b'        return data.get(size / 2);\n'
+        b'    }',
+    ),
+)
 
 
 def patch_utility(source: bytes) -> tuple[bytes, bool]:
@@ -546,6 +713,23 @@ def patch_report_pending_handoff(source: bytes) -> tuple[bytes, int]:
     return source, changed
 
 
+def patch_gather_data_consumer(source: bytes) -> tuple[bytes, int]:
+    """Harden the Kafka-to-TagManagement gather-data calculation path."""
+
+    changed = 0
+    newline = b"\r\n" if b"\r\n" in source else b"\n"
+    for original, replacement in GATHER_DATA_REPLACEMENTS:
+        original = original.replace(b"\n", newline)
+        replacement = replacement.replace(b"\n", newline)
+        if replacement in source:
+            continue
+        if source.count(original) != 1:
+            raise ValueError("PATROL gather-data consumer anchor was not found uniquely")
+        source = source.replace(original, replacement, 1)
+        changed += 1
+    return source, changed
+
+
 def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str, object]:
     utility_path = module_root / UTILITY_RELATIVE_PATH
     service_root = module_root / SERVICE_IMPL_RELATIVE_PATH
@@ -560,6 +744,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
     task_generation_fix_count = 0
     hidden_danger_fix_count = 0
     report_pending_fix_count = 0
+    gather_data_fix_count = 0
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
         before = path.read_bytes()
         after, current_count, current_indentation_count = patch_service(before)
@@ -611,6 +796,18 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
     if not check and report_after != report_before:
         custom_report_path.write_bytes(report_after)
 
+    gather_data_path = module_root / PATROL_GATHER_DATA_CONSUMER_RELATIVE_PATH
+    if not gather_data_path.is_file():
+        raise ValueError("PATROL gather-data consumer source was not found")
+    gather_data_before = gather_data_path.read_bytes()
+    gather_data_after, gather_data_fix_count = patch_gather_data_consumer(gather_data_before)
+    if gather_data_fix_count:
+        relative_path = str(gather_data_path.relative_to(module_root))
+        if relative_path not in patched_files:
+            patched_files.append(relative_path)
+    if not check and gather_data_after != gather_data_before:
+        gather_data_path.write_bytes(gather_data_after)
+
     remaining = []
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
         source = path.read_bytes()
@@ -632,6 +829,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         or task_generation_fix_count
         or hidden_danger_fix_count
         or report_pending_fix_count
+        or gather_data_fix_count
     ):
         raise ValueError(
             f"source patch is required: utilityChanged={utility_changed}, "
@@ -639,6 +837,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
             f"taskGeneration={task_generation_fix_count}, "
             f"hiddenDanger={hidden_danger_fix_count}"
             f", reportPending={report_pending_fix_count}"
+            f", gatherData={gather_data_fix_count}"
         )
     if not check and utility_changed:
         utility_path.write_bytes(utility_after)
@@ -657,6 +856,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         "taskGenerationFixCount": task_generation_fix_count,
         "hiddenDangerFixCount": hidden_danger_fix_count,
         "reportPendingFixCount": report_pending_fix_count,
+        "gatherDataFixCount": gather_data_fix_count,
         "patchedFileCount": len(patched_files),
         "patchedFiles": patched_files,
         "helperReferenceCount": helper_references,

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-17T01:54:09.209Z",
-  "repoBaseCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
+  "generatedAt": "2026-07-17T03:26:33.871Z",
+  "repoBaseCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
   "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "runtimeBuildSourceCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "moduleCode": "PATROL_1.0.0",
@@ -9,7 +9,7 @@
   "database": "PostgreSQL",
   "targetHost": "10.11.100.17",
   "targetAccessPolicy": "COMPANY_LAN",
-  "overallStatus": "TARGET_REPORT_STATISTICS_PASS_MONITOR_FALLBACK",
+  "overallStatus": "TARGET_GATHER_RUNTIME_PASS_EXTERNAL_TAG_DATA_BLOCKED",
   "source": {
     "archive": "PATROL_6.0.4.0.zip",
     "sha256": "1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394",
@@ -27,17 +27,17 @@
       {
         "name": "core",
         "javaFiles": 149,
-        "sha256": "d95814b7debcf9af9a155150787cfd247d4f6c1dc8164c6ccc103276ca802221"
+        "sha256": "f56950e06b3bc4ac40d887287044d0f2824231384c3bb03bfb2070695e3f7293"
       },
       {
         "name": "api",
         "javaFiles": 63,
-        "sha256": "8cbb3382bd65fe214e3fc674108b2def45bce084e5a6c06845e1da0123c44bc1"
+        "sha256": "ebff69b088e31d17aef534584ab33750ab9a2b96e24b001653ecb655c0fc4be1"
       },
       {
         "name": "service",
         "javaFiles": 243,
-        "sha256": "f9ab3be78b52c0d0b3c4ef344ab82fa9ab3526ffa0ab60cab0460ac8e01f473d"
+        "sha256": "e2cb13cbdf8a10bd8d0335b78a6fa12b9d22dca513c81079da73164e514f939a"
       }
     ]
   },
@@ -83,16 +83,18 @@
   "runtimePatch": {
     "baselineJarSha256": "b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38",
     "deployedJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
-    "deployedJarSha256": "99e5c346448595db8cecf5aafb2523a0dd9c1816ae6f80f6fa22f1abc89ad0aa",
+    "deployedJarSha256": "78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979",
     "deployment": "PASS",
     "healthVerification": "PASS",
     "nginxSyntax": "PASS",
     "postgresContainerHealth": "PASS",
-    "rollbackJar": "/data/docker/adp-patrol-report-20260717/EamMs-1.0.0.pre-report-pending-af01d6a.jar",
-    "rollbackJarSha256": "af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753",
+    "rollbackJar": "/data/docker/adp-patrol-gather-20260717-1025/EamMs-1.0.0.pre-simlogin-7c0ebd.jar",
+    "rollbackJarSha256": "7c0ebd709e7ac8ad5c8f8febb2ec032b8fad9821d6e111f8628b22e6a24d7284",
     "i18nSchemaCompatibility": "PASS_AFTER_I18N_RESTART",
     "reportPendingCompatibility": "PASS",
-    "startupSeconds": 396.38,
+    "simulatedLoginCompatibility": "PASS_WITH_CONFIGURABLE_PUBLIC_KEY_FALLBACK",
+    "nestedJarPackaging": "PASS_ZIP_STORED_CRC_UNIQUE_ENTRIES",
+    "startupSeconds": 404.544,
     "knownStartupWarning": "/bap-workspace/i18n_temp/EamMs.zip is absent during asynchronous i18n upload; PATROL still registers and serves requests"
   },
   "functionalAcceptance": {
@@ -246,10 +248,11 @@
       "report pages browser/API/PostgreSQL aggregate reconciliation",
       "pending hidden-danger treatment chart",
       "task completion and stability statistics",
-      "route/task monitor fallback"
+      "route/task monitor fallback",
+      "Kafka gather consumer, simulated login, TagManagement request and PostgreSQL target-row resolution"
     ],
     "remaining": [
-      "gather-error analysis with an enabled error-benchmark item and non-null gather_data",
+      "gather-data median persistence with a real enabled TagManagement point and history, followed by error-analysis chart reconciliation",
       "SESGIS map positioning and trajectory replay"
     ],
     "blocked": [
@@ -258,11 +261,13 @@
     ],
     "knownWarnings": [
       "EamMs logs getDataGridsByViewCode missing PATROL_1.0.0_patrolPlan_createTaskEdit while task generation still succeeds",
-      "EamMs cold start took 396.38 seconds on the current test host",
+      "EamMs cold start took 404.544 seconds on the current test host",
+      "test auth and EamMs JWT signing configuration remain misaligned; the configurable simulated-login public-key fallback is enabled and must be aligned before production",
       "asynchronous i18n upload warns that /bap-workspace/i18n_temp/EamMs.zip is absent, but PATROL registration and requests succeed"
     ],
     "deploymentNotes": [
-      "In-place varchar-to-timestamp repair requires restarting i18n once to clear PostgreSQL prepared plans; fresh Docker startup applies migrations before i18n starts."
+      "In-place varchar-to-timestamp repair requires restarting i18n once to clear PostgreSQL prepared plans; fresh Docker startup applies migrations before i18n starts.",
+      "A non-final manual zip candidate compressed a Spring Boot nested jar and was rolled back to 99e5c346448595db8cecf5aafb2523a0dd9c1816ae6f80f6fa22f1abc89ad0aa; the final builder enforces ZIP_STORED, CRC integrity and unique entries."
     ]
   },
   "energyModules": {
@@ -352,7 +357,7 @@
     "status": "PASS_WITH_NOT_APPLICABLE_DATA_PREREQUISITE",
     "report": "metadata/patrol-report-acceptance.json",
     "script": "deploy/docker/scripts/adp-patrol-report-smoke.js",
-    "generatedAt": "2026-07-17T01:54:09.209Z",
+    "generatedAt": "2026-07-17T03:26:33.871Z",
     "routes": [
       "/msService/PATROL/patrolTask/taskDetail/potrolResultSummary",
       "/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
@@ -411,5 +416,50 @@
       "gather-error analysis is NOT_APPLICABLE because no enabled error-benchmark item and no eligible gather_data record exist",
       "monitor route/task fallback is accepted; GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package"
     ]
+  },
+  "gatherDataAcceptance": {
+    "status": "PASS_WITH_EXTERNAL_DATA_BLOCKER",
+    "report": "metadata/patrol-gather-data-runtime-acceptance.json",
+    "script": "deploy/docker/scripts/adp-patrol-gather-data-runtime-acceptance.js",
+    "generatedAt": "2026-07-17T03:21:40.266Z",
+    "marker": "ADP_GATHER_1784258508884",
+    "runtime": {
+      "eamSha256": "78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979",
+      "restartCount": 0,
+      "topic": "topic.kafka.PATROL.gatherData",
+      "consumerGroup": "anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000",
+      "topicOffsetBefore": 20,
+      "topicOffsetAfter": 25,
+      "consumerLagAfter": 0
+    },
+    "messageCases": {
+      "total": 5,
+      "emptyDataGuard": "PASS",
+      "invalidTaskIdGuard": "PASS",
+      "invalidWorkItemListGuard": "PASS",
+      "invalidWorkItemIdGuard": "PASS",
+      "validCompletedDetailLookup": "PASS"
+    },
+    "simulatedLogin": {
+      "fallbackPublicKeyObservedOnFirstRun": true,
+      "authenticatedDownstreamObserved": true,
+      "failureObserved": false,
+      "tokenValuesCaptured": false
+    },
+    "tagManagement": {
+      "requestedTag": "TAG_ADP_E2E_202607162116_PATROL_ITEM",
+      "windowUses24HourFormat": true,
+      "tagRows": 0,
+      "matchingEnabledRows": 0,
+      "historyValues": 0
+    },
+    "persistence": {
+      "table": "mp_task_details",
+      "id": 6676867603743568,
+      "identityStable": true,
+      "gatherData": null,
+      "persisted": false
+    },
+    "boundary": "The technical consumer/auth/module-discovery/Feign/target-row path passed. Median persistence remains blocked only because the test environment has no matching enabled tag metadata or history."
   }
 }

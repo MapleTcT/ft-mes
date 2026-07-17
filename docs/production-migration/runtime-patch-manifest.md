@@ -7,11 +7,11 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-17T02:01:25+00:00` |
-| Repo Commit | `a008baeb8055a8daea953141f4ea068272d80a68` |
+| Generated At | `2026-07-17T03:29:58+00:00` |
+| Repo Commit | `f5af7f2669d408d2b4592cf4b28dabf57cda7fb0` |
 | Database Target | `PostgreSQL` |
 | Total Files | `358` |
-| Total Bytes | `54862005` |
+| Total Bytes | `54875417` |
 
 ## Categories
 
@@ -21,8 +21,8 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nginx-runtime-config` | 2 | 20399 | Nginx runtime configuration used by the Docker frontend gateway. |
 | `postgres-init-sql` | 186 | 54024175 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 7 | 29988 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
-| `runtime-patch-source` | 21 | 82088 | Source or template files used to rebuild runtime patch payloads. |
-| `runtime-script` | 26 | 260340 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
+| `runtime-patch-source` | 21 | 82246 | Source or template files used to rebuild runtime patch payloads. |
+| `runtime-script` | 26 | 273594 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
 | `runtime-static-override` | 72 | 402662 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
@@ -273,7 +273,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-patch-source` | `deploy/docker/patches/flow-postgres-datasource/src/com/supcon/supfusion/flow/taskcenter/component/DataSourceBuilder.java` | 2577 | `831643e133e8763c5dddab4e5646667fdc61de3a237b6312cfec68ae61515158` |
 | `runtime-patch-source` | `deploy/docker/patches/flow-postgres-datasource/src/com/supcon/supfusion/flow/taskcenter/listener/AllTenantInitialCommandLineRunner.java` | 7010 | `23697cc70d400aeb5bb67acbed5dba85eb5476505e717fbaed970929ad0bf434` |
 | `runtime-patch-source` | `deploy/docker/patches/flow-postgres-datasource/src/com/supcon/supfusion/flow/taskcenter/listener/TenantProcessEngineInitialListener.java` | 10343 | `4272f773aa5be16f09c817fa900e45a3a800fada9f6548b64e4b8a5dd3cf08a7` |
-| `runtime-patch-source` | `deploy/docker/patches/foundation-simulated-login-serverport/src/com/supcon/orchid/foundation/internal/services/SimulatedLoginService.java` | 9185 | `f120ff9c3da36d4328b146ed78f7ea783291b9d92c4bec4833aa9c3ca22c8c54` |
+| `runtime-patch-source` | `deploy/docker/patches/foundation-simulated-login-serverport/src/com/supcon/orchid/foundation/internal/services/SimulatedLoginService.java` | 9343 | `fa8f4c01d81208bad143a795c52083c824412588a474f23613ee2df14d4453a8` |
 | `runtime-patch-source` | `deploy/docker/patches/kafka-jaas-noop/src/main/java/org/springframework/kafka/security/jaas/KafkaJaasLoginModuleInitializer.java` | 595 | `21463fdd4f898918c721f7cb9084fae995aa4d7eda8183337b0aa9cde2b4f955` |
 | `runtime-patch-source` | `deploy/docker/patches/notification-dynamic-templates/META-INF/postgresql/dynamic/notice_msg.sql.ftl` | 1762 | `567f379f8d85f292f06dc79ccdc8c3413422e03e12035e7a6b16462c67939c03` |
 | `runtime-patch-source` | `deploy/docker/patches/notification-dynamic-templates/META-INF/postgresql/dynamic/notice_task.sql.ftl` | 838 | `f5d25fa1a57c548f4b5a1ca081f0b68948cdaf75798f5c41894c9f4b163a66d0` |
@@ -305,7 +305,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-keycloak-admin-url.py` | 4845 | `f24075ccb7c00d3be741c1cd16f80bf0f7dee6972ba1c099d517af091c172969` |
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-rbac-permission-mapper.py` | 13058 | `6dcb6ff575129d2890c715b3908721983a5b07cbfe002b6f49c82a0cd0e4a8b5` |
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-standalone-auth-tasks.py` | 5611 | `29467c1dc300924779152c59aba12dcb01dfb3592c81dbb49fe4788da82fb653` |
-| `runtime-script` | `deploy/docker/scripts/patch-patrol-postgres-source.py` | 31208 | `8409e27b051ce50dc9cd4860724710d131090d2569097a6b02d53a0e6d8941f3` |
+| `runtime-script` | `deploy/docker/scripts/patch-patrol-postgres-source.py` | 44462 | `38f9e41e553e6a6ddb754049ce12bb6cca770dc40c8a0594132db57f216f74e0` |
 | `runtime-script` | `deploy/docker/scripts/patch-postgres-runtime.py` | 42267 | `236a99b837bfd58cad2b402cafbc56608d18c7aa03fd8fee2e84a4b8ce042342` |
 | `runtime-script` | `deploy/docker/scripts/patch-printer-empty-registration.py` | 6542 | `efa748082c663db643b61a42407a471f93030e0a9d36eb5055a2eb0eeaaa3bd7` |
 | `runtime-script` | `deploy/docker/scripts/patch-rm-batch-formula-list.py` | 5368 | `7fb84b505f32d8c70fbdfcd65c68447aa0b2e1de990c540c44e24b525370d9e3` |

@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-07-17T01:54:09.209Z",
-  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
+  "generatedAt": "2026-07-17T03:26:33.871Z",
+  "repoCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
   "reportKind": "patrol-report-browser-api-postgres-acceptance",
   "baseUrl": "http://10.11.100.17:18080",
   "username": "admin",
   "database": "PostgreSQL",
   "databaseTarget": "v6@10.11.100.17",
   "reportMonth": "2026-07",
-  "outputDir": "/tmp/adp-patrol-report-smoke-20260717015320",
+  "outputDir": "/tmp/adp-patrol-report-smoke-20260717032543",
   "summary": {
     "total": 8,
     "pass": 7,
@@ -115,7 +115,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/01-potrol-result-summary.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/01-potrol-result-summary.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -203,7 +203,7 @@
           "method": "GET",
           "status": 200,
           "type": "script",
-          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/i18n-value.js?0.2525912037201804",
+          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/i18n-value.js?0.7603315544941385",
           "contentType": "application/javascript",
           "requestBody": null,
           "responseBody": null,
@@ -258,7 +258,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/02-abnormal-summary.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/02-abnormal-summary.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -313,7 +313,7 @@
           "method": "GET",
           "status": 200,
           "type": "script",
-          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolTask/potrolTask/taskOverviewList/i18n-value.js?0.8274950236299244",
+          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
           "contentType": "application/javascript",
           "requestBody": null,
           "responseBody": null,
@@ -324,7 +324,7 @@
           "method": "GET",
           "status": 200,
           "type": "script",
-          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/compat/i18n-value.js",
+          "url": "http://10.11.100.17:18080/greenDill/static/PATROL/patrolTask/potrolTask/taskOverviewList/i18n-value.js?0.9781659700064035",
           "contentType": "application/javascript",
           "requestBody": null,
           "responseBody": null,
@@ -435,7 +435,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/03-task-overview.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/03-task-overview.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -552,9 +552,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "script",
-          "url": "http://10.11.100.17:18080/msService/PATROL/_static/common.js",
-          "contentType": "application/javascript;charset=UTF-8",
+          "type": "stylesheet",
+          "url": "http://10.11.100.17:18080/msService/PATROL/_static/umi.css",
+          "contentType": "text/css;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -563,9 +563,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "stylesheet",
-          "url": "http://10.11.100.17:18080/msService/PATROL/_static/umi.css",
-          "contentType": "text/css;charset=UTF-8",
+          "type": "script",
+          "url": "http://10.11.100.17:18080/msService/PATROL/_static/common.js",
+          "contentType": "application/javascript;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -596,9 +596,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "stylesheet",
-          "url": "http://10.11.100.17:18080/msService/PATROL/_static/vendors.chunk.css",
-          "contentType": "text/css;charset=UTF-8",
+          "type": "script",
+          "url": "http://10.11.100.17:18080/msService/PATROL/_static/platform__index.async.js",
+          "contentType": "application/javascript;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -607,9 +607,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "script",
-          "url": "http://10.11.100.17:18080/msService/PATROL/_static/platform__index.async.js",
-          "contentType": "application/javascript;charset=UTF-8",
+          "type": "stylesheet",
+          "url": "http://10.11.100.17:18080/msService/PATROL/_static/vendors.chunk.css",
+          "contentType": "text/css;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -635,34 +635,6 @@
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
-          "errorSnippet": null
-        },
-        {
-          "method": "POST",
-          "status": 200,
-          "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/getGroupList?departmentId=1",
-          "contentType": "application/json;charset=utf-8",
-          "requestBody": "",
-          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"id\":6675485506913104}],\"message\":\"操作成功\"}",
-          "responseSummary": {
-            "appCode": 200,
-            "dataCount": 1
-          },
-          "errorSnippet": null
-        },
-        {
-          "method": "POST",
-          "status": 200,
-          "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/getFaultDealCountGroupByCompleteUser",
-          "contentType": "application/json;charset=utf-8",
-          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"\",\"startTimeTo\":\"\",\"endTimeFrom\":\"\",\"endTimeTo\":\"\",\"createTimeFrom\":\"\",\"createTimeTo\":\"\",\"discoveryStaffId\":\"\"}",
-          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"num\":6}],\"message\":\"操作成功\"}",
-          "responseSummary": {
-            "appCode": 200,
-            "dataCount": 1
-          },
           "errorSnippet": null
         },
         {
@@ -695,6 +667,34 @@
             "appCode": 200,
             "resultCount": 5,
             "totalCount": 6
+          },
+          "errorSnippet": null
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "xhr",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/getFaultDealCountGroupByCompleteUser",
+          "contentType": "application/json;charset=utf-8",
+          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"\",\"startTimeTo\":\"\",\"endTimeFrom\":\"\",\"endTimeTo\":\"\",\"createTimeFrom\":\"\",\"createTimeTo\":\"\",\"discoveryStaffId\":\"\"}",
+          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"num\":6}],\"message\":\"操作成功\"}",
+          "responseSummary": {
+            "appCode": 200,
+            "dataCount": 1
+          },
+          "errorSnippet": null
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "xhr",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolRoute/workGroup/getGroupList?departmentId=1",
+          "contentType": "application/json;charset=utf-8",
+          "requestBody": "",
+          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"id\":6675485506913104}],\"message\":\"操作成功\"}",
+          "responseSummary": {
+            "appCode": 200,
+            "dataCount": 1
           },
           "errorSnippet": null
         },
@@ -750,7 +750,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/04-unusual-summary.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/04-unusual-summary.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -845,9 +845,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "document",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskComplete/taskFinishIndex",
-          "contentType": "text/html;charset=UTF-8",
+          "type": "stylesheet",
+          "url": "http://10.11.100.17:18080/msService/PATROL/_static/umi.css",
+          "contentType": "text/css;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -856,9 +856,9 @@
         {
           "method": "GET",
           "status": 200,
-          "type": "stylesheet",
-          "url": "http://10.11.100.17:18080/msService/PATROL/_static/umi.css",
-          "contentType": "text/css;charset=UTF-8",
+          "type": "document",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskComplete/taskFinishIndex",
+          "contentType": "text/html;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -956,29 +956,6 @@
           "method": "POST",
           "status": 200,
           "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTaskCompleteStatisticsRC",
-          "contentType": "application/json;charset=utf-8",
-          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"people\"}",
-          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"id\":1,\"totalNum\":16,\"faultRate\":0.7500,\"faultNum\":12}],\"message\":\"操作成功\"}",
-          "responseSummary": {
-            "appCode": 200,
-            "dataCount": 1,
-            "rows": [
-              {
-                "name": "虚拟人员",
-                "id": 1,
-                "totalNum": 16,
-                "faultRate": 0.75,
-                "faultNum": 12
-              }
-            ]
-          },
-          "errorSnippet": null
-        },
-        {
-          "method": "POST",
-          "status": 200,
-          "type": "xhr",
           "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTaskCompleteStatisticsTableData",
           "contentType": "application/json;charset=utf-8",
           "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"route\"}",
@@ -1000,6 +977,29 @@
                 "cardSignNum": 0,
                 "onTimeNum": 16,
                 "routeName": "ADP_E2E_202607162045_PATROL_ROUTE_UPDATED"
+              }
+            ]
+          },
+          "errorSnippet": null
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "xhr",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTaskCompleteStatisticsRC",
+          "contentType": "application/json;charset=utf-8",
+          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"people\"}",
+          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"id\":1,\"totalNum\":16,\"faultRate\":0.7500,\"faultNum\":12}],\"message\":\"操作成功\"}",
+          "responseSummary": {
+            "appCode": 200,
+            "dataCount": 1,
+            "rows": [
+              {
+                "name": "虚拟人员",
+                "id": 1,
+                "totalNum": 16,
+                "faultRate": 0.75,
+                "faultNum": 12
               }
             ]
           },
@@ -1070,6 +1070,29 @@
           "method": "POST",
           "status": 200,
           "type": "xhr",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTaskCompleteStatisticsRC",
+          "contentType": "application/json;charset=utf-8",
+          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"people\"}",
+          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"id\":1,\"totalNum\":16,\"faultRate\":0.7500,\"faultNum\":12}],\"message\":\"操作成功\"}",
+          "responseSummary": {
+            "appCode": 200,
+            "dataCount": 1,
+            "rows": [
+              {
+                "name": "虚拟人员",
+                "id": 1,
+                "totalNum": 16,
+                "faultRate": 0.75,
+                "faultNum": 12
+              }
+            ]
+          },
+          "errorSnippet": null
+        },
+        {
+          "method": "POST",
+          "status": 200,
+          "type": "xhr",
           "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTableData",
           "contentType": "application/json;charset=utf-8",
           "requestBody": "{\"total\":1,\"pageNo\":1,\"pageSize\":5,\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"dept\"}",
@@ -1096,36 +1119,13 @@
             ]
           },
           "errorSnippet": null
-        },
-        {
-          "method": "POST",
-          "status": 200,
-          "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/getTaskCompleteStatisticsRC",
-          "contentType": "application/json;charset=utf-8",
-          "requestBody": "{\"departmentId\":1,\"startTimeFrom\":\"2026-07-01 00:00:00\",\"startTimeTo\":\"2026-07-31 23:59:59\",\"veidoo\":\"people\"}",
-          "responseBody": "{\"code\":200,\"data\":[{\"name\":\"虚拟人员\",\"id\":1,\"totalNum\":16,\"faultRate\":0.7500,\"faultNum\":12}],\"message\":\"操作成功\"}",
-          "responseSummary": {
-            "appCode": 200,
-            "dataCount": 1,
-            "rows": [
-              {
-                "name": "虚拟人员",
-                "id": 1,
-                "totalNum": 16,
-                "faultRate": 0.75,
-                "faultNum": 12
-              }
-            ]
-          },
-          "errorSnippet": null
         }
       ],
       "networkErrors": [],
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/05-task-finish-statistics.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/05-task-finish-statistics.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -1194,19 +1194,6 @@
           "method": "GET",
           "status": 200,
           "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
-          "contentType": "application/json;charset=utf-8",
-          "requestBody": "",
-          "responseBody": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}",
-          "responseSummary": {
-            "appCode": 200
-          },
-          "errorSnippet": null
-        },
-        {
-          "method": "GET",
-          "status": 200,
-          "type": "xhr",
           "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/editStates?viewCode=PATROL_1.0.0_patrolTask_stabilityRAMenu",
           "contentType": "application/json;charset=utf-8",
           "requestBody": "",
@@ -1214,17 +1201,6 @@
           "responseSummary": {
             "appCode": 200
           },
-          "errorSnippet": null
-        },
-        {
-          "method": "GET",
-          "status": 200,
-          "type": "document",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/stabilityRateAnalys",
-          "contentType": "text/html;charset=UTF-8",
-          "requestBody": null,
-          "responseBody": null,
-          "responseSummary": null,
           "errorSnippet": null
         },
         {
@@ -1244,6 +1220,17 @@
           "type": "script",
           "url": "http://10.11.100.17:18080/msService/PATROL/_static/common.js",
           "contentType": "application/javascript;charset=UTF-8",
+          "requestBody": null,
+          "responseBody": null,
+          "responseSummary": null,
+          "errorSnippet": null
+        },
+        {
+          "method": "GET",
+          "status": 200,
+          "type": "document",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/stabilityRateAnalys",
+          "contentType": "text/html;charset=UTF-8",
           "requestBody": null,
           "responseBody": null,
           "responseSummary": null,
@@ -1411,7 +1398,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/06-stability-rate.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/06-stability-rate.png",
       "status": "PASS",
       "statusReason": null
     },
@@ -1684,7 +1671,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/07-gather-error-analysis.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/07-gather-error-analysis.png",
       "status": "NOT_APPLICABLE",
       "statusReason": "NO_ERROR_BENCHMARK_ITEM_CONFIGURED"
     },
@@ -1708,7 +1695,7 @@
         "frameUrl": null
       },
       "title": "巡检监控地图",
-      "bodyPreview": "[frame http://10.11.100.17:18080/msService/SESGISConfig/themeConfig/themeLayers/index?themeCode=workRouteMap]\n巡检运行监控\n刷新\n地图状态\nSESGISConfig 服务端包尚未提供，当前展示真实巡检路线和任务运行数据；地图定位与轨迹回放待依赖包补齐后恢复。\n巡检路线\n1\n任务总数\n28\n执行中\n0\n已超期\n0\n任务运行清单\n更新时间 2026/7/17 09:54:06\n任务编号\t巡检路线\t状态\t开始时间\t结束时间\npatrolTask_20260716_001\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/16 22:15:00\t2026/7/16 23:15:00\npatrolTask_20260716_002\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 10:00:00\t2026/7/17 11:00:00\npatrolTask_20260716_003\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 10:00:00\t2026/7/17 11:00:00\npatrolTask_20260716_004\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_005\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_006\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_007\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_008\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_009\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t",
+      "bodyPreview": "[frame http://10.11.100.17:18080/msService/SESGISConfig/themeConfig/themeLayers/index?themeCode=workRouteMap]\n巡检运行监控\n刷新\n地图状态\nSESGISConfig 服务端包尚未提供，当前展示真实巡检路线和任务运行数据；地图定位与轨迹回放待依赖包补齐后恢复。\n巡检路线\n1\n任务总数\n28\n执行中\n0\n已超期\n0\n任务运行清单\n更新时间 2026/7/17 11:26:31\n任务编号\t巡检路线\t状态\t开始时间\t结束时间\npatrolTask_20260716_001\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/16 22:15:00\t2026/7/16 23:15:00\npatrolTask_20260716_002\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 10:00:00\t2026/7/17 11:00:00\npatrolTask_20260716_003\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 10:00:00\t2026/7/17 11:00:00\npatrolTask_20260716_004\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_005\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_006\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t未下发\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_007\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_008\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t2026/7/17 11:00:00\t2026/7/17 12:00:00\npatrolTask_20260716_009\tADP_E2E_202607162045_PATROL_ROUTE_UPDATED\t已取消\t",
       "visibleError": null,
       "rawI18nKeys": [],
       "notifications": [],
@@ -1754,10 +1741,10 @@
           "method": "GET",
           "status": 200,
           "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+          "url": "http://10.11.100.17:18080/msService/PATROL/patrolMonit/patrolMonit/editStates?viewCode=PATROL_1.0.0_patrolMonit_patrolMonitMap",
           "contentType": "application/json;charset=utf-8",
           "requestBody": "",
-          "responseBody": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}",
+          "responseBody": "{\"code\":200,\"data\":{\"hasSupervision\":false,\"creatorInfo\":{\"mainPosition\":{\"cid\":1000,\"id\":1},\"position\":null,\"positions\":[{\"cid\":1000,\"id\":1,\"isVirtual\":true,\"layRec\":\"1\",\"name\":\"虚拟岗位\"}],\"staff\":{\"id\":1,\"name\":\"默认人员\"}},\"hasPayCloseAttention\":false},\"message\":\"操作成功\"}",
           "responseSummary": {
             "appCode": 200
           },
@@ -1767,10 +1754,10 @@
           "method": "GET",
           "status": 200,
           "type": "xhr",
-          "url": "http://10.11.100.17:18080/msService/PATROL/patrolMonit/patrolMonit/editStates?viewCode=PATROL_1.0.0_patrolMonit_patrolMonitMap",
+          "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
           "contentType": "application/json;charset=utf-8",
           "requestBody": "",
-          "responseBody": "{\"code\":200,\"data\":{\"hasSupervision\":false,\"creatorInfo\":{\"mainPosition\":{\"cid\":1000,\"id\":1},\"position\":null,\"positions\":[{\"cid\":1000,\"id\":1,\"isVirtual\":true,\"layRec\":\"1\",\"name\":\"虚拟岗位\"}],\"staff\":{\"id\":1,\"name\":\"默认人员\"}},\"hasPayCloseAttention\":false},\"message\":\"操作成功\"}",
+          "responseBody": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}",
           "responseSummary": {
             "appCode": 200
           },
@@ -1826,7 +1813,7 @@
       "consoleErrors": [],
       "pageErrors": [],
       "requestFailures": [],
-      "screenshot": "/tmp/adp-patrol-report-smoke-20260717015320/08-patrol-monitor-map.png",
+      "screenshot": "/tmp/adp-patrol-report-smoke-20260717032543/08-patrol-monitor-map.png",
       "status": "PASS",
       "statusReason": null
     }

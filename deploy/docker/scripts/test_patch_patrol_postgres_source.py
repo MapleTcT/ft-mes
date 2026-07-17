@@ -157,6 +157,33 @@ class PatrolPostgresSourcePatchTest(unittest.TestCase):
         self.assertIn(PATCHER.REPORT_PENDING_MARKER, patched)
         self.assertIn(b"pending = pending.add(new BigDecimal(total))", patched)
 
+    def test_gather_data_patch_is_safe_precise_and_idempotent(self):
+        source = b"\n".join(original for original, _ in PATCHER.GATHER_DATA_REPLACEMENTS)
+
+        patched, count = PATCHER.patch_gather_data_consumer(source)
+        patched_twice, count_twice = PATCHER.patch_gather_data_consumer(patched)
+
+        self.assertEqual(len(PATCHER.GATHER_DATA_REPLACEMENTS), count)
+        self.assertEqual(0, count_twice)
+        self.assertEqual(patched, patched_twice)
+        self.assertIn(b"ObjectUtils.isEmpty(workItemTaskIds)", patched)
+        self.assertIn(b"Message<?> value", patched)
+        self.assertIn(b"StandardCharsets.UTF_8", patched)
+        self.assertIn(b"payload instanceof byte[]", patched)
+        self.assertIn(b"messageData == null", patched)
+        self.assertIn(b'new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")', patched)
+        self.assertIn(b"ObjectUtils.isEmpty(workItemIds)", patched)
+        self.assertIn(b"invalid task id", patched)
+        self.assertIn(b"invalid work-item list", patched)
+        self.assertIn(b"invalid work-item id", patched)
+        self.assertIn(b"taskDetail.getCompleteDate() == null", patched)
+        self.assertIn(b"malformed TagManagement history response", patched)
+        self.assertIn(b"response == null ? null", patched)
+        self.assertIn(b"BigDecimal.valueOf(median)", patched)
+        self.assertIn(b"return data.get(size / 2);", patched)
+        self.assertNotIn(b"Math.ceil", patched)
+        self.assertNotIn(b"new BigDecimal(median)", patched)
+
 
 if __name__ == "__main__":
     unittest.main()

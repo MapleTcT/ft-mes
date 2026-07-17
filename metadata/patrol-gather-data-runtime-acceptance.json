@@ -1,0 +1,150 @@
+{
+  "generatedAt": "2026-07-17T03:21:40.266Z",
+  "repoCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
+  "database": "PostgreSQL",
+  "runtime": {
+    "sshTarget": "v6@10.11.100.17",
+    "eamContainer": "adp-mes-newbase-EamMs-1",
+    "kafkaContainer": "adp-mes-newbase-kafka-1",
+    "postgresContainer": "adp-mes-newbase-postgres-1",
+    "deployedSha256": "78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979",
+    "expectedEamSha256": "78cac278ccaf69fd62fccd7704d4b40cbac9cc5d8398a1f1d9d5493d22a47979",
+    "startedAt": "2026-07-17T03:09:36.575404915Z",
+    "restartCount": 0
+  },
+  "kafka": {
+    "topic": "topic.kafka.PATROL.gatherData",
+    "zookeeperConnect": "zookeeper:2181",
+    "description": [
+      "Topic:topic.kafka.PATROL.gatherData\tPartitionCount:1\tReplicationFactor:1\tConfigs:",
+      "\tTopic: topic.kafka.PATROL.gatherData\tPartition: 0\tLeader: 0\tReplicas: 0\tIsr: 0"
+    ],
+    "consumerBindingEvidence": [
+      "11:16:19.490  INFO 1 --- [           main] o.s.c.s.b.k.p.KafkaTopicProvisioner      : Using kafka topic for outbound: topic.kafka.PATROL.gatherData",
+      "11:16:21.388  INFO 1 --- [           main] o.s.i.monitor.IntegrationMBeanExporter   : Registering MessageChannel topic.kafka.PATROL.gatherData.anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000.errors",
+      "11:16:21.403  INFO 1 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'EamMs-1.topic.kafka.PATROL.gatherData.anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000.errors' has 1 subscriber(s).",
+      "11:16:21.403  INFO 1 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'EamMs-1.topic.kafka.PATROL.gatherData.anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000.errors' has 0 subscriber(s).",
+      "11:16:21.403  INFO 1 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'EamMs-1.topic.kafka.PATROL.gatherData.anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000.errors' has 1 subscriber(s).",
+      "11:16:21.403  INFO 1 --- [           main] o.s.c.stream.binder.BinderErrorChannel   : Channel 'EamMs-1.topic.kafka.PATROL.gatherData.anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000.errors' has 2 subscriber(s).",
+      "11:16:21.432  INFO 1 --- [container-0-C-1] o.s.c.s.b.k.KafkaMessageChannelBinder$1  : partitions assigned: [topic.kafka.PATROL.gatherData-0]"
+    ],
+    "consumerGroup": "anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000",
+    "topicEndOffsetBefore": 20,
+    "topicEndOffsetAfter": 25,
+    "consumerPositionBefore": {
+      "group": "anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000",
+      "partition": 0,
+      "currentOffset": 20,
+      "logEndOffset": 20,
+      "lag": 0
+    },
+    "consumerPositionAfter": {
+      "group": "anonymous.cde47c7e-2e95-440d-ace2-36ed1279b000",
+      "partition": 0,
+      "currentOffset": 25,
+      "logEndOffset": 25,
+      "lag": 0
+    },
+    "marker": "ADP_GATHER_1784258508884",
+    "cases": [
+      {
+        "case": "empty-data",
+        "expectedLog": "Ignore empty PATROL gather-data message",
+        "observed": true
+      },
+      {
+        "case": "invalid-task-id",
+        "expectedLog": "invalid task id",
+        "observed": true
+      },
+      {
+        "case": "invalid-work-item-list",
+        "expectedLog": "invalid work-item list",
+        "observed": true
+      },
+      {
+        "case": "invalid-work-item-id",
+        "expectedLog": "invalid work-item id",
+        "observed": true
+      },
+      {
+        "case": "valid-completed-detail",
+        "expectedLog": "调用测点接口参数",
+        "observed": true
+      }
+    ]
+  },
+  "tagManagement": {
+    "table": "tmm_tags",
+    "counts": {
+      "total": 0,
+      "valid": 0,
+      "enabled": 0,
+      "valued": 0,
+      "matching": 0
+    },
+    "requestedTag": "TAG_ADP_E2E_202607162116_PATROL_ITEM",
+    "requestWindowUses24HourFormat": true,
+    "lookupEvidence": "11:21:57.905  INFO 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : 调用测点接口参数:{\"count\":60,\"endTime\":\"2026-07-17 08:31:05\",\"option\":\"NONE\",\"startTime\":\"2026-07-17 08:30:05\",\"tagName\":\"TAG_ADP_E2E_202607162116_PATROL_ITEM\"}"
+  },
+  "simulatedLogin": {
+    "successObserved": false,
+    "failureObserved": false,
+    "authenticatedDownstreamObserved": true,
+    "usable": true,
+    "tokenValuesCaptured": false
+  },
+  "persistence": {
+    "table": "mp_task_details",
+    "verificationSql": "SELECT id,patrol_task,work_item_id,cid,item_number,complete_date,gather_data\nFROM mp_task_details\nWHERE patrol_task=6676867595027280 AND work_item_id=6675549930308432\nORDER BY id DESC\nLIMIT 1;",
+    "before": {
+      "id": "6676867603743568",
+      "patrolTaskId": "6676867595027280",
+      "workItemId": "6675549930308432",
+      "companyId": 1000,
+      "itemNumber": "TAG_ADP_E2E_202607162116_PATROL_ITEM",
+      "completeDate": "2026-07-17 08:30:35.009",
+      "gatherData": null
+    },
+    "after": {
+      "id": "6676867603743568",
+      "patrolTaskId": "6676867595027280",
+      "workItemId": "6675549930308432",
+      "companyId": 1000,
+      "itemNumber": "TAG_ADP_E2E_202607162116_PATROL_ITEM",
+      "completeDate": "2026-07-17 08:30:35.009",
+      "gatherData": null
+    },
+    "gatherDataPersisted": false
+  },
+  "technicalChecks": {
+    "containerRunning": true,
+    "restartCountZero": true,
+    "deployedShaMatches": true,
+    "topicExists": true,
+    "consumerBindingVisible": true,
+    "topicOffsetAdvanced": true,
+    "consumerLagZero": true,
+    "malformedMessagesIsolated": true,
+    "simulatedLoginOrContextUsable": true,
+    "validLookupAttempted": true,
+    "twentyFourHourWindowObserved": true,
+    "noOuterConsumerFailure": true,
+    "detailIdentityStable": true
+  },
+  "logEvidence": [
+    "11:21:50.390  WARN 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : Ignore empty PATROL gather-data message",
+    "11:21:52.242  WARN 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : Ignore PATROL gather-data message with an invalid task id",
+    "11:21:54.111  WARN 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : Ignore PATROL gather-data message with an invalid work-item list",
+    "11:21:55.994  WARN 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : Ignore PATROL gather-data message with an invalid work-item id",
+    "11:21:57.905  INFO 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : 调用测点接口参数:{\"count\":60,\"endTime\":\"2026-07-17 08:31:05\",\"option\":\"NONE\",\"startTime\":\"2026-07-17 08:30:05\",\"tagName\":\"TAG_ADP_E2E_202607162116_PATROL_ITEM\"}",
+    "11:21:57.923  INFO 1 --- [container-0-C-1] .P.m.c.PATROLCreateCalcGatherDataService : 调用测点接口返回结果:{\"code\":200,\"data\":{\"name\":\"TAG_ADP_E2E_202607162116_PATROL_ITEM\",\"result\":false,\"values\":[]},\"message\":\"操作成功\"}"
+  ],
+  "status": "PASS_WITH_EXTERNAL_DATA_BLOCKER",
+  "issues": [
+    {
+      "code": "NO_TAG_METADATA_OR_HISTORY",
+      "detail": "No enabled tmm_tags row matches TAG_ADP_E2E_202607162116_PATROL_ITEM; median persistence cannot be truthfully accepted."
+    }
+  ]
+}

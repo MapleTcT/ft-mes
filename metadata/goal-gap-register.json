@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T02:07:25+00:00",
-  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
+  "generatedAt": "2026-07-17T03:31:42+00:00",
+  "repoCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -409,13 +409,14 @@
         "PATROL execution real browser and PostgreSQL acceptance is PASS with marker ADP_E2E_20260716210839_PATROL_EXECUTION: task issue/run, result entry, completion and completed-state re-render passed 32/32; mp_potrol_tasks and mp_task_details confirmed execution times, completion staff, result, conclusion and completion audit fields, the cancel branch independently regressed PASS, and browser errors were zero.",
         "PATROL shared inspection plan/task, input-standard, route/area/item CRUD and execution completion remain PASS after migrations 178-186 were applied on 10.11.100.17.",
         "PATROL hidden-danger real browser/API/PostgreSQL acceptance is PASS with marker ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER: abnormal result completion, real grid selection and confirmation, idempotent createHiddenDanger, mp_task_details to ses_hrm_riskhandles linkage, EAM risk-ledger re-render and SESHRM source translation passed 45/45; 8 screenshots were generated and browser errors were zero. This is a PATROL_COMPATIBILITY_PENDING handoff, not a claim that the absent SESH rectification/review/closure workflow exists.",
-        "PATROL report/monitor real browser/API/PostgreSQL acceptance generated at 2026-07-17T01:54:09.209Z is PASS: 8 pages produced 7 PASS and 1 NOT_APPLICABLE, while 23 aggregate checks produced 22 PASS and 1 NOT_APPLICABLE with zero browser errors. Direct database reconciliation confirmed result summary 16, abnormal results 12, task overview 22, hidden dangers linked/pending/closed 6/6/0, task completion 16/22, abnormal detail rate 12/16 and monitor routes/tasks 1/28. Gather-error analysis is N/A because the database has 0 enabled error-benchmark items and 0 eligible gather_data details; route/task monitor fallback is accepted, while GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package."
+        "PATROL report/monitor real browser/API/PostgreSQL acceptance generated at 2026-07-17T03:26:33.871Z is PASS: 8 pages produced 7 PASS and 1 NOT_APPLICABLE, while 23 aggregate checks produced 22 PASS and 1 NOT_APPLICABLE with zero browser errors. Direct database reconciliation confirmed result summary 16, abnormal results 12, task overview 22, hidden dangers linked/pending/closed 6/6/0, task completion 16/22, abnormal detail rate 12/16 and monitor routes/tasks 1/28. Gather-error analysis is N/A because the database has 0 enabled error-benchmark items and 0 eligible gather_data details; route/task monitor fallback is accepted, while GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package.",
+        "PATROL gather-data runtime acceptance generated at 2026-07-17T03:21:40.266Z is PASS_WITH_EXTERNAL_DATA_BLOCKER on 10.11.100.17: five real Kafka messages advanced topic and consumer offsets 20->25 with lag 0; four malformed input classes were isolated; simulated login/current context reached the real TagManagement history endpoint; the 24-hour request window and mp_task_details target identity were verified. tmm_tags has 0 rows and the endpoint returned values=[], so gather_data truthfully remains null and median persistence is blocked only by missing external tag metadata/history."
       ],
       "blockingIssues": [
-        "剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；PATROL 采集误差分析仍需真实误差基准项和 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
+        "剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
       ],
       "nextActions": [
-        "保持 material/WMS、ProcessAnalysis、PATROL 配置/执行/异常隐患和统计聚合回归；配置真实误差基准巡检项并产生 gather_data 后复验误差分析；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
+        "保持 material/WMS、ProcessAnalysis、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
       ],
       "artifacts": [
         "docs/production-module-functional-test-cases.md",
@@ -460,7 +461,9 @@
         "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
         "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js",
         "deploy/docker/scripts/adp-patrol-report-smoke.js",
-        "metadata/patrol-report-acceptance.json"
+        "metadata/patrol-report-acceptance.json",
+        "deploy/docker/scripts/adp-patrol-gather-data-runtime-acceptance.js",
+        "metadata/patrol-gather-data-runtime-acceptance.json"
       ]
     },
     {

@@ -112,22 +112,22 @@ public class SimulatedLoginService {
                 authUrl, HttpMethod.GET, requestCallback, responseExtractor, params);
 
         JSONObject body = responseEntity.getBody();
-        String responseBody = body == null ? "request auth failed!" : body.toJSONString();
+        String responseDescription = describeResponse(body);
         if (!responseEntity.getStatusCode().equals(HttpStatus.OK) || body == null) {
-            logger.error("Simulated login failed: " + responseBody);
-            throw new BAPException("Simulated login failed, because cannot get access token! Because: " + responseBody);
+            logger.error("Simulated login failed: " + responseDescription);
+            throw new BAPException("Simulated login failed, because cannot get access token! Because: " + responseDescription);
         }
 
         JSONObject jsonObject = responseEntity.getBody();
         String accessToken = jsonObject.getString("accessToken");
         if (StringUtils.isEmpty(accessToken)) {
-            logger.error("Simulated login failed: " + responseBody);
+            logger.error("Simulated login failed: " + responseDescription);
             throw new BAPException("Simulated login failed, because cannot get access token!");
         }
 
         JwtUser jwtUser = parseJwtUser(accessToken);
         if (jwtUser == null) {
-            logger.error("Simulated login failed: " + responseBody);
+            logger.error("Simulated login failed: " + responseDescription);
             throw new BAPException("Simulated login failed, because parse access token failed!");
         }
 
@@ -148,6 +148,10 @@ public class SimulatedLoginService {
         UserContextFactory.create(jwtUser);
         logger.info("authenticated user " + jwtUser.getUsername() + ", setting security context");
         return jwtUser;
+    }
+
+    private static String describeResponse(JSONObject body) {
+        return body == null ? "request auth failed!" : "response fields=" + body.keySet();
     }
 
     private JwtUser parseJwtUser(String accessToken) {

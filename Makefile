@@ -66,6 +66,8 @@ PATROL_ROUTE_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-route-persistence-acceptance.
 PATROL_AREA_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-area-persistence-acceptance.json
 PATROL_ITEM_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-item-persistence-acceptance.json
 PATROL_REPORT_ACCEPTANCE_OUTPUT ?= metadata/patrol-report-acceptance.json
+PATROL_GATHER_ACCEPTANCE_OUTPUT ?= metadata/patrol-gather-data-runtime-acceptance.json
+PATROL_GATHER_EXPECTED_EAM_SHA256 ?=
 SYSTEMCONFIG_BUILTINS_OUTPUT ?= metadata/systemconfig-builtins-readiness-smoke.json
 SYSTEMCONFIG_CONTROLLED_OUTPUT ?= metadata/systemconfig-controlled-runtime-config-acceptance.json
 SYSTEMCONFIG_CONTROLLED_TARGET_MODE ?= qcs
@@ -309,6 +311,7 @@ help:
 	@printf '%s\n' '  make acceptance-patrol-area-persistence Run PATROL area browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-item-persistence Run PATROL item browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-report Run PATROL report/monitor browser/API/PostgreSQL acceptance'
+	@printf '%s\n' '  make acceptance-patrol-gather-data Run PATROL Kafka/TagManagement/PostgreSQL gather-data acceptance'
 	@printf '%s\n' '  make smoke-systemconfig-builtins Run built-in system config list/detail/read-only DB smoke'
 	@printf '%s\n' '  make acceptance-systemconfig-controlled-runtime-config Run controlled runtime config save/read/rollback acceptance (SYSTEMCONFIG_CONTROLLED_TARGET_MODE=qcs|rm)'
 	@printf '%s\n' '  make smoke-runtime-configuration Run read-only entity/runtime configuration readiness smoke'
@@ -352,6 +355,7 @@ compose-config:
 	$(COMPOSE) config --quiet
 
 runtime-script-check:
+	sh -n deploy/docker/scripts/build-foundation-simulated-login-serverport-patch.sh
 	sh -n deploy/bpi-streaming/scripts/create-topics.sh
 	sh -n deploy/bpi-streaming/scripts/preflight.sh
 	sh -n deploy/bpi-streaming/scripts/smoke-cluster.sh
@@ -475,6 +479,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-business-dependency-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-production-export-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-patrol-report-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-patrol-gather-data-runtime-acceptance.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/generate-business-view-runtime-sql.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_business_view_runtime_sql.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/generate-module-access-workflow-sql.py
@@ -485,6 +490,8 @@ runtime-script-check:
 	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_module_system_code_sql.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-patrol-postgres-source.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_patrol_postgres_source.py
+	$(PYTHON) -m py_compile deploy/docker/scripts/test_foundation_simulated_login_patch.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_foundation_simulated_login_patch.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-patrol-runtime.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_eam_patrol_runtime.py
 	$(NODE) deploy/docker/scripts/test-patrol-monitor-fallback.js
@@ -982,7 +989,7 @@ acceptance-systemcode-persistence:
 acceptance-systemconfig-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_PERSISTENCE_OUTPUT=$(SYSTEMCONFIG_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js
 
-.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence acceptance-patrol-hidden-danger-persistence acceptance-patrol-report
+.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence acceptance-patrol-hidden-danger-persistence acceptance-patrol-report acceptance-patrol-gather-data
 acceptance-patrol-task-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_TASK_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
@@ -994,6 +1001,9 @@ acceptance-patrol-hidden-danger-persistence:
 
 acceptance-patrol-report:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_REPORT_OUTPUT=$(PATROL_REPORT_ACCEPTANCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-report-smoke.js
+
+acceptance-patrol-gather-data:
+	ADP_USERNAME=$(ADP_USERNAME) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PATROL_GATHER_OUTPUT=$(PATROL_GATHER_ACCEPTANCE_OUTPUT) ADP_EXPECTED_EAM_SHA256=$(PATROL_GATHER_EXPECTED_EAM_SHA256) $(NODE) deploy/docker/scripts/adp-patrol-gather-data-runtime-acceptance.js
 
 acceptance-patrol-input-standard-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT=$(PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js

@@ -2817,6 +2817,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-gather-data-runtime-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3334,6 +3340,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test_audit_postgres_mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_foundation_simulated_login_patch.py",
       "state": "tracked",
       "tracked": true
     },
@@ -4834,6 +4846,12 @@
     {
       "ignored": false,
       "path": "metadata/patrol-execution-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-gather-data-runtime-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7034,7 +7052,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 532
+      "tracked": 534
     },
     "docs": {
       "tracked": 90
@@ -7043,7 +7061,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 118
+      "tracked": 119
     },
     "package.json": {
       "tracked": 1
@@ -7067,8 +7085,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1168,
-    "tracked": 1168,
+    "totalFiles": 1171,
+    "tracked": 1171,
     "untracked": 0
   },
   "untrackedByDirectory": []
