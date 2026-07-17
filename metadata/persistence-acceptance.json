@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-16T21:08:52.560Z",
+  "generatedAt": "2026-07-17T00:30:44.547Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_EXECUTION_PASS_AND_EXISTING_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_PATROL_HIDDEN_DANGER_PASS_AND_EXISTING_BLOCKERS",
   "latestRevalidation": {
     "generatedAt": "2026-07-16T21:08:52.560Z",
     "coreFlow": {
@@ -62,11 +62,19 @@
       "marker": "ADP_E2E_20260716210839_PATROL_EXECUTION",
       "evidence": "metadata/patrol-execution-persistence-acceptance.json",
       "cancelRegression": "ADP_E2E_20260716210929_PATROL: PASS"
+    },
+    "patrolHiddenDanger": {
+      "status": "PASS",
+      "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+      "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json",
+      "riskId": 6676868002956112,
+      "assertions": "45/45",
+      "eamRiskSource": "巡检"
     }
   },
   "summary": {
-    "testedFeatures": 165,
-    "pass": 160,
+    "testedFeatures": 168,
+    "pass": 163,
     "fail": 0,
     "blocked": 3,
     "notApplicable": 2
@@ -3495,6 +3503,61 @@
       "verificationSql": "SELECT task_state,version,valid FROM public.mp_potrol_tasks WHERE id=6676470908830544;",
       "status": "PASS",
       "evidence": "metadata/patrol-execution-persistence-acceptance.json. The completed task left the entering-result list and reappeared as 已完成 in the task list; five screenshots were generated and console/page/request/screenshot failures were all zero.",
+      "issues": []
+    },
+    {
+      "module": "PATROL异常结果与完成",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+      "operation": "在真实结果编辑器录入99.99并选择异常，保存完成巡检任务",
+      "api": "POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676867595027280",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLPotrolTaskController.submit -> PATROLPotrolTaskServiceImpl.submit/savePotrolTask -> DataGridService/JPA",
+      "tables": [
+        "mp_potrol_tasks",
+        "mp_task_details"
+      ],
+      "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+      "verificationSql": "SELECT p.code,t.id,t.table_no,t.task_state,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,d.id AS detail_id,d.concluse,d.real_value,d.complete_user,d.complete_date,d.version AS detail_version FROM public.mp_patrol_plans p JOIN public.mp_potrol_tasks t ON t.patrol_plan_id=p.id JOIN public.mp_task_details d ON d.patrol_task=t.id WHERE p.code='ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN';",
+      "status": "PASS",
+      "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json. HTTP 200/success=true; PostgreSQL confirmed taskState=completed, detail concluse=99.99 and real_value=PATROL_realValue/abnormal with completion audit fields populated.",
+      "issues": []
+    },
+    {
+      "module": "PATROL异常巡检生成隐患",
+      "route": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+      "operation": "选择异常明细，通过真实生成隐患按钮和确认框创建待治理隐患并重复提交验证幂等",
+      "api": "POST /msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PATROLTaskDetailController.createHiddenDanger -> PATROLTaskDetailServiceImpl.createHiddenDanger -> Hibernate/JDBC compatibility persistence",
+      "tables": [
+        "mp_task_details",
+        "ses_hrm_riskhandles"
+      ],
+      "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+      "verificationSql": "SELECT d.id,d.is_fault,d.fault_id,d.fault_table_no,r.id AS risk_id,r.table_no,r.status,r.valid,r.version,r.risk_mode,r.risk_source,r.risk_content,r.finder,r.find_time FROM public.mp_task_details d JOIN public.ses_hrm_riskhandles r ON r.id=d.fault_id WHERE d.id=6676867603743568; SELECT count(*) FROM public.ses_hrm_riskhandles WHERE id=6676868002956112;",
+      "status": "PASS",
+      "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json. First UI request returned createdCount=1/riskId=6676868002956112; PostgreSQL linked detail 6676867603743568 and persisted PATROL_COMPATIBILITY_PENDING. A second request returned createdCount=0/reusedCount=1 and the risk count remained one.",
+      "issues": []
+    },
+    {
+      "module": "EAM隐患台账复显",
+      "route": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/riskRecord",
+      "operation": "从异常巡检生成后打开EAM隐患记录并核对同一隐患、来源翻译和内容",
+      "api": "POST /msService/EAM/businessConfig/riskHandle/data-dg1578550214154",
+      "method": "POST",
+      "requiresPersistence": false,
+      "backendEntry": "EAM riskHandle datagrid -> ec_sql/runtime_datagrid -> SystemCodeService/i18n projection",
+      "tables": [
+        "ses_hrm_riskhandles",
+        "sys_code",
+        "supfusion_i18n_resource"
+      ],
+      "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+      "verificationSql": "SELECT r.id,r.table_no,r.risk_source,r.risk_content,c.name AS source_i18n_key,i.i18n_value FROM public.ses_hrm_riskhandles r LEFT JOIN public.sys_code c ON c.full_path=r.risk_source LEFT JOIN public.supfusion_i18n_resource i ON i.i18n_key=c.name AND i.langu_code='zh_CN' AND COALESCE(i.tenant_id,'dt')='dt' WHERE r.id=6676868002956112;",
+      "status": "PASS",
+      "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json. EAM datagrid returned HTTP 200 and rendered PATROL-RISK-6676868002956112; riskSource was translated to 巡检, the risk content matched the abnormal detail, and console/page/request failures were zero.",
       "issues": []
     }
   ],

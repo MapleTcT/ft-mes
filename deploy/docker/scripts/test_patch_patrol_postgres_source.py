@@ -77,6 +77,46 @@ class PatrolPostgresSourcePatchTest(unittest.TestCase):
         self.assertIn(b"ps.setInt(29, 0)", patched)
         self.assertIn(PATCHER.TASK_DETAIL_DEFAULT_MARKER, patched)
 
+    def test_hidden_danger_patch_adds_degraded_persistence_and_is_idempotent(self):
+        source = (
+            b"    @Override\r\n"
+            b"    public Map<String, Object> createHiddenDanger(String ids, Map<String, String> headerMap, Boolean isCheckFault) {\r\n"
+            b"        return new HashMap<>();\r\n"
+            b"    }\r\n\r\n"
+            b"    private Map<String, Object> generateDetailMap(PATROLTaskDetail patrolTaskDetail) {\r\n"
+            + PATCHER.source_fragment(PATCHER.HIDDEN_DANGER_OLD_CONTEXT, b"\r\n")
+            + b"        if (StringUtil.isNotBlank(patrolTaskDetail.getWorkItemId().getNormalRange())) {\r\n"
+            b"        }\r\n"
+            b"        return new HashMap<>();\r\n"
+            b"    }\r\n"
+            b"    public void checkFaultExist(List<PATROLTaskDetail> taskDetails) {\r\n"
+            b"        List<Long> workItemIds = new ArrayList<>();\r\n"
+            + PATCHER.HIDDEN_DANGER_WORK_ITEM_ANCHOR
+            + b"\r\n"
+            b"        String sql = \""
+            + PATCHER.HIDDEN_DANGER_ALIAS_OLD
+            + b"\";\r\n"
+            b"    }\r\n"
+        )
+
+        patched, count = PATCHER.patch_hidden_danger(source)
+        patched_twice, count_twice = PATCHER.patch_hidden_danger(patched)
+
+        self.assertEqual(5, count)
+        self.assertEqual(0, count_twice)
+        self.assertEqual(patched, patched_twice)
+        self.assertIn(PATCHER.HIDDEN_DANGER_COMPATIBILITY_MARKER, patched)
+        self.assertIn(b"saveRiskHandleCompatibility", patched)
+        self.assertIn(b"getFaultId() != null", patched)
+        self.assertIn(b"createdCount", patched)
+        self.assertIn(b"resolveHiddenDangerFinder", patched)
+        self.assertIn(b"org.hibernate.type.LongType.INSTANCE", patched)
+        self.assertIn(b"org.hibernate.type.StringType.INSTANCE", patched)
+        self.assertIn(PATCHER.HIDDEN_DANGER_NORMAL_RANGE_NEW, patched)
+        self.assertIn(PATCHER.HIDDEN_DANGER_WORK_ITEM_GUARD, patched)
+        self.assertIn(PATCHER.HIDDEN_DANGER_ALIAS_NEW, patched)
+        self.assertNotIn(PATCHER.HIDDEN_DANGER_ALIAS_OLD, patched)
+
     def test_utility_patch_is_idempotent_and_preserves_postgres_quotes(self):
         source = (
             b"package test;\n"

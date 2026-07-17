@@ -1,0 +1,951 @@
+{
+  "generatedAt": "2026-07-17T00:30:44.547Z",
+  "baseUrl": "http://10.11.100.17:18080",
+  "database": "PostgreSQL",
+  "action": "hidden-danger",
+  "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+  "planCode": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN",
+  "generationRemark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_TASK_GENERATION",
+  "ids": {
+    "routeId": 6675485506913104,
+    "staffId": 1,
+    "planId": 6676867588637520,
+    "generationId": 6676867592733520,
+    "taskId": 6676867595027280,
+    "taskDetailId": 6676867603743568,
+    "riskId": 6676868002956112
+  },
+  "endpoints": {
+    "planSubmit": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867588637520,\"tableInfoId\":null},\"message\":\"操作成功\"}"
+    },
+    "taskGeneration": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867592733520,\"tableInfoId\":null},\"message\":\"操作成功\"}"
+    },
+    "taskListQuery": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+    },
+    "enteringResultQuery": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/running\",\"value\":\"执行中\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675806914790224,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675806915019600,\"tableNo\":\"patrolTask_20260716_006\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}}"
+    },
+    "completionSave": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/{save|submit}",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"success\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867595027280,\"tableInfoId\":6676867595158352},\"message\":\"操作成功\"}"
+    },
+    "enteringResultParentRefresh": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675806914790224,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675806915019600,\"tableNo\":\"patrolTask_20260716_006\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675800454841168,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675800454939472,\"tableNo\":\"patrolTask_20260716_005\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}"
+    },
+    "completedTaskQuery": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"valid\":true,\"version\":2,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+    },
+    "abnormalSummaryQuery": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":null,\"faultTableNo\":null,\"id\":6676867603743568,\"isFault\":null,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784248235008,\"actualStartTime\":1784248233000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"workRoute\":{\"attrMap\":null,\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},\"realValue\":{\"id\":\"PATROL_realValue/abnormal\",\"value\":\"异常\"},\"tableInfoId\":null,\"taskAreaId\":{\"attrMap\":null,\"cardTime\":null,\"id\":6676867603415888},\"valid\":true,\"version\":1,\"workId\":{\"attrMap\":null,\"id\":6675531420975952,\"name\":\"ADP_E2E_202607162112_PATROL_AREA\"}},{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":6676847392080720,\"faultTableNo\":\"PATROL-RISK-6676847392080720\",\"id\":6676847047689040,\"isFault\":true,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784247606536,\"actualStartTime\":1784247605000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676847042216784,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_018\",\"taskState\":{\"id\":\"PATROL_taskState/compl"
+    },
+    "hiddenDangerCreate": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"compatibilityStatus\":\"PATROL_COMPATIBILITY_PENDING\",\"compatibilityMode\":true,\"reusedCount\":0,\"data\":[{\"taskDetailId\":6676867603743568,\"tableNo\":\"PATROL-RISK-6676868002956112\",\"riskId\":6676868002956112}],\"createdCount\":1},\"message\":\"操作成功\"}"
+    },
+    "hiddenDangerRetry": {
+      "method": "POST",
+      "path": "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+      "status": 200,
+      "ok": true,
+      "body": "{\"code\":200,\"data\":{\"reusedCount\":1,\"data\":[{\"reused\":true,\"taskDetailId\":6676867603743568,\"tableNo\":\"PATROL-RISK-6676868002956112\",\"riskId\":6676868002956112}],\"createdCount\":0},\"message\":\"操作成功\"}"
+    },
+    "eamRiskLedger": {
+      "method": "GET",
+      "path": "/msService/EAM/businessConfig/riskHandle/riskRecord",
+      "status": 200,
+      "ok": true,
+      "body": ""
+    }
+  },
+  "payloads": {
+    "plan": {
+      "patrolPlan": {
+        "code": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN",
+        "startTime": 1784289600000,
+        "endTime": 1784289600000,
+        "useTimes": 1,
+        "potrolType": {
+          "id": "PATROL_planType/single"
+        },
+        "finishTimeType": {
+          "id": "PATROL_finishType/none"
+        },
+        "assignType": {
+          "id": "PATROL_assignType/effect"
+        },
+        "staffAssignType": {
+          "id": "PATROL_staffAssign/staff"
+        },
+        "state": true,
+        "finishPlan": false,
+        "planCount": 0,
+        "workRouteId": {
+          "id": 6675485506913104,
+          "code": "ADP_E2E_202607162045_PATROL_ROUTE",
+          "name": "ADP_E2E_202607162045_PATROL_ROUTE_UPDATED",
+          "patrolType": {
+            "id": "PATROL_routeType/eam"
+          }
+        },
+        "patrolPlanStaffIdmultiselectIDs": "1",
+        "patrolPlanStaffIdmultiselectNames": "虚拟人员",
+        "patrolPlanStaffIdAddIds": "1,",
+        "patrolPlanStaffIdDeleteIds": "",
+        "patrolPlanRoleIdmultiselectIDs": "",
+        "patrolPlanRoleIdmultiselectNames": ""
+      },
+      "viewCode": "PATROL_1.0.0_patrolPlan_patrolPlan",
+      "modelName": "PATROLPatrolPlan",
+      "operateType": "save",
+      "dgList": {},
+      "dgDeletedIds": {}
+    },
+    "taskGeneration": {
+      "createTask": {
+        "startTime": 1784287800000,
+        "endTime": 1784295000000,
+        "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_TASK_GENERATION",
+        "createPlanIdPatrolPlanmultiselectIDs": "6676867588637520",
+        "createPlanIdPatrolPlanmultiselectNames": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN",
+        "createPlanIdPatrolPlanAddIds": "6676867588637520,",
+        "createPlanIdPatrolPlanDeleteIds": ""
+      },
+      "viewCode": "PATROL_1.0.0_patrolPlan_createTaskEdit",
+      "modelName": "PATROLCreateTask",
+      "operateType": "save",
+      "dgList": {},
+      "dgDeletedIds": {}
+    },
+    "stateTransitions": [
+      {
+        "state": "PATROL_taskState/issued",
+        "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_ISSUED",
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":200,\"data\":\"SUCCESS\",\"message\":\"操作成功\"}"
+      },
+      {
+        "state": "PATROL_taskState/running",
+        "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING",
+        "status": 200,
+        "ok": true,
+        "body": "{\"code\":200,\"data\":\"SUCCESS\",\"message\":\"操作成功\"}"
+      }
+    ],
+    "completion": {
+      "result": "99.99",
+      "conclusion": "异常",
+      "conclusionId": "PATROL_realValue/abnormal",
+      "detailCount": 1
+    },
+    "hiddenDanger": {
+      "ids": "6676867603743568,",
+      "uiRequest": {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "postData": "ids=6676867603743568%2C"
+      }
+    }
+  },
+  "executionEditorState": {
+    "judgeType": "function",
+    "judgeInstalled": true,
+    "detailCount": 1,
+    "rows": [
+      {
+        "id": 6676867603743568,
+        "concluse": "99.99",
+        "realValueId": "PATROL_realValue/abnormal"
+      }
+    ]
+  },
+  "statePersistence": {
+    "id": 6676867595027280,
+    "tableNo": "patrolTask_20260717_019",
+    "taskState": "PATROL_taskState/completed",
+    "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING",
+    "version": 2,
+    "valid": true,
+    "actualStartTime": "2026-07-17T08:30:33",
+    "actualEndTime": "2026-07-17T08:30:35.008",
+    "completeStaff": 1
+  },
+  "hiddenDanger": {
+    "abnormalSelection": [
+      {
+        "id": 6676867603743568,
+        "isFault": false,
+        "tableNo": "patrolTask_20260717_019",
+        "cid": 1000
+      }
+    ],
+    "confirmText": "确认 是否生成隐患单？ 确 认取 消",
+    "clientState": {
+      "ajaxHelperType": "function",
+      "jqueryType": "function",
+      "userCompanyId": 1000,
+      "selected": [
+        {
+          "id": 6676867603743568,
+          "cid": 1000,
+          "isFault": false
+        }
+      ],
+      "confirmButton": {
+        "text": "确 认",
+        "className": "ant-btn modal-footer-btn ant-btn-primary",
+        "disabled": false
+      }
+    },
+    "creationPersistence": {
+      "detail": {
+        "id": 6676867603743568,
+        "isFault": true,
+        "faultId": 6676868002956112,
+        "faultTableNo": "PATROL-RISK-6676868002956112"
+      },
+      "risk": {
+        "id": 6676868002956112,
+        "tableNo": "PATROL-RISK-6676868002956112",
+        "status": 1,
+        "valid": 1,
+        "version": 0,
+        "riskMode": "PATROL_COMPATIBILITY_PENDING",
+        "riskSource": "SESHRM_riskResource/005",
+        "riskContent": "隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\n",
+        "finder": 1,
+        "findTime": "2026-07-17T08:30:35.009",
+        "createTime": "2026-07-17T08:30:41.637"
+      },
+      "riskCount": 1
+    },
+    "retryPersistence": {
+      "riskCount": 1,
+      "faultId": 6676868002956112,
+      "faultTableNo": "PATROL-RISK-6676868002956112"
+    },
+    "eamRiskVisible": true,
+    "eamRiskRow": {
+      "id": 6676868002956112,
+      "riskTableNo": "PATROL-RISK-6676868002956112",
+      "riskSource": "巡检",
+      "riskContent": "隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\n"
+    },
+    "eamRiskScriptOrder": {
+      "sesgisIndex": 13,
+      "editIndex": 14,
+      "sources": [
+        "",
+        "http://10.11.100.17:18080/greenDill/static/EAM/js/EAM.js",
+        "http://10.11.100.17:18080/greenDill/static/EAM/js/commonTool.js",
+        "",
+        "",
+        "http://10.11.100.17:18080/greenDill/static/scripts/15.564bae75.js",
+        "http://10.11.100.17:18080/greenDill/static/scripts/styles.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.core.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.antdicons.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.antd.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/i18n.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.commons.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.echarts.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/vendors.sesgis.js?v=1677582772048",
+        "http://10.11.100.17:18080/greenDill/static/scripts/edit.js?v=1677582772048",
+        ""
+      ]
+    }
+  },
+  "persistenceSql": "select json_build_object(\n  'plan', (\n    select json_build_object(\n      'id', p.id, 'code', p.code, 'valid', p.valid, 'workRouteId', p.work_route_id,\n      'state', p.state, 'finishPlan', p.finish_plan, 'planCount', p.plan_count,\n      'startTime', p.start_time, 'nextTime', p.next_time\n    ) from public.mp_patrol_plans p where p.id=6676867588637520\n  ),\n  'planStaffCount', (\n    select count(*) from public.mp_plan_staffs s\n    where s.patrol_plan=6676867588637520 and s.staff_id=1 and s.valid=true\n  ),\n  'generation', (\n    select json_build_object('id', c.id, 'valid', c.valid, 'remark', c.remark, 'startTime', c.start_time, 'endTime', c.end_time)\n    from public.mp_create_tasks c where c.id=6676867592733520\n  ),\n  'task', (\n    select json_build_object(\n      'id', t.id, 'valid', t.valid, 'tableNo', t.table_no, 'taskState', t.task_state, 'remark', t.remark,\n      'patrolPlan', t.patrol_plan, 'patrolPlanId', t.patrol_plan_id, 'workRoute', t.work_route,\n      'actualStartTime', t.actual_start_time, 'actualEndTime', t.actual_end_time,\n      'completeStaff', t.complete_staff\n    ) from public.mp_potrol_tasks t where t.patrol_plan_id=6676867588637520 order by t.id desc limit 1\n  ),\n  'detail', (\n    select json_build_object(\n      'id', d.id, 'valid', d.valid, 'version', d.version,\n      'taskDetailState', d.task_detail_state, 'patrolTask', d.patrol_task,\n      'workItemId', d.work_item_id, 'content', d.content,\n      'concluse', d.concluse, 'realValue', d.real_value,\n      'completeUser', d.complete_user, 'completeDate', d.complete_date,\n      'isFault', d.is_fault, 'faultId', d.fault_id, 'faultTableNo', d.fault_table_no\n    )\n    from public.mp_task_details d\n    where d.patrol_task=(select t.id from public.mp_potrol_tasks t where t.patrol_plan_id=6676867588637520 order by t.id desc limit 1)\n    order by d.id limit 1\n  ),\n  'planAssociationMismatchCount', (\n    select count(*) from public.mp_potrol_tasks t\n    where t.patrol_plan_id=6676867588637520 and t.patrol_plan is distinct from t.patrol_plan_id\n  ),\n  'detailLifecycleNullCount', (\n    select count(*) from public.mp_task_details d\n    where d.patrol_task=(select t.id from public.mp_potrol_tasks t where t.patrol_plan_id=6676867588637520 order by t.id desc limit 1)\n      and (d.valid is null or d.version is null or d.task_detail_state is null)\n  ),\n  'detailCompletionNullCount', (\n    select count(*) from public.mp_task_details d\n    where d.patrol_task=(select t.id from public.mp_potrol_tasks t where t.patrol_plan_id=6676867588637520 order by t.id desc limit 1)\n      and (d.concluse is null or d.real_value is null or d.complete_user is null or d.complete_date is null)\n  )\n);",
+  "persistence": {
+    "plan": {
+      "id": 6676867588637520,
+      "code": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN",
+      "valid": true,
+      "workRouteId": 6675485506913104,
+      "state": true,
+      "finishPlan": true,
+      "planCount": 1,
+      "startTime": "2026-07-17T20:00:00",
+      "nextTime": null
+    },
+    "planStaffCount": 1,
+    "generation": {
+      "id": 6676867592733520,
+      "valid": true,
+      "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_TASK_GENERATION",
+      "startTime": "2026-07-17T19:30:00",
+      "endTime": "2026-07-17T21:30:00"
+    },
+    "task": {
+      "id": 6676867595027280,
+      "valid": true,
+      "tableNo": "patrolTask_20260717_019",
+      "taskState": "PATROL_taskState/completed",
+      "remark": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING",
+      "patrolPlan": 6676867588637520,
+      "patrolPlanId": 6676867588637520,
+      "workRoute": 6675485506913104,
+      "actualStartTime": "2026-07-17T08:30:33",
+      "actualEndTime": "2026-07-17T08:30:35.008",
+      "completeStaff": 1
+    },
+    "detail": {
+      "id": 6676867603743568,
+      "valid": true,
+      "version": 2,
+      "taskDetailState": "PATROL_taskDetailState/pending",
+      "patrolTask": 6676867595027280,
+      "workItemId": 6675549930308432,
+      "content": "ADP_E2E_202607162116_PATROL_ITEM",
+      "concluse": "99.99",
+      "realValue": "PATROL_realValue/abnormal",
+      "completeUser": 1,
+      "completeDate": "2026-07-17T08:30:35.009",
+      "isFault": true,
+      "faultId": 6676868002956112,
+      "faultTableNo": "PATROL-RISK-6676868002956112"
+    },
+    "planAssociationMismatchCount": 0,
+    "detailLifecycleNullCount": 0,
+    "detailCompletionNullCount": 0
+  },
+  "assertions": {
+    "planPersisted": true,
+    "planStaffPersisted": true,
+    "generationPersisted": true,
+    "taskPersisted": true,
+    "taskPlanAssociationPersisted": true,
+    "taskListContainsMarker": true,
+    "taskMarkerVisibleInGrid": true,
+    "detailPersisted": true,
+    "noPlanAssociationMismatch": true,
+    "noNullDetailLifecycle": true,
+    "planPageNoVisibleError": true,
+    "taskPageNoVisibleError": true,
+    "noPatrolRequestFailures": true,
+    "noLegacyI18nParameterErrors": true,
+    "noConsoleErrors": true,
+    "noPageErrors": true,
+    "issuedAndRunningTransitionsSucceeded": true,
+    "resultEditorLoadedJudge": true,
+    "resultEditorRowsCompleted": true,
+    "completionSaveResponseSuccess": true,
+    "enteringResultParentRefreshSucceeded": true,
+    "taskCompletedPersisted": true,
+    "taskExecutionTimesPersisted": true,
+    "taskCompleteStaffPersisted": true,
+    "taskExecutionRemarkPersisted": true,
+    "detailResultPersisted": true,
+    "detailConclusionPersisted": true,
+    "detailCompletionAuditPersisted": true,
+    "allDetailsCompleted": true,
+    "taskCompletedVisibleInGrid": true,
+    "enteringResultPageNoVisibleError": true,
+    "completedTaskPageNoVisibleError": true,
+    "abnormalSummaryPageNoVisibleError": true,
+    "abnormalSummaryQuerySucceeded": true,
+    "abnormalDetailSelectedThroughGrid": true,
+    "hiddenDangerConfirmationShown": true,
+    "hiddenDangerUiRequestCaptured": true,
+    "hiddenDangerUiResponseSucceeded": true,
+    "taskDetailLinkedToRisk": true,
+    "compatibilityRiskPersisted": true,
+    "hiddenDangerRetryReusedExistingRisk": true,
+    "eamRiskPageNoVisibleError": true,
+    "eamRiskVisibleInGrid": true,
+    "eamRiskSourceTranslated": true,
+    "eamRiskSesgisLoadsBeforeEdit": true
+  },
+  "failedAssertions": [],
+  "evidence": {
+    "navigations": [
+      {
+        "label": "巡检计划列表",
+        "route": "/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      },
+      {
+        "label": "巡检任务列表",
+        "route": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      },
+      {
+        "label": "巡检结果录入列表",
+        "route": "/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      },
+      {
+        "label": "巡检任务完成结果",
+        "route": "/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      },
+      {
+        "label": "巡检异常汇总",
+        "route": "/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      },
+      {
+        "label": "EAM 风险台账",
+        "route": "/msService/EAM/businessConfig/riskHandle/riskRecord",
+        "status": 200,
+        "navigationError": null,
+        "visibleError": null,
+        "unresolvedI18nKeys": []
+      }
+    ],
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolPlan_potrolPlanList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+        "postData": "{\"patrolPlan\":{\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"startTime\":1784289600000,\"endTime\":1784289600000,\"useTimes\":1,\"potrolType\":{\"id\":\"PATROL_planType/single\"},\"finishTimeType\":{\"id\":\"PATROL_finishType/none\"},\"assignType\":{\"id\":\"PATROL_assignType/effect\"},\"staffAssignType\":{\"id\":\"PATROL_staffAssign/staff\"},\"state\":true,\"finishPlan\":false,\"planCount\":0,\"workRouteId\":{\"id\":6675485506913104,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\"}},\"patrolPlanStaffIdmultiselectIDs\":\"1\",\"patrolPlanStaffIdmultiselectNames\":\"虚拟人员\",\"patrolPlanStaffIdAddIds\":\"1,\",\"patrolPlanStaffIdDeleteIds\":\"\",\"patrolPlanRoleIdmultiselectIDs\":\"\",\"patrolPlanRoleIdmultiselectNames\":\"\"},\"viewCode\":\"PATROL_1.0.0_patrolPlan_patrolPlan\",\"modelName\":\"PATROLPatrolPlan\",\"operateType\":\"save\",\"dgList\":{},\"dgDeletedIds\":{}}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+        "postData": "{\"createTask\":{\"startTime\":1784287800000,\"endTime\":1784295000000,\"remark\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_TASK_GENERATION\",\"createPlanIdPatrolPlanmultiselectIDs\":\"6676867588637520\",\"createPlanIdPatrolPlanmultiselectNames\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"createPlanIdPatrolPlanAddIds\":\"6676867588637520,\",\"createPlanIdPatrolPlanDeleteIds\":\"\"},\"viewCode\":\"PATROL_1.0.0_patrolPlan_createTaskEdit\",\"modelName\":\"PATROLCreateTask\",\"operateType\":\"save\",\"dgList\":{},\"dgDeletedIds\":{}}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_potrolTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_potrolTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState%2Fissued&remark=ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_ISSUED&idList=6676867595027280",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState%2Frunning&remark=ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING&idList=6676867595027280",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_enteringResultList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_enteringResultList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/editStates?viewCode=PATROL_1.0.0_patrolTask_enteringResultEdit&id=6676867595027280",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/data/6676867595027280",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6676867595158352&type=Table&viewCode=PATROL_1.0.0_patrolTask_enteringResultEdit",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/data-dg1584600022503?datagridCode=PATROL_1.0.0_patrolTask_enteringResultEditdg1584600022503&id=6676867595027280",
+        "postData": "{\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_enteringResultEdit\",\"pageSize\":65535,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?__pc__=ZW50ZXJpbmdSZXN1bHRMaXN0X2VudHJfbW9kaWZ5X1BBVFJPTF8xLjAuMF9wYXRyb2xUYXNrX2VudGVyaW5nUmVzdWx0TGlzdHw_&id=6676867595027280",
+        "postData": "{\"workFlowVar\":{},\"operateType\":\"save\",\"taskDescription\":\"生效\",\"dgList\":{\"dg1584600022503\":\"[{\\\"concluse\\\":\\\"99.99\\\",\\\"attachmentMultiFileIcons\\\":[],\\\"attachmentMultiFileIds\\\":[],\\\"attachmentMultiFileNames\\\":[],\\\"autoJudge\\\":false,\\\"claim\\\":\\\"运行状态正常\\\",\\\"completeDate\\\":1784248235009,\\\"completeUser\\\":{\\\"id\\\":1,\\\"code\\\":\\\"default\\\",\\\"name\\\":\\\"默认人员\\\"},\\\"content\\\":\\\"ADP_E2E_202607162116_PATROL_ITEM\\\",\\\"defaultValue\\\":\\\"\\\",\\\"eamId\\\":null,\\\"id\\\":\\\"6676867603743568\\\",\\\"inputStandardId\\\":{\\\"id\\\":1002},\\\"isPass\\\":false,\\\"isPhone\\\":false,\\\"isRealPass\\\":null,\\\"isRealPhoto\\\":null,\\\"normalRange\\\":\\\"\\\",\\\"part\\\":\\\"泵房A\\\",\\\"passReason\\\":null,\\\"patrolTask\\\":{\\\"id\\\":6676867595027280},\\\"publicItemId\\\":null,\\\"realValue\\\":{\\\"id\\\":\\\"PATROL_realValue/abnormal\\\"},\\\"remark\\\":null,\\\"sort\\\":0,\\\"taskAreaId\\\":{\\\"id\\\":6676867603415888},\\\"valueName\\\":\\\"\\\",\\\"version\\\":0,\\\"workId\\\":{\\\"id\\\":6675531420975952},\\\"workItemId\\\":{\\\"id\\\":6675549930308432}}]\"},\"dgDeletedIds\":{\"dg1584600022503\":null},\"potrolTask\":{\"startTime\":1784289600000,\"endTime\":1784293200000,\"workRoute\":{\"id\":6675485506913104,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"},\"patrolType\":{\"id\":\"PATROL_routeType/eam\"},\"teamDetail\":{\"id\":\"\",\"code\":\"\",\"name\":\"\"},\"patrolTaskStaffIdAddIds\":\"\",\"patrolTaskStaffIdDeleteIds\":\"\",\"patrolTaskStaffIdmultiselectIDs\":\"1,\",\"remark\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING\",\"actualStartTime\":1784248233000,\"completeStaff\":{\"id\":1,\"code\":\"default\",\"name\":\"默认人员\"},\"version\":1,\"taskState\":{\"id\":\"PATROL_taskState/completed\"},\"actualEndTime\":1784248235008},\"uploadFileFormMap\":[],\"ids2del\":\"\",\"viewCode\":\"PATROL_1.0.0_patrolTask_enteringResultEdit\",\"superEdit\":true}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_enteringResultList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_potrolTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_potrolTaskList\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/myAjax.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_abnormalSummary\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_abnormalSummary\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "postData": "ids=6676867603743568%2C"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "postData": "{\"classifyCodes\":\"\",\"customCondition\":{},\"permissionCode\":\"PATROL_1.0.0_patrolTask_abnormalSummary\",\"pageNo\":1,\"paging\":true,\"pageSize\":20,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "postData": "ids=6676867603743568%2C"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/riskRecord",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/baseService/workbench/download/getAuthenticationMessage",
+        "postData": null
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/editStates?viewCode=EAM_1.0.0_businessConfig_riskRecord",
+        "postData": null
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/data-dg1578550214154?datagridCode=EAM_1.0.0_businessConfig_riskRecorddg1578550214154&id=-1",
+        "postData": "{\"customCondition\":{},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/data-dg1578550214154?datagridCode=EAM_1.0.0_businessConfig_riskRecorddg1578550214154&id=-1",
+        "postData": "{\"customCondition\":{},\"pageNo\":1,\"paging\":true,\"pageSize\":10,\"crossCompanyFlag\":\"true\"}"
+      }
+    ],
+    "responses": [
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList",
+        "status": 200,
+        "body": "<!doctype html>\r\n<html lang=\"zh-cn\">\r\n\r\n<head>\r\n\t<meta charset=\"UTF-8\">\r\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\r\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t<title></title>\r\n\t<!--巡检计划-->\t\r\n\t<script>\t\t\r\n\t\tvar loadScript = function(url, placeBody) {\r\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\r\n\t\t\t\tvar xhr = new XMLHttpRequest();\r\n\t\t\t\txhr.open(\"GET\", url, false);\r\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\r\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\r\n\t\t\t\t}\r\n\t\t\t\txhr.onreadystatechange = function() {\r\n\t\t\t\t\tif (xhr.readyState === 4) {\r\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\r\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\terrorCallback && errorCallback();\r\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t};\r\n\t\t\t\treturn xhr.send(null);\r\n\t\t\t}\r\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\r\n\t\t\tif (!isChrome) {\r\n\t\t\t\turl += '-es5';\r\n\t\t\t}\r\n\t\t\turl += '.js?v=' + Math.random();\r\n\t\t\t\r\n\t\t\tloadUrlContent(url, function(content){\r\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\r\n\t\t\t\tvar s = document.createElement('script');\r\n\t\t\t\ts.text = content;\r\n\t\t\t\tparentEl.appendChild(s);\r\n\t\t\t});\r\n\t\t};\r\n\t</script>\r\n\r\n\t<!-- 自定义代码，在custom对应目录下 -->\r\n\t<!-- head.html--start -->\r\n\t\r\n<script src='/msService/PATROL/js/patrol.js'></script>\r\n\t<!-- head.html--end -->\r\n\t<script>\r\n\t\t\r\n\t\t\r\n\t\tdocument.write(\"<script src='/greenDill/static/PATROL/patrolPlan/patrolPlan/potrolPlanList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\r\n\t</script>\r\n\t<script type=\"text/javascript\">\r\n\t\tvar pageConfig = {\r\n\t\t\t\"prefix\": \"/msService\",// url前缀\r\n\t\t\t\"viewCode\": \"PATROL_1.0.0_patrolPlan_potrolPlanList\", //  视图编码\r\n\t\t\t\"entityCode\":\"PATROL_1.0.0_patrolP"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200,
+        "body": "/**\n * 时间格式化\n **/\nDate.prototype.MY_FORMAT = function(number, format) {\n  \tif(format == \"undefined\"||format==null||format===\"\"){\n    \tformat = \"YYYY-MM-DD HH:mm:ss\";\n    }\n\tfunction formatNumber(n) {\n\t\treturn (n = n.toString())[1] ? n : \"0\" + n\n\t}\n\tvar formateArr = [\"YYYY\", \"MM\", \"DD\", \"HH\", \"mm\", \"ss\"]\n\t\t, returnArr = []\n\t\t, time = String(number).length < 13 ? 1e3 * number : number\n\t\t, date = new Date(time);\n\tfor (var i in returnArr.push(date.getFullYear()),\n\t\treturnArr.push(formatNumber(date.getMonth() + 1)),\n\t\treturnArr.push(formatNumber(date.getDate())),\n\t\treturnArr.push(formatNumber(date.getHours())),\n\t\treturnArr.push(formatNumber(date.getMinutes())),\n\t\treturnArr.push(formatNumber(date.getSeconds())),\n\t\treturnArr) {\n\t\tformat = format.replace(formateArr[i], returnArr[i]);\n\t}\n\treturn format;\n}\n/*\n * 跳转隐患单查看界面\n */\n function viewFault(faultId){\n    //获取权限编码\n    var powerCode = ReactAPI.getPowerCode(\"SESHRM_1.0.0_accidentRisk_riskHandleList_self\")['SESHRM_1.0.0_accidentRisk_riskHandleList_self'];\n    //打开查看界面\n    window.open(\"/msService/SESHRM/accidentRisk/riskHandle/riskDetailVIew?__pc__=\"+powerCode+\"&id=\"+faultId);\n }\n/*\n * 选择班组更新巡检任务的负责人\n */\nfunction changeOwnStaff(obj){\n\t//成员的ID集合\n   var staffIDs=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_a132945e_4632_43ee_99ac_ddc143ea01e9.split(',');\n   //成员的名字集合\n   var staffNames=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_55c79794_1599_4cc8_a7db_e38084515687.split(',');\n   var ownStaff=[];\n   //为负责人设置值\n   for(var i=0;i<staffIDs.length;i++){\n\t\townStaff.push({\n\t\t\tid: staffIDs[i],\n\t\t\tname: staffNames[i]\n\t\t  });\n   }\n   ReactAPI.getComponentAPI(\"Reference\").APIs(\"potrolTask.patrolTaskStaffId\").setValue(ownStaff);\n}\n/*\n * 获取当前页面url参数\n */\nfunction getParam(paramName){\n  \t//汉字会被编码，进行还原\n\tvar query = decod"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/potrolPlanList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":null,\"cid\":1000,\"code\":\"ADP_E2E_20260717002818_PATROL_HIDDEN_DANGER_PLAN\",\"createStaff\":null,\"createTime\":null,\"endTime\":1784289600000,\"id\":6676865354974032,\"lastTime\":null,\"nextTime\":1784289600000,\"planCount\":0,\"potrolType\":{\"id\":\"PATROL_planType/single\",\"value\":\"单次\"},\"repeatNum\":null,\"startTime\":1784289600000,\"state\":true,\"status\":null,\"tableInfoId\":null,\"tableNo\":null,\"useTimes\":1.000000,\"valid\":true,\"version\":1,\"workRouteId\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":null,\"cid\":1000,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"createStaff\":null,\"createTime\":null,\"endTime\":1784289600000,\"id\":6676847035237200,\"lastTime\":1784289600000,\"nextTime\":null,\"planCount\":1,\"potrolType\":{\"id\":\"PATROL_planType/single\",\"value\":\"单次\"},\"repeatNum\":null,\"startTime\":1784289600000,\"state\":true,\"status\":null,\"tableInfoId\":null,\"tableNo\":null,\"useTimes\":1.000000,\"valid\":true,\"version\":2,\"workRouteId\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":null,\"cid\":1000,\"code\":\"ADP_E2E_20260717001857_PATROL_HIDDEN_DANGER_PLAN\",\"createStaff\":null,\"createTime\":null,\"endTime\":1784289600000,\"id\":6676845017088848,\"lastTime\":1784289600000,\"nextTime\":null,\"planCount\":1,\"potrolType\":{\"id\":\"PATROL_planType/single\",\"value\":\"单次\"},\"repeatNum\":null,\"startTime\":1784289600000,\"state\":true,\"status\":null,\"tableInfoId\":null,\"tableNo\":null,\"useTimes\":1.000000,\"va"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/patrolPlan/patrolPlan/submit",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867588637520,\"tableInfoId\":null},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolPlan/createTask/createTaskEdit/submit",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"operate\":\"add\",\"dealSuccessFlag\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867592733520,\"tableInfoId\":null},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "status": 200,
+        "body": "<!doctype html>\r\n<html lang=\"zh-cn\">\r\n\r\n<head>\r\n\t<meta charset=\"UTF-8\">\r\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\r\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t<title></title>\r\n\t<!--巡检任务-->\t\r\n\t<script>\t\t\r\n\t\tvar loadScript = function(url, placeBody) {\r\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\r\n\t\t\t\tvar xhr = new XMLHttpRequest();\r\n\t\t\t\txhr.open(\"GET\", url, false);\r\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\r\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\r\n\t\t\t\t}\r\n\t\t\t\txhr.onreadystatechange = function() {\r\n\t\t\t\t\tif (xhr.readyState === 4) {\r\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\r\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\terrorCallback && errorCallback();\r\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t};\r\n\t\t\t\treturn xhr.send(null);\r\n\t\t\t}\r\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\r\n\t\t\tif (!isChrome) {\r\n\t\t\t\turl += '-es5';\r\n\t\t\t}\r\n\t\t\turl += '.js?v=' + Math.random();\r\n\t\t\t\r\n\t\t\tloadUrlContent(url, function(content){\r\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\r\n\t\t\t\tvar s = document.createElement('script');\r\n\t\t\t\ts.text = content;\r\n\t\t\t\tparentEl.appendChild(s);\r\n\t\t\t});\r\n\t\t};\r\n\t</script>\r\n\r\n\t<!-- 自定义代码，在custom对应目录下 -->\r\n\t<!-- head.html--start -->\r\n\t\r\n\t<!-- head.html--end -->\r\n\t<script>\r\n\t\t\r\n\t\t\r\n\t\tdocument.write(\"<script src='/greenDill/static/PATROL/patrolTask/potrolTask/potrolTaskList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\r\n\t</script>\r\n\t<script type=\"text/javascript\">\r\n\t\tvar pageConfig = {\r\n\t\t\t\"prefix\": \"/msService\",// url前缀\r\n\t\t\t\"viewCode\": \"PATROL_1.0.0_patrolTask_potrolTaskList\", //  视图编码\r\n\t\t\t\"entityCode\":\"PATROL_1.0.0_patrolTask\",// 实体编码\r\n\t\t\t\"menuCode\": \"PATROL_1.0.0_patrolTask_po"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState%2Fissued&remark=ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_ISSUED&idList=6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":\"SUCCESS\",\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState%2Frunning&remark=ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_RUNNING&idList=6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":\"SUCCESS\",\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+        "status": 200,
+        "body": "<!doctype html>\r\n<html lang=\"zh-cn\">\r\n\r\n<head>\r\n\t<meta charset=\"UTF-8\">\r\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\r\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t<title></title>\r\n\t<!--巡检结果录入-->\t\r\n\t<script>\t\t\r\n\t\tvar loadScript = function(url, placeBody) {\r\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\r\n\t\t\t\tvar xhr = new XMLHttpRequest();\r\n\t\t\t\txhr.open(\"GET\", url, false);\r\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\r\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\r\n\t\t\t\t}\r\n\t\t\t\txhr.onreadystatechange = function() {\r\n\t\t\t\t\tif (xhr.readyState === 4) {\r\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\r\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\terrorCallback && errorCallback();\r\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t};\r\n\t\t\t\treturn xhr.send(null);\r\n\t\t\t}\r\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\r\n\t\t\tif (!isChrome) {\r\n\t\t\t\turl += '-es5';\r\n\t\t\t}\r\n\t\t\turl += '.js?v=' + Math.random();\r\n\t\t\t\r\n\t\t\tloadUrlContent(url, function(content){\r\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\r\n\t\t\t\tvar s = document.createElement('script');\r\n\t\t\t\ts.text = content;\r\n\t\t\t\tparentEl.appendChild(s);\r\n\t\t\t});\r\n\t\t};\r\n\t</script>\r\n\r\n\t<!-- 自定义代码，在custom对应目录下 -->\r\n\t<!-- head.html--start -->\r\n\t\r\n\t<!-- head.html--end -->\r\n\t<script>\r\n\t\t\r\n\t\t\r\n\t\t\r\n\t</script>\r\n\t<script type=\"text/javascript\">\r\n\t\tvar pageConfig = {\r\n\t\t\t\"prefix\": \"/msService\",// url前缀\r\n\t\t\t\"viewCode\": \"PATROL_1.0.0_patrolTask_enteringResultList\", //  视图编码\r\n\t\t\t\"entityCode\":\"PATROL_1.0.0_patrolTask\",// 实体编码\r\n\t\t\t\"menuCode\": \"PATROL_1.0.0_patrolTask_enteringResultList\",\r\n\t\t\t\"viewName\": \"巡检结果录入\",// 视图名称\r\n\t\t\t\"viewType\": \"LIST\",// 视图类型\r\n\t\t\t\"modelCode\": \"PATROL_1.0.0_patrolTask_PotrolTask\""
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/running\",\"value\":\"执行中\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675806914790224,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675806915019600,\"tableNo\":\"patrolTask_20260716_006\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/running\",\"value\":\"执行中\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675806914790224,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675806915019600,\"tableNo\":\"patrolTask_20260716_006\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200,
+        "body": "/**\n * 时间格式化\n **/\nDate.prototype.MY_FORMAT = function(number, format) {\n  \tif(format == \"undefined\"||format==null||format===\"\"){\n    \tformat = \"YYYY-MM-DD HH:mm:ss\";\n    }\n\tfunction formatNumber(n) {\n\t\treturn (n = n.toString())[1] ? n : \"0\" + n\n\t}\n\tvar formateArr = [\"YYYY\", \"MM\", \"DD\", \"HH\", \"mm\", \"ss\"]\n\t\t, returnArr = []\n\t\t, time = String(number).length < 13 ? 1e3 * number : number\n\t\t, date = new Date(time);\n\tfor (var i in returnArr.push(date.getFullYear()),\n\t\treturnArr.push(formatNumber(date.getMonth() + 1)),\n\t\treturnArr.push(formatNumber(date.getDate())),\n\t\treturnArr.push(formatNumber(date.getHours())),\n\t\treturnArr.push(formatNumber(date.getMinutes())),\n\t\treturnArr.push(formatNumber(date.getSeconds())),\n\t\treturnArr) {\n\t\tformat = format.replace(formateArr[i], returnArr[i]);\n\t}\n\treturn format;\n}\n/*\n * 跳转隐患单查看界面\n */\n function viewFault(faultId){\n    //获取权限编码\n    var powerCode = ReactAPI.getPowerCode(\"SESHRM_1.0.0_accidentRisk_riskHandleList_self\")['SESHRM_1.0.0_accidentRisk_riskHandleList_self'];\n    //打开查看界面\n    window.open(\"/msService/SESHRM/accidentRisk/riskHandle/riskDetailVIew?__pc__=\"+powerCode+\"&id=\"+faultId);\n }\n/*\n * 选择班组更新巡检任务的负责人\n */\nfunction changeOwnStaff(obj){\n\t//成员的ID集合\n   var staffIDs=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_a132945e_4632_43ee_99ac_ddc143ea01e9.split(',');\n   //成员的名字集合\n   var staffNames=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_55c79794_1599_4cc8_a7db_e38084515687.split(',');\n   var ownStaff=[];\n   //为负责人设置值\n   for(var i=0;i<staffIDs.length;i++){\n\t\townStaff.push({\n\t\t\tid: staffIDs[i],\n\t\t\tname: staffNames[i]\n\t\t  });\n   }\n   ReactAPI.getComponentAPI(\"Reference\").APIs(\"potrolTask.patrolTaskStaffId\").setValue(ownStaff);\n}\n/*\n * 获取当前页面url参数\n */\nfunction getParam(paramName){\n  \t//汉字会被编码，进行还原\n\tvar query = decod"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/editStates?viewCode=PATROL_1.0.0_patrolTask_enteringResultEdit&id=6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"hasSupervision\":false,\"creatorInfo\":{\"mainPosition\":null,\"position\":{\"cid\":1000,\"id\":1,\"name\":\"虚拟岗位\"},\"positions\":null,\"staff\":{\"id\":1,\"name\":\"虚拟人员\"}},\"hasPayCloseAttention\":false},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/data/6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"id\":6676867595027280,\"version\":1,\"bapSearchId\":\"com.supcon.orchid.PATROL.entities.PATROLPotrolTask@6676867595027280\",\"bapSearchType\":\"com.supcon.orchid.PATROL.entities.PATROLPotrolTask\",\"createStaffId\":1,\"modifyStaffId\":1,\"createStaff\":{\"id\":1,\"version\":0,\"bapSearchId\":\"com.supcon.orchid.foundation.entities.Staff@1\",\"bapSearchType\":\"com.supcon.orchid.foundation.entities.Staff\",\"bapSearchUrl\":null,\"bapSearchAssId\":null,\"bapSearchEntityCode\":null,\"bapSearchDocType\":null,\"bapSearchDocId\":null,\"bapSearchDocName\":null,\"bapSearchDocContent\":null,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createTime\":1781177374007,\"modifyTime\":1781177374007,\"deleteTime\":null,\"valid\":true,\"code\":\"default_person\",\"name\":\"虚拟人员\",\"mobile\":null,\"email\":null,\"birthday\":null,\"nativePlace\":null,\"idCard\":null,\"imagePath\":null,\"marriage\":null,\"nation\":null,\"sex\":null,\"securityClass\":null,\"memo\":\"虚拟人员\",\"politicsInfo\":null,\"jabber\":null,\"virtualMobile\":null,\"height\":null,\"computeLevel\":null,\"foreignLanguage\":null,\"school\":null,\"biyeTime\":null,\"profession\":null,\"educational\":null,\"degree\":null,\"dangandi\":null,\"hukoudi\":null,\"hukouxingzhi\":null,\"workStatus\":{\"id\":\"sys_person_status/onWork\",\"version\":0,\"cid\":1000,\"createStaffId\":null,\"modifyStaffId\":null,\"deleteStaffId\":null,\"createStaff\":null,\"deleteStaff\":null,\"createTime\":1781177072739,\"modifyTime\":null,\"deleteTime\":null,\"valid\":true,\"parent\":null,\"children\":[],\"layRec\":null,\"layNo\":1,\"parentId\":null,\"fullPathName\":null,\"leaf\":false,\"leaf2\":false,\"type\":null,\"code\":\"onWork\",\"entityCode\":\"sys_person_status\",\"value\":\"在职\",\"attribute\":false,\"memo\":\"系统默认\",\"sort\":1,\"defaultFlag\":true,\"zhCnValue\":null,\"codeDesA\":null,\"codeDesB\":null,\"codeDesC\":null,\"seqId\":null,\"uniqueCode\":\"sys_person_status/onWork\",\"root\":true,\"children"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/upload-list?linkId=6676867595158352&type=Table&viewCode=PATROL_1.0.0_patrolTask_enteringResultEdit",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":[],\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/data-dg1584600022503?datagridCode=PATROL_1.0.0_patrolTask_enteringResultEditdg1584600022503&id=6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":65535,\"prePage\":1,\"result\":[{\"attachmentMultiFileIcons\":[],\"attachmentMultiFileIds\":[],\"attachmentMultiFileNames\":[],\"attrMap\":null,\"autoJudge\":false,\"claim\":\"运行状态正常\",\"completeDate\":null,\"completeUser\":null,\"concluse\":null,\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"defaultValue\":\"\",\"eamId\":null,\"id\":6676867603743568,\"inputStandardId\":{\"attrMap\":null,\"editType\":{\"id\":\"PATROL_editType/input\",\"value\":\"录入\"},\"id\":1002,\"valType\":{\"id\":\"PATROL_valueType/number\",\"value\":\"数字\"}},\"isPass\":false,\"isPhone\":false,\"isRealPass\":null,\"isRealPhoto\":null,\"normalRange\":\"\",\"part\":\"泵房A\",\"passReason\":null,\"patrolTask\":{\"attrMap\":null,\"id\":6676867595027280},\"publicItemId\":null,\"realValue\":null,\"remark\":null,\"sort\":0,\"taskAreaId\":{\"attrMap\":null,\"id\":6676867603415888},\"valueName\":\"\",\"version\":0,\"workId\":{\"attrMap\":null,\"id\":6675531420975952},\"workItemId\":{\"attrMap\":null,\"id\":6675549930308432,\"inputStandardId\":{\"attrMap\":null,\"decimalPlace\":2}}}],\"totalCount\":1,\"totalPages\":1},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?__pc__=ZW50ZXJpbmdSZXN1bHRMaXN0X2VudHJfbW9kaWZ5X1BBVFJPTF8xLjAuMF9wYXRyb2xUYXNrX2VudGVyaW5nUmVzdWx0TGlzdHw_&id=6676867595027280",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"operate\":\"edit\",\"success\":true,\"viewselect\":null,\"operateType\":\"save\",\"id\":6676867595027280,\"tableInfoId\":6676867595158352},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/enteringResultList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675806914790224,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675806915019600,\"tableNo\":\"patrolTask_20260716_006\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_enteringResultList_LISTPT_ASSO_cfd73aa6_e388_4283_9229_1c892f81ca39\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":null,\"endTime\":1784260800000,\"id\":6675800454841168,\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784257200000,\"status\":99,\"tableInfoId\":6675800454939472,\"tableNo\":\"patrolTask_20260716_005\",\"taskState\":{\"id\":\"PATROL_taskState/notIssued\",\"value\":\"未下发\"},\"valid\":true,\"version\":1,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\",\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList",
+        "status": 200,
+        "body": "<!doctype html>\r\n<html lang=\"zh-cn\">\r\n\r\n<head>\r\n\t<meta charset=\"UTF-8\">\r\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\r\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t<title></title>\r\n\t<!--巡检任务-->\t\r\n\t<script>\t\t\r\n\t\tvar loadScript = function(url, placeBody) {\r\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\r\n\t\t\t\tvar xhr = new XMLHttpRequest();\r\n\t\t\t\txhr.open(\"GET\", url, false);\r\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\r\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\r\n\t\t\t\t}\r\n\t\t\t\txhr.onreadystatechange = function() {\r\n\t\t\t\t\tif (xhr.readyState === 4) {\r\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\r\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\terrorCallback && errorCallback();\r\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t};\r\n\t\t\t\treturn xhr.send(null);\r\n\t\t\t}\r\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\r\n\t\t\tif (!isChrome) {\r\n\t\t\t\turl += '-es5';\r\n\t\t\t}\r\n\t\t\turl += '.js?v=' + Math.random();\r\n\t\t\t\r\n\t\t\tloadUrlContent(url, function(content){\r\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\r\n\t\t\t\tvar s = document.createElement('script');\r\n\t\t\t\ts.text = content;\r\n\t\t\t\tparentEl.appendChild(s);\r\n\t\t\t});\r\n\t\t};\r\n\t</script>\r\n\r\n\t<!-- 自定义代码，在custom对应目录下 -->\r\n\t<!-- head.html--start -->\r\n\t\r\n\t<!-- head.html--end -->\r\n\t<script>\r\n\t\t\r\n\t\t\r\n\t\tdocument.write(\"<script src='/greenDill/static/PATROL/patrolTask/potrolTask/potrolTaskList/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\r\n\t</script>\r\n\t<script type=\"text/javascript\">\r\n\t\tvar pageConfig = {\r\n\t\t\t\"prefix\": \"/msService\",// url前缀\r\n\t\t\t\"viewCode\": \"PATROL_1.0.0_patrolTask_potrolTaskList\", //  视图编码\r\n\t\t\t\"entityCode\":\"PATROL_1.0.0_patrolTask\",// 实体编码\r\n\t\t\t\"menuCode\": \"PATROL_1.0.0_patrolTask_po"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"valid\":true,\"version\":2,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/potrolTask/potrolTaskList-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":true,\"hasPre\":false,\"nextPage\":2,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784248229188,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676867595027280,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676867588637520},\"patrolPlanId\":6676867588637520,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":null},\"startTime\":1784289600000,\"status\":99,\"tableInfoId\":6676867595158352,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"valid\":true,\"version\":2,\"workRoute\":{\"attrMap\":null,\"code\":\"ADP_E2E_202607162045_PATROL_ROUTE\",\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},{\"attrMap\":{\"PATROL_1_0_0_patrolTask_potrolTaskList_LISTPT_ASSO_3a556662_35fb_4884_a6ab_1aff5d055ac7\":\"虚拟人员\"},\"cid\":1000,\"createStaff\":null,\"createTime\":1784247601966,\"endTime\":1784293200000,\"exceptinWorkIds\":null,\"id\":6676847042216784,\"patrolPlan\":{\"attrMap\":null,\"code\":\"ADP_E2E_20260717001958_PATROL_HIDDEN_DANGER_PLAN\",\"id\":6676847035237200},\"patrolPlanId\":6676847035237200,\"patrolType\":{\"id\":\"PATROL_routeType/eam\",\"value\":\"设备巡检\"},\"pending\":{\"activityName\":null,\"activityType\":null,\"bulkDealFlag\":null,\"deploymentId\":null,\"id\":null,\"openUrl\":null,\"processDescription\":null,\"processId\":null,\"processKey\":null,\"processVersion\":null,\"taskDescription\":\"生效\",\"userId\":nu"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+        "status": 200,
+        "body": "<!doctype html>\r\n<html lang=\"zh-cn\">\r\n\r\n<head>\r\n\t<meta charset=\"UTF-8\">\r\n\t<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\r\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\r\n\t<title></title>\r\n\t<!--异常巡检结果汇总-->\t\r\n\t<script>\t\t\r\n\t\tvar loadScript = function(url, placeBody) {\r\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\r\n\t\t\t\tvar xhr = new XMLHttpRequest();\r\n\t\t\t\txhr.open(\"GET\", url, false);\r\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\r\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\r\n\t\t\t\t}\r\n\t\t\t\txhr.onreadystatechange = function() {\r\n\t\t\t\t\tif (xhr.readyState === 4) {\r\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\r\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\r\n\t\t\t\t\t} else {\r\n\t\t\t\t\t\terrorCallback && errorCallback();\r\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\r\n\t\t\t\t\t}\r\n\t\t\t\t\t}\r\n\t\t\t\t};\r\n\t\t\t\treturn xhr.send(null);\r\n\t\t\t}\r\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\r\n\t\t\tif (!isChrome) {\r\n\t\t\t\turl += '-es5';\r\n\t\t\t}\r\n\t\t\turl += '.js?v=' + Math.random();\r\n\t\t\t\r\n\t\t\tloadUrlContent(url, function(content){\r\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\r\n\t\t\t\tvar s = document.createElement('script');\r\n\t\t\t\ts.text = content;\r\n\t\t\t\tparentEl.appendChild(s);\r\n\t\t\t});\r\n\t\t};\r\n\t</script>\r\n\r\n\t<!-- 自定义代码，在custom对应目录下 -->\r\n\t<!-- head.html--start -->\r\n\t\r\n<script src=\"/msService/PATROL/js/myAjax.js\"></script>\r\n<script src=\"/msService/PATROL/js/patrol.js\"></script>\r\n\t<!-- head.html--end -->\r\n\t<script>\r\n\t\t\r\n\t\t\r\n\t\tdocument.write(\"<script src='/greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/i18n-value.js?\" + Math.random() + \"' ><\\/script>\");\r\n\t</script>\r\n\t<script type=\"text/javascript\">\r\n\t\tvar pageConfig = {\r\n\t\t\t\"prefix\": \"/msService\",// url前缀\r\n\t\t\t\"viewCode\": \"PATROL_1.0.0_patrolTask_abn"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/patrol.js",
+        "status": 200,
+        "body": "/**\n * 时间格式化\n **/\nDate.prototype.MY_FORMAT = function(number, format) {\n  \tif(format == \"undefined\"||format==null||format===\"\"){\n    \tformat = \"YYYY-MM-DD HH:mm:ss\";\n    }\n\tfunction formatNumber(n) {\n\t\treturn (n = n.toString())[1] ? n : \"0\" + n\n\t}\n\tvar formateArr = [\"YYYY\", \"MM\", \"DD\", \"HH\", \"mm\", \"ss\"]\n\t\t, returnArr = []\n\t\t, time = String(number).length < 13 ? 1e3 * number : number\n\t\t, date = new Date(time);\n\tfor (var i in returnArr.push(date.getFullYear()),\n\t\treturnArr.push(formatNumber(date.getMonth() + 1)),\n\t\treturnArr.push(formatNumber(date.getDate())),\n\t\treturnArr.push(formatNumber(date.getHours())),\n\t\treturnArr.push(formatNumber(date.getMinutes())),\n\t\treturnArr.push(formatNumber(date.getSeconds())),\n\t\treturnArr) {\n\t\tformat = format.replace(formateArr[i], returnArr[i]);\n\t}\n\treturn format;\n}\n/*\n * 跳转隐患单查看界面\n */\n function viewFault(faultId){\n    //获取权限编码\n    var powerCode = ReactAPI.getPowerCode(\"SESHRM_1.0.0_accidentRisk_riskHandleList_self\")['SESHRM_1.0.0_accidentRisk_riskHandleList_self'];\n    //打开查看界面\n    window.open(\"/msService/SESHRM/accidentRisk/riskHandle/riskDetailVIew?__pc__=\"+powerCode+\"&id=\"+faultId);\n }\n/*\n * 选择班组更新巡检任务的负责人\n */\nfunction changeOwnStaff(obj){\n\t//成员的ID集合\n   var staffIDs=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_a132945e_4632_43ee_99ac_ddc143ea01e9.split(',');\n   //成员的名字集合\n   var staffNames=obj[0].attrMap.PATROL_1_0_0_team_teamDetailRef_LISTPT_ASSO_55c79794_1599_4cc8_a7db_e38084515687.split(',');\n   var ownStaff=[];\n   //为负责人设置值\n   for(var i=0;i<staffIDs.length;i++){\n\t\townStaff.push({\n\t\t\tid: staffIDs[i],\n\t\t\tname: staffNames[i]\n\t\t  });\n   }\n   ReactAPI.getComponentAPI(\"Reference\").APIs(\"potrolTask.patrolTaskStaffId\").setValue(ownStaff);\n}\n/*\n * 获取当前页面url参数\n */\nfunction getParam(paramName){\n  \t//汉字会被编码，进行还原\n\tvar query = decod"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/js/myAjax.js",
+        "status": 200,
+        "body": "//GET同步\nvar _getSync = function(url,params,success,error){\n    var paramsStr = \"\";\n    $.each(params,function(key,value){\n        paramsStr += key+\"=\"+value +\"&\";\n    });\n    url += \"?\"+paramsStr.substr(0,paramsStr.length-1);\n    $.ajax({\n        url:url,\n        type:\"GET\",\n        async:false,\n        success:function(res){\n            if(success!=null&&success!=undefined &&(typeof success == \"function\" )){\n                success(res);\n            }\n        },\n        error:function(res){\n            if(error!=null&&error!=undefined &&(typeof error == \"function\" )){\n                error(res);\n            }\n        }\n    });\n};\n//POST同步\nvar _postSync = function(url,params,success,error){\n\t$.ajax({\n\t\turl:url,\n\t\ttype:\"POST\",\n\t\tasync:false,\n\t\tdata:params,\n\t\tsuccess:function(res){\n\t\t\tif(success!=null&&success!=undefined &&(typeof success == \"function\" )){\n\t\t\t\tsuccess(res);\n\t\t\t}\n\t\t},\n\t\terror:function(res){\n\t\t\tif(error!=null&&error!=undefined &&(typeof error == \"function\" )){\n\t\t\t\terror(res);\n\t\t\t}\n\t\t}\n\t});\n};\n//POST异步\nvar _postAsync = function(url,params,success,error){\n\t$.ajax({\n\t\turl:url,\n\t\ttype:\"POST\",\n\t\tasync:true,\n\t\tdata:params,\n\t\tsuccess:function(res){\n\t\t\tif(success!=null&&success!=undefined &&(typeof success == \"function\" )){\n\t\t\t\tsuccess(res);\n\t\t\t}\n\t\t},\n\t\terror:function(res){\n\t\t\tif(error!=null&&error!=undefined &&(typeof error == \"function\" )){\n\t\t\t\terror(res);\n\t\t\t}\n\t\t}\n\t});\n};\n\n//POST异步带过度框\nvar _postAsyncWithLoading = function(url,params,success,error,loadingMessage,event){\n\tif(loadingMessage==null||loadingMessage==\"undefined\"){\n\t\tloadingMessage = \"处理中...\";\n\t}\n\t$.ajax({\n\t\turl:url,\n\t\ttype:\"POST\",\n\t\tasync:true,\n\t\tdata:params,\n\t\tbeforeSend:function(){\n\t\t\tif(event!=null&&event!=\"undefined\"){\n\t\t\t\tevent.ReactAPI.openLoading(loadingMessage);\n\t\t\t}else{\n\t\t\t\tReactAPI.openLoadi"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/PATROL/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/PATROL/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":null,\"faultTableNo\":null,\"id\":6676867603743568,\"isFault\":null,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784248235008,\"actualStartTime\":1784248233000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"workRoute\":{\"attrMap\":null,\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},\"realValue\":{\"id\":\"PATROL_realValue/abnormal\",\"value\":\"异常\"},\"tableInfoId\":null,\"taskAreaId\":{\"attrMap\":null,\"cardTime\":null,\"id\":6676867603415888},\"valid\":true,\"version\":1,\"workId\":{\"attrMap\":null,\"id\":6675531420975952,\"name\":\"ADP_E2E_202607162112_PATROL_AREA\"}},{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":6676847392080720,\"faultTableNo\":\"PATROL-RISK-6676847392080720\",\"id\":6676847047689040,\"isFault\":true,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784247606536,\"actualStartTime\":1784247605000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676847042216784,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_018\",\"taskState\":{\"id\":\"PATROL_taskState/compl"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":null,\"faultTableNo\":null,\"id\":6676867603743568,\"isFault\":null,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784248235008,\"actualStartTime\":1784248233000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"workRoute\":{\"attrMap\":null,\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},\"realValue\":{\"id\":\"PATROL_realValue/abnormal\",\"value\":\"异常\"},\"tableInfoId\":null,\"taskAreaId\":{\"attrMap\":null,\"cardTime\":null,\"id\":6676867603415888},\"valid\":true,\"version\":1,\"workId\":{\"attrMap\":null,\"id\":6675531420975952,\"name\":\"ADP_E2E_202607162112_PATROL_AREA\"}},{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":6676847392080720,\"faultTableNo\":\"PATROL-RISK-6676847392080720\",\"id\":6676847047689040,\"isFault\":true,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784247606536,\"actualStartTime\":1784247605000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676847042216784,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_018\",\"taskState\":{\"id\":\"PATROL_taskState/compl"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"compatibilityStatus\":\"PATROL_COMPATIBILITY_PENDING\",\"compatibilityMode\":true,\"reusedCount\":0,\"data\":[{\"taskDetailId\":6676867603743568,\"tableNo\":\"PATROL-RISK-6676868002956112\",\"riskId\":6676868002956112}],\"createdCount\":1},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/abnormalSummary-query",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":20,\"prePage\":1,\"result\":[{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":6676868002956112,\"faultTableNo\":\"PATROL-RISK-6676868002956112\",\"id\":6676867603743568,\"isFault\":true,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784248235008,\"actualStartTime\":1784248233000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676867595027280,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_019\",\"taskState\":{\"id\":\"PATROL_taskState/completed\",\"value\":\"已完成\"},\"workRoute\":{\"attrMap\":null,\"id\":6675485506913104,\"name\":\"ADP_E2E_202607162045_PATROL_ROUTE_UPDATED\"}},\"realValue\":{\"id\":\"PATROL_realValue/abnormal\",\"value\":\"异常\"},\"tableInfoId\":null,\"taskAreaId\":{\"attrMap\":null,\"cardTime\":null,\"id\":6676867603415888},\"valid\":true,\"version\":2,\"workId\":{\"attrMap\":null,\"id\":6675531420975952,\"name\":\"ADP_E2E_202607162112_PATROL_AREA\"}},{\"attachmentAttachementInfo\":null,\"attachmentDocument\":null,\"attrMap\":null,\"cid\":1000,\"concluse\":\"99.99\",\"content\":\"ADP_E2E_202607162116_PATROL_ITEM\",\"createStaff\":null,\"createTime\":null,\"eamId\":{\"attrMap\":null,\"code\":null,\"id\":null,\"name\":null},\"faultId\":6676847392080720,\"faultTableNo\":\"PATROL-RISK-6676847392080720\",\"id\":6676847047689040,\"isFault\":true,\"isRealPhoto\":null,\"part\":\"泵房A\",\"patrolTask\":{\"actualEndTime\":1784247606536,\"actualStartTime\":1784247605000,\"attrMap\":null,\"endTime\":1784293200000,\"id\":6676847042216784,\"modifyStaff\":{\"id\":1,\"name\":\"虚拟人员\"},\"startTime\":1784289600000,\"tableNo\":\"patrolTask_20260717_018\",\"ta"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"reusedCount\":1,\"data\":[{\"reused\":true,\"taskDetailId\":6676867603743568,\"tableNo\":\"PATROL-RISK-6676868002956112\",\"riskId\":6676868002956112}],\"createdCount\":0},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/riskRecord",
+        "status": 200,
+        "body": "<!doctype html>\n<html lang=\"zh-cn\">\n\n<head>\n\t<meta charset=\"UTF-8\">\n\t<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n\t<title></title>\n\t<!--隐患记录-->\t\n\t<script>\t\t\n\t\tvar loadScript = function(url, placeBody) {\n\t\t\tfunction loadUrlContent(url, successCallback, errorCallback) {\n\t\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\t\txhr.open(\"GET\", url, false);\n\t\t\t\tif (\"overrideMimeType\" in xhr) {\n\t\t\t\t\txhr.overrideMimeType(\"text/plain\");\n\t\t\t\t}\n\t\t\t\txhr.onreadystatechange = function() {\n\t\t\t\t\tif (xhr.readyState === 4) {\n\t\t\t\t\tif (xhr.status === 0 || xhr.status === 200) {\n\t\t\t\t\t\tsuccessCallback(xhr.responseText);\n\t\t\t\t\t} else {\n\t\t\t\t\t\terrorCallback && errorCallback();\n\t\t\t\t\t\tthrow new Error(\"Could not load \" + url);\n\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\t\t\t\treturn xhr.send(null);\n\t\t\t}\n\t\t\tvar isChrome = window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);\n\t\t\tif (!isChrome) {\n\t\t\t\turl += '-es5';\n\t\t\t}\n\t\t\turl += '.js?v=' + Math.random();\n\t\t\t\n\t\t\tloadUrlContent(url, function(content){\n\t\t\t\tvar parentEl = document.getElementsByTagName('head')[0];\n\t\t\t\tvar s = document.createElement('script');\n\t\t\t\ts.text = content;\n\t\t\t\tparentEl.appendChild(s);\n\t\t\t});\n\t\t};\n\t</script>\n\n\t<!-- 自定义代码，在custom对应目录下 -->\n\t<!-- head.html--start -->\n\t\r\n<script src=\"/greenDill/static/EAM/js/EAM.js\"></script>\r\n<script src=\"/greenDill/static/EAM/js/commonTool.js\"></script>\n\t<!-- head.html--end -->\n\t<script>\n\t\t\n\t\t\n\t\t\n\t</script>\n\t<script type=\"text/javascript\">\n\t\tvar pageConfig = {\n\t\t\t\"prefix\": \"/msService\",// url前缀\n\t\t\t\"viewCode\": \"EAM_1.0.0_businessConfig_riskRecord\", //  视图编码\n\t\t\t\"entityCode\":\"EAM_1.0.0_businessConfig\",// 实体编码\n\t\t\t\"menuCode\": \"EAM_1.0.0_businessConfig_riskRecord\",\n\t\t\t\"viewName\": \"隐患记录\",// 视图名称\n\t\t\t\"viewType\": \"EXTRA\",// 视图类型\n\t\t\t\"modelCode\": \"EAM_1.0.0_businessConfig_RiskHandle\",// 模型编码\n\t\t\t\"moduleCode\""
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/EAM/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/baseService/workbench/download/getAuthenticationMessage",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"methodType\":\"GET\",\"serverName\":\"EamMs\",\"url\":\"/EAM/baseService/workbench/download/validate\"},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "GET",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/editStates?viewCode=EAM_1.0.0_businessConfig_riskRecord",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"hasSupervision\":false,\"creatorInfo\":{\"mainPosition\":{\"cid\":1000,\"id\":1},\"position\":null,\"positions\":[{\"cid\":1000,\"id\":1,\"isVirtual\":true,\"layRec\":\"1\",\"name\":\"虚拟岗位\"}],\"staff\":{\"id\":1,\"name\":\"默认人员\"}},\"hasPayCloseAttention\":false},\"message\":\"操作成功\"}"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/data-dg1578550214154?datagridCode=EAM_1.0.0_businessConfig_riskRecorddg1578550214154&id=-1",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":10,\"prePage\":1,\"result\":[{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784248235009,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676868002956112,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676868002956112\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784247606536,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676847392080720,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676847392080720\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784247301797,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676837473698640,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676837473698640\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784246587373,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676813990282064,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent"
+      },
+      {
+        "method": "POST",
+        "url": "http://10.11.100.17:18080/msService/EAM/businessConfig/riskHandle/data-dg1578550214154?datagridCode=EAM_1.0.0_businessConfig_riskRecorddg1578550214154&id=-1",
+        "status": 200,
+        "body": "{\"code\":200,\"data\":{\"first\":1,\"hasNext\":false,\"hasPre\":false,\"nextPage\":1,\"pageNo\":1,\"pageSize\":10,\"prePage\":1,\"result\":[{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784248235009,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676868002956112,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676868002956112\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784247606536,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676847392080720,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676847392080720\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784247301797,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676837473698640,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent\":\"隐患现象:部位:泵房A,巡检内容:ADP_E2E_202607162116_PATROL_ITEM,巡检结果:99.99,巡检结论为:异常\\n\",\"riskLevel\":null,\"riskSource\":\"巡检\",\"riskTableNo\":\"PATROL-RISK-6676837473698640\",\"tableInfoId\":null,\"valid\":true,\"version\":0},{\"attrMap\":null,\"cid\":1000,\"eamInfo\":null,\"findTime\":1784246587373,\"finder\":{\"id\":1,\"name\":\"虚拟人员\"},\"id\":6676813990282064,\"objparama\":null,\"objparamb\":null,\"objparamc\":null,\"objparamd\":null,\"objparame\":null,\"objparamf\":null,\"objparamg\":null,\"objparamh\":null,\"riskContent"
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "screenshots": [
+      "/tmp/adp-patrol-persistence-20260717003024/01-patrol-plan-list.png",
+      "/tmp/adp-patrol-persistence-20260717003024/02-patrol-task-list.png",
+      "/tmp/adp-patrol-persistence-20260717003024/03-patrol-entering-result-list.png",
+      "/tmp/adp-patrol-persistence-20260717003024/04-patrol-entering-result-before-save.png",
+      "/tmp/adp-patrol-persistence-20260717003024/05-patrol-task-completed.png",
+      "/tmp/adp-patrol-persistence-20260717003024/06-patrol-abnormal-before-hidden-danger.png",
+      "/tmp/adp-patrol-persistence-20260717003024/06a-patrol-hidden-danger-confirm.png",
+      "/tmp/adp-patrol-persistence-20260717003024/07-eam-risk-ledger.png"
+    ],
+    "screenshotFailures": []
+  },
+  "status": "PASS"
+}

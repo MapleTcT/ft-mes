@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-16T23:54:22+08:00",
-  "repoCommit": "299b0c8dd3993a819a58bf589d7b39bcbbfea580",
+  "generatedAt": "2026-07-17T00:30:44.547Z",
+  "repoCommit": "21812424ab512a69407474180b4f7c9a5110c600",
   "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "database": "PostgreSQL",
   "scope": {
@@ -104,7 +104,7 @@
       "postgresTargetRollbackRehearsal": "REQUIRES_EXPLICIT_CONFIRMATION",
       "runtimePatchStaged": true,
       "runtimePatchDeployed": true,
-      "runtimeJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+      "runtimeJarSha256": "af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753",
       "runtimeFound": true,
       "registryFound": false,
       "serviceFound": false,
@@ -114,11 +114,13 @@
       "tablesFound": "TARGET_POSTGRESQL",
       "functionalAcceptance": {
         "status": "PASS",
-        "marker": "ADP_E2E_20260716155413_PATROL",
-        "scope": "plan save, task generation, list query, batch cancellation, PostgreSQL verification, cancelled-state re-render",
+        "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+        "scope": "configuration CRUD, plan/task lifecycle, result entry, abnormal completion, idempotent hidden-danger creation, PostgreSQL linkage, EAM risk-ledger re-render",
         "browserConsoleErrors": 0,
         "pageErrors": 0,
-        "requestFailures": 0
+        "requestFailures": 0,
+        "assertions": "45/45",
+        "evidence": "metadata/patrol-hidden-danger-persistence-acceptance.json"
       },
       "expectedCounts": {
         "tables": 37,
@@ -131,8 +133,8 @@
         "BaseSet",
         "TeamInfo"
       ],
-      "impact": "设备巡检和安环巡检共用核心已部署，计划和任务状态链可用；其余执行、异常和统计功能仍需验收",
-      "nextAction": "继续完成输入标准、路线 CRUD、任务下发/执行/完成、异常、统计和经确认的目标回滚演练"
+      "impact": "设备巡检和安环巡检共用核心已部署；配置、任务执行、异常结果、待治理隐患生成和EAM台账复显链可用，完整SESH治理及统计监控仍需验收",
+      "nextAction": "保持现有真实页面/API/PostgreSQL回归并继续统计监控；若目标包含整改、复查和销项，先取得真实SESH包，不能把PATROL_COMPATIBILITY_PENDING冒充完整治理闭环"
     },
     {
       "id": "EMS_SUP_EMS",

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 185,
+  "migrationCount": 186,
   "firstNumber": 1,
-  "lastNumber": 185,
+  "lastNumber": 186,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,27 +12,27 @@
   "watchStatementCount": 71,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10786,
+    "alter-table": 10789,
     "create-function": 84,
-    "create-index": 975,
+    "create-index": 977,
     "create-table": 568,
     "create-view": 142,
-    "insert": 10999,
-    "update": 11061
+    "insert": 11007,
+    "update": 11076
   },
   "idempotencySignalTotals": {
     "create-or-replace": 223,
-    "do-block": 386,
+    "do-block": 391,
     "if-exists": 105,
-    "if-not-exists": 12904,
-    "on-conflict": 10940,
+    "if-not-exists": 12970,
+    "on-conflict": 10947,
     "to-regclass": 219,
-    "where-not-exists": 39
+    "where-not-exists": 42
   },
   "tagTotals": {
     "auth-rbac-org": 37,
     "business": 34,
-    "compatibility": 75,
+    "compatibility": 76,
     "configuration": 42,
     "general": 28,
     "notification": 9,
@@ -729,7 +729,7 @@
         "notification"
       ],
       "lineCount": 175,
-      "sha256": "b4afb8d147923038d9f3ca31d4ffd0730256d5877ccffa761b8c19e6c344393f",
+      "sha256": "0985df6f8a36a65e9d07d5bae8d4e3ad75c3a01923f24b31e17c9b793c2c6f6c",
       "statementCounts": {
         "create-table": 9,
         "create-view": 0,
@@ -6293,7 +6293,7 @@
         "compatibility"
       ],
       "lineCount": 252,
-      "sha256": "b5f24e29f94e00741856f5c750bab339f7ba30f6ce9f0a5926cbe969189e7e1b",
+      "sha256": "287e2ac7b221c57840849a6f305bce6d9a0c474f036a462508b39bcb2c7cfd17",
       "statementCounts": {
         "create-table": 0,
         "create-view": 0,
@@ -6993,6 +6993,39 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
+      "name": "186-patrol-hidden-danger-eam-risk-compat.sql",
+      "number": 186,
+      "slug": "patrol-hidden-danger-eam-risk-compat",
+      "validName": true,
+      "tags": [
+        "compatibility"
+      ],
+      "lineCount": 709,
+      "sha256": "6fbe419b11cb1c99e27ba0c7086abc37de37c9ae2ccc0b9e31973daa29653da9",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 2,
+        "alter-table": 3,
+        "insert": 8,
+        "update": 15
+      },
+      "idempotencySignals": {
+        "if-exists": 0,
+        "if-not-exists": 66,
+        "on-conflict": 7,
+        "do-block": 5,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 3
       },
       "highRiskStatements": [],
       "watchStatements": [],

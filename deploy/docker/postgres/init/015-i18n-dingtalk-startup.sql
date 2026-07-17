@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS public.supfusion_i18n_resource (
   creator varchar(32) DEFAULT 'system',
   create_time timestamp DEFAULT CURRENT_TIMESTAMP,
   create_staff_id bigint DEFAULT 0,
-  modifier varchar(32),
+  modifier timestamp,
   modify_time timestamp,
   modify_staff_id bigint
 );

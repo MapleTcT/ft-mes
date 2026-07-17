@@ -18,6 +18,13 @@ SERVICE_IMPL_RELATIVE_PATH = Path(
 PATROL_PLAN_SERVICE_RELATIVE_PATH = (
     SERVICE_IMPL_RELATIVE_PATH / "PATROLPatrolPlanServiceImpl.java"
 )
+PATROL_TASK_DETAIL_SERVICE_RELATIVE_PATH = (
+    SERVICE_IMPL_RELATIVE_PATH / "PATROLTaskDetailServiceImpl.java"
+)
+PATROL_TASK_DETAIL_CUSTOM_RELATIVE_PATH = Path(
+    "service/src/main/custom/com/supcon/orchid/PATROL/services/impl/"
+    "PATROLTaskDetailServiceImpl"
+)
 UTILITY_METHOD_MARKER = b"public static String normalizeIdentifierQuotes"
 UTILITY_IMPORT = b"import com.supcon.orchid.db.DbUtils;"
 UTILITY_IMPORT_ANCHOR = b"import com.supcon.orchid.foundation.entities.Company;"
@@ -67,6 +74,242 @@ TASK_DETAIL_VALUES_PREFIX = b'+ " values('
 TASK_DETAIL_VALUES_SUFFIX = b')";'
 TASK_DETAIL_DEFAULT_MARKER = b'ps.setString(30, "PATROL_taskDetailState/pending")'
 TASK_DETAIL_BATCH_ANCHOR = b"                    ps.addBatch();"
+HIDDEN_DANGER_SIGNATURE = b"public Map<String, Object> createHiddenDanger("
+HIDDEN_DANGER_NEXT_METHOD = b"    private Map<String, Object> generateDetailMap("
+HIDDEN_DANGER_COMPATIBILITY_MARKER = b"PATROL_COMPATIBILITY_PENDING"
+HIDDEN_DANGER_METHOD = """    @Override
+    public Map<String, Object> createHiddenDanger(String ids, Map<String, String> headerMap, Boolean isCheckFault) {
+        if (headerMap == null) {
+            headerMap = new HashMap<>();
+        }
+        Map<String, Object> resultMap = new HashMap<>();
+        boolean faultModuleAvailable = moduleCheckService.checkModelIsUpload(FAULT_MODULE_CODE)
+                && moduleCheckService.checkModelIsPublish(FAULT_MODULE_CODE);
+
+        if (StringUtil.isBlank(ids)) {
+            throw new BAPException(InternationalResource.get(KEY_TASKDETAIL_EMPTY, getCurrentLanguage()));
+        }
+        String[] idArr = ids.split(",");
+        List<Map<String, Object>> detailList = new ArrayList<>();
+        List<Map<String, Object>> existingResultList = new ArrayList<>();
+        List<PATROLTaskDetail> taskDetails = new ArrayList<>();
+        for (String idText : idArr) {
+            Long id;
+            try {
+                id = Long.parseLong(idText.trim());
+            } catch (Exception e) {
+                log.error("Invalid PATROL task detail id: " + idText, e);
+                throw new BAPException(InternationalResource.get(KEY_PARAMS_ERROR, getCurrentLanguage()), e);
+            }
+            PATROLTaskDetail patrolTaskDetail = getTaskDetail(id);
+            if (patrolTaskDetail == null) {
+                continue;
+            }
+            if (patrolTaskDetail.getFaultId() != null) {
+                Map<String, Object> existingResult = new HashMap<>();
+                existingResult.put("taskDetailId", patrolTaskDetail.getId());
+                existingResult.put("tableNo", patrolTaskDetail.getFaultTableNo());
+                existingResult.put("riskId", patrolTaskDetail.getFaultId());
+                existingResult.put("reused", Boolean.TRUE);
+                existingResultList.add(existingResult);
+                continue;
+            }
+            taskDetails.add(patrolTaskDetail);
+        }
+
+        if (Boolean.TRUE.equals(isCheckFault)) {
+            checkFaultExist(taskDetails);
+        }
+        for (PATROLTaskDetail patrolTaskDetail : taskDetails) {
+            detailList.add(generateDetailMap(patrolTaskDetail));
+        }
+
+        Map<String, Object> resultInfo = new HashMap<>();
+        if (!detailList.isEmpty()) {
+            log.info("Creating PATROL hidden danger records, count=" + detailList.size());
+            try {
+                if (faultModuleAvailable) {
+                    resultInfo = riskHandleWFClient.saveRiskHandleWF(detailList, headerMap);
+                } else {
+                    resultInfo = saveRiskHandleCompatibility(taskDetails, detailList);
+                }
+            } catch (Exception e) {
+                log.error("Failed to create PATROL hidden danger records", e);
+                throw new BAPException(InternationalResource.get(KEY_CREATE_FAIL, getCurrentLanguage()) + e.getMessage());
+            }
+        }
+
+        List<Map<String, Object>> resultList = resultInfo == null
+                ? null
+                : (List<Map<String, Object>>) resultInfo.get("data");
+        if (resultList != null) {
+            for (Map<String, Object> faultInfo : resultList) {
+                try {
+                    Long taskDetailId = Long.valueOf(faultInfo.get("taskDetailId").toString());
+                    PATROLTaskDetail patrolTaskDetail = getTaskDetail(taskDetailId);
+                    patrolTaskDetail.setIsFault(true);
+                    patrolTaskDetail.setFaultTableNo((String) faultInfo.get("tableNo"));
+                    patrolTaskDetail.setFaultId(Long.valueOf(faultInfo.get("riskId").toString()));
+                    taskDetailDao.merge(patrolTaskDetail);
+                    taskDetailDao.flush();
+                } catch (Exception e) {
+                    log.error("Created hidden danger but failed to link PATROL task detail", e);
+                    throw new BAPException(InternationalResource.get(KEY_TASKDETAIL_UPDATE_FAIL, getCurrentLanguage()));
+                }
+            }
+        }
+
+        if (resultInfo != null) {
+            resultMap.putAll(resultInfo);
+        }
+        List<Map<String, Object>> responseData = new ArrayList<>(existingResultList);
+        if (resultList != null) {
+            responseData.addAll(resultList);
+        }
+        resultMap.put("data", responseData);
+        resultMap.put("createdCount", resultList == null ? 0 : resultList.size());
+        resultMap.put("reusedCount", existingResultList.size());
+        return resultMap;
+    }
+
+    private Map<String, Object> saveRiskHandleCompatibility(
+            List<PATROLTaskDetail> taskDetails, List<Map<String, Object>> detailList) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        Date createdAt = new Date();
+        String insertSql = "INSERT INTO SES_HRM_RISKHANDLES "
+                + "(ID,VALID,STATUS,VERSION,SORT,CID,CREATE_TIME,MODIFY_TIME,CREATE_STAFF_ID,MODIFY_STAFF_ID,"
+                + "FIND_TIME,FINDER,TABLE_NO,EAM_INFO,RISK_TYPE,RISK_SOURCE,RISK_MODE,RISK_CONTENT) "
+                + "VALUES (:id,1,1,0,0,:cid,:createdAt,:createdAt,:staffId,:staffId,"
+                + ":findTime,:finder,:tableNo,:eamInfo,:riskType,:riskSource,:riskMode,:riskContent)";
+
+        for (int index = 0; index < taskDetails.size(); index++) {
+            PATROLTaskDetail taskDetail = taskDetails.get(index);
+            Map<String, Object> detailInfo = detailList.get(index);
+            PATROLPotrolTask patrolTask = taskDetail.getPatrolTask() == null
+                    ? null
+                    : potrolTaskDao.get(taskDetail.getPatrolTask().getId());
+            Long finderId = resolveHiddenDangerFinder(taskDetail, patrolTask);
+            Date findTime = resolveHiddenDangerFindTime(taskDetail, patrolTask);
+            Long riskId = SnowFlakeIdWorker.getInstance().nextId();
+            String tableNo = "PATROL-RISK-" + riskId;
+
+            Object equipmentInfo = detailInfo.get("equipmentInfo");
+            Long equipmentId = equipmentInfo == null
+                    ? null
+                    : Long.valueOf(equipmentInfo.toString());
+            Object riskTypeValue = detailInfo.get("riskType");
+            String riskType = riskTypeValue == null ? null : riskTypeValue.toString();
+            Object riskSourceValue = detailInfo.get("riskResource");
+            String riskSource = riskSourceValue == null ? null : riskSourceValue.toString();
+            Object riskContentValue = detailInfo.get("riskRemark");
+            String riskContent = riskContentValue == null ? null : riskContentValue.toString();
+
+            NativeQuery insertQuery = taskDetailDao.createNativeQuery(insertSql);
+            insertQuery
+                    .setParameter("id", riskId)
+                    .setParameter("cid", getCurrentCompanyId())
+                    .setParameter("createdAt", createdAt)
+                    .setParameter("staffId", finderId)
+                    .setParameter("findTime", findTime)
+                    .setParameter("finder", finderId)
+                    .setParameter("tableNo", tableNo)
+                    .setParameter("eamInfo", equipmentId, org.hibernate.type.LongType.INSTANCE)
+                    .setParameter("riskType", riskType, org.hibernate.type.StringType.INSTANCE)
+                    .setParameter("riskSource", riskSource, org.hibernate.type.StringType.INSTANCE)
+                    .setParameter(
+                            "riskMode",
+                            "PATROL_COMPATIBILITY_PENDING",
+                            org.hibernate.type.StringType.INSTANCE)
+                    .setParameter("riskContent", riskContent, org.hibernate.type.StringType.INSTANCE)
+                    .executeUpdate();
+
+            Map<String, Object> faultInfo = new HashMap<>();
+            faultInfo.put("taskDetailId", taskDetail.getId());
+            faultInfo.put("tableNo", tableNo);
+            faultInfo.put("riskId", riskId);
+            resultList.add(faultInfo);
+        }
+
+        Map<String, Object> resultInfo = new HashMap<>();
+        resultInfo.put("data", resultList);
+        resultInfo.put("compatibilityMode", Boolean.TRUE);
+        resultInfo.put("compatibilityStatus", "PATROL_COMPATIBILITY_PENDING");
+        log.warn("SESHRM is unavailable; created auditable EAM pending risk records");
+        return resultInfo;
+    }
+
+    private Long resolveHiddenDangerFinder(PATROLTaskDetail taskDetail, PATROLPotrolTask patrolTask) {
+        if (taskDetail.getCompleteUser() != null) {
+            return taskDetail.getCompleteUser().getId();
+        }
+        if (patrolTask != null && patrolTask.getCompleteStaff() != null) {
+            return patrolTask.getCompleteStaff().getId();
+        }
+        Staff currentStaff = (Staff) getCurrentStaff();
+        if (currentStaff != null) {
+            return currentStaff.getId();
+        }
+        throw new BAPException("PATROL hidden danger finder is missing");
+    }
+
+    private Date resolveHiddenDangerFindTime(PATROLTaskDetail taskDetail, PATROLPotrolTask patrolTask) {
+        if (taskDetail.getCompleteDate() != null) {
+            return taskDetail.getCompleteDate();
+        }
+        if (patrolTask != null && patrolTask.getActualEndTime() != null) {
+            return patrolTask.getActualEndTime();
+        }
+        return new Date();
+    }
+
+"""
+HIDDEN_DANGER_OLD_CONTEXT = """        PATROLPotrolTask patrolTask = potrolTaskDao.get(patrolTaskDetail.getPatrolTask().getId());
+        //发现人
+        //任务明细的提交人(完成人)
+        Long findUserId = null;
+        if (patrolTaskDetail.getCompleteUser() != null) {
+            findUserId = patrolTaskDetail.getCompleteUser().getId();
+        } else {
+            findUserId = patrolTask.getCompleteStaff().getId();
+        }
+        detailMap.put("finder", patrolTaskDetail.getCompleteUser().getId());
+        //发现时间
+        //任务明细的提交时间
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date findTime = null;
+        if (patrolTaskDetail.getCompleteDate() != null) {
+            findTime = patrolTaskDetail.getCompleteDate();
+        } else {
+            findTime = patrolTask.getActualEndTime();
+        }
+        detailMap.put("findTime", format.format(findTime));
+"""
+HIDDEN_DANGER_NEW_CONTEXT = """        PATROLPotrolTask patrolTask = patrolTaskDetail.getPatrolTask() == null
+                ? null
+                : potrolTaskDao.get(patrolTaskDetail.getPatrolTask().getId());
+        Long findUserId = resolveHiddenDangerFinder(patrolTaskDetail, patrolTask);
+        detailMap.put("finder", findUserId);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date findTime = resolveHiddenDangerFindTime(patrolTaskDetail, patrolTask);
+        detailMap.put("findTime", format.format(findTime));
+"""
+HIDDEN_DANGER_NORMAL_RANGE_OLD = (
+    b"if (StringUtil.isNotBlank(patrolTaskDetail.getWorkItemId().getNormalRange())) {"
+)
+HIDDEN_DANGER_NORMAL_RANGE_NEW = (
+    b"if (patrolTaskDetail.getWorkItemId() != null "
+    b"&& StringUtil.isNotBlank(patrolTaskDetail.getWorkItemId().getNormalRange())) {"
+)
+HIDDEN_DANGER_WORK_ITEM_GUARD = b"        if (workItemIds.isEmpty()) {"
+HIDDEN_DANGER_WORK_ITEM_ANCHOR = b"        // \xe8\x8e\xb7\xe5\x8f\x96\xe9\x9a\x90\xe6\x82\xa3\xe5\x8d\x95\xe6\x9c\xaa\xe7\x94\x9f\xe6\x95\x88\xe7\x9a\x84\xe5\xb7\xa1\xe6\xa3\x80\xe9\xa1\xb9id"
+HIDDEN_DANGER_ALIAS_OLD = (
+    b"select detail.WORK_ITEM_ID as WORKITEMID, max(riskhandle.id) as RISKHANDLEID, "
+    b"max(riskhandle.table_no) as RISKHANDLETABLENO from MP_TASK_DETAILS detail "
+)
+HIDDEN_DANGER_ALIAS_NEW = (
+    b"select detail.WORK_ITEM_ID as \\\"WORKITEMID\\\", max(riskhandle.id) as \\\"RISKHANDLEID\\\", "
+    b"max(riskhandle.table_no) as \\\"RISKHANDLETABLENO\\\" from MP_TASK_DETAILS detail "
+)
 
 
 def patch_utility(source: bytes) -> tuple[bytes, bool]:
@@ -195,6 +438,73 @@ def patch_task_generation(source: bytes) -> tuple[bytes, int]:
     return source, changed
 
 
+def source_fragment(text: str, newline: bytes) -> bytes:
+    return text.replace("\n", newline.decode("ascii")).encode("utf-8")
+
+
+def patch_hidden_danger(source: bytes) -> tuple[bytes, int]:
+    """Keep PATROL abnormal results traceable when SESH is not deployed."""
+
+    changed = 0
+    newline = b"\r\n" if b"\r\n" in source else b"\n"
+
+    if HIDDEN_DANGER_COMPATIBILITY_MARKER not in source:
+        signature_at = source.find(HIDDEN_DANGER_SIGNATURE)
+        if signature_at < 0:
+            raise ValueError("PATROL hidden-danger method was not found")
+        method_start = source.rfind(b"    @Override", 0, signature_at)
+        method_end = source.find(HIDDEN_DANGER_NEXT_METHOD, signature_at)
+        if method_start < 0 or method_end < 0:
+            raise ValueError("PATROL hidden-danger method boundaries were not found")
+        replacement = source_fragment(HIDDEN_DANGER_METHOD, newline)
+        source = source[:method_start] + replacement + source[method_end:]
+        changed += 1
+
+    old_context = source_fragment(HIDDEN_DANGER_OLD_CONTEXT, newline)
+    new_context = source_fragment(HIDDEN_DANGER_NEW_CONTEXT, newline)
+    if old_context in source:
+        source = source.replace(old_context, new_context, 1)
+        changed += 1
+    elif new_context not in source:
+        raise ValueError("PATROL hidden-danger finder/time block was not found")
+
+    if HIDDEN_DANGER_NORMAL_RANGE_OLD in source:
+        source = source.replace(
+            HIDDEN_DANGER_NORMAL_RANGE_OLD,
+            HIDDEN_DANGER_NORMAL_RANGE_NEW,
+            1,
+        )
+        changed += 1
+    elif HIDDEN_DANGER_NORMAL_RANGE_NEW not in source:
+        raise ValueError("PATROL hidden-danger normal-range guard was not found")
+
+    if HIDDEN_DANGER_WORK_ITEM_GUARD not in source:
+        anchor_at = source.find(HIDDEN_DANGER_WORK_ITEM_ANCHOR)
+        if anchor_at < 0:
+            raise ValueError("PATROL hidden-danger work-item query anchor was not found")
+        guard = source_fragment(
+            """        if (workItemIds.isEmpty()) {
+            return;
+        }
+""",
+            newline,
+        )
+        source = source[:anchor_at] + guard + source[anchor_at:]
+        changed += 1
+
+    if HIDDEN_DANGER_ALIAS_OLD in source:
+        source = source.replace(
+            HIDDEN_DANGER_ALIAS_OLD,
+            HIDDEN_DANGER_ALIAS_NEW,
+            1,
+        )
+        changed += 1
+    elif HIDDEN_DANGER_ALIAS_NEW not in source:
+        raise ValueError("PATROL hidden-danger PostgreSQL aliases were not found")
+
+    return source, changed
+
+
 def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str, object]:
     utility_path = module_root / UTILITY_RELATIVE_PATH
     service_root = module_root / SERVICE_IMPL_RELATIVE_PATH
@@ -207,12 +517,16 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
     replacement_count = 0
     indentation_count = 0
     task_generation_fix_count = 0
+    hidden_danger_fix_count = 0
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
         before = path.read_bytes()
         after, current_count, current_indentation_count = patch_service(before)
         current_task_generation_count = 0
         if path == module_root / PATROL_PLAN_SERVICE_RELATIVE_PATH:
             after, current_task_generation_count = patch_task_generation(after)
+        current_hidden_danger_count = 0
+        if path == module_root / PATROL_TASK_DETAIL_SERVICE_RELATIVE_PATH:
+            after, current_hidden_danger_count = patch_hidden_danger(after)
         if current_count or current_indentation_count:
             patched_files.append(str(path.relative_to(module_root)))
             replacement_count += current_count
@@ -222,8 +536,26 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
             if relative_path not in patched_files:
                 patched_files.append(relative_path)
             task_generation_fix_count += current_task_generation_count
+        if current_hidden_danger_count:
+            relative_path = str(path.relative_to(module_root))
+            if relative_path not in patched_files:
+                patched_files.append(relative_path)
+            hidden_danger_fix_count += current_hidden_danger_count
         if not check and after != before:
             path.write_bytes(after)
+
+    custom_task_detail_path = module_root / PATROL_TASK_DETAIL_CUSTOM_RELATIVE_PATH
+    if not custom_task_detail_path.is_file():
+        raise ValueError("PATROL custom task-detail service source was not found")
+    custom_before = custom_task_detail_path.read_bytes()
+    custom_after, custom_hidden_danger_count = patch_hidden_danger(custom_before)
+    if custom_hidden_danger_count:
+        relative_path = str(custom_task_detail_path.relative_to(module_root))
+        if relative_path not in patched_files:
+            patched_files.append(relative_path)
+        hidden_danger_fix_count += custom_hidden_danger_count
+    if not check and custom_after != custom_before:
+        custom_task_detail_path.write_bytes(custom_after)
 
     remaining = []
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
@@ -232,6 +564,8 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
             source, _, _ = patch_service(source)
             if path == module_root / PATROL_PLAN_SERVICE_RELATIVE_PATH:
                 source, _ = patch_task_generation(source)
+            if path == module_root / PATROL_TASK_DETAIL_SERVICE_RELATIVE_PATH:
+                source, _ = patch_hidden_danger(source)
         if b".replace('\"', '`')" in source:
             remaining.append(str(path.relative_to(module_root)))
 
@@ -242,11 +576,13 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         or replacement_count
         or indentation_count
         or task_generation_fix_count
+        or hidden_danger_fix_count
     ):
         raise ValueError(
             f"source patch is required: utilityChanged={utility_changed}, "
             f"replacements={replacement_count}, indentation={indentation_count}, "
-            f"taskGeneration={task_generation_fix_count}"
+            f"taskGeneration={task_generation_fix_count}, "
+            f"hiddenDanger={hidden_danger_fix_count}"
         )
     if not check and utility_changed:
         utility_path.write_bytes(utility_after)
@@ -263,6 +599,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         "replacementCount": replacement_count,
         "indentationFixCount": indentation_count,
         "taskGenerationFixCount": task_generation_fix_count,
+        "hiddenDangerFixCount": hidden_danger_fix_count,
         "patchedFileCount": len(patched_files),
         "patchedFiles": patched_files,
         "helperReferenceCount": helper_references,

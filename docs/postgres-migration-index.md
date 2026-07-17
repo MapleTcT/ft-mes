@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`185`。
-- 编号范围：`001` 到 `185`。
+- 脚本数量：`186`。
+- 编号范围：`001` 到 `186`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -22,7 +22,7 @@
 | --- | --- |
 | auth-rbac-org | 37 |
 | business | 34 |
-| compatibility | 75 |
+| compatibility | 76 |
 | configuration | 42 |
 | general | 28 |
 | notification | 9 |
@@ -33,25 +33,25 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10786 |
+| alter-table | 10789 |
 | create-function | 84 |
-| create-index | 975 |
+| create-index | 977 |
 | create-table | 568 |
 | create-view | 142 |
-| insert | 10999 |
-| update | 11061 |
+| insert | 11007 |
+| update | 11076 |
 
 ## 幂等信号统计
 
 | Signal | Count |
 | --- | --- |
 | create-or-replace | 223 |
-| do-block | 386 |
+| do-block | 391 |
 | if-exists | 105 |
-| if-not-exists | 12904 |
-| on-conflict | 10940 |
+| if-not-exists | 12970 |
+| on-conflict | 10947 |
 | to-regclass | 219 |
-| where-not-exists | 39 |
+| where-not-exists | 42 |
 
 ## 脚本清单
 
@@ -242,6 +242,7 @@
 | 183 | 183-patrol-system-codes.sql | general | 147 | insert:2, update:4 | 4 | - |
 | 184 | 184-patrol-ui-runtime-metadata.sql | platform | 118479 | insert:4608, update:4608 | 4608 | - |
 | 185 | 185-patrol-task-persistence-compat.sql | compatibility | 83 | alter-table:1, update:5 | 1 | - |
+| 186 | 186-patrol-hidden-danger-eam-risk-compat.sql | compatibility | 709 | create-index:2, alter-table:3, insert:8, update:15 | 81 | - |
 
 ## 规则
 

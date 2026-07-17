@@ -7,23 +7,23 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-16T21:47:40+00:00` |
-| Repo Commit | `28d93d0673171efc2b47fc64b45dd5f43e66b0ad` |
+| Generated At | `2026-07-17T00:49:02+00:00` |
+| Repo Commit | `21812424ab512a69407474180b4f7c9a5110c600` |
 | Database Target | `PostgreSQL` |
-| Total Files | `355` |
-| Total Bytes | `54768045` |
+| Total Files | `358` |
+| Total Bytes | `54858149` |
 
 ## Categories
 
 | Category | Files | Bytes | Description |
 | --- | ---: | ---: | --- |
 | `nacos-config-template` | 44 | 42353 | Sanitized Nacos configuration templates used by render-nacos-configs.py. |
-| `nginx-runtime-config` | 2 | 17985 | Nginx runtime configuration used by the Docker frontend gateway. |
-| `postgres-init-sql` | 185 | 53958346 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
+| `nginx-runtime-config` | 2 | 20030 | Nginx runtime configuration used by the Docker frontend gateway. |
+| `postgres-init-sql` | 186 | 54024175 | Idempotent PostgreSQL initialization, compatibility, runtime view, and business smoke fixups. |
 | `runtime-binary-patch` | 7 | 29988 | Compiled runtime patch payloads copied into the recovered Windows package at deploy time. |
 | `runtime-patch-source` | 21 | 82088 | Source or template files used to rebuild runtime patch payloads. |
-| `runtime-script` | 26 | 239723 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
-| `runtime-static-override` | 70 | 397562 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
+| `runtime-script` | 26 | 257231 | Scripts that render Nacos configs or patch the recovered runtime bundle. |
+| `runtime-static-override` | 72 | 402284 | Static frontend runtime overrides mounted into the Docker frontend gateway. |
 
 ## Manifest Entries
 
@@ -73,7 +73,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `nacos-config-template` | `deploy/nacos-config/supfusion-systemConfig.properties` | 807 | `557f134990f19b26597602b918aa3ce1f611d20ddcb4dfd828dd7c1f4e4805ea` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-task-scheduler.properties` | 1680 | `578b65e2754b9053209fb17cac4d8f027e3a1279a6fdd35f75c8b8435579f4ad` |
 | `nacos-config-template` | `deploy/nacos-config/supfusion-theme.properties` | 630 | `f62add6300bbb4758d3fba662cc7646530e9ecfbfe7da64452dbec2b30213c17` |
-| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 17765 | `e7a55796d5b8caabd6d48d11ef9062287bdfad58f1e0d846bee0186d6735530a` |
+| `nginx-runtime-config` | `deploy/docker/nginx/adp.conf` | 19810 | `8500a13cabf0e98279c149c49deb0c27a9f97a78581712db2989fcfa2856d052` |
 | `nginx-runtime-config` | `deploy/docker/nginx/gzip.conf` | 220 | `605130384f1677fdd26d0ea7514d87b8ad2619c794548a3a1cf200a3aa0d0a64` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/001-adp-postgres-compat.sql` | 4430 | `cea2ef60626794cdd7b2149a221072807385f3c5a587c8bb641a9f08eaa24f96` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/002-sms-jincang.sql` | 612 | `43007e1051a191caa4b6eb1238520600530c2605258ce166d0b00cdd0a32e598` |
@@ -89,7 +89,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/012-rbac-userpermission-menuoperate-code.sql` | 608 | `2a8b6f118d8494bada4bf86d7e2ead8b06a6591e85abf2990375e322f3619a17` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/013-page-runtime-schema-fixups.sql` | 18311 | `9e86a39b8ec4c810509369d3276aa4d5070d4717641b78b76f42c6b39c6991e8` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/014-ui-smoke-runtime-fixups.sql` | 18778 | `3ad9ffed8ce256a08cdcc5f32a2ad1b1b9c6d787613f3851b99d8f2b7307a403` |
-| `postgres-init-sql` | `deploy/docker/postgres/init/015-i18n-dingtalk-startup.sql` | 6118 | `b4afb8d147923038d9f3ca31d4ffd0730256d5877ccffa761b8c19e6c344393f` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/015-i18n-dingtalk-startup.sql` | 6116 | `0985df6f8a36a65e9d07d5bae8d4e3ad75c3a01923f24b31e17c9b793c2c6f6c` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/016-notification-printer-runtime-fixups.sql` | 23369 | `d7862341e47176b00c3a4d8278e50baace8dcf3b9ffff629bc5c6188f581df29` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/017-rbac-menuoperate-url-ref-fixups.sql` | 8108 | `71f6d9fe21d722cb957441bb5f21b3264797702402cbe7b90a378025ab138233` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/018-org-mnecode-fixups.sql` | 2693 | `3e8a2776e3220b4ea133fd99273d05fe446540e75e134116904acf1e3ecb43e3` |
@@ -242,7 +242,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql` | 12515 | `2e0b9c0b9c2ba9924ec65c51511c746d6ef1c495addbba9703c1fd3109dfc129` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/166-postgres-legacy-bigint-text-like-operator.sql` | 3318 | `2f24949c40bbf5185539a2b90f81efd373132b484ec9f044ca7ddd441d548300` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/167-postgres-legacy-varchar-text-like-operator.sql` | 1941 | `5ec9a2a8da9e4edcc38fa8170963e0e89cf2778e6eb92d0f24f0601d25800024` |
-| `postgres-init-sql` | `deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql` | 11023 | `b5f24e29f94e00741856f5c750bab339f7ba30f6ce9f0a5926cbe969189e7e1b` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/168-wom-maketasklist-toolbar-interaction-compat.sql` | 11041 | `287e2ac7b221c57840849a6f305bce6d9a0c474f036a462508b39bcb2c7cfd17` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/169-custom-property-project-property-compat.sql` | 457 | `ac93668e0bf2915972b09d14ba25a3d6bf710444a3364617529c38c44e7596fa` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/170-rbac-pstaff-pposition-compat.sql` | 2461 | `2aecd5ef4201d076073adde88d6decad5d506adce748a85e373a6bc665d8a914` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/171-wts-workpermit-export-action.sql` | 11981 | `9a030b54bec7942f3e497826e2ef609e0a3c85c5e80599a7d0f9b4ac3ec34876` |
@@ -260,6 +260,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `postgres-init-sql` | `deploy/docker/postgres/init/183-patrol-system-codes.sql` | 24797 | `d6f7eefd2e500e707f7934b7404649a8ca97633012e390a8ad28335aa46a1051` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/184-patrol-ui-runtime-metadata.sql` | 16344840 | `dd4e2f1d88a229699fec02af957a0a793038eeae862a2b6a7ddbbc83423e2bd5` |
 | `postgres-init-sql` | `deploy/docker/postgres/init/185-patrol-task-persistence-compat.sql` | 2458 | `428688e43fce48a3eae2f8a97e3d17f8b64b162da5837a0b3fc461a5b854feba` |
+| `postgres-init-sql` | `deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql` | 65813 | `6fbe419b11cb1c99e27ba0c7086abc37de37c9ae2ccc0b9e31973daa29653da9` |
 | `runtime-binary-patch` | `deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar` | 2603 | `4af609b0f58221eb3b9794437cecc5cd9ca6ee159d90a90739bfab01a9675eca` |
 | `runtime-binary-patch` | `deploy/docker/patches/notification-dynamic-templates/notification-dynamic-templates.jar` | 2056 | `929fad64e9dc57463ab4ba54d1274c8a7ee49d5f1af2a0b44a5734b2611bf058` |
 | `runtime-binary-patch` | `deploy/docker/patches/rm-config-defaults/rm-config-defaults.jar` | 2042 | `4c8179d3cbabd71f14fb7ff073997b4b32648924601c6cf9f1be8a71e9504a3a` |
@@ -293,7 +294,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/build-wom-config-default-patch.sh` | 1373 | `ede31f8645df35b088434b188f8c19c8a851b0b0393ad5a810953102a2b0a586` |
 | `runtime-script` | `deploy/docker/scripts/patch-basicmanagement-signature-mapper.py` | 4607 | `c7fa52fba780faad6752700adf63356952f16850807f6c4c1b432794ba45c1a0` |
 | `runtime-script` | `deploy/docker/scripts/patch-configuration-entity-model-runtime.py` | 5316 | `e270c32cf3f7c2ebbb2dc4ef5e4aaefea3dad754a0d74c81bb39f491eb179686` |
-| `runtime-script` | `deploy/docker/scripts/patch-eam-patrol-runtime.py` | 10910 | `d8b1e0d18647b8dcadbda74852dd1aa5c1aba67fbb382c8f4ee445d1e796786c` |
+| `runtime-script` | `deploy/docker/scripts/patch-eam-patrol-runtime.py` | 12011 | `dfd9102b251d716ee8149b1388417c1a9e081d3154d9dabbad009ab2b23b204b` |
 | `runtime-script` | `deploy/docker/scripts/patch-eam-reactapi-ready.py` | 5534 | `55d71252622f6c4ac3fc0e8750464d53d01680491abac5cced2d298ae8d7b75b` |
 | `runtime-script` | `deploy/docker/scripts/patch-flow-postgres-datasource.py` | 6353 | `6981f42b705228e394d6846df9fa2aac83f93e5bc3daac9c9d6a9e425858eb76` |
 | `runtime-script` | `deploy/docker/scripts/patch-foundation-extra-view-lob.py` | 4229 | `b9fe2efb8fe9d9c6682757d75d49cb71321c8accbe28e9cd610d8e771b539ad3` |
@@ -304,7 +305,7 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-keycloak-admin-url.py` | 4845 | `f24075ccb7c00d3be741c1cd16f80bf0f7dee6972ba1c099d517af091c172969` |
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-rbac-permission-mapper.py` | 13058 | `6dcb6ff575129d2890c715b3908721983a5b07cbfe002b6f49c82a0cd0e4a8b5` |
 | `runtime-script` | `deploy/docker/scripts/patch-orgmanagement-standalone-auth-tasks.py` | 5611 | `29467c1dc300924779152c59aba12dcb01dfb3592c81dbb49fe4788da82fb653` |
-| `runtime-script` | `deploy/docker/scripts/patch-patrol-postgres-source.py` | 11692 | `8c5f5969981dce33370e54eefbd958b27233c69acee9f5d4f80ff8dac67abc11` |
+| `runtime-script` | `deploy/docker/scripts/patch-patrol-postgres-source.py` | 28099 | `adf4f2ce45fdfadeb67e2ea5b125cb43d1db32e9fb4f3cbb891f1bfc729593f1` |
 | `runtime-script` | `deploy/docker/scripts/patch-postgres-runtime.py` | 42267 | `236a99b837bfd58cad2b402cafbc56608d18c7aa03fd8fee2e84a4b8ce042342` |
 | `runtime-script` | `deploy/docker/scripts/patch-printer-empty-registration.py` | 6542 | `efa748082c663db643b61a42407a471f93030e0a9d36eb5055a2eb0eeaaa3bd7` |
 | `runtime-script` | `deploy/docker/scripts/patch-rm-batch-formula-list.py` | 5368 | `7fb84b505f32d8c70fbdfcd65c68447aa0b2e1de990c540c44e24b525370d9e3` |
@@ -326,6 +327,8 @@ It records the current runtime patch, PostgreSQL init SQL, and Nacos template ch
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolRoute/workGroup/workGroupList/body.js` | 13512 | `8738c7863e0951b454a8e54e7d2486d2c66bffc710f77dbdf8ee474683bff67a` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body-es5.js` | 2910 | `5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/potrolTask/enteringResultEdit/body.js` | 2910 | `5c2f6653de83355b072c5c631d3fb98b6ae7bc1670c3d8a9bf10b26c33b4a360` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body-es5.js` | 303 | `4004ee453b44ed880f925380fa70bf881c9c1925fe7a6e929b4c13d19cd5e934` |
+| `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js` | 4419 | `131442c052ba7c5844c29ff533b56268bcb8a8eba770efe009caf2d14fc7bc92` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties` | 1253 | `979853ad29cd2c294e85673b6767204a26f423b769e4dea8fa9b206f21a74d3f` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskBatchView.html` | 5299 | `61a018dfba75f33df6f566b09b83ca43f6df2ec08cef24469f790d49d89e560b` |
 | `runtime-static-override` | `deploy/docker/assets/module-static/WOM/produceTask/produceTask/makeTaskEdit.html` | 5189 | `4fe7d559bfa24d3752a3aa4237c843d181971f002ad01b5f7227e5687b33485a` |

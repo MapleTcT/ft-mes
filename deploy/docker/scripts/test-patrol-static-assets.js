@@ -17,6 +17,22 @@ const assetRoot = path.join(
 );
 const nginxPath = path.join(dockerRoot, "nginx", "adp.conf");
 const nginx = fs.readFileSync(nginxPath, "utf8");
+const hiddenDangerMigration = fs.readFileSync(
+  path.join(dockerRoot, "postgres", "init", "186-patrol-hidden-danger-eam-risk-compat.sql"),
+  "utf8"
+);
+const i18nStartupMigration = fs.readFileSync(
+  path.join(dockerRoot, "postgres", "init", "015-i18n-dingtalk-startup.sql"),
+  "utf8"
+);
+const womToolbarMigration = fs.readFileSync(
+  path.join(dockerRoot, "postgres", "init", "168-wom-maketasklist-toolbar-interaction-compat.sql"),
+  "utf8"
+);
+const hiddenDangerSourcePatch = fs.readFileSync(
+  path.join(dockerRoot, "scripts", "patch-patrol-postgres-source.py"),
+  "utf8"
+);
 const i18nPath = path.join(dockerRoot, "assets", "module-static", "PATROL", "i18n-value.js");
 const i18n = fs.readFileSync(i18nPath, "utf8");
 const routeAssetRoot = path.join(
@@ -55,6 +71,15 @@ const resultEditorAssetRoot = path.join(
   "potrolTask",
   "enteringResultEdit"
 );
+const hiddenDangerAssetRoot = path.join(
+  dockerRoot,
+  "assets",
+  "module-static",
+  "PATROL",
+  "patrolTask",
+  "taskDetail",
+  "abnormalSummary"
+);
 
 for (const [key, value] of [
   ["ec.print.template.delete", "删除"],
@@ -85,6 +110,34 @@ for (const fileName of ["body.js", "body-es5.js"]) {
   assert(nginx.includes(`alias ${aliasPath};`), `${fileName} must map to the restored asset`);
 
   new Function(source);
+}
+
+for (const fileName of ["body.js", "body-es5.js"]) {
+  const assetPath = path.join(hiddenDangerAssetRoot, fileName);
+  const source = fs.readFileSync(assetPath, "utf8");
+  const requestPath = `/greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/${fileName}`;
+  const aliasPath = `/usr/share/nginx/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/${fileName}`;
+
+  if (fileName === "body.js") {
+    assert(
+      source.includes("__ADP_PATROL_HIDDEN_DANGER_ACTION_INSTALLED__"),
+      `${fileName} must install the hidden-danger action once`
+    );
+  }
+  assert(nginx.includes(`location = ${requestPath} {`), `${fileName} must have an exact Nginx route`);
+  assert(nginx.includes(`alias ${aliasPath};`), `${fileName} must map to the restored asset`);
+  new Function(source);
+}
+
+const hiddenDangerBody = fs.readFileSync(path.join(hiddenDangerAssetRoot, "body.js"), "utf8");
+for (const marker of [
+  'target.closest("#btn-createTask")',
+  'text("PATROL.custom.danger.isCreated")',
+  'text("PATROL.custom.danger.created"',
+  'CREATE_URL = "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger"',
+  "root.createTask = createHiddenDanger",
+]) {
+  assert(hiddenDangerBody.includes(marker), `PATROL hidden-danger body must implement ${marker}`);
 }
 
 for (const fileName of ["body.js", "body-es5.js"]) {
@@ -215,6 +268,21 @@ assert(
   patrolResultEditorBodyIndex < placeholderRouteIndex,
   "PATROL result-editor exact routes must precede the generic body-script fallback"
 );
+const patrolHiddenDangerBodyIndex = nginx.indexOf(
+  "location = /greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js"
+);
+assert(patrolHiddenDangerBodyIndex >= 0, "nginx must expose the PATROL hidden-danger body script");
+assert(
+  patrolHiddenDangerBodyIndex < placeholderRouteIndex,
+  "PATROL hidden-danger exact routes must precede the generic body-script fallback"
+);
+assert(
+  nginx.includes("location = /msService/PATROL/patrolTask/taskDetail/abnormalSummary {") &&
+    nginx.includes(
+      '<script src="/greenDill/static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js"></script>'
+    ),
+  "PATROL abnormal-summary HTML must load the hidden-danger compatibility action"
+);
 const patrolAreaEditorBodyIndex = nginx.indexOf(
   "location = /greenDill/static/PATROL/patrolRoute/workGroup/workAreaPtEdit/body.js"
 );
@@ -248,6 +316,58 @@ assert(
 assert(
   nginx.includes("alias /usr/share/nginx/module-static/PATROL/i18n-value.js;"),
   "PATROL page i18n routes must use the compatibility bundle"
+);
+const eamRiskPageIndex = nginx.indexOf(
+  "location = /msService/EAM/businessConfig/riskHandle/riskRecord {"
+);
+const genericMsServiceIndex = nginx.indexOf("location ^~ /msService/ {");
+assert(eamRiskPageIndex >= 0, "EAM risk-record page must have an exact Nginx route");
+assert(
+  eamRiskPageIndex < genericMsServiceIndex,
+  "EAM risk-record page patch must precede the generic msService proxy"
+);
+assert(
+  nginx.includes('/greenDill/static/scripts/vendors.sesgis.js?v=1677582772048'),
+  "EAM risk-record page must load the SESGIS vendor before edit.js"
+);
+assert(
+  hiddenDangerSourcePatch.includes("PATROL_COMPATIBILITY_PENDING"),
+  "PATROL source patch must mark compatibility risks as pending"
+);
+for (const marker of [
+  "EAM_1.0.0_businessConfig_riskRecorddg1578550214154",
+  "payload text := $eam_risk_grid$",
+  "EAM risk-record datagrid JSON is incomplete",
+  "SESHRM_riskResource/005",
+  "SESHRM.systemEntityname.randon1570600798462",
+  "SESHRM.systemCodevalue.randon1589806103444",
+  "SESHRM inspection source system code is missing",
+  "SESHRM inspection source translation is missing",
+]) {
+  assert(
+    hiddenDangerMigration.includes(marker),
+    `PATROL hidden-danger migration must restore ${marker}`
+  );
+}
+
+const i18nResourceTable = i18nStartupMigration.match(
+  /CREATE TABLE IF NOT EXISTS public\.supfusion_i18n_resource\s*\(([\s\S]*?)\);/
+);
+assert(i18nResourceTable, "i18n bootstrap must define supfusion_i18n_resource");
+assert(
+  /\bmodifier\s+timestamp\b/.test(i18nResourceTable[1]),
+  "i18n resource modifier must match the runtime java.util.Date mapping"
+);
+assert(
+  hiddenDangerMigration.includes("ALTER COLUMN modifier TYPE timestamp without time zone") &&
+    hiddenDangerMigration.includes("modifier = CURRENT_TIMESTAMP") &&
+    !hiddenDangerMigration.includes("modifier = 'system'"),
+  "PATROL hidden-danger migration must repair and write timestamp modifiers"
+);
+assert(
+  womToolbarMigration.includes("modifier = CURRENT_TIMESTAMP") &&
+    !womToolbarMigration.includes("modifier = 'system'"),
+  "WOM toolbar translations must write timestamp modifiers"
 );
 
 console.log("PATROL static asset acceptance: PASS");

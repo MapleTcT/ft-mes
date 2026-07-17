@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Add PATROL 6.0.4.0 to an existing EamMs Spring Boot runtime jar.
+"""Add or update PATROL 6.0.4.0 in an EamMs Spring Boot runtime jar.
 
 The recovered EamMs runtime already contains environment-specific PostgreSQL
 patches. Rebuilding it from an older launcher can silently lose those fixes, so
-this tool performs a guarded, additive merge against the exact running jar.
+this tool performs a guarded merge against the exact running jar.
 """
 
 from __future__ import annotations
@@ -65,6 +65,23 @@ def append_indexed_value(lines: list[str], prefix: str, value: str) -> int:
     return index
 
 
+def set_indexed_value(lines: list[str], prefix: str, index: int, value: str) -> None:
+    marker = f"{prefix}[{index}]="
+    replacement = marker + value
+    found = False
+    updated: list[str] = []
+    for line in lines:
+        if line.startswith(marker):
+            if not found:
+                updated.append(replacement)
+                found = True
+            continue
+        updated.append(line)
+    if not found:
+        updated.append(replacement)
+    lines[:] = updated
+
+
 def patch_bootstrap(original: bytes, version_stamp: str) -> bytes:
     text = original.decode("utf-8")
     lines = text.splitlines()
@@ -77,10 +94,8 @@ def patch_bootstrap(original: bytes, version_stamp: str) -> bytes:
     locale_prefix = "supfusion.cloud.i18n.locale-modules"
     locale_index = append_indexed_value(lines, locale_prefix, PATROL_ALIAS)
     version_prefix = "supfusion.cloud.i18n.module-versions"
-    locale_versions = indexed_properties(lines, version_prefix)
     expected_version = PATROL_ALIAS + version_stamp
-    if locale_versions.get(locale_index) != expected_version:
-        lines.append(f"{version_prefix}[{locale_index}]={expected_version}")
+    set_indexed_value(lines, version_prefix, locale_index, expected_version)
 
     append_indexed_value(lines, "supfusion.cloud.i18n.modules", PATROL_ALIAS)
     patched = "\n".join(lines) + "\n"
@@ -164,7 +179,8 @@ def build_output(
     output_path: Path,
     artifacts: dict[str, Path],
     version_stamp: str,
-) -> tuple[list[str], int]:
+    replace_existing: bool = False,
+) -> tuple[list[str], int, list[str]]:
     if output_path.exists():
         raise ValueError(f"refusing to overwrite existing output: {output_path}")
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -182,8 +198,13 @@ def build_output(
             if BOOTSTRAP_PATH not in input_entries:
                 raise ValueError(f"input jar is missing {BOOTSTRAP_PATH}")
             collisions = sorted(set(input_entries) & set(nested_names))
-            if collisions:
+            if collisions and not replace_existing:
                 raise ValueError(f"PATROL artifacts already exist in input jar: {collisions}")
+            if replace_existing and set(collisions) != set(nested_names):
+                raise ValueError(
+                    "replace-existing requires all PATROL artifacts in the input jar: "
+                    f"found={collisions}, expected={sorted(nested_names)}"
+                )
 
             patched_bootstrap = patch_bootstrap(
                 source.read(BOOTSTRAP_PATH), version_stamp
@@ -191,6 +212,8 @@ def build_output(
             with zipfile.ZipFile(temporary, "w", allowZip64=True) as output:
                 output.comment = source.comment
                 for info in source_infos:
+                    if info.filename in collisions:
+                        continue
                     cloned = clone_zip_info(info)
                     if info.filename == BOOTSTRAP_PATH:
                         output.writestr(cloned, patched_bootstrap)
@@ -205,7 +228,7 @@ def build_output(
 
         verify_output(set(input_entries), temporary, nested_names)
         temporary.replace(output_path)
-        return nested_names, len(input_entries)
+        return nested_names, len(input_entries), collisions
     except Exception:
         if temporary.exists():
             temporary.unlink()
@@ -220,6 +243,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--expected-input-sha256", required=True)
     parser.add_argument("--source-commit", default="unknown")
     parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--replace-existing",
+        action="store_true",
+        help="replace the three existing PATROL nested jars in a guarded runtime update",
+    )
     parser.add_argument(
         "--version-stamp",
         default=time.strftime("%Y%m%d%H%M"),
@@ -247,11 +275,12 @@ def main() -> int:
 
     try:
         artifacts = validate_patrol_artifacts(args.patrol_jar)
-        nested_names, input_entry_count = build_output(
+        nested_names, input_entry_count, replaced_nested_names = build_output(
             args.input_jar,
             args.output_jar,
             artifacts,
             args.version_stamp,
+            args.replace_existing,
         )
     except (OSError, ValueError, zipfile.BadZipFile) as error:
         print(f"PATROL runtime patch failed: {error}", file=sys.stderr)
@@ -268,6 +297,7 @@ def main() -> int:
         "versionStamp": args.version_stamp,
         "inputEntryCount": input_entry_count,
         "addedNestedJars": nested_names,
+        "replacedNestedJars": replaced_nested_names,
         "artifactSha256": {
             path.name: sha256(path) for path in artifacts.values()
         },

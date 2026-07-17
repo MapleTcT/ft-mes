@@ -981,6 +981,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body-es5.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
       "state": "tracked",
       "tracked": true
@@ -2655,6 +2667,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3334,6 +3352,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/test_generate_module_system_code_sql.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/test_patch_eam_patrol_runtime.py",
       "state": "tracked",
       "tracked": true
     },
@@ -4804,6 +4828,12 @@
     {
       "ignored": false,
       "path": "metadata/patrol-execution-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-hidden-danger-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6992,7 +7022,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 527
+      "tracked": 531
     },
     "docs": {
       "tracked": 90
@@ -7001,7 +7031,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 116
+      "tracked": 117
     },
     "package.json": {
       "tracked": 1
@@ -7025,8 +7055,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1161,
-    "tracked": 1161,
+    "totalFiles": 1166,
+    "tracked": 1166,
     "untracked": 0
   },
   "untrackedByDirectory": []

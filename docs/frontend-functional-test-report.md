@@ -424,13 +424,15 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 - QCS 受控配置回滚后报告合格链路当前复验：`metadata/qcs-report-chain-qualified-current.json`；Marker `ADP_E2E_20260621065620_QCS_REPORT_QUAL`；API/DB/SSH base 为 `http://100.99.133.43:18080`，浏览器大静态资源入口为 `http://222.88.185.146:18080`；真实 WOM 前端先调用 `POST /msService/WOM/produceTask/produceTask/createManuInspect` 创建制造请检，再通过 QCS 请检列表和报告编辑页上下文调用 `/QCS/inspect/inspect/bulkSubmit` 与 `/QCS/inspectReport/inspectReport/batchDealReports`；报告保存返回 `HTTP 200`，最终报告 `status=99/check_result=合格`，WOM 任务/待入库/执行日志回写 `已检/合格`，批次回写 `BaseSet_checkResult/qualified`，前端无 blocking console/network/page error。
 - QCS 受控配置回滚后报告不合格链路当前复验：`metadata/qcs-report-chain-unqualified-current.json`；Marker `ADP_E2E_20260621070426_QCS_UNQLF`；同一真实浏览器/API/DB 组合创建制造请检、生成报告、保存 `checkResult=不合格` 并两段提交生效；最终报告 `status=99/check_result=不合格/un_qlf_deal_flag=true`，WOM 任务/待入库/执行日志回写 `Checked/Unqualified`，批次回写 `BaseSet_checkResult/unqualified/is_available=false/active_batch_state_id=11003`，并自动生成 `qcs_un_qlf_deals.id=757556916282624`。
 
-## PATROL 共享巡检任务链（2026-07-16）
+## PATROL 共享巡检任务链（2026-07-17）
 
 目标：`http://10.11.100.17:18080`；计划/取消基线 marker：
 `ADP_E2E_20260716155413_PATROL`；执行完成 marker：
-`ADP_E2E_20260716210839_PATROL_EXECUTION`。机器证据：
+`ADP_E2E_20260716210839_PATROL_EXECUTION`；异常生成隐患 marker：
+`ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER`。机器证据：
 `metadata/patrol-module-recovery-acceptance.json`、
-`metadata/patrol-execution-persistence-acceptance.json`。
+`metadata/patrol-execution-persistence-acceptance.json`、
+`metadata/patrol-hidden-danger-persistence-acceptance.json`。
 
 | 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
 |---|---|---|---|---|---|---|---|---|
@@ -441,6 +443,9 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 任务下发/执行 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList`、`/enteringResultList` | 对新生成任务依次执行“已下发”“执行中”，再进入结果录入列表 | `GET .../taskStateUpdate?changeState=.../issued`、`GET .../taskStateUpdate?changeState=.../running`、`POST .../enteringResultList-query` | 两次状态变更均成功，结果录入页显示 `patrolTask_20260717_006` 为“执行中”；浏览器错误为 0 | 三个请求均 HTTP 200；状态转换返回 `SUCCESS` | `mp_potrol_tasks` | PASS | 状态变更沿原产品 API 完成，没有直接修改数据库 |
 | PATROL 现场结果录入 | `/msService/PATROL/patrolTask/potrolTask/enteringResultList` -> `enteringResultEdit` | 选择真实任务行，打开编辑器，为明细填写结果 `12.34`、结论“正常”并保存 | `POST .../data-dg1584600022503`、`POST .../enteringResultEdit/submit?id=6676470908830544` | 明细、录入标准和判定脚本真实加载；保存返回成功；console/page/request failure 均为 0 | HTTP 200；任务和明细在同一业务保存链更新 | `mp_potrol_tasks`、`mp_task_details` | PASS | 已恢复 `enteringResultEdit/body.js/body-es5.js`，数字范围、比较符、空值和字符判定都有静态回归 |
 | PATROL 任务完成/复显 | `/msService/PATROL/patrolTask/potrolTask/potrolTaskList` | 保存结果后等待父列表刷新，再重开任务列表查询同一 marker | `POST .../enteringResultList-query`、`POST .../potrolTaskList-query` | 结果录入列表移除已完成任务，任务列表复显“已完成”；5 张截图完整生成 | PostgreSQL 确认任务状态、实际起止时间、完成人和明细结果/结论/完成人/完成时间全部落库 | `mp_potrol_tasks`、`mp_task_details` | PASS | 32/32 断言通过；取消分支另以 `ADP_E2E_20260716210929_PATROL` 回归 PASS |
+| PATROL 异常结果录入 | `/msService/PATROL/patrolTask/potrolTask/enteringResultList` -> `enteringResultEdit` | 对新任务下发、执行，录入 `99.99` 并选择“异常”后保存完成 | `POST .../enteringResultEdit/submit?id=6676867595027280` | 异常结论、完成状态和父列表复显正常；浏览器无错误 | PostgreSQL 确认任务完成，明细 `real_value=PATROL_realValue/abnormal`，结果和完成审计字段齐全 | `mp_potrol_tasks`、`mp_task_details` | PASS | 使用独立异常 marker，不复用正常结果断言 |
+| PATROL 异常生成隐患 | `/msService/PATROL/patrolTask/taskDetail/abnormalSummary` | 勾选异常明细，点击“生成隐患”，在真实确认框点击“确认”，随后重复提交验证幂等 | `POST /msService/PATROL/patrolTask/taskDetail/createHiddenDanger` | 按钮和确认框可用，首次提示成功，刷新后明细已生成隐患；重复请求不新增记录 | 首次 `createdCount=1/riskId=6676868002956112`；`mp_task_details` 写入 `fault_id/fault_table_no/is_fault`，`ses_hrm_riskhandles` 写入 `PATROL_COMPATIBILITY_PENDING`；重试 `reusedCount=1` 且总数仍为 1 | `mp_task_details`、`ses_hrm_riskhandles` | PASS | 这是 SESH 未安装时的可审计待治理兼容记录，不等同完整整改/复查/销项流程 |
+| EAM 隐患台账复显 | `/msService/EAM/businessConfig/riskHandle/riskRecord` | 生成隐患后打开 EAM 隐患记录，核对同一单号、内容和来源 | `POST .../data-dg1578550214154` | 表格出现 `PATROL-RISK-6676868002956112`，隐患来源显示“巡检”，console/page/request failure 均为 0 | EAM DataGrid HTTP 200，返回同一 risk id、内容和翻译后的来源；i18n 字段类型与真实运行包一致 | `ses_hrm_riskhandles`、`sys_code`、`supfusion_i18n_resource` | PASS | 存量库首次把 `modifier` 从 varchar 修为 timestamp 后需重启一次 i18n 连接池；新环境在服务启动前迁移，不触发该步骤 |
 | PATROL 录入标准新增 | `/msService/PATROL/inputStandard/inputStandard/inputStanList` | 点击“新增”，选择字符/录入并保存唯一 marker | `POST .../inputStanEdit/submit` | 表单联动和保存正常，列表出现 marker；console/page/request error 均为 0 | HTTP 200，返回 `id=6675974928974672`；PostgreSQL `version=1/state=true/valid=true` | `mp_input_standards` | PASS | 已恢复该编辑页缺失的真实 `body.js/body-es5.js`，不再返回 `void 0` |
 | PATROL 录入标准修改 | 同上 | 选择 marker 行，修改名称和备注并保存 | `POST .../inputStanEdit/submit` | 编辑页回显、保存和列表刷新正常 | PostgreSQL 名称/备注更新，`version 1 -> 2` | `mp_input_standards` | PASS | 无 |
 | PATROL 录入标准停用/启用 | 同上 | 依次点击“停用”“启用” | `GET .../updateItemState?itemState=0/1&tableType=inputStand` | 两次成功提示和列表状态复显正常 | PostgreSQL `state true -> false -> true` | `mp_input_standards` | PASS | 无 |
@@ -462,11 +467,14 @@ marker `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART` / taskId
 | PATROL 巡检项删除 | 同上 | 在巡检项编辑器选择 marker，点击“删行”并保存 | `GET .../deleteWorkItems`、`POST .../workItemPtEdit/submit` | 行先从编辑器移除，软删除和父表保存均返回 200，刷新后 marker 不再出现 | PostgreSQL `valid=false`；种子路线、区域和巡检项继续有效 | `mp_work_items` | PASS | 失败轮次均由同一业务软删除 API 清理，无有效测试数据残留 |
 
 本节已证明计划生成任务、任务状态变更、输入标准、路线、区域和巡检项完整 CRUD，以及任务下发、执行、
-结果录入和完成回写通过。异常/隐患处置和统计页仍是后续验收项。执行链机器证据：
+正常/异常结果录入、完成回写、异常生成待治理隐患和 EAM 台账复显通过。完整隐患整改/复查/销项依赖尚未安装的
+SESH 治理模块，不能由本次兼容记录外推；统计页仍是后续验收项。执行链机器证据：
 `metadata/patrol-execution-persistence-acceptance.json`；输入标准机器证据：
 `metadata/patrol-input-standard-persistence-acceptance.json`；路线、区域和巡检项机器证据：
-`metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`、`metadata/patrol-item-persistence-acceptance.json`。可重放命令：
+`metadata/patrol-route-persistence-acceptance.json`、`metadata/patrol-area-persistence-acceptance.json`、`metadata/patrol-item-persistence-acceptance.json`；
+异常隐患机器证据：`metadata/patrol-hidden-danger-persistence-acceptance.json`。可重放命令：
 `make acceptance-patrol-execution-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
+`make acceptance-patrol-hidden-danger-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
 `make acceptance-patrol-input-standard-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17` 和
 `make acceptance-patrol-route-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、
 `make acceptance-patrol-area-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17`、

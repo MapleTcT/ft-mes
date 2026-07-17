@@ -57,7 +57,7 @@ wom_toolbar_i18n_rows AS (
 UPDATE public.supfusion_i18n_resource existing
 SET i18n_value = seed.i18n_value,
     valid = '1',
-    modifier = 'system',
+    modifier = CURRENT_TIMESTAMP,
     modify_time = CURRENT_TIMESTAMP,
     modify_staff_id = 1
 FROM wom_toolbar_i18n_rows seed
@@ -131,7 +131,7 @@ SELECT
     'system',
     CURRENT_TIMESTAMP,
     1,
-    'system',
+    CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     1
 FROM wom_toolbar_i18n_rows seed

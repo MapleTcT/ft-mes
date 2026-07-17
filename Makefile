@@ -60,6 +60,7 @@ SYSTEMCODE_PERSISTENCE_OUTPUT ?= /tmp/adp-systemcode-persistence-acceptance.json
 SYSTEMCONFIG_PERSISTENCE_OUTPUT ?= /tmp/adp-systemconfig-persistence-acceptance.json
 PATROL_TASK_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-task-persistence-acceptance.json
 PATROL_EXECUTION_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-execution-persistence-acceptance.json
+PATROL_HIDDEN_DANGER_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-hidden-danger-persistence-acceptance.json
 PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-input-standard-persistence-acceptance.json
 PATROL_ROUTE_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-route-persistence-acceptance.json
 PATROL_AREA_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-area-persistence-acceptance.json
@@ -301,6 +302,7 @@ help:
 	@printf '%s\n' '  make acceptance-rbac-permission-persistence Run RBAC role/user permission persistence acceptance'
 	@printf '%s\n' '  make acceptance-systemcode-persistence Run system code dictionary CRUD persistence acceptance'
 	@printf '%s\n' '  make acceptance-systemconfig-persistence Run system config catalog/value persistence acceptance'
+	@printf '%s\n' '  make acceptance-patrol-hidden-danger-persistence Run abnormal PATROL -> pending EAM risk persistence acceptance'
 	@printf '%s\n' '  make acceptance-patrol-input-standard-persistence Run PATROL input-standard browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-route-persistence Run PATROL route browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-area-persistence Run PATROL area browser/PostgreSQL CRUD acceptance'
@@ -439,6 +441,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-runtime-configuration-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-entity-model-config-crud-readiness-probe.js
 	$(NODE) --check deploy/docker/scripts/adp-custom-property-persistence-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-patrol-route-persistence-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-patrol-area-persistence-acceptance.js
@@ -480,6 +483,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-patrol-postgres-source.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_patrol_postgres_source.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/patch-eam-patrol-runtime.py
+	$(PYTHON) -m unittest deploy/docker/scripts/test_patch_eam_patrol_runtime.py
 	$(NODE) deploy/docker/scripts/test-patrol-monitor-fallback.js
 	$(NODE) deploy/docker/scripts/test-patrol-static-assets.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/audit-postgres-mappings.py
@@ -975,12 +979,15 @@ acceptance-systemcode-persistence:
 acceptance-systemconfig-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_PERSISTENCE_OUTPUT=$(SYSTEMCONFIG_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js
 
-.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence
+.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence acceptance-patrol-hidden-danger-persistence
 acceptance-patrol-task-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_TASK_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
 acceptance-patrol-execution-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_TASK_ACTION=complete ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_EXECUTION_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
+
+acceptance-patrol-hidden-danger-persistence:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_TASK_ACTION=hidden-danger ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_HIDDEN_DANGER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
 acceptance-patrol-input-standard-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT=$(PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js

@@ -1,14 +1,14 @@
 # PATROL 共享巡检模块恢复验收
 
-- 验收日期：`2026-07-16`
+- 验收日期：`2026-07-17`
 - 原厂产品：`PATROL_1.0.0` / `6.0.4.0`
 - 当前源码接入提交：`mes-modules-patrol-intake@0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0`
 - 目标运行构件源码提交：`8971a8770452c2bb55261f330284cd3dd26824b1`
-- 主仓库执行链验收基线：`28d93d0673171efc2b47fc64b45dd5f43e66b0ad`
+- 主仓库异常隐患补丁基线：`21812424ab512a69407474180b4f7c9a5110c600` + 当前工作树
 - 承载服务：`EamMs`
 - 目标环境：`v6@10.11.100.17`
 - 默认数据库：PostgreSQL
-- 当前结论：`TARGET_EXECUTION_PERSISTENCE_PASS`
+- 当前结论：`TARGET_HIDDEN_DANGER_PERSISTENCE_PASS`
 
 机器可读记录见 [PATROL 恢复验收](../../metadata/patrol-module-recovery-acceptance.json)；可重放脚本见
 `deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js`。
@@ -18,12 +18,15 @@
 PATROL 原厂源码、PostgreSQL 迁移、运行元数据、菜单权限、工作流和运行 JAR 已部署到测试环境。
 真实浏览器先完成“新增计划 -> 生成任务 -> 普通查询 -> 批量取消 -> PostgreSQL 回读 -> 页面复显”
 闭环；随后又完成“新增计划 -> 生成任务 -> 下发 -> 执行 -> 录入结果 -> 完成 -> PostgreSQL 回读 -> 页面复显”
-闭环。执行 marker `ADP_E2E_20260716210839_PATROL_EXECUTION` 的 32 项断言全部 PASS，浏览器 console、page error、
-PATROL network failure 均为 0，取消分支也在其后独立回归 PASS。
+闭环；本轮继续完成“异常结果 -> 完成任务 -> 异常汇总 -> 生成隐患 -> PostgreSQL 关联 -> 重复提交幂等 ->
+EAM 台账复显”闭环。执行 marker `ADP_E2E_20260716210839_PATROL_EXECUTION` 的 32 项断言、异常隐患 marker
+`ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 的 45 项断言全部 PASS，浏览器 console、page error、PATROL network
+failure 均为 0，取消分支也在其后独立回归 PASS。
 
 这证明共享巡检的输入标准、路线/区域/项目配置、计划/任务状态和现场执行结果链在 PostgreSQL 上可用，
 也再次确认设备巡检、工艺巡检和安环巡检共用同一 PATROL 数据域。它不等于整个巡检产品已经全部验收：
-异常/隐患处置和统计监控页面仍需继续逐页闭合。
+异常结果到 EAM 待治理隐患的生成链已经可用，统计监控页面仍需继续逐页闭合。由于完整 SESH 模块没有交付，
+本次 `PATROL_COMPATIBILITY_PENDING` 记录不能被解释为隐患整改、复查和销项治理流程已恢复。
 
 ## 来源与构建
 
@@ -32,9 +35,9 @@ PATROL network failure 均为 0，取消分支也在其后独立回归 PASS。
 | 原始包 | `PATROL_6.0.4.0.zip` | PASS |
 | 原包 SHA-256 | `1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394` | PASS |
 | 完整性 | 1113 文件、455 Java、267 Web、9 SQL | PASS |
-| PATROL core | `7cb79a90f0fc781e9063a534a1825cb48fff753b077db142eccc43eecdf66461` | PASS |
-| PATROL api | `718a0efc664e0f88ee0926616e540343f6c5e02f472ee1182a398ede02ef5a14` | PASS |
-| PATROL service | `ecddc8350d281a6255b4d55e0b0c5039a7addcbfc2d3ace23853079ad752aecd` | PASS |
+| PATROL core | `9b9d0367d1acc3e89d38adb556c1941f2d37284f093cded4bb2edc2b573beb3e` | PASS |
+| PATROL api | `34b4bce83a4f6af9cb19ebd5a25336b019001b84a384cffeb7df9b777bbf6c6c` | PASS |
+| PATROL service | `94c3289a063272da90c7eb3544a23cee200bcf2b210fa9f0594b50db75db0510` | PASS |
 
 模块仍以 Java 8 构建；供应商包没有测试源码，因此构建 PASS 只证明编译和依赖解析，业务结论来自
 下面的真实页面/API/PostgreSQL 验收。
@@ -51,6 +54,12 @@ PATROL network failure 均为 0，取消分支也在其后独立回归 PASS。
 6. `183-patrol-system-codes.sql`
 7. `184-patrol-ui-runtime-metadata.sql`
 8. `185-patrol-task-persistence-compat.sql`
+9. `186-patrol-hidden-danger-eam-risk-compat.sql`
+
+第 186 号迁移补齐 EAM 风险模型投影、PATROL 异常明细关联、`SESHRM_riskResource/005` 系统编码及中英文资源。
+真实 i18n 运行包把 `supfusion_i18n_resource.modifier` 映射为 `java.util.Date`，旧建库脚本却使用 varchar；迁移会
+识别并修复存量字符型字段。在线改列后只需重启一次 i18n 清理旧 prepared plan，新建 Docker 环境在 i18n 启动前
+完成迁移，不存在连接缓存切换。
 
 `deploy/docker/postgres/verify/001-patrol-acceptance.sql` 在目标 PostgreSQL 的当前结果：
 
@@ -71,12 +80,12 @@ PATROL network failure 均为 0，取消分支也在其后独立回归 PASS。
 | 检查项 | 结果 |
 |---|---|
 | 部署 JAR | `runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar` |
-| 部署 SHA-256 | `97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab` |
+| 部署 SHA-256 | `af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753` |
 | 基线 JAR SHA-256 | `b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38` |
 | EamMs | 容器运行，PATROL 请求真实命中 |
 | PostgreSQL | 容器 healthy |
 | Nginx | 配置 `nginx -t` PASS，兼容规则已热加载 |
-| 最近备份 | `/data/docker/adp-patrol-20260717054457-result-blank-fix` |
+| 回滚 JAR | `/data/docker/adp-patrol-20260716/EamMs-1.0.0.patrol-postgres-queryfix2-20260716.jar`，SHA-256 `97d3a265...e43d2ab` |
 | 结果录入脚本 | `enteringResultEdit/body.js`、`body-es5.js`，目标与仓库 SHA-256 均为 `5c2f6653...b4a360`；空/null 结果不会再被转换为数值 0 |
 
 前端兼容规则只处理旧框架的两个无效错误日志：
@@ -105,6 +114,10 @@ PATROL 六种任务状态 `未下发/已下发/执行中/已超期/已完成/已
 | 加载巡检明细 | `POST .../data-dg1584600022503` | `mp_task_details.id=6676470914171728` | PASS |
 | 录入结果并完成 | `POST .../enteringResultEdit/submit` | 任务和明细同时更新 | PASS |
 | 完成后复显 | 再次查询 `potrolTaskList` | 同一行显示“已完成” | PASS |
+| 录入异常结果 | `enteringResultEdit` 保存 `99.99/异常` | `mp_task_details.id=6676867603743568` | PASS |
+| 生成待治理隐患 | `abnormalSummary` 选择明细、点击按钮并确认 | `ses_hrm_riskhandles.id=6676868002956112`，明细 `fault_id` 同步 | PASS |
+| 重复生成幂等 | 再次调用 `createHiddenDanger` | `createdCount=0/reusedCount=1`，风险计数仍为 1 | PASS |
+| EAM 台账复显 | `riskRecord` DataGrid | 同一 `PATROL-RISK-*` 出现，来源显示“巡检” | PASS |
 
 状态变更返回：
 
@@ -176,6 +189,46 @@ detail.version=1
 500ms 延迟布局纳入真实交互等待，且没有屏蔽任何浏览器错误。随后取消动作 marker
 `ADP_E2E_20260716210929_PATROL` 再次回归 PASS。
 
+## 异常生成隐患与 EAM 台账（2026-07-17）
+
+机器记录：`metadata/patrol-hidden-danger-persistence-acceptance.json`；可重放命令：
+
+```bash
+make acceptance-patrol-hidden-danger-persistence \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_SSH_HOST=10.11.100.17
+```
+
+真实页面使用 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER`。用户在异常汇总表格真实勾选
+明细 `6676867603743568`，点击“生成隐患”并在 Ant Modal 中点击“确认”；浏览器捕获请求：
+
+```text
+POST /msService/PATROL/patrolTask/taskDetail/createHiddenDanger
+ids=6676867603743568,
+HTTP 200, createdCount=1, riskId=6676868002956112
+```
+
+PostgreSQL 直接查询确认：
+
+```text
+detail.is_fault=true
+detail.fault_id=6676868002956112
+detail.fault_table_no=PATROL-RISK-6676868002956112
+risk.status=1
+risk.valid=1
+risk.version=0
+risk.risk_mode=PATROL_COMPATIBILITY_PENDING
+risk.risk_source=SESHRM_riskResource/005
+risk.finder=1
+```
+
+第二次请求返回 `createdCount=0/reusedCount=1`，数据库仍只有一条同 ID 风险记录。随后真实 EAM 隐患记录页
+`POST .../data-dg1578550214154` 返回 HTTP 200，表格出现同一单号、发现人、时间和内容，隐患来源通过系统编码和
+i18n 显示为“巡检”。本轮 45/45 断言、8 张截图、console/page/request/screenshot failure 全部通过。
+
+兼容实现保留原有 SESH Feign 路径：未来真实 SESH 服务上传并发布后仍走原产品链；当前 SESH 缺失时才创建
+可审计的 EAM 待治理记录。因此本项是异常发现和移交闭环，不伪装成完整隐患治理闭环。
+
 ## 已恢复前置数据
 
 | 类型 | ID | Marker / 内容 | 状态 |
@@ -192,9 +245,10 @@ detail.version=1
 | 路线/区域/项目完整 CRUD | PASS | 保持行操作、CRUD、关联和软删除回归 |
 | 任务下发/执行/完成 | PASS | 保持真实状态机和取消分支回归 |
 | 执行结果 | PASS | 保持任务/明细同 marker 落库和页面复显回归 |
-| 异常/隐患处置 | PENDING | 验证异常生成、处置、状态回写和跨模块关联 |
+| 异常生成隐患与 EAM 复显 | PASS | 保持异常 marker、幂等、明细关联、来源翻译和页面复显回归 |
+| 隐患整改/复查/销项 | BLOCKED_SESH_NOT_INSTALLED | 若纳入目标，取得真实 SESH 包并验收完整状态机；不得用待治理兼容记录冒充 |
 | 统计和监控 | PENDING | 逐页清理 SQL/显示错误并核对聚合值 |
-| 目标机回滚演练 | REQUIRES_CONFIRMATION | 维护窗口内禁用、验证、重新应用 178-185 |
+| 目标机回滚演练 | REQUIRES_CONFIRMATION | 维护窗口内禁用、验证、重新应用 PATROL 迁移；共享 EAM/SESH 兼容数据不做破坏性删除 |
 
 EamMs 日志仍有 `getDataGridsByViewCode找不到viewCode:PATROL_1.0.0_patrolPlan_createTaskEdit`
 警告；本次任务生成、落库和复显不受影响，但应在后续元数据清理中确认该编辑视图是否本来就没有

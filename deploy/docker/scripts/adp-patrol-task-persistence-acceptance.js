@@ -9,11 +9,13 @@ const { chromium, request } = require("playwright");
 const now = new Date();
 const stamp = now.toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
 const action = process.env.ADP_PATROL_TASK_ACTION || "cancel";
-if (!new Set(["cancel", "complete"]).has(action)) {
+if (!new Set(["cancel", "complete", "hidden-danger"]).has(action)) {
   throw new Error(`Unsupported ADP_PATROL_TASK_ACTION: ${action}`);
 }
+const hiddenDangerMode = action === "hidden-danger";
 const marker =
-  process.env.ADP_E2E_MARKER || `ADP_E2E_${stamp}_${action === "complete" ? "PATROL_EXECUTION" : "PATROL"}`;
+  process.env.ADP_E2E_MARKER ||
+  `ADP_E2E_${stamp}_${hiddenDangerMode ? "PATROL_HIDDEN_DANGER" : action === "complete" ? "PATROL_EXECUTION" : "PATROL"}`;
 const baseUrl = (process.env.ADP_BASE_URL || "http://10.11.100.17:18080").replace(/\/+$/, "");
 const username = process.env.ADP_USERNAME || "admin";
 const password = process.env.ADP_PASSWORD || "123456";
@@ -54,15 +56,24 @@ const runningState = "PATROL_taskState/running";
 const completedState = "PATROL_taskState/completed";
 const stateChangeRemark = `${marker}_CANCELLED_BY_UI`;
 const executionRemark = `${marker}_RUNNING`;
-const completionResult = process.env.ADP_PATROL_COMPLETION_RESULT || "12.34";
-const completionConclusion = process.env.ADP_PATROL_COMPLETION_CONCLUSION || "正常";
-const completionConclusionId = process.env.ADP_PATROL_COMPLETION_CONCLUSION_ID || "PATROL_realValue/normal";
+const completionResult = process.env.ADP_PATROL_COMPLETION_RESULT || (hiddenDangerMode ? "99.99" : "12.34");
+const completionConclusion =
+  process.env.ADP_PATROL_COMPLETION_CONCLUSION || (hiddenDangerMode ? "异常" : "正常");
+const completionConclusionId =
+  process.env.ADP_PATROL_COMPLETION_CONCLUSION_ID ||
+  (hiddenDangerMode ? "PATROL_realValue/abnormal" : "PATROL_realValue/normal");
 const enteringResultListRoute = "/msService/PATROL/patrolTask/potrolTask/enteringResultList";
 const enteringResultQueryPath =
   "/msService/PATROL/patrolTask/potrolTask/enteringResultList-query";
 const enteringResultSubmitPrefix =
   "/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/";
 const resultGridCode = "PATROL_1.0.0_patrolTask_enteringResultEditdg1584600022503";
+const abnormalSummaryRoute = "/msService/PATROL/patrolTask/taskDetail/abnormalSummary";
+const abnormalSummaryQueryPath = `${abnormalSummaryRoute}-query`;
+const createHiddenDangerPath = "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger";
+const abnormalGridCode = "PATROL_1.0.0_patrolTask_abnormalSummary_taskDetail_sdg";
+const eamRiskRoute = "/msService/EAM/businessConfig/riskHandle/riskRecord";
+const eamRiskGridCode = "EAM_1.0.0_businessConfig_riskRecorddg1578550214154";
 let activeBrowser = null;
 
 const visibleErrorPattern =
@@ -188,6 +199,42 @@ async function browserApi(page, method, urlPath, payload) {
           "X-Requested-With": "XMLHttpRequest",
         },
         body: payloadArg === undefined ? undefined : JSON.stringify(payloadArg),
+      });
+      const text = await response.text();
+      let json = null;
+      try {
+        json = JSON.parse(text);
+      } catch (_error) {
+        json = null;
+      }
+      return { ok: response.ok, status: response.status, text, json };
+    },
+    { methodArg: method, urlPathArg: urlPath, payloadArg: payload }
+  );
+}
+
+async function browserFormApi(page, method, urlPath, payload) {
+  return page.evaluate(
+    async ({ methodArg, urlPathArg, payloadArg }) => {
+      const token =
+        window.localStorage.getItem("suposTicket") ||
+        window.localStorage.getItem("SUPOS_TICKET") ||
+        window.localStorage.getItem("token") ||
+        window.sessionStorage.getItem("suposTicket") ||
+        window.sessionStorage.getItem("SUPOS_TICKET") ||
+        window.sessionStorage.getItem("token") ||
+        "";
+      const response = await window.fetch(urlPathArg, {
+        method: methodArg,
+        credentials: "include",
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          langu_code: "zh_CN",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: new URLSearchParams(payloadArg).toString(),
       });
       const text = await response.text();
       let json = null;
@@ -384,8 +431,10 @@ async function main() {
     screenshots: [],
     screenshotFailures: [],
   };
-  const patrolUrlPattern = /\/msService\/PATROL\//;
-  trackPage(page, evidence, patrolUrlPattern);
+  const businessUrlPattern = hiddenDangerMode
+    ? /\/msService\/(?:PATROL|EAM)\//
+    : /\/msService\/PATROL\//;
+  trackPage(page, evidence, businessUrlPattern);
 
   const planPage = await openBusinessPage(page, planListRoute, evidence, "巡检计划列表");
   await page
@@ -502,6 +551,20 @@ limit 1;
   let taskCompletedVisibleInGrid = false;
   let executionEditor = null;
   let executionEditorState = null;
+  let abnormalSummaryPage = null;
+  let abnormalSummaryQueryResult = null;
+  let abnormalSelection = null;
+  let hiddenDangerConfirmText = null;
+  let hiddenDangerClientState = null;
+  let hiddenDangerResult = null;
+  let hiddenDangerRequest = null;
+  let hiddenDangerPersistence = null;
+  let hiddenDangerReuseResult = null;
+  let hiddenDangerReusePersistence = null;
+  let eamRiskPage = null;
+  let eamRiskVisible = false;
+  let eamRiskRow = null;
+  let eamRiskScriptOrder = null;
   const stateTransitions = [];
 
   if (action === "cancel") {
@@ -611,7 +674,7 @@ limit 1;
     executionEditor = await executionEditorPromise;
     executionEditor.setDefaultTimeout(pageTimeoutMs);
     executionEditor.setDefaultNavigationTimeout(pageTimeoutMs);
-    trackPage(executionEditor, evidence, patrolUrlPattern);
+    trackPage(executionEditor, evidence, businessUrlPattern);
     await executionEditor.waitForLoadState("domcontentloaded", { timeout: 30000 });
     await executionEditor.waitForFunction(
       ({ expectedTableNo, gridCode }) => {
@@ -718,6 +781,256 @@ limit 1;
     if (!completedQueryResult.ok || visibleErrorPattern.test(completedQueryResult.text)) {
       throw new Error(`Completed task query failed: ${JSON.stringify(compactHttp(completedQueryResult))}`);
     }
+
+    if (hiddenDangerMode) {
+      const taskDetailIdentity = queryJson(`
+select json_build_object('id', id)
+from public.mp_task_details
+where patrol_task=${taskId}
+order by id
+limit 1;
+`);
+      const taskDetailId = taskDetailIdentity && Number(taskDetailIdentity.id);
+      if (!taskDetailId) {
+        throw new Error(`Completed PATROL task has no detail row: ${taskId}`);
+      }
+
+      abnormalSummaryPage = await openBusinessPage(
+        page,
+        abnormalSummaryRoute,
+        evidence,
+        "巡检异常汇总"
+      );
+      const abnormalQueryResponsePromise = page.waitForResponse(
+        (response) =>
+          response.url().endsWith(abnormalSummaryQueryPath) &&
+          response.request().method() === "POST",
+        { timeout: 30000 }
+      );
+      await page.locator('button[data-id="query"]').click();
+      abnormalSummaryQueryResult = await compactPageResponse(await abnormalQueryResponsePromise);
+      if (!abnormalSummaryQueryResult.ok || visibleErrorPattern.test(abnormalSummaryQueryResult.text)) {
+        throw new Error(
+          `Abnormal-summary query failed: ${JSON.stringify(compactHttp(abnormalSummaryQueryResult))}`
+        );
+      }
+      await page.waitForFunction(
+        ({ expectedTableNo, gridCode }) => {
+          const group = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+          const api = group && typeof group.APIs === "function" ? group.APIs(gridCode) : null;
+          const rows = api ? api.getDatagridData() : [];
+          return rows.some((row) => row.patrolTask && row.patrolTask.tableNo === expectedTableNo);
+        },
+        { expectedTableNo: taskTableNo, gridCode: abnormalGridCode },
+        { timeout: 30000 }
+      );
+
+      const abnormalRow = page
+        .locator("div.sup-datagrid-row")
+        .filter({ hasText: taskTableNo })
+        .first();
+      await abnormalRow.locator("label.ant-checkbox-wrapper").click();
+      await page.waitForFunction(
+        ({ gridCode, expectedDetailId }) => {
+          const api = window.ReactAPI.getComponentAPI("SupDataGrid").APIs(gridCode);
+          return api.getSelecteds().some((row) => Number(row.id) === expectedDetailId);
+        },
+        { gridCode: abnormalGridCode, expectedDetailId: taskDetailId },
+        { timeout: 10000 }
+      );
+      abnormalSelection = await page.evaluate((gridCode) => {
+        const api = window.ReactAPI.getComponentAPI("SupDataGrid").APIs(gridCode);
+        return api.getSelecteds().map((row) => ({
+          id: Number(row.id),
+          isFault: row.isFault === true,
+          tableNo: row.patrolTask && row.patrolTask.tableNo,
+          cid: Number(row.cid),
+        }));
+      }, abnormalGridCode);
+      if (
+        abnormalSelection.length !== 1 ||
+        abnormalSelection[0].id !== taskDetailId ||
+        abnormalSelection[0].isFault
+      ) {
+        throw new Error(`PATROL abnormal-detail selection failed: ${JSON.stringify(abnormalSelection)}`);
+      }
+      await captureScreenshot(page, "06-patrol-abnormal-before-hidden-danger.png", evidence);
+
+      await page.getByText("生成隐患单", { exact: true }).click();
+      const confirmModal = page
+        .locator(".ant-modal.api-confirm")
+        .filter({ hasText: "是否生成隐患单" })
+        .last();
+      await confirmModal.waitFor({ state: "visible", timeout: 30000 });
+      hiddenDangerConfirmText = (await confirmModal.innerText()).replace(/\s+/g, " ").trim();
+      const confirmButton = confirmModal
+        .getByRole("button", { name: /确\s*认/ })
+        .last();
+      hiddenDangerClientState = await page.evaluate((gridCode) => {
+        const group = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+        const api = group && typeof group.APIs === "function" ? group.APIs(gridCode) : null;
+        return {
+          ajaxHelperType: typeof window._postAsyncWithLoading,
+          jqueryType: typeof window.$,
+          userCompanyId: Number(window.ReactAPI && window.ReactAPI.getUserInfo().company.id),
+          selected: api
+            ? api.getSelecteds().map((row) => ({
+                id: Number(row.id),
+                cid: Number(row.cid),
+                isFault: row.isFault === true,
+              }))
+            : [],
+        };
+      }, abnormalGridCode);
+      hiddenDangerClientState.confirmButton = await confirmButton.evaluate((button) => ({
+        text: button.innerText,
+        className: button.className,
+        disabled: button.disabled,
+      }));
+      await captureScreenshot(page, "06a-patrol-hidden-danger-confirm.png", evidence);
+      const hiddenDangerNetworkOutcomePromise = Promise.allSettled([
+        page.waitForRequest(
+          (requestItem) =>
+            requestItem.url().endsWith(createHiddenDangerPath) && requestItem.method() === "POST",
+          { timeout: 30000 }
+        ),
+        page.waitForResponse(
+          (response) =>
+            response.url().endsWith(createHiddenDangerPath) && response.request().method() === "POST",
+          { timeout: 30000 }
+        ),
+      ]);
+      await confirmButton.click();
+      const [requestOutcome, responseOutcome] = await hiddenDangerNetworkOutcomePromise;
+      if (requestOutcome.status === "rejected" || responseOutcome.status === "rejected") {
+        hiddenDangerClientState.afterConfirm = await page.evaluate(() => ({
+          body: (document.body.innerText || "").replace(/\s+/g, " ").slice(0, 1800),
+          visibleConfirmCount: Array.from(document.querySelectorAll(".ant-modal.api-confirm")).filter(
+            (item) => item.offsetParent !== null
+          ).length,
+          loadingCount: document.querySelectorAll(".ant-spin-spinning").length,
+        }));
+        hiddenDangerClientState.consoleErrors = evidence.consoleErrors.slice(-10);
+        hiddenDangerClientState.pageErrors = evidence.pageErrors.slice(-10);
+        throw new Error(
+          `Hidden-danger UI did not issue a request: ${JSON.stringify(hiddenDangerClientState)}`
+        );
+      }
+      const hiddenDangerRawRequest = requestOutcome.value;
+      hiddenDangerRequest = {
+        method: hiddenDangerRawRequest.method(),
+        url: hiddenDangerRawRequest.url(),
+        postData: hiddenDangerRawRequest.postData(),
+      };
+      hiddenDangerResult = await compactPageResponse(responseOutcome.value);
+      const hiddenDangerData = responseData(hiddenDangerResult);
+      if (
+        !hiddenDangerResult.ok ||
+        !hiddenDangerResult.json ||
+        hiddenDangerResult.json.code !== 200 ||
+        !hiddenDangerData ||
+        Number(hiddenDangerData.createdCount) !== 1 ||
+        visibleErrorPattern.test(hiddenDangerResult.text)
+      ) {
+        throw new Error(`Hidden-danger creation failed: ${JSON.stringify(compactHttp(hiddenDangerResult))}`);
+      }
+
+      hiddenDangerPersistence = queryJson(`
+select json_build_object(
+  'detail', (
+    select json_build_object(
+      'id', d.id,
+      'isFault', d.is_fault,
+      'faultId', d.fault_id,
+      'faultTableNo', d.fault_table_no
+    )
+    from public.mp_task_details d
+    where d.id=${taskDetailId}
+  ),
+  'risk', (
+    select json_build_object(
+      'id', r.id,
+      'tableNo', r.table_no,
+      'status', r.status,
+      'valid', r.valid,
+      'version', r.version,
+      'riskMode', r.risk_mode,
+      'riskSource', r.risk_source,
+      'riskContent', r.risk_content,
+      'finder', r.finder,
+      'findTime', r.find_time,
+      'createTime', r.create_time
+    )
+    from public.ses_hrm_riskhandles r
+    where r.id=(select d.fault_id from public.mp_task_details d where d.id=${taskDetailId})
+  ),
+  'riskCount', (
+    select count(*)
+    from public.ses_hrm_riskhandles r
+    where r.id=(select d.fault_id from public.mp_task_details d where d.id=${taskDetailId})
+  )
+);
+`);
+      const riskId = hiddenDangerPersistence && hiddenDangerPersistence.risk
+        ? Number(hiddenDangerPersistence.risk.id)
+        : null;
+      const riskTableNo = hiddenDangerPersistence && hiddenDangerPersistence.risk
+        ? hiddenDangerPersistence.risk.tableNo
+        : null;
+      if (!riskId || !riskTableNo) {
+        throw new Error(`Hidden-danger risk row was not persisted: ${JSON.stringify(hiddenDangerPersistence)}`);
+      }
+
+      hiddenDangerReuseResult = await browserFormApi(page, "POST", createHiddenDangerPath, {
+        ids: `${taskDetailId},`,
+      });
+      hiddenDangerReusePersistence = queryJson(`
+select json_build_object(
+  'riskCount', (select count(*) from public.ses_hrm_riskhandles where id=${riskId}),
+  'faultId', (select fault_id from public.mp_task_details where id=${taskDetailId}),
+  'faultTableNo', (select fault_table_no from public.mp_task_details where id=${taskDetailId})
+);
+`);
+
+      eamRiskPage = await openBusinessPage(page, eamRiskRoute, evidence, "EAM 风险台账");
+      eamRiskVisible = await page
+        .waitForFunction(
+          ({ expectedRiskId, gridCode }) => {
+            const group = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+            const api = group && typeof group.APIs === "function" ? group.APIs(gridCode) : null;
+            const rows = api ? api.getDatagridData() : [];
+            return rows.some((row) => Number(row.id) === expectedRiskId);
+          },
+          { expectedRiskId: riskId, gridCode: eamRiskGridCode },
+          { timeout: 30000 }
+        )
+        .then(() => true)
+        .catch(() => false);
+      eamRiskRow = await page.evaluate(
+        ({ expectedRiskId, gridCode }) => {
+          const group = window.ReactAPI && window.ReactAPI.getComponentAPI("SupDataGrid");
+          const api = group && typeof group.APIs === "function" ? group.APIs(gridCode) : null;
+          const rows = api ? api.getDatagridData() : [];
+          const row = rows.find((candidate) => Number(candidate.id) === expectedRiskId);
+          return row
+            ? {
+                id: row.id,
+                riskTableNo: row.riskTableNo,
+                riskSource: row.riskSource,
+                riskContent: row.riskContent,
+              }
+            : null;
+        },
+        { expectedRiskId: riskId, gridCode: eamRiskGridCode }
+      );
+      eamRiskScriptOrder = await page.evaluate(() => {
+        const sources = Array.from(document.scripts).map((script) => script.src || "");
+        const sesgisIndex = sources.findIndex((source) => source.includes("vendors.sesgis.js"));
+        const editIndex = sources.findIndex((source) => /\/scripts\/edit\.js(?:\?|$)/.test(source));
+        return { sesgisIndex, editIndex, sources };
+      });
+      await captureScreenshot(page, "07-eam-risk-ledger.png", evidence);
+    }
   }
 
   const statePersistence = queryJson(`
@@ -767,7 +1080,8 @@ select json_build_object(
       'taskDetailState', d.task_detail_state, 'patrolTask', d.patrol_task,
       'workItemId', d.work_item_id, 'content', d.content,
       'concluse', d.concluse, 'realValue', d.real_value,
-      'completeUser', d.complete_user, 'completeDate', d.complete_date
+      'completeUser', d.complete_user, 'completeDate', d.complete_date,
+      'isFault', d.is_fault, 'faultId', d.fault_id, 'faultTableNo', d.fault_table_no
     )
     from public.mp_task_details d
     where d.patrol_task=(select t.id from public.mp_potrol_tasks t where t.patrol_plan_id=${planId} order by t.id desc limit 1)
@@ -876,6 +1190,86 @@ select json_build_object(
       enteringResultPageNoVisibleError: !enteringResultPage.visibleError,
       completedTaskPageNoVisibleError: !completedTaskPage.visibleError,
     });
+    if (hiddenDangerMode) {
+      const createdData = responseData(hiddenDangerResult);
+      const reusedData = responseData(hiddenDangerReuseResult);
+      const risk = hiddenDangerPersistence && hiddenDangerPersistence.risk;
+      const linkedDetail = hiddenDangerPersistence && hiddenDangerPersistence.detail;
+      Object.assign(assertions, {
+        abnormalSummaryPageNoVisibleError: Boolean(abnormalSummaryPage && !abnormalSummaryPage.visibleError),
+        abnormalSummaryQuerySucceeded: Boolean(
+          abnormalSummaryQueryResult &&
+            abnormalSummaryQueryResult.ok &&
+            !visibleErrorPattern.test(abnormalSummaryQueryResult.text)
+        ),
+        abnormalDetailSelectedThroughGrid: Boolean(
+          abnormalSelection &&
+            abnormalSelection.length === 1 &&
+            Number(abnormalSelection[0].id) === Number(detail.id)
+        ),
+        hiddenDangerConfirmationShown: Boolean(
+          hiddenDangerConfirmText && hiddenDangerConfirmText.includes("是否生成隐患单")
+        ),
+        hiddenDangerUiRequestCaptured: Boolean(
+          hiddenDangerRequest &&
+            hiddenDangerRequest.method === "POST" &&
+            hiddenDangerRequest.url.endsWith(createHiddenDangerPath) &&
+            String(hiddenDangerRequest.postData || "").includes(`ids=${detail.id}`)
+        ),
+        hiddenDangerUiResponseSucceeded: Boolean(
+          hiddenDangerResult &&
+            hiddenDangerResult.ok &&
+            hiddenDangerResult.json &&
+            hiddenDangerResult.json.code === 200 &&
+            createdData &&
+            Number(createdData.createdCount) === 1 &&
+            Number(createdData.reusedCount) === 0 &&
+            createdData.compatibilityMode === true &&
+            createdData.compatibilityStatus === "PATROL_COMPATIBILITY_PENDING"
+        ),
+        taskDetailLinkedToRisk: Boolean(
+          linkedDetail &&
+            linkedDetail.isFault === true &&
+            Number(linkedDetail.faultId) === Number(risk && risk.id) &&
+            linkedDetail.faultTableNo === (risk && risk.tableNo)
+        ),
+        compatibilityRiskPersisted: Boolean(
+          risk &&
+            Number(hiddenDangerPersistence.riskCount) === 1 &&
+            Number(risk.status) === 1 &&
+            Number(risk.valid) === 1 &&
+            Number(risk.version) === 0 &&
+            risk.riskMode === "PATROL_COMPATIBILITY_PENDING" &&
+            risk.riskSource &&
+            risk.riskContent &&
+            Number(risk.finder) === staffId &&
+            risk.findTime &&
+            risk.createTime
+        ),
+        hiddenDangerRetryReusedExistingRisk: Boolean(
+          hiddenDangerReuseResult &&
+            hiddenDangerReuseResult.ok &&
+            hiddenDangerReuseResult.json &&
+            hiddenDangerReuseResult.json.code === 200 &&
+            reusedData &&
+            Number(reusedData.createdCount) === 0 &&
+            Number(reusedData.reusedCount) === 1 &&
+            Number(hiddenDangerReusePersistence && hiddenDangerReusePersistence.riskCount) === 1 &&
+            Number(hiddenDangerReusePersistence && hiddenDangerReusePersistence.faultId) ===
+              Number(risk && risk.id) &&
+            (hiddenDangerReusePersistence && hiddenDangerReusePersistence.faultTableNo) ===
+              (risk && risk.tableNo)
+        ),
+        eamRiskPageNoVisibleError: Boolean(eamRiskPage && !eamRiskPage.visibleError),
+        eamRiskVisibleInGrid: eamRiskVisible,
+        eamRiskSourceTranslated: Boolean(eamRiskRow && eamRiskRow.riskSource === "巡检"),
+        eamRiskSesgisLoadsBeforeEdit: Boolean(
+          eamRiskScriptOrder &&
+            eamRiskScriptOrder.sesgisIndex >= 0 &&
+            eamRiskScriptOrder.editIndex > eamRiskScriptOrder.sesgisIndex
+        ),
+      });
+    }
   }
   const failedAssertions = Object.entries(assertions)
     .filter(([, passed]) => !passed)
@@ -934,6 +1328,34 @@ select json_build_object(
       conclusionId: completionConclusionId,
       detailCount: executionEditorState && executionEditorState.detailCount,
     };
+    if (hiddenDangerMode) {
+      endpoints.abnormalSummaryQuery = {
+        method: "POST",
+        path: abnormalSummaryQueryPath,
+        ...compactHttp(abnormalSummaryQueryResult),
+      };
+      endpoints.hiddenDangerCreate = {
+        method: "POST",
+        path: createHiddenDangerPath,
+        ...compactHttp(hiddenDangerResult),
+      };
+      endpoints.hiddenDangerRetry = {
+        method: "POST",
+        path: createHiddenDangerPath,
+        ...compactHttp(hiddenDangerReuseResult),
+      };
+      endpoints.eamRiskLedger = {
+        method: "GET",
+        path: eamRiskRoute,
+        status: eamRiskPage && eamRiskPage.status,
+        ok: Boolean(eamRiskPage && eamRiskPage.status && eamRiskPage.status < 400),
+        body: "",
+      };
+      payloads.hiddenDanger = {
+        ids: `${detail.id},`,
+        uiRequest: hiddenDangerRequest,
+      };
+    }
   }
 
   const report = {
@@ -944,11 +1366,34 @@ select json_build_object(
     marker,
     planCode,
     generationRemark,
-    ids: { routeId, staffId, planId, generationId, taskId, taskDetailId: detail && detail.id },
+    ids: {
+      routeId,
+      staffId,
+      planId,
+      generationId,
+      taskId,
+      taskDetailId: detail && detail.id,
+      riskId:
+        hiddenDangerPersistence && hiddenDangerPersistence.risk
+          ? hiddenDangerPersistence.risk.id
+          : null,
+    },
     endpoints,
     payloads,
     executionEditorState,
     statePersistence,
+    hiddenDanger: hiddenDangerMode
+      ? {
+          abnormalSelection,
+          confirmText: hiddenDangerConfirmText,
+          clientState: hiddenDangerClientState,
+          creationPersistence: hiddenDangerPersistence,
+          retryPersistence: hiddenDangerReusePersistence,
+          eamRiskVisible,
+          eamRiskRow,
+          eamRiskScriptOrder,
+        }
+      : null,
     persistenceSql: persistenceSql.trim(),
     persistence,
     assertions,

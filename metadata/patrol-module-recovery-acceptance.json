@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-16T21:08:52.560Z",
+  "generatedAt": "2026-07-17T00:30:44.547Z",
   "repoBaseCommit": "28d93d0673171efc2b47fc64b45dd5f43e66b0ad",
   "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "runtimeBuildSourceCommit": "8971a8770452c2bb55261f330284cd3dd26824b1",
@@ -9,7 +9,7 @@
   "database": "PostgreSQL",
   "targetHost": "10.11.100.17",
   "targetAccessPolicy": "COMPANY_LAN",
-  "overallStatus": "TARGET_EXECUTION_PERSISTENCE_PASS",
+  "overallStatus": "TARGET_HIDDEN_DANGER_PERSISTENCE_PASS",
   "source": {
     "archive": "PATROL_6.0.4.0.zip",
     "sha256": "1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394",
@@ -27,17 +27,17 @@
       {
         "name": "core",
         "javaFiles": 149,
-        "sha256": "7cb79a90f0fc781e9063a534a1825cb48fff753b077db142eccc43eecdf66461"
+        "sha256": "9b9d0367d1acc3e89d38adb556c1941f2d37284f093cded4bb2edc2b573beb3e"
       },
       {
         "name": "api",
         "javaFiles": 63,
-        "sha256": "718a0efc664e0f88ee0926616e540343f6c5e02f472ee1182a398ede02ef5a14"
+        "sha256": "34b4bce83a4f6af9cb19ebd5a25336b019001b84a384cffeb7df9b777bbf6c6c"
       },
       {
         "name": "service",
         "javaFiles": 243,
-        "sha256": "ecddc8350d281a6255b4d55e0b0c5039a7addcbfc2d3ace23853079ad752aecd"
+        "sha256": "94c3289a063272da90c7eb3544a23cee200bcf2b210fa9f0594b50db75db0510"
       }
     ]
   },
@@ -51,7 +51,8 @@
       "182-patrol-workflow-runtime.sql",
       "183-patrol-system-codes.sql",
       "184-patrol-ui-runtime-metadata.sql",
-      "185-patrol-task-persistence-compat.sql"
+      "185-patrol-task-persistence-compat.sql",
+      "186-patrol-hidden-danger-eam-risk-compat.sql"
     ],
     "acceptanceFile": "deploy/docker/postgres/verify/001-patrol-acceptance.sql",
     "rollbackFile": "deploy/docker/postgres/rollback/001-disable-patrol.sql",
@@ -82,11 +83,14 @@
   "runtimePatch": {
     "baselineJarSha256": "b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38",
     "deployedJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
-    "deployedJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+    "deployedJarSha256": "af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753",
     "deployment": "PASS",
     "healthVerification": "PASS",
     "nginxSyntax": "PASS",
-    "postgresContainerHealth": "PASS"
+    "postgresContainerHealth": "PASS",
+    "rollbackJar": "/data/docker/adp-patrol-20260716/EamMs-1.0.0.patrol-postgres-queryfix2-20260716.jar",
+    "rollbackJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
+    "i18nSchemaCompatibility": "PASS_AFTER_I18N_RESTART"
   },
   "functionalAcceptance": {
     "status": "PASS",
@@ -230,14 +234,24 @@
       "inspection result entry",
       "task and detail PostgreSQL verification",
       "cancelled state browser re-render",
-      "completed state browser re-render"
+      "completed state browser re-render",
+      "abnormal inspection result persistence",
+      "idempotent hidden-danger creation",
+      "PATROL detail to EAM risk linkage",
+      "EAM risk-ledger browser re-render",
+      "SESHRM inspection-source translation"
     ],
     "remaining": [
-      "exception handling",
       "statistics and monitor pages"
+    ],
+    "blocked": [
+      "full hidden-danger rectification, review and closure workflow requires the real SESH module"
     ],
     "knownWarnings": [
       "EamMs logs getDataGridsByViewCode missing PATROL_1.0.0_patrolPlan_createTaskEdit while task generation still succeeds"
+    ],
+    "deploymentNotes": [
+      "In-place varchar-to-timestamp repair requires restarting i18n once to clear PostgreSQL prepared plans; fresh Docker startup applies migrations before i18n starts."
     ]
   },
   "energyModules": {
@@ -246,5 +260,81 @@
       "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.api:6.0.4.0",
       "com.supcon.greendill.Indicator:com.supcon.greendill.Indicator.core:6.0.4.0"
     ]
+  },
+  "hiddenDangerAcceptance": {
+    "status": "PASS",
+    "marker": "ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER",
+    "report": "metadata/patrol-hidden-danger-persistence-acceptance.json",
+    "rawReport": "/tmp/adp-patrol-hidden-danger-persistence-acceptance.json",
+    "script": "deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js",
+    "action": "hidden-danger",
+    "ids": {
+      "routeId": 6675485506913104,
+      "staffId": 1,
+      "planId": 6676867588637520,
+      "generationId": 6676867592733520,
+      "taskId": 6676867595027280,
+      "taskDetailId": 6676867603743568,
+      "riskId": 6676868002956112
+    },
+    "routes": [
+      "/msService/PATROL/patrolTask/potrolTask/enteringResultList",
+      "/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+      "/msService/EAM/businessConfig/riskHandle/riskRecord"
+    ],
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "status": 200,
+        "createdCount": 1
+      },
+      {
+        "method": "POST",
+        "path": "/msService/PATROL/patrolTask/taskDetail/createHiddenDanger",
+        "status": 200,
+        "createdCount": 0,
+        "reusedCount": 1
+      },
+      {
+        "method": "POST",
+        "path": "/msService/EAM/businessConfig/riskHandle/data-dg1578550214154",
+        "status": 200
+      }
+    ],
+    "persistence": {
+      "taskTable": "mp_potrol_tasks",
+      "detailTable": "mp_task_details",
+      "riskTable": "ses_hrm_riskhandles",
+      "taskState": "PATROL_taskState/completed",
+      "detailConclusion": "PATROL_realValue/abnormal",
+      "detailFaultLinked": true,
+      "riskMode": "PATROL_COMPATIBILITY_PENDING",
+      "riskSource": "SESHRM_riskResource/005",
+      "riskSourceDisplay": "巡检",
+      "idempotentRiskCount": 1
+    },
+    "runtimeAssets": {
+      "actionScript": "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js",
+      "actionScriptSha256": "131442c052ba7c5844c29ff533b56268bcb8a8eba770efe009caf2d14fc7bc92",
+      "migration": "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
+      "migrationSha256": "643e991f06f8e66e9ee16251c41611e73f5051f3445b30a82244134060d3959b"
+    },
+    "assertions": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "browserEvidence": {
+      "screenshotsGenerated": 8,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    }
   }
 }

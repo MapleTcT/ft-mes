@@ -431,7 +431,7 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 - WOM PostgreSQL LOB 兼容风险：真实生产请检和检查活动报工链路先后暴露 `qcs_table_types`、`WOMWaitPutRecord.remark`、`WOMProduceTask.remark`、`WOMProdTaskExelog.remark` 和 `WOMProCheckDetail.remark` 的 `@javax.persistence.Lob` 字段在 PostgreSQL `text` 非空值下会被驱动按 OID/CLOB 读取并报 `Bad value for type long`；已新增并应用 `112-qcs-table-types-lob-oid-compat.sql`、`115-wom-wait-put-records-lob-oid-compat.sql`、`116-wom-produce-task-lob-oid-compat.sql`、`147-wom-pro-check-details-lob-oid-compat.sql`，验收脚本也改为避开或使用 `lo_from_bytea` 写 marker CLOB 值。后续仍应对业务 LOB 字段做统一 PostgreSQL 兼容审计。
 - WOM 生产动作源地图：`metadata/production-module-source-action-map.json`
 
-## PATROL 共享巡检任务链（2026-07-16）
+## PATROL 共享巡检任务链（2026-07-17）
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
@@ -442,6 +442,9 @@ marker 验收，证明当前 JAR 和静态覆盖恢复后仍能落库。机器�
 | 任务下发并进入执行中 | `potrolTaskList -> enteringResultList` | `GET /msService/PATROL/patrolTask/potrolTask/taskStateUpdate?changeState=PATROL_taskState/issued`；同端点切换 `running` | `PATROLPotrolTaskController.taskStateUpdate -> PATROLPotrolTaskServiceImpl.taskStateUpdate` | `mp_potrol_tasks` | 按计划编码 `ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN` 联查任务状态、备注、version 和 valid | 两次请求均 HTTP 200/SUCCESS；结果录入列表真实显示任务 `6676470908830544` 为“执行中” | PASS |
 | 保存现场巡检结果并完成任务 | `enteringResultList -> enteringResultEdit` | `POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676470908830544` | `PATROLPotrolTaskController.submit -> PATROLPotrolTaskServiceImpl.submit/savePotrolTask -> DataGridService/JPA` | `mp_potrol_tasks`、`mp_task_details` | `SELECT p.code,t.id,t.table_no,t.task_state,t.remark,t.actual_start_time,t.actual_end_time,t.complete_staff,t.version,t.valid,d.id,d.concluse,d.real_value,d.complete_user,d.complete_date,d.version,d.valid FROM mp_patrol_plans p JOIN mp_potrol_tasks t ON t.patrol_plan_id=p.id JOIN mp_task_details d ON d.patrol_task=t.id WHERE p.code='ADP_E2E_20260716210839_PATROL_EXECUTION_PLAN';` | HTTP 200/success=true；任务为 `completed`、有实际起止时间和完成人、`version=2`；明细 `concluse=12.34`、`real_value=normal`、完成人/完成时间齐全、`version=1` | PASS |
 | 完成后父列表刷新和任务复显 | `enteringResultList`、`potrolTaskList` | `POST .../enteringResultList-query`；`POST .../potrolTaskList-query` | `PATROLPotrolTaskController -> PATROLPotrolTaskServiceImpl` | 只读核验上述两表 | 将接口返回状态和 PostgreSQL 同 marker 行逐字段比对 | 结果录入列表不再包含已完成任务，任务列表显示“已完成”；console/page/request failure 均为 0 | PASS |
+| 保存异常巡检结果并完成任务 | `enteringResultList -> enteringResultEdit` | `POST /msService/PATROL/patrolTask/potrolTask/enteringResultEdit/submit?id=6676867595027280` | `PATROLPotrolTaskController.submit -> PATROLPotrolTaskServiceImpl.submit/savePotrolTask -> DataGridService/JPA` | `mp_potrol_tasks`、`mp_task_details` | 按计划编码 `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER_PLAN` 联查任务、明细结果、结论和完成审计字段 | 任务为 `completed/version=2`；明细 `concluse=99.99`、`real_value=PATROL_realValue/abnormal`、完成人和完成时间齐全 | PASS |
+| 异常明细生成待治理隐患 | `abnormalSummary` 真实“生成隐患”按钮和确认框 | `POST /msService/PATROL/patrolTask/taskDetail/createHiddenDanger` | `PATROLTaskDetailController.createHiddenDanger -> PATROLTaskDetailServiceImpl.createHiddenDanger -> Hibernate/JDBC 兼容持久化` | `mp_task_details`、`ses_hrm_riskhandles` | `SELECT d.id,d.is_fault,d.fault_id,d.fault_table_no,r.id,r.table_no,r.status,r.valid,r.version,r.risk_mode,r.risk_source,r.risk_content,r.finder,r.find_time FROM mp_task_details d JOIN ses_hrm_riskhandles r ON r.id=d.fault_id WHERE d.id=6676867603743568;` | 首次创建 `riskId=6676868002956112`，明细关联字段齐全，风险为 `PATROL_COMPATIBILITY_PENDING/SESHRM_riskResource/005`；第二次调用复用同一记录，计数仍为 1 | PASS |
+| EAM 台账读取同一隐患及来源翻译 | `EAM/businessConfig/riskHandle/riskRecord` | `POST /msService/EAM/businessConfig/riskHandle/data-dg1578550214154` | `EAM riskHandle DataGrid -> ec_sql/runtime_datagrid -> SystemCodeService/i18n` | `ses_hrm_riskhandles`、`sys_code`、`supfusion_i18n_resource` | 按 `riskId=6676868002956112` 联查风险、`SESHRM_riskResource/005` 系统编码及 `zh_CN` 翻译 | HTTP 200；页面出现同一 `PATROL-RISK-*`，来源为“巡检”，内容与异常明细一致；浏览器错误为 0 | PASS |
 | 新增录入标准 | `inputStanList -> inputStanEdit` | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | `PATROLInputStandardController -> PATROLInputStandardServiceImpl -> JPA` | `mp_input_standards` | `SELECT id,version,code,name,val_type,edit_type,state,valid,remark,cid FROM mp_input_standards WHERE code='ADP_E2E_20260716165523_PATROL_INPUT';` | `id=6675974928974672`、`version=1`、字符/录入、`state=true`、`valid=true` | PASS |
 | 修改录入标准 | 同上 | `POST /msService/PATROL/inputStandard/inputStandard/inputStanEdit/submit` | 同上 | `mp_input_standards` | 同 marker SQL，核对名称、备注和 version | 名称和备注更新为 `_UPDATED`，`version=2` | PASS |
 | 停用录入标准 | `inputStanList` | `GET /msService/PATROL/publicItem/publicItem/updateItemState?itemState=0&tableType=inputStand` | `PATROLPublicItemController -> PATROLPublicItemServiceImpl -> native update` | `mp_input_standards` | 同 marker SQL，核对 `state` | HTTP 200/dealFlag=true，`state=false` | PASS |
@@ -472,6 +475,14 @@ PATROL request failure 均为 0。
 marker `ADP_E2E_20260716210839_PATROL_EXECUTION` 为 32/32 PASS，任务/明细 PostgreSQL 字段和 5 张阶段截图齐全，
 console error、page error、request failure 均为 0。随后取消分支 marker
 `ADP_E2E_20260716210929_PATROL` 也独立回归 PASS。
+
+异常隐患机器记录：`metadata/patrol-hidden-danger-persistence-acceptance.json`。同一脚本使用
+`ADP_PATROL_TASK_ACTION=hidden-danger` 重放“异常结果 -> 完成任务 -> 异常汇总 -> 生成隐患 -> PostgreSQL 关联 ->
+重复提交幂等 -> EAM 台账复显”链路；marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，
+8 张截图齐全，console/page/request/screenshot failure 都为 0。迁移 `186-patrol-hidden-danger-eam-risk-compat.sql`
+同时修复 `supfusion_i18n_resource.modifier` 与真实 `java.util.Date` 映射不一致的问题；存量在线迁移后重启一次
+i18n 清理旧 PostgreSQL prepared plan，新建环境因迁移先于服务启动而不需要额外动作。本项只证明待治理记录生成
+与 EAM 可见，不把未安装的 SESH 整改、复查和销项流程误报为已恢复。
 
 输入标准机器记录：`metadata/patrol-input-standard-persistence-acceptance.json`；可重放脚本：
 `deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js`。完整浏览器 CRUD 为 16/16 PASS，
