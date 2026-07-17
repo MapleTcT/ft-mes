@@ -99,10 +99,10 @@
       "requiresPersistence": true,
       "owner": "production-business-owner",
       "blockingIssues": [
-        "Material/inventory service write-back, defect-quantity scope, final stock-in and remaining production blockers still need marker PostgreSQL before/after evidence or signed risk acceptance."
+        "Material/WMS completion inbound and inventory write-back are accepted; visible manual task creation, external Batch editing and standalone bad-quantity scope still need a product decision, marker evidence or signed risk acceptance."
       ],
       "nextActions": [
-        "Prepare WOM/material marker data, execute remaining real frontend write actions, query PostgreSQL, and keep existing QCS report-chain evidence separate from unresolved inventory boundaries."
+        "Resolve the remaining product-scope and external-client blockers, execute any newly supported frontend write actions with markers, and query PostgreSQL before signoff."
       ]
     },
     {
@@ -129,10 +129,10 @@
       "requiresPersistence": true,
       "owner": "business-owner",
       "blockingIssues": [
-        "Import/export/upload applicability and evidence are not recorded."
+        "Production list export is accepted 6/6 in the test environment; production-rehearsal import and upload applicability/evidence are not yet signed."
       ],
       "nextActions": [
-        "Mark NOT_APPLICABLE with a reason if not used, otherwise attach browser and file evidence."
+        "Carry the verified export suite into the production rehearsal, then mark imports/uploads NOT_APPLICABLE with a reason or attach browser, file and persistence evidence."
       ]
     },
     {
@@ -199,10 +199,10 @@
       "evidence": "metadata/persistence-acceptance.json",
       "owner": "production-business-owner",
       "blockingIssues": [
-        "Remaining quality and inventory write actions do not have complete PostgreSQL before/after evidence."
+        "Accepted QCS and material/WMS write chains need production-rehearsal carry-forward evidence; standalone bad quantity remains a product-scope decision."
       ],
       "nextActions": [
-        "Complete marker validation for quality judgement, defect quantity, final stock-in and inventory write-back."
+        "Revalidate accepted quality and WMS marker chains in the production rehearsal and resolve or risk-accept standalone bad-quantity scope."
       ]
     },
     {
@@ -227,13 +227,12 @@
     {
       "id": "BUS-SIGNOFF-001",
       "severity": "BLOCKER",
-      "description": "Standalone bad-quantity scope, external Batch editing and export gaps still prevent production signoff; material/WMS completion inbound and ProcessAnalysis traceability are accepted.",
+      "description": "Standalone bad-quantity scope and external Batch editing still prevent production signoff; material/WMS completion inbound, ProcessAnalysis traceability and production list export are accepted.",
       "source": "metadata/production-module-blockers.json",
       "blockerCaseIds": [
         "PROD-010",
         "PROD-019",
-        "PROD-021",
-        "PROD-023"
+        "PROD-021"
       ],
       "owner": "production-business-owner",
       "riskAcceptance": "TBD",
@@ -250,8 +249,7 @@
         "PROD-ACTION-008",
         "PROD-010",
         "PROD-019",
-        "PROD-021",
-        "PROD-023"
+        "PROD-021"
       ],
       "owner": "production-business-owner",
       "riskAcceptance": "TBD",
@@ -270,22 +268,6 @@
       "owner": "platform-owner",
       "riskAcceptance": "TBD",
       "nextAction": "Complete marker acceptance or signed risk acceptance for built-in systemconfig catalogs; finish PostgreSQL physical model table auto-create evidence or risk acceptance; finish or formally risk-accept production Nacos/Keycloak configuration evidence."
-    },
-    {
-      "id": "BUS-SIGNOFF-004",
-      "severity": "BLOCKER",
-      "description": "Production export readiness is blocked per target page; each target export gap must be resolved or explicitly risk-accepted before business smoke signoff can become READY.",
-      "source": "metadata/production-export-gap-breakdown.json",
-      "exportTargetIds": [
-        "wom-make-task",
-        "rm-batch-formula",
-        "qcs-inspect-report",
-        "qcs-unqualified-deal",
-        "qcs-inspect-release"
-      ],
-      "owner": "business-owner",
-      "riskAcceptance": "TBD",
-      "nextAction": "Restore or implement target export buttons/runtime hooks/backend file responses, rerun smoke-production-export-readiness, regenerate production-export-gap-breakdown, then attach browser file evidence or signed risk acceptance for every unresolved target."
     }
   ],
   "signoffs": [

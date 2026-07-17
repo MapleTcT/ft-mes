@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T03:29:58+00:00",
-  "repoCommit": "f5af7f2669d408d2b4592cf4b28dabf57cda7fb0",
+  "generatedAt": "2026-07-17T05:29:51+00:00",
+  "repoCommit": "2a55462bc4241537762cd1df170a66298bcf5136",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
-    "totalFiles": 358,
-    "totalBytes": 54875417,
+    "totalFiles": 359,
+    "totalBytes": 54886658,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
-      "postgres-init-sql": 186,
+      "postgres-init-sql": 187,
       "runtime-binary-patch": 7,
       "runtime-patch-source": 21,
       "runtime-script": 26,
@@ -18,11 +18,11 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 20399,
-      "postgres-init-sql": 54024175,
+      "nginx-runtime-config": 20999,
+      "postgres-init-sql": 54033630,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82246,
-      "runtime-script": 273594,
+      "runtime-script": 274780,
       "runtime-static-override": 402662
     }
   },
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 20179,
-      "sha256": "dd367746fe5059551cfcc017732520359278b8c255374efd16f26d80bc0aa599"
+      "sizeBytes": 20779,
+      "sha256": "42471acfb78769387bec6a8160843a3639715783016b568b6c54ced6f6ae2b1c"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1429,6 +1429,12 @@
       "sha256": "6fbe419b11cb1c99e27ba0c7086abc37de37c9ae2ccc0b9e31973daa29653da9"
     },
     {
+      "path": "deploy/docker/postgres/init/187-production-list-export-capability.sql",
+      "category": "postgres-init-sql",
+      "sizeBytes": 9455,
+      "sha256": "4aca6624622e5f357fd096de3b514fecb5c5724fc03336daeba52cb3e0d2d546"
+    },
+    {
       "path": "deploy/docker/patches/kafka-jaas-noop/kafka-jaas-noop.jar",
       "category": "runtime-binary-patch",
       "sizeBytes": 2603,
@@ -1713,8 +1719,8 @@
     {
       "path": "deploy/docker/scripts/patch-rm-batch-formula-list.py",
       "category": "runtime-script",
-      "sizeBytes": 5368,
-      "sha256": "7fb84b505f32d8c70fbdfcd65c68447aa0b2e1de990c540c44e24b525370d9e3"
+      "sizeBytes": 6554,
+      "sha256": "00d275ac394dad3fd6fe28c0619ca2b49a5b1df87780c05bbf4dbc1b7a97a797"
     },
     {
       "path": "deploy/docker/scripts/patch-signature-log-service-fallback.py",

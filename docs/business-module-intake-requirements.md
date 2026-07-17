@@ -1,6 +1,6 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 7 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 6 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
@@ -16,7 +16,7 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 | 缺 runtime endpoint | 1 | `PROD-ACTION-008` |
 | 外部客户端 | 1 | `PROD-010` |
 | 缺服务包 | 0 | 无 |
-| 缺导出实现 | 1 | `PROD-023` |
+| 缺导出实现 | 0 | 无 |
 
 ## 验收总规则
 
@@ -38,9 +38,11 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 | `PROD-010` | 外部客户端 | 通过 Batch 客户端/ActiveX/WebSocket 打开真实编辑链 |
 | `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
 | `PROD-021` | 产品范围决定 | 保持报工和 material 回归，仅决策独立不良数量范围 |
-| `PROD-023` | 导出实现 | 补可见导出、后端 list-data export 和非空 workbook |
 
 `PROD-022` 完工入库已由 material/WMS marker 验收转为 PASS，证据为
 `metadata/material-wms-persistence-acceptance.json`，不再出现在接入需求中。
 `PROD-020` 追溯已由 ProcessAnalysis marker 验收转为 PASS，证据为
 `metadata/process-analysis-persistence-acceptance.json`。
+`PROD-023` 生产列表导出已在 `http://10.11.100.17:18080` 完成 6/6
+真实浏览器、运行时元数据、后端 file/workbook 响应和 sourceAudit 验收，状态
+`READY`，证据为 `metadata/production-export-readiness-smoke.json`。

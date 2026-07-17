@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 186,
+  "migrationCount": 187,
   "firstNumber": 1,
-  "lastNumber": 186,
+  "lastNumber": 187,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -13,17 +13,17 @@
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10789,
-    "create-function": 84,
+    "create-function": 85,
     "create-index": 977,
     "create-table": 568,
     "create-view": 142,
     "insert": 11007,
-    "update": 11076
+    "update": 11082
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 223,
+    "create-or-replace": 224,
     "do-block": 391,
-    "if-exists": 105,
+    "if-exists": 106,
     "if-not-exists": 12970,
     "on-conflict": 10947,
     "to-regclass": 219,
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 76,
     "configuration": 42,
-    "general": 28,
+    "general": 29,
     "notification": 9,
     "platform": 54,
     "workflow": 21
@@ -7026,6 +7026,39 @@
         "to-regclass": 0,
         "create-or-replace": 0,
         "where-not-exists": 3
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/187-production-list-export-capability.sql",
+      "name": "187-production-list-export-capability.sql",
+      "number": 187,
+      "slug": "production-list-export-capability",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 228,
+      "sha256": "4aca6624622e5f357fd096de3b514fecb5c5724fc03336daeba52cb3e0d2d546",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 0,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 6
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 0,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
       },
       "highRiskStatements": [],
       "watchStatements": [],

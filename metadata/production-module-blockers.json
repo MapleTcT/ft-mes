@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "generatedAt": "2026-07-17T04:53:37.777Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
   "sourceMatrix": "metadata/production-module-test-cases.json",
   "summary": {
-    "blockedCases": 4,
-    "blockers": 4,
+    "blockedCases": 3,
+    "blockers": 3,
     "externalClientRequired": 1,
     "missingServicePackage": 0,
     "productScopeConfirmation": 2,
     "compositeServiceAndScope": 0,
-    "missingExportImplementation": 1
+    "missingExportImplementation": 0
   },
   "latestEvidence": {
-    "lastRemoteRecheckAt": "2026-06-22T11:24:47.554Z",
+    "lastRemoteRecheckAt": "2026-07-17T04:53:37.777Z",
     "businessDependencyLastRecheckAt": "2026-07-10T09:18:52.471Z",
     "businessDependencyReadinessGeneratedAt": "2026-07-10T09:18:52.471Z",
     "businessDependencyReadinessStatus": "READY",
@@ -24,9 +24,9 @@
     "businessPackageScanGeneratedAt": "2026-07-10T08:46:19Z",
     "businessPackageScanStatus": "CANDIDATE_FOUND",
     "businessPackageScanCandidateDependencies": 2,
-    "productionExportReadinessGeneratedAt": "2026-06-22T11:24:47.554Z",
-    "productionExportReadinessStatus": "BLOCKED",
-    "productionExportVerifiedDataExports": 1,
+    "productionExportReadinessGeneratedAt": "2026-07-17T04:53:37.777Z",
+    "productionExportReadinessStatus": "READY",
+    "productionExportVerifiedDataExports": 6,
     "productionExportPagePass": 6,
     "coreFlowRecheckAt": "2026-07-10T07:25:00Z",
     "coreFlowEvidence": "metadata/core-flow-acceptance-20260710.json",
@@ -128,40 +128,6 @@
       "nonSolutions": [
         "Do not infer a standalone bad-quantity feature from QCS result fields.",
         "Do not count the accepted material WMS flow as blocked."
-      ]
-    },
-    {
-      "caseId": "PROD-023",
-      "title": "生产相关列表导出",
-      "status": "BLOCKED",
-      "category": "missing-export-implementation",
-      "blockerCategory": "missing-export-implementation",
-      "dependency": "Product decision and backend data-export implementation for production list pages",
-      "currentEvidenceRefs": [
-        "metadata/production-module-test-cases.json",
-        "metadata/production-export-readiness-smoke.json",
-        "docs/production-module-functional-test-cases.md"
-      ],
-      "recheckCommands": [
-        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000",
-        "manual: after export button/backend implementation is recovered, capture browser file response, filename, size, and workbook sample"
-      ],
-      "passCriteria": [
-        "Product owner confirms which production lists must support data export.",
-        "Runtime button/menu metadata exposes an export action for each required list.",
-        "Target source/runtime sourceAudit finds exportExcel/excelExport/导出 hooks for each required list.",
-        "Backend export endpoints return non-empty files with list data, not empty template-download placeholders.",
-        "PostgreSQL persistence is NOT_APPLICABLE for file export; acceptance evidence must instead prove the browser file response and sample workbook content.",
-        "Browser network evidence captures filename, response status, size, and sample workbook content."
-      ],
-      "nextActions": [
-        "Confirm export scope with product owner.",
-        "Recover or implement data-export service methods and runtime buttons for required lists; current public browser ingress already proves page reachability for all 6 target lists.",
-        "Run real browser file-response and sourceAudit acceptance before changing PROD-023 to PASS."
-      ],
-      "nonSolutions": [
-        "Do not accept empty HTTP 200 downloadXls responses as data export.",
-        "Do not confuse import-template download with list-data export."
       ]
     }
   ]

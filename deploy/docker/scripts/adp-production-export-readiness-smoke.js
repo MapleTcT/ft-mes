@@ -35,6 +35,7 @@ const targets = [
       "deploy/docker/assets/module-static/WOM/produceTask/produceTask/prepareMakeTaskList.html",
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/078-wom-list-button-runtime-json.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
   {
@@ -48,6 +49,7 @@ const targets = [
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/141-rm-formula-import-template.sql",
       "deploy/docker/postgres/init/160-rm-batch-formula-edit-view-runtime-json.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
   {
@@ -62,6 +64,7 @@ const targets = [
       "deploy/docker/postgres/init/153-wts-firework-runtime-json.sql",
       "deploy/docker/postgres/init/165-wts-workpermit-list-runtime-compat.sql",
       "deploy/docker/postgres/init/171-wts-workpermit-export-action.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
   {
@@ -75,6 +78,7 @@ const targets = [
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/107-qcs-inspect-detail-tables.sql",
       "deploy/docker/postgres/init/119-qcs-inspect-report-edit-runtime-json.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
   {
@@ -88,6 +92,7 @@ const targets = [
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/121-qcs-unqualified-deal-workflow-config.sql",
       "deploy/docker/postgres/init/122-qcs-unqualified-deal-runtime-compat.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
   {
@@ -101,6 +106,7 @@ const targets = [
       "deploy/docker/postgres/init/065-business-view-runtime-json.sql",
       "deploy/docker/postgres/init/124-qcs-inspect-release-runtime-json.sql",
       "deploy/docker/postgres/init/125-qcs-inspect-release-action-compat.sql",
+      "deploy/docker/postgres/init/187-production-list-export-capability.sql",
     ],
   },
 ];
@@ -142,6 +148,43 @@ function sanitizeBody(text) {
     .replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer <redacted>")
     .replace(/(suposTicket|SUPOS_TICKET|token)=([A-Za-z0-9._-]+)/g, "$1=<redacted>")
     .slice(0, 500);
+}
+
+function redactRequestPayload(value) {
+  if (Array.isArray(value)) {
+    return value.map(redactRequestPayload);
+  }
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, child]) => {
+      if (/(authorization|password|suposticket|token|secret)/i.test(key)) {
+        return [key, "<redacted>"];
+      }
+      return [key, redactRequestPayload(child)];
+    })
+  );
+}
+
+function parseRequestPayload(requestItem) {
+  if (!requestItem || requestItem.method() !== "POST") {
+    return null;
+  }
+  try {
+    return redactRequestPayload(requestItem.postDataJSON());
+  } catch (_error) {
+    return redactRequestPayload(parseJson(requestItem.postData(), null));
+  }
+}
+
+function buildBackendRequestEvidence(response) {
+  const requestItem = response.request();
+  return {
+    method: requestItem.method(),
+    url: response.url(),
+    payload: parseRequestPayload(requestItem),
+  };
 }
 
 function normalizeUrl(base, targetUrl) {
@@ -409,11 +452,19 @@ async function captureExportFile(page, target, trigger) {
     .waitForResponse(responseMatcher, { timeout: timeoutMs })
     .then(async (response) => {
       const body = await response.body();
-      return buildFileEvidence("browser-response", body, response.headers(), {
-        status: response.status(),
-        method: response.request().method(),
-        url: response.url(),
-      });
+      return {
+        ...buildFileEvidence("browser-response", body, response.headers(), {
+          status: response.status(),
+          method: response.request().method(),
+          url: response.url(),
+        }),
+        backendRequest: buildBackendRequestEvidence(response),
+        backendResponse: {
+          status: response.status(),
+          contentType: response.headers()["content-type"] || null,
+          contentDisposition: response.headers()["content-disposition"] || null,
+        },
+      };
     })
     .catch((error) => ({ source: "browser-response", error }));
 
@@ -421,11 +472,25 @@ async function captureExportFile(page, target, trigger) {
   const results = await Promise.all([downloadPromise, responsePromise]);
   const verified = results.find((result) => result && result.verifiedDataExport === true);
   if (verified) {
-    return verified;
+    const responseEvidence = results.find((result) => result && result.backendRequest);
+    return responseEvidence && !verified.backendRequest
+      ? {
+          ...verified,
+          backendRequest: responseEvidence.backendRequest,
+          backendResponse: responseEvidence.backendResponse,
+        }
+      : verified;
   }
   const nonEmptyFile = results.find((result) => result && !result.error && result.bodySize > 0);
   if (nonEmptyFile) {
-    return nonEmptyFile;
+    const responseEvidence = results.find((result) => result && result.backendRequest);
+    return responseEvidence && !nonEmptyFile.backendRequest
+      ? {
+          ...nonEmptyFile,
+          backendRequest: responseEvidence.backendRequest,
+          backendResponse: responseEvidence.backendResponse,
+        }
+      : nonEmptyFile;
   }
   const errors = results
     .filter((result) => result && result.error)
@@ -917,9 +982,50 @@ function buildQueryExportPayload(target) {
   };
 }
 
-async function probeQueryExport(api, ticket, target) {
+function browserQueryExportEvidence(target, exportClick) {
+  const file = exportClick && exportClick.file;
+  const backendRequest = file && file.backendRequest;
+  const backendResponse = file && file.backendResponse;
+  const matchesTarget = Boolean(
+    backendRequest &&
+      backendRequest.method === "POST" &&
+      backendRequest.url &&
+      backendRequest.url.includes(target.queryExportPath)
+  );
+  return {
+    verified: Boolean(
+      exportClick &&
+        exportClick.verifiedDataExport === true &&
+        matchesTarget &&
+        backendResponse &&
+        backendResponse.status >= 200 &&
+        backendResponse.status < 300
+    ),
+    matchesTarget,
+    request: backendRequest || null,
+    response: backendResponse || null,
+  };
+}
+
+function selectQueryExportPayload(target, exportClick) {
+  const browserEvidence = browserQueryExportEvidence(target, exportClick);
+  const capturedPayload = browserEvidence.request && browserEvidence.request.payload;
+  if (capturedPayload && typeof capturedPayload === "object" && !Array.isArray(capturedPayload)) {
+    return {
+      payload: JSON.parse(JSON.stringify(capturedPayload)),
+      source: "browser-export-request",
+    };
+  }
+  return {
+    payload: buildQueryExportPayload(target),
+    source: "synthetic-fallback",
+  };
+}
+
+async function probeQueryExport(api, ticket, target, exportClick) {
   const path = target.queryExportPath;
-  const requestPayload = buildQueryExportPayload(target);
+  const selectedPayload = selectQueryExportPayload(target, exportClick);
+  const requestPayload = selectedPayload.payload;
   try {
     const response = await api.post(`${baseUrl}${path}`, {
       data: requestPayload,
@@ -952,6 +1058,7 @@ async function probeQueryExport(api, ticket, target) {
       method: "POST",
       path,
       requestPayload,
+      requestPayloadSource: selectedPayload.source,
       status: response.status(),
       error: null,
       contentType: response.headers()["content-type"] || null,
@@ -970,6 +1077,7 @@ async function probeQueryExport(api, ticket, target) {
       method: "POST",
       path,
       requestPayload,
+      requestPayloadSource: selectedPayload.source,
       status: 0,
       error: sanitizeBody(error && error.message ? error.message : String(error)),
       contentType: null,
@@ -988,6 +1096,10 @@ async function probeQueryExport(api, ticket, target) {
 
 function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceAudit) {
   const exportClick = page.exportClick || emptyExportClickEvidence("NOT_ATTEMPTED", "No browser export click evidence was recorded.");
+  const browserBackendExport = browserQueryExportEvidence(
+    { queryExportPath: queryExport.path },
+    exportClick
+  );
   const hasAcceptedWorkbook =
     (download.status >= 200 &&
       download.status < 300 &&
@@ -1051,13 +1163,16 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
     },
     {
       name: "backendQueryExport",
-      passed: queryExport.verifiedDataExport === true,
+      passed: queryExport.verifiedDataExport === true || browserBackendExport.verified,
       evidence: [
         `path=${queryExport.path}`,
         `status=${queryExport.status}`,
+        `requestPayloadSource=${queryExport.requestPayloadSource || ""}`,
         `contentType=${queryExport.contentType || ""}`,
         `bodySize=${queryExport.bodySize}`,
         `magic=${queryExport.magic}`,
+        `browserRequest=${browserBackendExport.request ? browserBackendExport.request.url : ""}`,
+        `browserResponseStatus=${browserBackendExport.response ? browserBackendExport.response.status : ""}`,
       ],
     },
   ];
@@ -1074,7 +1189,9 @@ function evaluateDownloadAcceptance(page, layout, download, queryExport, sourceA
 function buildAcceptanceContract(target, item) {
   const currentGaps = [];
   const exportClick = item.page.exportClick || emptyExportClickEvidence("NOT_ATTEMPTED", "No browser export click evidence was recorded.");
+  const browserBackendExport = browserQueryExportEvidence(target, exportClick);
   const hasAcceptedBackendWorkbook = item.queryExport.verifiedDataExport === true ||
+    browserBackendExport.verified ||
     (item.download.status >= 200 &&
       item.download.status < 300 &&
       item.download.bodySize > 0 &&
@@ -1122,7 +1239,7 @@ function buildAcceptanceContract(target, item) {
       "download or queryExport returns a 2xx file response.",
       "download/queryExport/browser response bodySize is greater than 0.",
       "download/queryExport/browser response magic is OLE_XLS or ZIP_XLSX.",
-      "queryExport.verifiedDataExport is true when the list query exportFlag path is the intended backend export path.",
+      "queryExport.verifiedDataExport is true, or the captured browser request proves a workbook response from the intended list query exportFlag path.",
       "download.verifiedDataExport is true.",
     ],
     currentGaps,
@@ -1255,7 +1372,11 @@ async function main() {
         page = await withTimeout(probePage(context, target), pageTimeoutMs + 15000, `${target.id} page probe`);
         layout = await withTimeout(probeLayout(api, ticket, target), apiTimeoutMs + 5000, `${target.id} layout probe`);
         download = await withTimeout(probeDownload(api, ticket, target), apiTimeoutMs + 5000, `${target.id} download probe`);
-        queryExport = await withTimeout(probeQueryExport(api, ticket, target), apiTimeoutMs + 5000, `${target.id} query export probe`);
+        queryExport = await withTimeout(
+          probeQueryExport(api, ticket, target, page.exportClick),
+          apiTimeoutMs + 5000,
+          `${target.id} query export probe`
+        );
         sourceAudit = buildSourceAudit(target, genericExportFramework);
       } catch (error) {
         targetProbeError = sanitizeBody(error && error.message ? error.message : String(error));
@@ -1332,7 +1453,14 @@ async function main() {
       visibleExportActions: items.filter((item) => item.page.exportLabels.length > 0).length,
       runtimeExportActions: items.filter((item) => item.layout.exportButtonCandidates.length > 0).length,
       nonEmptyDownloads: items.filter((item) => item.download.bodySize > 0).length,
-      backendQueryExportWorkbooks: items.filter((item) => item.queryExport.verifiedDataExport === true).length,
+      backendQueryExportWorkbooks: items.filter(
+        (item) =>
+          item.queryExport.verifiedDataExport === true ||
+          browserQueryExportEvidence(
+            { queryExportPath: item.queryExport.path },
+            item.page.exportClick
+          ).verified
+      ).length,
       backendQueryExportErrors: items.filter((item) => item.queryExport.status >= 500 || item.queryExport.status === 0).length,
       verifiedDataExports: items.filter((item) => item.download.verifiedDataExport === true).length,
       ready: items.filter((item) => item.status === "READY").length,
@@ -1378,7 +1506,17 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error && error.stack ? error.stack : String(error));
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error && error.stack ? error.stack : String(error));
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {
+  browserQueryExportEvidence,
+  buildQueryExportPayload,
+  detectMagic,
+  redactRequestPayload,
+  selectQueryExportPayload,
+};

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-10T08:40:11.239Z",
+  "generatedAt": "2026-07-17T04:53:37.777Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -23,14 +23,14 @@
     "processAnalysisEvidence": "metadata/process-analysis-persistence-acceptance.json"
   },
   "summary": {
-    "totalItems": 7,
+    "totalItems": 6,
     "failBacklog": 0,
-    "blocked": 7,
+    "blocked": 6,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 7,
+    "moduleBacklog": 6,
     "missingServicePackage": 0,
     "externalClientRequired": 1,
-    "missingExportImplementation": 1,
+    "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
     "productScopeConfirmation": 4,
     "falseSuccessApi": 0,
@@ -364,46 +364,6 @@
       "nonSolutions": [
         "Do not invent a bad-quantity column or UI from inference.",
         "Do not reopen the accepted material WMS inventory boundary."
-      ]
-    },
-    {
-      "id": "PROD-023",
-      "title": "Production list data export implementation is missing",
-      "status": "BLOCKED",
-      "category": "missing-export-implementation",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [
-        "PROD-023"
-      ],
-      "persistenceCoverage": [],
-      "evidenceRefs": [
-        "metadata/production-module-blockers.json",
-        "metadata/production-module-test-cases.json",
-        "metadata/production-export-readiness-smoke.json",
-        "docs/production-module-functional-test-cases.md",
-        "docs/frontend-functional-test-report.md"
-      ],
-      "recheckCommands": [
-        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=120000 ADP_API_TIMEOUT_MS=30000",
-        "manual: after export button/backend implementation is recovered, capture browser file response, filename, size and workbook sample"
-      ],
-      "passCriteria": [
-        "Product owner confirms which production lists must support data export.",
-        "Runtime button/menu metadata exposes an export action for each required list.",
-        "Target source/runtime sourceAudit finds exportExcel/excelExport/导出 hooks for each required list.",
-        "Backend export endpoints return non-empty files with list data, not empty template-download placeholders.",
-        "PostgreSQL persistence is NOT_APPLICABLE for file export; acceptance evidence must prove browser file response and sample workbook content."
-      ],
-      "nextActions": [
-        "Confirm export scope with product owner.",
-        "Recover or implement data-export service methods and runtime buttons for required lists; current public browser ingress already proves page reachability for all 6 target lists.",
-        "Run real browser file-response and sourceAudit acceptance before changing PROD-023 to PASS."
-      ],
-      "nonSolutions": [
-        "Do not accept empty HTTP 200 downloadXls responses as data export.",
-        "Do not confuse import-template download with list-data export."
       ]
     }
   ]

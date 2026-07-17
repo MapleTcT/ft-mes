@@ -132,7 +132,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 不要用 Java 8 运行 BPI reactor，也不要为了兼容旧 JAR 把 Java 17 模块降级或并入旧服务进程。两侧只通过版本化 HTTP 或事件契约交互。
 
-执行 `make` 前先确认实际命中的工具链，避免 shell 中的旧 Maven 覆盖已安装版本：
+执行相应门禁前先确认实际命中的工具链，避免 shell 中的旧 Maven 覆盖已安装版本：
 
 ```bash
 java -version
@@ -141,7 +141,7 @@ command -v java
 command -v mvn
 ```
 
-`mvn -version` 必须同时显示 Maven `3.6.3+` 和 Java `17`。本仓库建议固定 Maven `3.9.x`；如果 `make bpi-stream-test` 报插件要求 Maven `3.6.3`，说明当前 `PATH` 仍命中旧 Maven，不是业务代码编译失败。
+`make ci` 使用 Java 8 主仓库基线；`make ci-java17` 必须由 Maven `3.6.3+` 和 Java `17` 执行。本仓库建议固定 Maven `3.9.x`；如果 BPI 门禁报插件要求 Maven `3.6.3` 或 JDK `17`，说明当前 `PATH` / `JAVA_HOME` 仍命中旧工具链，不是业务代码编译失败。
 
 ### 最短可信验证
 
@@ -151,6 +151,9 @@ command -v mvn
 make help
 make verify
 make ci
+
+JAVA_HOME=$(/usr/libexec/java_home -v 17) \
+make ci-java17
 ```
 
 本地验证真实 Flink checkpoint 与 Kafka 事务边界：

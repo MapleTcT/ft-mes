@@ -2855,7 +2855,7 @@
       "status": "PASS",
       "evidence": "metadata/bpi-rule-application-kafka-postgres-acceptance.json records Embedded Kafka 3.8.1 + PostgreSQL 16.13/Flyway V13. Direct JDBC assertions before cleanup proved final APPLIED + READY revision 5, application inbox 3, runtime inbox 3 and audit 4; stale runtime READY did not overwrite newer DEGRADED, exact replay after listener restart added no row, and poison payloads reached topic-specific DLQs.",
       "issues": [
-        "This is local split-layer evidence; target V13 deployment and one browser-to-Flink-to-PostgreSQL marker remain pending."
+        "Target Flyway V13 deployment and V12 savepoint restore to Flink job 40408b7907ca7b97ad750cc7d2bfb345 are PASS in metadata/bpi-rule-runtime-readiness-acceptance.json; one real READY point browser-to-Flink-to-PostgreSQL marker remains blocked by source readiness."
       ]
     },
     {

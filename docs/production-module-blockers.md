@@ -11,17 +11,17 @@ make production-export-gap-breakdown-check
 
 该账本不替代真实前端验收，也不把当前 BLOCKED 项改为 PASS。每个阻断项变更状态前，仍必须按 `docs/production-module-functional-test-cases.md` 的动作级验收规则执行真实浏览器/API/PostgreSQL 复验。
 
-最近一次业务依赖复验时间：`2026-07-10T07:16:11.006Z`。`material-service` 已有 Nacos `prod` 健康实例，三个兼容端点均通过网关且不再返回 tenant-service `503`；marker `ADP_E2E_20260710074612_MATERIAL_WMS` 已证明完工入库、质检释放、生产领料、幂等和清理，因此 `PROD-022` 已移出 blocker。`process-analysis` 仍为 `BLOCKED`：5 个端点继续返回 `503`，运行视图、菜单和 PostgreSQL 目标表仍为 0。生产导出复验仍保持原结论：WTS 单项 READY，其余目标未闭合。
+最近一次生产导出复验时间：`2026-07-17T04:53:37.777Z`。`material-service` 与 `process-analysis` 已有 Nacos `prod` 健康实例，并已分别通过真实 marker 落库验收。生产列表导出在当前测试入口 `http://10.11.100.17:18080` 完成 6/6 真实浏览器点击、运行时元数据、目标 sourceAudit 和有效工作簿响应复验，状态为 `READY`，证据为 `metadata/production-export-readiness-smoke.json`，因此 `PROD-023` 已移出 blocker。
 
 ## 当前摘要
 
 | 指标 | 数量 |
 | --- | ---: |
-| BLOCKED 用例 | 5 |
+| BLOCKED 用例 | 3 |
 | 外部客户端依赖 | 1 |
-| 缺服务包 | 1 |
+| 缺服务包 | 0 |
 | 产品范围确认 | 2 |
-| 缺导出实现/产品决策 | 1 |
+| 缺导出实现/产品决策 | 0 |
 
 ## 阻断项
 
@@ -30,7 +30,6 @@ make production-export-gap-breakdown-check
 | PROD-010 | external-client-required | 外部 Batch client / IE ActiveX / WebSocket 推送 | `make smoke-business-page`；接入 Batch 客户端后触发真实 `batchFormulaEdit` | 真实编辑入口打开；marker 保存/提交；PostgreSQL 证明 `rm_formulas` 和配套过程/活动表写入 | 连接 Batch 客户端/服务端路径，不用假按钮替代 |
 | PROD-019 | product-scope-confirmation | 独立不良数量是否属于产品范围 | `make persistence-acceptance-check`；产品范围确认 | 若要求独立不良数，必须先有字段/路由/PostgreSQL 数值表并 marker 验收 | 产品确认；不得重新把已 PASS 的 material/WMS 计入阻断 |
 | PROD-021 | product-scope-confirmation | 完整报工仅剩独立不良数量范围 | `make persistence-acceptance-check`；回归 WOM 报工和 WMS | 报工与 material/WMS 保持 PASS；独立不良数仅在产品提供字段后验收 | 完成范围决策 |
-| PROD-023 | missing-export-implementation | 产品确认导出范围 + 后端数据导出实现 | `make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000`；恢复导出按钮后抓浏览器文件响应；sourceAudit 必须证明目标页存在导出 hook；`acceptanceContract` 必须列出每个目标的当前缺口 | 产品确认需导出的列表；运行时有导出入口；目标源码/运行时有 `exportExcel/导出` hook；后端返回非空数据文件；`download.verifiedDataExport=true`；记录文件名/大小/样本内容 | 确认导出需求，恢复或实现数据导出按钮和后端方法 |
 
 ## 更新规则
 
@@ -39,7 +38,6 @@ make production-export-gap-breakdown-check
 - 每个 blocker 必须有仓库内证据引用、复验命令、PASS 条件、下一步和明确的非解法。
 - ProcessAnalysis 与 material/WMS 分别由 `metadata/process-analysis-persistence-acceptance.json`、`metadata/material-wms-persistence-acceptance.json` 作为 PASS 回归证据。
 - 新业务包导入后，先运行 `make business-package-scan`；若出现实现候选，再运行 `make smoke-business-dependencies` 和真实前端 marker 落库验收。
-- `PROD-023` 导出阻断项必须引用 `metadata/production-export-readiness-smoke.json`，并通过 `make smoke-production-export-readiness` 重新捕获浏览器文件响应、目标源码/运行时 sourceAudit 和逐目标 `acceptanceContract` 后才能改状态。
-- `PROD-023` 的逐目标导出缺口必须用 `make production-export-gap-breakdown` 从最新 smoke 报告生成，并用 `make production-export-gap-breakdown-check` 校验；不能手写一份会漂移的导出结论。
-- 2026-06-22 复验：WTS 作业许可 `workPermitList-query` 已通过真实浏览器点击 `导出` 生成 `WTS_workPermitList.xls`，`200/OLE_XLS/8704`，WTS 单项在导出报告中为 `READY`；`PROD-023` 仍为总体 BLOCKED，因为 WOM、RM 和 QCS 的 5 个导出目标尚未完成同等证据闭环。
+- `PROD-023` 已于 2026-07-17 关闭；`make smoke-production-export-readiness ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080` 必须继续作为发布回归，结果需保持 `READY`、6/6 有效工作簿和零后端导出错误。
+- 逐目标导出状态必须用 `make production-export-gap-breakdown` 从最新 smoke 报告生成，并用 `make production-export-gap-breakdown-check` 校验；不能手写一份会漂移的导出结论。
 - 不允许用 HTTP 200、静态页面可打开、临时 SQL 或假按钮把 BLOCKED 项改成 PASS。

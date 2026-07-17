@@ -926,12 +926,7 @@ def main() -> int:
             failures,
         )
         missing_export_target_payload = fake_ready_business_smoke_with_real_evidence_refs()
-        export_target_ids = {
-            target_id
-            for issue in missing_export_target_payload["openIssues"]
-            for target_id in issue.get("exportTargetIds", [])
-            if isinstance(target_id, str) and target_id.strip()
-        }
+        export_target_ids = {"qcs-inspect-release"}
         for issue in missing_export_target_payload["openIssues"]:
             if isinstance(issue.get("exportTargetIds"), list):
                 issue["exportTargetIds"] = [

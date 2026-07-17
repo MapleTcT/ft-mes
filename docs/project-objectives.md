@@ -75,8 +75,11 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 分离：Flink 2.2.1 MiniCluster + Kafka 4.2
 验证 checkpoint 前后双回执可见性、停用和 TaskManager 恢复；Embedded Kafka 3.8.1 + PostgreSQL
 16.13/Flyway V13 验证 `DEGRADED -> READY`、事件时间排序、精确重放、双 DLQ 和最终
-`APPLIED + READY/r5` 真实落库；操作台 `8/8` E2E 验证两个状态域独立显示。目标环境尚未部署 V13，
-历史规则仍需 savepoint/新版本迁移和回滚演练，因此 G-021 保持 `PARTIAL`。
+`APPLIED + READY/r5` 真实落库；操作台 `8/8` E2E 验证两个状态域独立显示。目标环境随后已完成
+Flyway V13 expand-only 迁移，并从 V12 savepoint 有状态恢复到 Flink job
+`40408b7907ca7b97ad750cc7d2bfb345`，当前为 `RUNNING/33-of-33`；来源目录仍为 1 点/0 READY，
+真实规则运行时回执、7-14 天影子运行、broker/应用镜像回退和 QCS/WMS 写回尚未完成，因此
+G-021 保持 `PARTIAL`。
 
 权威设计和验收入口：
 
@@ -258,8 +261,8 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 ### 主线 A：BPI Phase 0/1
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
-2. 保持已通过的目标环境 Flyway V12、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、独立发布、规则绑定、PostgreSQL revision 和重启读取作为发布回归；把本地已通过的 V13 独立运行时回执部署到目标环境后，再继续版本比较、审批和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
-3. 完成 V13 目标部署、broker 故障、savepoint 升级和 BPI 整体回滚演练；当前目标环境已完成带负载 TaskManager 重启恢复和单 marker 清理恢复。
+2. 保持已通过的目标环境 Flyway V13、V12 savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、独立发布、规则绑定、PostgreSQL revision 和重启读取作为发布回归；继续版本比较、审批和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
+3. 完成 broker 故障、应用镜像回退和 BPI 整体回滚演练；当前目标环境已完成 V13 expand-only 升级、savepoint 恢复、带负载 TaskManager 重启恢复和单 marker 清理恢复。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。
 5. MES 上下文真实链和 IoT source 分段链均已通过；点位准入变为 READY 后，用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链，再连续运行 7-14 天影子批次。
 6. 达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。

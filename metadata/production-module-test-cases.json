@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T02:02:43.004Z",
+  "generatedAt": "2026-07-17T04:53:37.777Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
   "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
   "evidence": {
-    "baseUrl": "http://222.88.185.146:18080; ssh/db/log host 100.99.133.43",
+    "baseUrl": "http://10.11.100.17:18080; ssh/db/log host 10.11.100.17",
     "businessDependencyReadinessSmoke": "metadata/business-dependency-readiness-smoke.json; 2026-06-20 re-runnable smoke status BLOCKED for material-service and process-analysis on 100.99.133.43",
     "apiLayoutSmokeReport": "/tmp/adp-business-module-smoke-20260615184508.json",
     "browserPageSmokeReport": "/tmp/adp-business-page-smoke-final-20260615204003/business-page-smoke-results.json",
@@ -79,9 +79,9 @@
   },
   "summary": {
     "totalCases": 43,
-    "pass": 39,
+    "pass": 40,
     "fail": 0,
-    "blocked": 4,
+    "blocked": 3,
     "notRun": 0,
     "requiresPersistence": 31,
     "routeSmokePass": 43
@@ -1446,30 +1446,22 @@
       "operationType": "export",
       "requiresPersistence": false,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "make smoke-production-export-readiness ADP_BASE_URL=http://100.99.133.43:18080 ADP_BROWSER_BASE_URL=http://222.88.185.146:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=240000 ADP_API_TIMEOUT_MS=30000 -> summary BLOCKED targets=6 pagePass=6 visibleExportActions=1 runtimeExportActions=1 nonEmptyDownloads=1 backendQueryExportWorkbooks=1 backendQueryExportErrors=4 verifiedDataExports=1 ready=1 actionRequired=0 blocked=5",
-        "WTS work permit has a user-visible runtime export button and real browser click file response; remaining WOM/RM/QCS targets still lack equivalent evidence.",
-        "sourceAudit proves the generic platform export framework exists; WTS now has target-specific runtime SQL source evidence, remaining targets still need target export hooks.",
-        "GET /msService/WOM/produceTask/produceTask/downloadXls?viewCode=WOM_1.0.0_produceTask_makeTaskList -> HTTP 200 bodySize=0",
-        "GET /msService/RM/formula/formula/downloadXls?viewCode=RM_1.0.0_formula_batchFormulaList -> HTTP 200 bodySize=8704 OLE_XLS, but page/runtime only expose 下载模板/导入Excel and no export action",
-        "POST /msService/WTS/workPermit/workPermit/workPermitList-query?exportFlag=true -> HTTP 200 bodySize=8704 OLE_XLS; real browser click on 导出 downloads WTS_workPermitList.xls bodySize=8704 OLE_XLS",
-        "GET /msService/QCS/inspectReport/inspectReport/downloadXls?viewCode=QCS_5.0.0.0_inspectReport_manuInspReportList -> HTTP 200 bodySize=0",
-        "GET /msService/QCS/unQlfDeal/unQlfDeal/downloadXls?viewCode=QCS_5.0.0.0_unQlfDeal_manuUnQlfDealList -> HTTP 200 bodySize=0",
-        "GET /msService/QCS/inspectRelease/inspectRelease/downloadXls?viewCode=QCS_5.0.0.0_inspectRelease_manuInspReleaseList -> HTTP 200 bodySize=0"
+        "make smoke-production-export-readiness ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 PRODUCTION_EXPORT_SMOKE_OUTPUT=metadata/production-export-readiness-smoke.json ADP_PAGE_TIMEOUT_MS=60000 ADP_API_TIMEOUT_MS=30000 -> summary READY targets=6 pagePass=6 visibleExportActions=6 runtimeExportActions=6 backendQueryExportWorkbooks=6 backendQueryExportErrors=0 verifiedDataExports=6 ready=6 blocked=0",
+        "POST /msService/WOM/produceTask/produceTask/makeTaskList-query with captured browser exportFlag payload -> HTTP 200 bodySize=5632 OLE_XLS",
+        "POST /msService/RM/formula/formula/batchFormulaList-query with captured browser exportFlag payload -> HTTP 200 bodySize=12270 ZIP_XLSX; browser filename RM_batchFormulaList.xlsx",
+        "POST /msService/WTS/workPermit/workPermit/workPermitList-query with captured browser exportFlag payload -> HTTP 200 bodySize=8704 OLE_XLS",
+        "POST /msService/QCS/inspectReport/inspectReport/manuInspReportList-query with captured browser exportFlag payload -> HTTP 200 bodySize=5120 OLE_XLS",
+        "POST /msService/QCS/unQlfDeal/unQlfDeal/manuUnQlfDealList-query with captured browser exportFlag payload -> HTTP 200 bodySize=4608 OLE_XLS",
+        "POST /msService/QCS/inspectRelease/inspectRelease/manuInspReleaseList-query with captured browser exportFlag payload -> HTTP 200 bodySize=4608 OLE_XLS"
       ],
-      "backendTraceStatus": "template-download-only-empty-export-hook",
+      "backendTraceStatus": "real-browser-and-postgresql-xlsx-export-accepted",
       "targetTables": [],
       "verificationSql": "",
-      "evidence": "2026-06-22T11:24:47.554Z refreshed export readiness smoke with API base http://100.99.133.43:18080 and browser base http://222.88.185.146:18080. Authenticated real browser probed 6 production-related list pages with ADP_PAGE_TIMEOUT_MS=240000: WOM make task, RM batch formula, WTS work permit, QCS inspect report, QCS unqualified deal, and QCS inspect release. All 6 target pages reached HTTP/navigation success through the public browser ingress. The committed smoke summary remains BLOCKED with targets=6, pagePass=6, visibleExportActions=1, runtimeExportActions=1, nonEmptyDownloads=1, backendQueryExportWorkbooks=1, backendQueryExportErrors=4, verifiedDataExports=1, ready=1, actionRequired=0 and blocked=5. WTS work permit is READY after deploy/docker/postgres/init/171-wts-workpermit-export-action.sql added runtime exportExcel/CUSTOM/funcbody/events; a real browser click on 导出 downloaded WTS_workPermitList.xls with bodySize=8704 and magic=OLE_XLS, and workPermitList-query exportFlag=true also returns 200/OLE_XLS/8704. WOM and 3 QCS query-export endpoints still return 500/JSON, RM query-export returns 200/JSON, and direct downloadXls remains empty or import-template-only for the unresolved targets. Evidence: metadata/production-export-readiness-smoke.json and real browser run output captured by make smoke-production-export-readiness.",
-      "issues": [
-        "Runtime layout metadata and visible browser export action are proven only for the WTS work permit target.",
-        "sourceAudit has target-specific evidence only for WTS; generic platform export templates are present but not enabled by the remaining target views.",
-        "The exposed downloadXls endpoints are template-download or empty paths, not verified list-data export paths.",
-        "WTS work permit query-export and real browser click are READY; WOM, RM, and QCS targets still need user-triggerable list-data export evidence.",
-        "Need product confirmation whether these lists should support export; if yes, add or recover the export button and a non-empty data-export implementation before file-response acceptance."
-      ],
-      "nextAction": "If export is required, recover the runtime export button and backend data-export implementation for target list pages, then capture frontend file response status, filename, size, and sample workbook content with make smoke-production-export-readiness.",
+      "evidence": "2026-07-17T04:53:37.777Z on http://10.11.100.17:18080, an authenticated real browser rendered and clicked the visible export action on all 6 target lists. The captured browser request payloads were replayed against the intended query endpoints and all returned real workbooks: WOM 5632/OLE_XLS, RM 12270/ZIP_XLSX, WTS 8704/OLE_XLS, QCS inspect report 5120/OLE_XLS, QCS unqualified deal 4608/OLE_XLS and QCS inspect release 4608/OLE_XLS. Runtime metadata and sourceAudit both expose target-specific export hooks. RM rejects unauthenticated and bogus-token requests with 401, returns 231 authenticated list rows with large IDs serialized as strings, uses the authenticated internal-only PostgreSQL compatibility route, suggests RM_batchFormulaList.xlsx, and reconciles 231 valid public.rm_formulas rows to 232 worksheet rows including the header. Export persistence is NOT_APPLICABLE and no business rows were mutated. Evidence: metadata/production-export-readiness-smoke.json, deploy/docker/postgres/init/187-production-list-export-capability.sql and deploy/docker/compat/rm-export/RmFormulaExportCompatServer.java.",
+      "issues": [],
+      "nextAction": "Keep make smoke-production-export-readiness as a release regression and verify representative workbook rows whenever list columns or RM formula schema change.",
       "coverageTags": [
         "import-export",
         "work-order"

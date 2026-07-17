@@ -11,12 +11,14 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT_PATH = ROOT / "metadata/production-export-readiness-smoke.json"
-EXPECTED_BASE_URL = "http://100.99.133.43:18080"
-EXPECTED_BROWSER_BASE_URL = "http://222.88.185.146:18080"
+EXPECTED_BASE_URL = "http://10.11.100.17:18080"
+EXPECTED_BROWSER_BASE_URL = "http://10.11.100.17:18080"
 LEGACY_DIRECT_BROWSER_BASE_URL = "http://100.99.133.43:18080"
+LEGACY_PUBLIC_BROWSER_BASE_URL = "http://222.88.185.146:18080"
 EXPECTED_BROWSER_BASE_URLS = {
     EXPECTED_BROWSER_BASE_URL,
     LEGACY_DIRECT_BROWSER_BASE_URL,
+    LEGACY_PUBLIC_BROWSER_BASE_URL,
 }
 
 EXPECTED_TARGETS = {
@@ -46,8 +48,8 @@ DOC_REQUIREMENTS = {
         "downloadXls",
     ],
     "docs/production-module-blockers.md": [
-        "make smoke-production-export-readiness",
-        "PROD-023",
+        "metadata/production-export-readiness-smoke.json",
+        "READY",
         EXPECTED_BROWSER_BASE_URL,
     ],
 }

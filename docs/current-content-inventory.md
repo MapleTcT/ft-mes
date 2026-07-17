@@ -10,7 +10,7 @@
 - 反编译服务 Java：`259` 个文件。
 - 前端 source map：`366` 个。
 - 前端恢复源码：`991` 个文件。
-- Docker Compose 服务：`58` 个。
+- Docker Compose 服务：`59` 个。
 - 默认数据库：`postgresql`。
 - Oracle 模式：`legacy-template-only`。
 
@@ -125,6 +125,7 @@
 | auditlog | platform-runtime | bap-server/base-Server/auditlog/supfusion-auditlog.jar |
 | craftGraphMs | business-runtime | bap-server/module-Server/craftGraphMs/manual/craftGraphMs-1.0.0.jar |
 | RMMs | business-runtime | bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar |
+| rm-export-compat | support-runtime | - |
 | WOMMs | business-runtime | bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar |
 | material | business-runtime | bap-server/module-Server/material/manual/material-wms.jar |
 | ProcessAnalysis | business-runtime | bap-server/module-Server/ProcessAnalysis/manual/process-analysis.jar |

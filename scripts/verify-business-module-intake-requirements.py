@@ -145,7 +145,6 @@ def check_doc(expected_ids: set[str], failures: list[str]) -> None:
         "material",
         "ProcessAnalysis",
         "PROD-ACTION-008",
-        "PROD-023",
     ):
         if fragment not in text:
             fail(failures, f"business module intake document missing required text: {fragment}")
@@ -279,10 +278,18 @@ def check_cross_refs(
     export_summary = as_dict(export_gap.get("summary"))
     verified_exports = export_summary.get("verifiedDataExports")
     targets = export_summary.get("targets")
-    if export_summary.get("status") != "BLOCKED" or not isinstance(verified_exports, int):
-        fail(failures, "PROD-023 intake requirement expects export gap breakdown to remain BLOCKED with an integer verifiedDataExports count")
-    elif isinstance(targets, int) and verified_exports >= targets:
-        fail(failures, "PROD-023 intake requirement expects at least one export target to remain unresolved while the blocker is active")
+    if "PROD-023" in requirements or "PROD-023" in backlog_items:
+        if export_summary.get("status") != "BLOCKED" or not isinstance(verified_exports, int):
+            fail(failures, "active PROD-023 intake requirement expects export gap breakdown to remain BLOCKED with an integer verifiedDataExports count")
+        elif isinstance(targets, int) and verified_exports >= targets:
+            fail(failures, "active PROD-023 intake requirement expects at least one export target to remain unresolved")
+    else:
+        if export_summary.get("status") != "READY":
+            fail(failures, "closed PROD-023 expects production export gap breakdown status READY")
+        if not isinstance(targets, int) or targets <= 0:
+            fail(failures, "closed PROD-023 expects a positive production export target count")
+        if not isinstance(verified_exports, int) or verified_exports != targets:
+            fail(failures, "closed PROD-023 expects every production export target to have a verified data workbook")
 
     toolbar_text = text_blob(wom_toolbar)
     if "generate-qrcode" not in toolbar_text or "blocked" not in toolbar_text:

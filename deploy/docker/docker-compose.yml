@@ -388,6 +388,36 @@ services:
       JAVA_OPTS: "${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai} -DRM/RM.Batch.username=${RM_BATCH_USERNAME:-admin} -DRM/RM.Batch.password=${RM_BATCH_PASSWORD:-123456} -DRM/RM.MQ.brokerUrl=${RM_BATCH_MQ_BROKER_HOST:-localhost}"
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar"]
 
+  rm-export-compat:
+    image: ${ADP_JAVA_BUILD_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jdk}
+    restart: unless-stopped
+    working_dir: /opt/adp/rm-export-compat
+    environment:
+      <<: *app-env
+      RM_EXPORT_PORT: "18090"
+      RM_EXPORT_MAX_ROWS: ${RM_EXPORT_MAX_ROWS:-5000}
+      RM_EXPORT_MAX_REQUEST_BYTES: ${RM_EXPORT_MAX_REQUEST_BYTES:-1048576}
+      RM_EXPORT_THREADS: ${RM_EXPORT_THREADS:-4}
+      RM_EXPORT_QUERY_TIMEOUT_SECONDS: ${RM_EXPORT_QUERY_TIMEOUT_SECONDS:-30}
+    volumes:
+      - ./compat/rm-export:/opt/adp/rm-export-compat:ro
+      - ../../runtime/bap-server/assembly/repository/maven/org/postgresql/postgresql/42.2.8/postgresql-42.2.8.jar:/opt/adp/drivers/postgresql.jar:ro
+    command:
+      - sh
+      - -c
+      - |
+        mkdir -p /tmp/rm-export-compat
+        javac -encoding UTF-8 -cp /opt/adp/drivers/postgresql.jar -d /tmp/rm-export-compat RmFormulaExportCompatServer.java
+        exec java -cp /tmp/rm-export-compat:/opt/adp/drivers/postgresql.jar RmFormulaExportCompatServer
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/18090'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   WOMMs:
     <<: *java-service
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/WOMMs/manual/WOMMs-1.0.0.jar"]
@@ -605,6 +635,7 @@ services:
       - ./nginx/adp.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - gateway
+      - rm-export-compat
 
 volumes:
   postgres-data:

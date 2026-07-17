@@ -25,6 +25,22 @@ NEW_INTERFACE_API = '''				"mainView": "/msService/RM/formula/formula/batchFormu
 				"deleteData": "/msService/RM/formula/formula/delete",// 删除数据
 				"sourceData": "/msService/RM/formula/formula/batchFormulaList-", //  列表数据'''
 
+DOWNLOAD_FILENAME_COMPAT_MARKER = "adp-rm-batch-formula-xlsx-filename"
+DOWNLOAD_FILENAME_COMPAT_SCRIPT = f'''<script id="{DOWNLOAD_FILENAME_COMPAT_MARKER}">
+(function () {{
+    var nativeClick = window.HTMLAnchorElement && window.HTMLAnchorElement.prototype.click;
+    if (!nativeClick) {{
+        return;
+    }}
+    window.HTMLAnchorElement.prototype.click = function () {{
+        if (this.download === "RM_batchFormulaList.xls" && /^blob:/i.test(this.href || "")) {{
+            this.download = "RM_batchFormulaList.xlsx";
+        }}
+        return nativeClick.apply(this, arguments);
+    }};
+}})();
+</script>'''
+
 
 def clone_info(info: zipfile.ZipInfo) -> zipfile.ZipInfo:
     result = zipfile.ZipInfo(info.filename, date_time=info.date_time)
@@ -61,6 +77,16 @@ def replace_once(text: str, old: str, new: str) -> tuple[str, bool]:
     return text.replace(old, new, 1), True
 
 
+def inject_download_filename_compat(text: str) -> tuple[str, bool]:
+    if DOWNLOAD_FILENAME_COMPAT_MARKER in text:
+        return text, False
+    if "</body>" in text:
+        return text.replace("</body>", f"{DOWNLOAD_FILENAME_COMPAT_SCRIPT}\n</body>", 1), True
+    if "</html>" in text:
+        return text.replace("</html>", f"{DOWNLOAD_FILENAME_COMPAT_SCRIPT}\n</html>", 1), True
+    return f"{text}\n{DOWNLOAD_FILENAME_COMPAT_SCRIPT}\n", True
+
+
 def patch_html(data: bytes) -> tuple[bytes, list[str]]:
     text = data.decode("utf-8")
     changes: list[str] = []
@@ -75,6 +101,10 @@ def patch_html(data: bytes) -> tuple[bytes, list[str]]:
         text, changed = replace_once(text, old, new)
         if changed:
             changes.append(label)
+
+    text, changed = inject_download_filename_compat(text)
+    if changed:
+        changes.append("downloadFilename")
 
     return text.encode("utf-8"), changes
 

@@ -587,12 +587,12 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 58,
+    "composeServiceCount": 59,
     "composeServiceKindCounts": {
       "business-runtime": 16,
       "infrastructure": 11,
       "platform-runtime": 28,
-      "support-runtime": 3
+      "support-runtime": 4
     },
     "composeServices": [
       {
@@ -794,6 +794,11 @@
         "service": "RMMs",
         "jarPath": "bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar",
         "kind": "business-runtime"
+      },
+      {
+        "service": "rm-export-compat",
+        "jarPath": "",
+        "kind": "support-runtime"
       },
       {
         "service": "WOMMs",
