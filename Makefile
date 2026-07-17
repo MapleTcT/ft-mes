@@ -528,7 +528,7 @@ ci-required-file-inventory-check:
 ci-required-file-strict-check:
 	$(PYTHON) scripts/generate-ci-required-file-inventory.py --report "$(CI_REQUIRED_FILE_INVENTORY)" --check --strict-tracked
 
-project-goal-acceptance-check:
+project-goal-acceptance-check: render-config
 	$(PYTHON) scripts/verify-project-goal-acceptance.py
 
 goal-gap-register:
@@ -816,7 +816,7 @@ postgres-migration-check:
 oracle-replacement-status:
 	$(PYTHON) scripts/generate-oracle-replacement-status.py
 
-oracle-replacement-check:
+oracle-replacement-check: render-config
 	$(PYTHON) scripts/generate-oracle-replacement-status.py --check
 
 production-source-inventory:
