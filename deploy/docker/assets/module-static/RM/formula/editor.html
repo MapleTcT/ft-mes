@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Batch 配方 Web 编辑</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --blue: #1677d2;
+      --blue-dark: #0f5fae;
+      --green: #17845c;
+      --red: #c73535;
+      --amber: #a76608;
+      --ink: #263648;
+      --muted: #68798b;
+      --line: #d8e0e8;
+      --panel: #f5f7f9;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--white);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: grid; grid-template-rows: 52px minmax(0, 1fr); height: 100%; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 18px;
+      color: var(--white);
+      background: var(--blue);
+      border-bottom: 1px solid var(--blue-dark);
+    }
+    .topbar h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: 0; }
+    .topbar .sub { opacity: .84; font-size: 12px; }
+    .status { margin-left: auto; min-width: 180px; text-align: right; font-size: 12px; }
+    .workspace { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 0; }
+    .sidebar { display: grid; grid-template-rows: auto minmax(0, 1fr); border-right: 1px solid var(--line); min-width: 0; }
+    .searchbar { display: grid; grid-template-columns: minmax(0, 1fr) 40px 40px; gap: 6px; padding: 12px; border-bottom: 1px solid var(--line); }
+    .formula-list { overflow: auto; }
+    .formula-item { width: 100%; padding: 11px 14px; text-align: left; color: var(--ink); background: var(--white); border: 0; border-bottom: 1px solid #edf1f4; }
+    .formula-item:hover { background: #f1f7fd; }
+    .formula-item.active { background: #e8f3fd; box-shadow: inset 3px 0 0 var(--blue); }
+    .formula-item strong, .formula-item span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .formula-item strong { font-weight: 600; }
+    .formula-item span { margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .editor { min-width: 0; overflow: auto; background: var(--panel); }
+    .empty { display: grid; place-items: center; min-height: 100%; color: var(--muted); }
+    .form-wrap { display: none; min-width: 760px; }
+    .form-wrap.visible { display: block; }
+    .toolbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 8px 16px; background: var(--white); border-bottom: 1px solid var(--line); }
+    .toolbar .spacer { flex: 1; }
+    .section { padding: 16px 18px; background: var(--white); border-bottom: 1px solid var(--line); }
+    .section h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; letter-spacing: 0; }
+    .fields { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 12px 14px; }
+    .field { min-width: 0; }
+    .field.wide { grid-column: span 2; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 5px; color: #526579; font-size: 12px; }
+    input, select, textarea { width: 100%; min-height: 34px; padding: 6px 9px; color: var(--ink); background: var(--white); border: 1px solid #becbd7; border-radius: 3px; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(22, 119, 210, .12); }
+    textarea { min-height: 68px; resize: vertical; }
+    .btn { min-height: 34px; padding: 6px 13px; color: #34475a; background: var(--white); border: 1px solid #b9c7d4; border-radius: 3px; }
+    .btn:hover { border-color: var(--blue); color: var(--blue); }
+    .btn.primary { color: var(--white); background: var(--blue); border-color: var(--blue); }
+    .btn.primary:hover { background: var(--blue-dark); }
+    .btn.publish { color: var(--white); background: var(--green); border-color: var(--green); }
+    .btn.danger { color: var(--red); border-color: #e2b6b6; }
+    .btn.icon { width: 40px; padding: 0; font-size: 18px; }
+    .btn:disabled { cursor: not-allowed; opacity: .5; }
+    .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .section-head h2 { margin: 0; }
+    .section-head .count { color: var(--muted); font-size: 12px; }
+    .section-head .spacer { flex: 1; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    table { width: 100%; min-width: 980px; border-collapse: collapse; table-layout: fixed; }
+    th, td { padding: 7px; vertical-align: middle; border-right: 1px solid #e5eaee; border-bottom: 1px solid #e5eaee; }
+    th { height: 38px; color: #53677b; background: #f2f5f7; font-size: 12px; font-weight: 600; text-align: left; }
+    tr:last-child td { border-bottom: 0; }
+    td input, td select { min-height: 30px; padding: 4px 6px; }
+    .check { width: 18px; min-height: 18px; }
+    .narrow { width: 74px; }
+    .medium { width: 130px; }
+    .actions { width: 78px; text-align: center; }
+    .row-delete { min-height: 28px; padding: 3px 8px; color: var(--red); background: var(--white); border: 1px solid #e1bebe; border-radius: 3px; }
+    .delivery { display: grid; grid-template-columns: repeat(5, minmax(110px, 1fr)); gap: 10px; padding: 12px; background: #f7fafc; border: 1px solid var(--line); }
+    .delivery div { min-width: 0; }
+    .delivery b, .delivery span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .delivery b { color: var(--muted); font-size: 11px; font-weight: 500; }
+    .delivery span { margin-top: 3px; }
+    .tag { display: inline-block; width: auto; padding: 2px 7px; border-radius: 3px; background: #e9eef3; }
+    .tag.ACKNOWLEDGED { color: #09633f; background: #dff3e9; }
+    .tag.FAILED, .tag.CONFIG_REQUIRED { color: #9b2929; background: #fae5e5; }
+    .toast { position: fixed; right: 18px; bottom: 18px; z-index: 20; max-width: 460px; padding: 10px 14px; color: var(--white); background: #33485c; border-radius: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.18); opacity: 0; pointer-events: none; transform: translateY(8px); transition: .16s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: var(--red); }
+    .toast.success { background: var(--green); }
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: 1fr; grid-template-rows: 230px minmax(0, 1fr); }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .fields { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+      .form-wrap { min-width: 0; }
+      .toolbar { position: static; flex-wrap: wrap; }
+      .topbar .sub { display: none; }
+    }
+    @media (max-width: 560px) {
+      .topbar { padding: 0 12px; }
+      .topbar h1 { font-size: 16px; }
+      .status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .fields { grid-template-columns: 1fr; }
+      .field.wide, .field.full { grid-column: 1; }
+      .section { padding: 14px 12px; }
+      .delivery { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>Batch 配方 Web 编辑</h1>
+      <span class="sub">RM 配方、工序、活动与投递修订</span>
+      <span class="status" id="appStatus">正在读取配方...</span>
+    </header>
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="searchbar">
+          <input id="searchInput" aria-label="搜索配方" placeholder="编码 / 名称 / Batch 编码">
+          <button class="btn icon" id="searchButton" title="查询" aria-label="查询">&#128269;</button>
+          <button class="btn icon" id="newButton" title="新建配方" aria-label="新建配方">+</button>
+        </div>
+        <div class="formula-list" id="formulaList"></div>
+      </aside>
+      <section class="editor">
+        <div class="empty" id="emptyState">请选择配方，或新建一个 Web 配方</div>
+        <form class="form-wrap" id="formulaForm">
+          <div class="toolbar">
+            <strong id="editorTitle">新建配方</strong>
+            <span id="versionText"></span>
+            <span class="spacer"></span>
+            <button type="button" class="btn primary" id="saveButton">保存修订</button>
+            <button type="button" class="btn publish" id="publishButton" disabled>投递 Batch/DCS</button>
+            <button type="button" class="btn" id="retryButton" hidden>重试投递</button>
+          </div>
+          <section class="section">
+            <h2>配方信息</h2>
+            <div class="fields">
+              <div class="field"><label for="formulaCode">配方编码 *</label><input id="formulaCode" maxlength="128" required></div>
+              <div class="field"><label for="formulaName">配方名称 *</label><input id="formulaName" maxlength="255" required></div>
+              <div class="field"><label for="formulaEdition">配方版本</label><input id="formulaEdition" maxlength="64"></div>
+              <div class="field"><label for="productId">产品 *</label><select id="productId" required><option value="">请选择产品</option></select></div>
+              <div class="field"><label for="normalSize">标准批量</label><input id="normalSize" maxlength="64"></div>
+              <div class="field"><label for="batchFormulaId">Batch 配方标识</label><input id="batchFormulaId" maxlength="128"></div>
+              <div class="field"><label for="batchFormulaCode">Batch 配方编码</label><input id="batchFormulaCode" maxlength="128"></div>
+              <div class="field"><label for="batchFormulaEdition">Batch 配方版本</label><input id="batchFormulaEdition" maxlength="64"></div>
+              <div class="field"><label for="batchServerId">Batch 服务器</label><select id="batchServerId"><option value="">暂不投递</option></select></div>
+              <div class="field"><label for="reportType">报表类型</label><input id="reportType" maxlength="128" value="RM_reportType/effectReport"></div>
+              <div class="field wide"><label for="setProcess">配方类型</label><input id="setProcess" maxlength="128" value="RM_formulaType/simpleFormula"></div>
+              <div class="field full"><label for="description">说明</label><textarea id="description" maxlength="2000"></textarea></div>
+            </div>
+          </section>
+          <section class="section">
+            <div class="section-head"><h2>工序</h2><span class="count" id="processCount"></span><span class="spacer"></span><button type="button" class="btn" id="addProcess">新增工序</button></div>
+            <div class="table-wrap"><table><thead><tr><th style="width:180px">名称 *</th><th class="narrow">顺序</th><th class="medium">Batch 单元</th><th class="narrow">时长</th><th class="narrow">自动</th><th class="narrow">首工序</th><th class="narrow">末工序</th><th>备注</th><th class="actions">操作</th></tr></thead><tbody id="processBody"></tbody></table></div>
+          </section>
+          <section class="section">
+            <div class="section-head"><h2>活动</h2><span class="count" id="activityCount"></span><span class="spacer"></span><button type="button" class="btn" id="addActivity">新增活动</button></div>
+            <div class="table-wrap"><table><thead><tr><th class="medium">所属工序 *</th><th style="width:170px">名称 *</th><th class="medium">活动类型</th><th class="medium">Batch 阶段</th><th class="medium">调度系统</th><th class="medium">执行系统</th><th class="narrow">自动</th><th class="narrow">定量</th><th class="narrow">数量</th><th>备注</th><th class="actions">操作</th></tr></thead><tbody id="activityBody"></tbody></table></div>
+          </section>
+          <section class="section">
+            <h2>投递状态</h2>
+            <div class="delivery" id="deliveryPanel"><div><b>状态</b><span>尚未投递</span></div></div>
+          </section>
+        </form>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script>
+    (function () {
+      "use strict";
+      var apiBase = "/msService/RM/formula-editor";
+      var state = { formulaId: null, version: null, revisionId: null, delivery: null, processes: [], activities: [], busy: false, materials: [], batchServers: [] };
+      var byId = function (id) { return document.getElementById(id); };
+      var value = function (id) { return byId(id).value.trim(); };
+      var idValue = function (id) { var raw = value(id); return raw || null; };
+      var escapeHtml = function (text) { return String(text == null ? "" : text).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; }); };
+      var requestId = function (prefix) { return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9); };
+      var clientKey = function (prefix) { return prefix + "-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7); };
+
+      function toast(message, type) {
+        var node = byId("toast");
+        node.textContent = message;
+        node.className = "toast show " + (type || "");
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(function () { node.className = "toast"; }, 3500);
+      }
+
+      function setBusy(busy, message) {
+        state.busy = busy;
+        byId("saveButton").disabled = busy;
+        byId("publishButton").disabled = busy || !state.formulaId || !state.revisionId;
+        byId("retryButton").disabled = busy;
+        byId("appStatus").textContent = message || (busy ? "处理中..." : "就绪");
+      }
+
+      function call(path, options) {
+        options = options || {};
+        options.credentials = "same-origin";
+        options.headers = options.headers || {};
+        options.headers.Accept = "application/json";
+        if (options.body) { options.headers["Content-Type"] = "application/json;charset=UTF-8"; }
+        return fetch(apiBase + path, options).then(function (response) {
+          return response.text().then(function (text) {
+            var payload;
+            try { payload = JSON.parse(text); } catch (_error) { throw new Error("接口返回格式异常 (" + response.status + ")"); }
+            if (!response.ok || payload.code !== 200) { throw new Error(payload.message || payload.msg || "请求失败"); }
+            return payload.data;
+          });
+        });
+      }
+
+      function loadList(options) {
+        options = options || {};
+        if (!options.background) { setBusy(true, "正在读取配方..."); }
+        return call("/formulas?limit=200&query=" + encodeURIComponent(value("searchInput")))
+          .then(function (data) {
+            var html = data.items.map(function (item) {
+              var active = String(item.id) === String(state.formulaId) ? " active" : "";
+              return '<button type="button" class="formula-item' + active + '" data-id="' + item.id + '"><strong>' + escapeHtml(item.formulaName || item.formulaCode) + '</strong><span>' + escapeHtml(item.formulaCode) + ' · v' + escapeHtml(item.version) + '</span></button>';
+            }).join("");
+            byId("formulaList").innerHTML = html || '<div style="padding:18px;color:#68798b">未找到配方</div>';
+            if (!options.background) { setBusy(false, "共 " + data.count + " 个配方"); }
+            return data;
+          })
+          .catch(function (error) {
+            if (!options.background) { setBusy(false, "读取失败"); }
+            toast(options.background ? "配方已保存，但列表刷新失败：" + error.message : error.message, "error");
+            return null;
+          });
+      }
+
+      function loadReferences() {
+        setBusy(true, "正在读取产品与 Batch 服务器...");
+        return Promise.all([
+          call("/references/materials?limit=500"),
+          call("/references/batch-servers?limit=300")
+        ]).then(function (results) {
+          state.materials = results[0].items || [];
+          state.batchServers = results[1].items || [];
+          renderReferenceSelect("productId", "请选择产品", state.materials);
+          renderReferenceSelect("batchServerId", "暂不投递", state.batchServers);
+        });
+      }
+
+      function renderReferenceSelect(id, emptyLabel, items) {
+        byId(id).innerHTML = '<option value="">' + escapeHtml(emptyLabel) + '</option>' + items.map(function (item) {
+          var label = [item.code, item.name].filter(Boolean).join(" - ") || ("ID " + item.id);
+          return '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(label) + '</option>';
+        }).join("");
+      }
+
+      function selectValue(id, data, label) {
+        var node = byId(id);
+        var raw = data == null ? "" : String(data);
+        if (raw && !Array.prototype.some.call(node.options, function (option) { return option.value === raw; })) {
+          var option = document.createElement("option");
+          option.value = raw;
+          option.textContent = label || ("ID " + raw);
+          node.appendChild(option);
+        }
+        node.value = raw;
+      }
+
+      function applyFormula(data, revisionId) {
+          state.formulaId = String(data.id);
+          state.version = Number(data.version || 0);
+          state.revisionId = revisionId != null ? String(revisionId) : (data.latestRevision && String(data.latestRevision.id) || null);
+          state.delivery = data.latestDelivery || null;
+          state.processes = (data.processes || []).map(function (row) { return Object.assign({}, row); });
+          state.activities = (data.activities || []).map(function (row) { return Object.assign({}, row); });
+          fill("formulaCode", data.formulaCode); fill("formulaName", data.formulaName); fill("formulaEdition", data.formulaEdition);
+          selectValue("productId", data.productId, [data.productCode, data.productName].filter(Boolean).join(" - ")); fill("normalSize", data.normalSize); fill("batchFormulaId", data.batchFormulaId);
+          fill("batchFormulaCode", data.batchFormulaCode); fill("batchFormulaEdition", data.batchFormulaEdition);
+          selectValue("batchServerId", data.batchServerId, [data.batchServerCode, data.batchServerName].filter(Boolean).join(" - ")); fill("reportType", data.reportType); fill("setProcess", data.setProcess);
+          fill("description", data.description);
+          byId("editorTitle").textContent = data.formulaName || data.formulaCode;
+          byId("versionText").textContent = "版本 " + state.version;
+          showForm(); renderChildren(); renderDelivery();
+      }
+
+      function openFormula(id) {
+        setBusy(true, "正在读取配方明细...");
+        return call("/formulas/" + id).then(function (data) {
+          applyFormula(data);
+          setBusy(false, "配方已读取");
+          loadList({ background: true });
+          return data;
+        }).catch(function (error) { setBusy(false, "读取失败"); toast(error.message, "error"); });
+      }
+
+      function newFormula() {
+        state.formulaId = null; state.version = null; state.revisionId = null; state.delivery = null;
+        state.processes = [{ clientKey: clientKey("process"), name: "主工序", executionOrder: 1, autoStart: false, firstProcess: true, lastProcess: true }];
+        state.activities = [];
+        ["formulaCode","formulaName","formulaEdition","productId","normalSize","batchFormulaId","batchFormulaCode","batchFormulaEdition","batchServerId","description"].forEach(function (id) { fill(id, ""); });
+        fill("reportType", "RM_reportType/effectReport"); fill("setProcess", "RM_formulaType/simpleFormula");
+        byId("editorTitle").textContent = "新建配方"; byId("versionText").textContent = "";
+        showForm(); renderChildren(); renderDelivery(); setBusy(false, "新建配方");
+      }
+
+      function showForm() { byId("emptyState").style.display = "none"; byId("formulaForm").className = "form-wrap visible"; }
+      function fill(id, data) { byId(id).value = data == null ? "" : data; }
+
+      function renderChildren() {
+        byId("processCount").textContent = state.processes.length + " 项";
+        byId("processBody").innerHTML = state.processes.map(function (row, index) {
+          return '<tr data-index="' + index + '"><td><input data-field="name" maxlength="255" value="' + escapeHtml(row.name) + '"></td><td><input data-field="executionOrder" type="number" min="1" value="' + escapeHtml(row.executionOrder || index + 1) + '"></td><td><input data-field="batchUnitId" maxlength="128" value="' + escapeHtml(row.batchUnitId) + '"></td><td><input data-field="duration" type="number" min="0" step="0.001" value="' + escapeHtml(row.duration) + '"></td><td><input class="check" data-field="autoStart" type="checkbox" ' + (row.autoStart ? "checked" : "") + '></td><td><input class="check" data-field="firstProcess" type="checkbox" ' + (row.firstProcess ? "checked" : "") + '></td><td><input class="check" data-field="lastProcess" type="checkbox" ' + (row.lastProcess ? "checked" : "") + '></td><td><input data-field="remark" maxlength="1000" value="' + escapeHtml(row.remark) + '"></td><td class="actions"><button type="button" class="row-delete" data-delete-process="' + index + '">删除</button></td></tr>';
+        }).join("");
+        var options = state.processes.map(function (row) { return '<option value="' + escapeHtml(row.clientKey) + '">' + escapeHtml(row.name || row.clientKey) + '</option>'; }).join("");
+        byId("activityCount").textContent = state.activities.length + " 项";
+        byId("activityBody").innerHTML = state.activities.map(function (row, index) {
+          return '<tr data-index="' + index + '"><td><select data-field="processKey">' + options.replace('value="' + escapeHtml(row.processKey) + '"', 'value="' + escapeHtml(row.processKey) + '" selected') + '</select></td><td><input data-field="name" maxlength="255" value="' + escapeHtml(row.name) + '"></td><td><input data-field="activeType" maxlength="128" value="' + escapeHtml(row.activeType) + '"></td><td><input data-field="batchPhaseId" maxlength="255" value="' + escapeHtml(row.batchPhaseId) + '"></td><td><input data-field="dispatchSystem" maxlength="128" value="' + escapeHtml(row.dispatchSystem) + '"></td><td><input data-field="executionSystem" maxlength="128" value="' + escapeHtml(row.executionSystem) + '"></td><td><input class="check" data-field="automatic" type="checkbox" ' + (row.automatic ? "checked" : "") + '></td><td><input class="check" data-field="fixedQuantity" type="checkbox" ' + (row.fixedQuantity ? "checked" : "") + '></td><td><input data-field="quantity" type="number" min="0" step="0.000001" value="' + escapeHtml(row.quantity) + '"></td><td><input data-field="remark" maxlength="1000" value="' + escapeHtml(row.remark) + '"></td><td class="actions"><button type="button" class="row-delete" data-delete-activity="' + index + '">删除</button></td></tr>';
+        }).join("");
+      }
+
+      function syncRows() {
+        Array.prototype.forEach.call(byId("processBody").querySelectorAll("tr"), function (tr) {
+          var row = state.processes[Number(tr.dataset.index)];
+          Array.prototype.forEach.call(tr.querySelectorAll("[data-field]"), function (input) { row[input.dataset.field] = input.type === "checkbox" ? input.checked : (input.type === "number" ? (input.value === "" ? null : Number(input.value)) : input.value.trim()); });
+        });
+        Array.prototype.forEach.call(byId("activityBody").querySelectorAll("tr"), function (tr) {
+          var row = state.activities[Number(tr.dataset.index)];
+          Array.prototype.forEach.call(tr.querySelectorAll("[data-field]"), function (input) { row[input.dataset.field] = input.type === "checkbox" ? input.checked : (input.type === "number" ? (input.value === "" ? null : Number(input.value)) : input.value.trim()); });
+        });
+      }
+
+      function payload() {
+        syncRows();
+        return { requestId: requestId("RM-WEB-SAVE"), expectedVersion: state.version, formulaCode: value("formulaCode"), formulaName: value("formulaName"), formulaEdition: value("formulaEdition"), productId: idValue("productId"), batchFormulaId: value("batchFormulaId"), batchFormulaCode: value("batchFormulaCode"), batchFormulaEdition: value("batchFormulaEdition"), batchServerId: idValue("batchServerId"), normalSize: value("normalSize"), description: value("description"), reportType: value("reportType"), setProcess: value("setProcess"), processes: state.processes, activities: state.activities };
+      }
+
+      function save() {
+        if (!byId("formulaForm").reportValidity()) { return; }
+        var body = payload();
+        if (!body.processes.length) { toast("至少需要一个工序", "error"); return; }
+        setBusy(true, "正在保存配方修订...");
+        call(state.formulaId ? "/formulas/" + state.formulaId : "/formulas", { method: state.formulaId ? "PUT" : "POST", body: JSON.stringify(body) })
+          .then(function (data) {
+            applyFormula(data.formula, data.revisionId);
+            setBusy(false, data.idempotent ? "修订已存在" : "配方修订已保存");
+            toast(data.idempotent ? "修订已存在" : "配方修订已保存", "success");
+            loadList({ background: true });
+          })
+          .catch(function (error) { setBusy(false, "保存失败"); toast(error.message, "error"); });
+      }
+
+      function publish() {
+        if (!state.formulaId || !state.revisionId) { return; }
+        setBusy(true, "正在投递 Batch/DCS...");
+        call("/formulas/" + state.formulaId + "/deliveries", { method: "POST", body: JSON.stringify({ requestId: requestId("RM-WEB-DELIVERY"), revisionId: state.revisionId }) })
+          .then(function (data) { state.delivery = data; renderDelivery(); setBusy(false, "投递完成: " + data.state); toast(data.state === "ACKNOWLEDGED" ? "Batch/DCS 已确认" : "投递未确认，可查看状态后重试", data.state === "ACKNOWLEDGED" ? "success" : "error"); })
+          .catch(function (error) { setBusy(false, "投递失败"); toast(error.message, "error"); });
+      }
+
+      function retry() {
+        if (!state.delivery || !state.delivery.id) { return; }
+        setBusy(true, "正在重试投递...");
+        call("/deliveries/" + state.delivery.id + "/retry", { method: "POST" })
+          .then(function (data) { state.delivery = data; renderDelivery(); setBusy(false, "重试完成: " + data.state); toast(data.state === "ACKNOWLEDGED" ? "Batch/DCS 已确认" : "重试仍未确认", data.state === "ACKNOWLEDGED" ? "success" : "error"); })
+          .catch(function (error) { setBusy(false, "重试失败"); toast(error.message, "error"); });
+      }
+
+      function renderDelivery() {
+        var data = state.delivery;
+        byId("publishButton").disabled = state.busy || !state.formulaId || !state.revisionId;
+        byId("retryButton").hidden = !data || data.state === "ACKNOWLEDGED";
+        if (!data) { byId("deliveryPanel").innerHTML = '<div><b>状态</b><span>尚未投递</span></div>'; return; }
+        byId("deliveryPanel").innerHTML = '<div><b>状态</b><span class="tag ' + escapeHtml(data.state) + '">' + escapeHtml(data.state) + '</span></div><div><b>投递编号</b><span>' + escapeHtml(data.id) + '</span></div><div><b>尝试次数</b><span>' + escapeHtml(data.attempts) + '</span></div><div><b>HTTP 状态</b><span>' + escapeHtml(data.httpStatus || "-") + '</span></div><div><b>适配器</b><span>' + escapeHtml(data.adapter || data.endpoint || "-") + '</span></div>';
+      }
+
+      byId("searchButton").addEventListener("click", loadList);
+      byId("searchInput").addEventListener("keydown", function (event) { if (event.key === "Enter") { event.preventDefault(); loadList(); } });
+      byId("newButton").addEventListener("click", newFormula);
+      byId("formulaList").addEventListener("click", function (event) { var button = event.target.closest("[data-id]"); if (button) { openFormula(button.dataset.id); } });
+      byId("addProcess").addEventListener("click", function () { syncRows(); state.processes.push({ clientKey: clientKey("process"), name: "", executionOrder: state.processes.length + 1, autoStart: false, firstProcess: false, lastProcess: false }); renderChildren(); });
+      byId("addActivity").addEventListener("click", function () { syncRows(); if (!state.processes.length) { toast("请先新增工序", "error"); return; } state.activities.push({ clientKey: clientKey("activity"), processKey: state.processes[0].clientKey, name: "", automatic: false, fixedQuantity: false }); renderChildren(); });
+      byId("processBody").addEventListener("click", function (event) { if (event.target.dataset.deleteProcess != null) { syncRows(); var removed = state.processes.splice(Number(event.target.dataset.deleteProcess), 1)[0]; state.activities = state.activities.filter(function (item) { return item.processKey !== removed.clientKey; }); renderChildren(); } });
+      byId("activityBody").addEventListener("click", function (event) { if (event.target.dataset.deleteActivity != null) { syncRows(); state.activities.splice(Number(event.target.dataset.deleteActivity), 1); renderChildren(); } });
+      byId("saveButton").addEventListener("click", save);
+      byId("publishButton").addEventListener("click", publish);
+      byId("retryButton").addEventListener("click", retry);
+      loadReferences().then(loadList).catch(function (error) {
+        setBusy(false, "主数据读取失败");
+        toast(error.message, "error");
+        loadList();
+      });
+    }());
+  </script>
+</body>
+</html>

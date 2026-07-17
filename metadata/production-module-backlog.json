@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T09:51:20Z",
+  "generatedAt": "2026-07-17T12:04:48.223Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -16,7 +16,8 @@
     "metadata/core-flow-runtime-rollback-rehearsal.json",
     "metadata/wom-qrcode-persistence-acceptance.json",
     "metadata/wom-qrcode-browser-acceptance.json",
-    "metadata/wom-manual-task-entry-acceptance.json"
+    "metadata/wom-manual-task-entry-acceptance.json",
+    "metadata/rm-web-formula-editor-acceptance.json"
   ],
   "latestCoreFlowEvidence": {
     "generatedAt": "2026-07-10T07:25:00Z",
@@ -48,16 +49,28 @@
         "docs/frontend-functional-test-report.md",
         "docs/backend-table-audit/persistence-acceptance.md"
       ]
+    },
+    {
+      "id": "PROD-010",
+      "status": "PASS",
+      "closedAt": "2026-07-17T12:04:48.223Z",
+      "reason": "A maintained RM Web formula editor, visible list entry, PostgreSQL revision/delivery ledger and isolated fail-first HTTP delivery contract are implemented and accepted without IE ActiveX or localhost:4433.",
+      "evidenceRefs": [
+        "metadata/rm-web-formula-editor-acceptance.json",
+        "metadata/production-module-test-cases.json",
+        "docs/frontend-functional-test-report.md",
+        "docs/backend-table-audit/persistence-acceptance.md"
+      ]
     }
   ],
   "summary": {
-    "totalItems": 4,
+    "totalItems": 3,
     "failBacklog": 0,
-    "blocked": 4,
+    "blocked": 3,
     "postgresCompatibilityGap": 0,
-    "moduleBacklog": 4,
+    "moduleBacklog": 3,
     "missingServicePackage": 0,
-    "externalClientRequired": 1,
+    "externalClientRequired": 0,
     "missingExportImplementation": 0,
     "compositeServiceAndScope": 0,
     "productScopeConfirmation": 3,
@@ -122,43 +135,6 @@
         "verificationSql": "SELECT count(*)::text\nFROM public.wom_produce_tasks\nWHERE coalesce(table_no::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(produce_batch_num::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%'\n   OR coalesce(day_plan_ids::text, '') LIKE '%ADP_E2E_20260622072905_PUBLIC_PRODUCE_NOOP%';",
         "evidence": "metadata/wom-public-produce-task-created-noop-probe.json"
       }
-    },
-    {
-      "id": "PROD-010",
-      "title": "Batch formula visible manual edit entry requires external Batch client",
-      "status": "BLOCKED",
-      "category": "external-client-required",
-      "disposition": "module-backlog",
-      "isPostgresCompatibilityGap": false,
-      "sourceStatus": "BLOCKED",
-      "productionCaseIds": [
-        "PROD-010"
-      ],
-      "persistenceCoverage": [],
-      "evidenceRefs": [
-        "metadata/production-module-blockers.json",
-        "metadata/production-module-test-cases.json",
-        "docs/production-module-functional-test-cases.md",
-        "docs/frontend-functional-test-report.md"
-      ],
-      "recheckCommands": [
-        "make smoke-business-page",
-        "manual: provision external Batch client, trigger WebSocket/ActiveX edit flow, then save with an ADP_E2E marker and query rm_formulas"
-      ],
-      "passCriteria": [
-        "The real external-client driven edit entry opens batchFormulaEdit without a fake platform-only button.",
-        "A unique marker proves edit/save persistence in rm_formulas and related RM process/activity tables.",
-        "Browser, API, backend and PostgreSQL evidence are added to the acceptance reports."
-      ],
-      "nextActions": [
-        "Recover or provision the external Batch client/server workflow.",
-        "Capture WebSocket/browser/API evidence for the real edit flow.",
-        "Move the production case to PASS only after marker persistence is proven."
-      ],
-      "nonSolutions": [
-        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
-        "Do not mark PASS from batch/sync import evidence alone."
-      ]
     },
     {
       "id": "PROD-019",

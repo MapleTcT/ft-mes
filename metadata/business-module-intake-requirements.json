@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T09:51:20Z",
+  "generatedAt": "2026-07-17T12:04:48.223Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
@@ -16,7 +16,8 @@
     "metadata/wom-toolbar-action-coverage.json",
     "metadata/wom-qrcode-route-probe.json",
     "metadata/wom-qrcode-persistence-acceptance.json",
-    "metadata/wom-qrcode-browser-acceptance.json"
+    "metadata/wom-qrcode-browser-acceptance.json",
+    "metadata/rm-web-formula-editor-acceptance.json"
   ],
   "closedRequirements": [
     {
@@ -27,20 +28,29 @@
         "metadata/wom-qrcode-persistence-acceptance.json",
         "metadata/wom-qrcode-browser-acceptance.json"
       ]
+    },
+    {
+      "id": "PROD-010",
+      "status": "PASS",
+      "closedAt": "2026-07-17T12:04:48.223Z",
+      "evidenceRefs": [
+        "metadata/rm-web-formula-editor-acceptance.json",
+        "metadata/production-module-test-cases.json"
+      ]
     }
   ],
   "summary": {
-    "requirements": 4,
-    "blocked": 4,
+    "requirements": 3,
+    "blocked": 3,
     "productDecision": 3,
     "runtimeEndpointRecovery": 0,
-    "externalClientAdapter": 1,
+    "externalClientAdapter": 0,
     "servicePackage": 0,
     "servicePackageAndScopeDecision": 0,
     "exportImplementation": 0,
     "postgresCompatibilityGap": 0,
-    "requiresRealBrowserProof": 3,
-    "requiresPostgreSQLProof": 4,
+    "requiresRealBrowserProof": 2,
+    "requiresPostgreSQLProof": 3,
     "requiresFileResponseProof": 0
   },
   "requirements": [
@@ -96,68 +106,6 @@
         "metadata/wom-public-produce-task-created-analysis.json",
         "metadata/wom-public-produce-task-created-noop-probe.json",
         "docs/backend-table-audit/wom-public-produce-task-created-analysis.md"
-      ]
-    },
-    {
-      "id": "PROD-010",
-      "title": "Batch formula visible manual edit entry requires external Batch client",
-      "status": "BLOCKED",
-      "category": "external-client-required",
-      "sourceBacklogId": "PROD-010",
-      "linkedBlockerCases": [
-        "PROD-010"
-      ],
-      "requiredIntakeType": "external-client-adapter",
-      "dependencyContractIds": [],
-      "requiredPackages": [
-        "External Batch client",
-        "Batch WebSocket or ActiveX bridge"
-      ],
-      "packageSearchTerms": [
-        "batchFormulaEdit",
-        "WebSocket",
-        "ActiveX",
-        "rm_formulas",
-        "rm_formula_processes",
-        "rm_process_actives"
-      ],
-      "frontendEntrypoints": [
-        "RM_1.0.0_formula_batchFormulaList",
-        "batchFormulaEdit opened by real external client flow"
-      ],
-      "apiEndpoints": [
-        "Batch client driven save/submit endpoint captured during real flow"
-      ],
-      "persistenceExpectation": "REQUIRED",
-      "targetTables": [
-        "rm_formulas",
-        "rm_formula_processes",
-        "rm_process_actives"
-      ],
-      "requiredEvidence": [
-        "real external-client driven browser entry",
-        "WebSocket/ActiveX bridge evidence where applicable",
-        "API request and response with ADP_E2E marker",
-        "PostgreSQL marker query against RM formula and process/activity tables"
-      ],
-      "recheckCommands": [
-        "make smoke-business-page",
-        "manual: provision external Batch client, trigger batchFormulaEdit, save with ADP_E2E marker and query RM target tables"
-      ],
-      "passCriteria": [
-        "The real external-client entry opens batchFormulaEdit.",
-        "The marker edit/save writes RM formula and process/activity tables.",
-        "Browser, API, backend and PostgreSQL evidence are added to acceptance reports."
-      ],
-      "nonSolutions": [
-        "Do not add a fake list button that bypasses the vendor Batch client workflow.",
-        "Do not mark PASS from batch/sync import evidence alone."
-      ],
-      "sourceEvidenceRefs": [
-        "metadata/production-module-backlog.json",
-        "metadata/production-module-blockers.json",
-        "metadata/production-module-test-cases.json",
-        "docs/frontend-functional-test-report.md"
       ]
     },
     {

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T10:10:30Z",
+  "generatedAt": "2026-07-17T12:04:48Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "module": "production",
-  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_REJECT_MATERIAL_MAIN_FLOWS_ACCEPTED_AND_REMAINING_EXTERNAL_BLOCKERS_REFINED",
+  "status": "ACTION_ACCEPTANCE_MATRIX_WITH_RM_WEB_FORMULA_EDITOR_ACCEPTED_AND_REMAINING_PRODUCT_SCOPE_BLOCKERS_REFINED",
   "evidence": {
     "baseUrl": "http://10.11.100.17:18080; ssh/db/log host 10.11.100.17",
     "businessDependencyReadinessSmoke": "metadata/business-dependency-readiness-smoke.json; 2026-06-20 re-runnable smoke status BLOCKED for material-service and process-analysis on 100.99.133.43",
@@ -77,13 +77,14 @@
     "coreFlowRuntimeRollbackRehearsal": "metadata/core-flow-runtime-rollback-rehearsal.json; marker ADP_E2E_20260710034638_CORE_RUNTIME_ROLLBACK; rollback and restore each completed a distinct WOM Spring Boot start, Nacos healthy registration and page HTTP 200; post-restore manufacturing-order and toolbar markers passed.",
     "coreFlowDirectHost": "2026-07-10 direct LAN recheck on 10.11.100.17: environment 9/9 PASS, platform 6/6 PASS, PostgreSQL runtime 8/8 PASS, mapper audit 0 error/0 warning; material and ProcessAnalysis remain BLOCKED.",
     "womQrCodePersistence": "metadata/wom-qrcode-persistence-acceptance.json; 2026-07-17 API/PostgreSQL acceptance passed 10/10 with two generated rows, idempotency, conflict handling, PNG rendering, print-state backfill and cleanup.",
-    "womQrCodeBrowser": "metadata/wom-qrcode-browser-acceptance.json; real makeTaskList SupDataGrid selection and normal mouse click passed 10/10, rendered two 320x320 QR images and produced zero browser/network errors; screenshot /tmp/wom-qrcode-browser-acceptance.png."
+    "womQrCodeBrowser": "metadata/wom-qrcode-browser-acceptance.json; real makeTaskList SupDataGrid selection and normal mouse click passed 10/10, rendered two 320x320 QR images and produced zero browser/network errors; screenshot /tmp/wom-qrcode-browser-acceptance.png.",
+    "rmWebFormulaEditor": "metadata/rm-web-formula-editor-acceptance.json; marker ADP_E2E_20260717120436_RM_WEB_FORMULA passed visible Web editor create, idempotent replay, two optimistic updates, isolated fail-first delivery/retry, six-table PostgreSQL readback, desktop/mobile browser checks and zero-row cleanup."
   },
   "summary": {
     "totalCases": 44,
-    "pass": 41,
+    "pass": 42,
     "fail": 0,
-    "blocked": 3,
+    "blocked": 2,
     "notRun": 0,
     "requiresPersistence": 32,
     "routeSmokePass": 44
@@ -659,7 +660,7 @@
         "Tailscale URL http://100.99.133.43:18080 still has intermittent large static bundle transfer instability; browser proof used the same environment public ingress while SSH/DB proof used 100.99.133.43.",
         "One transient i18n-value.js 503/ERR_ABORTED occurred during the successful run and recovered immediately to HTTP 200; not blocking this import acceptance."
       ],
-      "nextAction": "Keep PROD-010 separate for visible manual add/edit maintenance; continue export coverage under PROD-023.",
+      "nextAction": "Keep the PROD-010 Web editor marker flow in release regression; continue production Batch/DCS cutover evidence outside the page-edit blocker ledger.",
       "coverageTags": [
         "recipe",
         "import-export",
@@ -675,35 +676,34 @@
       "operationType": "visible-ui-update",
       "requiresPersistence": true,
       "routeSmokeStatus": "PASS",
-      "acceptanceStatus": "BLOCKED",
+      "acceptanceStatus": "PASS",
       "apiEndpoints": [
-        "GET /msService/RM/formula/formula/batchFormulaList",
-        "GET /msService/RM/formula/formula/batchFormulaEdit?entityCode=RM_1.0.0_formula",
-        "GET /msService/RM/formula/formula/batchFormulaView?entityCode=RM_1.0.0_formula&id=8991071330917339",
-        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaList",
-        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaEdit",
-        "GET /msService/baseService/view/layoutJson?viewCode=RM_1.0.0_formula_batchFormulaView",
-        "runtime_button batchFormula rows = 0",
-        "rbac_menuoperate exposes query only for batchFormulaList",
-        "batchFormulaList runtime buttons are 下载模板/导入Excel only",
-        "manual edit is pushed by external Batch ActiveX/WebSocket via custom batchEdit.html",
-        "POST /msService/RM/formula/formula/batch/sync accepted separately under PROD-043",
-        "POST /msService/RM/formula/formula/batch/delete accepted separately under PROD-043"
+        "GET /msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+        "GET /msService/RM/formula/editor",
+        "GET /msService/RM/formula-editor/references/materials",
+        "GET /msService/RM/formula-editor/references/batch-servers",
+        "GET /msService/RM/formula-editor/formulas",
+        "POST /msService/RM/formula-editor/formulas",
+        "PUT /msService/RM/formula-editor/formulas/{formulaId}",
+        "POST /msService/RM/formula-editor/formulas/{formulaId}/deliveries",
+        "POST /msService/RM/formula-editor/deliveries/{deliveryId}/retry"
       ],
-      "backendTraceStatus": "external-batch-client-edit-push-required",
+      "backendTraceStatus": "controller-service-jdbc-traced-and-postgres-verified",
       "targetTables": [
         "rm_formulas",
-        "rm_formula_qualities",
-        "rm_formula_types"
+        "rm_formula_processes",
+        "rm_process_actives",
+        "rm_formula_editor_revisions",
+        "rm_formula_deliveries",
+        "rm_formula_delivery_attempts"
       ],
-      "verificationSql": "select 'runtime_button_count', count(*) from public.runtime_button where view_code ilike '%batchFormula%'; select 'rbac', code, coalesce(url,''), coalesce(action_url,''), coalesce(view_code,'') from public.rbac_menuoperate where view_code ilike '%batchFormula%' or code ilike '%batchFormula%' order by code; select 'extra_buttons_has_add', position('新增' in convert_from(lo_get(view_json::oid), 'UTF8')), position('batchFormulaEdit' in convert_from(lo_get(view_json::oid), 'UTF8')) from public.runtime_extra_view where code='RM_1.0.0_formula_batchFormulaList';",
-      "evidence": "SQL 160 restored runtime JSON for batchFormulaEdit and batchFormulaView. After applying it on 100.99.133.43 and restarting baseService, PostgreSQL showed both runtime_extra_view.view_json values as OID. Real browser on same-environment public ingress http://222.88.185.146:18080 opened batchFormulaEdit and batchFormulaView with nav=200, layoutJson HTTP 200/code=200, and console/page/request failure counts all 0. On 2026-06-20 the new test address 100.99.133.43 was rechecked: runtime_button has 0 batchFormula rows; rbac_menuoperate only exposes query; parsed batchFormulaList runtime JSON contains only 下载模板 and 导入Excel buttons; authenticated Playwright opened batchFormulaList?system=formulaEnableFlw with navigationStatus=200/layoutJson=200 and no console/request failures. Screenshot /tmp/adp-rm-batchFormulaList-button-probe-1781899978217/batchFormulaList.png. Source batchEdit.html and product manual show manual edit depends on IE11 ActiveX, external Batch server, and WebSocket push to batchFormulaEdit, so the remaining gap is external Batch-client integration, not PostgreSQL mapping.",
+      "verificationSql": "SELECT id::text,version,formual_code,formula_edtion,batch_formula_edition,valid,batch_status FROM public.rm_formulas WHERE formual_code='ADP_E2E_20260717120436_RM_WEB_FORMULA'; SELECT count(*) FROM public.rm_formula_processes WHERE COALESCE(formula_id,formula)=9100000000000014 AND valid; SELECT count(*) FROM public.rm_process_actives WHERE formula_id=9100000000000014 AND valid; SELECT count(*),max(revision_no),max(formula_version) FROM public.rm_formula_editor_revisions WHERE formula_id=9100000000000014; SELECT state,attempts,http_status FROM public.rm_formula_deliveries WHERE formula_id=9100000000000014; SELECT state,http_status FROM public.rm_formula_delivery_attempts WHERE delivery_id=10 ORDER BY attempt_no;",
+      "evidence": "On 2026-07-17 at http://10.11.100.17:18080, the real RM batch formula list showed the visible Web编辑 entry and opened /msService/RM/formula/editor without IE ActiveX or localhost:4433. Marker ADP_E2E_20260717120436_RM_WEB_FORMULA was created through the visible form, replayed idempotently, updated twice to version 2, then delivered through the isolated fail-first HTTP adapter (FAILED/503) and retried to ACKNOWLEDGED/200. Direct PostgreSQL readback proved one active formula, one process, one activity, three immutable revisions, one delivery and two attempt rows. Desktop 1440x960 and mobile 390x844 had zero console/page/request errors and no document overflow. Marker cleanup returned all counts to zero. The adjacent unsafe bigint values were exercised after API identifiers were changed to JSON strings. Evidence: metadata/rm-web-formula-editor-acceptance.json and both RM editor screenshots.",
       "issues": [
-        "Current test environment has no external Batch client/IE ActiveX path to trigger the manual edit WebSocket push.",
-        "batchFormulaList intentionally exposes 下载模板/导入Excel only in current runtime metadata; adding a fake platform edit button would not represent the real product workflow.",
-        "batch/sync create and batch/delete cleanup are already accepted under PROD-043 and do not replace external-client manual edit acceptance."
+        "The isolated adapter proves the versioned HTTP acknowledgement and retry contract only; a real plant Batch/DCS endpoint, credentials and owner sign-off were not supplied.",
+        "The test database currently contains only ADP_E2E product master rows, so production master-data load remains a cutover prerequisite."
       ],
-      "nextAction": "Provision or connect the external Batch client/server path described in product documentation, trigger a real Batch edit push that opens batchFormulaEdit through WebSocket, then save/submit a marker formula and verify rm_formulas/rm_formula_processes/rm_process_actives in PostgreSQL.",
+      "nextAction": "Keep the Web editor and PostgreSQL marker flow in release regression; before plant cutover, configure the real Batch/DCS HTTPS endpoint and secret, load production product master data, then complete owner-signed delivery acknowledgement and rollback rehearsal.",
       "coverageTags": [
         "recipe",
         "persistence",
@@ -732,10 +732,10 @@
       "verificationSql": "select id,batch_formulaid,batch_status,formula_name,formula_edtion,batch_server_id,product_id,valid,status,coalesce(description,'') from public.rm_formulas where batch_formulaid='1781821964465576'; select id,main_obj,activity_name,outcome,outcome_des,process_key,process_version,user_id,table_info_id from public.rm_formulas_di where main_obj=756722825766144 order by id; select id,batch_formulaid,valid,status,coalesce(description,'') from public.rm_formulas where batch_formulaid='1781821964465576'; select count(*) from public.rm_process_actives where formula_id in (select id from public.rm_formulas where batch_formulaid='1781821964465576' and valid = true);",
       "evidence": "Marker ADP_E2E_20260619063244_RMBATCH_RECHECK. Browser context on http://100.99.133.43:18080 opened /msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw with navigation 200, then submitted batch/sync with mqValue.ID=1781821964465576 and formula name ADP_E2E_20260619063244_RMBATCH_RECHECK_FORMULA. API returned HTTP 200/data.success=true and PostgreSQL verified rm_formulas id 756722825766144, batch_formulaid 1781821964465576, valid=true/status=88. The same browser context then submitted batch/delete, API returned HTTP 200/dealSuccessFlag=true, and PostgreSQL verified the same formula valid=false/status=0 with active rm_process_actives count=0. Console/page/request failures were 0. Evidence: /tmp/adp-rm-batch-sync-persistence-20260618223244/rm-batch-sync-persistence-results.json.",
       "issues": [
-        "This accepts the batch integration sync/delete path, not the missing visible manual edit button workflow.",
-        "Excel import is now accepted separately under PROD-009."
+        "This accepts the recovered batch integration sync/delete path; visible manual maintenance is accepted separately under PROD-010.",
+        "Excel import is accepted separately under PROD-009."
       ],
-      "nextAction": "Keep PROD-010 for visible manual edit entry; use PROD-009 for import and this PASS only as evidence that batch formula integration create/delete writes are functional.",
+      "nextAction": "Regress this sync/delete path independently from the PROD-009 import and PROD-010 Web editor marker flows.",
       "coverageTags": [
         "recipe",
         "persistence",
@@ -1701,8 +1701,8 @@
     "workAppointmentRenderFix": "2026-06-19: WorkAppointment list static route now renders through nginx alias/static HTML. 148-runtime-visible-business-buttons.sql restores add/delete; 149-workappointment-i18n-resource-fixups.sql seeds resources; updated 148 namekey values make the legacy list render Chinese 新增/删除. Public browser click of 新增 opens workPlanEdit without console/page/request failures. Save/delete persistence remains PASS through browser page-context; full visible-form save, adjust/cancel, and approval remain pending.",
     "currentTestAddress": "2026-06-19: Current office SSH/DB host is 100.99.133.43. Browser QA may use http://222.88.185.146:18080 for the same environment because direct Tailscale large static bundle loading is too slow from the current network.",
     "qcsUnqualifiedDealway": "2026-06-19: QCS degradedRelease/让步放行 treatment decisioning accepted with marker ADP_E2E_20260618210018_QCS_DEGRADED_RELEASE, and return/拒收 accepted with marker ADP_E2E_20260619_QCS_RETURN_1. Bad quantity and inventory/inbound write-back remain separate blocked paths.",
-    "rmBatchFormula": "2026-06-20: Batch formula import, batch/sync create, batch/delete cleanup, and edit/view rendering are accepted. Visible manual edit workflow requires external Batch client/IE ActiveX/WebSocket push; current test env lacks that client, so PROD-010 remains BLOCKED as an external integration gap.",
-    "rmBatchFormulaUiEntryProbe": "2026-06-20: New test address 100.99.133.43 verified. runtime_button has 0 batchFormula rows, rbac_menuoperate exposes query only, runtime_extra_view batchFormulaList buttons are 下载模板/导入Excel only. Authenticated browser opened batchFormulaList?system=formulaEnableFlw with navigationStatus=200 and layoutJson=200, no console/request failures, screenshot /tmp/adp-rm-batchFormulaList-button-probe-1781899978217/batchFormulaList.png. Source batchEdit.html and product manual show manual edit depends on external Batch IE11 ActiveX/WebSocket push to batchFormulaEdit, so this remains external Batch-client integration blocked rather than a missing PostgreSQL mapping.",
+    "rmBatchFormula": "2026-07-17: Batch formula import, batch/sync create, batch/delete cleanup, old edit/view rendering and the maintained Web editor are accepted. PROD-010 passed three consecutive browser/API/PostgreSQL runs without IE ActiveX or localhost:4433. Real plant Batch/DCS delivery acknowledgement remains a production cutover prerequisite, not a page-edit blocker.",
+    "rmBatchFormulaUiEntryProbe": "The 2026-06-20 probe established that the recovered runtime only exposed download/import and delegated editing to an external IE11 ActiveX/WebSocket client. That historical blocker was superseded on 2026-07-17 by the authenticated /msService/RM/formula/editor entry backed by source module rm-formula-editor and migration 190; evidence is metadata/rm-web-formula-editor-acceptance.json.",
     "runtimeVisibleBusinessButtons": "2026-06-19: 148-runtime-visible-business-buttons.sql patched runtime_extra_view/ec_extra_view and baseService was restarted. 150-craftgraph-visible-modify-button.sql then restored craftGraph visible 修改. layoutJson now returns WTS 新增/修改, craftGraph 新增/修改/删除, and WorkAppointment 新增/删除 buttons with Chinese namekey values. craftGraph visible create/update/delete is PASS; WorkAppointment and WTS full workflow clicks remain pending.",
     "craftGraphVisibleSaveDelete": "2026-06-19: craftGraph basicInfo pure UI product selection, visible save, visible edit/update, and visible delete now have browser and PostgreSQL evidence. Product reference UI blocker is cleared; visible edit marker ADP_E2E_20260619071722_CRAFTGRAPH persisted version=1. PROD-012 is PASS. Remaining craftGraph notes are display clipping in edit modal and business confirmation on craft_tree_structures.valid after main soft delete.",
     "wtsFireworkStop": "2026-06-19: WTS fireWork WTS_processing/stop termination branch accepted with marker ADP_E2E_20260619144549_WTS_FIREWORK_STOP. Public browser E2E created a fresh permit/ticket and completed fireworkEdit/gas/risk/approval/execution-stop/production-safety-stop/work-unit-safety-stop. PostgreSQL on 100.99.133.43 verified status=99, job_status=WTS_jobStatus/errorClose, process_method=WTS_processing/stop, pending_count=0. Separate product cancel/delete/void entry remains unclaimed unless confirmed.",
@@ -1713,7 +1713,7 @@
     "womQrCode": "2026-07-17: the maintained wom-print source module, PostgreSQL migration 188, Nginx route and makeTaskList toolbar integration are deployed. Real browser marker ADP-WOM-UI-E2E-20260717084656-55303 passed 10/10, API marker ADP-WOM-E2E-20260717084642-55397 passed 10/10 including replay-safe print-state backfill, and cleanup restored zero marker rows. Physical printer dispatch remains outside the no-printer test configuration."
   },
   "latestRevalidation": {
-    "generatedAt": "2026-07-12T02:02:43.004Z",
+    "generatedAt": "2026-07-17T12:04:48.223Z",
     "database": "PostgreSQL",
     "coreFlow": {
       "status": "PASS",
@@ -1749,6 +1749,12 @@
       "status": "PASS",
       "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
       "evidence": "metadata/wom-manual-task-entry-acceptance.json"
+    },
+    "rmWebFormulaEditor": {
+      "status": "PASS_WITH_EXTERNAL_DCS_BLOCKED",
+      "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
+      "evidence": "metadata/rm-web-formula-editor-acceptance.json",
+      "cleanup": "formula/process/activity marker counts=0"
     }
   }
 }

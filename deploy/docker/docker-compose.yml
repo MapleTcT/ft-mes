@@ -388,6 +388,21 @@ services:
       JAVA_OPTS: "${JAVA_OPTS:--Xms256m -Xmx1024m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai} -DRM/RM.Batch.username=${RM_BATCH_USERNAME:-admin} -DRM/RM.Batch.password=${RM_BATCH_PASSWORD:-123456} -DRM/RM.MQ.brokerUrl=${RM_BATCH_MQ_BROKER_HOST:-localhost}"
     command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar"]
 
+  rm-formula-editor:
+    <<: *java-service
+    environment:
+      <<: *app-env
+      RM_FORMULA_EDITOR_PORT: "8080"
+      RM_FORMULA_EDITOR_DB_POOL_SIZE: ${RM_FORMULA_EDITOR_DB_POOL_SIZE:-8}
+      RM_FORMULA_EDITOR_TENANT_ID: ${RM_FORMULA_EDITOR_TENANT_ID:-default}
+      RM_FORMULA_DELIVERY_URL: ${RM_FORMULA_DELIVERY_URL:-}
+      RM_FORMULA_DELIVERY_TOKEN: ${RM_FORMULA_DELIVERY_TOKEN:-}
+      RM_FORMULA_SIMULATOR_ENABLED: ${RM_FORMULA_SIMULATOR_ENABLED:-false}
+      RM_FORMULA_SIMULATOR_SECRET: ${RM_FORMULA_SIMULATOR_SECRET:-disabled}
+      RM_FORMULA_SIMULATOR_FAIL_FIRST: ${RM_FORMULA_SIMULATOR_FAIL_FIRST:-false}
+      JAVA_OPTS: ${RM_FORMULA_EDITOR_JAVA_OPTS:--Xms128m -Xmx512m -Dfile.encoding=utf-8 -Duser.timezone=Asia/Shanghai}
+    command: ["sh", "/opt/adp/bin/run-service.sh", "/opt/adp/bap-server/module-Server/RMFormulaEditor/manual/rm-formula-editor.jar"]
+
   rm-export-compat:
     image: ${ADP_JAVA_BUILD_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:8-jdk}
     restart: unless-stopped
@@ -655,6 +670,7 @@ services:
     depends_on:
       - gateway
       - rm-export-compat
+      - rm-formula-editor
       - wom-print
       - wom-production-entry
 

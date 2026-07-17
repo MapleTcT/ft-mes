@@ -587,9 +587,9 @@
     ]
   },
   "deployment": {
-    "composeServiceCount": 61,
+    "composeServiceCount": 62,
     "composeServiceKindCounts": {
-      "business-runtime": 18,
+      "business-runtime": 19,
       "infrastructure": 11,
       "platform-runtime": 28,
       "support-runtime": 4
@@ -793,6 +793,11 @@
       {
         "service": "RMMs",
         "jarPath": "bap-server/module-Server/RMMs/manual/RMMs-1.0.0.jar",
+        "kind": "business-runtime"
+      },
+      {
+        "service": "rm-formula-editor",
+        "jarPath": "bap-server/module-Server/RMFormulaEditor/manual/rm-formula-editor.jar",
         "kind": "business-runtime"
       },
       {

@@ -151,6 +151,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: help ci ci-java17 verify verify-pom compose-config runtime-script-check sustainable-check ci-required-file-inventory ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown production-export-gap-breakdown-check production-source-evidence-refresh production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-doc production-cutover-gate-check production-rehearsal-plan production-rehearsal-plan-check production-evidence-ready-gate-regression-check runtime-patch-manifest runtime-patch-manifest-check bpi-contracts-test source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test create-backend-module module-intake-check material-wms-test material-wms-package material-wms-stage-runtime acceptance-material-wms-persistence process-analysis-test process-analysis-package process-analysis-stage-runtime acceptance-process-analysis-persistence inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check production-source-inventory production-target-preflight production-rowcount-compare production-checksum-compare production-db-migration-evidence-check production-db-migration-ready-check production-minio-source-inventory production-minio-target-inventory production-minio-compare production-minio-migration-evidence-check production-minio-migration-ready-check production-keycloak-source-export production-keycloak-target-export production-keycloak-compare production-keycloak-migration-evidence-check production-keycloak-migration-ready-check production-rollback-evidence-check production-rollback-ready-check production-license-strategy-check production-license-ready-check production-network-tls-check production-network-tls-ready-check production-security-hardening-check production-security-hardening-ready-check production-business-smoke-signoff-check production-business-smoke-signoff-ready-check production-nacos-runtime-patch-check production-nacos-runtime-patch-ready-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization smoke-test-environment smoke-postgres-runtime smoke-nacos-config smoke-keycloak-jwt smoke-minio-runtime smoke-business-dependencies business-package-scan smoke-production-export-readiness acceptance-organization-persistence acceptance-organization-group-persistence acceptance-organization-position-persistence acceptance-organization-position-role-persistence acceptance-organization-company-persistence acceptance-organization-person-persistence acceptance-organization-person-user-persistence acceptance-auth-user-persistence acceptance-rbac-permission-persistence acceptance-systemcode-persistence acceptance-systemconfig-persistence smoke-systemconfig-builtins acceptance-systemconfig-controlled-runtime-config smoke-runtime-configuration smoke-entity-model-config-crud-readiness acceptance-custom-property-persistence acceptance-patrol-input-standard-persistence acceptance-patrol-route-persistence acceptance-patrol-area-persistence acceptance-patrol-item-persistence acceptance-wom-manufacturing-order-persistence acceptance-wom-start-persistence acceptance-wom-hold-restart-persistence smoke-wom-toolbar-row acceptance-wom-stop-persistence acceptance-wom-stop-output-persistence acceptance-wom-advance-release-persistence acceptance-wom-prepare-need-persistence acceptance-wom-active-persistence acceptance-wom-active-end-persistence acceptance-wom-easy-active-persistence acceptance-wom-putin-active-persistence acceptance-wom-check-active-persistence acceptance-wom-process-start-persistence acceptance-wom-process-end-persistence acceptance-wom-process-unit-persistence acceptance-wom-manu-inspect-persistence acceptance-wom-checkoutbill-persistence acceptance-wom-reject-material-persistence probe-wom-public-produce-task-created-noop probe-wom-qrcode-route acceptance-qcs-report-chain-persistence acceptance-teaminfo-scheduleplan-persistence acceptance-craftgraph-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
 .PHONY: rehearse-core-flow-runtime-rollback
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
+.PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
 
 help:
@@ -240,6 +241,11 @@ help:
 	@printf '%s\n' '  make process-analysis-package Build the executable ProcessAnalysis JAR'
 	@printf '%s\n' '  make process-analysis-stage-runtime Copy the ProcessAnalysis JAR into the Docker runtime tree'
 	@printf '%s\n' '  make acceptance-process-analysis-persistence Run live trace/API/PostgreSQL marker acceptance'
+	@printf '%s\n' '  make rm-formula-editor-test Run RM Web formula editor service tests'
+	@printf '%s\n' '  make rm-formula-editor-package Build the executable RM Web formula editor JAR'
+	@printf '%s\n' '  make rm-formula-editor-stage-runtime Copy the RM Web formula editor JAR into the Docker runtime tree'
+	@printf '%s\n' '  make acceptance-rm-web-formula-editor-persistence Run visible RM browser/API/PostgreSQL/retry acceptance'
+	@printf '%s\n' '  make rm-web-formula-editor-acceptance-check Validate committed RM Web editor acceptance evidence'
 	@printf '%s\n' '  make wom-print-test         Run WOM QR generation and print-state tests'
 	@printf '%s\n' '  make wom-print-package      Build the executable WOM print JAR'
 	@printf '%s\n' '  make wom-print-stage-runtime Copy the WOM print JAR into the Docker runtime tree'
@@ -356,7 +362,7 @@ help:
 	@printf '%s\n' '  make audit-postgres-mappings Audit mapper SQL for PostgreSQL migration risk'
 	@printf '%s\n' '  make audit-postgres-report   Write a non-blocking PostgreSQL audit report'
 
-ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test bpi-adapter-static-check bpi-ui-static-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
+ci: verify bpi-contracts-test bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-stream-static-check bpi-stream-deployment-check bpi-production-context-test bpi-adapter-static-check bpi-ui-static-check runtime-script-check sustainable-check ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown-check production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-check production-rehearsal-plan-check production-db-migration-evidence-check production-rollback-evidence-check production-license-strategy-check production-network-tls-check production-security-hardening-check production-business-smoke-signoff-check production-nacos-runtime-patch-check production-minio-migration-evidence-check production-keycloak-migration-evidence-check production-evidence-ready-gate-regression-check runtime-patch-manifest-check rm-web-formula-editor-acceptance-check source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test inventory-check backend-dependency-check oracle-audit-check postgres-migration-check oracle-replacement-check audit-postgres-mappings
 
 ci-java17: bpi-contracts-test bpi-api-contract-check bpi-runtime-replay-test bpi-stream-test bpi-service-test
 
@@ -388,6 +394,7 @@ runtime-script-check:
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-joint-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
 	sh -n deploy/docker/scripts/build-rm-import-transaction-patch.sh
@@ -420,6 +427,7 @@ runtime-script-check:
 	$(PYTHON) -m py_compile scripts/verify-test-environment-address.py
 	$(PYTHON) -m py_compile scripts/verify-test-environment-static-bundle-link.py
 	$(PYTHON) -m py_compile scripts/verify-persistence-acceptance.py
+	$(PYTHON) -m py_compile scripts/verify-rm-web-formula-editor-acceptance.py
 	$(PYTHON) -m py_compile scripts/verify-production-module-test-cases.py
 	$(PYTHON) -m py_compile scripts/verify-wom-toolbar-action-coverage.py
 	$(PYTHON) -m py_compile scripts/verify-production-module-backlog.py
@@ -793,6 +801,22 @@ process-analysis-stage-runtime: process-analysis-package
 
 acceptance-process-analysis-persistence:
 	$(NODE) deploy/docker/scripts/adp-process-analysis-persistence-acceptance.js
+
+rm-formula-editor-test:
+	$(MVN) -pl backend/source-modules/rm-formula-editor -am test
+
+rm-formula-editor-package:
+	$(MVN) -pl backend/source-modules/rm-formula-editor -am package -DskipTests
+
+rm-formula-editor-stage-runtime: rm-formula-editor-package
+	mkdir -p runtime/bap-server/module-Server/RMFormulaEditor/manual
+	cp backend/source-modules/rm-formula-editor/target/rm-formula-editor-0.1.0-SNAPSHOT.jar runtime/bap-server/module-Server/RMFormulaEditor/manual/rm-formula-editor.jar
+
+acceptance-rm-web-formula-editor-persistence:
+	$(NODE) deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js
+
+rm-web-formula-editor-acceptance-check:
+	$(PYTHON) scripts/verify-rm-web-formula-editor-acceptance.py
 
 wom-print-test:
 	$(MVN) -pl backend/source-modules/wom-print -am test

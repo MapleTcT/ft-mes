@@ -1,0 +1,11 @@
+# Isolated test-environment overlay for the RM Batch/DCS delivery contract.
+# This proves HTTP acknowledgement and retry bookkeeping without pretending
+# that the in-process adapter is a plant Batch/DCS endpoint.
+
+services:
+  rm-formula-editor:
+    environment:
+      RM_FORMULA_DELIVERY_URL: http://rm-formula-editor:8080/internal/test/batch-dcs
+      RM_FORMULA_SIMULATOR_ENABLED: "true"
+      RM_FORMULA_SIMULATOR_SECRET: adp-rm-acceptance-only
+      RM_FORMULA_SIMULATOR_FAIL_FIRST: "true"

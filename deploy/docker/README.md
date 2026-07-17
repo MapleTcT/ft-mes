@@ -106,6 +106,29 @@ The Docker profile is PostgreSQL-first. `.env.example` and the built-in Compose 
 
 If a legacy module must temporarily connect to Oracle, copy the relevant values from `.env.oracle-legacy.example` into `.env` and document the reason in the migration notes for that module. Oracle should be explicit, not the silent default.
 
+## RM Web Formula Editor
+
+`rm-formula-editor` replaces the recovered IE ActiveX/localhost `4433` Batch formula editor with an authenticated Web page at `/msService/RM/formula/editor`. It writes the existing `rm_formulas`, `rm_formula_processes` and `rm_process_actives` tables and keeps separate revision/delivery ledgers.
+
+Production-safe defaults leave `RM_FORMULA_DELIVERY_URL` empty and the internal simulator disabled. Saving is available, while publishing records `CONFIG_REQUIRED` until the plant-owned Batch/DCS endpoint is configured. The acceptance overlay uses the same `adp-mes-newbase` Compose project; it does not create another test environment:
+
+```bash
+make rm-formula-editor-test
+make rm-formula-editor-stage-runtime
+docker compose --env-file deploy/docker/.env \
+  -f deploy/docker/docker-compose.yml \
+  -f deploy/docker/docker-compose.acceptance.yml \
+  up -d --force-recreate rm-formula-editor nginx
+make acceptance-rm-web-formula-editor-persistence \
+  ADP_BASE_URL=http://10.11.100.17:18080 \
+  ADP_DB_SSH_TARGET=v6@10.11.100.17
+docker compose --env-file deploy/docker/.env \
+  -f deploy/docker/docker-compose.yml \
+  up -d --force-recreate rm-formula-editor nginx
+```
+
+The final recreate is mandatory: it restores the production-safe external-adapter configuration after retry-contract testing.
+
 ## PostgreSQL Note
 
 The Docker profile uses PostgreSQL by default, adds an external PostgreSQL JDBC driver to each Java service classpath, and uses `prepare-runtime-patches.sh` to inject PostgreSQL DBP classes, generated `postgresql` mapper directories, recovered-package runtime fixes, and the current EAM static-page compatibility patch. The mapper generation is mechanical and records risky SQL patterns in `runtime/postgres-patch-report.json`; any remaining failures should be fixed from that report and container logs.

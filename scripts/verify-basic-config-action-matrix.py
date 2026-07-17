@@ -116,8 +116,8 @@ CONTROLLED_RUNTIME_CONFIG_CONTRACTS = {
     },
     "builtin-rm-runtime-config": {
         "required_before": {"business-owner-approval", "dedicated-marker", "rollback-plan", "rm-formula-regression"},
-        "required_pass_cases": {"PROD-008", "PROD-009", "PROD-043"},
-        "blocked_impact_cases": {"PROD-010"},
+        "required_pass_cases": {"PROD-008", "PROD-009", "PROD-010", "PROD-043"},
+        "blocked_impact_cases": set(),
         "required_tables": {"systemconfig_config_info", "systemconfig_config_version"},
         "minimum_fragments": {"ADP_E2E", "PostgreSQL", "RM", "rollback"},
     },

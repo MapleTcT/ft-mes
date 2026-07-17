@@ -24,18 +24,17 @@ make business-dependency-contract-check
 
 | 指标 | 数量 |
 | --- | ---: |
-| Backlog 项 | 4 |
+| Backlog 项 | 3 |
 | FAIL_BACKLOG | 0 |
-| BLOCKED | 4 |
+| BLOCKED | 3 |
 | PostgreSQL 兼容缺口 | 0 |
-| 模块 backlog | 4 |
+| 模块 backlog | 3 |
 
 ## 明细
 
 | ID | 状态 | 类型 | 关联用例/动作 | 证据 | 复验入口 | PASS 条件摘要 |
 | --- | --- | --- | --- | --- | --- | --- |
 | PROD-ACTION-007 | BLOCKED | product-scope-confirmation | public `produceTaskCreated` no-op 已显式禁用，待产品确认是否仍支持 | `metadata/wom-public-produce-task-created-analysis.json`；`metadata/wom-public-produce-task-created-noop-probe.json`；`docs/backend-table-audit/wom-public-produce-task-created-analysis.md` | `make probe-wom-public-produce-task-created-noop`；恢复/废弃决策后重新调用 public endpoint 并用 marker 查 `wom_produce_tasks` | 支持则真实落库；废弃则把明确失败/禁用写入产品/API 说明；禁止用 `produceTaskCreated2` 证据替代 |
-| PROD-010 | BLOCKED | external-client-required | RM 批量配方可见显式编辑入口 | `metadata/production-module-blockers.json`；`docs/frontend-functional-test-report.md` | 外部 Batch 客户端/ActiveX/WebSocket 联调后做 marker 保存 | 真实外部编辑入口打开并写入 RM 相关表 |
 | PROD-019 | BLOCKED | product-scope-confirmation | 独立 QCS 不良数量登记范围确认 | `metadata/wom-bad-quantity-analysis.json`；`metadata/material-wms-persistence-acceptance.json` | 产品确认独立不良数量是否属于支持范围 | 若需要，必须提供真实字段/路由/后端/PostgreSQL 数值表并 marker 验收；material/WMS 保持 PASS |
 | PROD-021 | BLOCKED | product-scope-confirmation | 完整报工仅剩独立不良数量范围确认 | `metadata/production-module-test-cases.json`；`metadata/wom-bad-quantity-analysis.json`；`metadata/material-wms-persistence-acceptance.json` | 保持报工和 material/WMS 回归，产品确认独立不良数量范围 | 只在产品确认需要时新增字段/路由/表并 marker 验收 |
 
@@ -43,6 +42,7 @@ make business-dependency-contract-check
 
 | ID | 状态 | 关闭证据 | 结论 |
 | --- | --- | --- | --- |
+| PROD-010 | PASS | `metadata/rm-web-formula-editor-acceptance.json`；`metadata/production-module-test-cases.json` | 2026-07-17 已新增可维护 `rm-formula-editor` 源码、可见 `Web编辑` 入口、PostgreSQL 修订/投递账本和安全 Nginx 鉴权。marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成创建、幂等、两次更新、失败/重试、六表回读、桌面/移动端和清理；不再依赖 IE ActiveX/localhost:4433。现场 Batch/DCS 端点仍需切换前联调签字。 |
 | PROD-ACTION-008 | PASS | `metadata/wom-qrcode-browser-acceptance.json`；`metadata/wom-qrcode-persistence-acceptance.json`；`metadata/wom-qrcode-route-probe.json` | 2026-07-17 已新增可维护 `wom-print` 源码、PostgreSQL 表和正常网关路由；真实 `makeTaskList` 鼠标点击、两张二维码渲染、幂等/冲突、PNG、打印状态回填和 marker 清理均通过。当前无打印机配置，物理出纸单独标记为 NOT_APPLICABLE。 |
 | PROD-ACTION-006 | PASS | `metadata/wom-manual-task-entry-acceptance.json`；`metadata/persistence-acceptance.json` | 2026-07-17 已新增可维护 `wom-production-entry` 源码、列表可见入口、PostgreSQL 请求账本和活动批号部分唯一索引；真实按钮点击、主数据选择、创建、同请求幂等、重复批号拒绝、待办打开、提交生效、软删除回滚和清理 9/9 通过。public `produceTaskCreated` 仍按独立 `PROD-ACTION-007` 管理。 |
 

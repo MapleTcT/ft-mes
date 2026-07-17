@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；当前目标数据库仍是 Flyway V12，JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。来源序列现已成为 READY 和拓扑发布的硬门槛，目标环境页面/API/PostgreSQL 已复验当前点位保持 0 READY。本地仓库进一步完成 Flyway V13，把控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 拆为独立回执，并通过 Flink checkpoint、真实 Kafka 消费、PostgreSQL 落库和 8 条浏览器 E2E；V13 尚未部署目标环境，不能替代 savepoint/历史规则迁移和目标 marker 验收。试点设备仍未注册/激活，产品 metadata、标定和来源序列未就绪，因此本轮结论仍是“同步控制链 PASS、数据源 BLOCKED”，不能发布为批次规则点位。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。PATROL 共享巡检已部署到目标 PostgreSQL/EamMs，输入标准、路线/区域/巡检项、计划/任务、正常/异常结果、异常生成待治理隐患及 EAM 台账复显均已通过真实页面/API/PostgreSQL marker；完整 SESH 整改/复查/销项和统计仍未闭合。四个 EMS 源码包已恢复，但被缺失的 Indicator `6.0.4.0` 和 PostgreSQL 迁移阻断。局部测试通过不能解释为“系统已可投产”。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收；JetLinks 点位目录已通过 Kafka 自动同步到 PostgreSQL，并由真实页面读取同一内容 revision。来源序列现已成为 READY 和拓扑发布的硬门槛，目标环境页面/API/PostgreSQL 已复验当前点位保持 0 READY。Flyway V13 已完成 expand-only 迁移和 savepoint 有状态恢复，但真实规则运行时回执、连续影子运行和现场切换仍未闭合。IoT 遥测和 MES production context 的分段链已有证据，但同一真实 marker 的 IoT + MES context + candidate/batch 联合链、连续影子运行和生产迁移条件尚未完成。PATROL 共享巡检已部署到目标 PostgreSQL/EamMs，输入标准、路线/区域/巡检项、计划/任务、正常/异常结果、异常生成待治理隐患及 EAM 台账复显均已通过真实页面/API/PostgreSQL marker；完整 SESH 整改/复查/销项和统计仍未闭合。WOM 可见新建指令单、二维码和 RM 批控配方 Web 编辑均已形成可维护源码，并通过真实浏览器/API/PostgreSQL marker；RM 现场 Batch/DCS 联调仍是切换前置。四个 EMS 源码包已恢复，但被缺失的 Indicator `6.0.4.0` 和 PostgreSQL 迁移阻断。局部测试通过不能解释为“系统已可投产”。
 
 ## 项目定位
 
@@ -22,6 +22,7 @@
 | 可持续开发仓库 | `READY` | 根父 POM、源码模块边界、CI、Compose、依赖/文件库存和 PostgreSQL-first 门禁 | 新模块持续补测试、迁移和库存 |
 | 既有 ADP/MES 平台 | `PARTIAL` | 登录、组织、权限、菜单及部分生产/质量功能有真实页面和 PostgreSQL marker 证据 | 生产矩阵仍有阻断项，业务链尚未全部闭合 |
 | WOM 可见新建指令单 | `PASS` | `wom-production-entry` 源码模块、列表入口、PostgreSQL 参照、迁移 189、marker `ADP_E2E_20260717101030_WOM_MANUAL_ENTRY` 的 9/9 浏览器/API/落库验收 | public `produceTaskCreated` 是否开放仍需产品范围决定；不影响受控可见入口 |
+| RM 批控配方 Web 编辑 | `PASS_WITH_EXTERNAL_DCS_BLOCKED` | `rm-formula-editor` 源码模块、迁移 190、可见 `Web编辑` 入口；marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成桌面/移动页面、API、六表 PostgreSQL 回读、失败重试和清理 | 配置真实现场 Batch/DCS HTTPS 端点，加载生产主数据并完成投递确认与回滚签字 |
 | PATROL 共享巡检 | `TARGET_HIDDEN_DANGER_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `af01d6a7...97f753`；异常隐患 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，明细关联、幂等和 EAM 来源“巡检”复显均有证据 | 继续统计监控；完整隐患治理需真实 SESH；目标回滚需维护窗口确认 |
 | EMS 能源管理 | `BLOCKED_MISSING_INDICATOR` | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 四个源码包和依赖关系已恢复 | 取得 Indicator `6.0.4.0` api/core，补 PostgreSQL 迁移，逐服务构建与验收 |
 | BPI 产品链 | `PARTIAL` | 契约、目标环境 Flyway V12、点位准入硬门禁、`MapleTcT/iot@41239b4e` 自动目录、强制来源序列与 `30m` 运行时证据门禁、MES Kafka 消费落库、可审计拓扑/规则产品化、本地 V13 独立运行时回执、真实 PostgreSQL、Kafka/Flink、WOM production context 和影子批次确认均有可复验证据 | V13 尚未部署目标；当前试点点位仍 BLOCKED；真实设备点位的连续单调序列、IoT/MES 同 marker 候选/批次、连续影子运行、END 边界和 QCS/WMS 写回仍未完成 |
@@ -98,14 +99,14 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 ## 目标测试环境（更新至 2026-07-17）
 
-当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。下表中的 BPI 证据保留其 2026-07-15 验收时使用的 Tailscale 地址 `100.99.133.43`，本轮没有重新执行 BPI 联合链，不能把 PATROL 的新验收时间套用到旧 BPI 证据。既有 ADP/MES Compose 保持原样，BPI 使用两个独立 Compose project，避免覆盖旧服务：
+当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。2026-07-17 运行面复核只保留一个 ADP Compose project：`adp-mes-newbase`，59 个容器运行、PostgreSQL healthy、前端返回 200；备份、补丁和验收证据不是运行环境。下表中的 BPI 证据保留其 2026-07-15 验收时使用的 Tailscale 地址 `100.99.133.43`，当前测试机未运行历史 BPI Compose project，本轮也没有重新执行 BPI 联合链，不能把历史状态描述成当前在线状态。
 
 | 入口/运行面 | 地址或项目 | 当前结果 |
 |---|---|---|
 | 既有 ADP/MES + PATROL | `http://10.11.100.17:18080` | 当前公司内网入口；PATROL 配置、任务执行、异常结果、待治理隐患生成和 EAM 台账复显链 PASS |
 | BPI 操作台（历史验收入口） | `http://100.99.133.43:18091` | 2026-07-15 真实浏览器证据；本轮未复跑 |
-| BPI Java/PostgreSQL | `ft-mes-bpi-runtime` | Web、adapter、service、PostgreSQL 全部 healthy；Flyway V12、21 张 BPI 表 |
-| Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | 3 broker、10 topic、Flink job `RUNNING`、30/30 task、持续成功 checkpoint |
+| BPI Java/PostgreSQL（历史验收） | `ft-mes-bpi-runtime` | 2026-07-15 验收时 Web、adapter、service、PostgreSQL healthy；当前未运行该 Compose project |
+| Kafka/Flink/MinIO（历史验收） | `ft-mes-bpi-streaming` | 2026-07-15 验收时 3 broker、10 topic、Flink job `RUNNING`；当前未运行该 Compose project |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |
 | TaskManager 恢复 | 带负载重启 1 个 TaskManager | 30/30 task 恢复，重启后继续完成 checkpoint |
 | 浏览器/Kafka/Flink/PostgreSQL 联合写链 | `ADP_E2E_20260714_091536_BPI_JOINT` | 规则发布与应用、唯一候选、影子批次、2 条证据、状态事件和审计全部 PASS |

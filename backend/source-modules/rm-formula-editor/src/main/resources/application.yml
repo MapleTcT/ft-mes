@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: RMFormulaEditor
+  datasource:
+    url: jdbc:postgresql://${SUPOS_SYSTEM_DB_HOST:postgres}:${SUPOS_SYSTEM_DB_PORT:5432}/${SUPOS_SYSTEM_DB_NAME:adp}
+    username: ${SUPOS_SYSTEM_DB_USERNAME:adp}
+    password: ${SUPOS_SYSTEM_DB_PASSWORD:adp123456}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${RM_FORMULA_EDITOR_DB_POOL_SIZE:8}
+      minimum-idle: 1
+      connection-timeout: 10000
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${SUPOS_NACOS_ADDRESS:nacos:8848}
+        group: ${SUPOS_NACOS_REGISTRY_GROUP:prod}
+        username: ${SUPOS_NACOS_USERNAME:nacos}
+        password: ${SUPOS_NACOS_PASSWORD:nacos}
+        metadata:
+          supfusion.tenantid: ${RM_FORMULA_EDITOR_TENANT_ID:default}
+          k8s.service.name: RMFormulaEditor
+          secure: "false"
+
+server:
+  port: ${RM_FORMULA_EDITOR_PORT:8080}
+
+rm-formula-editor:
+  default-tenant: ${RM_FORMULA_EDITOR_TENANT_ID:default}
+  delivery-url: ${RM_FORMULA_DELIVERY_URL:}
+  delivery-token: ${RM_FORMULA_DELIVERY_TOKEN:}
+  simulator-enabled: ${RM_FORMULA_SIMULATOR_ENABLED:false}
+  simulator-secret: ${RM_FORMULA_SIMULATOR_SECRET:disabled}
+  simulator-fail-first: ${RM_FORMULA_SIMULATOR_FAIL_FIRST:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    com.mapletct.ftmes.rmformula: INFO

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-17T12:57:14.758Z",
+  "environment": {
+    "baseUrl": "http://10.11.100.17:18080",
+    "sshHost": "10.11.100.17",
+    "database": "PostgreSQL",
+    "service": "RMFormulaEditor",
+    "serviceHealth": "RUNNING"
+  },
+  "marker": "ADP_E2E_20260717125659_RM_WEB_FORMULA",
+  "browser": {
+    "batchFormulaList": {
+      "route": "/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw",
+      "navigationStatus": 200,
+      "webEditorButtonVisible": true,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    },
+    "desktopEditor": {
+      "route": "/msService/RM/formula/editor",
+      "title": "Batch 配方 Web 编辑",
+      "formulaId": "9100000000000015",
+      "formulaVersion": 2,
+      "processRows": 1,
+      "activityRows": 1,
+      "saveHttpStatus": 200,
+      "publishHttpStatus": 200,
+      "retryHttpStatus": 200,
+      "deliveryState": "ACKNOWLEDGED",
+      "deliveryAttempts": 2,
+      "horizontalOverflow": false,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "screenshot": "metadata/rm-web-formula-editor.png"
+    },
+    "mobileEditor": {
+      "viewport": "390x844",
+      "formulaId": "9100000000000015",
+      "formulaVersion": 2,
+      "documentWidth": 390,
+      "clientWidth": 390,
+      "horizontalOverflow": false,
+      "processRows": 1,
+      "activityRows": 1,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "screenshot": "metadata/rm-web-formula-editor-mobile.png"
+    }
+  },
+  "api": {
+    "list": {
+      "method": "GET",
+      "path": "/msService/RM/formula-editor/formulas",
+      "httpStatus": 200,
+      "code": 200
+    },
+    "references": {
+      "materials": {
+        "method": "GET",
+        "path": "/msService/RM/formula-editor/references/materials",
+        "httpStatus": 200,
+        "code": 200,
+        "count": 228
+      },
+      "batchServers": {
+        "method": "GET",
+        "path": "/msService/RM/formula-editor/references/batch-servers",
+        "httpStatus": 200,
+        "code": 200,
+        "count": 1
+      }
+    },
+    "create": {
+      "method": "POST",
+      "path": "/msService/RM/formula-editor/formulas",
+      "httpStatus": 200,
+      "code": 200,
+      "requestId": "RM-WEB-SAVE-1784293023404-2lztw8o",
+      "formulaId": "9100000000000015",
+      "idempotentRetry": true
+    },
+    "update": {
+      "method": "PUT",
+      "path": "/msService/RM/formula-editor/formulas/9100000000000015",
+      "httpStatus": 200,
+      "code": 200,
+      "optimisticVersion": 2,
+      "firstRequestId": "RM-WEB-SAVE-1784293026120-0qs83y9",
+      "secondRequestId": "RM-WEB-SAVE-1784293026546-354ext8"
+    },
+    "delivery": {
+      "publishPath": "/msService/RM/formula-editor/formulas/9100000000000015/deliveries",
+      "retryPath": "/msService/RM/formula-editor/deliveries/11/retry",
+      "firstAttemptState": "FAILED",
+      "firstAttemptHttpStatus": 503,
+      "retryState": "ACKNOWLEDGED",
+      "retryHttpStatus": 200,
+      "attempts": 2,
+      "adapter": "TEST_SIMULATOR"
+    }
+  },
+  "postgresql": {
+    "formula": {
+      "table": "rm_formulas",
+      "id": "9100000000000015",
+      "version": 2,
+      "formulaEdition": "1.1",
+      "batchFormulaEdition": "2",
+      "valid": true,
+      "batchStatus": "WEB_DRAFT",
+      "description": "ADP_E2E_20260717125659_RM_WEB_FORMULA browser saved"
+    },
+    "process": {
+      "table": "rm_formula_processes",
+      "id": "9200000000000015",
+      "formulaId": "9100000000000015",
+      "name": "混配工序",
+      "valid": true,
+      "count": 1
+    },
+    "activity": {
+      "table": "rm_process_actives",
+      "id": "9300000000000015",
+      "formulaId": "9100000000000015",
+      "processId": "9200000000000015",
+      "name": "投料活动",
+      "dispatchSystem": "MES",
+      "executionSystem": "DCS",
+      "valid": true,
+      "count": 1
+    },
+    "revisions": {
+      "table": "rm_formula_editor_revisions",
+      "count": 3,
+      "latestRevisionNo": 3,
+      "latestFormulaVersion": 2
+    },
+    "deliveries": {
+      "table": "rm_formula_deliveries",
+      "count": 1,
+      "latestState": "ACKNOWLEDGED",
+      "latestAttempts": 2,
+      "latestHttpStatus": 200
+    },
+    "deliveryAttempts": {
+      "table": "rm_formula_delivery_attempts",
+      "latestDeliveryCount": 2,
+      "states": [
+        "FAILED:503",
+        "ACKNOWLEDGED:200"
+      ]
+    }
+  },
+  "postDeployRegression": {
+    "verifiedAt": "2026-07-17T12:57:13.429Z",
+    "jarSha256": "eb18305fdd34df95118a8f6aece1ebba9acb06a1b2500cd94abeeb83acc62f8c",
+    "unitTests": {
+      "run": 10,
+      "failures": 0,
+      "errors": 0,
+      "immutableRetryPayload": "PASS"
+    },
+    "runtime": {
+      "serviceHealth": "UP",
+      "authenticatedListHttpStatus": 200,
+      "authenticatedListCode": 200,
+      "visibleWebEditorEntry": true,
+      "webEditorPopupHttpStatus": 200,
+      "webEditorPopupSystemError": false,
+      "webEditorPopupHorizontalOverflow": false,
+      "consoleErrors": 0,
+      "pageErrors": 0
+    }
+  },
+  "scopeBoundary": {
+    "legacyActiveXRequired": false,
+    "localhost4433Required": false,
+    "webEditorStatus": "PASS",
+    "postgresPersistenceStatus": "PASS",
+    "httpDeliveryContractStatus": "PASS",
+    "externalBatchDcsStatus": "BLOCKED",
+    "externalBatchDcsReason": "The isolated test adapter proves the versioned HTTP contract, acknowledgement and retry ledger, but no plant Batch/DCS endpoint or owner sign-off was supplied."
+  },
+  "cleanup": {
+    "executed": true,
+    "counts": {
+      "formula": 0,
+      "process": 0,
+      "activity": 0
+    }
+  },
+  "summary": {
+    "status": "PASS_WITH_EXTERNAL_DCS_BLOCKED",
+    "webEditor": "PASS",
+    "api": "PASS",
+    "postgresPersistence": "PASS",
+    "testAdapterRetry": "PASS",
+    "externalBatchDcs": "BLOCKED"
+  },
+  "issues": []
+}

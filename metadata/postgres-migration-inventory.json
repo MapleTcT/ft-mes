@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 189,
+  "migrationCount": 190,
   "firstNumber": 1,
-  "lastNumber": 189,
+  "lastNumber": 190,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
   "highRiskStatementCount": 0,
   "unguardedStructuralStatementCount": 0,
-  "watchStatementCount": 72,
+  "watchStatementCount": 73,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
     "alter-table": 10797,
-    "create-function": 86,
-    "create-index": 983,
-    "create-table": 571,
+    "create-function": 87,
+    "create-index": 987,
+    "create-table": 574,
     "create-view": 142,
     "insert": 11010,
-    "update": 11089
+    "update": 11091
   },
   "idempotencySignalTotals": {
-    "create-or-replace": 225,
+    "create-or-replace": 226,
     "do-block": 392,
-    "if-exists": 107,
-    "if-not-exists": 12987,
+    "if-exists": 108,
+    "if-not-exists": 12998,
     "on-conflict": 10949,
     "to-regclass": 219,
     "where-not-exists": 43
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 76,
     "configuration": 42,
-    "general": 31,
+    "general": 32,
     "notification": 9,
     "platform": 54,
     "workflow": 21
@@ -7133,6 +7133,50 @@
           "pattern": "drop-function",
           "excerpt": "DROP FUNCTION IF EXISTS public.adp_add_wom_manual_task_button(jsonb);",
           "statement": "DROP FUNCTION IF EXISTS public.adp_add_wom_manual_task_button(jsonb);",
+          "safe": true,
+          "safety": "guarded-if-exists",
+          "issue": "",
+          "rationale": "Allowed only with IF EXISTS when replacing compatibility helper functions idempotently."
+        }
+      ],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/190-rm-web-formula-editor.sql",
+      "name": "190-rm-web-formula-editor.sql",
+      "number": 190,
+      "slug": "rm-web-formula-editor",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 195,
+      "sha256": "6c5340498a0d140b2d0832f6b33067d3d703ba5748aeaaf37ea950ef0797d279",
+      "statementCounts": {
+        "create-table": 3,
+        "create-view": 0,
+        "create-function": 1,
+        "create-index": 4,
+        "alter-table": 0,
+        "insert": 0,
+        "update": 2
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 11,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 1,
+        "where-not-exists": 0
+      },
+      "highRiskStatements": [],
+      "watchStatements": [
+        {
+          "line": 195,
+          "pattern": "drop-function",
+          "excerpt": "DROP FUNCTION IF EXISTS public.adp_rm_formula_web_editor_button(jsonb);",
+          "statement": "DROP FUNCTION IF EXISTS public.adp_rm_formula_web_editor_button(jsonb);",
           "safe": true,
           "safety": "guarded-if-exists",
           "issue": "",

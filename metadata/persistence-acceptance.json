@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-17T10:10:30Z",
+  "generatedAt": "2026-07-17T12:04:48.223Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
-  "status": "PARTIAL_ACCEPTANCE_WITH_WOM_MANUAL_ENTRY_PASS_AND_EXISTING_BLOCKERS",
+  "status": "PARTIAL_ACCEPTANCE_WITH_RM_WEB_FORMULA_EDITOR_PASS_AND_EXISTING_PRODUCT_SCOPE_BLOCKERS",
   "latestRevalidation": {
     "generatedAt": "2026-07-16T21:08:52.560Z",
     "coreFlow": {
@@ -88,11 +88,17 @@
       "marker": "ADP_E2E_20260717101030_WOM_MANUAL_ENTRY",
       "evidence": "metadata/wom-manual-task-entry-acceptance.json",
       "assertions": "9/9; visible list entry; create; same-request replay; duplicate-batch rejection; PostgreSQL partial unique concurrency guard; pending render; submit; soft-delete rollback; request-ledger cleanup"
+    },
+    "rmWebFormulaEditor": {
+      "status": "PASS_WITH_EXTERNAL_DCS_BLOCKED",
+      "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
+      "evidence": "metadata/rm-web-formula-editor-acceptance.json",
+      "assertions": "visible Web editor; PostgreSQL references; create; replay; two updates; failed delivery; acknowledged retry; six-table readback; bigint-safe API identifiers; desktop/mobile; cleanup"
     }
   },
   "summary": {
-    "testedFeatures": 170,
-    "pass": 166,
+    "testedFeatures": 171,
+    "pass": 167,
     "fail": 0,
     "blocked": 2,
     "notApplicable": 2
@@ -3618,9 +3624,39 @@
       "issues": [
         "Physical printer dispatch is NOT_APPLICABLE in the current no-printer configuration; this item proves the persisted print-state contract, not paper output."
       ]
+    },
+    {
+      "module": "RM 批控配方 Web 编辑",
+      "route": "/msService/RM/formula/formula/batchFormulaList?system=formulaEnableFlw -> /msService/RM/formula/editor",
+      "operation": "可见表单创建配方、幂等重放、两次修订并在投递失败后重试确认",
+      "api": "GET /msService/RM/formula-editor/references/materials; GET /references/batch-servers; POST/PUT /formulas; POST /formulas/{formulaId}/deliveries; POST /deliveries/{deliveryId}/retry",
+      "method": "GET/POST/PUT",
+      "requiresPersistence": true,
+      "backendEntry": "RmFormulaEditorController -> FormulaEditorService/FormulaDeliveryService -> FormulaEditorRepository/JdbcTemplate -> PostgreSQL; HTTP delivery adapter writes immutable attempt ledger",
+      "tables": [
+        "rm_formulas",
+        "rm_formula_processes",
+        "rm_process_actives",
+        "rm_formula_editor_revisions",
+        "rm_formula_deliveries",
+        "rm_formula_delivery_attempts"
+      ],
+      "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
+      "verificationSql": "SELECT id::text,version,formual_code,formula_edtion,batch_formula_edition,valid,batch_status FROM public.rm_formulas WHERE formual_code='ADP_E2E_20260717120436_RM_WEB_FORMULA'; SELECT count(*) FROM public.rm_formula_processes WHERE COALESCE(formula_id,formula)=9100000000000014 AND valid; SELECT count(*) FROM public.rm_process_actives WHERE formula_id=9100000000000014 AND valid; SELECT count(*),max(revision_no),max(formula_version) FROM public.rm_formula_editor_revisions WHERE formula_id=9100000000000014; SELECT state,attempts,http_status FROM public.rm_formula_deliveries WHERE formula_id=9100000000000014; SELECT state,http_status FROM public.rm_formula_delivery_attempts WHERE delivery_id=10 ORDER BY attempt_no;",
+      "status": "PASS",
+      "evidence": "metadata/rm-web-formula-editor-acceptance.json. The real list showed Web编辑. The visible form created the marker, replayed the same request without duplicate rows, saved two optimistic revisions to version 2, recorded FAILED:503 then ACKNOWLEDGED:200, and matched all six PostgreSQL tables. API identifier fields are strings to preserve bigint precision. Desktop/mobile browser errors and horizontal overflow were zero, three consecutive acceptance runs passed, and marker cleanup returned formula/process/activity counts to zero.",
+      "issues": [
+        "The real plant Batch/DCS endpoint, credentials and owner sign-off were not supplied; only the isolated versioned HTTP acknowledgement/retry contract is accepted.",
+        "The test database currently has only ADP_E2E product master rows, so production master-data load remains a cutover prerequisite."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
+      "artifact": "metadata/rm-web-formula-editor-acceptance.json",
+      "summary": "Visible RM Web editor create/replay/two updates, fail-first delivery/retry, six-table PostgreSQL readback, bigint-safe identifiers, desktop/mobile browser checks and zero-row cleanup passed three consecutive runs; external plant Batch/DCS remains blocked."
+    },
     {
       "marker": "ADP-WOM-UI-E2E-20260717084656-55303",
       "artifact": "metadata/wom-qrcode-browser-acceptance.json",

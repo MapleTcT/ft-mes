@@ -23,7 +23,7 @@ make entity-model-config-crud-readiness-check
 | AK/SK 凭证管理 | READ_ONLY_GUARDED | forbidden-in-generic-smoke | `metadata/systemconfig-builtins-readiness-smoke.json` | 安全确认、secret 轮换方案、专用 marker 和回滚方案 |
 | 密码配置 | READ_ONLY_GUARDED | forbidden-in-generic-smoke | `metadata/systemconfig-builtins-readiness-smoke.json` | 安全确认、专用 marker、回滚方案和 admin 登录 smoke |
 | 质量检验配置 | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-acceptance.json`、`metadata/qcs-runtime-config-wom-checkoutbill-regression.json`、`metadata/qcs-runtime-config-wom-manu-inspect-regression.json`、`metadata/qcs-report-chain-qualified-current.json`、`metadata/qcs-report-chain-unqualified-current.json`、`metadata/production-module-test-cases.json` | 单项 QCS marker 保存/回读/回滚已完成；配置回滚后 WOM checkoutBill 质量活动、createManuInspect 制造请检、QCS 报告保存/合格生效回写、不合格生效回写并自动生成不合格处理单均已复跑 PASS；后续任何 QCS 运行配置写操作仍必须专用 marker、回滚和业务回归 |
-| RM.ocd.RM | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-rm-current.json`、`metadata/rm-runtime-config-batch-sync-regression.json`、`metadata/production-module-test-cases.json` | RM.MQ `brokerUrl` 单项 marker 保存/回读/回滚已完成；回滚后 RM 批控配方同步/删除复跑 PASS；外部 Batch 客户端编辑入口仍单独 BLOCKED |
+| RM.ocd.RM | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-rm-current.json`、`metadata/rm-runtime-config-batch-sync-regression.json`、`metadata/rm-web-formula-editor-acceptance.json`、`metadata/production-module-test-cases.json` | RM.MQ `brokerUrl` 单项 marker 保存/回读/回滚已完成；回滚后同步/删除复跑 PASS；PROD-010 Web 编辑已通过，真实现场 Batch/DCS 投递仍需切换审批和回滚演练 |
 | BaseSet.ocd.BaseSet | CONTROLLED_MARKER_REQUIRED | dedicated-business-marker-only | `metadata/systemconfig-builtins-readiness-smoke.json`、`metadata/systemconfig-controlled-runtime-config-baseset-current.json`、`metadata/baseset-runtime-config-wom-start-regression.json`、`metadata/baseset-runtime-config-wom-manu-inspect-regression.json`、`metadata/production-module-test-cases.json` | `isEnable` 已完成受控 typed mutation、回读、PostgreSQL before/after 和立即回滚；回滚后 WOM start 与 WOM/QCS 制造请检生成均复跑 PASS。后续其他 BaseSet 配置和 material 库存/入库边界仍需专用 marker。 |
 | 低代码自定义字段模型映射启用/编辑/禁用 | PASS | marker-allowed | `metadata/custom-property-persistence-acceptance.json`、`deploy/docker/scripts/adp-custom-property-persistence-acceptance.js`、`deploy/docker/postgres/init/169-custom-property-project-property-compat.sql` | 保持回归；该项覆盖 customProperty 模型映射与 `runtime_property`/`project_property` 同步，实体/模型元数据 CRUD 由独立报告验收 |
 | 实体/模型配置新增 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | marker `ADP_E2E_202606221433_ENTITY_MODEL` 已证明 `ec_entity=1`、`ec_model=1`、内置 `ec_property=3`；PostgreSQL 物理模型表自动创建未在本报告中声明完成 |
@@ -82,7 +82,7 @@ make entity-model-config-crud-readiness-check
 已经为这三个 `CONTROLLED_MARKER_REQUIRED` 动作记录 `acceptanceContract`，并由 `make basic-config-action-matrix-check` 交叉读取 `metadata/production-module-test-cases.json`：
 
 - QCS 运行配置变更前必须准备专用 `ADP_E2E` marker、回滚方案和 QCS 报告链路回归，并要求 `PROD-018/031/032/033/034/035/036/037/038/039/040/041/042` 当前保持 `PASS`；`PROD-019` 仍作为 material/坏品数量边界 blocker 单独跟踪。
-- RM 运行配置变更前必须准备专用 marker、回滚方案和 RM 配方回归，并要求 `PROD-008/009/043` 当前保持 `PASS`；`PROD-010` 外部 Batch 客户端编辑入口仍单独阻断。
+- RM 运行配置变更前必须准备专用 marker、回滚方案和 RM 配方回归，并要求 `PROD-008/009/010/043` 当前保持 `PASS`；真实现场 Batch/DCS endpoint/secret 只能在切换审批和脱敏证据下配置。
 - BaseSet 运行配置变更前必须准备专用 marker、回滚方案和 WOM/QCS/material 回归，并要求 `PROD-001/002/003/004/022/031/035/036` 当前保持 `PASS`。
 
 这三个动作从 `CONTROLLED_MARKER_REQUIRED` 升级前，必须记录前端请求、`systemconfig_config_info` / `systemconfig_config_version` 的 PostgreSQL before/after SQL、回滚后的查询结果，以及对应生产用例的回归结果。已经补过单配置 marker 的目录仍保持受控状态，因为后续任何新配置项、敏感配置或外部客户端入口都必须另有专用 marker 和业务回归。
@@ -138,7 +138,7 @@ marker `ADP_E2E_20260621073500_RM_CFG_REG` 复跑 RM 批控配方
 先写入 `valid=true/status=88`，删除后变为 `valid=false/status=0`，有效
 `rm_process_actives` 计数为 `0`。证据见
 `metadata/rm-runtime-config-batch-sync-regression.json`。本项不修改
-RM username/password 等敏感配置，也不替代 `PROD-010` 外部 Batch 客户端显式编辑入口。
+RM username/password 或现场 Batch/DCS endpoint/secret 等敏感配置。`PROD-010` Web 编辑已由独立 marker 验收，隔离适配器不能替代现场投递确认和回滚签字。
 
 2026-06-22 补充 BaseSet 受控运行配置专项证据：`make acceptance-systemconfig-controlled-runtime-config
 SYSTEMCONFIG_CONTROLLED_TARGET_MODE=baseset` 在真实 `/systemconfig/#/sysconfig`

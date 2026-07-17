@@ -1,6 +1,6 @@
 # 业务模块接入验收要求
 
-本文件覆盖当前仍为 `BLOCKED` 的 4 个生产缺口。机器账本为
+本文件覆盖当前仍为 `BLOCKED` 的 3 个生产缺口。机器账本为
 `metadata/business-module-intake-requirements.json`：
 
 ```bash
@@ -14,7 +14,7 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 |---|---:|---|
 | 产品范围决定 | 3 | `PROD-ACTION-007`、`PROD-019`、`PROD-021` |
 | 缺 runtime endpoint | 0 | 无 |
-| 外部客户端 | 1 | `PROD-010` |
+| 外部客户端 | 0 | 无 |
 | 缺服务包 | 0 | 无 |
 | 缺导出实现 | 0 | 无 |
 
@@ -33,7 +33,6 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 | ID | 类型 | 下一步 |
 |---|---|---|
 | `PROD-ACTION-007` | 产品范围决定 | 明确 public `produceTaskCreated` 是废弃还是恢复 |
-| `PROD-010` | 外部客户端 | 通过 Batch 客户端/ActiveX/WebSocket 打开真实编辑链 |
 | `PROD-019` | 产品范围决定 | 确认是否存在独立不良数量；若存在，提供字段、路由、后端和 PostgreSQL 数值表 |
 | `PROD-021` | 产品范围决定 | 保持报工和 material 回归，仅决策独立不良数量范围 |
 
@@ -44,6 +43,11 @@ material/WMS 与 ProcessAnalysis 均已完成，不再是待接入服务包；
 `PROD-023` 生产列表导出已在 `http://10.11.100.17:18080` 完成 6/6
 真实浏览器、运行时元数据、后端 file/workbook 响应和 sourceAudit 验收，状态
 `READY`，证据为 `metadata/production-export-readiness-smoke.json`。
+
+`PROD-010` RM 批控配方 Web 编辑已于 2026-07-17 转为 PASS：真实列表显示
+`Web编辑`，marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成创建、
+幂等、两次修订、失败重试、六表 PostgreSQL 回读和清理。现场 Batch/DCS endpoint
+及签字是生产切换前置，不再作为业务模块接入缺口。
 
 ## 本轮关闭
 

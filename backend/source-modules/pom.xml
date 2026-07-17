@@ -23,6 +23,7 @@
         <module>material-wms</module>
         <module>mes-production-context-outbox</module>
         <module>process-analysis</module>
+        <module>rm-formula-editor</module>
         <module>wom-print</module>
         <module>wom-production-entry</module>
     </modules>

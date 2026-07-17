@@ -42,6 +42,13 @@ make ci
 | Module | Source | Status |
 | --- | --- | --- |
 | `basicmanagement-auditlog` | `backend/modules/com/supcon/supfusion/basicmanagement-auditlog/1.0-SNAPSHOT` | 可编译占位模块，保留原恢复源码中的 auditlog wiring 注释状态。 |
+| `batch-intelligence-adapter` | 自研兼容层 | Java 8 认证与 BPI API 适配。 |
+| `material-wms` | 自研恢复模块 | 完工入库、质检释放、生产领料与 PostgreSQL 幂等账本。 |
+| `mes-production-context-outbox` | 自研恢复模块 | WOM/BPI 生产上下文 outbox。 |
+| `process-analysis` | 自研恢复模块 | WOM/QCS/WMS 批次过程追溯。 |
+| `rm-formula-editor` | 原运行逻辑的源码化替代 | Web 配方、工序、活动、修订与 Batch/DCS 投递边界。 |
+| `wom-print` | 自研恢复模块 | 包装二维码和打印状态。 |
+| `wom-production-entry` | 自研恢复模块 | 可见制造指令新建、幂等和流程提交入口。 |
 
 ## 提升原则
 

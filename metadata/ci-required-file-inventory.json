@@ -519,6 +519,126 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/README.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/RmFormulaEditorApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/ApiIdentifierNormalizer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/DeliveryRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/FormulaDeliverySimulatorController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/FormulaSaveRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/LegacyResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/RmFormulaEditorController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/api/RmFormulaExceptionHandler.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/domain/RmFormulaBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/repository/FormulaEditorRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/service/FormulaDeliveryService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/service/FormulaEditorService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/java/com/mapletct/ftmes/rmformula/support/RequestContext.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/test/java/com/mapletct/ftmes/rmformula/FormulaDeliveryServiceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/test/java/com/mapletct/ftmes/rmformula/FormulaEditorServiceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/test/java/com/mapletct/ftmes/rmformula/LegacyResultTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/rm-formula-editor/src/test/java/com/mapletct/ftmes/rmformula/RequestContextTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/wom-print/README.md",
       "state": "tracked",
       "tracked": true
@@ -1228,6 +1348,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/assets/module-static/PATROL/platform-common-zh_CN.properties",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/assets/module-static/RM/formula/editor.html",
       "state": "tracked",
       "tracked": true
     },
@@ -2937,6 +3063,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/190-rm-web-formula-editor.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3172,6 +3304,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-rm-batch-sync-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -5343,6 +5481,24 @@
     },
     {
       "ignored": false,
+      "path": "metadata/rm-web-formula-editor-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/rm-web-formula-editor-mobile.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/rm-web-formula-editor.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/runtime-configuration-readiness-smoke.json",
       "state": "tracked",
       "tracked": true
@@ -5776,6 +5932,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-project-goal-acceptance.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-rm-web-formula-editor-acceptance.py",
       "state": "tracked",
       "tracked": true
     },
@@ -7388,13 +7550,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 120
+      "tracked": 140
     },
     "contracts": {
       "tracked": 19
     },
     "deploy": {
-      "tracked": 543
+      "tracked": 546
     },
     "docs": {
       "tracked": 90
@@ -7403,7 +7565,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 127
+      "tracked": 130
     },
     "package.json": {
       "tracked": 1
@@ -7412,7 +7574,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 52
+      "tracked": 53
     },
     "services": {
       "tracked": 167
@@ -7427,8 +7589,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1228,
-    "tracked": 1228,
+    "totalFiles": 1255,
+    "tracked": 1255,
     "untracked": 0
   },
   "untrackedByDirectory": []

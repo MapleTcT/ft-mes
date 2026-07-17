@@ -99,10 +99,10 @@
       "requiresPersistence": true,
       "owner": "production-business-owner",
       "blockingIssues": [
-        "Material/WMS completion inbound, inventory write-back and visible manual task creation are accepted; external Batch editing and standalone bad-quantity scope still need a product decision, marker evidence or signed risk acceptance."
+        "Material/WMS completion inbound, inventory write-back, visible manual task creation and RM Web formula editing are accepted; standalone bad-quantity scope still needs a product decision, while plant Batch/DCS acknowledgement remains separate cutover evidence."
       ],
       "nextActions": [
-        "Resolve the remaining product-scope and external-client blockers, execute any newly supported frontend write actions with markers, and query PostgreSQL before signoff."
+        "Resolve the remaining bad-quantity product-scope blockers, regress accepted marker flows, and attach plant Batch/DCS delivery acknowledgement before signoff."
       ]
     },
     {
@@ -227,10 +227,9 @@
     {
       "id": "BUS-SIGNOFF-001",
       "severity": "BLOCKER",
-      "description": "Standalone bad-quantity scope and external Batch editing still prevent production signoff; material/WMS completion inbound, ProcessAnalysis traceability and production list export are accepted.",
+      "description": "Standalone bad-quantity scope still prevents production signoff; RM Web editing, material/WMS completion inbound, ProcessAnalysis traceability and production list export are accepted, while plant Batch/DCS acknowledgement remains a separate cutover prerequisite.",
       "source": "metadata/production-module-blockers.json",
       "blockerCaseIds": [
-        "PROD-010",
         "PROD-019",
         "PROD-021"
       ],
@@ -241,11 +240,10 @@
     {
       "id": "BUS-SIGNOFF-002",
       "severity": "BLOCKER",
-      "description": "Production module backlog still contains unresolved action-level gaps: public produceTaskCreated product scope, external Batch client integration, and standalone bad-quantity product scope. The WOM QR-code runtime endpoint and visible WOM manual production-task entry are closed and are no longer part of this blocker.",
+      "description": "Production module backlog still contains unresolved action-level gaps: public produceTaskCreated product scope and standalone bad-quantity product scope. The WOM QR-code runtime endpoint, visible WOM manual production-task entry and RM Web formula editor are closed and are no longer part of this blocker.",
       "source": "metadata/production-module-backlog.json",
       "backlogItemIds": [
         "PROD-ACTION-007",
-        "PROD-010",
         "PROD-019",
         "PROD-021"
       ],
