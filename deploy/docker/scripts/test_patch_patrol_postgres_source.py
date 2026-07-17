@@ -135,6 +135,28 @@ class PatrolPostgresSourcePatchTest(unittest.TestCase):
         self.assertIn(b"return mysql ? sql.replace", patched)
         self.assertIn(b": sql;", patched)
 
+    def test_report_patch_counts_compatibility_handoffs_as_pending(self):
+        source = b"\n".join(
+            (
+                PATCHER.REPORT_PENDING_REPLACEMENTS[0][0],
+                PATCHER.REPORT_PENDING_REPLACEMENTS[1][0],
+                PATCHER.REPORT_PENDING_REPLACEMENTS[2][0],
+                PATCHER.REPORT_PENDING_REPLACEMENTS[3][0],
+            )
+        )
+
+        patched, count = PATCHER.patch_report_pending_handoff(source)
+        patched_twice, count_twice = PATCHER.patch_report_pending_handoff(patched)
+
+        self.assertEqual(4, count)
+        self.assertEqual(0, count_twice)
+        self.assertEqual(patched, patched_twice)
+        self.assertIn(b"hr.risk_mode riskMode", patched)
+        self.assertIn(b"group by hr.status, hr.risk_mode", patched)
+        self.assertIn(b'.addScalar("riskMode", HibernateType.STRING)', patched)
+        self.assertIn(PATCHER.REPORT_PENDING_MARKER, patched)
+        self.assertIn(b"pending = pending.add(new BigDecimal(total))", patched)
+
 
 if __name__ == "__main__":
     unittest.main()

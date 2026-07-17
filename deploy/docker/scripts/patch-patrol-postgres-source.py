@@ -25,6 +25,10 @@ PATROL_TASK_DETAIL_CUSTOM_RELATIVE_PATH = Path(
     "service/src/main/custom/com/supcon/orchid/PATROL/services/impl/"
     "PATROLTaskDetailServiceImpl"
 )
+PATROL_REPORT_CUSTOM_RELATIVE_PATH = Path(
+    "service/src/main/custom/com/supcon/orchid/PATROL/services/impl/"
+    "PatrolReportServiceImpl.java"
+)
 UTILITY_METHOD_MARKER = b"public static String normalizeIdentifierQuotes"
 UTILITY_IMPORT = b"import com.supcon.orchid.db.DbUtils;"
 UTILITY_IMPORT_ANCHOR = b"import com.supcon.orchid.foundation.entities.Company;"
@@ -310,6 +314,25 @@ HIDDEN_DANGER_ALIAS_NEW = (
     b"select detail.WORK_ITEM_ID as \\\"WORKITEMID\\\", max(riskhandle.id) as \\\"RISKHANDLEID\\\", "
     b"max(riskhandle.table_no) as \\\"RISKHANDLETABLENO\\\" from MP_TASK_DETAILS detail "
 )
+REPORT_PENDING_MARKER = b'"PATROL_COMPATIBILITY_PENDING".equals(riskMode)'
+REPORT_PENDING_REPLACEMENTS = (
+    (
+        b'StringBuffer sql = new StringBuffer(" select count(1) total, hr.status, wfp.task_description taskDescription ")',
+        b'StringBuffer sql = new StringBuffer(" select count(1) total, hr.status, hr.risk_mode riskMode, wfp.task_description taskDescription ")',
+    ),
+    (
+        b'sql.append(" group by hr.status, wfp.task_description ");',
+        b'sql.append(" group by hr.status, hr.risk_mode, wfp.task_description ");',
+    ),
+    (
+        b'.addScalar("status", HibernateType.INTEGER)\n                    .addScalar("taskDescription", HibernateType.STRING)',
+        b'.addScalar("status", HibernateType.INTEGER)\n                    .addScalar("riskMode", HibernateType.STRING)\n                    .addScalar("taskDescription", HibernateType.STRING)',
+    ),
+    (
+        b'Integer total = (Integer) map.get("total");\n                    if (status==PatrolConstant.flowStatus.FLOW_VALID',
+        b'Integer total = (Integer) map.get("total");\n                    String riskMode = (String) map.get("riskMode");\n                    if ("PATROL_COMPATIBILITY_PENDING".equals(riskMode)) {\n                        pending = pending.add(new BigDecimal(total));\n                        continue;\n                    }\n                    if (status==PatrolConstant.flowStatus.FLOW_VALID',
+    ),
+)
 
 
 def patch_utility(source: bytes) -> tuple[bytes, bool]:
@@ -505,6 +528,24 @@ def patch_hidden_danger(source: bytes) -> tuple[bytes, int]:
     return source, changed
 
 
+def patch_report_pending_handoff(source: bytes) -> tuple[bytes, int]:
+    """Count degraded PATROL-to-EAM handoffs as pending, never as closed."""
+
+    if REPORT_PENDING_MARKER in source:
+        return source, 0
+
+    changed = 0
+    newline = b"\r\n" if b"\r\n" in source else b"\n"
+    for original, replacement in REPORT_PENDING_REPLACEMENTS:
+        original = original.replace(b"\n", newline)
+        replacement = replacement.replace(b"\n", newline)
+        if source.count(original) != 1:
+            raise ValueError("PATROL pending-handoff report anchor was not found uniquely")
+        source = source.replace(original, replacement, 1)
+        changed += 1
+    return source, changed
+
+
 def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str, object]:
     utility_path = module_root / UTILITY_RELATIVE_PATH
     service_root = module_root / SERVICE_IMPL_RELATIVE_PATH
@@ -518,6 +559,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
     indentation_count = 0
     task_generation_fix_count = 0
     hidden_danger_fix_count = 0
+    report_pending_fix_count = 0
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
         before = path.read_bytes()
         after, current_count, current_indentation_count = patch_service(before)
@@ -557,6 +599,18 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
     if not check and custom_after != custom_before:
         custom_task_detail_path.write_bytes(custom_after)
 
+    custom_report_path = module_root / PATROL_REPORT_CUSTOM_RELATIVE_PATH
+    if not custom_report_path.is_file():
+        raise ValueError("PATROL custom report service source was not found")
+    report_before = custom_report_path.read_bytes()
+    report_after, report_pending_fix_count = patch_report_pending_handoff(report_before)
+    if report_pending_fix_count:
+        relative_path = str(custom_report_path.relative_to(module_root))
+        if relative_path not in patched_files:
+            patched_files.append(relative_path)
+    if not check and report_after != report_before:
+        custom_report_path.write_bytes(report_after)
+
     remaining = []
     for path in sorted(service_root.glob("PATROL*ServiceImpl.java")):
         source = path.read_bytes()
@@ -577,12 +631,14 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         or indentation_count
         or task_generation_fix_count
         or hidden_danger_fix_count
+        or report_pending_fix_count
     ):
         raise ValueError(
             f"source patch is required: utilityChanged={utility_changed}, "
             f"replacements={replacement_count}, indentation={indentation_count}, "
             f"taskGeneration={task_generation_fix_count}, "
             f"hiddenDanger={hidden_danger_fix_count}"
+            f", reportPending={report_pending_fix_count}"
         )
     if not check and utility_changed:
         utility_path.write_bytes(utility_after)
@@ -600,6 +656,7 @@ def patch_module(module_root: Path, check: bool, source_commit: str) -> dict[str
         "indentationFixCount": indentation_count,
         "taskGenerationFixCount": task_generation_fix_count,
         "hiddenDangerFixCount": hidden_danger_fix_count,
+        "reportPendingFixCount": report_pending_fix_count,
         "patchedFileCount": len(patched_files),
         "patchedFiles": patched_files,
         "helperReferenceCount": helper_references,

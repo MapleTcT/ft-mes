@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T00:59:39+00:00",
-  "repoCommit": "21812424ab512a69407474180b4f7c9a5110c600",
+  "generatedAt": "2026-07-17T02:01:11+00:00",
+  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
   "findingCount": 1564,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -237,7 +237,7 @@
     },
     {
       "file": "Makefile",
-      "line": 143,
+      "line": 144,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -245,7 +245,7 @@
     },
     {
       "file": "Makefile",
-      "line": 239,
+      "line": 240,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -253,7 +253,7 @@
     },
     {
       "file": "Makefile",
-      "line": 240,
+      "line": 241,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -261,7 +261,7 @@
     },
     {
       "file": "Makefile",
-      "line": 243,
+      "line": 244,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -269,7 +269,7 @@
     },
     {
       "file": "Makefile",
-      "line": 244,
+      "line": 245,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -277,7 +277,7 @@
     },
     {
       "file": "Makefile",
-      "line": 342,
+      "line": 344,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -285,7 +285,7 @@
     },
     {
       "file": "Makefile",
-      "line": 781,
+      "line": 784,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -293,7 +293,7 @@
     },
     {
       "file": "Makefile",
-      "line": 782,
+      "line": 785,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -301,7 +301,7 @@
     },
     {
       "file": "Makefile",
-      "line": 784,
+      "line": 787,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -309,7 +309,7 @@
     },
     {
       "file": "Makefile",
-      "line": 785,
+      "line": 788,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -317,7 +317,7 @@
     },
     {
       "file": "Makefile",
-      "line": 793,
+      "line": 796,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -325,7 +325,7 @@
     },
     {
       "file": "Makefile",
-      "line": 794,
+      "line": 797,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -333,7 +333,7 @@
     },
     {
       "file": "Makefile",
-      "line": 796,
+      "line": 799,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -341,7 +341,7 @@
     },
     {
       "file": "Makefile",
-      "line": 797,
+      "line": 800,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -12397,7 +12397,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 163,
+      "line": 164,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12405,7 +12405,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 372,
+      "line": 374,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12413,7 +12413,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 420,
+      "line": 422,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12421,7 +12421,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 429,
+      "line": 431,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12429,7 +12429,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 433,
+      "line": 435,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12437,7 +12437,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 440,
+      "line": 442,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12445,7 +12445,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 448,
+      "line": 450,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12453,7 +12453,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 449,
+      "line": 451,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

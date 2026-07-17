@@ -48,6 +48,9 @@ class ModuleI18nGeneratorTest(unittest.TestCase):
         self.assertIn("getLanguageObjData", script)
         self.assertIn("getTextWithModuleFallback", script)
         self.assertIn("__adpModuleI18nObserver_PATROL", script)
+        self.assertIn("translateDocumentTitle(targetWindow)", script)
+        self.assertIn("doc.title = resources[doc.title]", script)
+        self.assertIn("observerRoot = doc.documentElement || doc.body", script)
 
     def test_primary_bundle_overrides_compatibility_fallback(self):
         with tempfile.TemporaryDirectory() as directory:

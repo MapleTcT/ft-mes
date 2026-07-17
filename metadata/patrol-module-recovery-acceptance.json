@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-07-17T00:30:44.547Z",
-  "repoBaseCommit": "28d93d0673171efc2b47fc64b45dd5f43e66b0ad",
+  "generatedAt": "2026-07-17T01:54:09.209Z",
+  "repoBaseCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
   "sourceIntakeCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
-  "runtimeBuildSourceCommit": "8971a8770452c2bb55261f330284cd3dd26824b1",
+  "runtimeBuildSourceCommit": "0b8f37ebd13f3a9b72ae1a02cd59713e59fb68c0",
   "moduleCode": "PATROL_1.0.0",
   "projectVersion": "6.0.4.0",
   "hostService": "EamMs",
   "database": "PostgreSQL",
   "targetHost": "10.11.100.17",
   "targetAccessPolicy": "COMPANY_LAN",
-  "overallStatus": "TARGET_HIDDEN_DANGER_PERSISTENCE_PASS",
+  "overallStatus": "TARGET_REPORT_STATISTICS_PASS_MONITOR_FALLBACK",
   "source": {
     "archive": "PATROL_6.0.4.0.zip",
     "sha256": "1214f11302545d29ec2d611c49cb6bfe87aac3faf1344a94cb69eea9884b3394",
@@ -27,17 +27,17 @@
       {
         "name": "core",
         "javaFiles": 149,
-        "sha256": "9b9d0367d1acc3e89d38adb556c1941f2d37284f093cded4bb2edc2b573beb3e"
+        "sha256": "d95814b7debcf9af9a155150787cfd247d4f6c1dc8164c6ccc103276ca802221"
       },
       {
         "name": "api",
         "javaFiles": 63,
-        "sha256": "34b4bce83a4f6af9cb19ebd5a25336b019001b84a384cffeb7df9b777bbf6c6c"
+        "sha256": "8cbb3382bd65fe214e3fc674108b2def45bce084e5a6c06845e1da0123c44bc1"
       },
       {
         "name": "service",
         "javaFiles": 243,
-        "sha256": "94c3289a063272da90c7eb3544a23cee200bcf2b210fa9f0594b50db75db0510"
+        "sha256": "f9ab3be78b52c0d0b3c4ef344ab82fa9ab3526ffa0ab60cab0460ac8e01f473d"
       }
     ]
   },
@@ -83,14 +83,17 @@
   "runtimePatch": {
     "baselineJarSha256": "b44e4c9c4b79f23621f58d2a51a28450d9cc4225fb4f19586283fc228d49da38",
     "deployedJar": "/home/v6/adp-mes-docker-newbase-20260611-181921/runtime/bap-server/module-Server/EamMs/manual/EamMs-1.0.0.jar",
-    "deployedJarSha256": "af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753",
+    "deployedJarSha256": "99e5c346448595db8cecf5aafb2523a0dd9c1816ae6f80f6fa22f1abc89ad0aa",
     "deployment": "PASS",
     "healthVerification": "PASS",
     "nginxSyntax": "PASS",
     "postgresContainerHealth": "PASS",
-    "rollbackJar": "/data/docker/adp-patrol-20260716/EamMs-1.0.0.patrol-postgres-queryfix2-20260716.jar",
-    "rollbackJarSha256": "97d3a265bdc1b6d6a3018a808dda765f65ccbab975decd715777e56d1e43d2ab",
-    "i18nSchemaCompatibility": "PASS_AFTER_I18N_RESTART"
+    "rollbackJar": "/data/docker/adp-patrol-report-20260717/EamMs-1.0.0.pre-report-pending-af01d6a.jar",
+    "rollbackJarSha256": "af01d6a750ed4a812bc2028c2c5279453fd7bd03177f71b890a044f74e97f753",
+    "i18nSchemaCompatibility": "PASS_AFTER_I18N_RESTART",
+    "reportPendingCompatibility": "PASS",
+    "startupSeconds": 396.38,
+    "knownStartupWarning": "/bap-workspace/i18n_temp/EamMs.zip is absent during asynchronous i18n upload; PATROL still registers and serves requests"
   },
   "functionalAcceptance": {
     "status": "PASS",
@@ -239,16 +242,24 @@
       "idempotent hidden-danger creation",
       "PATROL detail to EAM risk linkage",
       "EAM risk-ledger browser re-render",
-      "SESHRM inspection-source translation"
+      "SESHRM inspection-source translation",
+      "report pages browser/API/PostgreSQL aggregate reconciliation",
+      "pending hidden-danger treatment chart",
+      "task completion and stability statistics",
+      "route/task monitor fallback"
     ],
     "remaining": [
-      "statistics and monitor pages"
+      "gather-error analysis with an enabled error-benchmark item and non-null gather_data",
+      "SESGIS map positioning and trajectory replay"
     ],
     "blocked": [
-      "full hidden-danger rectification, review and closure workflow requires the real SESH module"
+      "full hidden-danger rectification, review and closure workflow requires the real SESH module",
+      "map positioning and trajectory replay require the missing SESGISConfig service package"
     ],
     "knownWarnings": [
-      "EamMs logs getDataGridsByViewCode missing PATROL_1.0.0_patrolPlan_createTaskEdit while task generation still succeeds"
+      "EamMs logs getDataGridsByViewCode missing PATROL_1.0.0_patrolPlan_createTaskEdit while task generation still succeeds",
+      "EamMs cold start took 396.38 seconds on the current test host",
+      "asynchronous i18n upload warns that /bap-workspace/i18n_temp/EamMs.zip is absent, but PATROL registration and requests succeed"
     ],
     "deploymentNotes": [
       "In-place varchar-to-timestamp repair requires restarting i18n once to clear PostgreSQL prepared plans; fresh Docker startup applies migrations before i18n starts."
@@ -336,5 +347,69 @@
       "pageErrors": 0,
       "requestFailures": 0
     }
+  },
+  "reportAcceptance": {
+    "status": "PASS_WITH_NOT_APPLICABLE_DATA_PREREQUISITE",
+    "report": "metadata/patrol-report-acceptance.json",
+    "script": "deploy/docker/scripts/adp-patrol-report-smoke.js",
+    "generatedAt": "2026-07-17T01:54:09.209Z",
+    "routes": [
+      "/msService/PATROL/patrolTask/taskDetail/potrolResultSummary",
+      "/msService/PATROL/patrolTask/taskDetail/abnormalSummary",
+      "/msService/PATROL/patrolTask/potrolTask/taskOverviewList",
+      "/msService/PATROL/patrolTask/taskDetail/unusualSummary",
+      "/msService/PATROL/patrolTask/taskDetail/taskFinishStatistics",
+      "/msService/PATROL/patrolTask/potrolTask/stabilityRAMenu",
+      "/msService/PATROL/patrolTask/potrolTask/errorAnalysisMenu",
+      "/msService/PATROL/patrolMonit/patrolMonit/patrolMonitMap"
+    ],
+    "summary": {
+      "pages": 8,
+      "passed": 7,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 1,
+      "aggregateChecks": 23,
+      "aggregatePassed": 22,
+      "aggregateFailed": 0,
+      "aggregateNotApplicable": 1
+    },
+    "databaseValues": {
+      "resultSummaryCount": 16,
+      "abnormalSummaryCount": 12,
+      "taskOverviewCount": 22,
+      "hiddenDangerLinkedCount": 6,
+      "hiddenDangerPendingCount": 6,
+      "hiddenDangerClosedCount": 0,
+      "taskTotal": 22,
+      "taskCompleted": 16,
+      "taskUncompleted": 6,
+      "taskCompletionRate": 0.7273,
+      "detailTotal": 16,
+      "detailAbnormal": 12,
+      "detailAbnormalRate": 0.75,
+      "stabilitySamples": 16,
+      "monitorRoutes": 1,
+      "monitorTasks": 28,
+      "configuredErrorBenchmarkItems": 0,
+      "eligibleGatherErrorDetails": 0
+    },
+    "runtimeFixes": [
+      "generated PATROL i18n compatibility script now translates document.title and observes the document root",
+      "Nginx maps the legacy PATROL comp_icon.png asset path to the verified module image",
+      "PATROL_COMPATIBILITY_PENDING risks are counted as pending instead of being dropped from the treatment chart"
+    ],
+    "browserEvidence": {
+      "screenshotsGenerated": 8,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "networkErrors": 0,
+      "requestFailures": 0,
+      "rawI18nKeys": 0
+    },
+    "boundaries": [
+      "gather-error analysis is NOT_APPLICABLE because no enabled error-benchmark item and no eligible gather_data record exist",
+      "monitor route/task fallback is accepted; GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package"
+    ]
   }
 }

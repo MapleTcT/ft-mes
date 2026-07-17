@@ -65,6 +65,7 @@ PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-input-standard-persi
 PATROL_ROUTE_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-route-persistence-acceptance.json
 PATROL_AREA_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-area-persistence-acceptance.json
 PATROL_ITEM_PERSISTENCE_OUTPUT ?= /tmp/adp-patrol-item-persistence-acceptance.json
+PATROL_REPORT_ACCEPTANCE_OUTPUT ?= metadata/patrol-report-acceptance.json
 SYSTEMCONFIG_BUILTINS_OUTPUT ?= metadata/systemconfig-builtins-readiness-smoke.json
 SYSTEMCONFIG_CONTROLLED_OUTPUT ?= metadata/systemconfig-controlled-runtime-config-acceptance.json
 SYSTEMCONFIG_CONTROLLED_TARGET_MODE ?= qcs
@@ -307,6 +308,7 @@ help:
 	@printf '%s\n' '  make acceptance-patrol-route-persistence Run PATROL route browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-area-persistence Run PATROL area browser/PostgreSQL CRUD acceptance'
 	@printf '%s\n' '  make acceptance-patrol-item-persistence Run PATROL item browser/PostgreSQL CRUD acceptance'
+	@printf '%s\n' '  make acceptance-patrol-report Run PATROL report/monitor browser/API/PostgreSQL acceptance'
 	@printf '%s\n' '  make smoke-systemconfig-builtins Run built-in system config list/detail/read-only DB smoke'
 	@printf '%s\n' '  make acceptance-systemconfig-controlled-runtime-config Run controlled runtime config save/read/rollback acceptance (SYSTEMCONFIG_CONTROLLED_TARGET_MODE=qcs|rm)'
 	@printf '%s\n' '  make smoke-runtime-configuration Run read-only entity/runtime configuration readiness smoke'
@@ -472,6 +474,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-minio-runtime-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-dependency-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-production-export-readiness-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-patrol-report-smoke.js
 	$(PYTHON) -m py_compile deploy/docker/scripts/generate-business-view-runtime-sql.py
 	$(PYTHON) -m unittest deploy/docker/scripts/test_generate_business_view_runtime_sql.py
 	$(PYTHON) -m py_compile deploy/docker/scripts/generate-module-access-workflow-sql.py
@@ -979,7 +982,7 @@ acceptance-systemcode-persistence:
 acceptance-systemconfig-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_BROWSER_BASE_URL=$(ADP_BROWSER_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_SYSTEMCONFIG_PERSISTENCE_OUTPUT=$(SYSTEMCONFIG_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-systemconfig-persistence-acceptance.js
 
-.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence acceptance-patrol-hidden-danger-persistence
+.PHONY: acceptance-patrol-task-persistence acceptance-patrol-execution-persistence acceptance-patrol-hidden-danger-persistence acceptance-patrol-report
 acceptance-patrol-task-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_TASK_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
 
@@ -988,6 +991,9 @@ acceptance-patrol-execution-persistence:
 
 acceptance-patrol-hidden-danger-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_TASK_ACTION=hidden-danger ADP_PATROL_PERSISTENCE_OUTPUT=$(PATROL_HIDDEN_DANGER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-task-persistence-acceptance.js
+
+acceptance-patrol-report:
+	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_REPORT_OUTPUT=$(PATROL_REPORT_ACCEPTANCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-report-smoke.js
 
 acceptance-patrol-input-standard-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_PAGE_TIMEOUT_MS=$(ADP_PAGE_TIMEOUT_MS) ADP_PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT=$(PATROL_INPUT_STANDARD_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-patrol-input-standard-persistence-acceptance.js

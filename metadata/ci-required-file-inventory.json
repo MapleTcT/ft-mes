@@ -2829,6 +2829,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-patrol-report-smoke.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-patrol-route-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4852,6 +4858,12 @@
     {
       "ignored": false,
       "path": "metadata/patrol-module-recovery-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/patrol-report-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7022,7 +7034,7 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 531
+      "tracked": 532
     },
     "docs": {
       "tracked": 90
@@ -7031,7 +7043,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 117
+      "tracked": 118
     },
     "package.json": {
       "tracked": 1
@@ -7055,8 +7067,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1166,
-    "tracked": 1166,
+    "totalFiles": 1168,
+    "tracked": 1168,
     "untracked": 0
   },
   "untrackedByDirectory": []

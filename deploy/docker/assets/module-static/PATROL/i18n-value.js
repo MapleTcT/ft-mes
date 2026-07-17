@@ -1209,6 +1209,12 @@ window.InternationalResource["PATROL_1.0.0.portlettitleKey.randon1596177586328"]
     node.nodeValue = original.replace(trimmed, resources[trimmed]);
   }
 
+  function translateDocumentTitle(targetWindow) {
+    var doc = targetWindow && targetWindow.document;
+    if (!doc || resources[doc.title] == null) return;
+    doc.title = resources[doc.title];
+  }
+
   function translateSubtree(root) {
     if (!root || !root.ownerDocument || !root.ownerDocument.createTreeWalker) return;
     var doc = root.ownerDocument;
@@ -1226,11 +1232,15 @@ window.InternationalResource["PATROL_1.0.0.portlettitleKey.randon1596177586328"]
 
   function installObserver(targetWindow) {
     var doc = targetWindow.document;
-    if (!doc || !doc.body) return;
-    translateSubtree(doc.body);
+    if (!doc) return;
+    translateDocumentTitle(targetWindow);
+    if (doc.body) translateSubtree(doc.body);
+    var observerRoot = doc.documentElement || doc.body;
+    if (!observerRoot) return;
     if (!targetWindow.MutationObserver || targetWindow[observerFlag]) return;
     targetWindow[observerFlag] = true;
     var observer = new targetWindow.MutationObserver(function translateMutations(mutations) {
+      translateDocumentTitle(targetWindow);
       mutations.forEach(function translateMutation(mutation) {
         if (mutation.type === "characterData") {
           translateTextNode(mutation.target);
@@ -1242,7 +1252,7 @@ window.InternationalResource["PATROL_1.0.0.portlettitleKey.randon1596177586328"]
         });
       });
     });
-    observer.observe(doc.body, { childList: true, subtree: true, characterData: true });
+    observer.observe(observerRoot, { childList: true, subtree: true, characterData: true });
   }
 
   function install() {

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T00:49:02+00:00",
-  "repoCommit": "21812424ab512a69407474180b4f7c9a5110c600",
+  "generatedAt": "2026-07-17T02:01:25+00:00",
+  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
     "totalFiles": 358,
-    "totalBytes": 54858149,
+    "totalBytes": 54862005,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -18,12 +18,12 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 20030,
+      "nginx-runtime-config": 20399,
       "postgres-init-sql": 54024175,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82088,
-      "runtime-script": 257231,
-      "runtime-static-override": 402284
+      "runtime-script": 260340,
+      "runtime-static-override": 402662
     }
   },
   "categoryDescriptions": {
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 19810,
-      "sha256": "8500a13cabf0e98279c149c49deb0c27a9f97a78581712db2989fcfa2856d052"
+      "sizeBytes": 20179,
+      "sha256": "dd367746fe5059551cfcc017732520359278b8c255374efd16f26d80bc0aa599"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",
@@ -1695,8 +1695,8 @@
     {
       "path": "deploy/docker/scripts/patch-patrol-postgres-source.py",
       "category": "runtime-script",
-      "sizeBytes": 28099,
-      "sha256": "adf4f2ce45fdfadeb67e2ea5b125cb43d1db32e9fb4f3cbb891f1bfc729593f1"
+      "sizeBytes": 31208,
+      "sha256": "8409e27b051ce50dc9cd4860724710d131090d2569097a6b02d53a0e6d8941f3"
     },
     {
       "path": "deploy/docker/scripts/patch-postgres-runtime.py",
@@ -1755,8 +1755,8 @@
     {
       "path": "deploy/docker/assets/module-static/PATROL/i18n-value.js",
       "category": "runtime-static-override",
-      "sizeBytes": 117107,
-      "sha256": "00f11c383b9f460680c2462e537df1093d89ec4ffb112324dc5a8ca87b687763"
+      "sizeBytes": 117485,
+      "sha256": "08de9c6f27095b1a729da3f1d9b7c6db974092cc7a25af1fbf39fe9a724335ec"
     },
     {
       "path": "deploy/docker/assets/module-static/PATROL/inputStandard/inputStandard/inputStanEdit/body-es5.js",

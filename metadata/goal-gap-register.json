@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T00:57:09+00:00",
-  "repoCommit": "21812424ab512a69407474180b4f7c9a5110c600",
+  "generatedAt": "2026-07-17T02:07:25+00:00",
+  "repoCommit": "a008baeb8055a8daea953141f4ea068272d80a68",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -408,13 +408,14 @@
         "PATROL item real browser CRUD is PASS with marker ADP_E2E_20260716200952_PATROL_ITEM: editor add/insert/delete/move-up/move-down plus add/modify/stop/run/delete passed 21/21, PostgreSQL mp_work_items confirmed all critical process fields, input-standard and route/area foreign keys, version 0->1, is_run true->false->true and valid=false soft delete; raw menu i18n keys and the start/run action-code mismatch were fixed, seed route/area/item stayed valid, and browser errors were zero.",
         "PATROL execution real browser and PostgreSQL acceptance is PASS with marker ADP_E2E_20260716210839_PATROL_EXECUTION: task issue/run, result entry, completion and completed-state re-render passed 32/32; mp_potrol_tasks and mp_task_details confirmed execution times, completion staff, result, conclusion and completion audit fields, the cancel branch independently regressed PASS, and browser errors were zero.",
         "PATROL shared inspection plan/task, input-standard, route/area/item CRUD and execution completion remain PASS after migrations 178-186 were applied on 10.11.100.17.",
-        "PATROL hidden-danger real browser/API/PostgreSQL acceptance is PASS with marker ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER: abnormal result completion, real grid selection and confirmation, idempotent createHiddenDanger, mp_task_details to ses_hrm_riskhandles linkage, EAM risk-ledger re-render and SESHRM source translation passed 45/45; 8 screenshots were generated and browser errors were zero. This is a PATROL_COMPATIBILITY_PENDING handoff, not a claim that the absent SESH rectification/review/closure workflow exists."
+        "PATROL hidden-danger real browser/API/PostgreSQL acceptance is PASS with marker ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER: abnormal result completion, real grid selection and confirmation, idempotent createHiddenDanger, mp_task_details to ses_hrm_riskhandles linkage, EAM risk-ledger re-render and SESHRM source translation passed 45/45; 8 screenshots were generated and browser errors were zero. This is a PATROL_COMPATIBILITY_PENDING handoff, not a claim that the absent SESH rectification/review/closure workflow exists.",
+        "PATROL report/monitor real browser/API/PostgreSQL acceptance generated at 2026-07-17T01:54:09.209Z is PASS: 8 pages produced 7 PASS and 1 NOT_APPLICABLE, while 23 aggregate checks produced 22 PASS and 1 NOT_APPLICABLE with zero browser errors. Direct database reconciliation confirmed result summary 16, abnormal results 12, task overview 22, hidden dangers linked/pending/closed 6/6/0, task completion 16/22, abnormal detail rate 12/16 and monitor routes/tasks 1/28. Gather-error analysis is N/A because the database has 0 enabled error-benchmark items and 0 eligible gather_data details; route/task monitor fallback is accepted, while GIS positioning and trajectory replay remain blocked by the missing SESGISConfig package."
       ],
       "blockingIssues": [
-        "剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；PATROL 统计未验收，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
+        "剩余 4 条生产用例、独立不良数量等产品范围项、二维码/导出和业务负责人签字未完成；PATROL 采集误差分析仍需真实误差基准项和 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 已闭合。"
       ],
       "nextActions": [
-        "保持 material/WMS、ProcessAnalysis、PATROL 配置/执行/异常隐患链回归，继续 PATROL 统计；若要求整改、复查和销项先取得真实 SESH；继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
+        "保持 material/WMS、ProcessAnalysis、PATROL 配置/执行/异常隐患和统计聚合回归；配置真实误差基准巡检项并产生 gather_data 后复验误差分析；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续产品范围、二维码、外部客户端和导出验收，并补齐 before/after SQL、文件响应和业务签字。"
       ],
       "artifacts": [
         "docs/production-module-functional-test-cases.md",
@@ -457,7 +458,9 @@
         "metadata/patrol-execution-persistence-acceptance.json",
         "metadata/patrol-hidden-danger-persistence-acceptance.json",
         "deploy/docker/postgres/init/186-patrol-hidden-danger-eam-risk-compat.sql",
-        "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js"
+        "deploy/docker/assets/module-static/PATROL/patrolTask/taskDetail/abnormalSummary/body.js",
+        "deploy/docker/scripts/adp-patrol-report-smoke.js",
+        "metadata/patrol-report-acceptance.json"
       ]
     },
     {
