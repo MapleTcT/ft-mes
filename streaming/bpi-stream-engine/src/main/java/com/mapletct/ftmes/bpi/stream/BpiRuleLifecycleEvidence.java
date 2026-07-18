@@ -110,9 +110,6 @@ public final class BpiRuleLifecycleEvidence {
                 retirement.event().getEventId(),
                 BoundaryRuleRuntimeReadinessStatusV1.INACTIVE,
                 "retirement INACTIVE");
-        require(activeApplication.event().getDeploymentId()
-                        .equals(retirementApplication.event().getDeploymentId()),
-                "activation and retirement were applied by different deployments");
         require(retirementApplication.event().getDeploymentId()
                         .equals(retirementReadiness.value().event().getDeploymentId()),
                 "retirement application and readiness deployments differ");

@@ -43,13 +43,13 @@ class BpiRuleLifecycleEvidenceTest {
                         located(activation, 4L, "ACTIVATE"),
                         located(retirement, 5L, "RETIRE")),
                 List.of(
-                        application("active-application", "activate-event", 6L),
-                        application("retire-application", "retire-event", 7L)),
+                        application("active-application", "activate-event", "ubuntu-test-v15b", 6L),
+                        application("retire-application", "retire-event", "ubuntu-test-v15c", 7L)),
                 List.of(
                         readiness("active-readiness", "activate-event",
-                                BoundaryRuleRuntimeReadinessStatusV1.READY, 8L),
+                                BoundaryRuleRuntimeReadinessStatusV1.READY, "ubuntu-test-v15c", 8L),
                         readiness("retire-readiness", "retire-event",
-                                BoundaryRuleRuntimeReadinessStatusV1.INACTIVE, 9L)));
+                                BoundaryRuleRuntimeReadinessStatusV1.INACTIVE, "ubuntu-test-v15c", 9L)));
 
         assertEquals("activate-event", result.activePublication().event().getEventId());
         assertFalse(result.retirementPublication().event().getActive());
@@ -57,6 +57,8 @@ class BpiRuleLifecycleEvidenceTest {
                 result.retirementReadiness().event().getStatus());
         assertEquals(1, result.activeReadinessCount());
         assertEquals(1, result.activeReadinessDistinctEventIdCount());
+        assertEquals("ubuntu-test-v15b", result.activeApplication().event().getDeploymentId());
+        assertEquals("ubuntu-test-v15c", result.retirementApplication().event().getDeploymentId());
     }
 
     @Test
@@ -94,14 +96,15 @@ class BpiRuleLifecycleEvidenceTest {
                                 located(activation, 4L, "ACTIVATE"),
                                 located(retirement, 5L, "RETIRE")),
                         List.of(
-                                application("active-application", "activate-event", 6L),
-                                application("retire-application", "retire-event", 7L)),
+                                application("active-application", "activate-event", "ubuntu-test-v15b", 6L),
+                                application("retire-application", "retire-event", "ubuntu-test-v15c", 7L)),
                         List.of(
                                 duplicate,
                                 new BpiRuleLifecycleEvidence.LocatedReadiness(
                                         duplicate.event(), 1, 9L, 30_009L),
                                 readiness("retire-readiness", "retire-event",
-                                        BoundaryRuleRuntimeReadinessStatusV1.INACTIVE, 10L))));
+                                        BoundaryRuleRuntimeReadinessStatusV1.INACTIVE,
+                                        "ubuntu-test-v15c", 10L))));
 
         assertEquals(
                 "activation READY contains duplicate event ids: records=2, distinct=1",
@@ -137,6 +140,7 @@ class BpiRuleLifecycleEvidenceTest {
     private static BpiRuleLifecycleEvidence.LocatedApplication application(
             String eventId,
             String publicationEventId,
+            String deploymentId,
             long offset) {
         BoundaryRuleApplicationV1 event = BoundaryRuleApplicationV1.newBuilder()
                 .setEventId(eventId)
@@ -146,7 +150,7 @@ class BpiRuleLifecycleEvidenceTest {
                 .setLineId(CONFIG.lineId())
                 .setRuleCode(CONFIG.ruleCode())
                 .setRuleVersion(CONFIG.ruleVersion())
-                .setDeploymentId("ubuntu-test-v15")
+                .setDeploymentId(deploymentId)
                 .setStatus(BoundaryRuleApplicationStatusV1.APPLIED)
                 .build();
         return new BpiRuleLifecycleEvidence.LocatedApplication(event, 1, offset, 20_000L + offset);
@@ -157,6 +161,15 @@ class BpiRuleLifecycleEvidenceTest {
             String publicationEventId,
             BoundaryRuleRuntimeReadinessStatusV1 status,
             long offset) {
+        return readiness(eventId, publicationEventId, status, "ubuntu-test-v15", offset);
+    }
+
+    private static BpiRuleLifecycleEvidence.LocatedReadiness readiness(
+            String eventId,
+            String publicationEventId,
+            BoundaryRuleRuntimeReadinessStatusV1 status,
+            String deploymentId,
+            long offset) {
         BoundaryRuleRuntimeReadinessV1 event = BoundaryRuleRuntimeReadinessV1.newBuilder()
                 .setEventId(eventId)
                 .setPublicationEventId(publicationEventId)
@@ -165,7 +178,7 @@ class BpiRuleLifecycleEvidenceTest {
                 .setLineId(CONFIG.lineId())
                 .setRuleCode(CONFIG.ruleCode())
                 .setRuleVersion(CONFIG.ruleVersion())
-                .setDeploymentId("ubuntu-test-v15")
+                .setDeploymentId(deploymentId)
                 .setStatus(status)
                 .build();
         return new BpiRuleLifecycleEvidence.LocatedReadiness(event, 1, offset, 30_000L + offset);
