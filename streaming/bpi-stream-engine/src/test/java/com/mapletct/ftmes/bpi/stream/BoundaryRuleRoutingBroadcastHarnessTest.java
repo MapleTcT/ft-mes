@@ -169,11 +169,12 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
     }
 
     @Test
-    void readinessReceiptEmitsOnlyWhenStatusOrReasonChanges() throws Exception {
+    void readinessReceiptTracksCatalogRevisionAndSuppressesExactReplay() throws Exception {
         try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
             harness.open();
             rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
             catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(10)));
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(20)));
             catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0.plusSeconds(20)));
             catalog(harness, readyCatalog("TENANT-A", false, "CAL-1", T0.plusSeconds(30)));
             catalog(harness, readyCatalog("TENANT-A", true, "CAL-2", T0.plusSeconds(40)));
@@ -183,6 +184,7 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                     List.of(
                             BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
                             BoundaryRuleRuntimeReadinessStatusV1.READY,
+                            BoundaryRuleRuntimeReadinessStatusV1.READY,
                             BoundaryRuleRuntimeReadinessStatusV1.DEGRADED,
                             BoundaryRuleRuntimeReadinessStatusV1.DEGRADED),
                     receipts.stream().map(BoundaryRuleRuntimeReadinessV1::getStatus).toList());
@@ -190,12 +192,20 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                     List.of(
                             "POINT_CATALOG_RUNTIME_MISSING",
                             "",
+                            "",
                             "POINT_DEVICE_NOT_ACTIVE",
                             "POINT_CALIBRATION_VERSION_MISMATCH"),
                     receipts.stream().map(BoundaryRuleRuntimeReadinessV1::getReasonCode).toList());
             assertEquals(
                     "CATALOG-TENANT-A-" + T0.plusSeconds(40).toEpochMilli(),
-                    receipts.get(3).getPointCatalogEventId());
+                    receipts.get(4).getPointCatalogEventId());
+            assertEquals(
+                    List.of(
+                            "CATALOG-TENANT-A-" + T0.plusSeconds(10).toEpochMilli(),
+                            "CATALOG-TENANT-A-" + T0.plusSeconds(20).toEpochMilli()),
+                    receipts.subList(1, 3).stream()
+                            .map(BoundaryRuleRuntimeReadinessV1::getPointCatalogEventId)
+                            .toList());
         }
     }
 

@@ -77,6 +77,37 @@ class BpiRuleLifecycleEvidenceTest {
         assertEquals("expected exactly one retirement publication, found 2", error.getMessage());
     }
 
+    @Test
+    void rejectsDuplicateRuntimeReadinessEventIds() {
+        BoundaryRulePublicationV1 activation = publication("activate-event", true, "ACTIVATE", 1000L);
+        BoundaryRulePublicationV1 retirement = publication("retire-event", false, "RETIRE", 2000L);
+        BpiRuleLifecycleEvidence.LocatedReadiness duplicate = readiness(
+                "active-readiness",
+                "activate-event",
+                BoundaryRuleRuntimeReadinessStatusV1.READY,
+                8L);
+
+        IllegalStateException error = assertThrows(IllegalStateException.class, () ->
+                BpiRuleLifecycleEvidence.verify(
+                        CONFIG,
+                        List.of(
+                                located(activation, 4L, "ACTIVATE"),
+                                located(retirement, 5L, "RETIRE")),
+                        List.of(
+                                application("active-application", "activate-event", 6L),
+                                application("retire-application", "retire-event", 7L)),
+                        List.of(
+                                duplicate,
+                                new BpiRuleLifecycleEvidence.LocatedReadiness(
+                                        duplicate.event(), 1, 9L, 30_009L),
+                                readiness("retire-readiness", "retire-event",
+                                        BoundaryRuleRuntimeReadinessStatusV1.INACTIVE, 10L))));
+
+        assertEquals(
+                "activation READY contains duplicate event ids: records=2, distinct=1",
+                error.getMessage());
+    }
+
     private static BoundaryRulePublicationV1 publication(
             String eventId,
             boolean active,

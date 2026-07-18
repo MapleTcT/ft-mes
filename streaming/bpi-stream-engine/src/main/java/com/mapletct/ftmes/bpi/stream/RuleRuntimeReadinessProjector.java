@@ -97,7 +97,7 @@ final class RuleRuntimeReadinessProjector {
         }
     }
 
-    static boolean sameStatusAndReason(byte[] previousState, byte[] nextState) {
+    static boolean sameObservation(byte[] previousState, byte[] nextState) {
         if (previousState == null || previousState.length == 1) {
             return false;
         }
@@ -105,8 +105,16 @@ final class RuleRuntimeReadinessProjector {
             BoundaryRuleRuntimeReadinessV1 previous =
                     BoundaryRuleRuntimeReadinessV1.parseFrom(previousState);
             BoundaryRuleRuntimeReadinessV1 next = BoundaryRuleRuntimeReadinessV1.parseFrom(nextState);
-            return previous.getStatus() == next.getStatus()
-                    && previous.getReasonCode().equals(next.getReasonCode());
+            return previous.getEventId().equals(next.getEventId())
+                    && previous.getPublicationEventId().equals(next.getPublicationEventId())
+                    && previous.getDeploymentId().equals(next.getDeploymentId())
+                    && previous.getStatus() == next.getStatus()
+                    && previous.getReasonCode().equals(next.getReasonCode())
+                    && previous.getDetail().equals(next.getDetail())
+                    && previous.getObservedAtMs() == next.getObservedAtMs()
+                    && previous.getPointCatalogEventId().equals(next.getPointCatalogEventId())
+                    && previous.getPointCatalogSourceRevision()
+                            .equals(next.getPointCatalogSourceRevision());
         } catch (InvalidProtocolBufferException error) {
             throw new IllegalStateException("runtime readiness state is not valid Protobuf", error);
         }

@@ -298,7 +298,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 safeDetail,
                 catalog.getObservedAtMs(),
                 catalog);
-        if (!RuleRuntimeReadinessProjector.sameStatusAndReason(previousStatus, receipt)) {
+        if (!RuleRuntimeReadinessProjector.sameObservation(previousStatus, receipt)) {
             emit(context, RUNTIME_READINESS, receipt);
         }
         runtimeStatus.put(delete.ruleRef().key(), receipt);
@@ -343,7 +343,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         byte[] receipt = RuleRuntimeReadinessProjector.project(
                 plan.publication(), deploymentId, status, reasonCode, detail, observedAtMs, catalog);
         boolean readinessChanged =
-                !RuleRuntimeReadinessProjector.sameStatusAndReason(previousStatus, receipt);
+                !RuleRuntimeReadinessProjector.sameObservation(previousStatus, receipt);
         runtimeStatus.put(ruleKey, receipt);
         if (!knownStatus || isReady != wasReady) {
             BoundaryRuleUpdate update = isReady

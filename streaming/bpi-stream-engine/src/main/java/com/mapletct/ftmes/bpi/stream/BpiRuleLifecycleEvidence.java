@@ -162,6 +162,9 @@ public final class BpiRuleLifecycleEvidence {
                 .map(value -> value.event().getEventId())
                 .distinct()
                 .count();
+        require(distinctEventIdCount == matches.size(),
+                label + " contains duplicate event ids: records=" + matches.size()
+                        + ", distinct=" + distinctEventIdCount);
         return new ReadinessSelection(latest, matches.size(), distinctEventIdCount);
     }
 
