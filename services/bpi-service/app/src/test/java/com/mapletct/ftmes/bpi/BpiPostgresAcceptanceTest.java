@@ -7,6 +7,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.contract.identity.CandidateKeyFactory;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -847,6 +849,63 @@ class BpiPostgresAcceptanceTest {
                  WHERE tenant_id = ? AND candidate_key = ?
                 """, String.class, tenantId, UUID.fromString(event.getCandidateKey())))
                 .isEqualTo("bpi-stream-engine");
+    }
+
+    @Test
+    void delayedKafkaCandidatePersistsAfterRuleAndTopologyRetirement() {
+        String evidenceEventId = "ADP_E2E_BPI_RETIRED_FLOW_" + candidateKey;
+        String orderId = "ADP_E2E_BPI_RETIRED_ORDER_" + candidateKey;
+        BatchCandidateV1 event = candidateEvent(
+                evidenceEventId, orderId, Instant.parse("2026-07-12T08:45:00Z"));
+        ConsumerRecord<byte[], byte[]> record = candidateRecord(event, 43L);
+
+        jdbc.update("UPDATE bpi.bpi_rule_versions SET state = 'RETIRED' WHERE id = ?", ruleId);
+        jdbc.update("UPDATE bpi.bpi_topology_versions SET state = 'RETIRED' WHERE id = ?", topologyId);
+
+        candidateKafkaRecordProcessor.process(record);
+        candidateKafkaRecordProcessor.process(record);
+
+        assertThat(count("bpi_inbox_events")).isEqualTo(1);
+        assertThat(count("bpi_batch_candidates")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT r.state
+                  FROM bpi.bpi_batch_candidates c
+                  JOIN bpi.bpi_rule_versions r ON r.id = c.rule_version_id
+                 WHERE c.tenant_id = ? AND c.candidate_key = ?
+                """, String.class, tenantId, UUID.fromString(event.getCandidateKey())))
+                .isEqualTo("RETIRED");
+    }
+
+    @Test
+    void kafkaCandidateCannotReferenceNeverPublishedDraftRule() {
+        String evidenceEventId = "ADP_E2E_BPI_DRAFT_FLOW_" + candidateKey;
+        String orderId = "ADP_E2E_BPI_DRAFT_ORDER_" + candidateKey;
+        BatchCandidateV1 event = candidateEvent(
+                evidenceEventId, orderId, Instant.parse("2026-07-12T09:00:00Z"));
+        ConsumerRecord<byte[], byte[]> record = candidateRecord(event, 44L);
+
+        jdbc.update("UPDATE bpi.bpi_rule_versions SET state = 'DRAFT' WHERE id = ?", ruleId);
+
+        assertThatThrownBy(() -> candidateKafkaRecordProcessor.process(record))
+                .isInstanceOf(BpiValidationException.class)
+                .hasMessageContaining("Published topology/rule version pair does not exist");
+        assertThat(count("bpi_inbox_events")).isZero();
+        assertThat(count("bpi_batch_candidates")).isZero();
+    }
+
+    private ConsumerRecord<byte[], byte[]> candidateRecord(BatchCandidateV1 event, long offset) {
+        ConsumerRecord<byte[], byte[]> record = new ConsumerRecord<>(
+                "bpi.batch.candidate.v1",
+                2,
+                offset,
+                (event.getLineId() + "|" + event.getRuleCode()).getBytes(StandardCharsets.UTF_8),
+                event.toByteArray());
+        record.headers()
+                .add("event_id", event.getEventId().getBytes(StandardCharsets.UTF_8))
+                .add("candidate_key", event.getCandidateKey().getBytes(StandardCharsets.UTF_8))
+                .add("tenant_id", event.getTenantId().getBytes(StandardCharsets.UTF_8))
+                .add("schema_version", "v1".getBytes(StandardCharsets.UTF_8));
+        return record;
     }
 
     private BatchCandidateV1 candidateEvent(

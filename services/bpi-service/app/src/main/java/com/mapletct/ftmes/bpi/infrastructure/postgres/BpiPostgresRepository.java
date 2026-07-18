@@ -68,11 +68,11 @@ public class BpiPostgresRepository {
                  WHERE t.tenant_id = :tenantId
                    AND t.topology_code = :topologyCode
                    AND t.version = :topologyVersion
-                   AND t.state = 'PUBLISHED'
+                   AND t.state IN ('PUBLISHED', 'RETIRED')
                    AND r.tenant_id = :tenantId
                    AND r.rule_code = :ruleCode
                    AND r.version = :ruleVersion
-                   AND r.state = 'PUBLISHED'
+                   AND r.state IN ('PUBLISHED', 'RETIRED')
                 """;
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("tenantId", tenantId)
