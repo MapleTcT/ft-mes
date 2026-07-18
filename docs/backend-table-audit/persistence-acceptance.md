@@ -1,5 +1,23 @@
 # 后端落库验收报告
 
+## 2026-07-18 BPI 规则退役与延迟候选落库
+
+目标环境 `10.11.100.17` 已运行 Flyway V15。marker
+`ADP_E2E_20260718_065300_BPI_RETIRE_V15B` 从真实页面退役规则，经 Kafka/Flink
+形成 `APPLIED + INACTIVE`，并验证规则有效期内生成、退役后才由服务消费的候选仍可按
+历史已发布版本恰好一次落库。候选保持待审核，本轮没有把接口成功扩大为批次或生产写回。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 规则退役和运行时停用 | BPI `/bpi/#/rules` 详情抽屉 | `POST /bpi-api/rules/{id}/retire`；`bpi.boundary.rule-publication.v1` | `RuleController.retireRuleVersion -> RuleService.retire -> outbox -> Kafka/Flink receipts` | `bpi_rule_versions`、`bpi_outbox_events`、`bpi_inbox_events`、`bpi_audit_events` | 规则 `PUBLISHED/r4 -> RETIRED/r5`；Kafka `ACTIVATE -> RETIRE`；Flink application 两次 `APPLIED`，runtime `READY -> INACTIVE` | PASS |
+| savepoint 升级与回滚草稿 | BPI `/bpi/#/rules` | `POST /bpi-api/rules/drafts`；Flink savepoint/restore | 规则服务；Flink state backend | `bpi_rule_versions`，MinIO savepoint | savepoint `savepoint-4fe197-969006fb3dbb`；恢复 job `0a2dd090eb290f82d052fc7c0465311f` 为 33/33 RUNNING；新 `2.0.1` 为 `DRAFT/r1`，原版本保持 RETIRED/INACTIVE | PASS |
+| 退役后延迟候选消费 | BPI `/bpi/#/candidates` | Kafka `bpi.batch.candidate.v1`；`GET /bpi-api/candidates...` | `CandidateKafkaListener -> CandidateKafkaRecordProcessor -> CandidateEventMapper/BpiPostgresRepository` | `bpi_batch_candidates`、`bpi_inbox_events`、规则/拓扑版本表 | candidate `dacdef34-3b29-5753-81da-441ac736d015` 为唯一 `PENDING/r1`，inbox 唯一 1 条，规则状态 RETIRED、拓扑 PUBLISHED，batch 为 0；真实抽屉显示 2/2 证据，浏览器错误为 0 | PASS |
+| DLQ、清理和页面复验 | 候选页清理前后读取 | candidate source/DLQ；verification/cleanup SQL | Kafka consumer；PostgreSQL 单事务 marker 清理 | 本轮涉及的 BPI 表 | 六个 DLQ 分区均为 0；CLI lag 差值仅为事务 COMMIT 控制记录；11 类 marker 残留均为 0，清理后候选页显示空态 | PASS |
+
+机器证据：`metadata/bpi-rule-retirement-acceptance.json`；完整边界见
+`docs/testing/bpi-rule-retirement-acceptance.md`。本轮输入为受控回放，未确认候选，
+不声明真实设备连续运行、END 边界、WOM/QCS/WMS 写回或生产就绪。
+
 ## 2026-07-18 BPI 版本比较与规则审批生命周期
 
 目标环境 `10.11.100.17` 已运行 Flyway V14。真实页面完成版本差异查看、历史回放和

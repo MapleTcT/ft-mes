@@ -1239,6 +1239,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-rule-lifecycle-evidence.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/set-mes-context-outbox-enabled.sh",
       "state": "tracked",
       "tracked": true
@@ -3213,6 +3219,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4917,6 +4929,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-rule-retirement-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5224,6 +5242,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-publication-routing-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-retirement-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6891,6 +6915,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V15__bpi_rule_retirement_lifecycle.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -7443,6 +7473,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiRuleLifecycleEvidence.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/CandidateKafkaSerializationSchema.java",
       "state": "tracked",
       "tracked": true
@@ -7689,6 +7725,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleLifecycleEvidenceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/CandidateKafkaSerializationSchemaTest.java",
       "state": "tracked",
       "tracked": true
@@ -7778,16 +7820,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 554
+      "tracked": 556
     },
     "docs": {
-      "tracked": 91
+      "tracked": 92
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 132
+      "tracked": 133
     },
     "package.json": {
       "tracked": 1
@@ -7799,20 +7841,20 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 173
+      "tracked": 174
     },
     "simulation": {
       "tracked": 4
     },
     "streaming": {
-      "tracked": 88
+      "tracked": 90
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1292,
-    "tracked": 1292,
+    "totalFiles": 1299,
+    "tracked": 1299,
     "untracked": 0
   },
   "untrackedByDirectory": []

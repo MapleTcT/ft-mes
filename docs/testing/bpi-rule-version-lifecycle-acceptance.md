@@ -65,9 +65,10 @@ FROM bpi.bpi_outbox_events
 WHERE aggregate_id = 'b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa';
 ```
 
-发布 outbox 为 `PENDING/attempts=0` 是本轮预期：目标保持 Phase 1 shadow-only，
-本次控制面验收期间 dispatcher 关闭。它不等于 Kafka/Flink 已应用；该数据面证据由
-既有联合回放验收承担，后续退役/回滚必须再次闭合 typed inactive 回执。
+发布 outbox 为 `PENDING/attempts=0` 是本轮控制面 marker 的预期：目标保持 Phase 1
+shadow-only，执行该 marker 时 dispatcher 关闭。它本身不等于 Kafka/Flink 已应用；随后
+独立 marker 已闭合规则退役、typed inactive、savepoint 和延迟候选落库，见
+[`bpi-rule-retirement-acceptance.md`](bpi-rule-retirement-acceptance.md)。
 
 ## 清理与边界
 
@@ -80,7 +81,8 @@ WHERE aggregate_id = 'b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa';
 - 不声明真实点位已经 READY。
 - 不声明规则已由 broker/Flink 应用或完成运行时 READY 回执。
 - 不写 WOM、QCS 或 WMS 生产状态。
-- 不替代规则退役、typed inactive、broker 故障、应用镜像回退和产品级回滚演练。
+- 本 marker 不替代规则退役和 typed inactive；二者已由独立 V15 marker 闭合。broker 故障、
+  应用镜像回退和产品级生产回滚仍未完成。
 
 原始浏览器报告、PostgreSQL 报告和两张截图保存在 `/tmp`，SHA-256 已写入机器记录，
 仓库不提交凭证、ticket、数据库 dump 或运行包二进制。

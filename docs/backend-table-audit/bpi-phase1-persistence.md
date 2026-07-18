@@ -6,7 +6,7 @@
 
 本次在 Java 17、Spring Boot 3.4.7 和隔离 Docker 网络中的 PostgreSQL 16.13 数据库 `bpi` 上，通过真实签名 JWT 调用 BPI HTTP API，并由 Flyway V1-V4 管理 `bpi` schema。验收证明候选接入、幂等重放、输入校验、功能开关、人工确认/拒绝、START 影子批次生成、END 边界关闭为 `CLOSED_RAW`、单产线唯一开放批次约束、批次暂停/恢复、证据/状态/审计持久化、乐观版本冲突和租户/产线隔离已形成最小闭环。
 
-这不是 BPI Phase 1 全量上线结论。本地嵌入式 Kafka 和模拟浏览器已有独立自动化证据，但测试机上的 Kafka/Flink/PostgreSQL/浏览器联合验收仍受磁盘门禁阻断；本阶段也不包含 WOM、QCS、WMS 的任何写入。
+这不是 BPI Phase 1 全量上线结论。本段记录 2026-07-13 的本地纵切快照；当时测试机联合链受磁盘门禁阻断。后续目标环境 Kafka/Flink/PostgreSQL/真实浏览器联合 marker、V15 规则退役和延迟候选落库均已通过，见 `metadata/bpi-browser-kafka-postgres-joint-acceptance.json` 与 `metadata/bpi-rule-retirement-acceptance.json`。现场 READY、连续运行和 WOM/QCS/WMS 生产写回仍未闭合。
 
 ## 验收基线
 

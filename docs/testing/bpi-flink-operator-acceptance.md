@@ -52,8 +52,9 @@ descriptor/map 的复制失败，因此数据面改为稳定 Protobuf wire bytes
   watermark strategy 和 idleness。2026-07-15 本地 Kafka 4.2 KRaft + Flink 2.2.1 MiniCluster
   已真实运行，验证 `APPLIED` 与独立 `READY/INACTIVE` 只在 checkpoint 后对
   `read_committed` 可见、TaskManager 重启恢复和无重复回执；证据见
-  `metadata/bpi-rule-application-flink-kafka-acceptance.json`。目标三 broker/MinIO 的 V13
-  savepoint 升级和回滚仍未完成。
+  `metadata/bpi-rule-application-flink-kafka-acceptance.json`。目标三 broker/MinIO 已在 Flyway V15
+  完成 savepoint 有状态升级、规则退役和回滚草稿，见
+  `metadata/bpi-rule-retirement-acceptance.json`；broker 故障和应用镜像回退仍未完成。
 - `LATE_EVENT_REVISION_REQUIRED` 尚未接入持久化修订队列和人工处置消费端。
-- BPIS/v1 到 BPIS/v2 的目标集群 savepoint 升级尚未实机演练。
+- BPIS/v1 到当前 V15 job 的目标集群 savepoint 恢复已实机通过；跨版本兼容仍由发布回归持续验证。
 - 规则更新流已改为版本化 `BPRU/v1` bytes；live Schema Registry 验收仍未完成。

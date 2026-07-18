@@ -23,6 +23,16 @@ SELECT id, source_revision
        OR source_instance LIKE 'BPI-JOINT-' || :'marker' || '%'
    );
 
+CREATE TEMP TABLE bpi_acceptance_target_candidates ON COMMIT DROP AS
+SELECT id, candidate_key, batch_id
+  FROM bpi.bpi_batch_candidates
+ WHERE tenant_id = '1000'
+   AND (
+       rule_version_id IN (SELECT id FROM bpi_acceptance_target_rules)
+       OR topology_version_id IN (SELECT id FROM bpi_acceptance_target_topologies)
+       OR order_id LIKE 'MO-' || :'marker' || '%'
+   );
+
 CREATE TEMP TABLE bpi_acceptance_target_inbox_events ON COMMIT DROP AS
 SELECT application_event_id AS event_id
   FROM bpi.bpi_outbox_events
@@ -38,7 +48,10 @@ SELECT runtime_readiness_event_id
 UNION
 SELECT 'point-catalog-' || substring(source_revision FROM 8)
   FROM bpi_acceptance_target_catalogs
- WHERE source_revision LIKE 'sha256:%';
+ WHERE source_revision LIKE 'sha256:%'
+UNION
+SELECT 'CANDIDATE-' || candidate_key::text
+  FROM bpi_acceptance_target_candidates;
 
 CREATE TEMP TABLE bpi_acceptance_target_batches ON COMMIT DROP AS
 SELECT id
@@ -47,6 +60,12 @@ SELECT id
    AND (
        rule_version_id IN (SELECT id FROM bpi_acceptance_target_rules)
        OR topology_version_id IN (SELECT id FROM bpi_acceptance_target_topologies)
+       OR id IN (
+           SELECT batch_id
+             FROM bpi_acceptance_target_candidates
+            WHERE batch_id IS NOT NULL
+       )
+       OR order_id LIKE 'MO-' || :'marker' || '%'
    );
 
 CREATE TEMP TABLE bpi_acceptance_target_telemetry ON COMMIT DROP AS
@@ -72,12 +91,7 @@ DELETE FROM bpi.bpi_batch_state_events
    AND batch_id IN (SELECT id FROM bpi_acceptance_target_batches);
 
 DELETE FROM bpi.bpi_batch_candidates
- WHERE tenant_id = '1000'
-   AND (
-       rule_version_id IN (SELECT id FROM bpi_acceptance_target_rules)
-       OR topology_version_id IN (SELECT id FROM bpi_acceptance_target_topologies)
-       OR batch_id IN (SELECT id FROM bpi_acceptance_target_batches)
-   );
+ WHERE id IN (SELECT id FROM bpi_acceptance_target_candidates);
 
 DELETE FROM bpi.bpi_batch_instances
  WHERE id IN (SELECT id FROM bpi_acceptance_target_batches);
@@ -92,6 +106,10 @@ DELETE FROM bpi.bpi_audit_events
        SELECT id FROM bpi_acceptance_target_rules
        UNION ALL
        SELECT id FROM bpi_acceptance_target_topologies
+       UNION ALL
+       SELECT id FROM bpi_acceptance_target_candidates
+       UNION ALL
+       SELECT id FROM bpi_acceptance_target_batches
    );
 
 DELETE FROM bpi.bpi_api_idempotency
@@ -108,6 +126,16 @@ DELETE FROM bpi.bpi_api_idempotency
              FROM bpi_acceptance_target_topologies target
             WHERE resource_path LIKE '%' || target.id::text || '%'
        )
+       OR EXISTS (
+           SELECT 1
+             FROM bpi_acceptance_target_candidates target
+            WHERE resource_path LIKE '%' || target.id::text || '%'
+       )
+       OR EXISTS (
+           SELECT 1
+             FROM bpi_acceptance_target_batches target
+            WHERE resource_path LIKE '%' || target.id::text || '%'
+       )
    );
 
 DELETE FROM bpi.bpi_inbox_events
@@ -115,6 +143,9 @@ DELETE FROM bpi.bpi_inbox_events
    AND (
        idempotency_key LIKE :'marker' || '%'
        OR event_id LIKE :'marker' || '%'
+       OR idempotency_key IN (
+           SELECT candidate_key::text FROM bpi_acceptance_target_candidates
+       )
        OR event_id IN (SELECT event_id FROM bpi_acceptance_target_inbox_events)
    );
 
@@ -177,8 +208,6 @@ UPDATE bpi.bpi_feature_flags
    AND flag_key = 'bpi.rule-management'
    AND updated_by = :'marker';
 
-COMMIT;
-
 SELECT jsonb_pretty(jsonb_build_object(
     'marker', :'marker',
     'remaining', jsonb_build_object(
@@ -223,7 +252,62 @@ SELECT jsonb_pretty(jsonb_build_object(
             SELECT count(*)
               FROM bpi.bpi_api_idempotency
              WHERE tenant_id = '1000'
-               AND idempotency_key LIKE :'marker' || '%'
+               AND (
+                   idempotency_key LIKE :'marker' || '%'
+                   OR EXISTS (
+                       SELECT 1
+                         FROM bpi_acceptance_target_candidates target
+                        WHERE resource_path LIKE '%' || target.id::text || '%'
+                   )
+                   OR EXISTS (
+                       SELECT 1
+                         FROM bpi_acceptance_target_batches target
+                        WHERE resource_path LIKE '%' || target.id::text || '%'
+                   )
+               )
+        ),
+        'candidates', (
+            SELECT count(*)
+              FROM bpi.bpi_batch_candidates
+             WHERE id IN (SELECT id FROM bpi_acceptance_target_candidates)
+        ),
+        'batches', (
+            SELECT count(*)
+              FROM bpi.bpi_batch_instances
+             WHERE id IN (SELECT id FROM bpi_acceptance_target_batches)
+        ),
+        'inboxEvents', (
+            SELECT count(*)
+              FROM bpi.bpi_inbox_events
+             WHERE tenant_id = '1000'
+               AND (
+                   idempotency_key IN (
+                       SELECT candidate_key::text FROM bpi_acceptance_target_candidates
+                   )
+                   OR event_id IN (SELECT event_id FROM bpi_acceptance_target_inbox_events)
+               )
+        ),
+        'outboxEvents', (
+            SELECT count(*)
+              FROM bpi.bpi_outbox_events
+             WHERE tenant_id = '1000'
+               AND aggregate_id IN (SELECT id FROM bpi_acceptance_target_rules)
+        ),
+        'auditEvents', (
+            SELECT count(*)
+              FROM bpi.bpi_audit_events
+             WHERE tenant_id = '1000'
+               AND object_id IN (
+                   SELECT id FROM bpi_acceptance_target_rules
+                   UNION ALL
+                   SELECT id FROM bpi_acceptance_target_topologies
+                   UNION ALL
+                   SELECT id FROM bpi_acceptance_target_candidates
+                   UNION ALL
+                   SELECT id FROM bpi_acceptance_target_batches
+               )
         )
     )
 ));
+
+COMMIT;

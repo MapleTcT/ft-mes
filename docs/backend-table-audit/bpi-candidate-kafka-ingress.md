@@ -7,8 +7,9 @@
 CandidateIngestionService -> BpiPostgresRepository`。同一记录连续发布两次后，inbox 和 candidate 各保持
 1 行；坏 Protobuf 实际进入相同 partition 的 candidate DLQ。
 
-本次仅证明单 broker 测试进程内的消费与落库。测试机仍受磁盘门禁阻断，因此三节点 topic offset、
-Flink candidate offset、远端 PostgreSQL marker、DLQ 空队列及联合恢复状态仍为 `BLOCKED_DISK`。
+本段记录 2026-07-13 的单 broker 验收快照；当时测试机仍受磁盘门禁阻断。后续目标环境已完成
+三 broker、Flink、远端 PostgreSQL、DLQ、真实候选页面和延迟候选恰好一次落库，当前证据见
+`metadata/bpi-rule-retirement-acceptance.json`。本报告中的本地断言仍保留为底层回归证据。
 
 ## 消费与失败语义
 
@@ -45,4 +46,4 @@ tenant marker，不操作其他 schema、容器或数据。
 - consumer 使用 `read_committed`、关闭 auto commit、禁止自动建 topic。
 - 主 topic 与 DLQ 必须拥有相同 partition 数；测试编排当前均为 6 partition、RF=3、min ISR=2。
 - 主 topic 与 DLQ 名称必须不同，二者保留期均为 30 天。
-- 远端实机验证前不得把本报告状态提升为完整 `PASS`。
+- 远端实机结论必须引用后续目标验收记录，不能只凭本报告的单 broker 测试提升状态。

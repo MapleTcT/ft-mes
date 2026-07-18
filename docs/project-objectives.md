@@ -83,15 +83,25 @@ Flyway V13 expand-only 迁移，并从 V12 savepoint 有状态恢复到 Flink jo
 真实规则运行时回执、7-14 天影子运行、broker/应用镜像回退和 QCS/WMS 写回尚未完成，因此
 G-021 保持 `PARTIAL`。
 
-2026-07-18 目标环境已扩展到 Flyway V14，并以 marker
+2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
 规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。
 真实 ADP 页面、Java 8 适配器、Java 17 服务和 PostgreSQL 15.18 均已复验：两条 simulation 为
 `PASSED`，批准分支为 `PUBLISHED/r4 + APPROVED/r2 + 1 outbox`，驳回分支为
 `DRAFT/r4 + REJECTED/r2 + 0 publication outbox`，6 条审计和 6 条幂等记录准确；非预期浏览器错误为 0，
-marker 定向清理后残留为 0。版本比较与业务审批控制面因此从待办转为已闭合基线；G-021 仍保持
-`PARTIAL`，下一治理缺口是受控退役/回滚、typed inactive 回执、broker/应用镜像回退和现场 READY 数据源。
-证据见 [BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md)。
+marker 定向清理后残留为 0。版本比较与业务审批控制面因此从待办转为已闭合基线。
+
+同日目标环境继续升级到 Flyway V15。marker `ADP_E2E_20260718_065300_BPI_RETIRE_V15B`
+通过真实规则页面、Kafka 4.2、Flink 2.2.1、savepoint 和 PostgreSQL 15.18 闭合
+`PUBLISHED -> RETIRED`、typed `RETIRE`、双 `APPLIED`、运行时 `READY -> INACTIVE`、
+有状态恢复和 `2.0.1` 回滚草稿。规则退役前产生但退役后才消费的候选仍按历史已发布版本恰好一次
+写入 candidate/inbox，真实候选页复显 `PENDING/r1` 和 2/2 证据；未确认候选，因此 batch、WOM、
+QCS、WMS 均未写入。当前 marker 与旧诊断 marker 定向清理后 11 类残留均为 0。版本比较、审批、
+受控退役、typed inactive、savepoint 升级和候选在途语义已成为发布回归基线。G-021 仍保持
+`PARTIAL`：现场来源 READY、真实 END 边界、7-14 天影子运行、broker 故障恢复、应用镜像回退和
+QCS/WMS 写回仍未闭合。证据见
+[BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md) 和
+[BPI 规则退役、回滚与延迟候选落库验收](testing/bpi-rule-retirement-acceptance.md)。
 
 权威设计和验收入口：
 

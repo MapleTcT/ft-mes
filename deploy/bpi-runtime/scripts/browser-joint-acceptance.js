@@ -15,6 +15,7 @@ const ruleCode = process.env.BPI_ACCEPTANCE_RULE_CODE || "";
 const goldenSetId = process.env.BPI_ACCEPTANCE_GOLDEN_SET_ID || "";
 const boundaryTime = process.env.BPI_ACCEPTANCE_BOUNDARY_TIME || "";
 const orderId = process.env.BPI_ACCEPTANCE_ORDER_ID || `MO-${marker}`;
+const expectedLineId = process.env.BPI_ACCEPTANCE_LINE_ID || "";
 const expectedRuntimeStatus = (process.env.BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS || "")
   .trim()
   .toUpperCase();
@@ -26,8 +27,8 @@ const screenshotPath = path.resolve(process.env.BPI_BROWSER_SCREENSHOT || `/tmp/
 const headless = process.env.BPI_HEADLESS !== "false";
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 120_000);
 
-if (!new Set(["publish", "confirm", "read", "rule-read"]).has(action)) {
-  throw new Error("BPI_BROWSER_ACTION must be publish, confirm, read or rule-read");
+if (!new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent"]).has(action)) {
+  throw new Error("BPI_BROWSER_ACTION must be publish, confirm, read, rule-read, candidate-read or candidate-absent");
 }
 if (action === "publish" && (!ruleCode || !goldenSetId || !boundaryTime)) {
   throw new Error("publish requires rule code, golden set ID and boundary time");
@@ -228,6 +229,59 @@ async function confirmCandidate(page, evidence) {
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
 
+async function readCandidate(page, evidence) {
+  await page.goto(`${bpiBaseUrl}/#/candidates`, { waitUntil: "networkidle", timeout: timeoutMs });
+  await page.getByRole("heading", { name: "候选批次" }).waitFor({ timeout: timeoutMs });
+  const row = page.locator("[data-candidate-id]").filter({ hasText: orderId });
+  if (await row.count() !== 1) throw new Error(`expected one candidate row for ${orderId}`);
+  evidence.candidateId = await row.getAttribute("data-candidate-id");
+  evidence.candidateRowText = (await row.innerText()).trim();
+  await row.click();
+  const drawer = page.locator("#detail-drawer");
+  await drawer.waitFor({ state: "visible", timeout: timeoutMs });
+  if (expectedLineId) {
+    await drawer.getByRole("heading", { name: expectedLineId, exact: true }).waitFor({ timeout: timeoutMs });
+  }
+  await drawer.getByText(orderId, { exact: true }).waitFor({ timeout: timeoutMs });
+  await page.waitForFunction(() => {
+    const current = document.querySelector("#detail-drawer");
+    if (!current) return false;
+    const bounds = current.getBoundingClientRect();
+    return bounds.left >= -1 && bounds.right <= window.innerWidth + 1;
+  }, undefined, { timeout: timeoutMs });
+  evidence.candidateDrawerText = (await drawer.innerText()).trim();
+  evidence.drawerBounds = await drawer.evaluate((current) => {
+    const bounds = current.getBoundingClientRect();
+    return {
+      left: bounds.left,
+      right: bounds.right,
+      width: bounds.width,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  evidence.pendingStateVisible = await drawer.getByText("PENDING", { exact: true }).count() === 1;
+  evidence.confirmEnabled = await drawer.locator("#open-confirm").isEnabled();
+  evidence.rejectEnabled = await drawer.locator("#open-reject").isEnabled();
+  if (!evidence.pendingStateVisible || !evidence.confirmEnabled || !evidence.rejectEnabled) {
+    throw new Error("candidate drawer did not expose one actionable PENDING candidate");
+  }
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+}
+
+async function readCandidateAbsence(page, evidence) {
+  await page.goto(`${bpiBaseUrl}/#/candidates`, { waitUntil: "networkidle", timeout: timeoutMs });
+  await page.getByRole("heading", { name: "候选批次" }).waitFor({ timeout: timeoutMs });
+  const rows = page.locator("[data-candidate-id]");
+  const matchingRows = rows.filter({ hasText: orderId });
+  evidence.pendingCandidateCount = await rows.count();
+  evidence.matchingOrderRows = await matchingRows.count();
+  evidence.emptyStateVisible = await page.getByText("没有待审核候选", { exact: true }).count() === 1;
+  if (evidence.matchingOrderRows !== 0 || (evidence.pendingCandidateCount === 0 && !evidence.emptyStateVisible)) {
+    throw new Error(`candidate cleanup is not visible in the browser for ${orderId}`);
+  }
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+}
+
 async function readOverview(page, evidence) {
   await page.goto(`${bpiBaseUrl}/#/overview`, { waitUntil: "networkidle", timeout: timeoutMs });
   await page.getByRole("heading", { name: "实时生产态势" }).waitFor({ timeout: timeoutMs });
@@ -332,6 +386,8 @@ async function main() {
 
     if (action === "publish") await publishRule(page, report.evidence);
     else if (action === "confirm") await confirmCandidate(page, report.evidence);
+    else if (action === "candidate-read") await readCandidate(page, report.evidence);
+    else if (action === "candidate-absent") await readCandidateAbsence(page, report.evidence);
     else if (action === "rule-read") await readRuleRuntime(page, report.evidence);
     else await readOverview(page, report.evidence);
     report.page = { url: page.url(), title: await page.title() };

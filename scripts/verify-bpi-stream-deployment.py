@@ -342,7 +342,12 @@ def main() -> int:
         ROOT / "deploy/bpi-runtime/scripts/browser-joint-acceptance.js"
     ).read_text(encoding="utf-8")
     for marker in (
-        'new Set(["publish", "confirm", "read", "rule-read"])',
+        'new Set(["publish", "confirm", "read", "rule-read", "candidate-read", "candidate-absent"])',
+        "BPI_ACCEPTANCE_LINE_ID",
+        "readCandidate",
+        "readCandidateAbsence",
+        "drawerBounds",
+        "candidate drawer did not expose one actionable PENDING candidate",
         "BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS",
         "BPI_ACCEPTANCE_EXPECTED_PUBLISH_STATUS",
         "BPI_ACCEPTANCE_EXPECTED_PUBLISH_DETAIL",

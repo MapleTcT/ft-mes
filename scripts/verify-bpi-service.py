@@ -88,6 +88,8 @@ REQUIRED_FILES = [
     "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
     "docs/testing/bpi-rule-version-lifecycle-acceptance.md",
     "metadata/bpi-rule-version-lifecycle-acceptance.json",
+    "docs/testing/bpi-rule-retirement-acceptance.md",
+    "metadata/bpi-rule-retirement-acceptance.json",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
@@ -351,6 +353,22 @@ def main() -> int:
         failures,
     )
     require_text(
+        ROOT / "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
+        ["'candidates'", "'candidateInbox'", "candidate.candidate_key::text"],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
+        [
+            "bpi_acceptance_target_candidates",
+            "SELECT candidate_key::text FROM bpi_acceptance_target_candidates",
+            "'candidates'",
+            "'inboxEvents'",
+            "'auditEvents'",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
         ["application/x-protobuf", "protobufHttpIngressEnabled", "BatchCandidateV1.parseFrom"],
         failures,
@@ -534,6 +552,35 @@ def main() -> int:
             "topologies", "rules", "idempotency", "telemetryEvents",
             "catalogSnapshots", "goldenBoundaries")):
         fail("BPI version lifecycle marker cleanup must leave zero fixture rows", failures)
+
+    retirement_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-retirement-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if retirement_acceptance.get("status") != "PASS_CONTROLLED_TARGET_SHADOW":
+        fail("BPI rule retirement acceptance must retain controlled target shadow PASS scope", failures)
+    retirement_summary = retirement_acceptance.get("summary", {})
+    if (retirement_summary.get("testedFeatures") != 10
+            or retirement_summary.get("pass") != 10
+            or retirement_summary.get("fail") != 0
+            or retirement_summary.get("blocked") != 0):
+        fail("BPI rule retirement acceptance must preserve ten passing features", failures)
+    retirement_browser = retirement_acceptance.get("browser", {})
+    if any(retirement_browser.get(key) != 0 for key in (
+            "unexpectedConsoleErrors", "pageErrors", "requestFailures")):
+        fail("BPI rule retirement browser acceptance must have zero unexpected errors", failures)
+    retirement_persistence = retirement_acceptance.get("candidatePersistence", {})
+    if (retirement_persistence.get("candidateRowsBeforeCleanup") != 1
+            or retirement_persistence.get("inboxRowsBeforeCleanup") != 1
+            or retirement_persistence.get("batchRowsBeforeCleanup") != 0):
+        fail("BPI delayed candidate must persist exactly once without creating a batch", failures)
+    retirement_cleanup = retirement_acceptance.get("cleanup", {}).get("remaining", {})
+    if any(retirement_cleanup.get(key) != 0 for key in (
+            "topologies", "rules", "idempotency", "telemetryEvents",
+            "catalogSnapshots", "goldenBoundaries", "candidates", "batches",
+            "inboxEvents", "outboxEvents", "auditEvents")):
+        fail("BPI rule retirement cleanup must leave zero marker rows", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

@@ -87,6 +87,55 @@ SELECT jsonb_pretty(jsonb_build_object(
                OR resource_path LIKE '%' || md5(:'marker' || ':rule-reject')::uuid::text || '%'
            )
     ), '[]'::jsonb),
+    'candidates', COALESCE((
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', candidate.id,
+            'candidateKey', candidate.candidate_key,
+            'state', candidate.state,
+            'revision', candidate.revision,
+            'boundaryType', candidate.boundary_type,
+            'orderId', candidate.order_id,
+            'ruleCode', rule.rule_code,
+            'ruleVersion', rule.version,
+            'ruleState', rule.state,
+            'topologyCode', topology.topology_code,
+            'topologyVersion', topology.version,
+            'topologyState', topology.state
+        ) ORDER BY candidate.created_at, candidate.id)
+          FROM bpi.bpi_batch_candidates candidate
+          JOIN bpi.bpi_rule_versions rule ON rule.id = candidate.rule_version_id
+          JOIN bpi.bpi_topology_versions topology ON topology.id = candidate.topology_version_id
+         WHERE candidate.tenant_id = '1000'
+           AND (
+               rule.rule_code LIKE :'marker' || '%'
+               OR topology.topology_code LIKE :'marker' || '%'
+               OR candidate.order_id LIKE 'MO-' || :'marker' || '%'
+           )
+    ), '[]'::jsonb),
+    'candidateInbox', COALESCE((
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', inbox.id,
+            'eventId', inbox.event_id,
+            'idempotencyKey', inbox.idempotency_key,
+            'source', inbox.source,
+            'receivedAt', inbox.received_at,
+            'processedAt', inbox.processed_at
+        ) ORDER BY inbox.received_at, inbox.id)
+          FROM bpi.bpi_inbox_events inbox
+         WHERE inbox.tenant_id = '1000'
+           AND inbox.idempotency_key IN (
+               SELECT candidate.candidate_key::text
+                 FROM bpi.bpi_batch_candidates candidate
+                 JOIN bpi.bpi_rule_versions rule ON rule.id = candidate.rule_version_id
+                 JOIN bpi.bpi_topology_versions topology ON topology.id = candidate.topology_version_id
+                WHERE candidate.tenant_id = '1000'
+                  AND (
+                      rule.rule_code LIKE :'marker' || '%'
+                      OR topology.topology_code LIKE :'marker' || '%'
+                      OR candidate.order_id LIKE 'MO-' || :'marker' || '%'
+                  )
+           )
+    ), '[]'::jsonb),
     'outbox', COALESCE((
         SELECT jsonb_agg(jsonb_build_object(
             'id', outbox.id,

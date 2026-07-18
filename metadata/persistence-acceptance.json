@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-18T02:33:00Z",
-  "repoCommit": "WORKTREE",
+  "generatedAt": "2026-07-18T08:15:00Z",
+  "repoCommit": "07b26131a319857429ae2e8f5803d5a4af3f910d+acceptance-worktree",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-17T14:10:28Z",
+    "generatedAt": "2026-07-18T08:15:00Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -100,11 +100,17 @@
       "marker": "ADP_E2E_20260717141017_WOM_BAD_QTY",
       "evidence": "metadata/wom-quality-quantity-persistence-acceptance.json",
       "assertions": "visible WOM/QCS entries; 10 reported / 2 bad / 8 good; WMS PARTIAL 8 available / 2 hold; idempotent retry; reversal to QUALIFIED 10 / 0; cleanup 0 / 0 / 0"
+    },
+    "bpiRuleRetirement": {
+      "status": "PASS_CONTROLLED_TARGET_SHADOW",
+      "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
+      "evidence": "metadata/bpi-rule-retirement-acceptance.json",
+      "assertions": "real browser retire and candidate read; typed ACTIVATE/RETIRE; APPLIED and READY->INACTIVE; savepoint restore; delayed candidate/inbox 1/1 with batch 0; 11 cleanup categories zero"
     }
   },
   "summary": {
-    "testedFeatures": 177,
-    "pass": 174,
+    "testedFeatures": 178,
+    "pass": 175,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3777,9 +3783,40 @@
       "status": "PASS",
       "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. The independent BPI_ADMIN request returned 200; PostgreSQL showed DRAFT/r4 and REJECTED/r2 with no publication outbox, and the real page reloaded the draft state. Marker cleanup returned all fixture counts to zero.",
       "issues": []
+    },
+    {
+      "module": "BPI 规则退役与延迟候选落库",
+      "route": "/bpi/#/rules -> /bpi/#/candidates",
+      "operation": "从真实页面退役已发布规则，验证 typed inactive 和 savepoint 恢复，并读取退役前生成、退役后消费的待审核候选",
+      "api": "POST /bpi-api/rules/{ruleId}/retire; POST /bpi-api/rules/drafts; GET /bpi-api/candidates; GET /bpi-api/candidates/{candidateId}",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.retireRuleVersion -> RuleService.retire -> outbox/Kafka/Flink receipts; CandidateKafkaListener -> CandidateKafkaRecordProcessor -> CandidateEventMapper/BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
+      "verificationSql": "\\i deploy/docker/scripts/bpi-version-lifecycle-verification.sql; SELECT c.id,c.candidate_key,c.state,c.revision,c.order_id,r.state AS rule_state,t.state AS topology_state FROM bpi.bpi_batch_candidates c JOIN bpi.bpi_rule_versions r ON r.id=c.rule_version_id JOIN bpi.bpi_topology_versions t ON t.id=c.topology_version_id WHERE c.candidate_key='dacdef34-3b29-5753-81da-441ac736d015'; SELECT source,event_id,idempotency_key,processed_at FROM bpi.bpi_inbox_events WHERE idempotency_key='dacdef34-3b29-5753-81da-441ac736d015';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-retirement-acceptance.json. Target Flyway V15 and real ADP pages proved PUBLISHED/r4 -> RETIRED/r5, Kafka ACTIVATE -> RETIRE, Flink APPLIED twice and READY -> INACTIVE, savepoint restore to a RUNNING 33/33 job, a controlled 2.0.1 rollback draft, and exactly one PENDING/r1 candidate plus one inbox row for a historically published RETIRED rule. No batch was created. Candidate and cleanup browser runs had zero unexpected errors; eleven marker categories returned zero after cleanup.",
+      "issues": [
+        "Controlled Phase 1 replay only: the candidate was intentionally not confirmed, and this item does not claim real-device continuous operation, END boundary, WOM/QCS/WMS writeback or production readiness."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
+      "artifact": "metadata/bpi-rule-retirement-acceptance.json",
+      "summary": "Target ADP rule and candidate pages, PostgreSQL 15.18/Flyway V15, Kafka 4.2 and Flink 2.2.1 closed controlled retirement, typed inactive, savepoint restore, rollback draft, delayed candidate/inbox exactly-once persistence and eleven-category cleanup without creating a batch or production writeback."
+    },
     {
       "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
       "artifact": "metadata/bpi-rule-version-lifecycle-acceptance.json",

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18T08:15:00Z",
+  "repoCommit": "07b26131a319857429ae2e8f5803d5a4af3f910d+acceptance-worktree",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_TARGET_SHADOW",
+  "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiCandidateRoute": "http://10.11.100.17:18080/bpi/#/candidates",
+    "serviceBaseUrl": "http://10.11.100.17:19091",
+    "databaseName": "ft_mes_bpi",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 15,
+    "serviceImage": "ft-mes-bpi-service:20260718-07b26131",
+    "serviceImageId": "sha256:fa34bd6c2a737f8453507f6197d6f64af979259ea37b5725efb502ee2f6c339a",
+    "adapterImage": "ft-mes-bpi-adapter:20260718-v15b",
+    "adapterImageId": "sha256:81c22c0b6dccd7965e3f95c235454645cf6440c6cb179059b3e45cef94532998",
+    "streamSourceCommit": "993b99ffa07eaa4bf8e4d5c8783533186ae7cd1e",
+    "streamJarSha256": "10ddc3dc0a213a79cfa889ac07c70e635714788139c8154f0950c5cb3d8ce32f",
+    "flinkVersion": "2.2.1",
+    "flinkRestUrl": "http://100.99.133.43:18081",
+    "flinkJobId": "0a2dd090eb290f82d052fc7c0465311f",
+    "flinkDeploymentId": "ubuntu-test-v15c-993b99ff",
+    "kafkaVersion": "4.2.0",
+    "kafkaBrokers": 3
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "rule": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B_RULE@2.0.0",
+    "topology": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B_TOPOLOGY@2.0.0",
+    "orderId": "MO-ADP_E2E_20260718_065300_BPI_RETIRE_V15B"
+  },
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "items": [
+    {
+      "id": "browser-rule-retirement",
+      "status": "PASS",
+      "operation": "Retire the published rule from the real rule drawer",
+      "request": "POST /bpi-api/rules/9251fa42-d7d5-28c2-41ac-65f155aff4aa/retire",
+      "httpStatus": 200,
+      "evidence": "The rule changed from PUBLISHED/r4 to RETIRED/r5; the page then displayed RETIRE, APPLIED and runtime INACTIVE with zero unexpected browser errors."
+    },
+    {
+      "id": "typed-kafka-lifecycle",
+      "status": "PASS",
+      "operation": "Publish typed ACTIVATE and RETIRE lifecycle events",
+      "evidence": "Kafka publication offsets were partition 1 offsets 0 and 1; active=true/ACTIVATE changed to active=false/RETIRE."
+    },
+    {
+      "id": "flink-application-and-inactive",
+      "status": "PASS",
+      "operation": "Apply both lifecycle events and emit independent runtime readiness",
+      "evidence": "Flink emitted APPLIED for both publications and the runtime state progressed READY -> INACTIVE on deployment ubuntu-test-v15c-993b99ff."
+    },
+    {
+      "id": "savepoint-upgrade",
+      "status": "PASS",
+      "operation": "Stop with savepoint and restore the exact stateful job JAR",
+      "evidence": "The stop operation completed at s3://ft-mes-bpi-checkpoints/savepoints/savepoint-4fe197-969006fb3dbb; the restored job is RUNNING with 33/33 tasks and two TaskManagers."
+    },
+    {
+      "id": "rollback-draft",
+      "status": "PASS",
+      "operation": "Create a controlled 2.0.1 rollback draft from the retired 2.0.0 version",
+      "evidence": "The new UUID remained DRAFT/r1 and NOT_PUBLISHED while the original UUID stayed RETIRED/r5 and INACTIVE."
+    },
+    {
+      "id": "delayed-candidate-persistence",
+      "status": "PASS",
+      "operation": "Consume a candidate produced before retirement after the rule became RETIRED",
+      "evidence": "Service source 07b26131 resolved historically published RETIRED rule/topology references and persisted candidate dacdef34-3b29-5753-81da-441ac736d015 exactly once."
+    },
+    {
+      "id": "candidate-inbox-idempotency",
+      "status": "PASS",
+      "operation": "Persist the Kafka inbox identity and replay boundary",
+      "evidence": "Exactly one bpi.batch.candidate.v1 inbox row used event CANDIDATE-dacdef34-3b29-5753-81da-441ac736d015 and the candidate key as idempotency key; no batch was created."
+    },
+    {
+      "id": "browser-candidate-read",
+      "status": "PASS",
+      "operation": "Read the pending candidate and evidence from the real candidate page without confirming it",
+      "evidence": "List and detail GET requests returned 200; the drawer showed LINE-S07-01, the exact order/rule/topology, PENDING/r1 and 2/2 evidence at 1280x720."
+    },
+    {
+      "id": "kafka-dlq-and-control-records",
+      "status": "PASS",
+      "operation": "Verify candidate consumer state, DLQ and reported lag semantics",
+      "evidence": "Six candidate DLQ partitions ended at offset 0. Partitions 0 and 1 each contained one business record at offset 0 and one transactional COMMIT control record at offset 1; reported lag=1 was not unread business data."
+    },
+    {
+      "id": "marker-cleanup-and-browser-refresh",
+      "status": "PASS",
+      "operation": "Clean current and diagnostic markers, then re-read PostgreSQL and the candidate page",
+      "evidence": "Eleven marker-owned persistence categories returned zero; current tenant candidate/batch/candidate-inbox counts were 0/0/0 and the browser displayed the empty state with zero errors."
+    }
+  ],
+  "browser": {
+    "candidateReadStatus": "PASS",
+    "candidateCleanupReadStatus": "PASS",
+    "loginStatus": 200,
+    "candidateListStatus": 200,
+    "candidateDetailStatus": 200,
+    "drawerBounds": {
+      "left": 660.0235,
+      "right": 1280.0234,
+      "width": 620,
+      "viewportWidth": 1280
+    },
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "postCleanupPendingCandidates": 0
+  },
+  "candidatePersistence": {
+    "candidateId": "5bd6be41-3306-54ab-88df-58b0b8edd88d",
+    "candidateKey": "dacdef34-3b29-5753-81da-441ac736d015",
+    "eventId": "CANDIDATE-dacdef34-3b29-5753-81da-441ac736d015",
+    "topic": "bpi.batch.candidate.v1",
+    "partition": 0,
+    "offset": 0,
+    "stateBeforeCleanup": "PENDING",
+    "revisionBeforeCleanup": 1,
+    "ruleStateAtPersistence": "RETIRED",
+    "candidateRowsBeforeCleanup": 1,
+    "inboxRowsBeforeCleanup": 1,
+    "batchRowsBeforeCleanup": 0,
+    "persistedAt": "2026-07-18T07:50:52.901139Z",
+    "verificationSql": "deploy/docker/scripts/bpi-version-lifecycle-verification.sql"
+  },
+  "kafka": {
+    "candidateConsumerGroup": "ft-mes-bpi-service-candidates-v1",
+    "consumerMembers": 3,
+    "scopeAllowlist": "1000 / PLANT-01 / LINE-S07-01",
+    "candidateBusinessRecords": 2,
+    "transactionControlRecords": 2,
+    "reportedLag": {
+      "partition0": 1,
+      "partition1": 1
+    },
+    "unreadBusinessRecords": 0,
+    "candidateDlqEndOffsets": [0, 0, 0, 0, 0, 0]
+  },
+  "flink": {
+    "jobState": "RUNNING",
+    "runningTasks": 33,
+    "totalTasks": 33,
+    "taskManagers": 2,
+    "latestAcceptedCheckpointId": 53,
+    "activationApplication": "APPLIED",
+    "retirementApplication": "APPLIED",
+    "runtimeSequence": ["READY", "INACTIVE"]
+  },
+  "cleanup": {
+    "script": "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
+    "localRegressionMarker": "ADP_SQL_20260718_CLEANUP",
+    "targetMarkersCleaned": [
+      "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
+      "ADP_E2E_20260718_054351_BPI_RETIRE"
+    ],
+    "remaining": {
+      "topologies": 0,
+      "rules": 0,
+      "idempotency": 0,
+      "telemetryEvents": 0,
+      "catalogSnapshots": 0,
+      "goldenBoundaries": 0,
+      "candidates": 0,
+      "batches": 0,
+      "inboxEvents": 0,
+      "outboxEvents": 0,
+      "auditEvents": 0
+    },
+    "sharedFeatureFlagPolicy": "The shared bpi.rule-management flag was preserved; only marker-owned actor attribution was normalized."
+  },
+  "rawEvidence": [
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-rule-retirement.json", "sha256": "9d11349ec174f35acf6793ca8d3ddfd7791c352941d2167006dd484243442278"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-rule-lifecycle-kafka.json", "sha256": "4b68f34b86f3c2e9c0137c3d4546078542532e81ae1d04237ed9a0298638b57d"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-joint-replay.json", "sha256": "9ce99367c8f7e3459019207e1e2d954983a8779e360de40b56b483873605485a"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-candidate-browser.json", "sha256": "1a0c8c698d9d310d5e5bba96c02f47ec13cde3e2f1abac488d89a32c600af366"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-candidate-visible.png", "sha256": "61483cc19c118f68ffa6ae8220ffcf5224d6a5c7b67b5022d5b72577047f3f2f"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-postgres-verification.txt", "sha256": "cc205aafbed41b3a69d3ce082b23e9c02cb0133a7513cf30d08e5e3916ff7870"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-cluster-smoke.json", "sha256": "c5ad0b4fa0da4a1bcb566b44b58546f5297d35f61f8ba6265a194e7380db1388"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-savepoint-stop.json", "sha256": "28dfaa935ebf81da669f4b71b82a1c033fe14696fc3d91664a0431cced0f5de3"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-cleanup.txt", "sha256": "bb9a46150c444ba81f6fa33b7532ff39176552daaef022c9cc69cf4ec8d3d905"},
+    {"path": "/tmp/ADP_E2E_20260718_065300_BPI_RETIRE_V15B-candidate-cleanup-browser.json", "sha256": "6a6e50dc998d3080b5ea5ce3cb265c74c0eda0b82149dd4bbff55d7b4b018b21"}
+  ],
+  "boundaries": [
+    "This is a controlled target-environment Phase 1 shadow acceptance, not production readiness.",
+    "The candidate was intentionally left PENDING; no shadow batch, WOM, QCS or WMS state was created.",
+    "The replay used controlled MES context and telemetry, not a continuous real-device production run.",
+    "Real source READY, END boundary, 7-14 day shadow operation, broker outage recovery and QCS/WMS writeback remain incomplete.",
+    "No credential, token, cookie, private key, database password, dump or runtime binary is stored in this record."
+  ]
+}

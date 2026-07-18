@@ -1,5 +1,20 @@
 # 前端功能测试报告
 
+## 2026-07-18 BPI 规则退役与延迟候选复显
+
+本轮使用真实 ADP 登录访问 `http://10.11.100.17:18080/bpi/`，唯一 marker 为
+`ADP_E2E_20260718_065300_BPI_RETIRE_V15B`。规则退役后经 Kafka/Flink 收到 typed
+inactive；退役前生成、退役后消费的候选保持待审核，只读验收没有确认候选或创建批次。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 规则退役 | `/bpi/#/rules` 规则详情 | 退役已发布 `2.0.0` 规则并刷新状态 | `POST /bpi-api/rules/{id}/retire`；规则详情 GET | POST `200`；页面显示 RETIRE、application `APPLIED`、runtime `INACTIVE`；非预期 console/page/request error 均为 0 | 规则 `PUBLISHED/r4 -> RETIRED/r5`；Kafka `ACTIVATE -> RETIRE`；Flink `READY -> INACTIVE` | 规则、outbox、inbox、审计、幂等表 | PASS | 受控 shadow-only，不代表现场点位 READY |
+| BPI 延迟候选读取 | `/bpi/#/candidates` | 打开唯一订单行和详情抽屉，不确认候选 | `GET /bpi-api/candidates`；`GET /bpi-api/candidates/{id}` | 两次 GET 均 `200`；抽屉显示精确订单、LINE-S07-01、规则/拓扑 `2.0.0`、`PENDING/r1` 和 2/2 证据；1280x720 内完整可见；浏览器错误为 0 | candidate/inbox 恰好 `1/1`，规则状态 RETIRED，batch 为 0 | `bpi_batch_candidates`、`bpi_inbox_events`、规则/拓扑版本表 | PASS | 候选故意不确认，不声明 batch 或生产写回 |
+| BPI 候选清理复验 | `/bpi/#/candidates` | marker 定向清理后刷新列表 | `GET /bpi-api/candidates` | GET `200`；marker 行为 0，当前空列表显示“没有待审核候选”；console/page/request error 均为 0 | 11 类 marker 残留均为 0；全局 candidate/batch/candidate inbox 为 `0/0/0` | 本轮涉及的 BPI 表 | PASS | 清理脚本只处理 marker 和关联 ID，共享功能开关保留 |
+
+机器证据：`metadata/bpi-rule-retirement-acceptance.json`。候选截图在等待抽屉滑入动画完成后
+采集，避免把动画中间帧误判为布局故障。
+
 ## 2026-07-18 BPI 版本比较与规则审批生命周期
 
 本轮在 `http://10.11.100.17:18080/bpi/#/rules` 使用真实 ADP 登录、正式 Java 8
