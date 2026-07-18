@@ -140,6 +140,9 @@ function createScenario() {
   const rule = {
     id: '78d57d90-fdc8-4a57-a660-a1ae73c2bc96', ...ruleBody, state: 'DRAFT', revision: 7,
     checksum: sha256(ruleBody), latestSimulationId: null,
+    approvalId: null, approvalStatus: 'NOT_REQUESTED', approvalRevision: 0,
+    approvalSubmittedBy: null, approvalSubmittedAt: null,
+    approvalDecidedBy: null, approvalDecidedAt: null,
     publicationStatus: 'NOT_PUBLISHED', publicationRevision: 0,
     publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
     publicationManualRetryCount: 0, publicationPublishedAt: null,

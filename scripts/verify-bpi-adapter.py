@@ -47,7 +47,20 @@ def main() -> int:
                 failures.append(f"BPI adapter trusts forbidden browser scope header {forbidden!r}")
 
         route_policy = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java").read_text(encoding="utf-8")
-        for required in ("confirm", "reject", "suspend", "resume", "topologies", "rules", "rule-simulations", "simulate", "publish"):
+        for required in (
+            "confirm",
+            "reject",
+            "suspend",
+            "resume",
+            "topologies",
+            "rules",
+            "rule-simulations",
+            "compare",
+            "simulate",
+            "submit-approval",
+            "reject-approval",
+            "publish",
+        ):
             if required not in route_policy:
                 failures.append(f"BPI adapter route policy is missing approved command {required!r}")
 
@@ -65,7 +78,16 @@ def main() -> int:
 
         compose = (ROOT / "deploy/docker/docker-compose.yml").read_text(encoding="utf-8")
         nginx = (ROOT / "deploy/docker/nginx/adp.conf").read_text(encoding="utf-8")
-        for required in ("bpi-adapter:", "BPI_ADAPTER_KEYCLOAK_JWK_SET_URI", "BPI_ADAPTER_ROLE_RULES", "BPI_ADAPTER_SUBJECT_SCOPE_RULES"):
+        for required in (
+            "bpi-adapter:",
+            "BPI_ADAPTER_KEYCLOAK_JWK_SET_URI",
+            "BPI_ADAPTER_KEYCLOAK_ISSUER",
+            "BPI_ADAPTER_LEGACY_TICKET_ENABLED",
+            "BPI_ADAPTER_LEGACY_GATEWAY_BASE_URL",
+            "BPI_ADAPTER_ROLE_RULES",
+            "systemRole=BPI_ADMIN|BPI_OPERATOR",
+            "BPI_ADAPTER_SUBJECT_SCOPE_RULES",
+        ):
             if required not in compose:
                 failures.append(f"BPI adapter Compose wiring is missing {required!r}")
         for required in ("location ^~ /bpi-api/", "location ^~ /bpi/", "bpi_adapter_upstream"):

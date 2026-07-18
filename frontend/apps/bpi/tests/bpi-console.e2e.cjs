@@ -309,6 +309,20 @@ test('process engineer creates validates and publishes topology before creating 
   await page.getByText('拓扑 ADP_E2E_TOPOLOGY@1.0.0 已发布').waitFor();
   await page.locator('#detail-drawer [data-close-drawer]').first().click();
 
+  await page.getByRole('button', { name: '新建拓扑' }).click();
+  await page.locator('#topology-base').selectOption({ label: 'ADP_E2E_TOPOLOGY@1.0.0' });
+  await page.locator('#topology-version').fill('1.1.0');
+  const nextTopology = JSON.parse(await page.locator('#topology-definition').inputValue());
+  nextTopology.localityGroup = 'LINE-S07-01-V2';
+  await page.locator('#topology-definition').fill(JSON.stringify(nextTopology, null, 2));
+  await page.locator('#topology-reason').fill('调整版本化本地性组并核对结构差异');
+  await page.getByRole('button', { name: '创建草稿' }).click();
+  await page.getByText('拓扑草稿 ADP_E2E_TOPOLOGY@1.1.0 已创建').waitFor();
+  await page.getByRole('heading', { name: '版本差异' }).waitFor();
+  await page.getByText('对比 ADP_E2E_TOPOLOGY@1.0.0 → ADP_E2E_TOPOLOGY@1.1.0', { exact: true }).waitFor();
+  await page.locator('.version-diff code').getByText('/localityGroup', { exact: true }).waitFor();
+  await page.locator('#detail-drawer [data-close-drawer]').first().click();
+
   await page.getByRole('button', { name: '新建规则' }).click();
   await page.getByRole('heading', { name: '新建规则版本' }).waitFor();
   await page.locator('#rule-code').fill('ADP_E2E_BATCH_START');
@@ -320,7 +334,7 @@ test('process engineer creates validates and publishes topology before creating 
 
   const topologies = await fetch(`${simulatorUrl}/bpi/v1/topologies?plantId=PLANT-01`).then((response) => response.json());
   const rules = await fetch(`${simulatorUrl}/bpi/v1/rules?plantId=PLANT-01`).then((response) => response.json());
-  const createdTopology = topologies.data.find((item) => item.code === 'ADP_E2E_TOPOLOGY');
+  const createdTopology = topologies.data.find((item) => item.code === 'ADP_E2E_TOPOLOGY' && item.version === '1.0.0');
   const createdRule = rules.data.find((item) => item.code === 'ADP_E2E_BATCH_START');
   assert.equal(createdTopology.state, 'PUBLISHED');
   assert.equal(createdTopology.validationStatus, 'PASSED');
@@ -334,7 +348,7 @@ test('process engineer creates validates and publishes topology before creating 
   await page.close();
 });
 
-test('process engineer replays PostgreSQL evidence and publishes a checksum-gated rule', async () => {
+test('process engineer submits replay proof and an independent administrator publishes the rule', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -358,12 +372,22 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   assert.match(await page.locator('.simulation-result').textContent(), /误报0/);
   assert.match(await page.locator('.simulation-result').textContent(), /观测值18640/);
 
-  await page.getByRole('button', { name: '发布规则版本' }).click();
-  await page.getByRole('heading', { name: '发布边界规则' }).waitFor();
+  await page.getByRole('button', { name: '提交审批' }).click();
+  await page.getByRole('heading', { name: '提交规则审批' }).waitFor();
   await page.locator('#confirm-reason').fill('S07 历史批次回放通过并完成工艺工程师复核');
-  await page.getByRole('button', { name: '确认发布' }).click();
-  await page.getByText('规则 RULE-S07-START@1.2.0 已提交发布，当前待分发').waitFor();
+  await page.getByRole('button', { name: '确认提交审批' }).click();
+  await page.getByText('规则 RULE-S07-START@1.2.0 已进入待审批').waitFor();
+  await page.locator('.batch-state-band').getByText('PENDING_APPROVAL', { exact: true }).waitFor();
+  await page.getByRole('heading', { name: '版本审批' }).waitFor();
+  await page.getByText('PENDING', { exact: true }).last().waitFor();
+
+  await page.getByRole('button', { name: '管理员批准并发布' }).click();
+  await page.getByRole('heading', { name: '批准并发布边界规则' }).waitFor();
+  await page.locator('#confirm-reason').fill('独立管理员复核规则、模拟证明和作用域后批准发布');
+  await page.getByRole('button', { name: '确认批准并发布' }).click();
+  await page.getByText('规则 RULE-S07-START@1.2.0 已批准发布，当前待分发').waitFor();
   await page.locator('.batch-state-band').getByText('PUBLISHED', { exact: true }).waitFor();
+  await page.getByText('APPROVED', { exact: true }).last().waitFor();
   await page.getByRole('heading', { name: '规则发布链路' }).waitFor();
   await page.getByText('待分发', { exact: true }).last().waitFor();
   await page.getByText('发布事件已与规则版本同事务落库，等待 Kafka 分发。').waitFor();
@@ -372,13 +396,14 @@ test('process engineer replays PostgreSQL evidence and publishes a checksum-gate
   await page.getByText('尚未收到 Flink 应用回执；即使 Kafka 已确认，也不能将该规则标记为在线生效。').waitFor();
   await page.getByRole('heading', { name: '流式评估器运行就绪' }).waitFor();
   await page.getByText('运行时 WAITING', { exact: true }).last().waitFor();
-  assert.match(await page.locator('.batch-state-band').textContent(), /revision 9/);
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 10/);
 
   const rule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
   assert.equal(rule.data.state, 'PUBLISHED');
   assert.equal(rule.data.publicationStatus, 'PENDING');
   assert.equal(rule.data.publicationAttemptCount, 0);
-  assert.equal(rule.data.revision, 9);
+  assert.equal(rule.data.approvalStatus, 'APPROVED');
+  assert.equal(rule.data.revision, 10);
   assert.ok(rule.data.latestSimulationId);
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-published.png', fullPage: true });
@@ -513,6 +538,10 @@ test('process engineer sees business wording when point readiness blocks publica
   await page.getByRole('button', { name: '运行历史回放' }).click();
   await page.getByRole('button', { name: '开始回放' }).click();
   await page.getByText('历史回放通过，可提交发布').waitFor();
+  await page.getByRole('button', { name: '提交审批' }).click();
+  await page.locator('#confirm-reason').fill('提交点位准入拦截验证');
+  await page.getByRole('button', { name: '确认提交审批' }).click();
+  await page.getByText('已进入待审批').waitFor();
   await page.route('**/bpi-api/rules/*/publish', async (route) => {
     await route.fulfill({
       status: 422,
@@ -526,9 +555,9 @@ test('process engineer sees business wording when point readiness blocks publica
     });
   });
 
-  await page.getByRole('button', { name: '发布规则版本' }).click();
+  await page.getByRole('button', { name: '管理员批准并发布' }).click();
   await page.locator('#confirm-reason').fill('验证点位准入失败时的业务提示');
-  await page.getByRole('button', { name: '确认发布' }).click();
+  await page.getByRole('button', { name: '确认批准并发布' }).click();
 
   const toast = page.locator('#toast');
   await toast.getByText(/规则未发布：当前点位未通过运行准入/).waitFor();

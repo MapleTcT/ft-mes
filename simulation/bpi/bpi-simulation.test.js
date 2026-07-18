@@ -265,8 +265,65 @@ test('candidate rejection is idempotent and never creates a shadow batch', async
   assert.equal(result.json.data[0].pendingCandidates, 0);
 });
 
+test('topology and rule comparisons return deterministic JSON Pointer changes', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  const topology = (await request('GET', '/bpi/v1/topologies?plantId=PLANT-01')).json.data[0];
+  const topologyDefinition = structuredClone(topology.definition);
+  topologyDefinition.localityGroup = 'LOCALITY-S07-EVAP-V2';
+  result = await request('POST', '/bpi/v1/topologies/drafts', {
+    headers: commandHeaders('compare-topology-draft-0001', topology.revision),
+    body: {
+      code: topology.code,
+      version: '4',
+      plantId: topology.plantId,
+      lineId: topology.lineId,
+      baseVersionId: topology.id,
+      definition: topologyDefinition,
+      reason: '建立拓扑差异测试版本',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  const targetTopology = result.json.data;
+  result = await request('GET', `/bpi/v1/topologies/${targetTopology.id}/compare?against=${topology.id}`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.objectType, 'TOPOLOGY_VERSION');
+  assert.equal(result.json.data.changeCount, 1);
+  assert.deepEqual(result.json.data.changes.map((change) => `${change.path}|${change.changeType}`), [
+    '/localityGroup|CHANGED',
+  ]);
+
+  const rule = (await request('GET', '/bpi/v1/rules?plantId=PLANT-01')).json.data[0];
+  const ast = structuredClone(rule.ast);
+  ast.conditions[0].threshold = 17;
+  result = await request('POST', '/bpi/v1/rules/drafts', {
+    headers: commandHeaders('compare-rule-draft-0002', rule.revision),
+    body: {
+      code: rule.code,
+      version: '1.3.0',
+      lineId: rule.lineId,
+      topologyVersion: rule.topologyVersion,
+      baseVersionId: rule.id,
+      ast,
+      reason: '建立规则差异测试版本',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  const targetRule = result.json.data;
+  result = await request('GET', `/bpi/v1/rules/${targetRule.id}/compare?against=${rule.id}`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.objectType, 'RULE_VERSION');
+  assert.equal(result.json.data.changeCount, 1);
+  assert.deepEqual(result.json.data.changes.map((change) => `${change.path}|${change.changeType}`), [
+    '/ast/conditions/0/threshold|CHANGED',
+  ]);
+});
+
 test('rule simulation checksum gates publication', async () => {
-  let pointResult = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
+  let pointResult = await request('POST', '/__simulation/reset');
+  assert.equal(pointResult.response.status, 200);
+  pointResult = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
   assert.equal(pointResult.response.status, 200);
   assert.equal(pointResult.json.data.snapshot.readyPointCount, 2);
   pointResult = await request('GET', '/bpi/v1/point-catalog/snapshots?plantId=PLANT-01&lineId=LINE-S07-01');
@@ -327,23 +384,65 @@ test('rule simulation checksum gates publication', async () => {
   result = await request('GET', `/bpi/v1/rule-simulations/${simulation.id}`);
   assert.deepEqual(result.json.data, simulation);
 
-  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/publish`, {
-    headers: commandHeaders('publish-rule-bad-0001', 8),
-    body: { reason: '审批发布', simulationId: simulation.id, simulationChecksum: 'bad-checksum' },
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/submit-approval`, {
+    headers: commandHeaders('submit-rule-bad-0001', 8),
+    body: { reason: '提交审批', simulationId: simulation.id, simulationChecksum: 'bad-checksum' },
   });
   assert.equal(result.response.status, 422);
 
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/submit-approval`, {
+    headers: commandHeaders('submit-rule-good-0002', 8),
+    body: { reason: '提交审批', simulationId: simulation.id, simulationChecksum: simulation.checksum },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'PENDING_APPROVAL');
+  assert.equal(result.json.data.approvalStatus, 'PENDING');
+  assert.equal(result.json.data.revision, 9);
+
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/reject-approval`, {
+    headers: commandHeaders('reject-rule-approval-0003', 9),
+    body: { reason: '现场复核要求重新调整保持时间' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'DRAFT');
+  assert.equal(result.json.data.approvalStatus, 'REJECTED');
+  assert.equal(result.json.data.revision, 10);
+
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/simulate`, {
+    headers: commandHeaders('simulate-rule-after-reject-0004', 10), body: simulationInput,
+  });
+  assert.equal(result.response.status, 202);
+  const approvedSimulation = result.json.data;
+  assert.equal(result.json.data.state, 'PASSED');
+
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/submit-approval`, {
+    headers: commandHeaders('submit-rule-after-reject-0005', 11),
+    body: {
+      reason: '重新回放后提交审批',
+      simulationId: approvedSimulation.id,
+      simulationChecksum: approvedSimulation.checksum,
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'PENDING_APPROVAL');
+  assert.equal(result.json.data.revision, 12);
+
   result = await request('POST', `/bpi/v1/rules/${RULE_ID}/publish`, {
-    headers: commandHeaders('publish-rule-good-0002', 8),
-    body: { reason: '审批发布', simulationId: simulation.id, simulationChecksum: simulation.checksum },
+    headers: commandHeaders('publish-rule-good-0006', 12),
+    body: {
+      reason: '独立管理员批准发布',
+      simulationId: approvedSimulation.id,
+      simulationChecksum: approvedSimulation.checksum,
+    },
   });
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.state, 'PUBLISHED');
+  assert.equal(result.json.data.approvalStatus, 'APPROVED');
   assert.equal(result.json.data.publicationStatus, 'PENDING');
   assert.equal(result.json.data.publicationRevision, 1);
   assert.equal(result.json.data.publicationAttemptCount, 0);
   assert.equal(result.json.data.publicationTotalAttemptCount, 0);
-  assert.equal(result.json.data.revision, 9);
+  assert.equal(result.json.data.revision, 13);
   assert.equal(result.json.data.applicationStatus, 'WAITING');
   assert.equal(result.json.data.runtimeReadinessStatus, 'WAITING');
 

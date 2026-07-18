@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T14:10:28Z",
+  "generatedAt": "2026-07-18T02:33:00Z",
   "repoCommit": "WORKTREE",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
@@ -103,8 +103,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 171,
-    "pass": 168,
+    "testedFeatures": 177,
+    "pass": 174,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3660,9 +3660,131 @@
         "The real plant Batch/DCS endpoint, credentials and owner sign-off were not supplied; only the isolated versioned HTTP acknowledgement/retry contract is accepted.",
         "The test database currently has only ADP_E2E product master rows, so production master-data load remains a cutover prerequisite."
       ]
+    },
+    {
+      "module": "BPI 拓扑版本治理",
+      "route": "/bpi/#/rules",
+      "operation": "在真实拓扑详情抽屉比较同 code、同 scope 的两个已发布版本",
+      "api": "GET /bpi-api/topologies/b76983eb-2d8b-e74d-f50b-398df1e22923/compare?baseVersionId={baseId}",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RuleController.compareTopologyVersions -> RuleService.compareTopologyVersions -> VersionComparisonService",
+      "tables": [
+        "bpi.bpi_topology_versions"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT topology_code,version,state,revision,definition FROM bpi.bpi_topology_versions WHERE topology_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. The real target page rendered a deterministic 11-item JSON Pointer diff, including /localityGroup and node/edge additions; the operation was read-only and marker cleanup left zero topology rows.",
+      "issues": []
+    },
+    {
+      "module": "BPI 规则版本治理",
+      "route": "/bpi/#/rules",
+      "operation": "在真实规则详情抽屉比较已发布规则与候选规则",
+      "api": "GET /bpi-api/rules/b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa/compare?baseVersionId={baseId}",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RuleController.compareRuleVersions -> RuleService.compareRuleVersions -> VersionComparisonService",
+      "tables": [
+        "bpi.bpi_rule_versions"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT rule_code,version,state,revision,definition FROM bpi.bpi_rule_versions WHERE rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. The real target page rendered the topology reference and /conditions/0/threshold changes in stable order; cross-code and cross-scope comparison remains fail closed.",
+      "issues": []
+    },
+    {
+      "module": "BPI 规则历史回放",
+      "route": "/bpi/#/rules",
+      "operation": "对发布候选和驳回候选分别执行有界历史回放",
+      "api": "POST /bpi-api/rules/{ruleId}/simulate",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.simulateRule -> RuleService.simulate -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_simulations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.rule_code,s.state,s.metrics,s.checksum FROM bpi.bpi_rule_simulations s JOIN bpi.bpi_rule_versions r ON r.id=s.rule_version_id WHERE r.rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. Both real page requests returned 202; PostgreSQL showed two PASSED simulations with matched=1, missed=0, falsePositive=0 and meanBoundaryErrorSeconds=0, and both rules advanced to SIMULATION_PASSED/r2.",
+      "issues": []
+    },
+    {
+      "module": "BPI 规则提交审批",
+      "route": "/bpi/#/rules",
+      "operation": "从真实规则详情提交当前最新通过的 simulation 进入审批",
+      "api": "POST /bpi-api/rules/{ruleId}/submit-approval",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.submitRuleApproval -> RuleService.submitApproval -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.rule_code,r.state,r.revision,a.state,a.simulation_id,a.submitted_by FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id WHERE r.rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. Both requests returned 200; the exact simulation ID/checksum was persisted in PENDING approval requests and both rules advanced to PENDING_APPROVAL/r3. The same submitter was then rejected with the expected 422 on both decision paths.",
+      "issues": []
+    },
+    {
+      "module": "BPI 规则独立批准",
+      "route": "/bpi/#/rules + controlled independent BPI_ADMIN decision API",
+      "operation": "由同时不同于创建人和提交人的管理员批准发布，再刷新真实页面复显",
+      "api": "POST /bpi/v1/rules/b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa/publish",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.publishRuleVersion -> RuleService.publish -> RulePostgresRepository/RulePublicationOutboxRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.state,r.revision,a.state,a.revision,a.decided_by,o.event_type,o.topic,o.status,o.attempt_count FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id LEFT JOIN bpi.bpi_outbox_events o ON o.aggregate_id=r.id WHERE r.id='b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. The independent BPI_ADMIN request returned 200; PostgreSQL showed PUBLISHED/r4, APPROVED/r2 and one BOUNDARY_RULE_PUBLISHED outbox row; the real page reloaded the published state. Marker cleanup returned all fixture counts to zero.",
+      "issues": [
+        "The outbox remained PENDING with attempts=0 because this controlled Phase 1 acceptance kept the dispatcher disabled; this item does not claim Kafka/Flink application."
+      ]
+    },
+    {
+      "module": "BPI 规则独立驳回",
+      "route": "/bpi/#/rules + controlled independent BPI_ADMIN decision API",
+      "operation": "由不同于提交人的管理员驳回审批，再刷新真实页面复显草稿",
+      "api": "POST /bpi/v1/rules/c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb/reject-approval",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.rejectRuleApproval -> RuleService.rejectApproval -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.state,r.revision,a.state,a.revision,a.decided_by,a.decision_reason FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id WHERE r.id='c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-rule-version-lifecycle-acceptance.json. The independent BPI_ADMIN request returned 200; PostgreSQL showed DRAFT/r4 and REJECTED/r2 with no publication outbox, and the real page reloaded the draft state. Marker cleanup returned all fixture counts to zero.",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "artifact": "metadata/bpi-rule-version-lifecycle-acceptance.json",
+      "summary": "Target ADP page, Java 8 adapter, Java 17 BPI service and PostgreSQL Flyway V14 closed deterministic topology/rule comparison, two passed simulations, exact-proof approval submission, same-actor 422 rejection, independent approval/rejection, six audit/idempotency actions and zero-row marker cleanup."
+    },
     {
       "marker": "ADP_E2E_20260717120436_RM_WEB_FORMULA",
       "artifact": "metadata/rm-web-formula-editor-acceptance.json",

@@ -151,6 +151,57 @@ function stableUuid(value) {
   return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
 }
 
+function compareVersions(objectType, base, target, baseContent, targetContent) {
+  const changes = [];
+  let changeCount = 0;
+  const missing = Symbol('missing');
+  const value = (item) => item === missing ? null : clone(item);
+  const walk = (path, before, after) => {
+    if (before !== missing && after !== missing
+        && JSON.stringify(before) === JSON.stringify(after)) return;
+    const beforeObject = before !== null && before !== missing && !Array.isArray(before) && typeof before === 'object';
+    const afterObject = after !== null && after !== missing && !Array.isArray(after) && typeof after === 'object';
+    if (beforeObject && afterObject) {
+      const names = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort();
+      names.forEach((name) => walk(
+        `${path}/${name.replaceAll('~', '~0').replaceAll('/', '~1')}`,
+        Object.prototype.hasOwnProperty.call(before, name) ? before[name] : missing,
+        Object.prototype.hasOwnProperty.call(after, name) ? after[name] : missing,
+      ));
+      return;
+    }
+    if (Array.isArray(before) && Array.isArray(after)) {
+      const size = Math.max(before.length, after.length);
+      for (let index = 0; index < size; index += 1) {
+        walk(`${path}/${index}`, index < before.length ? before[index] : missing,
+          index < after.length ? after[index] : missing);
+      }
+      return;
+    }
+    changeCount += 1;
+    if (changes.length >= 500) return;
+    changes.push({
+      path: path || '/',
+      changeType: before === missing ? 'ADDED' : after === missing ? 'REMOVED' : 'CHANGED',
+      beforeValue: value(before),
+      afterValue: value(after),
+    });
+  };
+  walk('', baseContent, targetContent);
+  const reference = (item) => ({
+    id: item.id, code: item.code, version: item.version, state: item.state, checksum: item.checksum,
+  });
+  return {
+    objectType,
+    base: reference(base),
+    target: reference(target),
+    identical: changeCount === 0,
+    changeCount,
+    truncated: changeCount > changes.length,
+    changes,
+  };
+}
+
 function topologyValidation(definition, pointCatalog) {
   const errors = [];
   const warnings = [];
@@ -563,6 +614,18 @@ function createHandler(state) {
         if (!topology) return send(res, 404, problem(404, 'Not Found', 'Topology not found.', 'getTopologyVersion'), 'getTopologyVersion');
         return send(res, 200, envelope('getTopologyVersion', topology), 'getTopologyVersion');
       }
+      ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)\/compare$/);
+      if (req.method === 'GET' && ids) {
+        const target = state.topologies.find((item) => item.id === ids[0]);
+        const base = state.topologies.find((item) => item.id === url.searchParams.get('against'));
+        if (!target || !base) return send(res, 404, problem(404, 'Not Found', 'Topology version not found.', 'compareTopologyVersions'), 'compareTopologyVersions');
+        if (target.code !== base.code || target.plantId !== base.plantId || target.lineId !== base.lineId) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Topology versions must share code and scope before comparison.', 'compareTopologyVersions'), 'compareTopologyVersions');
+        }
+        return send(res, 200, envelope('compareTopologyVersions', compareVersions(
+          'TOPOLOGY_VERSION', base, target, base.definition, target.definition,
+        )), 'compareTopologyVersions');
+      }
       ids = match(path, /^\/bpi\/v1\/topologies\/([^/]+)\/validate$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'validateTopologyDraft';
@@ -625,7 +688,11 @@ function createHandler(state) {
           id: stableUuid({ type: 'rule', code: body.code, version: body.version }), code: body.code,
           version: body.version, plantId: topology.plantId, lineId: body.lineId,
           topologyVersion: body.topologyVersion, ast: clone(body.ast), state: 'DRAFT', revision: 1,
-          checksum: sha256(body.ast), latestSimulationId: null, publicationStatus: 'NOT_PUBLISHED',
+          checksum: sha256(body.ast), latestSimulationId: null,
+          approvalId: null, approvalStatus: 'NOT_REQUESTED', approvalRevision: 0,
+          approvalSubmittedBy: null, approvalSubmittedAt: null,
+          approvalDecidedBy: null, approvalDecidedAt: null,
+          publicationStatus: 'NOT_PUBLISHED',
           publicationRevision: 0, publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
           publicationManualRetryCount: 0, publicationPublishedAt: null,
           publicationLastRequeuedAt: null, publicationLastError: null,
@@ -645,6 +712,20 @@ function createHandler(state) {
         const rule = state.rules.find((item) => item.id === ids[0]);
         if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', 'getRuleVersion'), 'getRuleVersion');
         return send(res, 200, envelope('getRuleVersion', rule), 'getRuleVersion');
+      }
+      ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/compare$/);
+      if (req.method === 'GET' && ids) {
+        const target = state.rules.find((item) => item.id === ids[0]);
+        const base = state.rules.find((item) => item.id === url.searchParams.get('against'));
+        if (!target || !base) return send(res, 404, problem(404, 'Not Found', 'Rule version not found.', 'compareRuleVersions'), 'compareRuleVersions');
+        if (target.code !== base.code || target.plantId !== base.plantId || target.lineId !== base.lineId) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Rule versions must share code and scope before comparison.', 'compareRuleVersions'), 'compareRuleVersions');
+        }
+        return send(res, 200, envelope('compareRuleVersions', compareVersions(
+          'RULE_VERSION', base, target,
+          { topologyVersion: base.topologyVersion, ast: base.ast },
+          { topologyVersion: target.topologyVersion, ast: target.ast },
+        )), 'compareRuleVersions');
       }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/simulate$/);
       if (req.method === 'POST' && ids) {
@@ -681,6 +762,51 @@ function createHandler(state) {
         if (!simulation) return send(res, 404, problem(404, 'Not Found', 'Simulation not found.', 'getRuleSimulation'), 'getRuleSimulation');
         return send(res, 200, envelope('getRuleSimulation', simulation), 'getRuleSimulation');
       }
+      ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/submit-approval$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'submitRuleApproval';
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, rule.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const simulation = state.simulations.get(body.simulationId);
+        if (rule.state !== 'SIMULATION_PASSED' || !body.reason || !simulation
+            || simulation.state !== 'PASSED' || body.simulationChecksum !== simulation.checksum) {
+          const response = problem(422, 'Simulation Proof Required', 'A passed simulation and matching checksum are required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        rule.state = 'PENDING_APPROVAL';
+        rule.approvalId = stableUuid({ type: 'approval', ruleId: rule.id, revision: rule.revision });
+        rule.approvalStatus = 'PENDING';
+        rule.approvalRevision = 1;
+        rule.approvalSubmittedBy = 'simulated.bpi.engineer';
+        rule.approvalSubmittedAt = FIXED_TIME;
+        rule.approvalDecidedBy = null;
+        rule.approvalDecidedAt = null;
+        rule.revision += 1;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, rule), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/reject-approval$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'rejectRuleApproval';
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, rule.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (rule.state !== 'PENDING_APPROVAL' || !body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(409, 'Invalid Approval State', 'Rule must be pending approval.', operationId, rule.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        rule.state = 'DRAFT';
+        rule.approvalStatus = 'REJECTED';
+        rule.approvalRevision += 1;
+        rule.approvalDecidedBy = 'simulated.bpi.admin';
+        rule.approvalDecidedAt = FIXED_TIME;
+        rule.revision += 1;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, rule), operationId);
+      }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/publish$/);
       if (req.method === 'POST' && ids) {
         const operationId = 'publishRuleVersion';
@@ -690,11 +816,17 @@ function createHandler(state) {
         if (!context) return;
         const body = await readJson(req);
         const simulation = state.simulations.get(body.simulationId);
-        if (!body.reason || !simulation || simulation.state !== 'PASSED' || body.simulationChecksum !== simulation.checksum) {
+        if (rule.state !== 'PENDING_APPROVAL' || rule.approvalStatus !== 'PENDING'
+            || !body.reason || !simulation || simulation.state !== 'PASSED'
+            || body.simulationChecksum !== simulation.checksum) {
           const response = problem(422, 'Simulation Proof Required', 'A passed simulation and matching checksum are required.', operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
         }
         rule.state = 'PUBLISHED';
+        rule.approvalStatus = 'APPROVED';
+        rule.approvalRevision += 1;
+        rule.approvalDecidedBy = 'simulated.bpi.admin';
+        rule.approvalDecidedAt = FIXED_TIME;
         rule.publicationStatus = 'PENDING';
         rule.publicationRevision = 1;
         rule.publicationAttemptCount = 0;

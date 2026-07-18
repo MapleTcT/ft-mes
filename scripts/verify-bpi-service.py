@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V11__bpi_point_catalog_least_privilege.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V12__bpi_point_catalog_source_property.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V14__bpi_rule_approval_workflow.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -39,6 +40,10 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/CandidateController.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/VersionComparisonService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleApprovalView.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/VersionChangeView.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/VersionComparisonView.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RulePublicationFactory.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxRepository.java",
@@ -49,6 +54,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordProcessor.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessPostgresRepository.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleApplicationKafkaPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/VersionComparisonServiceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateEventProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaProperties.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfiguration.java",
@@ -80,6 +86,12 @@ REQUIRED_FILES = [
     "metadata/bpi-rule-runtime-readiness-acceptance.json",
     "metadata/bpi-rule-runtime-readiness-target-acceptance.json",
     "metadata/bpi-rule-application-kafka-postgres-acceptance.json",
+    "docs/testing/bpi-rule-version-lifecycle-acceptance.md",
+    "metadata/bpi-rule-version-lifecycle-acceptance.json",
+    "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
+    "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
+    "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
+    "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
     "deploy/docker/postgres/init/176-bpi-database-role.sh",
 ]
 
@@ -192,6 +204,16 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V14__bpi_rule_approval_workflow.sql",
+        [
+            "PENDING_APPROVAL",
+            "bpi_rule_approval_requests",
+            "uq_bpi_rule_approval_pending",
+            "WHERE state = 'PENDING'",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
          "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
@@ -228,6 +250,12 @@ def main() -> int:
             "MAX_REPLAY_OBSERVATIONS",
             "simulationChecksum",
             "RULE_SIMULATED",
+            "compareTopologies",
+            "compareRules",
+            "submitApproval",
+            "rejectApproval",
+            "RULE_APPROVAL_SUBMITTED",
+            "RULE_APPROVAL_REJECTED",
             "RULE_PUBLISHED",
             "insertPublication",
             "publicationEventId",
@@ -238,8 +266,12 @@ def main() -> int:
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
         [
             "/bpi/v1/topologies",
+            "/bpi/v1/topologies/{topologyId}/compare",
+            "/bpi/v1/rules/{ruleId}/compare",
             "/bpi/v1/rules/{ruleId}/simulate",
             "/bpi/v1/rule-simulations/{simulationId}",
+            "/bpi/v1/rules/{ruleId}/submit-approval",
+            "/bpi/v1/rules/{ruleId}/reject-approval",
             "/bpi/v1/rules/{ruleId}/publish",
         ],
         failures,
@@ -249,7 +281,21 @@ def main() -> int:
         ["replayEmitsAtTheExactHoldTimerInsteadOfTheWindowEnd", "expectedBoundary", "meanBoundaryErrorSeconds",
          "outboxClaimsRecoverAndReachPublishedOrFailedTerminalState", "publicationStatus",
          "flinkRuntimeReadinessTransitionsPersistAndOlderReceiptCannotOverwriteApiTruth",
-         "RULE_RUNTIME_DEGRADED", "RULE_RUNTIME_READY"],
+         "RULE_RUNTIME_DEGRADED", "RULE_RUNTIME_READY",
+         "ruleAndTopologyComparisonUseScopedControlledContent",
+         "independentAdministratorCanRejectApprovalBackToDraftWithoutPublication",
+         "RULE_APPROVAL_SUBMITTED|2|3", "RULE_APPROVAL_REJECTED|3|4"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/VersionComparisonServiceTest.java",
+        [
+            "reportsStableJsonPointersForAddedRemovedAndChangedValues",
+            "/bindings/1|CHANGED",
+            "/enabled|ADDED",
+            "/obsolete|REMOVED",
+            "/threshold|CHANGED",
+        ],
         failures,
     )
     require_text(
@@ -460,6 +506,34 @@ def main() -> int:
         fail("BPI Kafka/PostgreSQL acceptance must finish with APPLIED control-plane state", failures)
     if database_assertions.get("finalRuntimeReadinessStatus") != "READY":
         fail("BPI Kafka/PostgreSQL acceptance must finish with READY runtime state", failures)
+
+    lifecycle_acceptance = json.loads(
+        (ROOT / "metadata/bpi-rule-version-lifecycle-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if lifecycle_acceptance.get("status") != "PASS_CONTROLLED_TARGET":
+        fail("BPI version lifecycle acceptance must retain controlled target PASS scope", failures)
+    if lifecycle_acceptance.get("database") != "PostgreSQL":
+        fail("BPI version lifecycle acceptance must identify PostgreSQL", failures)
+    lifecycle_summary = lifecycle_acceptance.get("summary", {})
+    if (lifecycle_summary.get("testedFeatures") != 6
+            or lifecycle_summary.get("pass") != 6
+            or lifecycle_summary.get("fail") != 0
+            or lifecycle_summary.get("blocked") != 0):
+        fail("BPI version lifecycle acceptance must preserve six passing features", failures)
+    lifecycle_browser = lifecycle_acceptance.get("browser", {})
+    if (lifecycle_browser.get("unexpectedConsoleErrors") != 0
+            or lifecycle_browser.get("pageErrors") != 0
+            or lifecycle_browser.get("requestFailures") != 0):
+        fail("BPI version lifecycle browser acceptance must have zero unexpected errors", failures)
+    if lifecycle_browser.get("expectedConsoleErrors") != 2:
+        fail("BPI version lifecycle acceptance must retain two deliberate 422 browser records", failures)
+    lifecycle_cleanup = lifecycle_acceptance.get("cleanup", {}).get("remaining", {})
+    if any(lifecycle_cleanup.get(key) != 0 for key in (
+            "topologies", "rules", "idempotency", "telemetryEvents",
+            "catalogSnapshots", "goldenBoundaries")):
+        fail("BPI version lifecycle marker cleanup must leave zero fixture rows", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

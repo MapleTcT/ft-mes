@@ -39,6 +39,7 @@ import type {
   StateEvent,
   TopologyVersion,
   TopologyDraftCommand,
+  VersionComparison,
 } from './types';
 import './styles.css';
 
@@ -68,7 +69,7 @@ const state = {
   selectedSimulation: null as RuleSimulation | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
-  ruleCommand: null as 'publish' | 'retry' | null,
+  ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
@@ -90,6 +91,14 @@ function formatTime(value?: string | null): string {
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('zh-CN', {
     month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
   }).format(date);
+}
+
+function versionComparisonHtml(comparison: VersionComparison | null, subject: '拓扑' | '规则'): string {
+  if (!comparison) {
+    return `<div class="section-title"><h3>版本差异</h3><span>无可比版本</span></div><p>同一${subject}代码和作用域出现第二个版本后，可在这里查看受控内容差异。</p>`;
+  }
+  const changes = comparison.changes.map((change) => `<li><code>${escapeHtml(change.path)}</code><span>${escapeHtml(change.changeType)}</span><small>${escapeHtml(JSON.stringify(change.beforeValue) ?? '-')} → ${escapeHtml(JSON.stringify(change.afterValue) ?? '-')}</small></li>`).join('');
+  return `<div class="section-title"><h3>版本差异</h3><span>${comparison.changeCount} 项</span></div><p>对比 ${escapeHtml(comparison.base.code)}@${escapeHtml(comparison.base.version)} → ${escapeHtml(comparison.target.code)}@${escapeHtml(comparison.target.version)}</p>${comparison.identical ? '<div class="simulation-empty"><span>受控内容一致</span></div>' : `<ul class="version-diff">${changes}</ul>`}${comparison.truncated ? '<p>差异超过 500 项，页面仅展示前 500 项。</p>' : ''}`;
 }
 
 function number(value: number | null | undefined, digits = 1): string {
@@ -804,12 +813,19 @@ async function openTopology(topologyId: string): Promise<void> {
   try {
     const topology = (await bpiApi.topology(topologyId)).data;
     state.selectedTopology = topology;
+    const comparisonPeer = state.topologies.find((item) => item.id !== topology.id
+      && item.code === topology.code
+      && item.plantId === topology.plantId
+      && item.lineId === topology.lineId);
+    const comparison = comparisonPeer
+      ? (await bpiApi.compareTopologies(topology.id, comparisonPeer.id)).data
+      : null;
     const issues = [...(topology.validationErrors || []), ...(topology.validationWarnings || [])];
     const issueRows = issues.map((issue) => `<li><span class="evidence-state evidence-state--${issue.severity === 'ERROR' ? 'bad' : 'ok'}"></span><div><strong>${escapeHtml(issue.code)}</strong><small>${escapeHtml(issue.path)}</small></div><b>${escapeHtml(issue.message)}</b></li>`).join('');
     const bindingRows = (topology.definition.bindings || []).map((binding) => `<li><span class="evidence-state evidence-state--ok"></span><div><strong>${escapeHtml(binding.signal)}</strong><small>${escapeHtml(binding.productId || '-')} / ${escapeHtml(binding.deviceId || '-')}</small></div><b>${escapeHtml(binding.propertyId)}</b></li>`).join('');
     const canValidate = topology.state === 'DRAFT';
     const canPublish = topology.state === 'DRAFT' && topology.validationStatus === 'PASSED';
-    openDrawer(`<header><div><span>版本化工艺拓扑</span><h2>${escapeHtml(topology.code)}@${escapeHtml(topology.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(topology.state)}${statusChip(topology.validationStatus || 'NOT_VALIDATED')}</div><span>revision ${topology.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(topology.plantId)} / ${escapeHtml(topology.lineId)}</b></div><div><span>本地性组</span><b>${escapeHtml(topology.definition.localityGroup || '-')}</b></div><div><span>校验人 / 时间</span><b>${escapeHtml(topology.validatedBy || '-')} · ${formatTime(topology.validatedAt)}</b></div><div><span>发布人 / 时间</span><b>${escapeHtml(topology.publishedBy || '-')} · ${formatTime(topology.publishedAt)}</b></div><div><span>拓扑 checksum</span><b class="mono-value">${escapeHtml(topology.checksum)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogSnapshotId || '-')}</b></div><div><span>目录 checksum</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogChecksum || '-')}</b></div><div><span>节点 / 路径</span><b>${topology.definition.nodes?.length || 0} / ${topology.definition.edges?.length || 0}</b></div></div><div class="drawer-section"><div class="section-title"><h3>JetLinks 测点绑定</h3><span>${topology.definition.bindings?.length || 0} 条</span></div>${bindingRows ? `<ul class="evidence-list evidence-list--compact">${bindingRows}</ul>` : '<div class="simulation-empty">暂无测点绑定</div>'}</div><div class="drawer-section"><div class="section-title"><h3>校验结果</h3><span>${issues.length} 项</span></div>${issueRows ? `<ul class="evidence-list topology-issue-list">${issueRows}</ul>` : '<div class="simulation-empty">暂无校验问题</div>'}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${canValidate ? '<button class="button button--secondary" id="open-topology-validate">校验拓扑</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-topology-publish">发布拓扑</button>' : ''}</footer>`);
+    openDrawer(`<header><div><span>版本化工艺拓扑</span><h2>${escapeHtml(topology.code)}@${escapeHtml(topology.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(topology.state)}${statusChip(topology.validationStatus || 'NOT_VALIDATED')}</div><span>revision ${topology.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(topology.plantId)} / ${escapeHtml(topology.lineId)}</b></div><div><span>本地性组</span><b>${escapeHtml(topology.definition.localityGroup || '-')}</b></div><div><span>校验人 / 时间</span><b>${escapeHtml(topology.validatedBy || '-')} · ${formatTime(topology.validatedAt)}</b></div><div><span>发布人 / 时间</span><b>${escapeHtml(topology.publishedBy || '-')} · ${formatTime(topology.publishedAt)}</b></div><div><span>拓扑 checksum</span><b class="mono-value">${escapeHtml(topology.checksum)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogSnapshotId || '-')}</b></div><div><span>目录 checksum</span><b class="mono-value">${escapeHtml(topology.validatedPointCatalogChecksum || '-')}</b></div><div><span>节点 / 路径</span><b>${topology.definition.nodes?.length || 0} / ${topology.definition.edges?.length || 0}</b></div></div><div class="drawer-section">${versionComparisonHtml(comparison, '拓扑')}</div><div class="drawer-section"><div class="section-title"><h3>JetLinks 测点绑定</h3><span>${topology.definition.bindings?.length || 0} 条</span></div>${bindingRows ? `<ul class="evidence-list evidence-list--compact">${bindingRows}</ul>` : '<div class="simulation-empty">暂无测点绑定</div>'}</div><div class="drawer-section"><div class="section-title"><h3>校验结果</h3><span>${issues.length} 项</span></div>${issueRows ? `<ul class="evidence-list topology-issue-list">${issueRows}</ul>` : '<div class="simulation-empty">暂无校验问题</div>'}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${canValidate ? '<button class="button button--secondary" id="open-topology-validate">校验拓扑</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-topology-publish">发布拓扑</button>' : ''}</footer>`);
     document.querySelector('#open-topology-validate')?.addEventListener('click', () => openTopologyCommandDialog('validate'));
     document.querySelector('#open-topology-publish')?.addEventListener('click', () => openTopologyCommandDialog('publish'));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
@@ -1052,6 +1068,14 @@ async function openRule(ruleId: string): Promise<void> {
       ? (await bpiApi.simulation(rule.latestSimulationId)).data
       : null;
     const topology = state.topologies.find((item) => `${item.code}@${item.version}` === rule.topologyVersion);
+    const comparisonPeer = state.rules.find((item) => item.id !== rule.id
+      && item.code === rule.code
+      && item.plantId === rule.plantId
+      && item.lineId === rule.lineId);
+    let comparison: VersionComparison | null = null;
+    if (comparisonPeer) {
+      comparison = (await bpiApi.compareRules(rule.id, comparisonPeer.id)).data;
+    }
     const conditions = ruleConditions(rule).map((condition) => `<li><div><strong>${escapeHtml(condition.signal)}</strong><small>${escapeHtml(condition.classification)} · ${escapeHtml(condition.operator)}</small></div><b>${escapeHtml(condition.threshold)}</b><em>${escapeHtml(condition.holdSeconds)}s</em></li>`).join('');
     const simulation = state.selectedSimulation;
     const simulationHtml = simulation ? `<div class="simulation-result simulation-result--${simulation.state === 'PASSED' ? 'pass' : 'fail'}"><div class="section-title"><h3>最近回放</h3>${statusChip(simulation.state)}</div><div class="metric-grid"><div><span>命中</span><b>${simulation.metrics.matched}</b></div><div><span>漏检</span><b>${simulation.metrics.missed}</b></div><div><span>误报</span><b>${simulation.metrics.falsePositive}</b></div><div><span>平均偏差</span><b>${number(simulation.metrics.meanBoundaryErrorSeconds)}s</b></div></div><dl class="manifest"><div><dt>观测值</dt><dd>${simulation.inputManifest.observationCount ?? '-'}</dd></div><div><dt>金标准边界</dt><dd>${simulation.inputManifest.goldenBoundaryCount ?? '-'}</dd></div><div><dt>发射边界</dt><dd>${simulation.emittedBoundaries.map(formatTime).join('、') || '-'}</dd></div></dl><div class="checksum"><span>simulation checksum</span><code>${escapeHtml(simulation.checksum)}</code></div>${simulation.failureReason ? `<p>${escapeHtml(simulation.failureReason)}</p>` : ''}</div>` : `<div class="simulation-empty"><i data-lucide="flask-conical"></i><span>尚未使用 PostgreSQL 历史测点和人工金标准执行回放。</span></div>`;
@@ -1061,11 +1085,16 @@ async function openRule(ruleId: string): Promise<void> {
     const runtimeReadinessError = rule.runtimeReadinessReasonCode || rule.runtimeReadinessDetail
       ? `<div class="error-callout"><strong>${escapeHtml(rule.runtimeReadinessReasonCode || 'RUNTIME_NOT_READY')}</strong>${rule.runtimeReadinessDetail ? `<span>${escapeHtml(rule.runtimeReadinessDetail)}</span>` : ''}</div>`
       : '';
+    const approvalHtml = `<div class="section-title"><h3>版本审批</h3>${statusChip(rule.approvalStatus)}</div><div class="facts-grid"><div><span>提交人</span><b>${escapeHtml(rule.approvalSubmittedBy || '-')}</b></div><div><span>提交时间</span><b>${formatTime(rule.approvalSubmittedAt)}</b></div><div><span>决定人</span><b>${escapeHtml(rule.approvalDecidedBy || '-')}</b></div><div><span>决定时间</span><b>${formatTime(rule.approvalDecidedAt)}</b></div></div><p>${rule.approvalStatus === 'PENDING' ? '规则已冻结在待审批状态，必须由不同于创建人和提交人的管理员批准。' : rule.approvalStatus === 'APPROVED' ? '审批与发布审计已落库，后续运行状态仍以 Kafka 和 Flink 回执为准。' : rule.approvalStatus === 'REJECTED' ? '该审批已驳回，规则退回草稿并需要重新模拟。' : '最近一次模拟通过后可提交审批。'}</p>`;
+    const comparisonHtml = versionComparisonHtml(comparison, '规则');
     const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>本轮尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>人工重试</span><b>${rule.publicationManualRetryCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div><div><span>最近重新入队</span><b>${formatTime(rule.publicationLastRequeuedAt)}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}<div class="application-trace"><div class="section-title"><h3>控制面应用回执</h3>${applicationChip(rule.applicationStatus)}</div><div class="facts-grid"><div><span>控制面部署</span><b>${escapeHtml(rule.applicationDeploymentId || '-')}</b></div><div><span>Flink 观察时间</span><b>${formatTime(rule.applicationObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.applicationReceivedAt)}</b></div><div><span>回执后修订</span><b>r${rule.publicationRevision}</b></div></div><p>${escapeHtml(applicationExplanation(rule))}</p>${applicationError}</div><div class="runtime-readiness-trace runtime-readiness-trace--${statusTone(rule.runtimeReadinessStatus)}"><div class="section-title"><h3>流式评估器运行就绪</h3>${runtimeReadinessChip(rule.runtimeReadinessStatus)}</div><div class="facts-grid"><div><span>规则版本</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>评估器部署</span><b>${escapeHtml(rule.runtimeReadinessDeploymentId || '-')}</b></div><div><span>运行观察时间</span><b>${formatTime(rule.runtimeReadinessObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.runtimeReadinessReceivedAt)}</b></div><div><span>点位目录事件</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogEventId || '-')}</b></div><div><span>目录来源版本</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogSourceRevision || '-')}</b></div></div><p>${escapeHtml(runtimeReadinessExplanation(rule))}</p>${runtimeReadinessError}</div>`;
-    const canPublish = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
-    openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${rule.publicationStatus === 'FAILED' ? '<button class="button button--danger" id="open-publication-retry">管理员重新入队</button>' : ''}${canPublish ? '<button class="button button--primary" id="open-rule-publish">发布规则版本</button>' : ''}</footer>`);
+    const canSubmit = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
+    const canApprove = rule.state === 'PENDING_APPROVAL' && simulation?.state === 'PASSED';
+    openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${comparisonHtml}</div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${approvalHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${rule.publicationStatus === 'FAILED' ? '<button class="button button--danger" id="open-publication-retry">管理员重新入队</button>' : ''}${canApprove ? '<button class="button button--danger" id="open-rule-reject">管理员驳回</button><button class="button button--primary" id="open-rule-approve">管理员批准并发布</button>' : ''}${canSubmit ? '<button class="button button--primary" id="open-rule-submit">提交审批</button>' : ''}</footer>`);
     document.querySelector('#open-simulation')?.addEventListener('click', openRuleSimulationDialog);
-    document.querySelector('#open-rule-publish')?.addEventListener('click', openRulePublishDialog);
+    document.querySelector('#open-rule-submit')?.addEventListener('click', () => openRulePublishDialog('submit'));
+    document.querySelector('#open-rule-approve')?.addEventListener('click', () => openRulePublishDialog('approve'));
+    document.querySelector('#open-rule-reject')?.addEventListener('click', openRuleRejectDialog);
     document.querySelector('#open-publication-retry')?.addEventListener('click', openRuleRetryDialog);
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
 }
@@ -1112,24 +1141,24 @@ async function handleRuleSimulation(event: SubmitEvent): Promise<void> {
   }
 }
 
-function openRulePublishDialog(): void {
+function openRulePublishDialog(command: 'submit' | 'approve'): void {
   const rule = state.selectedRule;
   const simulation = state.selectedSimulation;
   if (!rule || !simulation || simulation.state !== 'PASSED') return;
   state.candidateCommand = null;
   state.batchCommand = null;
   state.topologyCommand = null;
-  state.ruleCommand = 'publish';
+  state.ruleCommand = command;
   document.querySelector('#command-kicker')!.textContent = '规则版本控制';
-  document.querySelector('#command-title')!.textContent = '发布边界规则';
-  document.querySelector('#command-reason-label')!.textContent = '发布依据';
+  document.querySelector('#command-title')!.textContent = command === 'submit' ? '提交规则审批' : '批准并发布边界规则';
+  document.querySelector('#command-reason-label')!.textContent = command === 'submit' ? '提交依据' : '审批依据';
   document.querySelector('#command-summary')!.innerHTML = `<div><span>规则</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>作用域</span><b>${escapeHtml(rule.lineId)}</b></div><div><span>回放结果</span><b>${simulation.metrics.matched} 命中 / ${simulation.metrics.missed} 漏检 / ${simulation.metrics.falsePositive} 误报</b></div><div><span>版本</span><b>r${rule.revision}</b></div>`;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
   reason.value = '';
-  reason.placeholder = '填写回放批次范围、现场复核和发布依据';
+  reason.placeholder = command === 'submit' ? '填写回放批次范围、现场复核和提交依据' : '填写独立复核、职责分离和发布依据';
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.className = 'button button--primary';
-  button.textContent = '确认发布';
+  button.textContent = command === 'submit' ? '确认提交审批' : '确认批准并发布';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
 }
@@ -1138,17 +1167,22 @@ async function handleRulePublish(): Promise<void> {
   const rule = state.selectedRule;
   const simulation = state.selectedSimulation;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
-  if (!rule || !simulation || reason.length < 3) return;
+  const command = state.ruleCommand;
+  if (!rule || !simulation || !['submit', 'approve'].includes(command || '') || reason.length < 3) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;
-  button.textContent = '发布中...';
+  button.textContent = command === 'submit' ? '提交中...' : '发布中...';
   try {
-    const response = await bpiApi.publishRule(rule, simulation, reason, commandId());
+    const response = command === 'submit'
+      ? await bpiApi.submitRuleApproval(rule, simulation, reason, commandId())
+      : await bpiApi.publishRule(rule, simulation, reason, commandId());
     state.selectedRule = response.data;
     state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
     state.ruleCommand = null;
-    showToast(`规则 ${response.data.code}@${response.data.version} 已提交发布，当前${response.data.publicationStatus === 'PENDING' ? '待分发' : response.data.publicationStatus}`);
+    showToast(command === 'submit'
+      ? `规则 ${response.data.code}@${response.data.version} 已进入待审批`
+      : `规则 ${response.data.code}@${response.data.version} 已批准发布，当前${response.data.publicationStatus === 'PENDING' ? '待分发' : response.data.publicationStatus}`);
     renderRules();
     await openRule(response.data.id);
   } catch (error) {
@@ -1160,8 +1194,29 @@ async function handleRulePublish(): Promise<void> {
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
-    button.textContent = '确认发布';
+    button.textContent = command === 'submit' ? '确认提交审批' : '确认批准并发布';
   }
+}
+
+function openRuleRejectDialog(): void {
+  const rule = state.selectedRule;
+  if (!rule || rule.state !== 'PENDING_APPROVAL') return;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.topologyCommand = null;
+  state.ruleCommand = 'reject';
+  document.querySelector('#command-kicker')!.textContent = '规则版本审批';
+  document.querySelector('#command-title')!.textContent = '驳回规则审批';
+  document.querySelector('#command-reason-label')!.textContent = '驳回原因';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>规则</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>提交人</span><b>${escapeHtml(rule.approvalSubmittedBy || '-')}</b></div><div><span>处理结果</span><b>PENDING_APPROVAL → DRAFT</b></div><div><span>版本</span><b>r${rule.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = '填写规则、数据、回放或现场复核中需要修正的问题';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = 'button button--danger';
+  button.textContent = '确认驳回';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
 }
 
 function openRuleRetryDialog(): void {
@@ -1186,12 +1241,33 @@ function openRuleRetryDialog(): void {
 }
 
 async function handleRuleCommand(): Promise<void> {
-  if (state.ruleCommand === 'publish') {
+  if (state.ruleCommand === 'submit' || state.ruleCommand === 'approve') {
     await handleRulePublish();
     return;
   }
   const rule = state.selectedRule;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (rule && state.ruleCommand === 'reject' && reason.length >= 3) {
+    const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+    button.disabled = true;
+    button.textContent = '驳回中...';
+    try {
+      const response = await bpiApi.rejectRuleApproval(rule, reason, commandId());
+      state.selectedRule = response.data;
+      state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
+      document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+      state.ruleCommand = null;
+      showToast(`规则 ${response.data.code}@${response.data.version} 已退回草稿`);
+      renderRules();
+      await openRule(response.data.id);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      button.disabled = false;
+      button.textContent = '确认驳回';
+    }
+    return;
+  }
   if (!rule || state.ruleCommand !== 'retry' || reason.length < 3) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;

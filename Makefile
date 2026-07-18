@@ -506,6 +506,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-minio-runtime-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-business-dependency-readiness-smoke.js
 	$(NODE) --check deploy/docker/scripts/adp-production-export-readiness-smoke.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js
 	$(NODE) --check deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	$(NODE) deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	mkdir -p /tmp/adp-rm-export-compat-check

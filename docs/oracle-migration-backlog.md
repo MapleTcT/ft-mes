@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-17T14:37:45+00:00`。
-- Repo Commit：`a04671b6efeea02c7cfdd140c0cd20a583163b4d`。
-- 总引用数：`1574`。
+- Generated At：`2026-07-18T03:27:33+00:00`。
+- Repo Commit：`032ca832ced0ad66d0d2bc3a990b5a8cc5eadabe`。
+- 总引用数：`1575`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -21,7 +21,7 @@
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
 | documentation-or-workflow | 187 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
-| java-row-index-noise | 46 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
+| java-row-index-noise | 47 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 574 | PostgreSQL compatibility SQL may mention Oracle as source context. |
@@ -57,12 +57,12 @@
 | backend/modules/com/supcon/supfusion/system-config-dao/1.0.0-SNAPSHOT/META-INF/mysql/systemconfig_1.sql | 12 |
 | docs/backend-module-promotion-guide.md | 12 |
 | backend/modules/com/supcon/supfusion/auth-dao/1.0.0-SNAPSHOT/META-INF/oracle/auth_1.sql | 11 |
+| services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java | 10 |
 | backend/modules/com/supcon/supfusion/notification/admin-service/1.0.0-SNAPSHOT/com/supcon/supfusion/notification/admin/service/impl/NoticeTaskServiceImpl.java | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mariadb/rbac_1.sql | 9 |
 | backend/modules/com/supcon/supfusion/rbac-dao/1.0.0-SNAPSHOT/META-INF/mysql/rbac_1.sql | 9 |
 | deploy/docker/scripts/patch-postgres-runtime.py | 9 |
 | docs/backend-module-dependency-inventory.md | 9 |
-| services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/RulePostgresRepository.java | 9 |
 | backend/modules/com/supcon/supfusion/i18n-dao/1.0.1-SNAPSHOT/com/supcon/supfusion/i18n/dao/mapper/oracle/I18nResourceDao.xml | 8 |
 
 ## 优先 Backlog 样例

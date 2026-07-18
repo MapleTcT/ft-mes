@@ -3213,6 +3213,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
       "state": "tracked",
       "tracked": true
@@ -3586,6 +3592,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/audit-postgres-mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -4905,6 +4929,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-rule-version-lifecycle-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-source-sequence-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5212,6 +5242,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-timing-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-rule-version-lifecycle-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6273,6 +6309,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/VersionComparisonService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/VersionRefs.java",
       "state": "tracked",
       "tracked": true
@@ -6405,6 +6447,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleApprovalView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RulePublicationEnvelope.java",
       "state": "tracked",
       "tracked": true
@@ -6460,6 +6508,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/TopologyVersionView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/VersionChangeView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/VersionComparisonView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6825,6 +6885,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V14__bpi_rule_approval_workflow.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -6958,6 +7024,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/RuleRuntimeReadinessKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/VersionComparisonServiceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7706,16 +7778,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 550
+      "tracked": 554
     },
     "docs": {
-      "tracked": 90
+      "tracked": 91
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 131
+      "tracked": 132
     },
     "package.json": {
       "tracked": 1
@@ -7727,7 +7799,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 167
+      "tracked": 173
     },
     "simulation": {
       "tracked": 4
@@ -7739,8 +7811,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1280,
-    "tracked": 1280,
+    "totalFiles": 1292,
+    "tracked": 1292,
     "untracked": 0
   },
   "untrackedByDirectory": []

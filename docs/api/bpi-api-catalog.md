@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 27 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 31 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +28,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
-- 当前允许 GET overview/line/candidate/batch/point-catalog/topology/rule/simulation 读取，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、topology draft/validate/publish、rule draft/simulate/publish/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/topology/rule/simulation 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -56,14 +56,18 @@
 | 点位准入 | POST | `/bpi/v1/point-catalog/snapshots` | `importPointCatalogSnapshot` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | SERVICE_IMPLEMENTED |
+| 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}/compare` | `compareTopologyVersions` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/drafts` | `createTopologyDraft` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/validate` | `validateTopologyDraft` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | POST | `/bpi/v1/topologies/{topologyId}/publish` | `publishTopologyVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rules` | `listRules` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rules/{ruleId}` | `getRuleVersion` | SERVICE_IMPLEMENTED |
+| 边界规则 | GET | `/bpi/v1/rules/{ruleId}/compare` | `compareRuleVersions` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/drafts` | `createRuleDraft` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/simulate` | `simulateRule` | SERVICE_IMPLEMENTED |
 | 边界规则 | GET | `/bpi/v1/rule-simulations/{simulationId}` | `getRuleSimulation` | SERVICE_IMPLEMENTED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/submit-approval` | `submitRuleApproval` | SERVICE_IMPLEMENTED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/reject-approval` | `rejectRuleApproval` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publication/retry` | `retryRulePublication` | SERVICE_IMPLEMENTED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SIMULATED |
@@ -104,11 +108,18 @@ P1 批次信号的硬准入条件，缺失时 `ready=false` 且拓扑校验返�
 和超过 100,000 个观测值均返回 `422` 并回滚幂等预留。结果写入 `bpi_rule_simulations`，并把规则推进到
 `SIMULATION_PASSED` 或退回 `DRAFT`。
 
-`publishRuleVersion` 只接受当前规则最近一次 `PASSED` 模拟的 simulationId 和 checksum；revision、checksum 或
-作用域不匹配均 fail closed。成功后规则、`RULE_PUBLISHED` 审计和 Kafka outbox 事件在同一事务提交。
+`submitRuleApproval` 只接受当前规则最近一次 `PASSED` 模拟的 simulationId 和 checksum，并把规则、审批申请和
+`RULE_APPROVAL_SUBMITTED` 审计在同一事务推进到 `PENDING_APPROVAL`。`publishRuleVersion` 只允许
+`BPI_ADMIN` 处理仍为 `PENDING` 的申请，批准人必须同时不同于规则创建人和审批提交人；发布前重新核对当前
+点位目录，revision、checksum、作用域、审批申请或模拟证明不匹配均 fail closed。成功后审批决定、规则、
+`RULE_PUBLISHED` 审计和 Kafka outbox 事件在同一事务提交。`rejectRuleApproval` 由不同于提交人的管理员把申请
+标记为 `REJECTED`，规则退回 `DRAFT`，必须重新模拟后才能再次提交。
 `retryRulePublication` 仅允许 `BPI_ADMIN` 把 `FAILED` 事件重新入队；它使用独立、单调递增的发布 revision
-执行并发控制，保留累计尝试/人工重试计数，并写入 `RULE_PUBLICATION_REQUEUED` 审计。生产要求的双人审批
-工作流仍是未完成项。
+执行并发控制，保留累计尝试/人工重试计数，并写入 `RULE_PUBLICATION_REQUEUED` 审计。
+
+`compareTopologyVersions` 和 `compareRuleVersions` 只比较同 tenant、同 code、同 plant/line 作用域的版本；
+规则差异覆盖拓扑引用和 AST，拓扑差异覆盖受控 definition。返回稳定 JSON Pointer、增加/删除/修改类型和
+前后值，最多返回前 500 项并显式标记 `truncated`，不允许跨作用域比较泄露配置。
 
 规则响应同时返回 `publicationStatus` 与 `applicationStatus`。前者只证明 transactional outbox 到 Kafka broker 的
 分发状态；后者由 `bpi.boundary.rule-application.v1` 回执驱动，包含 Flink deployment、观察/接收时间和拒绝错误。

@@ -12,12 +12,12 @@ public class BpiRoutePolicy {
     private static final Pattern GET_ROUTE = Pattern.compile(
             "^/(?:overview|lines/" + ID + "/current-state|candidates(?:/" + ID + ")?|"
                     + "batches(?:/" + ID + "(?:/(?:evidence|timeline))?)?|"
-                    + "topologies(?:/" + ID + ")?|point-catalog/(?:current|snapshots)|"
-                    + "rules(?:/" + ID + ")?|rule-simulations/" + ID + ")$");
+                    + "topologies(?:/" + ID + "(?:/compare)?)?|point-catalog/(?:current|snapshots)|"
+                    + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
                     + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|rules/drafts|"
-                    + "rules/" + ID + "/(?:simulate|publish|publication/retry))$");
+                    + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {
         if (method == HttpMethod.GET) return GET_ROUTE.matcher(path).matches();

@@ -130,6 +130,7 @@ class BpiRulePostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_inbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_outbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("UPDATE bpi.bpi_rule_versions SET latest_simulation_id = NULL WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_rule_approval_requests WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_simulations WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_golden_boundaries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_telemetry_points WHERE tenant_id = ?", tenantId);
@@ -247,12 +248,12 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(count("bpi_api_idempotency")).isEqualTo(1);
 
         byte[] badPublish = objectMapper.writeValueAsBytes(Map.of(
-                "reason", "审批发布规则版本",
+                "reason", "提交规则审批",
                 "simulationId", simulationId,
                 "simulationChecksum", "bad-checksum"));
-        mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
+        mockMvc.perform(post("/bpi/v1/rules/{id}/submit-approval", ruleId)
                         .header("Authorization", "Bearer " + engineerToken)
-                        .header("Idempotency-Key", "bad-publish-" + ruleId)
+                        .header("Idempotency-Key", "bad-submit-" + ruleId)
                         .header("If-Match", "2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(badPublish))
@@ -261,11 +262,59 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(count("bpi_api_idempotency")).isEqualTo(1);
         assertThat(count("bpi_outbox_events")).isZero();
 
-        insertCatalogSnapshot(false, boundaryTime.plusSeconds(2));
+        byte[] publishBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "提交规则审批",
+                "simulationId", simulationId,
+                "simulationChecksum", simulationChecksum));
+        String submitKey = "submit-rule-approval-" + ruleId;
+        mockMvc.perform(post("/bpi/v1/rules/{id}/submit-approval", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", submitKey)
+                        .header("If-Match", "2")
+                        .header("X-Trace-Id", "TRACE-SUBMIT-" + ruleId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(publishBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.approvalStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.approvalSubmittedBy").value("rule-acceptance-user"));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/submit-approval", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", submitKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(publishBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.revision").value(3));
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision FROM bpi.bpi_rule_versions
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, ruleId)).isEqualTo("PENDING_APPROVAL|3");
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || submitted_by
+                  FROM bpi.bpi_rule_approval_requests
+                 WHERE tenant_id = ? AND rule_version_id = ?
+                """, String.class, tenantId, ruleId)).isEqualTo("PENDING|1|rule-acceptance-user");
+
         mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
                         .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "engineer-publish-denied-" + ruleId)
+                        .header("If-Match", "3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(publishBody))
+                .andExpect(status().isForbidden());
+
+        String adminToken = token(
+                "rule-approval-admin", tenantId, List.of("BPI_ADMIN"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+
+        insertCatalogSnapshot(false, boundaryTime.plusSeconds(2));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
                         .header("Idempotency-Key", "catalog-drift-publish-" + ruleId)
-                        .header("If-Match", "2")
+                        .header("If-Match", "3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(Map.of(
                                 "reason", "目录漂移时禁止发布",
@@ -277,42 +326,45 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(jdbc.queryForObject("""
                 SELECT state || '|' || revision FROM bpi.bpi_rule_versions
                  WHERE tenant_id = ? AND id = ?
-                """, String.class, tenantId, ruleId)).isEqualTo("SIMULATION_PASSED|2");
+                """, String.class, tenantId, ruleId)).isEqualTo("PENDING_APPROVAL|3");
         assertThat(count("bpi_outbox_events")).isZero();
-        assertThat(count("bpi_api_idempotency")).isEqualTo(1);
+        assertThat(count("bpi_api_idempotency")).isEqualTo(2);
         insertCatalogSnapshot(true, boundaryTime.plusSeconds(3));
 
-        byte[] publishBody = objectMapper.writeValueAsBytes(Map.of(
-                "reason", "审批发布规则版本",
-                "simulationId", simulationId,
-                "simulationChecksum", simulationChecksum));
         String publishKey = "publish-rule-" + ruleId;
         mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
-                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .header("Idempotency-Key", publishKey)
-                        .header("If-Match", "2")
+                        .header("If-Match", "3")
                         .header("X-Trace-Id", "TRACE-PUBLISH-" + ruleId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publishBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state").value("PUBLISHED"))
-                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.revision").value(4))
+                .andExpect(jsonPath("$.data.approvalStatus").value("APPROVED"))
+                .andExpect(jsonPath("$.data.approvalDecidedBy").value("rule-approval-admin"))
                 .andExpect(jsonPath("$.data.publicationStatus").value("PENDING"))
                 .andExpect(jsonPath("$.data.publicationAttemptCount").value(0));
         mockMvc.perform(post("/bpi/v1/rules/{id}/publish", ruleId)
-                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Authorization", "Bearer " + adminToken)
                         .header("Idempotency-Key", publishKey)
-                        .header("If-Match", "2")
+                        .header("If-Match", "3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(publishBody))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Idempotent-Replay", "true"))
-                .andExpect(jsonPath("$.data.revision").value(3));
+                .andExpect(jsonPath("$.data.revision").value(4));
 
         assertThat(jdbc.queryForObject("""
                 SELECT state || '|' || revision FROM bpi.bpi_rule_versions
                  WHERE tenant_id = ? AND id = ?
-                """, String.class, tenantId, ruleId)).isEqualTo("PUBLISHED|3");
+                """, String.class, tenantId, ruleId)).isEqualTo("PUBLISHED|4");
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || decided_by
+                  FROM bpi.bpi_rule_approval_requests
+                 WHERE tenant_id = ? AND rule_version_id = ?
+                """, String.class, tenantId, ruleId)).isEqualTo("APPROVED|2|rule-approval-admin");
         assertThat(count("bpi_outbox_events")).isOne();
         Map<String, Object> outbox = jdbc.queryForMap("""
                 SELECT status, attempt_count, topic, partition_key, payload
@@ -345,8 +397,11 @@ class BpiRulePostgresAcceptanceTest {
                  WHERE tenant_id = ? AND object_id = ?
                  ORDER BY after_revision
                 """, String.class, tenantId, ruleId))
-                .containsExactly("RULE_SIMULATED|1|2", "RULE_PUBLISHED|2|3");
-        assertThat(count("bpi_api_idempotency")).isEqualTo(2);
+                .containsExactly(
+                        "RULE_SIMULATED|1|2",
+                        "RULE_APPROVAL_SUBMITTED|2|3",
+                        "RULE_PUBLISHED|3|4");
+        assertThat(count("bpi_api_idempotency")).isEqualTo(3);
         assertThat(count("bpi_outbox_events")).isOne();
 
         String wrongScopeToken = token(
@@ -354,6 +409,140 @@ class BpiRulePostgresAcceptanceTest {
         mockMvc.perform(get("/bpi/v1/rules/{id}", ruleId)
                         .header("Authorization", "Bearer " + wrongScopeToken))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void ruleAndTopologyComparisonUseScopedControlledContent() throws Exception {
+        UUID topologyTargetId = UUID.randomUUID();
+        UUID ruleTargetId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_topology_versions
+                    (id, tenant_id, topology_code, version, state, checksum, definition,
+                     plant_id, line_id, revision, created_by, updated_by)
+                VALUES (?, ?, 'TOPO-S07', '4', 'DRAFT', ?, CAST(? AS jsonb),
+                        'PLANT-01', 'LINE-S07-01', 1, 'comparison', 'comparison')
+                """, topologyTargetId, tenantId, "u".repeat(64),
+                objectMapper.writeValueAsString(Map.of(
+                        "localityGroup", "LOCALITY-S07-EVAP",
+                        "description", "comparison target",
+                        "bindings", List.of())));
+        jdbc.update("""
+                INSERT INTO bpi.bpi_rule_versions
+                    (id, tenant_id, rule_code, version, topology_version_id, state, checksum, definition,
+                     revision, plant_id, line_id, created_by, updated_by)
+                VALUES (?, ?, 'RULE-S07-START', '1.3.0', ?, 'DRAFT', ?, CAST(? AS jsonb),
+                        1, 'PLANT-01', 'LINE-S07-01', 'comparison', 'comparison')
+                """, ruleTargetId, tenantId, topologyId, "s".repeat(64), ruleDefinition(15));
+
+        String viewerToken = token(
+                tenantId, List.of("BPI_VIEWER"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        mockMvc.perform(get("/bpi/v1/rules/{id}/compare", ruleTargetId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("against", ruleId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.objectType").value("RULE_VERSION"))
+                .andExpect(jsonPath("$.data.base.version").value("1.2.0"))
+                .andExpect(jsonPath("$.data.target.version").value("1.3.0"))
+                .andExpect(jsonPath("$.data.identical").value(false))
+                .andExpect(jsonPath("$.data.changeCount").value(2))
+                .andExpect(jsonPath("$.data.changes[0].path").value("/ast/conditions/0/holdSeconds"));
+        mockMvc.perform(get("/bpi/v1/topologies/{id}/compare", topologyTargetId)
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("against", topologyId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.objectType").value("TOPOLOGY_VERSION"))
+                .andExpect(jsonPath("$.data.changeCount").value(org.hamcrest.Matchers.greaterThan(0)));
+    }
+
+    @Test
+    void independentAdministratorCanRejectApprovalBackToDraftWithoutPublication() throws Exception {
+        String engineerToken = token(
+                tenantId, List.of("BPI_ENGINEER"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        byte[] simulationBody = objectMapper.writeValueAsBytes(Map.of(
+                "lineId", "LINE-S07-01",
+                "from", boundaryTime.minusSeconds(1).toString(),
+                "to", boundaryTime.plusSeconds(1).toString(),
+                "topologyVersion", "TOPO-S07@3",
+                "calibrationVersion", "CAL-1",
+                "goldenSetId", "GOLDEN-S07-2026Q2"));
+        MvcResult simulated = mockMvc.perform(post("/bpi/v1/rules/{id}/simulate", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "reject-flow-simulate-" + ruleId)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(simulationBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PASSED"))
+                .andReturn();
+        JsonNode simulation = objectMapper.readTree(simulated.getResponse().getContentAsString()).path("data");
+        UUID simulationId = UUID.fromString(simulation.path("id").asText());
+        String simulationChecksum = simulation.path("checksum").asText();
+        byte[] approvalBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "提交后验证管理员驳回",
+                "simulationId", simulationId,
+                "simulationChecksum", simulationChecksum));
+
+        mockMvc.perform(post("/bpi/v1/rules/{id}/submit-approval", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "reject-flow-submit-" + ruleId)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(approvalBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.approvalStatus").value("PENDING"));
+
+        String adminToken = token(
+                "rule-rejection-admin", tenantId, List.of("BPI_ADMIN"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+        String rejectionKey = "reject-flow-decision-" + ruleId;
+        byte[] rejectionBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "模拟证据不足，退回修订",
+                "comment", "验收确认驳回不会产生规则发布事件"));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/reject-approval", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", rejectionKey)
+                        .header("If-Match", "3")
+                        .header("X-Trace-Id", "TRACE-REJECT-" + ruleId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rejectionBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("DRAFT"))
+                .andExpect(jsonPath("$.data.revision").value(4))
+                .andExpect(jsonPath("$.data.approvalStatus").value("REJECTED"))
+                .andExpect(jsonPath("$.data.approvalDecidedBy").value("rule-rejection-admin"));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/reject-approval", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", rejectionKey)
+                        .header("If-Match", "3")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rejectionBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.state").value("DRAFT"));
+
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision FROM bpi.bpi_rule_versions
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, ruleId)).isEqualTo("DRAFT|4");
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || decided_by || '|' || decision_reason
+                  FROM bpi.bpi_rule_approval_requests
+                 WHERE tenant_id = ? AND rule_version_id = ?
+                """, String.class, tenantId, ruleId))
+                .isEqualTo("REJECTED|2|rule-rejection-admin|模拟证据不足，退回修订");
+        assertThat(jdbc.queryForList("""
+                SELECT action || '|' || before_revision || '|' || after_revision
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id = ?
+                 ORDER BY after_revision
+                """, String.class, tenantId, ruleId))
+                .containsExactly(
+                        "RULE_SIMULATED|1|2",
+                        "RULE_APPROVAL_SUBMITTED|2|3",
+                        "RULE_APPROVAL_REJECTED|3|4");
+        assertThat(count("bpi_api_idempotency")).isEqualTo(3);
+        assertThat(count("bpi_outbox_events")).isZero();
     }
 
     @Test
@@ -842,11 +1031,20 @@ class BpiRulePostgresAcceptanceTest {
     }
 
     private String token(String tenant, List<String> roles, List<String> plants, List<String> lines) throws Exception {
+        return token("rule-acceptance-user", tenant, roles, plants, lines);
+    }
+
+    private String token(
+            String subject,
+            String tenant,
+            List<String> roles,
+            List<String> plants,
+            List<String> lines) throws Exception {
         Instant now = Instant.now();
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer("ft-mes-adapter")
                 .audience("bpi-service")
-                .subject("rule-acceptance-user")
+                .subject(subject)
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .claim("tenant_id", tenant)

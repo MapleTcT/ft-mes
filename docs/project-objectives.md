@@ -83,6 +83,16 @@ Flyway V13 expand-only 迁移，并从 V12 savepoint 有状态恢复到 Flink jo
 真实规则运行时回执、7-14 天影子运行、broker/应用镜像回退和 QCS/WMS 写回尚未完成，因此
 G-021 保持 `PARTIAL`。
 
+2026-07-18 目标环境已扩展到 Flyway V14，并以 marker
+`ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
+规则历史回放、精确 simulation 证明提交、同 actor `422` 拒绝、独立管理员批准发布和独立管理员驳回。
+真实 ADP 页面、Java 8 适配器、Java 17 服务和 PostgreSQL 15.18 均已复验：两条 simulation 为
+`PASSED`，批准分支为 `PUBLISHED/r4 + APPROVED/r2 + 1 outbox`，驳回分支为
+`DRAFT/r4 + REJECTED/r2 + 0 publication outbox`，6 条审计和 6 条幂等记录准确；非预期浏览器错误为 0，
+marker 定向清理后残留为 0。版本比较与业务审批控制面因此从待办转为已闭合基线；G-021 仍保持
+`PARTIAL`，下一治理缺口是受控退役/回滚、typed inactive 回执、broker/应用镜像回退和现场 READY 数据源。
+证据见 [BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -263,7 +273,7 @@ G-021 保持 `PARTIAL`。
 ### 主线 A：BPI Phase 0/1
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
-2. 保持已通过的目标环境 Flyway V13、V12 savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、独立发布、规则绑定、PostgreSQL revision 和重启读取作为发布回归；继续版本比较、审批和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
+2. 保持已通过的目标环境 Flyway V14、V12 savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、PostgreSQL revision 和重启读取作为发布回归；继续受控退役、typed inactive 和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
 3. 完成 broker 故障、应用镜像回退和 BPI 整体回滚演练；当前目标环境已完成 V13 expand-only 升级、savepoint 恢复、带负载 TaskManager 重启恢复和单 marker 清理恢复。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。
 5. MES 上下文真实链和 IoT source 分段链均已通过；点位准入变为 READY 后，用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链，再连续运行 7-14 天影子批次。

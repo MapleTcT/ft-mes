@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18T02:33:00Z",
+  "repoCommit": "032ca832ced0ad66d0d2bc3a990b5a8cc5eadabe+worktree",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_TARGET",
+  "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiRoute": "http://10.11.100.17:18080/bpi/#/rules",
+    "serviceBaseUrl": "http://10.11.100.17:19091",
+    "databaseName": "ft_mes_bpi",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 14,
+    "serviceImage": "ft-mes-bpi-service:20260718-v14",
+    "adapterImage": "ft-mes-bpi-adapter:20260718-v14"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "summary": {
+    "testedFeatures": 6,
+    "pass": 6,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0
+  },
+  "browser": {
+    "loginStatus": 200,
+    "ticketKind": "UUID",
+    "networkResponses": 40,
+    "networkStatusCounts": {
+      "200": 36,
+      "202": 2,
+      "422": 2
+    },
+    "expectedConsoleErrors": 2,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "expected422Classification": "The two resource errors are the deliberate same-actor publish and reject requests used to prove separation of duties."
+  },
+  "identifiers": {
+    "topologyTargetId": "b76983eb-2d8b-e74d-f50b-398df1e22923",
+    "publishRuleId": "b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa",
+    "publishSimulationId": "18696dcb-1ff2-4caf-ae5f-984872e65047",
+    "rejectRuleId": "c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb",
+    "rejectSimulationId": "acfe3600-ae72-44d6-8363-7d9c8a96c3e7",
+    "independentDecisionActor": "ADP_E2E_20260718_023214_BPI_LIFECYCLE_APPROVER"
+  },
+  "items": [
+    {
+      "module": "BPI topology versioning",
+      "route": "/bpi/#/rules",
+      "operation": "Compare two published topology versions in the real topology detail drawer",
+      "api": "/bpi-api/topologies/b76983eb-2d8b-e74d-f50b-398df1e22923/compare",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RuleController.compareTopologyVersions -> RuleService.compareTopologyVersions -> VersionComparisonService",
+      "tables": [
+        "bpi.bpi_topology_versions"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT topology_code,version,state,revision,definition FROM bpi.bpi_topology_versions WHERE topology_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "The real drawer displayed a deterministic 11-item diff from 1.0.0 to 2.0.0, including /localityGroup and node/edge additions. Comparison is read-only; both source versions were queried directly before marker cleanup.",
+      "issues": []
+    },
+    {
+      "module": "BPI rule versioning",
+      "route": "/bpi/#/rules",
+      "operation": "Compare published and draft rule versions in the real rule detail drawer",
+      "api": "/bpi-api/rules/b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa/compare",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "RuleController.compareRuleVersions -> RuleService.compareRuleVersions -> VersionComparisonService",
+      "tables": [
+        "bpi.bpi_rule_versions"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT rule_code,version,state,revision,definition FROM bpi.bpi_rule_versions WHERE rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "The real drawer displayed the deterministic AST change at /conditions/0/threshold together with the topology reference change. Cross-code and cross-scope comparisons remain fail closed.",
+      "issues": []
+    },
+    {
+      "module": "BPI rule simulation",
+      "route": "/bpi/#/rules",
+      "operation": "Run bounded historical replay for the publish and reject candidates",
+      "api": "/bpi-api/rules/{ruleId}/simulate",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.simulateRule -> RuleService.simulate -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_simulations",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.rule_code,s.state,s.metrics,s.checksum FROM bpi.bpi_rule_simulations s JOIN bpi.bpi_rule_versions r ON r.id=s.rule_version_id WHERE r.rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "Both POST requests returned 202. Both persisted simulations were PASSED with matched=1, missed=0, falsePositive=0 and meanBoundaryErrorSeconds=0; each rule advanced from DRAFT/r1 to SIMULATION_PASSED/r2.",
+      "issues": []
+    },
+    {
+      "module": "BPI rule approval submission",
+      "route": "/bpi/#/rules",
+      "operation": "Submit the exact latest passed simulation for approval from the real rule drawer",
+      "api": "/bpi-api/rules/{ruleId}/submit-approval",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.submitRuleApproval -> RuleService.submitApproval -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.rule_code,r.state,r.revision,a.state,a.simulation_id,a.submitted_by FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id WHERE r.rule_code LIKE 'ADP_E2E_20260718_023214_BPI_LIFECYCLE%';",
+      "status": "PASS",
+      "evidence": "Both submissions returned 200 and atomically persisted PENDING approval requests tied to the exact simulation ID/checksum; both rules advanced to PENDING_APPROVAL/r3. Reusing the submitter for publish and reject returned deliberate HTTP 422 responses.",
+      "issues": []
+    },
+    {
+      "module": "BPI independent approval",
+      "route": "/bpi/#/rules plus controlled BPI_ADMIN decision API",
+      "operation": "Approve and publish with an administrator different from both creator and submitter, then reload the real page",
+      "api": "/bpi/v1/rules/b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa/publish",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.publishRuleVersion -> RuleService.publish -> RulePostgresRepository/RulePublicationOutboxRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.state,r.revision,a.state,a.revision,a.decided_by,o.event_type,o.topic,o.status,o.attempt_count FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id LEFT JOIN bpi.bpi_outbox_events o ON o.aggregate_id=r.id WHERE r.id='b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa';",
+      "status": "PASS",
+      "evidence": "The controlled independent BPI_ADMIN request returned 200. PostgreSQL showed rule PUBLISHED/r4, approval APPROVED/r2 and one BOUNDARY_RULE_PUBLISHED outbox row. The page reload displayed the published state. Outbox remained PENDING with attempts=0 because the Phase 1 target intentionally keeps the dispatcher disabled during this control-plane acceptance.",
+      "issues": []
+    },
+    {
+      "module": "BPI independent rejection",
+      "route": "/bpi/#/rules plus controlled BPI_ADMIN decision API",
+      "operation": "Reject a pending rule with a different administrator and verify return to draft on the real page",
+      "api": "/bpi/v1/rules/c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb/reject-approval",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "RuleController.rejectRuleApproval -> RuleService.rejectApproval -> RulePostgresRepository",
+      "tables": [
+        "bpi.bpi_rule_approval_requests",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260718_023214_BPI_LIFECYCLE",
+      "verificationSql": "SELECT r.state,r.revision,a.state,a.revision,a.decided_by,a.decision_reason FROM bpi.bpi_rule_versions r JOIN bpi.bpi_rule_approval_requests a ON a.rule_version_id=r.id WHERE r.id='c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb';",
+      "status": "PASS",
+      "evidence": "The controlled independent BPI_ADMIN request returned 200. PostgreSQL showed rule DRAFT/r4 and approval REJECTED/r2 with the decision actor/reason; no publication outbox was created. The page reload displayed the rejected rule back in draft.",
+      "issues": []
+    }
+  ],
+  "databaseEvidence": {
+    "rules": {
+      "published": "PUBLISHED/r4",
+      "rejected": "DRAFT/r4"
+    },
+    "approvals": {
+      "approved": "APPROVED/r2",
+      "rejected": "REJECTED/r2"
+    },
+    "simulations": 2,
+    "auditActions": [
+      "RULE_SIMULATED",
+      "RULE_APPROVAL_SUBMITTED",
+      "RULE_PUBLISHED",
+      "RULE_SIMULATED",
+      "RULE_APPROVAL_SUBMITTED",
+      "RULE_APPROVAL_REJECTED"
+    ],
+    "completedIdempotencyRows": 6,
+    "publicationOutboxRows": 1,
+    "publicationOutboxStatus": "PENDING",
+    "publicationOutboxAttempts": 0
+  },
+  "cleanup": {
+    "script": "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
+    "markersCleaned": [
+      "ADP_E2E_20260718_022559_BPI_LIFECYCLE",
+      "ADP_E2E_20260718_022814_BPI_LIFECYCLE",
+      "ADP_E2E_20260718_022923_BPI_LIFECYCLE",
+      "ADP_E2E_20260718_023214_BPI_LIFECYCLE"
+    ],
+    "remaining": {
+      "topologies": 0,
+      "rules": 0,
+      "idempotency": 0,
+      "telemetryEvents": 0,
+      "catalogSnapshots": 0,
+      "goldenBoundaries": 0
+    },
+    "featureFlagPolicy": "The shared bpi.rule-management flag was preserved; only the marker actor was normalized to bpi-test-environment."
+  },
+  "rawEvidence": [
+    {
+      "path": "/tmp/ADP_E2E_20260718_023214_BPI_LIFECYCLE-browser.json",
+      "sha256": "3a54b49358c44653a8b7d145c516440956ca32dc2ed6b3d7ebfc496566b08d71"
+    },
+    {
+      "path": "/tmp/ADP_E2E_20260718_023214_BPI_LIFECYCLE-postgres.json",
+      "sha256": "ee3cb50c67689a3033d0758d933bba198e5fbcf9a49ad184c7e5b317c898ced9"
+    },
+    {
+      "path": "/tmp/ADP_E2E_20260718_023214_BPI_LIFECYCLE-published.png",
+      "sha256": "fb895d6c66450316b6aaf5ce0bc0b0da3d74bc5b158471510b162f5220129bab"
+    },
+    {
+      "path": "/tmp/ADP_E2E_20260718_023214_BPI_LIFECYCLE-rejected.png",
+      "sha256": "8ecb47e20e3d1eef952b7cdf43b93cb666282eafdee704196dd44d27f6ce3d7a"
+    }
+  ],
+  "boundaries": [
+    "This acceptance proves target control-plane version comparison and rule approval/rejection persistence only.",
+    "Phase 1 remains shadow-only and does not write WOM, QCS or WMS production state.",
+    "Rule retirement, typed inactive delivery, broker failure, application image rollback and product-level rollback remain separate acceptance work."
+  ]
+}

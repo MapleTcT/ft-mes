@@ -7,6 +7,7 @@ import com.mapletct.ftmes.bpi.application.RuleService;
 import com.mapletct.ftmes.bpi.domain.RuleSimulationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
 import com.mapletct.ftmes.bpi.domain.TopologyVersionView;
+import com.mapletct.ftmes.bpi.domain.VersionComparisonView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,16 @@ public class RuleController {
             @PathVariable UUID topologyId,
             HttpServletRequest request) {
         return ApiResponse.of(ruleService.getTopology(actorContextFactory.from(jwt), topologyId), request);
+    }
+
+    @GetMapping("/bpi/v1/topologies/{topologyId}/compare")
+    public ApiResponse<VersionComparisonView> compareTopologies(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID topologyId,
+            @RequestParam UUID against,
+            HttpServletRequest request) {
+        return ApiResponse.of(
+                ruleService.compareTopologies(actorContextFactory.from(jwt), topologyId, against), request);
     }
 
     @PostMapping("/bpi/v1/topologies/drafts")
@@ -111,6 +122,16 @@ public class RuleController {
         return ApiResponse.of(ruleService.getRule(actorContextFactory.from(jwt), ruleId), request);
     }
 
+    @GetMapping("/bpi/v1/rules/{ruleId}/compare")
+    public ApiResponse<VersionComparisonView> compareRules(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID ruleId,
+            @RequestParam UUID against,
+            HttpServletRequest request) {
+        return ApiResponse.of(
+                ruleService.compareRules(actorContextFactory.from(jwt), ruleId, against), request);
+    }
+
     @PostMapping("/bpi/v1/rules/drafts")
     @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
     public ResponseEntity<ApiResponse<RuleVersionView>> createRuleDraft(
@@ -151,7 +172,7 @@ public class RuleController {
     }
 
     @PostMapping("/bpi/v1/rules/{ruleId}/publish")
-    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
     public ResponseEntity<ApiResponse<RuleVersionView>> publish(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID ruleId,
@@ -165,6 +186,34 @@ public class RuleController {
         ResponseEntity.BodyBuilder response = ResponseEntity.ok();
         if (result.replayed()) response.header("Idempotent-Replay", "true");
         return response.body(ApiResponse.of(result.data(), request));
+    }
+
+    @PostMapping("/bpi/v1/rules/{ruleId}/submit-approval")
+    @PreAuthorize("hasAnyRole('BPI_ENGINEER', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<RuleVersionView>> submitApproval(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID ruleId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody RulePublishCommand command,
+            HttpServletRequest request) {
+        CommandResult<RuleVersionView> result = ruleService.submitApproval(
+                actorContextFactory.from(jwt), ruleId, idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
+    }
+
+    @PostMapping("/bpi/v1/rules/{ruleId}/reject-approval")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<RuleVersionView>> rejectApproval(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID ruleId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        CommandResult<RuleVersionView> result = ruleService.rejectApproval(
+                actorContextFactory.from(jwt), ruleId, idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
     }
 
     @PostMapping("/bpi/v1/rules/{ruleId}/publication/retry")

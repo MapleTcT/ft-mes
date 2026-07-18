@@ -20,13 +20,17 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/resume"));
         assertTrue(policy.allows(HttpMethod.GET, "/topologies"));
         assertTrue(policy.allows(HttpMethod.GET, "/topologies/TOPO-S07-3"));
+        assertTrue(policy.allows(HttpMethod.GET, "/topologies/TOPO-S07-3/compare"));
         assertTrue(policy.allows(HttpMethod.GET, "/point-catalog/current"));
         assertTrue(policy.allows(HttpMethod.GET, "/point-catalog/snapshots"));
         assertTrue(policy.allows(HttpMethod.POST, "/point-catalog/snapshots"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START"));
+        assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare"));
         assertTrue(policy.allows(HttpMethod.GET, "/rule-simulations/SIM-S07-001"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/simulate"));
+        assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/submit-approval"));
+        assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/reject-approval"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publish"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publication/retry"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/drafts"));
@@ -36,6 +40,7 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
         assertFalse(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/update"));
+        assertFalse(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare/extra"));
         assertFalse(policy.allows(HttpMethod.POST, "/point-catalog/current"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));

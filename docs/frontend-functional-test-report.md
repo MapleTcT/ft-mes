@@ -1,5 +1,25 @@
 # 前端功能测试报告
 
+## 2026-07-18 BPI 版本比较与规则审批生命周期
+
+本轮在 `http://10.11.100.17:18080/bpi/#/rules` 使用真实 ADP 登录、正式 Java 8
+适配器、Java 17 BPI 服务和 PostgreSQL 15.18/Flyway V14 验收。唯一成功 marker 为
+`ADP_E2E_20260718_023214_BPI_LIFECYCLE`，机器记录见
+`metadata/bpi-rule-version-lifecycle-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 拓扑版本 | `/bpi/#/rules` 拓扑详情 | 对比同 code/同 scope 的 `1.0.0 -> 2.0.0` | `GET /bpi-api/topologies/{id}/compare` | 显示稳定的 11 项 JSON Pointer 差异，包含 `/localityGroup`、节点和路径变化 | 只读比较两个 PostgreSQL 版本，无写操作 | `bpi_topology_versions` | PASS | 无 |
+| BPI 规则版本 | `/bpi/#/rules` 规则详情 | 对比已发布规则和候选规则 | `GET /bpi-api/rules/{id}/compare` | 显示拓扑引用与 `/conditions/0/threshold` 差异 | 同 code/tenant/plant/line 约束通过，跨作用域保持拒绝 | `bpi_rule_versions` | PASS | 无 |
+| BPI 规则回放 | 同上 | 对发布候选和驳回候选分别执行历史回放 | `POST /bpi-api/rules/{id}/simulate` | 两次均 `202`，页面指标均为 matched=1、missed=0、falsePositive=0、平均偏差 0 | 两条 simulation `PASSED`，规则均 `DRAFT/r1 -> SIMULATION_PASSED/r2` | `bpi_rule_simulations`、规则/幂等/审计表 | PASS | 无 |
+| BPI 提交审批 | 同上 | 使用最新通过的 simulation 提交审批 | `POST /bpi-api/rules/{id}/submit-approval` | 两次均 `200`，页面进入 `PENDING_APPROVAL` | 两条申请固定 simulation ID/checksum，规则均推进到 r3 | `bpi_rule_approval_requests`、规则/幂等/审计表 | PASS | 无 |
+| BPI 职责分离与批准 | 同上；独立管理员决策后刷新页面 | 同一提交人发布被拒绝，再由不同管理员批准 | `POST .../publish` | 同一提交人得到预期 `422`；独立管理员 `200`；刷新页面显示 `PUBLISHED` | 规则 `PUBLISHED/r4`、审批 `APPROVED/r2`，唯一 publication outbox 已落库 | 审批、规则、outbox、幂等、审计表 | PASS | outbox 保持 `PENDING/attempts=0`，符合本轮 shadow-only 且 dispatcher 关闭的边界 |
+| BPI 职责分离与驳回 | 同上；独立管理员决策后刷新页面 | 同一提交人驳回被拒绝，再由不同管理员驳回 | `POST .../reject-approval` | 同一提交人得到预期 `422`；独立管理员 `200`；刷新页面显示 `DRAFT` | 规则 `DRAFT/r4`、审批 `REJECTED/r2`，无 publication outbox | 审批、规则、幂等、审计表 | PASS | 无 |
+
+浏览器共记录 `40` 个 BPI 响应：`36 x 200`、`2 x 202`、`2 x 422`。两条
+console resource error 正好对应职责分离反证，非预期 console/page/request error 均为 0。
+验收后成功 marker 和 3 个诊断 marker 已定向清理，相关残留计数均为 0。
+
 ## 2026-07-15 BPI 控制面与运行时状态分离
 
 本轮使用本地确定性 BPI 模拟器和真实 Chromium 页面验收，共 `9/9 PASS`，

@@ -6,6 +6,7 @@ import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
 import com.mapletct.ftmes.bpi.application.error.BpiNotFoundException;
 import com.mapletct.ftmes.bpi.domain.GoldenBoundary;
+import com.mapletct.ftmes.bpi.domain.RuleApprovalView;
 import com.mapletct.ftmes.bpi.domain.RuleSimulationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
 import com.mapletct.ftmes.bpi.domain.TelemetryObservation;
@@ -31,6 +32,13 @@ public class RulePostgresRepository {
             SELECT r.id, r.rule_code, r.version, r.state, r.revision, r.plant_id, r.line_id,
                    r.checksum, r.definition::text AS definition, r.latest_simulation_id,
                    t.topology_code || '@' || t.version AS topology_version,
+                   a.id AS approval_id,
+                   COALESCE(a.state, 'NOT_REQUESTED') AS approval_status,
+                   COALESCE(a.revision, 0) AS approval_revision,
+                   a.submitted_by AS approval_submitted_by,
+                   a.submitted_at AS approval_submitted_at,
+                   a.decided_by AS approval_decided_by,
+                   a.decided_at AS approval_decided_at,
                    COALESCE(o.status, CASE WHEN r.state = 'PUBLISHED'
                        THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS publication_status,
                    COALESCE(o.revision, 0) AS publication_revision,
@@ -59,6 +67,16 @@ public class RulePostgresRepository {
               FROM bpi.bpi_rule_versions r
               JOIN bpi.bpi_topology_versions t
                 ON t.tenant_id = r.tenant_id AND t.id = r.topology_version_id
+              LEFT JOIN LATERAL (
+                  SELECT approval.id, approval.state, approval.revision,
+                         approval.submitted_by, approval.submitted_at,
+                         approval.decided_by, approval.decided_at
+                    FROM bpi.bpi_rule_approval_requests approval
+                   WHERE approval.tenant_id = r.tenant_id
+                     AND approval.rule_version_id = r.id
+                   ORDER BY approval.submitted_at DESC, approval.id
+                   LIMIT 1
+              ) a ON true
               LEFT JOIN bpi.bpi_outbox_events o
                 ON o.tenant_id = r.tenant_id
                AND o.aggregate_type = 'RULE_VERSION'
@@ -332,6 +350,16 @@ public class RulePostgresRepository {
         return findRule(actor, ruleId, true);
     }
 
+    public String findRuleCreator(String tenantId, UUID ruleId) {
+        return jdbc.queryForObject("""
+                SELECT created_by
+                  FROM bpi.bpi_rule_versions
+                 WHERE tenant_id = :tenantId AND id = :id
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", tenantId)
+                .addValue("id", ruleId), String.class);
+    }
+
     public void insertRuleDraft(
             ActorContext actor,
             UUID id,
@@ -501,20 +529,143 @@ public class RulePostgresRepository {
         }
     }
 
-    public void publishRule(
-            String tenantId, UUID ruleId, long expectedRevision, UUID simulationId, String actorId) {
+    public RuleApprovalView submitRuleApproval(
+            ActorContext actor,
+            RuleVersionView rule,
+            RuleSimulationView simulation,
+            String reason) {
+        UUID approvalId = UUID.randomUUID();
         int updated = jdbc.update("""
                 UPDATE bpi.bpi_rule_versions
-                   SET state = 'PUBLISHED', revision = revision + 1,
+                   SET state = 'PENDING_APPROVAL', revision = revision + 1,
                        updated_by = :actorId, updated_at = now()
                  WHERE tenant_id = :tenantId AND id = :ruleId
                    AND revision = :expectedRevision
                    AND state = 'SIMULATION_PASSED'
                    AND latest_simulation_id = :simulationId
-                """, new MapSqlParameterSource().addValue("tenantId", tenantId).addValue("ruleId", ruleId)
-                .addValue("expectedRevision", expectedRevision).addValue("simulationId", simulationId)
-                .addValue("actorId", actorId));
-        if (updated != 1) throw new BpiConflictException("Rule is not ready for publication.", expectedRevision);
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("ruleId", rule.id())
+                .addValue("expectedRevision", rule.revision())
+                .addValue("simulationId", simulation.id()));
+        if (updated != 1) {
+            throw new BpiConflictException("Rule is not ready to submit for approval.", rule.revision());
+        }
+        jdbc.update("""
+                INSERT INTO bpi.bpi_rule_approval_requests
+                    (id, tenant_id, rule_version_id, simulation_id, simulation_checksum,
+                     state, revision, submitted_by, submit_reason)
+                VALUES (:id, :tenantId, :ruleId, :simulationId, :simulationChecksum,
+                        'PENDING', 1, :actorId, :reason)
+                """, new MapSqlParameterSource()
+                .addValue("id", approvalId)
+                .addValue("tenantId", actor.tenantId())
+                .addValue("ruleId", rule.id())
+                .addValue("simulationId", simulation.id())
+                .addValue("simulationChecksum", simulation.checksum())
+                .addValue("actorId", actor.userId())
+                .addValue("reason", reason));
+        return lockPendingApproval(actor, rule.id());
+    }
+
+    public RuleApprovalView lockPendingApproval(ActorContext actor, UUID ruleId) {
+        try {
+            RuleApprovalView approval = jdbc.queryForObject("""
+                    SELECT id, rule_version_id, simulation_id, simulation_checksum, state, revision,
+                           submitted_by, submitted_at, submit_reason,
+                           decided_by, decided_at, decision_reason
+                      FROM bpi.bpi_rule_approval_requests
+                     WHERE tenant_id = :tenantId
+                       AND rule_version_id = :ruleId
+                       AND state = 'PENDING'
+                     FOR UPDATE
+                    """, new MapSqlParameterSource()
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("ruleId", ruleId),
+                    (rs, rowNum) -> mapApproval(rs));
+            if (approval == null) throw new BpiNotFoundException("Pending rule approval not found.");
+            return approval;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Pending rule approval not found.");
+        }
+    }
+
+    public void approveRule(
+            ActorContext actor,
+            RuleVersionView rule,
+            RuleApprovalView approval,
+            String reason) {
+        int approvalUpdated = jdbc.update("""
+                UPDATE bpi.bpi_rule_approval_requests
+                   SET state = 'APPROVED', revision = revision + 1,
+                       decided_by = :actorId, decided_at = now(),
+                       decision_reason = :reason, updated_at = now()
+                 WHERE tenant_id = :tenantId AND id = :approvalId
+                   AND revision = :approvalRevision AND state = 'PENDING'
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("reason", reason)
+                .addValue("tenantId", actor.tenantId())
+                .addValue("approvalId", approval.id())
+                .addValue("approvalRevision", approval.revision()));
+        if (approvalUpdated != 1) {
+            throw new BpiConflictException("Rule approval was already decided.", approval.revision());
+        }
+        int ruleUpdated = jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'PUBLISHED', revision = revision + 1,
+                       updated_by = :actorId, updated_at = now()
+                 WHERE tenant_id = :tenantId AND id = :ruleId
+                   AND revision = :expectedRevision
+                   AND state = 'PENDING_APPROVAL'
+                   AND latest_simulation_id = :simulationId
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("ruleId", rule.id())
+                .addValue("expectedRevision", rule.revision())
+                .addValue("simulationId", approval.simulationId()));
+        if (ruleUpdated != 1) {
+            throw new BpiConflictException("Rule is not ready for approval.", rule.revision());
+        }
+    }
+
+    public void rejectRuleApproval(
+            ActorContext actor,
+            RuleVersionView rule,
+            RuleApprovalView approval,
+            String reason) {
+        int approvalUpdated = jdbc.update("""
+                UPDATE bpi.bpi_rule_approval_requests
+                   SET state = 'REJECTED', revision = revision + 1,
+                       decided_by = :actorId, decided_at = now(),
+                       decision_reason = :reason, updated_at = now()
+                 WHERE tenant_id = :tenantId AND id = :approvalId
+                   AND revision = :approvalRevision AND state = 'PENDING'
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("reason", reason)
+                .addValue("tenantId", actor.tenantId())
+                .addValue("approvalId", approval.id())
+                .addValue("approvalRevision", approval.revision()));
+        if (approvalUpdated != 1) {
+            throw new BpiConflictException("Rule approval was already decided.", approval.revision());
+        }
+        int ruleUpdated = jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'DRAFT', revision = revision + 1,
+                       updated_by = :actorId, updated_at = now()
+                 WHERE tenant_id = :tenantId AND id = :ruleId
+                   AND revision = :expectedRevision AND state = 'PENDING_APPROVAL'
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("ruleId", rule.id())
+                .addValue("expectedRevision", rule.revision()));
+        if (ruleUpdated != 1) {
+            throw new BpiConflictException("Rule is not pending approval.", rule.revision());
+        }
     }
 
     public void insertRuleAudit(
@@ -563,11 +714,18 @@ public class RulePostgresRepository {
         Timestamp applicationReceivedAt = rs.getTimestamp("application_received_at");
         Timestamp runtimeReadinessObservedAt = rs.getTimestamp("runtime_readiness_observed_at");
         Timestamp runtimeReadinessReceivedAt = rs.getTimestamp("runtime_readiness_received_at");
+        Timestamp approvalSubmittedAt = rs.getTimestamp("approval_submitted_at");
+        Timestamp approvalDecidedAt = rs.getTimestamp("approval_decided_at");
         return new RuleVersionView(
                 rs.getObject("id", UUID.class), rs.getString("rule_code"), rs.getString("version"),
                 rs.getString("state"), rs.getLong("revision"), rs.getString("plant_id"),
                 rs.getString("line_id"), rs.getString("topology_version"), rs.getString("checksum"),
                 readMap(rs.getString("definition")), rs.getObject("latest_simulation_id", UUID.class),
+                rs.getObject("approval_id", UUID.class), rs.getString("approval_status"),
+                rs.getLong("approval_revision"), rs.getString("approval_submitted_by"),
+                approvalSubmittedAt == null ? null : approvalSubmittedAt.toInstant(),
+                rs.getString("approval_decided_by"),
+                approvalDecidedAt == null ? null : approvalDecidedAt.toInstant(),
                 rs.getString("publication_status"), rs.getLong("publication_revision"),
                 rs.getInt("publication_attempt_count"), rs.getInt("publication_total_attempt_count"),
                 rs.getInt("publication_manual_retry_count"),
@@ -586,6 +744,24 @@ public class RulePostgresRepository {
                 rs.getString("runtime_readiness_detail"),
                 rs.getString("runtime_point_catalog_event_id"),
                 rs.getString("runtime_point_catalog_source_revision"));
+    }
+
+    private RuleApprovalView mapApproval(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Timestamp submittedAt = rs.getTimestamp("submitted_at");
+        Timestamp decidedAt = rs.getTimestamp("decided_at");
+        return new RuleApprovalView(
+                rs.getObject("id", UUID.class),
+                rs.getObject("rule_version_id", UUID.class),
+                rs.getObject("simulation_id", UUID.class),
+                rs.getString("simulation_checksum"),
+                rs.getString("state"),
+                rs.getLong("revision"),
+                rs.getString("submitted_by"),
+                submittedAt == null ? null : submittedAt.toInstant(),
+                rs.getString("submit_reason"),
+                rs.getString("decided_by"),
+                decidedAt == null ? null : decidedAt.toInstant(),
+                rs.getString("decision_reason"));
     }
 
     private MapSqlParameterSource scope(ActorContext actor, StringBuilder sql) {

@@ -238,6 +238,13 @@ export interface RuleVersion {
   checksum: string;
   ast: Record<string, unknown>;
   latestSimulationId?: string | null;
+  approvalId?: string | null;
+  approvalStatus: 'NOT_REQUESTED' | 'PENDING' | 'APPROVED' | 'REJECTED';
+  approvalRevision: number;
+  approvalSubmittedBy?: string | null;
+  approvalSubmittedAt?: string | null;
+  approvalDecidedBy?: string | null;
+  approvalDecidedAt?: string | null;
   publicationStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED';
   publicationRevision: number;
   publicationAttemptCount: number;
@@ -260,6 +267,31 @@ export interface RuleVersion {
   runtimeReadinessDetail?: string | null;
   runtimePointCatalogEventId?: string | null;
   runtimePointCatalogSourceRevision?: string | null;
+}
+
+export interface VersionReference {
+  id: string;
+  code: string;
+  version: string;
+  state: string;
+  checksum: string;
+}
+
+export interface VersionChange {
+  path: string;
+  changeType: 'ADDED' | 'REMOVED' | 'CHANGED';
+  beforeValue?: unknown;
+  afterValue?: unknown;
+}
+
+export interface VersionComparison {
+  objectType: 'TOPOLOGY_VERSION' | 'RULE_VERSION';
+  base: VersionReference;
+  target: VersionReference;
+  identical: boolean;
+  changeCount: number;
+  truncated: boolean;
+  changes: VersionChange[];
 }
 
 export interface RuleDraftCommand {

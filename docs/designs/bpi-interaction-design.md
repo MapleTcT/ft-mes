@@ -212,7 +212,7 @@ ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、�
 拓扑发布后不可修改；从已发布版本复制新草稿。正在运行的批次继续固定引用旧版本。
 
 **主要 API：** `listTopologies`、`getTopologyVersion`、`createTopologyDraft`、
-`validateTopologyDraft`、`publishTopologyVersion`。
+`compareTopologyVersions`、`validateTopologyDraft`、`publishTopologyVersion`。
 
 ### 5.7 边界规则 `/bpi/rules`
 
@@ -230,10 +230,12 @@ ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、�
 首期已实现“规则与拓扑”合并工作台：规则列表和当前已发布拓扑/测点绑定同屏展示；规则详情展示受控 AST、
 作用域、revision、规则 checksum，以及最近回放的观测值数量、金标准边界数、命中/漏检/误报、平均时间偏差、
 发射边界和 simulation checksum。回放当前为 30 秒事务内的有界同步操作，最多 100,000 个观测值；后续超过
-该规模时再拆为持久化后台任务。页面只在 `SIMULATION_PASSED` 且最近模拟为 `PASSED` 时显示发布按钮。
+该规模时再拆为持久化后台任务。页面只在 `SIMULATION_PASSED` 且最近模拟为 `PASSED` 时显示“提交审批”；
+进入 `PENDING_APPROVAL` 后显示审批人、提交时间以及“管理员批准并发布/管理员驳回”。
 
-当前 Phase 1 后端已实现 checksum/revision/幂等/作用域技术门和审计，但尚未实现双人审批工作流；因此它可用于
-测试环境规则治理，不应被描述为生产发布审批已经完成。规则草稿编辑、拓扑草稿/校验/发布也仍按设计保留为后续范围。
+当前 Phase 1 后端已实现 checksum/revision/幂等/作用域技术门、不可变审批申请和双人职责分离：提交人可为
+工程师或管理员，最终批准人必须是同时不同于规则创建人和提交人的管理员；驳回会退回草稿并要求重新模拟。
+页面还会自动选择同 code/同作用域的另一版本，展示拓扑引用和 AST 的稳定 JSON Pointer 差异。
 
 规则详情把业务规则状态与发布链路状态分开显示，并展示本轮尝试、累计尝试、人工重试、发布修订、最近重新入队时间、
 Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示“管理员重新入队”；操作要求原因、幂等键和发布 revision，
@@ -244,8 +246,13 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 规则业务 `PUBLISHED` 或 Kafka `PUBLISHED` 代替 Flink `APPLIED`。确定性浏览器测试已覆盖
 `WAITING -> REJECTED -> APPLIED`，但该模拟证据不替代真实 Kafka/Flink checkpoint/restart 验收。
 
-**主要 API：** `listRules`、`getRuleVersion`、`createRuleDraft`、`simulateRule`、
-`getRuleSimulation`、`publishRuleVersion`、`retryRulePublication`。
+**主要 API：** `listRules`、`getRuleVersion`、`compareRuleVersions`、`createRuleDraft`、`simulateRule`、
+`getRuleSimulation`、`submitRuleApproval`、`rejectRuleApproval`、`publishRuleVersion`、
+`retryRulePublication`。
+
+目标环境页面/API/PostgreSQL 的版本比较、提交审批、同 actor 拒绝、独立批准和独立驳回证据见
+[`bpi-rule-version-lifecycle-acceptance.md`](../testing/bpi-rule-version-lifecycle-acceptance.md)。该证据只闭合
+控制面，不替代规则退役、typed inactive、broker/Flink 应用和产品级回滚。
 
 ### 5.8 数据质量 `/bpi/data-quality`
 

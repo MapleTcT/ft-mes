@@ -7,11 +7,13 @@ import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
 import com.mapletct.ftmes.bpi.application.error.BpiPreconditionRequiredException;
 import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.domain.GoldenBoundary;
+import com.mapletct.ftmes.bpi.domain.RuleApprovalView;
 import com.mapletct.ftmes.bpi.domain.RulePublicationView;
 import com.mapletct.ftmes.bpi.domain.RuleSimulationView;
 import com.mapletct.ftmes.bpi.domain.RuleVersionView;
 import com.mapletct.ftmes.bpi.domain.TelemetryObservation;
 import com.mapletct.ftmes.bpi.domain.TopologyVersionView;
+import com.mapletct.ftmes.bpi.domain.VersionComparisonView;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.RulePostgresRepository;
@@ -60,6 +62,7 @@ public class RuleService {
     private final TopologyDefinitionValidator topologyValidator;
     private final PointCatalogService pointCatalogService;
     private final CanonicalJson canonicalJson;
+    private final VersionComparisonService versionComparisonService;
     private final ObjectMapper objectMapper;
 
     public RuleService(
@@ -72,6 +75,7 @@ public class RuleService {
             TopologyDefinitionValidator topologyValidator,
             PointCatalogService pointCatalogService,
             CanonicalJson canonicalJson,
+            VersionComparisonService versionComparisonService,
             ObjectMapper objectMapper) {
         this.repository = repository;
         this.sharedRepository = sharedRepository;
@@ -82,6 +86,7 @@ public class RuleService {
         this.topologyValidator = topologyValidator;
         this.pointCatalogService = pointCatalogService;
         this.canonicalJson = canonicalJson;
+        this.versionComparisonService = versionComparisonService;
         this.objectMapper = objectMapper;
     }
 
@@ -95,6 +100,20 @@ public class RuleService {
     @Transactional(readOnly = true)
     public TopologyVersionView getTopology(ActorContext actor, UUID topologyId) {
         return repository.findTopology(actor, topologyId);
+    }
+
+    @Transactional(readOnly = true)
+    public VersionComparisonView compareTopologies(
+            ActorContext actor, UUID topologyId, UUID againstId) {
+        TopologyVersionView target = repository.findTopology(actor, topologyId);
+        TopologyVersionView base = repository.findTopology(actor, againstId);
+        if (!target.code().equals(base.code())
+                || !target.plantId().equals(base.plantId())
+                || !target.lineId().equals(base.lineId())) {
+            throw new BpiValidationException("Topology versions must share code and scope before comparison.");
+        }
+        return versionComparisonService.compare(
+                "TOPOLOGY_VERSION", reference(base), base.definition(), reference(target), target.definition());
     }
 
     @Transactional(timeout = 15)
@@ -248,6 +267,26 @@ public class RuleService {
         return repository.findRule(actor, ruleId);
     }
 
+    @Transactional(readOnly = true)
+    public VersionComparisonView compareRules(
+            ActorContext actor, UUID ruleId, UUID againstId) {
+        RuleVersionView target = repository.findRule(actor, ruleId);
+        RuleVersionView base = repository.findRule(actor, againstId);
+        if (!target.code().equals(base.code())
+                || !target.plantId().equals(base.plantId())
+                || !target.lineId().equals(base.lineId())) {
+            throw new BpiValidationException("Rule versions must share code and scope before comparison.");
+        }
+        Map<String, Object> baseContent = new LinkedHashMap<>();
+        baseContent.put("topologyVersion", base.topologyVersion());
+        baseContent.put("ast", base.ast());
+        Map<String, Object> targetContent = new LinkedHashMap<>();
+        targetContent.put("topologyVersion", target.topologyVersion());
+        targetContent.put("ast", target.ast());
+        return versionComparisonService.compare(
+                "RULE_VERSION", reference(base), baseContent, reference(target), targetContent);
+    }
+
     @Transactional(timeout = 15)
     public CommandResult<RuleVersionView> createRuleDraft(
             ActorContext actor,
@@ -397,6 +436,19 @@ public class RuleService {
         if (rule.revision() != expectedRevision) {
             throw new BpiConflictException("Rule revision is stale.", rule.revision());
         }
+        if (!"PENDING_APPROVAL".equals(rule.state())) {
+            throw new BpiConflictException("Rule must be pending approval before publication.", rule.revision());
+        }
+        RuleApprovalView approval = repository.lockPendingApproval(actor, ruleId);
+        String creator = repository.findRuleCreator(actor.tenantId(), rule.id());
+        if (actor.userId().equals(creator) || actor.userId().equals(approval.submittedBy())) {
+            throw new BpiValidationException(
+                    "Rule publication requires an administrator other than the creator and submitter.");
+        }
+        if (!approval.simulationId().equals(command.simulationId())
+                || !approval.simulationChecksum().equals(command.simulationChecksum())) {
+            throw new BpiValidationException("Publication must use the simulation captured by the pending approval.");
+        }
         RuleSimulationView simulation = repository.findSimulation(actor, command.simulationId());
         if (!simulation.ruleId().equals(rule.id()) || !"PASSED".equals(simulation.state())
                 || !simulation.checksum().equals(command.simulationChecksum())) {
@@ -420,19 +472,101 @@ public class RuleService {
         var publication = publicationFactory.create(
                 actor, rule, topology, definition, publicationEventId, Instant.now(),
                 outboxProperties.topic(), traceId);
-        repository.publishRule(
-                actor.tenantId(), rule.id(), rule.revision(), simulation.id(), actor.userId());
+        repository.approveRule(actor, rule, approval, command.reason());
         outboxRepository.insertPublication(actor, rule, publication);
         repository.insertRuleAudit(
                 actor, rule, "RULE_PUBLISHED", rule.revision(), rule.revision() + 1,
                 command.reason(), traceId,
                 Map.of("simulationId", simulation.id(), "simulationChecksum", simulation.checksum(),
+                        "approvalId", approval.id(), "submittedBy", approval.submittedBy(),
+                        "approvedBy", actor.userId(), "creator", creator,
                         "publicationEventId", publicationEventId,
                         "pointCatalogSnapshotId", catalog.snapshotId().toString(),
                         "pointCatalogChecksum", catalog.snapshotChecksum()));
         RuleVersionView published = repository.findRule(actor, rule.id());
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(published));
         return new CommandResult<>(published, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<RuleVersionView> submitApproval(
+            ActorContext actor,
+            UUID ruleId,
+            String idempotencyKey,
+            String ifMatch,
+            RulePublishCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        RuleVersionView visible = repository.findRule(actor, ruleId);
+        assertRuleManagementEnabled(actor, visible);
+        String path = "/bpi/v1/rules/" + ruleId + "/submit-approval";
+        String requestChecksum = Checksums.sha256(ruleId + "|" + expectedRevision + "|" + writeJson(command));
+        CommandResult<RuleVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<RuleVersionView>() {});
+        if (replay != null) return replay;
+
+        RuleVersionView rule = repository.lockRule(actor, ruleId);
+        if (rule.revision() != expectedRevision) {
+            throw new BpiConflictException("Rule revision is stale.", rule.revision());
+        }
+        if (!"SIMULATION_PASSED".equals(rule.state())) {
+            throw new BpiConflictException("Rule must pass simulation before approval submission.", rule.revision());
+        }
+        RuleSimulationView simulation = repository.findSimulation(actor, command.simulationId());
+        if (!simulation.ruleId().equals(rule.id()) || !"PASSED".equals(simulation.state())
+                || !simulation.checksum().equals(command.simulationChecksum())) {
+            throw new BpiValidationException("A PASSED simulation with the matching checksum is required.");
+        }
+        RuleApprovalView approval = repository.submitRuleApproval(actor, rule, simulation, command.reason());
+        repository.insertRuleAudit(
+                actor, rule, "RULE_APPROVAL_SUBMITTED", rule.revision(), rule.revision() + 1,
+                command.reason(), traceId,
+                Map.of("approvalId", approval.id(), "simulationId", simulation.id(),
+                        "simulationChecksum", simulation.checksum(), "submittedBy", actor.userId()));
+        RuleVersionView pending = repository.findRule(actor, rule.id());
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(pending));
+        return new CommandResult<>(pending, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<RuleVersionView> rejectApproval(
+            ActorContext actor,
+            UUID ruleId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        RuleVersionView visible = repository.findRule(actor, ruleId);
+        assertRuleManagementEnabled(actor, visible);
+        String path = "/bpi/v1/rules/" + ruleId + "/reject-approval";
+        String requestChecksum = Checksums.sha256(ruleId + "|" + expectedRevision + "|" + writeJson(command));
+        CommandResult<RuleVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<RuleVersionView>() {});
+        if (replay != null) return replay;
+
+        RuleVersionView rule = repository.lockRule(actor, ruleId);
+        if (rule.revision() != expectedRevision) {
+            throw new BpiConflictException("Rule revision is stale.", rule.revision());
+        }
+        if (!"PENDING_APPROVAL".equals(rule.state())) {
+            throw new BpiConflictException("Rule is not pending approval.", rule.revision());
+        }
+        RuleApprovalView approval = repository.lockPendingApproval(actor, ruleId);
+        if (actor.userId().equals(approval.submittedBy())) {
+            throw new BpiValidationException("Rule approval must be decided by a different administrator.");
+        }
+        repository.rejectRuleApproval(actor, rule, approval, command.reason());
+        repository.insertRuleAudit(
+                actor, rule, "RULE_APPROVAL_REJECTED", rule.revision(), rule.revision() + 1,
+                command.reason(), traceId,
+                Map.of("approvalId", approval.id(), "submittedBy", approval.submittedBy(),
+                        "rejectedBy", actor.userId()));
+        RuleVersionView rejected = repository.findRule(actor, rule.id());
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(rejected));
+        return new CommandResult<>(rejected, false);
     }
 
     @Transactional(timeout = 15)
@@ -490,6 +624,16 @@ public class RuleService {
         }
         advanceReplayClock(definition, state, windowEnd, emitted);
         return emitted.stream().sorted().toList();
+    }
+
+    private VersionComparisonView.VersionReference reference(TopologyVersionView topology) {
+        return new VersionComparisonView.VersionReference(
+                topology.id(), topology.code(), topology.version(), topology.state(), topology.checksum());
+    }
+
+    private VersionComparisonView.VersionReference reference(RuleVersionView rule) {
+        return new VersionComparisonView.VersionReference(
+                rule.id(), rule.code(), rule.version(), rule.state(), rule.checksum());
     }
 
     private BoundaryWindowState advanceReplayClock(

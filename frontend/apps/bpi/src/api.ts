@@ -15,6 +15,7 @@ import type {
   StateEvent,
   TopologyVersion,
   TopologyDraftCommand,
+  VersionComparison,
 } from './types';
 
 const API_ROOT = '/bpi-api';
@@ -102,6 +103,8 @@ export const bpiApi = {
       body: JSON.stringify(command),
     }),
   topology: (id: string) => request<TopologyVersion>(`/topologies/${encodeURIComponent(id)}`),
+  compareTopologies: (id: string, against: string) =>
+    request<VersionComparison>(`/topologies/${encodeURIComponent(id)}/compare?against=${encodeURIComponent(against)}`),
   createTopologyDraft: (command: TopologyDraftCommand, key: string, revision = 0) =>
     request<TopologyVersion>('/topologies/drafts', {
       method: 'POST',
@@ -122,6 +125,8 @@ export const bpiApi = {
     }),
   rules: (plantId: string) => request<RuleVersion[]>(`/rules?plantId=${encodeURIComponent(plantId)}`),
   rule: (id: string) => request<RuleVersion>(`/rules/${encodeURIComponent(id)}`),
+  compareRules: (id: string, against: string) =>
+    request<VersionComparison>(`/rules/${encodeURIComponent(id)}/compare?against=${encodeURIComponent(against)}`),
   createRuleDraft: (command: RuleDraftCommand, key: string, revision = 0) =>
     request<RuleVersion>('/rules/drafts', {
       method: 'POST',
@@ -140,6 +145,18 @@ export const bpiApi = {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
       body: JSON.stringify({ reason, simulationId: simulation.id, simulationChecksum: simulation.checksum }),
+    }),
+  submitRuleApproval: (rule: RuleVersion, simulation: RuleSimulation, reason: string, key: string) =>
+    request<RuleVersion>(`/rules/${encodeURIComponent(rule.id)}/submit-approval`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
+      body: JSON.stringify({ reason, simulationId: simulation.id, simulationChecksum: simulation.checksum }),
+    }),
+  rejectRuleApproval: (rule: RuleVersion, reason: string, key: string) =>
+    request<RuleVersion>(`/rules/${encodeURIComponent(rule.id)}/reject-approval`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
+      body: JSON.stringify({ reason }),
     }),
   retryRulePublication: (rule: RuleVersion, reason: string, key: string) =>
     request<RuleVersion>(`/rules/${encodeURIComponent(rule.id)}/publication/retry`, {

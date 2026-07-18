@@ -1,5 +1,23 @@
 # 后端落库验收报告
 
+## 2026-07-18 BPI 版本比较与规则审批生命周期
+
+目标环境 `10.11.100.17` 已运行 Flyway V14。真实页面完成版本差异查看、历史回放和
+提交审批；由于同一 ADP `admin` 会映射为同一提交 actor，批准/驳回由受控的独立
+`BPI_ADMIN` 身份执行，随后刷新真实页面核对终态。签名材料未写入仓库。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL/结果摘要 | 状态 |
+|---|---|---|---|---|---|---|
+| 拓扑/规则版本比较 | BPI `/bpi/#/rules` 详情抽屉 | `GET /bpi-api/topologies/{id}/compare`；`GET /bpi-api/rules/{id}/compare` | `RuleController -> RuleService -> VersionComparisonService` | 只读 `bpi_topology_versions`、`bpi_rule_versions` | marker `ADP_E2E_20260718_023214_BPI_LIFECYCLE`；页面显示拓扑 11 项差异和规则 `/conditions/0/threshold` 差异；顺序确定且同 scope 约束生效 | PASS |
+| 历史回放并提交审批 | BPI 规则详情 | `POST /bpi-api/rules/{id}/simulate`；`POST .../submit-approval` | `RuleController -> RuleService -> RulePostgresRepository` | `bpi_rule_simulations`、`bpi_rule_approval_requests`、`bpi_rule_versions`、`bpi_api_idempotency`、`bpi_audit_events` | 两条 simulation 均 `PASSED` 且指标 `1/0/0/0`；两条申请固定 simulation ID/checksum，规则 `DRAFT/r1 -> SIMULATION_PASSED/r2 -> PENDING_APPROVAL/r3` | PASS |
+| 职责分离反证与独立批准 | 同一提交人页面操作；独立管理员 API 决策后刷新页面 | `POST /bpi/v1/rules/b54aedc7-6dd2-47cd-fa8e-c95b1a32fefa/publish` | `RuleService.publish -> RulePostgresRepository/RulePublicationOutboxRepository` | 审批、规则、outbox、幂等、审计表 | 同一提交人 `422`；不同管理员 `200`；直接查库为规则 `PUBLISHED/r4`、申请 `APPROVED/r2`、1 条 `BOUNDARY_RULE_PUBLISHED` outbox，页面复显 PUBLISHED | PASS |
+| 职责分离反证与独立驳回 | 同上 | `POST /bpi/v1/rules/c1e5ea8e-7d1b-54ef-3a76-d3ab09a2e3bb/reject-approval` | `RuleService.rejectApproval -> RulePostgresRepository` | 审批、规则、幂等、审计表 | 同一提交人 `422`；不同管理员 `200`；直接查库为规则 `DRAFT/r4`、申请 `REJECTED/r2`、无 publication outbox，页面复显 DRAFT | PASS |
+| 审计、幂等与清理 | 不适用；验收收尾 | verification/cleanup SQL | PostgreSQL 单事务 marker 清理 | 本轮涉及的 BPI 表 | 6 条审计动作顺序正确，6 条幂等记录均 `COMPLETED`；成功 marker 和 3 个诊断 marker 清理后 topology/rule/idempotency/telemetry/catalog/golden 均为 0 | PASS |
+
+机器证据：`metadata/bpi-rule-version-lifecycle-acceptance.json`；完整 SQL、原始报告哈希、
+请求状态和边界见 `docs/testing/bpi-rule-version-lifecycle-acceptance.md`。outbox 的
+`PENDING/attempts=0` 是本轮控制面验收预期，不能被描述为 Kafka/Flink 已应用。
+
 ## 2026-07-17 WOM 包装二维码生成与打印状态回填
 
 本轮使用真实 `makeTaskList` 页面选中 SupDataGrid 制造任务行，再以普通鼠标点击
