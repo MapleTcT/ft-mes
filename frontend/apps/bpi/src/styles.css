@@ -188,6 +188,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .topology-issue-list li { grid-template-columns: 10px 160px minmax(0, 1fr); }
 .topology-issue-list b { overflow-wrap: anywhere; white-space: normal; font-weight: 500; }
 .application-trace { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+.lifecycle-summary { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
 .application-trace .error-callout { display: grid; gap: 4px; }
 .application-trace .error-callout span { overflow-wrap: anywhere; }
 .runtime-readiness-trace { margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-left-width: 4px; background: #f7f9fa; }

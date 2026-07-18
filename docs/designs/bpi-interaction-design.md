@@ -248,7 +248,11 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 
 **主要 API：** `listRules`、`getRuleVersion`、`compareRuleVersions`、`createRuleDraft`、`simulateRule`、
 `getRuleSimulation`、`submitRuleApproval`、`rejectRuleApproval`、`publishRuleVersion`、
-`retryRulePublication`。
+`retryRulePublication`、`retireRuleVersion`。
+
+规则详情同时展示生命周期动作、序号和期望在线状态。管理员只有在激活事件已经取得 Kafka、Flink
+和运行态证据后才能执行退役；退役后页面持续显示停用事件的分发、应用与 `INACTIVE` 进度。
+已退役版本提供“创建回滚草稿”，预填历史 AST 与拓扑，但仍必须以新版本重新完成回放、审批和发布。
 
 目标环境页面/API/PostgreSQL 的版本比较、提交审批、同 actor 拒绝、独立批准和独立驳回证据见
 [`bpi-rule-version-lifecycle-acceptance.md`](../testing/bpi-rule-version-lifecycle-acceptance.md)。该证据只闭合

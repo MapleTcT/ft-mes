@@ -17,7 +17,7 @@ public class BpiRoutePolicy {
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
                     + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|rules/drafts|"
-                    + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|publication/retry))$");
+                    + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|retire|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {
         if (method == HttpMethod.GET) return GET_ROUTE.matcher(path).matches();

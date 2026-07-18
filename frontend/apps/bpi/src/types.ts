@@ -245,6 +245,9 @@ export interface RuleVersion {
   approvalSubmittedAt?: string | null;
   approvalDecidedBy?: string | null;
   approvalDecidedAt?: string | null;
+  lifecycleAction: 'NOT_PUBLISHED' | 'ACTIVATE' | 'RETIRE';
+  lifecycleSequence: number;
+  lifecycleActive: boolean;
   publicationStatus: 'NOT_PUBLISHED' | 'NOT_TRACKED' | 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED';
   publicationRevision: number;
   publicationAttemptCount: number;

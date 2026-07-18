@@ -12,11 +12,14 @@ import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
+import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.Checksums;
 import com.mapletct.ftmes.bpi.application.RuleApplicationReceiptService;
 import com.mapletct.ftmes.bpi.application.RuleRuntimeReadinessReceiptService;
+import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
 import com.mapletct.ftmes.bpi.domain.OutboxEventClaim;
 import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxRepository;
+import com.mapletct.ftmes.bpi.infrastructure.postgres.RulePostgresRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +39,12 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -63,6 +69,7 @@ class BpiRulePostgresAcceptanceTest {
     @Autowired ObjectMapper objectMapper;
     @Autowired JdbcTemplate jdbc;
     @Autowired RulePublicationOutboxRepository outboxRepository;
+    @Autowired RulePostgresRepository ruleRepository;
     @Autowired RuleApplicationReceiptService receiptService;
     @Autowired RuleRuntimeReadinessReceiptService runtimeReadinessReceiptService;
 
@@ -409,6 +416,186 @@ class BpiRulePostgresAcceptanceTest {
         mockMvc.perform(get("/bpi/v1/rules/{id}", ruleId)
                         .header("Authorization", "Bearer " + wrongScopeToken))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void administratorRetiresAppliedRuleAndCreatesRollbackDraftFromInactiveVersion() throws Exception {
+        jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'PUBLISHED', revision = 4
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, ruleId);
+        UUID activationEventId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_outbox_events
+                    (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
+                     event_type, topic, partition_key, payload, headers, status,
+                     application_status, runtime_readiness_status,
+                     lifecycle_action, lifecycle_sequence, lifecycle_active)
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?,
+                        'BOUNDARY_RULE_PUBLISHED', 'bpi.boundary.rule-publication.v1', ?, ?,
+                        CAST(? AS jsonb), 'PUBLISHED', 'APPLIED', 'READY',
+                        'ACTIVATE', 1, true)
+                """, activationEventId, tenantId, ruleId,
+                tenantId + ":LINE-S07-01:RULE-S07-START:1.2.0",
+                new byte[] {1, 2, 3}, "{\"lifecycle_action\":\"ACTIVATE\"}");
+        UUID replacementRuleId = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO bpi.bpi_rule_versions
+                    (id, tenant_id, rule_code, version, topology_version_id, state, checksum, definition,
+                     revision, plant_id, line_id, created_by, updated_by)
+                VALUES (?, ?, 'RULE-S07-START', '1.2.99', ?, 'DRAFT', ?, CAST(? AS jsonb),
+                        1, 'PLANT-01', 'LINE-S07-01', 'replacement', 'replacement')
+                """, replacementRuleId, tenantId, topologyId, "h".repeat(64), ruleDefinition());
+        ActorContext replacementActor = new ActorContext(
+                tenantId, "rule-retirement-admin", Set.of("BPI_ADMIN"),
+                Set.of("PLANT-01"), Set.of("LINE-S07-01"));
+        var replacementRule = ruleRepository.findRule(replacementActor, replacementRuleId);
+        assertThatThrownBy(() -> ruleRepository.assertRulePublicationHandoffReady(
+                replacementActor, replacementRule))
+                .isInstanceOf(BpiConflictException.class)
+                .hasMessage("Retire the currently published rule version before publishing its replacement.");
+        String engineerToken = token(
+                tenantId, List.of("BPI_ENGINEER"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        String adminToken = token(
+                "rule-retirement-admin", tenantId, List.of("BPI_ADMIN"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+        byte[] retireBody = objectMapper.writeValueAsBytes(Map.of(
+                "reason", "发布替代版本前安全停止当前边界规则"));
+
+        mockMvc.perform(post("/bpi/v1/rules/{id}/retire", ruleId)
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .header("Idempotency-Key", "retire-denied-" + ruleId)
+                        .header("If-Match", "4")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(retireBody))
+                .andExpect(status().isForbidden());
+
+        String retirementKey = "retire-rule-" + ruleId;
+        mockMvc.perform(post("/bpi/v1/rules/{id}/retire", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", retirementKey)
+                        .header("If-Match", "4")
+                        .header("X-Trace-Id", "TRACE-RETIRE-" + ruleId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(retireBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("RETIRED"))
+                .andExpect(jsonPath("$.data.revision").value(5))
+                .andExpect(jsonPath("$.data.lifecycleAction").value("RETIRE"))
+                .andExpect(jsonPath("$.data.lifecycleSequence").value(2))
+                .andExpect(jsonPath("$.data.lifecycleActive").value(false))
+                .andExpect(jsonPath("$.data.publicationStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.applicationStatus").value("WAITING"))
+                .andExpect(jsonPath("$.data.runtimeReadinessStatus").value("WAITING"));
+        mockMvc.perform(post("/bpi/v1/rules/{id}/retire", ruleId)
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", retirementKey)
+                        .header("If-Match", "4")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(retireBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.lifecycleSequence").value(2));
+
+        List<Map<String, Object>> lifecycle = jdbc.queryForList("""
+                SELECT id, lifecycle_action, lifecycle_sequence, lifecycle_active, payload,
+                       headers ->> 'lifecycle_action' AS header_action
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND aggregate_id = ?
+                 ORDER BY lifecycle_sequence
+                """, tenantId, ruleId);
+        assertThat(lifecycle).hasSize(2);
+        assertThat(lifecycle.get(0))
+                .containsEntry("lifecycle_action", "ACTIVATE")
+                .containsEntry("lifecycle_sequence", 1L)
+                .containsEntry("lifecycle_active", true);
+        assertThat(lifecycle.get(1))
+                .containsEntry("lifecycle_action", "RETIRE")
+                .containsEntry("lifecycle_sequence", 2L)
+                .containsEntry("lifecycle_active", false)
+                .containsEntry("header_action", "RETIRE");
+        UUID retirementEventId = (UUID) lifecycle.get(1).get("id");
+        assertThat(retirementEventId).isNotEqualTo(activationEventId);
+        BoundaryRulePublicationV1 retirement = BoundaryRulePublicationV1.parseFrom(
+                (byte[]) lifecycle.get(1).get("payload"));
+        assertThat(retirement.getEventId()).isEqualTo(retirementEventId.toString());
+        assertThat(retirement.getActive()).isFalse();
+        assertThat(retirement.getRuleCode()).isEqualTo("RULE-S07-START");
+        assertThat(retirement.getRuleVersion()).isEqualTo("1.2.0");
+        assertThatThrownBy(() -> ruleRepository.assertRulePublicationHandoffReady(
+                replacementActor, replacementRule))
+                .isInstanceOf(BpiConflictException.class)
+                .hasMessage("The previous rule retirement must reach Kafka PUBLISHED, Flink APPLIED and runtime INACTIVE before replacement publication.");
+
+        jdbc.update("""
+                UPDATE bpi.bpi_outbox_events
+                   SET status = 'PUBLISHED', published_at = now(), revision = revision + 1
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, retirementEventId);
+        BoundaryRuleApplicationV1 applied = application(
+                retirementEventId,
+                "RETIREMENT-APPLIED-" + retirementEventId,
+                BoundaryRuleApplicationStatusV1.APPLIED,
+                "",
+                "inactive rule update applied",
+                boundaryTime.plusSeconds(4));
+        receiptService.apply(applied, Checksums.sha256(applied.toByteArray()));
+        BoundaryRuleRuntimeReadinessV1 inactive = runtimeReadiness(
+                retirementEventId,
+                "RETIREMENT-INACTIVE-" + retirementEventId,
+                BoundaryRuleRuntimeReadinessStatusV1.INACTIVE,
+                "RULE_INACTIVE",
+                "published rule version is inactive",
+                boundaryTime.plusSeconds(5),
+                "CATALOG-RETIREMENT",
+                "revision-retirement");
+        runtimeReadinessReceiptService.apply(inactive, Checksums.sha256(inactive.toByteArray()));
+        assertThatCode(() -> ruleRepository.assertRulePublicationHandoffReady(
+                replacementActor, replacementRule)).doesNotThrowAnyException();
+        jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ? AND id = ?",
+                tenantId, replacementRuleId);
+
+        mockMvc.perform(get("/bpi/v1/rules/{id}", ruleId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("RETIRED"))
+                .andExpect(jsonPath("$.data.lifecycleAction").value("RETIRE"))
+                .andExpect(jsonPath("$.data.publicationStatus").value("PUBLISHED"))
+                .andExpect(jsonPath("$.data.applicationStatus").value("APPLIED"))
+                .andExpect(jsonPath("$.data.runtimeReadinessStatus").value("INACTIVE"))
+                .andExpect(jsonPath("$.data.runtimeReadinessReasonCode").value("RULE_INACTIVE"));
+
+        byte[] rollbackDraft = objectMapper.writeValueAsBytes(Map.of(
+                "code", "RULE-S07-START",
+                "version", "1.2.1",
+                "lineId", "LINE-S07-01",
+                "topologyVersion", "TOPO-S07@3",
+                "baseVersionId", ruleId,
+                "ast", objectMapper.readTree(ruleDefinition()),
+                "reason", "从已退役稳定版本创建受控回滚草稿"));
+        MvcResult rollbackResult = mockMvc.perform(post("/bpi/v1/rules/drafts")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", "rollback-draft-" + ruleId)
+                        .header("If-Match", "5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rollbackDraft))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("DRAFT"))
+                .andExpect(jsonPath("$.data.version").value("1.2.1"))
+                .andExpect(jsonPath("$.data.lifecycleAction").value("NOT_PUBLISHED"))
+                .andReturn();
+        UUID rollbackRuleId = UUID.fromString(objectMapper.readTree(
+                rollbackResult.getResponse().getContentAsString()).path("data").path("id").asText());
+        assertThat(rollbackRuleId).isNotEqualTo(ruleId);
+        assertThat(count("bpi_rule_versions")).isEqualTo(2);
+        assertThat(count("bpi_outbox_events")).isEqualTo(2);
+        assertThat(jdbc.queryForList("""
+                SELECT action FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_id IN (?, ?)
+                 ORDER BY created_at
+                """, String.class, tenantId, ruleId, rollbackRuleId))
+                .containsExactly("RULE_RETIRED", "RULE_DRAFT_CREATED");
     }
 
     @Test

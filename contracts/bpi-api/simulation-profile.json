@@ -31,6 +31,7 @@
     "rejectRuleApproval",
     "publishRuleVersion",
     "retryRulePublication",
+    "retireRuleVersion",
     "listDataQualityIncidents",
     "getDataQualityIncident",
     "getIntegrationHealth"

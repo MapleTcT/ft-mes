@@ -233,6 +233,20 @@ public class RuleController {
         return response.body(ApiResponse.of(result.data(), request));
     }
 
+    @PostMapping("/bpi/v1/rules/{ruleId}/retire")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<RuleVersionView>> retire(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID ruleId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        CommandResult<RuleVersionView> result = ruleService.retire(
+                actorContextFactory.from(jwt), ruleId, idempotencyKey, ifMatch, command, traceId(request));
+        return ok(result, request);
+    }
+
     private String traceId(HttpServletRequest request) {
         return String.valueOf(request.getAttribute(TraceIdFilter.ATTRIBUTE));
     }

@@ -251,7 +251,7 @@ function createHandler(state) {
         return send(res, 200, { status: 'RESET' }, 'simulationReset');
       }
       if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
-        if (state.rule.state !== 'PUBLISHED'
+        if (!['PUBLISHED', 'RETIRED'].includes(state.rule.state)
             || !['PENDING', 'DISPATCHING'].includes(state.rule.publicationStatus)) {
           return send(res, 409, { status: 'NOT_DISPATCHING' }, 'simulationFailRulePublication');
         }
@@ -266,7 +266,7 @@ function createHandler(state) {
         if (state.rule.publicationStatus === 'PUBLISHED') {
           return send(res, 200, envelope('simulationCompleteRulePublication', state.rule), 'simulationCompleteRulePublication');
         }
-        if (state.rule.state !== 'PUBLISHED' || state.rule.publicationStatus === 'FAILED') {
+        if (!['PUBLISHED', 'RETIRED'].includes(state.rule.state) || state.rule.publicationStatus === 'FAILED') {
           return send(res, 409, { status: 'NOT_DISPATCHABLE' }, 'simulationCompleteRulePublication');
         }
         state.rule.publicationStatus = 'PUBLISHED';
@@ -678,6 +678,9 @@ function createHandler(state) {
         const topology = state.topologies.find((item) => `${item.code}@${item.version}` === body.topologyVersion && item.state === 'PUBLISHED');
         const missing = ['code', 'version', 'lineId', 'topologyVersion', 'ast', 'reason'].filter((key) => body[key] === undefined || body[key] === '');
         if (missing.length || !topology) return send(res, 422, problem(422, 'Validation Failed', missing.length ? `Missing fields: ${missing.join(', ')}.` : 'Published topology not found.', operationId), operationId);
+        if (base && !['PUBLISHED', 'RETIRED'].includes(base.state)) {
+          return send(res, 409, problem(409, 'Invalid Base Version', 'Only a published or retired rule can be copied.', operationId, base.revision), operationId);
+        }
         const boundSignals = new Set((topology.definition.bindings || []).map((binding) => binding.signal));
         const unbound = (body.ast.conditions || []).map((condition) => condition.signal).filter((signal) => !boundSignals.has(signal));
         if (unbound.length) return send(res, 422, problem(422, 'Validation Failed', `Rule conditions reference signals not bound by the topology: ${unbound.join(', ')}.`, operationId), operationId);
@@ -692,6 +695,7 @@ function createHandler(state) {
           approvalId: null, approvalStatus: 'NOT_REQUESTED', approvalRevision: 0,
           approvalSubmittedBy: null, approvalSubmittedAt: null,
           approvalDecidedBy: null, approvalDecidedAt: null,
+          lifecycleAction: 'NOT_PUBLISHED', lifecycleSequence: 0, lifecycleActive: false,
           publicationStatus: 'NOT_PUBLISHED',
           publicationRevision: 0, publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
           publicationManualRetryCount: 0, publicationPublishedAt: null,
@@ -740,6 +744,10 @@ function createHandler(state) {
         if (missing.length) {
           const response = problem(422, 'Validation Failed', `Missing fields: ${missing.join(', ')}.`, operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (!['DRAFT', 'SIMULATION_PASSED'].includes(rule.state)) {
+          const response = problem(409, 'Invalid Rule State', `Rule cannot be simulated from state ${rule.state}.`, operationId, rule.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
         }
         const simulation = {
           id: stableUuid({ type: 'simulation', ruleId: rule.id }), ruleId: rule.id, state: 'PASSED',
@@ -827,6 +835,9 @@ function createHandler(state) {
         rule.approvalRevision += 1;
         rule.approvalDecidedBy = 'simulated.bpi.admin';
         rule.approvalDecidedAt = FIXED_TIME;
+        rule.lifecycleAction = 'ACTIVATE';
+        rule.lifecycleSequence += 1;
+        rule.lifecycleActive = true;
         rule.publicationStatus = 'PENDING';
         rule.publicationRevision = 1;
         rule.publicationAttemptCount = 0;
@@ -852,6 +863,53 @@ function createHandler(state) {
         rule.revision += 1;
         const response = envelope(operationId, rule);
         return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/retire$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'retireRuleVersion';
+        const rule = state.rules.find((item) => item.id === ids[0]);
+        if (!rule) return send(res, 404, problem(404, 'Not Found', 'Rule not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, rule.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const readyToRetire = rule.state === 'PUBLISHED'
+          && rule.lifecycleAction === 'ACTIVATE'
+          && rule.lifecycleActive
+          && rule.publicationStatus === 'PUBLISHED'
+          && rule.applicationStatus === 'APPLIED'
+          && ['READY', 'DEGRADED'].includes(rule.runtimeReadinessStatus);
+        if (!body.reason || String(body.reason).trim().length < 3 || !readyToRetire) {
+          const response = problem(409, 'Invalid Retirement State', 'Rule retirement requires Kafka PUBLISHED, Flink APPLIED and a known active runtime state.', operationId, rule.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        rule.state = 'RETIRED';
+        rule.lifecycleAction = 'RETIRE';
+        rule.lifecycleSequence += 1;
+        rule.lifecycleActive = false;
+        rule.publicationStatus = 'PENDING';
+        rule.publicationRevision = 1;
+        rule.publicationAttemptCount = 0;
+        rule.publicationTotalAttemptCount = 0;
+        rule.publicationManualRetryCount = 0;
+        rule.publicationPublishedAt = null;
+        rule.publicationLastRequeuedAt = null;
+        rule.publicationLastError = null;
+        rule.applicationStatus = 'WAITING';
+        rule.applicationDeploymentId = null;
+        rule.applicationObservedAt = null;
+        rule.applicationReceivedAt = null;
+        rule.applicationErrorCode = null;
+        rule.applicationErrorDetail = null;
+        rule.runtimeReadinessStatus = 'WAITING';
+        rule.runtimeReadinessDeploymentId = null;
+        rule.runtimeReadinessObservedAt = null;
+        rule.runtimeReadinessReceivedAt = null;
+        rule.runtimeReadinessReasonCode = null;
+        rule.runtimeReadinessDetail = null;
+        rule.runtimePointCatalogEventId = null;
+        rule.runtimePointCatalogSourceRevision = null;
+        rule.revision += 1;
+        return rememberAndSend(state, context, res, 200, envelope(operationId, rule), operationId);
       }
       ids = match(path, /^\/bpi\/v1\/rules\/([^/]+)\/publication\/retry$/);
       if (req.method === 'POST' && ids) {

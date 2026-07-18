@@ -39,7 +39,10 @@ public class RulePostgresRepository {
                    a.submitted_at AS approval_submitted_at,
                    a.decided_by AS approval_decided_by,
                    a.decided_at AS approval_decided_at,
-                   COALESCE(o.status, CASE WHEN r.state = 'PUBLISHED'
+                   COALESCE(o.lifecycle_action, 'NOT_PUBLISHED') AS lifecycle_action,
+                   COALESCE(o.lifecycle_sequence, 0) AS lifecycle_sequence,
+                   COALESCE(o.lifecycle_active, false) AS lifecycle_active,
+                   COALESCE(o.status, CASE WHEN r.state IN ('PUBLISHED', 'RETIRED')
                        THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS publication_status,
                    COALESCE(o.revision, 0) AS publication_revision,
                    COALESCE(o.attempt_count, 0) AS publication_attempt_count,
@@ -48,14 +51,14 @@ public class RulePostgresRepository {
                    o.published_at AS publication_published_at,
                    o.last_requeued_at AS publication_last_requeued_at,
                    o.last_error AS publication_last_error,
-                   COALESCE(o.application_status, CASE WHEN r.state = 'PUBLISHED'
+                   COALESCE(o.application_status, CASE WHEN r.state IN ('PUBLISHED', 'RETIRED')
                        THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS application_status,
                    o.application_deployment_id,
                    o.application_observed_at,
                    o.application_received_at,
                    o.application_error_code,
                    o.application_error_detail,
-                   COALESCE(o.runtime_readiness_status, CASE WHEN r.state = 'PUBLISHED'
+                   COALESCE(o.runtime_readiness_status, CASE WHEN r.state IN ('PUBLISHED', 'RETIRED')
                        THEN 'NOT_TRACKED' ELSE 'NOT_PUBLISHED' END) AS runtime_readiness_status,
                    o.runtime_readiness_deployment_id,
                    o.runtime_readiness_observed_at,
@@ -77,11 +80,16 @@ public class RulePostgresRepository {
                    ORDER BY approval.submitted_at DESC, approval.id
                    LIMIT 1
               ) a ON true
-              LEFT JOIN bpi.bpi_outbox_events o
-                ON o.tenant_id = r.tenant_id
-               AND o.aggregate_type = 'RULE_VERSION'
-               AND o.aggregate_id = r.id
-               AND o.event_type = 'BOUNDARY_RULE_PUBLISHED'
+              LEFT JOIN LATERAL (
+                  SELECT lifecycle_event.*
+                    FROM bpi.bpi_outbox_events lifecycle_event
+                   WHERE lifecycle_event.tenant_id = r.tenant_id
+                     AND lifecycle_event.aggregate_type = 'RULE_VERSION'
+                     AND lifecycle_event.aggregate_id = r.id
+                     AND lifecycle_event.event_type = 'BOUNDARY_RULE_PUBLISHED'
+                   ORDER BY lifecycle_event.lifecycle_sequence DESC
+                   LIMIT 1
+              ) o ON true
             """;
     private static final String TOPOLOGY_SELECT = """
             SELECT id, topology_code, version, state, revision, plant_id, line_id,
@@ -360,6 +368,65 @@ public class RulePostgresRepository {
                 .addValue("id", ruleId), String.class);
     }
 
+    public void lockRuleCodeScope(ActorContext actor, RuleVersionView rule) {
+        String lockKey = String.join("|", actor.tenantId(), rule.plantId(), rule.lineId(), rule.code());
+        jdbc.query(
+                "SELECT pg_advisory_xact_lock(hashtextextended(:lockKey, 0))",
+                new MapSqlParameterSource().addValue("lockKey", lockKey),
+                rs -> null);
+    }
+
+    public void assertRulePublicationHandoffReady(ActorContext actor, RuleVersionView rule) {
+        Integer activeVersions = jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_rule_versions existing
+                 WHERE existing.tenant_id = :tenantId
+                   AND existing.plant_id = :plantId
+                   AND existing.line_id = :lineId
+                   AND existing.rule_code = :ruleCode
+                   AND existing.state = 'PUBLISHED'
+                   AND existing.id <> :ruleId
+                """, ruleScope(actor, rule), Integer.class);
+        if (activeVersions != null && activeVersions > 0) {
+            throw new BpiConflictException(
+                    "Retire the currently published rule version before publishing its replacement.",
+                    rule.revision());
+        }
+
+        Integer incompleteRetirements = jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_rule_versions retired
+                  LEFT JOIN LATERAL (
+                      SELECT lifecycle_event.lifecycle_action,
+                             lifecycle_event.status,
+                             lifecycle_event.application_status,
+                             lifecycle_event.runtime_readiness_status
+                        FROM bpi.bpi_outbox_events lifecycle_event
+                       WHERE lifecycle_event.tenant_id = retired.tenant_id
+                         AND lifecycle_event.aggregate_type = 'RULE_VERSION'
+                         AND lifecycle_event.aggregate_id = retired.id
+                         AND lifecycle_event.event_type = 'BOUNDARY_RULE_PUBLISHED'
+                       ORDER BY lifecycle_event.lifecycle_sequence DESC
+                       LIMIT 1
+                  ) lifecycle ON true
+                 WHERE retired.tenant_id = :tenantId
+                   AND retired.plant_id = :plantId
+                   AND retired.line_id = :lineId
+                   AND retired.rule_code = :ruleCode
+                   AND retired.state = 'RETIRED'
+                   AND retired.id <> :ruleId
+                   AND (lifecycle.lifecycle_action IS DISTINCT FROM 'RETIRE'
+                        OR lifecycle.status IS DISTINCT FROM 'PUBLISHED'
+                        OR lifecycle.application_status IS DISTINCT FROM 'APPLIED'
+                        OR lifecycle.runtime_readiness_status IS DISTINCT FROM 'INACTIVE')
+                """, ruleScope(actor, rule), Integer.class);
+        if (incompleteRetirements != null && incompleteRetirements > 0) {
+            throw new BpiConflictException(
+                    "The previous rule retirement must reach Kafka PUBLISHED, Flink APPLIED and runtime INACTIVE before replacement publication.",
+                    rule.revision());
+        }
+    }
+
     public void insertRuleDraft(
             ActorContext actor,
             UUID id,
@@ -612,22 +679,47 @@ public class RulePostgresRepository {
         if (approvalUpdated != 1) {
             throw new BpiConflictException("Rule approval was already decided.", approval.revision());
         }
-        int ruleUpdated = jdbc.update("""
+        int ruleUpdated;
+        try {
+            ruleUpdated = jdbc.update("""
+                    UPDATE bpi.bpi_rule_versions
+                       SET state = 'PUBLISHED', revision = revision + 1,
+                           updated_by = :actorId, updated_at = now()
+                     WHERE tenant_id = :tenantId AND id = :ruleId
+                       AND revision = :expectedRevision
+                       AND state = 'PENDING_APPROVAL'
+                       AND latest_simulation_id = :simulationId
+                    """, new MapSqlParameterSource()
+                    .addValue("actorId", actor.userId())
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("ruleId", rule.id())
+                    .addValue("expectedRevision", rule.revision())
+                    .addValue("simulationId", approval.simulationId()));
+        } catch (DataIntegrityViolationException exception) {
+            throw new BpiConflictException(
+                    "Another version of this rule is already published in the same scope.",
+                    rule.revision());
+        }
+        if (ruleUpdated != 1) {
+            throw new BpiConflictException("Rule is not ready for approval.", rule.revision());
+        }
+    }
+
+    public void retireRule(ActorContext actor, RuleVersionView rule) {
+        int updated = jdbc.update("""
                 UPDATE bpi.bpi_rule_versions
-                   SET state = 'PUBLISHED', revision = revision + 1,
+                   SET state = 'RETIRED', revision = revision + 1,
                        updated_by = :actorId, updated_at = now()
                  WHERE tenant_id = :tenantId AND id = :ruleId
                    AND revision = :expectedRevision
-                   AND state = 'PENDING_APPROVAL'
-                   AND latest_simulation_id = :simulationId
+                   AND state = 'PUBLISHED'
                 """, new MapSqlParameterSource()
                 .addValue("actorId", actor.userId())
                 .addValue("tenantId", actor.tenantId())
                 .addValue("ruleId", rule.id())
-                .addValue("expectedRevision", rule.revision())
-                .addValue("simulationId", approval.simulationId()));
-        if (ruleUpdated != 1) {
-            throw new BpiConflictException("Rule is not ready for approval.", rule.revision());
+                .addValue("expectedRevision", rule.revision()));
+        if (updated != 1) {
+            throw new BpiConflictException("Rule can no longer be retired.", rule.revision());
         }
     }
 
@@ -726,6 +818,8 @@ public class RulePostgresRepository {
                 approvalSubmittedAt == null ? null : approvalSubmittedAt.toInstant(),
                 rs.getString("approval_decided_by"),
                 approvalDecidedAt == null ? null : approvalDecidedAt.toInstant(),
+                rs.getString("lifecycle_action"), rs.getLong("lifecycle_sequence"),
+                rs.getBoolean("lifecycle_active"),
                 rs.getString("publication_status"), rs.getLong("publication_revision"),
                 rs.getInt("publication_attempt_count"), rs.getInt("publication_total_attempt_count"),
                 rs.getInt("publication_manual_retry_count"),
@@ -744,6 +838,15 @@ public class RulePostgresRepository {
                 rs.getString("runtime_readiness_detail"),
                 rs.getString("runtime_point_catalog_event_id"),
                 rs.getString("runtime_point_catalog_source_revision"));
+    }
+
+    private MapSqlParameterSource ruleScope(ActorContext actor, RuleVersionView rule) {
+        return new MapSqlParameterSource()
+                .addValue("tenantId", actor.tenantId())
+                .addValue("plantId", rule.plantId())
+                .addValue("lineId", rule.lineId())
+                .addValue("ruleCode", rule.code())
+                .addValue("ruleId", rule.id());
     }
 
     private RuleApprovalView mapApproval(java.sql.ResultSet rs) throws java.sql.SQLException {

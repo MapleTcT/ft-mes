@@ -37,13 +37,30 @@ public class RulePublicationOutboxRepository {
             ActorContext actor,
             RuleVersionView rule,
             RulePublicationEnvelope event) {
+        insertPublication(actor, rule, event, "ACTIVATE", true);
+    }
+
+    public void insertPublication(
+            ActorContext actor,
+            RuleVersionView rule,
+            RulePublicationEnvelope event,
+            String lifecycleAction,
+            boolean lifecycleActive) {
         jdbc.update("""
                 INSERT INTO bpi.bpi_outbox_events
                     (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
-                     event_type, topic, partition_key, payload, headers)
+                     event_type, topic, partition_key, payload, headers,
+                     lifecycle_action, lifecycle_sequence, lifecycle_active)
                 VALUES (:id, :tenantId, :plantId, :lineId, 'RULE_VERSION', :aggregateId,
                         'BOUNDARY_RULE_PUBLISHED', :topic, :partitionKey, :payload,
-                        CAST(:headers AS jsonb))
+                        CAST(:headers AS jsonb), :lifecycleAction,
+                        (SELECT COALESCE(MAX(existing.lifecycle_sequence), 0) + 1
+                           FROM bpi.bpi_outbox_events existing
+                          WHERE existing.tenant_id = :tenantId
+                            AND existing.aggregate_type = 'RULE_VERSION'
+                            AND existing.aggregate_id = :aggregateId
+                            AND existing.event_type = 'BOUNDARY_RULE_PUBLISHED'),
+                        :lifecycleActive)
                 """, new MapSqlParameterSource()
                 .addValue("id", event.eventId())
                 .addValue("tenantId", actor.tenantId())
@@ -53,7 +70,9 @@ public class RulePublicationOutboxRepository {
                 .addValue("topic", event.topic())
                 .addValue("partitionKey", event.partitionKey())
                 .addValue("payload", event.payload())
-                .addValue("headers", writeJson(event.headers())));
+                .addValue("headers", writeJson(event.headers()))
+                .addValue("lifecycleAction", lifecycleAction)
+                .addValue("lifecycleActive", lifecycleActive));
     }
 
     @Transactional
@@ -149,6 +168,8 @@ public class RulePublicationOutboxRepository {
                        AND aggregate_type = 'RULE_VERSION'
                        AND aggregate_id = :ruleId
                        AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                     ORDER BY lifecycle_sequence DESC
+                     LIMIT 1
                      FOR UPDATE
                     """, new MapSqlParameterSource()
                     .addValue("tenantId", actor.tenantId())
@@ -164,6 +185,7 @@ public class RulePublicationOutboxRepository {
     public RulePublicationView requeueFailed(
             ActorContext actor,
             UUID ruleId,
+            UUID publicationId,
             long expectedRevision) {
         int updated = jdbc.update("""
                 UPDATE bpi.bpi_outbox_events
@@ -177,12 +199,14 @@ public class RulePublicationOutboxRepository {
                    AND aggregate_type = 'RULE_VERSION'
                    AND aggregate_id = :ruleId
                    AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                   AND id = :publicationId
                    AND status = 'FAILED'
                    AND revision = :expectedRevision
                 """, new MapSqlParameterSource()
                 .addValue("actorId", actor.userId())
                 .addValue("tenantId", actor.tenantId())
                 .addValue("ruleId", ruleId)
+                .addValue("publicationId", publicationId)
                 .addValue("expectedRevision", expectedRevision));
         if (updated != 1) {
             throw new BpiConflictException("Rule publication can no longer be retried.", expectedRevision);

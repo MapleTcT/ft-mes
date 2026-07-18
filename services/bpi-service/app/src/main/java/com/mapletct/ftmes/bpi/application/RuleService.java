@@ -314,8 +314,9 @@ public class RuleService {
             if (base.revision() != expectedRevision) {
                 throw new BpiConflictException("Base rule revision is stale.", base.revision());
             }
-            if (!"PUBLISHED".equals(base.state())) {
-                throw new BpiConflictException("Only a published rule can be copied.", base.revision());
+            if (!Set.of("PUBLISHED", "RETIRED").contains(base.state())) {
+                throw new BpiConflictException(
+                        "Only a published or retired rule can be copied into a new draft.", base.revision());
             }
             if (!base.code().equals(command.code()) || !base.lineId().equals(command.lineId())) {
                 throw new BpiValidationException("A copied rule must keep its code and line scope.");
@@ -468,6 +469,8 @@ public class RuleService {
             throw new BpiValidationException(
                     "Rule publication requires current READY point catalog bindings: " + codes + ".");
         }
+        repository.lockRuleCodeScope(actor, rule);
+        repository.assertRulePublicationHandoffReady(actor, rule);
         UUID publicationEventId = UUID.randomUUID();
         var publication = publicationFactory.create(
                 actor, rule, topology, definition, publicationEventId, Instant.now(),
@@ -596,12 +599,73 @@ public class RuleService {
             throw new BpiConflictException(
                     "Only a FAILED rule publication can be retried.", before.revision());
         }
-        RulePublicationView after = outboxRepository.requeueFailed(actor, ruleId, before.revision());
+        RulePublicationView after = outboxRepository.requeueFailed(
+                actor, ruleId, before.id(), before.revision());
         outboxRepository.insertPublicationAudit(
                 actor, rule, before, after, command.reason(), traceId);
         RuleVersionView requeued = repository.findRule(actor, ruleId);
         sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(requeued));
         return new CommandResult<>(requeued, false);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<RuleVersionView> retire(
+            ActorContext actor,
+            UUID ruleId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateHeaders(idempotencyKey, ifMatch);
+        long expectedRevision = parseRevision(ifMatch);
+        RuleVersionView visible = repository.findRule(actor, ruleId);
+        assertRuleManagementEnabled(actor, visible);
+        String path = "/bpi/v1/rules/" + ruleId + "/retire";
+        String requestChecksum = Checksums.sha256(ruleId + "|" + expectedRevision + "|" + writeJson(command));
+        CommandResult<RuleVersionView> replay = replay(
+                actor, idempotencyKey, path, requestChecksum, new TypeReference<RuleVersionView>() {});
+        if (replay != null) return replay;
+
+        RuleVersionView rule = repository.lockRule(actor, ruleId);
+        if (rule.revision() != expectedRevision) {
+            throw new BpiConflictException("Rule revision is stale.", rule.revision());
+        }
+        if (!"PUBLISHED".equals(rule.state())) {
+            throw new BpiConflictException("Only a published rule can be retired.", rule.revision());
+        }
+        if (!"ACTIVATE".equals(rule.lifecycleAction()) || !rule.lifecycleActive()
+                || rule.lifecycleSequence() < 1) {
+            throw new BpiConflictException(
+                    "Rule activation lifecycle evidence is missing; retirement cannot be proven safe.",
+                    rule.revision());
+        }
+        if (!"PUBLISHED".equals(rule.publicationStatus())
+                || !"APPLIED".equals(rule.applicationStatus())
+                || !Set.of("READY", "DEGRADED").contains(rule.runtimeReadinessStatus())) {
+            throw new BpiConflictException(
+                    "Rule retirement requires Kafka PUBLISHED, Flink APPLIED and a known active runtime state.",
+                    rule.revision());
+        }
+
+        repository.lockRuleCodeScope(actor, rule);
+        BoundaryRuleDefinition definition = definitionParser.parse(rule);
+        TopologyVersionView topology = repository.findTopologyForRule(actor, rule.id());
+        UUID retirementEventId = UUID.randomUUID();
+        var retirement = publicationFactory.create(
+                actor, rule, topology, definition, retirementEventId, Instant.now(),
+                outboxProperties.topic(), traceId, false);
+        repository.retireRule(actor, rule);
+        outboxRepository.insertPublication(actor, rule, retirement, "RETIRE", false);
+        repository.insertRuleAudit(
+                actor, rule, "RULE_RETIRED", rule.revision(), rule.revision() + 1,
+                command.reason(), traceId,
+                Map.of("retirementEventId", retirementEventId,
+                        "previousLifecycleSequence", rule.lifecycleSequence(),
+                        "nextLifecycleSequence", rule.lifecycleSequence() + 1,
+                        "previousRuntimeReadiness", rule.runtimeReadinessStatus()));
+        RuleVersionView retired = repository.findRule(actor, rule.id());
+        sharedRepository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(retired));
+        return new CommandResult<>(retired, false);
     }
 
     private List<Instant> evaluate(

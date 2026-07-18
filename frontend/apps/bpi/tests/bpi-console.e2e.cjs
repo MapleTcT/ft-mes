@@ -523,6 +523,74 @@ test('process engineer submits replay proof and an independent administrator pub
   await page.getByRole('heading', { name: '流式评估器运行就绪' }).scrollIntoViewIfNeeded();
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-rule-application-applied.png', fullPage: true });
+
+  await page.getByRole('button', { name: '管理员退役' }).click();
+  await page.getByRole('heading', { name: '退役边界规则' }).waitFor();
+  await page.locator('#confirm-reason').fill('替代版本发布前按变更窗口停用当前在线规则');
+  await page.getByRole('button', { name: '确认退役并停用' }).click();
+  await page.getByText('规则 RULE-S07-START@1.2.0 已退役，等待 Kafka 与 Flink 确认 INACTIVE').waitFor();
+  await page.locator('.batch-state-band').getByText('RETIRED', { exact: true }).waitFor();
+  await page.getByRole('heading', { name: '生命周期命令' }).waitFor();
+  await page.locator('.lifecycle-summary').getByText('RETIRE', { exact: true }).waitFor();
+  await page.locator('.lifecycle-summary').getByText('#2', { exact: true }).waitFor();
+  await page.locator('.lifecycle-summary').getByText('INACTIVE', { exact: true }).waitFor();
+  await page.getByText('退役状态与 active=false 停用事件已同事务落库，等待 Kafka 分发。').waitFor();
+  const retiredRule = await fetch(`${simulatorUrl}/bpi/v1/rules/${RULE_ID}`).then((response) => response.json());
+  assert.equal(retiredRule.data.state, 'RETIRED');
+  assert.equal(retiredRule.data.lifecycleAction, 'RETIRE');
+  assert.equal(retiredRule.data.lifecycleSequence, 2);
+  assert.equal(retiredRule.data.lifecycleActive, false);
+  assert.equal(retiredRule.data.publicationStatus, 'PENDING');
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-retirement-pending.png', fullPage: true });
+
+  const completeRetirement = await fetch(`${simulatorUrl}/__simulation/complete-rule-publication`, { method: 'POST' });
+  assert.equal(completeRetirement.status, 200);
+  const applyRetirement = await fetch(`${simulatorUrl}/__simulation/rule-application`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'APPLIED', deploymentId: 'flink-simulator-retirement' }),
+  });
+  assert.equal(applyRetirement.status, 200);
+  const inactiveReadiness = await fetch(`${simulatorUrl}/__simulation/rule-runtime-readiness`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventId: 'e2e-readiness-inactive-0003',
+      status: 'INACTIVE',
+      deploymentId: 'flink-simulator-retirement',
+      observedAt: '2026-07-12T08:01:00.000Z',
+      receivedAt: '2026-07-12T08:01:01.000Z',
+      reasonCode: 'RULE_INACTIVE',
+      detail: 'retired rule version removed from the evaluator',
+      pointCatalogEventId: 'catalog-event-43',
+      pointCatalogSourceRevision: 'sha256:catalog-43',
+    }),
+  });
+  assert.equal(inactiveReadiness.status, 200);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-rule-id]').click();
+  await page.getByText('Kafka 已确认', { exact: true }).last().waitFor();
+  await page.getByText('控制面 APPLIED', { exact: true }).last().waitFor();
+  await page.getByText('运行时 INACTIVE', { exact: true }).last().waitFor();
+  await page.getByText('该精确规则版本已从评估器停用，不会参与新的边界计算。').waitFor();
+  await page.getByRole('button', { name: '创建回滚草稿' }).click();
+  await page.getByRole('heading', { name: '创建回滚规则草稿' }).waitFor();
+  assert.equal(await page.locator('#rule-base').inputValue(), RULE_ID);
+  assert.equal(await page.locator('#rule-code').inputValue(), 'RULE-S07-START');
+  await page.locator('#rule-version').fill('1.2.1');
+  await page.locator('#rule-reason').fill('从已确认 INACTIVE 的稳定版本创建受控回滚草稿');
+  await page.getByRole('button', { name: '创建草稿' }).click();
+  await page.getByText('规则草稿 RULE-S07-START@1.2.1 已创建').waitFor();
+  await page.getByRole('heading', { name: 'RULE-S07-START@1.2.1' }).waitFor();
+  await page.locator('.batch-state-band').getByText('DRAFT', { exact: true }).waitFor();
+  const rollbackRules = await fetch(`${simulatorUrl}/bpi/v1/rules?plantId=PLANT-01`).then((response) => response.json());
+  const rollbackRule = rollbackRules.data.find((item) => item.version === '1.2.1');
+  assert.ok(rollbackRule);
+  assert.equal(rollbackRule.state, 'DRAFT');
+  assert.notEqual(rollbackRule.id, RULE_ID);
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-rule-rollback-draft.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

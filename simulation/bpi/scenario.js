@@ -143,6 +143,7 @@ function createScenario() {
     approvalId: null, approvalStatus: 'NOT_REQUESTED', approvalRevision: 0,
     approvalSubmittedBy: null, approvalSubmittedAt: null,
     approvalDecidedBy: null, approvalDecidedAt: null,
+    lifecycleAction: 'NOT_PUBLISHED', lifecycleSequence: 0, lifecycleActive: false,
     publicationStatus: 'NOT_PUBLISHED', publicationRevision: 0,
     publicationAttemptCount: 0, publicationTotalAttemptCount: 0,
     publicationManualRetryCount: 0, publicationPublishedAt: null,

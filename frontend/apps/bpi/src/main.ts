@@ -69,7 +69,7 @@ const state = {
   selectedSimulation: null as RuleSimulation | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
-  ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | null,
+  ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
@@ -130,9 +130,15 @@ function publicationChip(status: RuleVersion['publicationStatus']): string {
 
 function publicationExplanation(rule: RuleVersion): string {
   if (rule.publicationStatus === 'PUBLISHED') {
-    return '发布事件已获 Kafka broker 确认；是否进入运行态仍以 Flink 应用回执为准。';
+    return rule.lifecycleAction === 'RETIRE'
+      ? '停用事件已获 Kafka broker 确认；规则是否真正退出评估器仍以 Flink APPLIED 与 INACTIVE 回执为准。'
+      : '发布事件已获 Kafka broker 确认；是否进入运行态仍以 Flink 应用回执为准。';
   }
-  if (rule.publicationStatus === 'PENDING') return '发布事件已与规则版本同事务落库，等待 Kafka 分发。';
+  if (rule.publicationStatus === 'PENDING') {
+    return rule.lifecycleAction === 'RETIRE'
+      ? '退役状态与 active=false 停用事件已同事务落库，等待 Kafka 分发。'
+      : '发布事件已与规则版本同事务落库，等待 Kafka 分发。';
+  }
   if (rule.publicationStatus === 'DISPATCHING') return '服务正在向 Kafka 分发规则事件。';
   if (rule.publicationStatus === 'FAILED') return '规则事件已达到重试上限；需排查 Kafka，并按运维流程重新入队。';
   if (rule.publicationStatus === 'NOT_TRACKED') return '该版本缺少 outbox 发布证据，不能视为在线生效。';
@@ -152,13 +158,17 @@ function applicationChip(status: RuleVersion['applicationStatus']): string {
 
 function applicationExplanation(rule: RuleVersion): string {
   if (rule.applicationStatus === 'APPLIED') {
-    return '控制面已接受该规则版本，APPLIED 回执经 checkpoint 提交后完成作用域与 checksum 校验并写入 PostgreSQL；这不代表流式评估器已 READY。';
+    return rule.lifecycleAction === 'RETIRE'
+      ? '控制面已接受停用指令；只有运行态继续返回 INACTIVE，才能确认该版本已退出新的边界计算。'
+      : '控制面已接受该规则版本，APPLIED 回执经 checkpoint 提交后完成作用域与 checksum 校验并写入 PostgreSQL；这不代表流式评估器已 READY。';
   }
   if (rule.applicationStatus === 'REJECTED') {
     return 'Flink 已拒绝该规则版本；排除拒绝原因并收到 APPLIED 回执前，该版本不能视为在线生效。';
   }
   if (rule.applicationStatus === 'WAITING') {
-    return '尚未收到 Flink 应用回执；即使 Kafka 已确认，也不能将该规则标记为在线生效。';
+    return rule.lifecycleAction === 'RETIRE'
+      ? '尚未收到 Flink 对停用事件的应用回执；当前不能确认规则已经退出评估器。'
+      : '尚未收到 Flink 应用回执；即使 Kafka 已确认，也不能将该规则标记为在线生效。';
   }
   if (rule.applicationStatus === 'NOT_TRACKED') {
     return '该已发布版本没有可核验的应用回执链路，运行态状态未知。';
@@ -265,7 +275,7 @@ function shell(): void {
       </dialog>
       <dialog id="rule-editor-dialog" class="command-dialog editor-dialog">
         <form method="dialog" id="rule-editor-form">
-          <header><div><span>边界治理</span><h2>新建规则版本</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <header><div><span>边界治理</span><h2 id="rule-editor-title">新建规则版本</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
           <div class="editor-fields">
             <label><span>起始版本</span><select id="rule-base"><option value="">全新规则</option></select></label>
             <label><span>规则编码</span><input id="rule-code" required maxlength="128" pattern="[A-Za-z0-9](?:[A-Za-z0-9._:]|-)*" /></label>
@@ -802,7 +812,7 @@ function renderRules(): void {
   content.querySelectorAll('[data-rule-id]').forEach((row) => row.addEventListener('click', () => void openRule(String((row as HTMLElement).dataset.ruleId))));
   content.querySelectorAll('[data-topology-id]').forEach((row) => row.addEventListener('click', () => void openTopology(String((row as HTMLElement).dataset.topologyId))));
   content.querySelector('#new-topology')?.addEventListener('click', openTopologyEditor);
-  content.querySelector('#new-rule')?.addEventListener('click', openRuleEditor);
+  content.querySelector('#new-rule')?.addEventListener('click', () => openRuleEditor());
   content.querySelector<HTMLInputElement>('#rule-search')?.addEventListener('input', (event) => {
     const keyword = (event.target as HTMLInputElement).value.trim().toLowerCase();
     content.querySelectorAll<HTMLTableRowElement>('[data-rule-id]').forEach((row) => { row.hidden = !row.textContent!.toLowerCase().includes(keyword); });
@@ -944,15 +954,15 @@ async function handleTopologyDraft(event: SubmitEvent): Promise<void> {
   finally { button.disabled = false; button.textContent = '创建草稿'; }
 }
 
-function openRuleEditor(): void {
+function openRuleEditor(preferredBaseId?: string): void {
   const topologies = state.topologies.filter((item) => item.state === 'PUBLISHED');
   if (!topologies.length) {
     showToast('请先校验并发布一个拓扑版本', true);
     return;
   }
-  const publishedRules = state.rules.filter((item) => item.state === 'PUBLISHED');
+  const controlledRules = state.rules.filter((item) => ['PUBLISHED', 'RETIRED'].includes(item.state));
   const base = document.querySelector<HTMLSelectElement>('#rule-base')!;
-  base.innerHTML = `<option value="">全新规则</option>${publishedRules.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.code)}@${escapeHtml(item.version)}</option>`).join('')}`;
+  base.innerHTML = `<option value="">全新规则</option>${controlledRules.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.code)}@${escapeHtml(item.version)} · ${item.state === 'RETIRED' ? '回滚来源' : '已发布'}</option>`).join('')}`;
   const topologySelect = document.querySelector<HTMLSelectElement>('#rule-topology')!;
   topologySelect.innerHTML = topologies.map((item) => `<option value="${escapeHtml(item.code)}@${escapeHtml(item.version)}">${escapeHtml(item.code)}@${escapeHtml(item.version)} · ${escapeHtml(item.lineId)}</option>`).join('');
   topologySelect.onchange = applyRuleTopology;
@@ -960,6 +970,11 @@ function openRuleEditor(): void {
   document.querySelector<HTMLInputElement>('#rule-version')!.value = '';
   applyRuleTopology();
   document.querySelector<HTMLTextAreaElement>('#rule-reason')!.value = '';
+  document.querySelector('#rule-editor-title')!.textContent = preferredBaseId ? '创建回滚规则草稿' : '新建规则版本';
+  if (preferredBaseId && controlledRules.some((item) => item.id === preferredBaseId)) {
+    base.value = preferredBaseId;
+    applyRuleBase();
+  }
   document.querySelector<HTMLDialogElement>('#rule-editor-dialog')!.showModal();
 }
 
@@ -1086,16 +1101,33 @@ async function openRule(ruleId: string): Promise<void> {
       ? `<div class="error-callout"><strong>${escapeHtml(rule.runtimeReadinessReasonCode || 'RUNTIME_NOT_READY')}</strong>${rule.runtimeReadinessDetail ? `<span>${escapeHtml(rule.runtimeReadinessDetail)}</span>` : ''}</div>`
       : '';
     const approvalHtml = `<div class="section-title"><h3>版本审批</h3>${statusChip(rule.approvalStatus)}</div><div class="facts-grid"><div><span>提交人</span><b>${escapeHtml(rule.approvalSubmittedBy || '-')}</b></div><div><span>提交时间</span><b>${formatTime(rule.approvalSubmittedAt)}</b></div><div><span>决定人</span><b>${escapeHtml(rule.approvalDecidedBy || '-')}</b></div><div><span>决定时间</span><b>${formatTime(rule.approvalDecidedAt)}</b></div></div><p>${rule.approvalStatus === 'PENDING' ? '规则已冻结在待审批状态，必须由不同于创建人和提交人的管理员批准。' : rule.approvalStatus === 'APPROVED' ? '审批与发布审计已落库，后续运行状态仍以 Kafka 和 Flink 回执为准。' : rule.approvalStatus === 'REJECTED' ? '该审批已驳回，规则退回草稿并需要重新模拟。' : '最近一次模拟通过后可提交审批。'}</p>`;
+    const lifecycleHtml = `<div class="lifecycle-summary"><div class="section-title"><h3>生命周期命令</h3>${statusChip(rule.lifecycleAction)}</div><div class="facts-grid"><div><span>动作</span><b>${rule.lifecycleAction === 'RETIRE' ? '退役停用' : rule.lifecycleAction === 'ACTIVATE' ? '发布激活' : '尚未发布'}</b></div><div><span>序号</span><b>#${rule.lifecycleSequence}</b></div><div><span>期望在线状态</span><b>${rule.lifecycleActive ? 'ACTIVE' : 'INACTIVE'}</b></div><div><span>规则状态</span><b>${escapeHtml(rule.state)}</b></div></div></div>`;
     const comparisonHtml = versionComparisonHtml(comparison, '规则');
     const publicationHtml = `<div class="section-title"><h3>规则发布链路</h3>${publicationChip(rule.publicationStatus)}</div><div class="facts-grid"><div><span>本轮尝试</span><b>${rule.publicationAttemptCount}</b></div><div><span>累计尝试</span><b>${rule.publicationTotalAttemptCount}</b></div><div><span>人工重试</span><b>${rule.publicationManualRetryCount}</b></div><div><span>发布修订</span><b>r${rule.publicationRevision}</b></div><div><span>最近重新入队</span><b>${formatTime(rule.publicationLastRequeuedAt)}</b></div><div><span>Kafka 确认时间</span><b>${formatTime(rule.publicationPublishedAt)}</b></div></div><p>${escapeHtml(publicationExplanation(rule))}</p>${rule.publicationLastError ? `<div class="error-callout">${escapeHtml(rule.publicationLastError)}</div>` : ''}<div class="application-trace"><div class="section-title"><h3>控制面应用回执</h3>${applicationChip(rule.applicationStatus)}</div><div class="facts-grid"><div><span>控制面部署</span><b>${escapeHtml(rule.applicationDeploymentId || '-')}</b></div><div><span>Flink 观察时间</span><b>${formatTime(rule.applicationObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.applicationReceivedAt)}</b></div><div><span>回执后修订</span><b>r${rule.publicationRevision}</b></div></div><p>${escapeHtml(applicationExplanation(rule))}</p>${applicationError}</div><div class="runtime-readiness-trace runtime-readiness-trace--${statusTone(rule.runtimeReadinessStatus)}"><div class="section-title"><h3>流式评估器运行就绪</h3>${runtimeReadinessChip(rule.runtimeReadinessStatus)}</div><div class="facts-grid"><div><span>规则版本</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>评估器部署</span><b>${escapeHtml(rule.runtimeReadinessDeploymentId || '-')}</b></div><div><span>运行观察时间</span><b>${formatTime(rule.runtimeReadinessObservedAt)}</b></div><div><span>BPI 接收时间</span><b>${formatTime(rule.runtimeReadinessReceivedAt)}</b></div><div><span>点位目录事件</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogEventId || '-')}</b></div><div><span>目录来源版本</span><b class="mono-value">${escapeHtml(rule.runtimePointCatalogSourceRevision || '-')}</b></div></div><p>${escapeHtml(runtimeReadinessExplanation(rule))}</p>${runtimeReadinessError}</div>`;
     const canSubmit = rule.state === 'SIMULATION_PASSED' && simulation?.state === 'PASSED';
     const canApprove = rule.state === 'PENDING_APPROVAL' && simulation?.state === 'PASSED';
+    const canSimulate = ['DRAFT', 'SIMULATION_PASSED'].includes(rule.state);
+    const canRetire = rule.state === 'PUBLISHED'
+      && rule.lifecycleAction === 'ACTIVATE'
+      && rule.lifecycleActive
+      && rule.publicationStatus === 'PUBLISHED'
+      && rule.applicationStatus === 'APPLIED'
+      && ['READY', 'DEGRADED'].includes(rule.runtimeReadinessStatus);
     openDrawer(`<header><div><span>受控边界规则</span><h2>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(rule.state)}</div><span>revision ${rule.revision}</span></div><div class="drawer-section facts-grid"><div><span>作用域</span><b>${escapeHtml(rule.plantId)} / ${escapeHtml(rule.lineId)}</b></div><div><span>拓扑版本</span><b>${escapeHtml(rule.topologyVersion)}</b></div><div><span>规则 checksum</span><b class="mono-value">${escapeHtml(rule.checksum)}</b></div><div><span>拓扑绑定</span><b>${topology?.definition.bindings?.length || 0} 个测点</b></div></div><div class="drawer-section"><div class="section-title"><h3>受控 AST 条件</h3><span>${ruleConditions(rule).length} 条</span></div><ul class="evidence-list rule-condition-list">${conditions}</ul></div><div class="drawer-section">${comparisonHtml}</div><div class="drawer-section">${simulationHtml}</div><div class="drawer-section">${approvalHtml}</div><div class="drawer-section">${publicationHtml}</div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button><button class="button button--secondary" id="open-simulation"><i data-lucide="play"></i>运行历史回放</button>${rule.publicationStatus === 'FAILED' ? '<button class="button button--danger" id="open-publication-retry">管理员重新入队</button>' : ''}${canApprove ? '<button class="button button--danger" id="open-rule-reject">管理员驳回</button><button class="button button--primary" id="open-rule-approve">管理员批准并发布</button>' : ''}${canSubmit ? '<button class="button button--primary" id="open-rule-submit">提交审批</button>' : ''}</footer>`);
+    const publicationSection = Array.from(document.querySelectorAll<HTMLElement>('.drawer-section'))
+      .find((section) => section.querySelector('h3')?.textContent === '规则发布链路');
+    publicationSection?.insertAdjacentHTML('afterbegin', lifecycleHtml);
+    if (!canSimulate) document.querySelector('#open-simulation')?.remove();
+    const actions = document.querySelector<HTMLElement>('.drawer-actions');
+    if (canRetire) actions?.insertAdjacentHTML('beforeend', '<button class="button button--danger" id="open-rule-retire">管理员退役</button>');
+    if (rule.state === 'RETIRED') actions?.insertAdjacentHTML('beforeend', '<button class="button button--primary" id="open-rule-rollback">创建回滚草稿</button>');
     document.querySelector('#open-simulation')?.addEventListener('click', openRuleSimulationDialog);
     document.querySelector('#open-rule-submit')?.addEventListener('click', () => openRulePublishDialog('submit'));
     document.querySelector('#open-rule-approve')?.addEventListener('click', () => openRulePublishDialog('approve'));
     document.querySelector('#open-rule-reject')?.addEventListener('click', openRuleRejectDialog);
     document.querySelector('#open-publication-retry')?.addEventListener('click', openRuleRetryDialog);
+    document.querySelector('#open-rule-retire')?.addEventListener('click', openRuleRetireDialog);
+    document.querySelector('#open-rule-rollback')?.addEventListener('click', () => openRuleEditor(rule.id));
   } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
 }
 
@@ -1240,6 +1272,27 @@ function openRuleRetryDialog(): void {
   reason.focus();
 }
 
+function openRuleRetireDialog(): void {
+  const rule = state.selectedRule;
+  if (!rule || rule.state !== 'PUBLISHED' || rule.lifecycleAction !== 'ACTIVATE') return;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.topologyCommand = null;
+  state.ruleCommand = 'retire';
+  document.querySelector('#command-kicker')!.textContent = '规则生命周期';
+  document.querySelector('#command-title')!.textContent = '退役边界规则';
+  document.querySelector('#command-reason-label')!.textContent = '退役依据';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>规则</span><b>${escapeHtml(rule.code)}@${escapeHtml(rule.version)}</b></div><div><span>当前证据</span><b>Kafka ${rule.publicationStatus} / Flink ${rule.applicationStatus}</b></div><div><span>处理结果</span><b>PUBLISHED → RETIRED</b></div><div><span>生命周期</span><b>#${rule.lifecycleSequence} → #${rule.lifecycleSequence + 1}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = '填写替代版本、变更单、停用窗口和现场复核依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = 'button button--danger';
+  button.textContent = '确认退役并停用';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
 async function handleRuleCommand(): Promise<void> {
   if (state.ruleCommand === 'submit' || state.ruleCommand === 'approve') {
     await handleRulePublish();
@@ -1265,6 +1318,30 @@ async function handleRuleCommand(): Promise<void> {
     } finally {
       button.disabled = false;
       button.textContent = '确认驳回';
+    }
+    return;
+  }
+  if (rule && state.ruleCommand === 'retire' && reason.length >= 3) {
+    const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+    button.disabled = true;
+    button.textContent = '退役中...';
+    try {
+      const response = await bpiApi.retireRule(rule, reason, commandId());
+      state.selectedRule = response.data;
+      state.rules = state.rules.map((item) => item.id === response.data.id ? response.data : item);
+      document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+      state.ruleCommand = null;
+      showToast(`规则 ${response.data.code}@${response.data.version} 已退役，等待 Kafka 与 Flink 确认 INACTIVE`);
+      renderRules();
+      await openRule(response.data.id);
+    } catch (error) {
+      if (error instanceof ApiProblem && error.problem.status === 409) {
+        showToast(`退役前置状态已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+        await openRule(rule.id);
+      } else showToast(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      button.disabled = false;
+      button.textContent = '确认退役并停用';
     }
     return;
   }

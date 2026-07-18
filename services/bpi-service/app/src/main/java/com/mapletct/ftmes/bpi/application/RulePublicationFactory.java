@@ -40,6 +40,19 @@ public class RulePublicationFactory {
             Instant publishedAt,
             String topic,
             String traceId) {
+        return create(actor, rule, topology, definition, eventId, publishedAt, topic, traceId, true);
+    }
+
+    public RulePublicationEnvelope create(
+            ActorContext actor,
+            RuleVersionView rule,
+            TopologyVersionView topology,
+            BoundaryRuleDefinition definition,
+            UUID eventId,
+            Instant publishedAt,
+            String topic,
+            String traceId,
+            boolean active) {
         try {
             if (!"PUBLISHED".equals(topology.state())) {
                 throw new BpiValidationException("Rule publication requires a PUBLISHED topology version.");
@@ -64,11 +77,12 @@ public class RulePublicationFactory {
                     .setAllowedLatenessMs(definition.timing().allowedLateness().toMillis())
                     .setWatermarkDelayMs(definition.timing().watermarkDelay().toMillis())
                     .setEvaluationTimeoutMs(definition.timing().evaluationTimeout().toMillis())
-                    .setActive(true)
+                    .setActive(active)
                     .setPublishedAtMs(publishedAt.toEpochMilli())
                     .setChecksum(rule.checksum())
                     .putHeaders("schema_version", "1")
                     .putHeaders("event_type", "BOUNDARY_RULE_PUBLISHED")
+                    .putHeaders("lifecycle_action", active ? "ACTIVATE" : "RETIRE")
                     .putHeaders("trace_id", traceId == null ? "" : traceId);
             for (EvidenceCondition condition : definition.conditions()) {
                 publication.addConditions(condition(condition));
@@ -79,6 +93,7 @@ public class RulePublicationFactory {
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("schema_version", "1");
             headers.put("event_type", "BOUNDARY_RULE_PUBLISHED");
+            headers.put("lifecycle_action", active ? "ACTIVATE" : "RETIRE");
             headers.put("trace_id", traceId == null ? "" : traceId);
             return new RulePublicationEnvelope(
                     eventId, topic, partitionKey, publication.build().toByteArray(), headers);

@@ -164,4 +164,10 @@ export const bpiApi = {
       headers: { 'Idempotency-Key': key, 'If-Match': String(rule.publicationRevision) },
       body: JSON.stringify({ reason }),
     }),
+  retireRule: (rule: RuleVersion, reason: string, key: string) =>
+    request<RuleVersion>(`/rules/${encodeURIComponent(rule.id)}/retire`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(rule.revision) },
+      body: JSON.stringify({ reason }),
+    }),
 };

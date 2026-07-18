@@ -298,13 +298,12 @@ test('topology and rule comparisons return deterministic JSON Pointer changes', 
   const ast = structuredClone(rule.ast);
   ast.conditions[0].threshold = 17;
   result = await request('POST', '/bpi/v1/rules/drafts', {
-    headers: commandHeaders('compare-rule-draft-0002', rule.revision),
+    headers: commandHeaders('compare-rule-draft-0002', 0),
     body: {
       code: rule.code,
       version: '1.3.0',
       lineId: rule.lineId,
       topologyVersion: rule.topologyVersion,
-      baseVersionId: rule.id,
       ast,
       reason: '建立规则差异测试版本',
     },
@@ -560,6 +559,39 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.response.status, 409);
   assert.equal(result.json.status, 'RUNTIME_READINESS_REPLAY_CONFLICT');
 
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/retire`, {
+    headers: commandHeaders('retire-rule-0007', 13),
+    body: { reason: '发布替代版本前按变更单退役当前规则' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'RETIRED');
+  assert.equal(result.json.data.revision, 14);
+  assert.equal(result.json.data.lifecycleAction, 'RETIRE');
+  assert.equal(result.json.data.lifecycleSequence, 2);
+  assert.equal(result.json.data.lifecycleActive, false);
+  assert.equal(result.json.data.publicationStatus, 'PENDING');
+  assert.equal(result.json.data.applicationStatus, 'WAITING');
+  assert.equal(result.json.data.runtimeReadinessStatus, 'WAITING');
+
+  result = await request('POST', `/bpi/v1/rules/${RULE_ID}/retire`, {
+    headers: commandHeaders('retire-rule-0007', 13),
+    body: { reason: '发布替代版本前按变更单退役当前规则' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.equal(result.json.data.lifecycleSequence, 2);
+
+  result = await request('POST', '/__simulation/complete-rule-publication');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.publicationStatus, 'PUBLISHED');
+  assert.equal(result.json.data.publicationRevision, 2);
+
+  result = await request('POST', '/__simulation/rule-application', {
+    body: { status: 'APPLIED', deploymentId: 'flink-simulator-b' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.applicationStatus, 'APPLIED');
+  assert.equal(result.json.data.publicationRevision, 3);
+
   result = await request('POST', '/__simulation/rule-runtime-readiness', {
     body: {
       eventId: 'readiness-inactive-0004',
@@ -572,7 +604,25 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.runtimeReadinessStatus, 'INACTIVE');
   assert.equal(result.json.data.applicationStatus, 'APPLIED');
-  assert.equal(result.json.data.publicationRevision, 18);
+  assert.equal(result.json.data.publicationRevision, 4);
+  const retiredRule = result.json.data;
+
+  result = await request('POST', '/bpi/v1/rules/drafts', {
+    headers: commandHeaders('rollback-rule-draft-0008', 14),
+    body: {
+      code: retiredRule.code,
+      version: '1.2.1',
+      lineId: retiredRule.lineId,
+      topologyVersion: retiredRule.topologyVersion,
+      baseVersionId: retiredRule.id,
+      ast: retiredRule.ast,
+      reason: '从已退役稳定版本创建受控回滚草稿',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'DRAFT');
+  assert.equal(result.json.data.lifecycleAction, 'NOT_PUBLISHED');
+  assert.equal(result.json.data.lifecycleSequence, 0);
 
   result = await request('POST', '/__simulation/rule-application', {
     body: { status: 'REJECTED', errorCode: 'STALE_REPLAY' },
@@ -580,7 +630,7 @@ test('rule simulation checksum gates publication', async () => {
   assert.equal(result.response.status, 200);
   assert.equal(result.json.data.applicationStatus, 'APPLIED');
   assert.equal(result.json.data.runtimeReadinessStatus, 'INACTIVE');
-  assert.equal(result.json.data.publicationRevision, 18);
+  assert.equal(result.json.data.publicationRevision, 4);
 
   result = await request('POST', '/__simulation/fail-rule-publication');
   assert.equal(result.response.status, 409);

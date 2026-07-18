@@ -70,6 +70,7 @@
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/reject-approval` | `rejectRuleApproval` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publication/retry` | `retryRulePublication` | SERVICE_IMPLEMENTED |
+| 边界规则 | POST | `/bpi/v1/rules/{ruleId}/retire` | `retireRuleVersion` | SERVICE_IMPLEMENTED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SIMULATED |
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SIMULATED |
 | 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | CONTRACT_ONLY |
@@ -116,6 +117,11 @@ P1 批次信号的硬准入条件，缺失时 `ready=false` 且拓扑校验返�
 标记为 `REJECTED`，规则退回 `DRAFT`，必须重新模拟后才能再次提交。
 `retryRulePublication` 仅允许 `BPI_ADMIN` 把 `FAILED` 事件重新入队；它使用独立、单调递增的发布 revision
 执行并发控制，保留累计尝试/人工重试计数，并写入 `RULE_PUBLICATION_REQUEUED` 审计。
+
+`retireRuleVersion` 仅允许 `BPI_ADMIN` 退役已经达到 Kafka `PUBLISHED`、Flink `APPLIED` 且运行态为
+`READY` 或 `DEGRADED` 的规则。命令将规则推进到 `RETIRED`，同时追加新的 `active=false` 生命周期事件；
+只有收到该事件对应的 `APPLIED` 与 `INACTIVE` 回执后，替代版本才允许发布。回滚通过从 `RETIRED`
+历史版本创建新草稿完成，不会重新激活不可变旧版本。
 
 `compareTopologyVersions` 和 `compareRuleVersions` 只比较同 tenant、同 code、同 plant/line 作用域的版本；
 规则差异覆盖拓扑引用和 AST，拓扑差异覆盖受控 definition。返回稳定 JSON Pointer、增加/删除/修改类型和

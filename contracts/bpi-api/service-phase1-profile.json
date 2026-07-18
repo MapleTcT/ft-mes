@@ -32,7 +32,8 @@
     "submitRuleApproval",
     "rejectRuleApproval",
     "publishRuleVersion",
-    "retryRulePublication"
+    "retryRulePublication",
+    "retireRuleVersion"
   ],
   "internalEndpoints": [
     {

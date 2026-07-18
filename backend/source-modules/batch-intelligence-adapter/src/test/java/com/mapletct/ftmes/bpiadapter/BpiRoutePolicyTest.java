@@ -33,6 +33,7 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/reject-approval"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publish"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/publication/retry"));
+        assertTrue(policy.allows(HttpMethod.POST, "/rules/RULE-S07-START/retire"));
         assertTrue(policy.allows(HttpMethod.POST, "/rules/drafts"));
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/drafts"));
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/validate"));
