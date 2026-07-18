@@ -1,11 +1,18 @@
 package com.mapletct.ftmes.bpi.stream;
 
+import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.List;
 
 final class BpiJointAcceptanceScenario {
@@ -19,6 +26,7 @@ final class BpiJointAcceptanceScenario {
         }
         long contextRevision = baseTime.getEpochSecond();
         long sourceEpoch = baseTime.getEpochSecond();
+        PointCatalogSnapshotV1 pointCatalog = pointCatalog(config, baseTime.minusSeconds(1));
         ProductionContextEventV1 context = ProductionContextEventV1.newBuilder()
                 .setEventId(config.marker() + "-CONTEXT")
                 .setTenantId(config.tenantId())
@@ -38,7 +46,76 @@ final class BpiJointAcceptanceScenario {
                 telemetry(config, baseTime.plusSeconds(1), sourceEpoch, 1),
                 telemetry(config, baseTime.plusSeconds(2), sourceEpoch, 2),
                 telemetry(config, baseTime.plusSeconds(3), sourceEpoch, 3));
-        return new Scenario(config, context, telemetry);
+        return new Scenario(config, pointCatalog, context, telemetry);
+    }
+
+    private static PointCatalogSnapshotV1 pointCatalog(
+            BpiJointAcceptanceReplayConfig config,
+            Instant observedAt) {
+        PointCatalogPointV1 flow = point(
+                config,
+                config.flowPropertyId(),
+                "instantFlow",
+                "进料瞬时流量",
+                config.flowUnit(),
+                "double");
+        PointCatalogPointV1 pump = point(
+                config,
+                config.pumpPropertyId(),
+                "pumpRunning",
+                "进料泵运行",
+                config.pumpUnit(),
+                "boolean");
+        String sourceInstance = "BPI-JOINT-" + config.marker();
+        PointCatalogSnapshotV1 content = PointCatalogSnapshotV1.newBuilder()
+                .setSource("ACCEPTANCE")
+                .setSourceInstance(sourceInstance)
+                .setTenantId(config.tenantId())
+                .setPlantId(config.plantId())
+                .setLineId(config.lineId())
+                .addPoints(flow)
+                .addPoints(pump)
+                .build();
+        String digest = sha256(content.toByteArray());
+        return content.toBuilder()
+                .setEventId("point-catalog-" + digest)
+                .setSourceRevision("sha256:" + digest)
+                .setObservedAtMs(observedAt.toEpochMilli())
+                .setReason("Controlled browser-rule joint acceptance")
+                .build();
+    }
+
+    private static PointCatalogPointV1 point(
+            BpiJointAcceptanceReplayConfig config,
+            String propertyId,
+            String sourcePropertyId,
+            String pointName,
+            String unit,
+            String dataType) {
+        return PointCatalogPointV1.newBuilder()
+                .setLocalityGroup(config.localityGroup())
+                .setProductId(config.productId())
+                .setDeviceId(config.deviceId())
+                .setPropertyId(propertyId)
+                .setSourcePropertyId(sourcePropertyId)
+                .setPointName(pointName)
+                .setUnit(unit)
+                .setDataType(dataType)
+                .setDeviceState(PointDeviceStateV1.POINT_DEVICE_ACTIVE)
+                .setRegistered(true)
+                .setPropertyPresent(true)
+                .setCalibrationVersion(config.calibrationVersion())
+                .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED)
+                .setSourceSequenceEnabled(true)
+                .build();
+    }
+
+    private static String sha256(byte[] value) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value));
+        } catch (NoSuchAlgorithmException error) {
+            throw new IllegalStateException("SHA-256 is not available", error);
+        }
     }
 
     private static TelemetryEnvelopeV1 telemetry(
@@ -53,13 +130,13 @@ final class BpiJointAcceptanceScenario {
                 .setPlantId(config.plantId())
                 .setLineId(config.lineId())
                 .setGatewayId("GATEWAY-BPI-ACCEPTANCE")
-                .setProductId("PRODUCT-BPI-ACCEPTANCE")
+                .setProductId(config.productId())
                 .setDeviceId(config.deviceId())
                 .setEventTimeMs(eventTime.toEpochMilli())
                 .setIngestTimeMs(Instant.now().toEpochMilli())
                 .setSequence(sequence)
                 .setSourceEpoch(sourceEpoch)
-                .setSequenceOrigin(SequenceOrigin.EXPORTER)
+                .setSequenceOrigin(SequenceOrigin.GATEWAY)
                 .addPoints(PointValue.newBuilder()
                         .setPropertyId(config.flowPropertyId())
                         .setDoubleValue(18.0 + sequence)
@@ -80,6 +157,7 @@ final class BpiJointAcceptanceScenario {
 
     record Scenario(
             BpiJointAcceptanceReplayConfig config,
+            PointCatalogSnapshotV1 pointCatalog,
             ProductionContextEventV1 context,
             List<TelemetryEnvelopeV1> telemetry) {
 

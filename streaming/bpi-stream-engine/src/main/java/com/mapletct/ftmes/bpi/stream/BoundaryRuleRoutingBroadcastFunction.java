@@ -11,6 +11,7 @@ import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointValue;
 import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
@@ -50,6 +51,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
             };
 
     private final String deploymentId;
+    private transient boolean controlPlaneEmitter;
 
     BoundaryRuleRoutingBroadcastFunction() {
         this("test-deployment");
@@ -60,6 +62,11 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
             throw new IllegalArgumentException("deploymentId is required");
         }
         this.deploymentId = deploymentId;
+    }
+
+    @Override
+    public void open(OpenContext openContext) {
+        controlPlaneEmitter = getRuntimeContext().getTaskInfo().getIndexOfThisSubtask() == 0;
     }
 
     @Override
@@ -129,7 +136,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         try {
             control = BoundaryRoutingControlCodec.decode(controlBytes);
         } catch (IllegalStateException error) {
-            context.output(ISSUES, new BoundaryRoutingIssue(
+            emit(context, ISSUES, new BoundaryRoutingIssue(
                     "ROUTING_CONTROL_REJECTED", "", "", error.getMessage()));
             return;
         }
@@ -147,7 +154,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
             publication = BoundaryRulePublicationV1.parseFrom(publicationBytes);
             incoming = BoundaryRulePublicationMapper.map(publication);
         } catch (InvalidProtocolBufferException | IllegalArgumentException | IllegalStateException error) {
-            context.output(ISSUES, new BoundaryRoutingIssue(
+            emit(context, ISSUES, new BoundaryRoutingIssue(
                     "RULE_PUBLICATION_REJECTED", "", "", error.getMessage()));
             return;
         }
@@ -161,19 +168,19 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         if (existingBytes != null) {
             BoundaryRulePublicationV1 existing = BoundaryRulePublicationV1.parseFrom(existingBytes);
             if (!BoundaryRulePublicationSemantics.equivalent(existing, publication)) {
-                context.output(ISSUES, new BoundaryRoutingIssue(
+                emit(context, ISSUES, new BoundaryRoutingIssue(
                         "RULE_VERSION_CONFLICT", publication.getEventId(), "",
                         "published rule versions are immutable; use a new version"));
                 return;
             }
             if (!existing.getActive() && publication.getActive()) {
-                context.output(ISSUES, new BoundaryRoutingIssue(
+                emit(context, ISSUES, new BoundaryRoutingIssue(
                         "RULE_REACTIVATION_REQUIRES_NEW_VERSION", publication.getEventId(), "",
                         "an inactive rule version cannot be reactivated"));
                 return;
             }
             if (publication.getPublishedAtMs() < existing.getPublishedAtMs()) {
-                context.output(ISSUES, new BoundaryRoutingIssue(
+                emit(context, ISSUES, new BoundaryRoutingIssue(
                         "RULE_PUBLICATION_OUT_OF_ORDER", publication.getEventId(), "",
                         "publication time is older than the current lifecycle state"));
                 return;
@@ -189,7 +196,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         try {
             incoming = PointCatalogRuntimeValidator.validate(PointCatalogSnapshotV1.parseFrom(snapshotBytes));
         } catch (InvalidProtocolBufferException | IllegalArgumentException error) {
-            context.output(ISSUES, new BoundaryRoutingIssue(
+            emit(context, ISSUES, new BoundaryRoutingIssue(
                     "POINT_CATALOG_RUNTIME_REJECTED", "", "", error.getMessage()));
             return;
         }
@@ -201,7 +208,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         if (currentBytes != null) {
             PointCatalogSnapshotV1 current = PointCatalogSnapshotV1.parseFrom(currentBytes);
             if (incoming.getObservedAtMs() < current.getObservedAtMs()) {
-                context.output(ISSUES, catalogIssue(
+                emit(context, ISSUES, catalogIssue(
                         incoming, "POINT_CATALOG_OUT_OF_ORDER", "older catalog snapshot was ignored"));
                 return;
             }
@@ -209,7 +216,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 if (java.util.Arrays.equals(currentBytes, snapshotBytes)) {
                     return;
                 }
-                context.output(ISSUES, catalogIssue(
+                emit(context, ISSUES, catalogIssue(
                         incoming,
                         "POINT_CATALOG_TIME_CONFLICT",
                         "different catalog content has the same observed_at_ms"));
@@ -243,7 +250,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                     failClosedLegacyPublication(
                             context, publication, incoming, runtimeStatus, error.getMessage());
                 }
-                context.output(ISSUES, publication == null
+                emit(context, ISSUES, publication == null
                         ? new BoundaryRoutingIssue(
                                 "RULE_PUBLICATION_RUNTIME_REJECTED", "", "", error.getMessage())
                         : publicationIssue(
@@ -278,7 +285,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 publication.getRuleVersion());
         byte[] previousStatus = runtimeStatus.get(delete.ruleRef().key());
         if (previousStatus == null || RuleRuntimeReadinessProjector.ready(previousStatus)) {
-            context.output(RULE_UPDATES, BoundaryRuleUpdateCodec.encode(delete));
+            emit(context, RULE_UPDATES, BoundaryRuleUpdateCodec.encode(delete));
         }
         String safeDetail = detail == null || detail.isBlank()
                 ? "stored rule publication cannot be mapped by the current runtime"
@@ -292,7 +299,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                 catalog.getObservedAtMs(),
                 catalog);
         if (!RuleRuntimeReadinessProjector.sameStatusAndReason(previousStatus, receipt)) {
-            context.output(RUNTIME_READINESS, receipt);
+            emit(context, RUNTIME_READINESS, receipt);
         }
         runtimeStatus.put(delete.ruleRef().key(), receipt);
     }
@@ -347,12 +354,16 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                             plan.publication().getLineId(),
                             plan.rule().ruleCode(),
                             plan.rule().ruleVersion());
-            context.output(RULE_UPDATES, BoundaryRuleUpdateCodec.encode(update));
+            emit(context, RULE_UPDATES, BoundaryRuleUpdateCodec.encode(update));
         }
         if (readinessChanged) {
-            context.output(RUNTIME_READINESS, receipt);
-            if (readinessIssue != null) context.output(ISSUES, readinessIssue);
+            emit(context, RUNTIME_READINESS, receipt);
+            if (readinessIssue != null) emit(context, ISSUES, readinessIssue);
         }
+    }
+
+    private <T> void emit(Context context, OutputTag<T> tag, T value) {
+        if (controlPlaneEmitter) context.output(tag, value);
     }
 
     private static PointCatalogSnapshotV1 currentCatalog(

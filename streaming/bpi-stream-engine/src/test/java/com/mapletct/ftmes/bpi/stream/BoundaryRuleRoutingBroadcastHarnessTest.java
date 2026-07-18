@@ -200,6 +200,22 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
     }
 
     @Test
+    void nonLeaderSubtaskMaintainsBroadcastStateWithoutDuplicatingGlobalOutputs() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness(3, 1)) {
+            harness.open();
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, publication("TENANT-A", "RULE-A", true, "sha:a"));
+
+            assertTrue(runtimeReadiness(harness).isEmpty());
+            assertTrue(runtimeRuleUpdates(harness).isEmpty());
+            assertTrue(harness.getBroadcastState(BoundaryRuleRoutingBroadcastFunction.PUBLICATIONS)
+                    .contains("TENANT-A|PLANT-01|LINE-01|RULE-A|1"));
+            assertTrue(harness.getBroadcastState(BoundaryRuleRoutingBroadcastFunction.ROUTES)
+                    .contains("TENANT-A|PLANT-01|LINE-01|PRODUCT-1|DEVICE-1|flow"));
+        }
+    }
+
+    @Test
     void newerCatalogDowngradeStopsRoutingAndOlderReadySnapshotCannotRestoreIt() throws Exception {
         try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
             harness.open();
@@ -281,6 +297,12 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
 
     private static BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness()
             throws Exception {
+        return harness(1, 0);
+    }
+
+    private static BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness(
+            int parallelism,
+            int subtaskIndex) throws Exception {
         return new BroadcastOperatorTestHarness<>(
                 new CoBroadcastWithNonKeyedOperator<>(
                         new BoundaryRuleRoutingBroadcastFunction(),
@@ -290,9 +312,9 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
                                 BoundaryRuleRoutingBroadcastFunction.POINT_CATALOGS,
                                 BoundaryRuleRoutingBroadcastFunction.POINTS,
                                 BoundaryRuleRoutingBroadcastFunction.RUNTIME_RULE_STATUS)),
-                1,
-                1,
-                0);
+                parallelism,
+                parallelism,
+                subtaskIndex);
     }
 
     static BoundaryRulePublicationV1 publication(

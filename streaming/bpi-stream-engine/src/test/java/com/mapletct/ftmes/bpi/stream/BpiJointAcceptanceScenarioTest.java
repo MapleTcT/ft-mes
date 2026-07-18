@@ -7,6 +7,7 @@ import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
+import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,15 +30,24 @@ class BpiJointAcceptanceScenarioTest {
     Path tempDir;
 
     @Test
-    void scenarioProducesOnlyContextAndTelemetryForAnExistingPublishedRule() {
+    void scenarioProducesMatchingCatalogContextAndTelemetryForAnExistingPublishedRule() {
         BpiJointAcceptanceReplayConfig config = config(tempDir.resolve("joint.json"));
         BpiJointAcceptanceScenario.Scenario scenario = BpiJointAcceptanceScenario.create(config, T0);
 
         assertEquals("1000|PLANT-01|LINE-S07-01", scenario.contextKey());
+        assertEquals(2, scenario.pointCatalog().getPointsCount());
+        assertEquals("PRODUCT-SUGAR", scenario.pointCatalog().getPoints(0).getProductId());
+        assertEquals("LOCALITY-S07-V2", scenario.pointCatalog().getPoints(0).getLocalityGroup());
+        assertTrue(scenario.pointCatalog().getSourceRevision().matches("sha256:[0-9a-f]{64}"));
+        assertEquals(
+                "point-catalog-" + scenario.pointCatalog().getSourceRevision().substring("sha256:".length()),
+                scenario.pointCatalog().getEventId());
         assertEquals("MO-" + MARKER, scenario.context().getOrderId());
         assertEquals(T0.getEpochSecond(), scenario.context().getContextRevision());
         assertEquals(3, scenario.telemetry().size());
         scenario.telemetry().forEach(envelope -> {
+            assertEquals("PRODUCT-SUGAR", envelope.getProductId());
+            assertEquals(SequenceOrigin.GATEWAY, envelope.getSequenceOrigin());
             var validation = BpiContractValidator.validate(envelope);
             assertTrue(validation.isEnvelopeAccepted());
             assertEquals(2, validation.getAcceptedPointIndexes().size());
@@ -149,7 +159,14 @@ class BpiJointAcceptanceScenarioTest {
                 candidate,
                 new BpiJointAcceptanceReplay.OutputOffset(config.candidateTopic(), 2, 84),
                 1,
-                java.util.List.of());
+                java.util.List.of(),
+                new BpiJointAcceptanceReplay.RuntimeReadinessEvidence(
+                        new BpiJointAcceptanceReplay.OutputOffset(
+                                config.ruleRuntimeReadinessTopic(), 0, 21),
+                        "READY-1",
+                        "flink-test",
+                        scenario.pointCatalog().getEventId(),
+                        scenario.pointCatalog().getSourceRevision()));
 
         BpiJointAcceptanceReplay.writeReport(config, scenario, result, "PASS", null);
 
@@ -158,6 +175,9 @@ class BpiJointAcceptanceScenarioTest {
         assertEquals("BPI_BROWSER_PUBLICATION_OUTBOX", json.path("ruleSource").asText());
         assertEquals("SYNTHETIC_REPLAY", json.path("contextSource").asText());
         assertEquals("RULE-S07-START@1.2.0", json.path("scope").path("rule").asText());
+        assertEquals("iot.point-catalog.snapshot.v1", json.path("topics").path("pointCatalog").asText());
+        assertEquals("READY-1", json.path("runtimeReadiness").path("eventId").asText());
+        assertEquals(21, json.path("runtimeReadiness").path("offset").asLong());
         assertEquals(84, json.path("candidate").path("offset").asLong());
         assertTrue(json.path("error").isNull());
     }
@@ -177,6 +197,8 @@ class BpiJointAcceptanceScenarioTest {
                 Map.entry("BPI_JOINT_TOPOLOGY_VERSION", "3"),
                 Map.entry("BPI_JOINT_RULE_CODE", "RULE-S07-START"),
                 Map.entry("BPI_JOINT_RULE_VERSION", "1.2.0"),
+                Map.entry("BPI_JOINT_LOCALITY_GROUP", "LOCALITY-S07-V2"),
+                Map.entry("BPI_JOINT_PRODUCT_ID", "PRODUCT-SUGAR"),
                 Map.entry("BPI_JOINT_DEVICE_ID", "DEVICE-S07-01"),
                 Map.entry("BPI_JOINT_REPORT", report.toAbsolutePath().toString()));
     }

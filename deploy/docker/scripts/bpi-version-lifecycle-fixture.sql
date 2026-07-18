@@ -62,9 +62,9 @@ INSERT INTO bpi.bpi_rule_versions
      revision, created_by, created_at, plant_id, line_id, updated_by)
 VALUES
     (md5(:'marker' || ':rule-base')::uuid, '1000', :'marker' || '_RULE', '1.0.0',
-     md5(:'marker' || ':topology-v1')::uuid, 'PUBLISHED', repeat('d', 64),
+     md5(:'marker' || ':topology-v1')::uuid, 'DRAFT', repeat('d', 64),
      '{"boundaryType":"START","quorumMinimum":2,"minimumConfidence":0.8,"maxCompositePenalty":0.8,"timing":{"allowedLatenessSeconds":0,"watermarkDelaySeconds":0,"evaluationTimeoutSeconds":300},"conditions":[{"signal":"flow.instant","operator":"GREATER_THAN","threshold":8,"holdSeconds":0,"maxSilenceSeconds":60,"classification":"QUORUM","weight":50},{"signal":"pump.running","operator":"EQUALS_TRUE","holdSeconds":0,"maxSilenceSeconds":60,"classification":"QUORUM","weight":50}]}'::jsonb,
-     4, :'marker' || '_AUTHOR', now() - interval '3 minutes', 'PLANT-01', 'LINE-S07-01',
+     1, :'marker' || '_AUTHOR', now() - interval '3 minutes', 'PLANT-01', 'LINE-S07-01',
      :'marker' || '_AUTHOR'),
     (md5(:'marker' || ':rule-publish')::uuid, '1000', :'marker' || '_RULE', '2.0.0',
      md5(:'marker' || ':topology-v2')::uuid, 'DRAFT', repeat('e', 64),

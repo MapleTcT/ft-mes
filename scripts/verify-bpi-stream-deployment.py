@@ -17,6 +17,7 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/run-replay.sh",
     "deploy/bpi-streaming/scripts/run-joint-replay.sh",
     "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
+    "deploy/bpi-streaming/scripts/run-rule-lifecycle-evidence.sh",
     "deploy/bpi-streaming/scripts/run-postgres-replay.sh",
     "deploy/bpi-streaming/scripts/start-jobmanager.sh",
     "deploy/bpi-streaming/scripts/capture-upgrade-savepoint.sh",
@@ -303,6 +304,24 @@ def main() -> int:
     ):
         if marker not in deactivation:
             failures.append(f"BPI rule deactivation is missing safety marker: {marker}")
+
+    lifecycle_evidence = (
+        ROOT / "deploy/bpi-streaming/scripts/run-rule-lifecycle-evidence.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BpiRuleLifecycleEvidence",
+        "--no-deps",
+        "BPI_LIFECYCLE_EVIDENCE_RULE_CODE",
+        "BPI_LIFECYCLE_EVIDENCE_RULE_VERSION",
+        "runtimeReadyThenInactive",
+    ):
+        if marker not in lifecycle_evidence:
+            failures.append(f"BPI read-only lifecycle evidence is missing marker: {marker}")
+    for forbidden in ("BpiRuleDeactivationReplay", "docker compose down", "docker volume"):
+        if forbidden in lifecycle_evidence:
+            failures.append(
+                f"BPI read-only lifecycle evidence contains mutating marker: {forbidden}"
+            )
 
     cleanup = (
         ROOT / "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql"

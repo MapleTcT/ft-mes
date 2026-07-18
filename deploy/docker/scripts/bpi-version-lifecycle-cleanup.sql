@@ -14,6 +14,32 @@ SELECT id
  WHERE tenant_id = '1000'
    AND rule_code LIKE :'marker' || '%';
 
+CREATE TEMP TABLE bpi_acceptance_target_catalogs ON COMMIT DROP AS
+SELECT id, source_revision
+  FROM bpi.bpi_point_catalog_snapshots
+ WHERE tenant_id = '1000'
+   AND (
+       source_revision = :'marker'
+       OR source_instance LIKE 'BPI-JOINT-' || :'marker' || '%'
+   );
+
+CREATE TEMP TABLE bpi_acceptance_target_inbox_events ON COMMIT DROP AS
+SELECT application_event_id AS event_id
+  FROM bpi.bpi_outbox_events
+ WHERE tenant_id = '1000'
+   AND aggregate_id IN (SELECT id FROM bpi_acceptance_target_rules)
+   AND application_event_id IS NOT NULL
+UNION
+SELECT runtime_readiness_event_id
+  FROM bpi.bpi_outbox_events
+ WHERE tenant_id = '1000'
+   AND aggregate_id IN (SELECT id FROM bpi_acceptance_target_rules)
+   AND runtime_readiness_event_id IS NOT NULL
+UNION
+SELECT 'point-catalog-' || substring(source_revision FROM 8)
+  FROM bpi_acceptance_target_catalogs
+ WHERE source_revision LIKE 'sha256:%';
+
 CREATE TEMP TABLE bpi_acceptance_target_batches ON COMMIT DROP AS
 SELECT id
   FROM bpi.bpi_batch_instances
@@ -89,6 +115,7 @@ DELETE FROM bpi.bpi_inbox_events
    AND (
        idempotency_key LIKE :'marker' || '%'
        OR event_id LIKE :'marker' || '%'
+       OR event_id IN (SELECT event_id FROM bpi_acceptance_target_inbox_events)
    );
 
 DELETE FROM bpi.bpi_rule_approval_requests
@@ -137,16 +164,11 @@ DELETE FROM bpi.bpi_topology_versions
 
 DELETE FROM bpi.bpi_point_catalog_entries
  WHERE tenant_id = '1000'
-   AND snapshot_id IN (
-       SELECT id
-         FROM bpi.bpi_point_catalog_snapshots
-        WHERE tenant_id = '1000'
-          AND source_revision = :'marker'
-   );
+   AND snapshot_id IN (SELECT id FROM bpi_acceptance_target_catalogs);
 
 DELETE FROM bpi.bpi_point_catalog_snapshots
  WHERE tenant_id = '1000'
-   AND source_revision = :'marker';
+   AND id IN (SELECT id FROM bpi_acceptance_target_catalogs);
 
 UPDATE bpi.bpi_feature_flags
    SET updated_by = 'bpi-test-environment',
@@ -192,7 +214,10 @@ SELECT jsonb_pretty(jsonb_build_object(
             SELECT count(*)
               FROM bpi.bpi_point_catalog_snapshots
              WHERE tenant_id = '1000'
-               AND source_revision = :'marker'
+               AND (
+                   source_revision = :'marker'
+                   OR source_instance LIKE 'BPI-JOINT-' || :'marker' || '%'
+               )
         ),
         'idempotency', (
             SELECT count(*)

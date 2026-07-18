@@ -13,9 +13,11 @@ import java.util.regex.Pattern;
 record BpiJointAcceptanceReplayConfig(
         String bootstrapServers,
         String telemetryTopic,
+        String pointCatalogTopic,
         String contextTopic,
         String candidateTopic,
         String dataQualityTopic,
+        String ruleRuntimeReadinessTopic,
         String marker,
         String tenantId,
         String plantId,
@@ -24,6 +26,8 @@ record BpiJointAcceptanceReplayConfig(
         String topologyVersion,
         String ruleCode,
         String ruleVersion,
+        String localityGroup,
+        String productId,
         String deviceId,
         String flowPropertyId,
         String flowUnit,
@@ -49,9 +53,11 @@ record BpiJointAcceptanceReplayConfig(
     BpiJointAcceptanceReplayConfig {
         required(bootstrapServers, "bootstrapServers");
         topic(telemetryTopic, "telemetryTopic");
+        topic(pointCatalogTopic, "pointCatalogTopic");
         topic(contextTopic, "contextTopic");
         topic(candidateTopic, "candidateTopic");
         topic(dataQualityTopic, "dataQualityTopic");
+        topic(ruleRuntimeReadinessTopic, "ruleRuntimeReadinessTopic");
         if (!SAFE_MARKER.matcher(marker).matches()) {
             throw new IllegalArgumentException("marker must be 8-80 safe token characters");
         }
@@ -62,6 +68,8 @@ record BpiJointAcceptanceReplayConfig(
         token(topologyVersion, "topologyVersion");
         token(ruleCode, "ruleCode");
         token(ruleVersion, "ruleVersion");
+        token(localityGroup, "localityGroup");
+        token(productId, "productId");
         token(deviceId, "deviceId");
         token(flowPropertyId, "flowPropertyId");
         unit(flowUnit, "flowUnit");
@@ -95,9 +103,12 @@ record BpiJointAcceptanceReplayConfig(
         return new BpiJointAcceptanceReplayConfig(
                 value(environment, "BPI_KAFKA_BOOTSTRAP_SERVERS", null),
                 value(environment, "BPI_TELEMETRY_TOPIC", "iot.telemetry.selected.v1"),
+                value(environment, "BPI_POINT_CATALOG_TOPIC", "iot.point-catalog.snapshot.v1"),
                 value(environment, "BPI_CONTEXT_TOPIC", "mes.production.context.v1"),
                 value(environment, "BPI_CANDIDATE_TOPIC", "bpi.batch.candidate.v1"),
                 value(environment, "BPI_DATA_QUALITY_TOPIC", "bpi.data-quality.v1"),
+                value(environment, "BPI_RULE_RUNTIME_READINESS_TOPIC",
+                        "bpi.boundary.rule-runtime-readiness.v1"),
                 marker,
                 value(environment, "BPI_JOINT_TENANT_ID", null),
                 value(environment, "BPI_JOINT_PLANT_ID", null),
@@ -106,6 +117,8 @@ record BpiJointAcceptanceReplayConfig(
                 value(environment, "BPI_JOINT_TOPOLOGY_VERSION", null),
                 value(environment, "BPI_JOINT_RULE_CODE", null),
                 value(environment, "BPI_JOINT_RULE_VERSION", null),
+                value(environment, "BPI_JOINT_LOCALITY_GROUP", "LOCALITY-S07-V2"),
+                value(environment, "BPI_JOINT_PRODUCT_ID", "PRODUCT-BPI-ACCEPTANCE"),
                 value(environment, "BPI_JOINT_DEVICE_ID", null),
                 value(environment, "BPI_JOINT_FLOW_PROPERTY_ID", "flow.instant"),
                 value(environment, "BPI_JOINT_FLOW_UNIT", "t/h"),

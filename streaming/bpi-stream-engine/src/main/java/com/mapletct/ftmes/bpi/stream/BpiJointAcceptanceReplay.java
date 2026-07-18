@@ -4,7 +4,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.mapletct.ftmes.bpi.contract.validation.BpiContractValidator;
 import com.mapletct.ftmes.bpi.contract.v1.BatchCandidateV1;
 import com.mapletct.ftmes.bpi.contract.v1.DataQualityEventV1;
+import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
 import com.mapletct.ftmes.bpi.contract.v1.ProductionContextEventV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
 import com.mapletct.ftmes.bpi.contract.v1.TelemetryEnvelopeV1;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -65,6 +68,9 @@ public final class BpiJointAcceptanceReplay {
             boolean syntheticContextClosed = false;
             positionAtEnd(consumer, config);
             try {
+                inputs.add(sendPointCatalog(producer, config, scenario));
+                producer.flush();
+                RuntimeReadinessEvidence runtimeReadiness = awaitRuntimeReady(consumer, config, scenario);
                 if (config.usesMesOutboxContext()) {
                     inputs.add(awaitMesOutboxContext(config, scenario));
                 } else {
@@ -86,7 +92,8 @@ public final class BpiJointAcceptanceReplay {
                     }
                 }
                 producer.flush();
-                ReplayResult observed = awaitResult(consumer, config, scenario, List.copyOf(inputs));
+                ReplayResult observed = awaitResult(
+                        consumer, config, scenario, List.copyOf(inputs), runtimeReadiness);
                 if (syntheticContextPublished) {
                     inputs.add(sendContext(producer, config, scenario, scenario.closingContext()));
                     producer.flush();
@@ -123,13 +130,78 @@ public final class BpiJointAcceptanceReplay {
                 context.toByteArray());
     }
 
+    private static InputOffset sendPointCatalog(
+            KafkaProducer<byte[], byte[]> producer,
+            BpiJointAcceptanceReplayConfig config,
+            BpiJointAcceptanceScenario.Scenario scenario) throws ExecutionException, InterruptedException {
+        PointCatalogSnapshotV1 catalog = scenario.pointCatalog();
+        Headers headers = new RecordHeaders()
+                .add("event_id", catalog.getEventId().getBytes(StandardCharsets.UTF_8))
+                .add("tenant_id", catalog.getTenantId().getBytes(StandardCharsets.UTF_8))
+                .add("source_revision", catalog.getSourceRevision().getBytes(StandardCharsets.UTF_8))
+                .add("schema_version", "v1".getBytes(StandardCharsets.UTF_8));
+        String key = String.join(
+                "|",
+                catalog.getTenantId(),
+                catalog.getPlantId(),
+                catalog.getLineId(),
+                catalog.getSourceInstance());
+        RecordMetadata metadata = producer.send(new ProducerRecord<>(
+                config.pointCatalogTopic(),
+                null,
+                catalog.getObservedAtMs(),
+                key.getBytes(StandardCharsets.UTF_8),
+                catalog.toByteArray(),
+                headers)).get();
+        return new InputOffset(
+                config.pointCatalogTopic(),
+                metadata.partition(),
+                metadata.offset(),
+                catalog.getEventId());
+    }
+
     private static ReplayResult withInputs(ReplayResult observed, List<InputOffset> inputs) {
         return new ReplayResult(
                 List.copyOf(inputs),
                 observed.candidate(),
                 observed.candidateOffset(),
                 observed.candidateCount(),
-                observed.qualityIssues());
+                observed.qualityIssues(),
+                observed.runtimeReadiness());
+    }
+
+    private static RuntimeReadinessEvidence awaitRuntimeReady(
+            KafkaConsumer<byte[], byte[]> consumer,
+            BpiJointAcceptanceReplayConfig config,
+            BpiJointAcceptanceScenario.Scenario scenario) throws InvalidProtocolBufferException {
+        Instant deadline = Instant.now().plus(config.timeout());
+        while (Instant.now().isBefore(deadline)) {
+            ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofSeconds(1));
+            for (ConsumerRecord<byte[], byte[]> record : records) {
+                if (!record.topic().equals(config.ruleRuntimeReadinessTopic())) {
+                    continue;
+                }
+                BoundaryRuleRuntimeReadinessV1 readiness =
+                        BoundaryRuleRuntimeReadinessV1.parseFrom(record.value());
+                if (readiness.getTenantId().equals(scenario.tenantId())
+                        && readiness.getPlantId().equals(scenario.plantId())
+                        && readiness.getLineId().equals(scenario.lineId())
+                        && readiness.getRuleCode().equals(scenario.ruleCode())
+                        && readiness.getRuleVersion().equals(config.ruleVersion())
+                        && readiness.getPointCatalogEventId().equals(scenario.pointCatalog().getEventId())
+                        && readiness.getPointCatalogSourceRevision()
+                                .equals(scenario.pointCatalog().getSourceRevision())
+                        && readiness.getStatus() == BoundaryRuleRuntimeReadinessStatusV1.READY) {
+                    return new RuntimeReadinessEvidence(
+                            new OutputOffset(record.topic(), record.partition(), record.offset()),
+                            readiness.getEventId(),
+                            readiness.getDeploymentId(),
+                            readiness.getPointCatalogEventId(),
+                            readiness.getPointCatalogSourceRevision());
+                }
+            }
+        }
+        throw new IllegalStateException("browser-published rule did not reach runtime READY before telemetry replay");
     }
 
     static boolean matchesCandidate(
@@ -247,7 +319,8 @@ public final class BpiJointAcceptanceReplay {
             KafkaConsumer<byte[], byte[]> consumer,
             BpiJointAcceptanceReplayConfig config,
             BpiJointAcceptanceScenario.Scenario scenario,
-            List<InputOffset> inputs) throws InvalidProtocolBufferException {
+            List<InputOffset> inputs,
+            RuntimeReadinessEvidence runtimeReadiness) throws InvalidProtocolBufferException {
         Instant deadline = Instant.now().plus(config.timeout());
         Instant graceDeadline = null;
         BatchCandidateV1 matched = null;
@@ -282,7 +355,9 @@ public final class BpiJointAcceptanceReplay {
             }
         }
         if (matched == null) {
-            throw new IllegalStateException("no candidate from the browser-published rule arrived before timeout");
+            throw new IllegalStateException(
+                    "no candidate from the browser-published rule arrived before timeout; "
+                            + "matching data-quality issues: " + qualityIssues);
         }
         if (candidateCount != 1) {
             throw new IllegalStateException("expected exactly one matching candidate, found " + candidateCount);
@@ -290,13 +365,17 @@ public final class BpiJointAcceptanceReplay {
         if (!qualityIssues.isEmpty()) {
             throw new IllegalStateException("matching data-quality issues: " + qualityIssues);
         }
-        return new ReplayResult(inputs, matched, candidateOffset, candidateCount, List.copyOf(qualityIssues));
+        return new ReplayResult(
+                inputs, matched, candidateOffset, candidateCount, List.copyOf(qualityIssues), runtimeReadiness);
     }
 
     private static void positionAtEnd(
             KafkaConsumer<byte[], byte[]> consumer,
             BpiJointAcceptanceReplayConfig config) {
-        consumer.subscribe(List.of(config.candidateTopic(), config.dataQualityTopic()));
+        consumer.subscribe(List.of(
+                config.candidateTopic(),
+                config.dataQualityTopic(),
+                config.ruleRuntimeReadinessTopic()));
         Instant deadline = Instant.now().plusSeconds(20);
         while (consumer.assignment().isEmpty() && Instant.now().isBefore(deadline)) {
             consumer.poll(Duration.ofMillis(250));
@@ -304,8 +383,12 @@ public final class BpiJointAcceptanceReplay {
         if (consumer.assignment().isEmpty()) {
             throw new IllegalStateException("Kafka joint replay consumer received no partition assignment");
         }
-        consumer.seekToEnd(consumer.assignment());
         for (TopicPartition partition : consumer.assignment()) {
+            if (partition.topic().equals(config.ruleRuntimeReadinessTopic())) {
+                consumer.seekToBeginning(List.of(partition));
+            } else {
+                consumer.seekToEnd(List.of(partition));
+            }
             consumer.position(partition);
         }
     }
@@ -398,9 +481,12 @@ public final class BpiJointAcceptanceReplay {
                 .append("},\n")
                 .append("  \"topics\": {\n")
                 .append("    \"telemetry\": ").append(quote(config.telemetryTopic())).append(",\n")
+                .append("    \"pointCatalog\": ").append(quote(config.pointCatalogTopic())).append(",\n")
                 .append("    \"context\": ").append(quote(config.contextTopic())).append(",\n")
                 .append("    \"candidate\": ").append(quote(config.candidateTopic())).append(",\n")
-                .append("    \"dataQuality\": ").append(quote(config.dataQualityTopic())).append("\n")
+                .append("    \"dataQuality\": ").append(quote(config.dataQualityTopic())).append(",\n")
+                .append("    \"runtimeReadiness\": ")
+                .append(quote(config.ruleRuntimeReadinessTopic())).append("\n")
                 .append("  },\n");
         if (result != null) {
             json.append("  \"inputs\": [\n");
@@ -413,6 +499,19 @@ public final class BpiJointAcceptanceReplay {
                 json.append(index + 1 == result.inputs().size() ? "\n" : ",\n");
             }
             json.append("  ],\n")
+                    .append("  \"runtimeReadiness\": {\n")
+                    .append("    \"eventId\": ").append(quote(result.runtimeReadiness().eventId())).append(",\n")
+                    .append("    \"deploymentId\": ")
+                    .append(quote(result.runtimeReadiness().deploymentId())).append(",\n")
+                    .append("    \"topic\": ")
+                    .append(quote(result.runtimeReadiness().offset().topic())).append(",\n")
+                    .append("    \"partition\": ").append(result.runtimeReadiness().offset().partition()).append(",\n")
+                    .append("    \"offset\": ").append(result.runtimeReadiness().offset().offset()).append(",\n")
+                    .append("    \"pointCatalogEventId\": ")
+                    .append(quote(result.runtimeReadiness().pointCatalogEventId())).append(",\n")
+                    .append("    \"pointCatalogSourceRevision\": ")
+                    .append(quote(result.runtimeReadiness().pointCatalogSourceRevision())).append("\n")
+                    .append("  },\n")
                     .append("  \"candidate\": {\n")
                     .append("    \"candidateKey\": ").append(quote(result.candidate().getCandidateKey())).append(",\n")
                     .append("    \"eventId\": ").append(quote(result.candidate().getEventId())).append(",\n")
@@ -456,6 +555,14 @@ public final class BpiJointAcceptanceReplay {
     record OutputOffset(String topic, int partition, long offset) {
     }
 
+    record RuntimeReadinessEvidence(
+            OutputOffset offset,
+            String eventId,
+            String deploymentId,
+            String pointCatalogEventId,
+            String pointCatalogSourceRevision) {
+    }
+
     private record ContextInput(
             ConsumerRecord<byte[], byte[]> record,
             ProductionContextEventV1 context) {
@@ -466,6 +573,7 @@ public final class BpiJointAcceptanceReplay {
             BatchCandidateV1 candidate,
             OutputOffset candidateOffset,
             int candidateCount,
-            List<String> qualityIssues) {
+            List<String> qualityIssues,
+            RuntimeReadinessEvidence runtimeReadiness) {
     }
 }
