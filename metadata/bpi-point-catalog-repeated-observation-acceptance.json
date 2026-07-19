@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-07-19T11:09:30+08:00",
+  "baseCommit": "d8e9a7aea92b83b546f282029565fda0abb2e96f",
+  "database": "PostgreSQL 15.18 target",
+  "host": "10.11.100.17",
+  "marker": "ADP_BPI_REPEAT_SEQUENCE_20260719_1106",
+  "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
+  "contract": {
+    "sourceRevision": "canonical content SHA-256",
+    "eventIdentity": "point-catalog-{contentDigest}-{observedAtMs}",
+    "legacyEventIdentityAccepted": true,
+    "snapshotUniqueness": [
+      "tenant_id",
+      "source",
+      "source_instance",
+      "plant_id",
+      "line_id",
+      "source_revision",
+      "observed_at"
+    ],
+    "flywayVersion": 16
+  },
+  "build": {
+    "iotBaseCommit": "c077279ff8d13a809dac31eef126adbe126740ef",
+    "iotJarSha256": "ee9553ba4889459404d930ff5f8231c0a9a61a84f03ae1550b5af031efbe8326",
+    "jetlinksImage": "mapletct/jetlinks-bpi-pilot:20260719-repeat-observation",
+    "bpiServiceImage": "ft-mes-bpi-service:20260719-repeat-observation"
+  },
+  "controlledSequence": {
+    "requests": 2,
+    "http200": 2,
+    "eventBusSubscribers": 3,
+    "kafkaTopic": "iot.telemetry.selected.v1",
+    "partition": 2,
+    "offsetBefore": 2,
+    "offsetAfter": 4,
+    "sourceSequenceEnabled": true,
+    "readyPointCount": 0,
+    "exporterErrors": 0
+  },
+  "finalFailClosedState": {
+    "pilotIngressEnabled": false,
+    "authenticatedIngressStatus": 404,
+    "sourceRevision": "sha256:f67db5dad8358a7194a175d4a28fb2c33a581766900d0022ec926b9116804743",
+    "sameRevisionObservationCount": 3,
+    "sourceSequenceEnabled": false,
+    "pointCount": 1,
+    "readyPointCount": 0,
+    "readinessIssues": [
+      "DEVICE_NOT_REGISTERED",
+      "DEVICE_NOT_ACTIVE",
+      "PROPERTY_NOT_AVAILABLE",
+      "UNIT_MISSING",
+      "CALIBRATION_NOT_VERIFIED",
+      "SOURCE_SEQUENCE_DISABLED"
+    ]
+  },
+  "browser": {
+    "marker": "ADP_BPI_REPEAT_FINAL_20260719_110916",
+    "route": "http://10.11.100.17:18080/bpi/#/points",
+    "api": "GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01",
+    "apiStatus": 200,
+    "status": "PASS",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "report": "/tmp/ADP_BPI_REPEAT_FINAL_20260719_110916-point-catalog.json",
+    "screenshot": "/tmp/ADP_BPI_REPEAT_FINAL_20260719_110916-point-catalog.png"
+  },
+  "tests": {
+    "iotMapperTests": {"tests": 6, "failures": 0, "errors": 0},
+    "mesKafkaProcessorTests": {"tests": 5, "failures": 0, "errors": 0},
+    "mesPostgresAcceptanceTests": {"tests": 2, "failures": 0, "errors": 0}
+  },
+  "rollback": {
+    "iot": "/data/docker/bpi-upgrade-backups/20260719-repeat-observation-iot",
+    "mes": "/data/docker/bpi-upgrade-backups/20260719-repeat-observation-mes",
+    "controlledEvidence": "/data/docker/bpi-upgrade-backups/ADP_BPI_REPEAT_SEQUENCE_20260719_1106"
+  },
+  "remainingBlockers": [
+    "Pilot device registration and activation are not complete.",
+    "Product property metadata, unit and reviewed calibration are not complete.",
+    "Real device or gateway source epoch and monotonic sequence are not connected.",
+    "Real IoT telemetry and MES production context have not formed a same-scope candidate and batch.",
+    "The 7-14 day shadow observation has not started."
+  ]
+}

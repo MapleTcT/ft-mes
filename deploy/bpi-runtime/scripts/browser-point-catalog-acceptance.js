@@ -36,6 +36,18 @@ const expectedPointIssues = [
   "CALIBRATION_NOT_VERIFIED",
   "SOURCE_SEQUENCE_DISABLED",
 ];
+const expectedAutomaticPointIssues = [
+  ...expectedPointIssues.slice(0, 3),
+  "UNIT_MISSING",
+  ...expectedPointIssues.slice(3),
+];
+const expectedPointLabels = [
+  "设备未注册",
+  "设备未激活",
+  "设备属性不可用",
+  "标定未验证",
+  "来源序列未启用",
+];
 const expectedTopologyErrors = [
   "POINT_DEVICE_NOT_REGISTERED",
   "POINT_DEVICE_NOT_ACTIVE",
@@ -199,7 +211,7 @@ async function importBlockedPointCatalog(page, evidence) {
   await page.getByText("点位快照已导入：0/1 就绪").waitFor();
   const pointRow = page.locator(`[data-point-id="${evidence.pointId}"]`);
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
+  for (const label of expectedPointLabels) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
 
@@ -301,7 +313,7 @@ async function readPersistedAcceptance(page, evidence) {
   const pointRow = page.locator("[data-point-id]").filter({ hasText: deviceId });
   if (await pointRow.count() !== 1) throw new Error("persisted point is not uniquely visible after restart");
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
+  for (const label of expectedPointLabels) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
   evidence.readiness = "BLOCKED";
@@ -334,13 +346,13 @@ async function readAutomaticSnapshot(page, evidence) {
     throw new Error("automatically synchronized point is not uniquely visible");
   }
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of ["设备未注册", "设备未激活", "属性不存在", "标定未验证", "来源序列缺失"]) {
+  for (const label of [...expectedPointLabels.slice(0, 3), "单位缺失", ...expectedPointLabels.slice(3)]) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
   evidence.readiness = "BLOCKED";
   evidence.automaticSnapshotVisible = true;
   evidence.sourceRevision = sourceRevision;
-  evidence.pointIssues = expectedPointIssues;
+  evidence.pointIssues = expectedAutomaticPointIssues;
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
 

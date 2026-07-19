@@ -109,7 +109,9 @@ public class PointCatalogKafkaRecordProcessor {
         if (!expectedRevision.equals(event.getSourceRevision())) {
             throw rejected("Point catalog source_revision does not match the canonical payload SHA-256.");
         }
-        if (!("point-catalog-" + digest).equals(event.getEventId())) {
+        String legacyEventId = "point-catalog-" + digest;
+        String observedEventId = legacyEventId + "-" + event.getObservedAtMs();
+        if (!legacyEventId.equals(event.getEventId()) && !observedEventId.equals(event.getEventId())) {
             throw rejected("Point catalog event_id does not match the canonical payload SHA-256.");
         }
     }

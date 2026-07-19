@@ -103,12 +103,22 @@ QCS/WMS 写回仍未闭合。证据见
 [BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md) 和
 [BPI 规则退役、回滚与延迟候选落库验收](testing/bpi-rule-retirement-acceptance.md)。
 
+2026-07-19 又修复了点位目录重复内容无法撤销准入的问题。`sourceRevision` 继续表示规范化内容，
+event ID 与 PostgreSQL V16 唯一键增加观测时间；MES 消费者保留旧 event ID 滚动兼容。目标环境用
+marker `ADP_BPI_REPEAT_SEQUENCE_20260719_1106` 真实验证来源序列 `false -> true -> false`：受控消息
+HTTP 200、Kafka offset `2 -> 4`，最终入口恢复为 404，同一 false revision 保存 3 次独立观测，
+最新目录仍为 1 点/0 READY。最终浏览器 marker `ADP_BPI_REPEAT_FINAL_20260719_110916` 为 PASS，
+console/page/request error 均为 0。该修复保证运行时证据过期或配置回退能失败关闭，但不改变现场
+设备、metadata、单位、标定和真实连续序列尚未就绪的事实。证据见
+[BPI 点位目录重复观测与准入撤销验收](testing/bpi-point-catalog-repeated-observation-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
 - [BPI 交互设计](designs/bpi-interaction-design.md)
 - [BPI API 目录](api/bpi-api-catalog.md)
 - [BPI 工程测试计划](testing/bpi-engineering-test-plan.md)
+- [BPI 点位目录重复观测与准入撤销验收](testing/bpi-point-catalog-repeated-observation-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

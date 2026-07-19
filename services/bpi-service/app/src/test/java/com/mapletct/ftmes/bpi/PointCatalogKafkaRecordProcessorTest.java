@@ -79,6 +79,23 @@ class PointCatalogKafkaRecordProcessorTest {
     }
 
     @Test
+    void legacyContentOnlyEventIdentityRemainsAcceptedDuringRollingUpgrade() {
+        PointCatalogSnapshotV1 current = event();
+        PointCatalogSnapshotV1 legacy = current.toBuilder()
+                .setEventId("point-catalog-" + current.getSourceRevision().substring("sha256:".length()))
+                .build();
+
+        processor.process(record(legacy));
+
+        verify(service).importSnapshot(
+                any(),
+                org.mockito.ArgumentMatchers.eq(legacy.getEventId()),
+                org.mockito.ArgumentMatchers.eq("0"),
+                any(),
+                org.mockito.ArgumentMatchers.eq(legacy.getEventId()));
+    }
+
+    @Test
     void malformedOutOfScopeAndUnspecifiedReadinessAreRejectedBeforePersistence() {
         ConsumerRecord<byte[], byte[]> malformed = new ConsumerRecord<>(
                 TOPIC, 0, 1L, "x".getBytes(StandardCharsets.UTF_8), new byte[]{1, 2, 3});
@@ -196,10 +213,11 @@ class PointCatalogKafkaRecordProcessorTest {
                 .addPoints(point)
                 .build();
         String digest = sha256(content.toByteArray());
+        long observedAtMs = Instant.now().minusSeconds(1).toEpochMilli();
         return content.toBuilder()
-                .setEventId("point-catalog-" + digest)
+                .setEventId("point-catalog-" + digest + "-" + observedAtMs)
                 .setSourceRevision("sha256:" + digest)
-                .setObservedAtMs(Instant.now().minusSeconds(1).toEpochMilli())
+                .setObservedAtMs(observedAtMs)
                 .setReason("Automatic JetLinks point catalog synchronization")
                 .build();
     }

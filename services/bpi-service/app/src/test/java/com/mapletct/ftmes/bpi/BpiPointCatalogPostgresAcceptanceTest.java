@@ -280,6 +280,53 @@ class BpiPointCatalogPostgresAcceptanceTest {
         assertThat(count("bpi_api_idempotency")).isEqualTo(13);
     }
 
+    @Test
+    void repeatedSourceRevisionWithLaterObservationCanRevokeReadiness() throws Exception {
+        String sourceRevision = marker + "_REPEATED";
+        Instant firstObservedAt = Instant.now().minusSeconds(10);
+        Instant secondObservedAt = firstObservedAt.plusSeconds(5);
+
+        MvcResult first = mockMvc.perform(post("/bpi/v1/point-catalog/snapshots")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", "point-cycle-first-" + marker)
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(pointCatalogBody(sourceRevision, firstObservedAt)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
+                .andReturn();
+
+        JsonNode revokedBody = objectMapper.readTree(pointCatalogBody(sourceRevision, secondObservedAt));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) revokedBody.path("points").get(0))
+                .put("sourceSequenceEnabled", false);
+        MvcResult revoked = mockMvc.perform(post("/bpi/v1/point-catalog/snapshots")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", "point-cycle-revoked-" + marker)
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(revokedBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(0))
+                .andReturn();
+
+        String firstId = response(first).path("data").path("snapshot").path("id").asText();
+        String revokedId = response(revoked).path("data").path("snapshot").path("id").asText();
+        assertThat(revokedId).isNotEqualTo(firstId);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_point_catalog_snapshots
+                 WHERE tenant_id = ? AND source_revision = ?
+                """, Integer.class, tenantId, sourceRevision)).isEqualTo(2);
+
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(revokedId))
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(0))
+                .andExpect(jsonPath("$.data.points[0].sourceSequenceEnabled").value(false));
+    }
+
     private UUID createTopology(String code, Map<String, Object> definition, String key) throws Exception {
         MvcResult result = mockMvc.perform(post("/bpi/v1/topologies/drafts")
                         .header("Authorization", "Bearer " + engineerToken)
