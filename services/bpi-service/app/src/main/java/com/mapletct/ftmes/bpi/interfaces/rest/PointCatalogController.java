@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi.interfaces.rest;
 
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.CommandResult;
+import com.mapletct.ftmes.bpi.application.PointCatalogPage;
 import com.mapletct.ftmes.bpi.application.PointCatalogService;
 import com.mapletct.ftmes.bpi.domain.PointCatalogSnapshotView;
 import com.mapletct.ftmes.bpi.domain.PointCatalogView;
@@ -48,9 +49,18 @@ public class PointCatalogController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam String plantId,
             @RequestParam String lineId,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Integer limit,
             HttpServletRequest request) {
+        if (limit == null && (cursor == null || cursor.isBlank()) && (search == null || search.isBlank())) {
+            return ApiResponse.of(
+                    service.current(actorContextFactory.from(jwt), plantId, lineId).orElse(null), request);
+        }
+        PointCatalogPage page = service.currentPage(
+                actorContextFactory.from(jwt), plantId, lineId, search, cursor, limit);
         return ApiResponse.of(
-                service.current(actorContextFactory.from(jwt), plantId, lineId).orElse(null), request);
+                page.catalog(), request, page.snapshotAt(), page.nextCursor());
     }
 
     @PostMapping("/bpi/v1/point-catalog/snapshots")

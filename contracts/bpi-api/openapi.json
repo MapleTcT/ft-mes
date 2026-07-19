@@ -278,11 +278,18 @@
     "/bpi/v1/point-catalog/current": {
       "get": {
         "tags": ["Point Catalog"], "operationId": "getCurrentPointCatalog", "summary": "查询产线当前点位目录和准入状态",
+        "description": "不传 search、cursor、limit 时保持旧版全量响应；传入任一分页参数后，按不可变快照和产品/设备/属性键集分页。后续页必须原样携带首屏 search。",
         "parameters": [
           {"name": "plantId", "in": "query", "required": true, "schema": {"type": "string"}},
-          {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string"}}
+          {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "search", "in": "query", "description": "按产品、设备、属性、来源属性、点位名称或 locality group 模糊检索，并绑定游标作用域。", "schema": {"type": "string", "maxLength": 128}},
+          {"name": "cursor", "in": "query", "description": "服务端签名的不透明游标，固定首屏快照和查询作用域。", "schema": {"type": "string"}},
+          {"name": "limit", "in": "query", "description": "显式启用分页；默认 100。", "schema": {"type": "integer", "minimum": 1, "maximum": 200, "default": 100}}
         ],
-        "responses": {"200": {"description": "当前快照；未导入时 data 为 null", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCatalogCurrentResponse"}}}}}
+        "responses": {
+          "200": {"description": "当前或游标固定快照；未导入时 data 为 null，分页时 meta.nextCursor 表示后续页。", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCatalogCurrentResponse"}}}},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
+        }
       }
     },
     "/bpi/v1/point-calibrations": {

@@ -1,8 +1,10 @@
 const http = require('node:http');
+const { createHmac, timingSafeEqual } = require('node:crypto');
 const { FIXED_TIME, clone, createScenario, sha256 } = require('./scenario');
 
 const JSON_TYPE = 'application/json; charset=utf-8';
 const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
+const POINT_CATALOG_CURSOR_SECRET = 'bpi-simulator-point-catalog-cursor-v1';
 
 function meta(operationId, pagination = {}) {
   return {
@@ -38,6 +40,51 @@ function decodeCalibrationCursor(value, expectedScopeFingerprint) {
     throw new Error('invalid cursor');
   }
   return decoded;
+}
+
+function pointCatalogScopeFingerprint(url, search) {
+  return sha256(['plantId', 'lineId']
+    .map((name) => `${name}=${url.searchParams.get(name) || ''}`)
+    .concat(`search=${search}`)
+    .join('|'));
+}
+
+function pointCatalogCursorSignature(payload) {
+  return createHmac('sha256', POINT_CATALOG_CURSOR_SECRET)
+    .update(`bpi.point-catalog.cursor.v1|${payload}`)
+    .digest('base64url');
+}
+
+function encodePointCatalogCursor(cursor) {
+  const payload = Buffer.from(JSON.stringify(cursor), 'utf8').toString('base64url');
+  return `${payload}.${pointCatalogCursorSignature(payload)}`;
+}
+
+function decodePointCatalogCursor(value, expectedScopeFingerprint) {
+  if (!value || value.length > 4096) throw new Error('invalid cursor');
+  const parts = value.split('.');
+  if (parts.length !== 2) throw new Error('invalid cursor');
+  const expectedSignature = Buffer.from(pointCatalogCursorSignature(parts[0]), 'utf8');
+  const actualSignature = Buffer.from(parts[1], 'utf8');
+  if (actualSignature.length !== expectedSignature.length
+      || !timingSafeEqual(actualSignature, expectedSignature)) throw new Error('invalid cursor');
+  const decoded = JSON.parse(Buffer.from(parts[0], 'base64url').toString('utf8'));
+  if (decoded.version !== 1 || decoded.scopeFingerprint !== expectedScopeFingerprint
+      || typeof decoded.snapshotId !== 'string' || !decoded.snapshotId
+      || typeof decoded.productId !== 'string' || !decoded.productId
+      || typeof decoded.deviceId !== 'string' || !decoded.deviceId
+      || typeof decoded.propertyId !== 'string' || !decoded.propertyId) {
+    throw new Error('invalid cursor');
+  }
+  return decoded;
+}
+
+function comparePointIdentity(left, right) {
+  for (const field of ['productId', 'deviceId', 'propertyId']) {
+    if (left[field] < right[field]) return -1;
+    if (left[field] > right[field]) return 1;
+  }
+  return 0;
 }
 
 function problem(status, title, detail, operationId, currentRevision = null) {
@@ -609,10 +656,60 @@ function createHandler(state) {
       }
       if (req.method === 'GET' && path === '/bpi/v1/point-catalog/current') {
         refreshPointCatalogReadiness(state);
-        const matchesScope = state.pointCatalog
-          && state.pointCatalog.snapshot.plantId === url.searchParams.get('plantId')
-          && state.pointCatalog.snapshot.lineId === url.searchParams.get('lineId');
-        return send(res, 200, envelope('getCurrentPointCatalog', matchesScope ? state.pointCatalog : null), 'getCurrentPointCatalog');
+        const operationId = 'getCurrentPointCatalog';
+        const explicitPagination = ['search', 'cursor', 'limit']
+          .some((name) => url.searchParams.has(name));
+        const matchesScope = (catalog) => catalog
+          && catalog.snapshot.plantId === url.searchParams.get('plantId')
+          && catalog.snapshot.lineId === url.searchParams.get('lineId');
+        if (!explicitPagination) {
+          return send(res, 200, envelope(operationId, matchesScope(state.pointCatalog) ? state.pointCatalog : null), operationId);
+        }
+        const rawLimit = url.searchParams.get('limit');
+        const limit = rawLimit === null ? 100 : Number(rawLimit);
+        const search = String(url.searchParams.get('search') || '').trim().toLowerCase();
+        if (!Number.isInteger(limit) || limit < 1 || limit > 200 || search.length > 128) {
+          return send(res, 422, problem(422, 'Validation Failed',
+            search.length > 128 ? 'search must not exceed 128 characters.' : 'limit must be between 1 and 200.', operationId), operationId);
+        }
+        const scopeFingerprint = pointCatalogScopeFingerprint(url, search);
+        let cursor = null;
+        try {
+          const encodedCursor = url.searchParams.get('cursor');
+          cursor = encodedCursor ? decodePointCatalogCursor(encodedCursor, scopeFingerprint) : null;
+        } catch (error) {
+          return send(res, 422, problem(422, 'Validation Failed',
+            'Point catalog cursor is invalid or does not match the requested scope.', operationId), operationId);
+        }
+        const catalog = cursor
+          ? state.pointCatalogHistory.find((item) => item.snapshot.id === cursor.snapshotId)
+          : state.pointCatalog;
+        if (!matchesScope(catalog)) {
+          if (cursor) return send(res, 422, problem(422, 'Validation Failed', 'Point catalog cursor snapshot is unavailable.', operationId), operationId);
+          return send(res, 200, envelope(operationId, null), operationId);
+        }
+        const values = catalog.points
+          .filter((point) => !search || [point.productId, point.deviceId, point.propertyId,
+            point.sourcePropertyId, point.pointName, point.localityGroup]
+            .filter(Boolean).join(' ').toLowerCase().includes(search))
+          .filter((point) => !cursor || comparePointIdentity(point, cursor) > 0)
+          .sort(comparePointIdentity);
+        const page = values.slice(0, limit);
+        const last = page.at(-1);
+        const nextCursor = values.length > limit && last
+          ? encodePointCatalogCursor({
+            version: 1,
+            snapshotId: catalog.snapshot.id,
+            productId: last.productId,
+            deviceId: last.deviceId,
+            propertyId: last.propertyId,
+            scopeFingerprint,
+          })
+          : null;
+        return send(res, 200, envelope(operationId, {
+          snapshot: catalog.snapshot,
+          points: page,
+        }, { snapshotAt: catalog.snapshot.importedAt, nextCursor }), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/point-catalog/snapshots') {
         refreshPointCatalogReadiness(state);
@@ -645,6 +742,7 @@ function createHandler(state) {
           importedBy: 'simulated.bpi.admin', importedAt: FIXED_TIME,
         };
         state.pointCatalog = { snapshot, points };
+        state.pointCatalogHistory.push(state.pointCatalog);
         refreshPointCatalogReadiness(state);
         return rememberAndSend(state, context, res, 200, envelope(operationId, state.pointCatalog), operationId);
       }

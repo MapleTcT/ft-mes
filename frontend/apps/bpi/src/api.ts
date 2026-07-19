@@ -96,8 +96,17 @@ export const bpiApi = {
   timeline: (id: string) => request<StateEvent[]>(`/batches/${encodeURIComponent(id)}/timeline`),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
-  currentPointCatalog: (plantId: string, lineId: string) =>
-    request<PointCatalogView | null>(`/point-catalog/current?plantId=${encodeURIComponent(plantId)}&lineId=${encodeURIComponent(lineId)}`),
+  currentPointCatalog: (
+    plantId: string,
+    lineId: string,
+    options?: { cursor?: string | null; limit?: number; search?: string },
+  ) => {
+    const parameters = new URLSearchParams({ plantId, lineId });
+    if (options?.cursor) parameters.set('cursor', options.cursor);
+    if (options?.limit !== undefined) parameters.set('limit', String(options.limit));
+    if (options?.search) parameters.set('search', options.search);
+    return request<PointCatalogView | null>(`/point-catalog/current?${parameters.toString()}`);
+  },
   importPointCatalog: (command: PointCatalogSnapshotCommand, key: string) =>
     request<PointCatalogView>('/point-catalog/snapshots', {
       method: 'POST',

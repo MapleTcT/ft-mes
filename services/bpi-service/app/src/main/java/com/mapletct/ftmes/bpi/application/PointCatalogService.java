@@ -32,20 +32,26 @@ import java.util.UUID;
 
 @Service
 public class PointCatalogService {
+    private static final int DEFAULT_PAGE_SIZE = 100;
+    private static final int MAX_PAGE_SIZE = 200;
+
     private final PointCatalogPostgresRepository repository;
     private final BpiPostgresRepository sharedRepository;
     private final CanonicalJson canonicalJson;
     private final ObjectMapper objectMapper;
+    private final PointCatalogCursorCodec cursorCodec;
 
     public PointCatalogService(
             PointCatalogPostgresRepository repository,
             BpiPostgresRepository sharedRepository,
             CanonicalJson canonicalJson,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            PointCatalogCursorCodec cursorCodec) {
         this.repository = repository;
         this.sharedRepository = sharedRepository;
         this.canonicalJson = canonicalJson;
         this.objectMapper = objectMapper;
+        this.cursorCodec = cursorCodec;
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +67,53 @@ public class PointCatalogService {
         assertConcreteScope(actor, plantId, lineId);
         return repository.findCurrentSnapshot(actor, plantId, lineId)
                 .map(snapshot -> new PointCatalogView(snapshot, repository.listPoints(actor, snapshot)));
+    }
+
+    @Transactional(readOnly = true)
+    public PointCatalogPage currentPage(
+            ActorContext actor,
+            String plantId,
+            String lineId,
+            String search,
+            String encodedCursor,
+            Integer requestedLimit) {
+        assertConcreteScope(actor, plantId, lineId);
+        int limit = pageSize(requestedLimit);
+        String normalizedSearch = normalizedSearch(search);
+        String scopeFingerprint = scopeFingerprint(actor, plantId, lineId, normalizedSearch);
+        PointCatalogCursorCodec.Cursor cursor = encodedCursor == null || encodedCursor.isBlank()
+                ? null
+                : cursorCodec.decode(encodedCursor, scopeFingerprint);
+        Optional<PointCatalogSnapshotView> selected = cursor == null
+                ? repository.findCurrentSnapshot(actor, plantId, lineId)
+                : Optional.of(repository.findSnapshot(actor, cursor.snapshotId()));
+        if (selected.isEmpty()) {
+            return new PointCatalogPage(null, Instant.now(), null);
+        }
+
+        PointCatalogSnapshotView snapshot = selected.get();
+        if (!snapshot.plantId().equals(plantId) || !snapshot.lineId().equals(lineId)) {
+            throw new BpiValidationException(
+                    "Point catalog cursor is invalid or does not match the requested scope.");
+        }
+        List<PointCatalogPointView> values = repository.listPointPage(
+                actor,
+                snapshot,
+                normalizedSearch,
+                cursor == null ? null : cursor.productId(),
+                cursor == null ? null : cursor.deviceId(),
+                cursor == null ? null : cursor.propertyId(),
+                limit + 1);
+        boolean hasMore = values.size() > limit;
+        List<PointCatalogPointView> points = hasMore ? values.subList(0, limit) : values;
+        String nextCursor = null;
+        if (hasMore) {
+            PointCatalogPointView last = points.get(points.size() - 1);
+            nextCursor = cursorCodec.encode(new PointCatalogCursorCodec.Cursor(
+                    snapshot.id(), last.productId(), last.deviceId(), last.propertyId()), scopeFingerprint);
+        }
+        return new PointCatalogPage(
+                new PointCatalogView(snapshot, points), snapshot.importedAt(), nextCursor);
     }
 
     @Transactional(timeout = 30)
@@ -190,6 +243,38 @@ public class PointCatalogService {
         payload.put("observedAt", command.observedAt());
         payload.put("points", command.points());
         return payload;
+    }
+
+    private int pageSize(Integer requestedLimit) {
+        int limit = requestedLimit == null ? DEFAULT_PAGE_SIZE : requestedLimit;
+        if (limit < 1 || limit > MAX_PAGE_SIZE) {
+            throw new BpiValidationException("limit must be between 1 and 200.");
+        }
+        return limit;
+    }
+
+    private String normalizedSearch(String search) {
+        String value = search == null ? "" : search.trim().toLowerCase(java.util.Locale.ROOT);
+        if (value.length() > 128) {
+            throw new BpiValidationException("search must not exceed 128 characters.");
+        }
+        return value;
+    }
+
+    private String scopeFingerprint(
+            ActorContext actor,
+            String plantId,
+            String lineId,
+            String search) {
+        return Checksums.sha256(String.join("|",
+                fingerprintPart(actor.tenantId()),
+                fingerprintPart(plantId),
+                fingerprintPart(lineId),
+                fingerprintPart(search)));
+    }
+
+    private String fingerprintPart(String value) {
+        return value.length() + ":" + value;
     }
 
     private void assertUniquePoints(List<PointCatalogPointCommand> points) {

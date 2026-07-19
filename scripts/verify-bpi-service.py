@@ -58,9 +58,12 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationCursorCodec.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationPage.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogCursorCodec.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogPage.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleApplicationKafkaListener.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordProcessor.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessPostgresRepository.java",
@@ -107,9 +110,14 @@ REQUIRED_FILES = [
     "docs/testing/bpi-point-calibration-pagination-acceptance.md",
     "metadata/bpi-point-calibration-pagination-acceptance.json",
     "metadata/bpi-point-calibration-pagination.png",
+    "docs/testing/bpi-point-catalog-pagination-acceptance.md",
+    "metadata/bpi-point-catalog-pagination-acceptance.json",
+    "metadata/bpi-point-catalog-pagination.png",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
+    "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
@@ -356,6 +364,37 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCatalogController.java",
+        [
+            "limit == null",
+            "service.current(actorContextFactory.from(jwt), plantId, lineId)",
+            "service.currentPage(",
+            "page.nextCursor()",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogService.java",
+        [
+            "DEFAULT_PAGE_SIZE = 100",
+            "MAX_PAGE_SIZE = 200",
+            "scopeFingerprint",
+            "repository.findSnapshot(actor, cursor.snapshotId())",
+            "limit + 1",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogCursorCodec.java",
+        [
+            "bpi.point-catalog.cursor.v1",
+            "HmacSHA256",
+            "MessageDigest.isEqual",
+            "MAX_CURSOR_LENGTH",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
         [
             "source_claim_ready_point_count",
@@ -364,6 +403,20 @@ def main() -> int:
             "calibration.valid_until > s.observed_at",
             "calibration.valid_from <= CURRENT_TIMESTAMP",
             "calibration.valid_until > CURRENT_TIMESTAMP",
+            "(e.product_id, e.device_id, e.property_id)",
+            "> (:cursorProductId, :cursorDeviceId, :cursorPropertyId)",
+            "ORDER BY e.product_id, e.device_id, e.property_id LIMIT :fetchLimit",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCatalogPostgresAcceptanceTest.java",
+        [
+            "currentPointCatalogCursorPinsImmutableSnapshotAndSearchScope",
+            "firstCursor + \"a\"",
+            ".param(\"search\", \"different-search\")",
+            ".param(\"limit\", \"201\")",
+            "bpi_point_catalog_entries",
         ],
         failures,
     )
@@ -503,6 +556,30 @@ def main() -> int:
             "changedScopeParameters",
             "browser lost the point search value while appending a page",
             "browser follow-up request omitted the cursor",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
+        [
+            "readAllPages",
+            "tamperedCursorStatus",
+            "changedSearchStatus",
+            "cursor did not remain pinned after a newer snapshot was imported",
+            "browser lost the server search value",
+            "cleanupRequired",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
+        [
+            "bpi_point_catalog_pagination_targets",
+            "bpi.bpi_point_catalog_entries",
+            "bpi.bpi_point_catalog_snapshots",
+            "bpi.bpi_api_idempotency",
+            "bpi.bpi_audit_events",
+            "cleanup_ok",
         ],
         failures,
     )
@@ -808,6 +885,50 @@ def main() -> int:
         screenshot_hash = hashlib.sha256(pagination_screenshot_path.read_bytes()).hexdigest()
         if screenshot_hash != pagination_browser.get("screenshotSha256"):
             fail("BPI calibration pagination screenshot hash does not match", failures)
+
+    point_pagination = json.loads(
+        (ROOT / "metadata/bpi-point-catalog-pagination-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if point_pagination.get("status") != "PASS_TARGET_CLEANED":
+        fail("BPI point catalog pagination acceptance must retain cleaned target PASS", failures)
+    point_runtime = point_pagination.get("runtime", {})
+    if (point_runtime.get("database") != "PostgreSQL 15.18"
+            or point_runtime.get("flywayVersion") != 18
+            or point_runtime.get("serviceHealth") != "UP"):
+        fail("BPI point catalog pagination runtime evidence is incomplete", failures)
+    point_api = point_pagination.get("api", {})
+    if (len(point_api.get("pages", [])) != 3
+            or point_api.get("totalItems") != 5
+            or point_api.get("uniqueItems") != 5
+            or point_api.get("tamperedCursorStatus") != 422
+            or point_api.get("changedSearchStatus") != 422
+            or point_api.get("pinnedContinuationSnapshotId") != point_api.get("snapshotId")
+            or point_api.get("legacyPointCount") != 1):
+        fail("BPI point catalog pagination API evidence is incomplete", failures)
+    point_browser = point_pagination.get("browser", {})
+    if (len(point_browser.get("loadedIds", [])) != 5
+            or len(set(point_browser.get("loadedIds", []))) != 5
+            or sum(1 for item in point_browser.get("requests", []) if item.get("hasCursor")) != 2
+            or any(point_browser.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))):
+        fail("BPI point catalog pagination browser evidence is incomplete", failures)
+    point_cleanup = point_pagination.get("cleanup", {})
+    if (point_pagination.get("cleanupRequired") is not False
+            or point_cleanup.get("deletedSnapshots") != 2
+            or point_cleanup.get("deletedEntries") != 6
+            or point_cleanup.get("postgresBaselineRestored") is not True
+            or point_cleanup.get("apiBaselineRestored") is not True
+            or any(point_cleanup.get(key) != 0 for key in (
+                "remainingSnapshots", "remainingEntries",
+                "remainingAuditEvents", "remainingIdempotencyRecords"))):
+        fail("BPI point catalog pagination marker cleanup is incomplete", failures)
+    point_screenshot_path = ROOT / point_pagination.get("screenshot", "")
+    if point_screenshot_path.is_file():
+        screenshot_hash = hashlib.sha256(point_screenshot_path.read_bytes()).hexdigest()
+        if screenshot_hash != point_pagination.get("screenshotSha256"):
+            fail("BPI point catalog pagination screenshot hash does not match", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

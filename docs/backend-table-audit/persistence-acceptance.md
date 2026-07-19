@@ -623,6 +623,18 @@ KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目�
 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。该项不把 exporter 自增回退序列解释为现场来源序列，
 也不改变目标试点设备仍为 `BLOCKED` 的结论。
 
+### BPI 点位目录稳定分页与定向清理（目标 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 读取不可变点位快照三页 | `http://10.11.100.17:18080/bpi/#/points` | `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=ADP_E2E_POINT_PAGE_20260719_1858&limit=2&cursor=...` | `BPI Web -> Java 8 Adapter -> PointCatalogController -> PointCatalogService -> PointCatalogPostgresRepository.listPointPage` | `bpi.bpi_point_catalog_snapshots`、`bpi.bpi_point_catalog_entries` | `WHERE tenant_id=:tenant AND snapshot_id=:snapshot AND (product_id,device_id,property_id) > (:product,:device,:property) ORDER BY product_id,device_id,property_id LIMIT :limitPlusOne` | 真实 API 返回 `2+2+1`、5 个唯一 ID、固定 snapshot id 与 snapshotAt；页面加载 5 条；游标篡改和换 search 均 422；浏览器错误 0 | PASS_TARGET_CLEANED |
+| 新 current 出现时继续旧 cursor | 同上 | 第一页 GET；`POST /point-catalog/snapshots`；旧 cursor GET；fresh GET | `PointCatalogCursorCodec -> PointCatalogService.currentPage -> findSnapshot/listPointPage` | 同上，另有 `bpi_api_idempotency`、`bpi_audit_events` | 按两个 marker snapshot id 查询，并比较旧 cursor 与 fresh GET 返回的 snapshot id | 旧 cursor 固定第一 snapshot `ef9d7443-...`；fresh GET 切换第二 snapshot `0ac14fc4-...`；无分页参数旧接口仍返回第二快照完整 1 点 | PASS_TARGET_CLEANED |
+| 定向删除受控 marker 并恢复基线 | 不适用 | 不适用；测试环境专用 SQL | `bpi-point-catalog-pagination-cleanup.sql` | `bpi_point_catalog_entries`、`bpi_point_catalog_snapshots`、`bpi_audit_events`、`bpi_api_idempotency` | 按 `tenant_id=1000` 与严格 `source_revision/idempotency_key` marker 删除并查询四类剩余；随后按 `observed_at DESC, imported_at DESC` 查询 current | 删除 entries 6、snapshots 2、audit 2、idempotency 2，四类剩余 0；PostgreSQL 与 adapter API 均恢复基线 snapshot `ca213975-...`、1 点、无 nextCursor | PASS |
+
+机器记录：`metadata/bpi-point-catalog-pagination-acceptance.json`；详细报告：
+`docs/testing/bpi-point-catalog-pagination-acceptance.md`。本项只验收读取、快照一致性和清理，不把受控
+marker 点位或目标现有 1 点解释为现场业务就绪。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

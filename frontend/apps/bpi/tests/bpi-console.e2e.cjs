@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const { after, before, test } = require('node:test');
 const { spawn } = require('node:child_process');
+const { once } = require('node:events');
 const path = require('node:path');
 const { chromium } = require('playwright');
 const { createBpiSimulator, listen } = require('../../../../simulation/bpi/server');
@@ -49,11 +50,25 @@ async function assertDrawerSettled(page) {
   assert.ok(box.x + box.width <= viewport.width + 1, `detail drawer ends outside viewport: ${JSON.stringify({ box, viewport })}`);
 }
 
+async function stopChildProcess(child) {
+  if (!child || child.exitCode !== null) return;
+  const exited = once(child, 'exit');
+  child.kill('SIGTERM');
+  const forceStop = new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      if (child.exitCode === null) child.kill('SIGKILL');
+      resolve();
+    }, 3_000);
+    timer.unref();
+  });
+  await Promise.race([exited, forceStop]);
+}
+
 before(async () => {
   ({ server: simulator } = createBpiSimulator());
   const address = await listen(simulator);
   simulatorUrl = `http://127.0.0.1:${address.port}`;
-  vite = spawn('npm', ['run', 'dev', '--', '--host', '127.0.0.1', '--port', '4173'], {
+  vite = spawn(process.execPath, [path.join(APP_ROOT, 'node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '4173'], {
     cwd: APP_ROOT,
     env: { ...process.env, BPI_API_TARGET: simulatorUrl },
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -66,7 +81,7 @@ before(async () => {
 
 after(async () => {
   if (browser) await browser.close();
-  if (vite && !vite.killed) vite.kill('SIGTERM');
+  await stopChildProcess(vite);
   if (simulator) await new Promise((resolve, reject) => simulator.close((error) => error ? reject(error) : resolve()));
 });
 
@@ -281,6 +296,117 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
   assert.equal(current.data.snapshot.readyPointCount, 0);
   await page.screenshot({ path: '/tmp/bpi-console-point-catalog.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('point catalog incrementally loads a pinned snapshot and searches the full catalog', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const points = Array.from({ length: 205 }, (_, index) => ({
+    localityGroup: 'LOCALITY-PAGE-E2E',
+    productId: 'PRODUCT-PAGE-E2E',
+    deviceId: 'DEVICE-PAGE-E2E',
+    propertyId: `property.${String(index).padStart(4, '0')}`,
+    sourcePropertyId: `sourceProperty${String(index).padStart(4, '0')}`,
+    pointName: `分页验收点位 ${String(index).padStart(4, '0')}`,
+    unit: 't/h',
+    dataType: 'double',
+    deviceState: 'ACTIVE',
+    registered: true,
+    propertyPresent: true,
+    calibrationVersion: null,
+    calibrationStatus: 'MISSING',
+    sourceSequenceEnabled: true,
+  }));
+  const importCatalog = (sourceRevision, importedPoints, key) => fetch(
+    `${simulatorUrl}/bpi/v1/point-catalog/snapshots`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': key,
+        'If-Match': '0',
+      },
+      body: JSON.stringify({
+        source: 'JETLINKS',
+        sourceInstance: 'jetlinks-pagination-e2e',
+        sourceRevision,
+        plantId: 'PLANT-01',
+        lineId: 'LINE-S07-01',
+        observedAt: new Date().toISOString(),
+        points: importedPoints,
+        reason: '验收高基数点位目录的快照固定分页',
+      }),
+    },
+  );
+  const imported = await importCatalog('ADP_E2E_POINT_PAGE_0205', points, 'point-page-e2e-0205');
+  assert.equal(imported.status, 200);
+  const importedBody = await imported.json();
+  const pinnedSnapshotId = importedBody.data.snapshot.id;
+
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  const pointRequests = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/point-catalog/current')) pointRequests.push(request.url());
+  });
+  await page.goto(`${APP_URL}/#/points`, { waitUntil: 'networkidle' });
+
+  await page.getByText('已加载 100 / 205 条').waitFor();
+  assert.equal(await page.locator('[data-point-id]').count(), 100);
+  await page.locator('#load-more-points').click();
+  await page.getByText('已加载 200 / 205 条').waitFor();
+  assert.equal(await page.locator('[data-point-id]').count(), 200);
+  await page.locator('#load-more-points').click();
+  await page.getByText('已加载 205 / 205 条').waitFor();
+  assert.equal(await page.locator('[data-point-id]').count(), 205);
+  assert.equal(await page.locator('#load-more-points').count(), 0);
+
+  const searchResponse = page.waitForResponse((response) => {
+    const requestUrl = new URL(response.url());
+    return requestUrl.pathname.endsWith('/point-catalog/current')
+      && requestUrl.searchParams.get('search') === 'property.0204';
+  });
+  await page.locator('#point-search').fill('property.0204');
+  await searchResponse;
+  await page.getByText('已加载 1 条匹配点位').waitFor();
+  assert.equal(await page.locator('[data-point-id]').count(), 1);
+  await page.locator('[data-point-id]').filter({ hasText: 'property.0204' }).waitFor();
+  assert.ok(pointRequests.some((value) => new URL(value).searchParams.get('limit') === '100'));
+  assert.ok(pointRequests.some((value) => new URL(value).searchParams.get('search') === 'property.0204'));
+
+  const firstPageResponse = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=property&limit=2`);
+  assert.equal(firstPageResponse.status, 200);
+  const firstPage = await firstPageResponse.json();
+  assert.equal(firstPage.data.snapshot.id, pinnedSnapshotId);
+  assert.equal(firstPage.data.points.length, 2);
+  assert.ok(firstPage.meta.nextCursor);
+
+  const replacement = await importCatalog('ADP_E2E_POINT_PAGE_REPLACEMENT', [{
+    ...points[0],
+    propertyId: 'property.replacement',
+    sourcePropertyId: 'sourcePropertyReplacement',
+    pointName: '替换快照点位',
+  }], 'point-page-e2e-replacement');
+  assert.equal(replacement.status, 200);
+  const replacementBody = await replacement.json();
+
+  const continuationResponse = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=property&limit=2&cursor=${encodeURIComponent(firstPage.meta.nextCursor)}`);
+  assert.equal(continuationResponse.status, 200);
+  const continuation = await continuationResponse.json();
+  assert.equal(continuation.data.snapshot.id, pinnedSnapshotId);
+  assert.deepEqual(continuation.data.points.map((point) => point.propertyId), ['property.0002', 'property.0003']);
+
+  const fresh = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=property&limit=2`).then((response) => response.json());
+  assert.equal(fresh.data.snapshot.id, replacementBody.data.snapshot.id);
+  assert.equal(fresh.data.points.length, 1);
+  const tampered = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=property&limit=2&cursor=${encodeURIComponent(`${firstPage.meta.nextCursor}a`)}`);
+  assert.equal(tampered.status, 422);
+  const wrongSearch = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01&search=different&limit=2&cursor=${encodeURIComponent(firstPage.meta.nextCursor)}`);
+  assert.equal(wrongSearch.status, 422);
+
+  await page.screenshot({ path: '/tmp/bpi-console-point-catalog-pagination.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

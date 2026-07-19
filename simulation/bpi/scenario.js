@@ -201,6 +201,7 @@ function createScenario() {
     topology,
     topologies: [topology],
     pointCatalog,
+    pointCatalogHistory: [pointCatalog],
     pointCalibrations,
     rule,
     rules: [rule],

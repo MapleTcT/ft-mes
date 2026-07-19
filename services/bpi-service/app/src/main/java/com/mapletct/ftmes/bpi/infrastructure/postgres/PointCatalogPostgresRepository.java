@@ -139,6 +139,39 @@ public class PointCatalogPostgresRepository {
                 (rs, rowNum) -> mapPoint(rs));
     }
 
+    public List<PointCatalogPointView> listPointPage(
+            ActorContext actor,
+            PointCatalogSnapshotView snapshot,
+            String search,
+            String cursorProductId,
+            String cursorDeviceId,
+            String cursorPropertyId,
+            int fetchLimit) {
+        if (!actor.canAccess(snapshot.plantId(), snapshot.lineId())) {
+            throw new BpiNotFoundException("Point catalog snapshot not found.");
+        }
+        StringBuilder sql = new StringBuilder(POINT_SELECT)
+                .append(" WHERE e.tenant_id = :tenantId AND e.snapshot_id = :snapshotId");
+        MapSqlParameterSource parameters = new MapSqlParameterSource("tenantId", actor.tenantId())
+                .addValue("snapshotId", snapshot.id())
+                .addValue("fetchLimit", fetchLimit);
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND position(lower(:search) in lower(concat_ws(' ',")
+                    .append(" e.product_id, e.device_id, e.property_id, e.source_property_id,")
+                    .append(" e.point_name, e.locality_group))) > 0");
+            parameters.addValue("search", search);
+        }
+        if (cursorProductId != null && cursorDeviceId != null && cursorPropertyId != null) {
+            sql.append(" AND (e.product_id, e.device_id, e.property_id)")
+                    .append(" > (:cursorProductId, :cursorDeviceId, :cursorPropertyId)");
+            parameters.addValue("cursorProductId", cursorProductId)
+                    .addValue("cursorDeviceId", cursorDeviceId)
+                    .addValue("cursorPropertyId", cursorPropertyId);
+        }
+        sql.append(" ORDER BY e.product_id, e.device_id, e.property_id LIMIT :fetchLimit");
+        return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> mapPoint(rs));
+    }
+
     public void insertSnapshot(
             ActorContext actor,
             UUID snapshotId,

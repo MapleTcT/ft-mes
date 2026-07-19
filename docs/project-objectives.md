@@ -152,6 +152,15 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 验收前后表均为 4 行。证据见
 [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)。
 
+同日点位目录读取也从一次性完整响应升级为兼容式高基数读取：点位页显式使用默认 100、上限 200 的
+keyset cursor，规则和拓扑旧调用不带分页参数时继续获得完整快照。cursor 以 HMAC 绑定 tenant、plant、
+line、search 和不可变 snapshot。目标 marker `ADP_E2E_POINT_PAGE_20260719_1858` 在真实页面、adapter、
+service 和 PostgreSQL 上完成 `2+2+1`、5 个唯一 ID、服务端搜索、游标篡改/换 search `422`，并证明
+新 current 出现后旧 cursor 仍固定旧快照。两个 marker snapshot、6 条 entry、2 条审计和 2 条幂等记录
+已定向清理为 0，原 1 点 current snapshot 已恢复。该项关闭目录读取高基数风险，但不改变现场真实目录
+仍只有 1 点、校准和来源序列未就绪，G-021 保持 `PARTIAL`。证据见
+[BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -164,6 +173,7 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 - [BPI 试点平台前置条件与单位别名验收](testing/bpi-pilot-platform-prerequisites-acceptance.md)
 - [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)
 - [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)
+- [BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

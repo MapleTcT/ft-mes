@@ -73,6 +73,7 @@ jobs:
   bpi-ui-node20:
     name: BPI console and browser acceptance
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout

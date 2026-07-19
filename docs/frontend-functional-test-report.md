@@ -609,6 +609,21 @@ marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：
 `metadata/bpi-source-sequence-readiness-acceptance.json`、
 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。
 
+### BPI 点位目录高基数分页（2026-07-19）
+
+本节使用目标环境 `10.11.100.17` 的真实 ADP 会话、adapter、Java 17 service、PostgreSQL 15.18
+和 `/bpi/#/points`，不是模拟器结论。受控 marker 在验收后已全部清理并恢复原 current snapshot。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 点位目录 | `http://10.11.100.17:18080/bpi/#/points` | 搜索 5 点 marker，连续加载三页 | `GET /bpi-api/point-catalog/current?search=...&limit=2&cursor=...` | 页面按 `2 -> 4 -> 5` 增量加载，搜索词保持，5 个 ID 无重复，末页移除“加载更多”；console/page/request failure 均为 0 | HMAC scope-bound cursor 固定同一 snapshot id/snapshotAt；篡改 cursor 和改 search 复用均为 `422` | 只读查询 `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries` | PASS_TARGET_CLEANED | 生产页长为 100；验收脚本只改请求 limit 为 2 以强制分页 |
+| BPI 点位目录 | 同上 | 翻页期间导入新快照 | 同上；`POST /bpi-api/point-catalog/snapshots` | 旧 cursor 页面数据不混入新快照；fresh 请求切换新快照 | 旧 cursor 继续返回第一 snapshot；fresh 和无分页参数旧接口返回第二 snapshot，旧接口完整 points 兼容 | `bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_TARGET_CLEANED | 两个 marker 快照只用于测试，验收后定向删除 |
+| BPI 点位目录清理 | 不适用 | 删除本轮 marker 并复验 current | 清理后 `GET .../current?limit=2` | API `200`、1 点、无 nextCursor | 删除 snapshots 2、entries 6、audit 2、idempotency 2；四类 marker 剩余均 0；原 snapshot `ca213975-...` 恢复 | 同上 | PASS | 原现场目录仍为 1 点且不满足 READY 条件 |
+
+证据：`metadata/bpi-point-catalog-pagination-acceptance.json`、
+`metadata/bpi-point-catalog-pagination.png`、
+`docs/testing/bpi-point-catalog-pagination-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

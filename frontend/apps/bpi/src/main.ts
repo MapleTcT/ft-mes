@@ -48,6 +48,8 @@ import './styles.css';
 
 type View = 'overview' | 'candidates' | 'batches' | 'points' | 'rules';
 const CALIBRATION_PAGE_SIZE = 50;
+const POINT_CATALOG_PAGE_SIZE = 100;
+const POINT_SEARCH_DEBOUNCE_MS = 250;
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) throw new Error('BPI app root is missing');
@@ -68,6 +70,9 @@ const state = {
   pointCatalog: null as PointCatalogView | null,
   calibrations: [] as PointCalibration[],
   pointSearch: '',
+  pointCatalogNextCursor: null as string | null,
+  pointCatalogSnapshotAt: null as string | null,
+  loadingMorePointCatalog: false,
   calibrationNextCursor: null as string | null,
   calibrationSnapshotAt: null as string | null,
   loadingMoreCalibrations: false,
@@ -86,6 +91,9 @@ const state = {
   timeline: [] as StateEvent[],
   error: null as Error | null,
 };
+
+let pointCatalogRequestGeneration = 0;
+let pointSearchTimer: number | null = null;
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '')
@@ -372,6 +380,11 @@ function bindShellEvents(): void {
 }
 
 function navigate(view: View): void {
+  if (pointSearchTimer !== null) {
+    window.clearTimeout(pointSearchTimer);
+    pointSearchTimer = null;
+  }
+  if (view !== 'points') pointCatalogRequestGeneration += 1;
   state.view = view;
   state.error = null;
   closeDrawer();
@@ -398,11 +411,21 @@ async function loadView(silent = false): Promise<void> {
       state.batches = response.data;
       state.meta = response.meta;
     } else if (state.view === 'points') {
+      if (pointSearchTimer !== null) {
+        window.clearTimeout(pointSearchTimer);
+        pointSearchTimer = null;
+      }
+      const requestGeneration = ++pointCatalogRequestGeneration;
       const [catalog, calibrations] = await Promise.all([
-        bpiApi.currentPointCatalog(state.plantId, state.pointLineId),
+        bpiApi.currentPointCatalog(state.plantId, state.pointLineId, {
+          limit: POINT_CATALOG_PAGE_SIZE,
+          search: normalizedPointSearch() || undefined,
+        }),
         bpiApi.listPointCalibrations(state.plantId, state.pointLineId, null, CALIBRATION_PAGE_SIZE),
       ]);
-      state.pointCatalog = catalog.data;
+      if (requestGeneration === pointCatalogRequestGeneration) {
+        applyPointCatalogPage(catalog);
+      }
       state.calibrations = calibrations.data;
       state.calibrationNextCursor = calibrations.meta.nextCursor || null;
       state.calibrationSnapshotAt = calibrations.meta.snapshotAt;
@@ -754,7 +777,7 @@ function pointCalibrationSection(): string {
 function renderPoints(): void {
   const content = document.querySelector<HTMLElement>('#content')!;
   const catalog = state.pointCatalog;
-  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" value="${escapeHtml(state.pointSearch)}" placeholder="产品、设备、属性、证书" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="new-point-calibration" class="icon-text-button"><i data-lucide="plus"></i><span>提交校准证据</span></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
+  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" maxlength="128" value="${escapeHtml(state.pointSearch)}" placeholder="产品、设备、属性、证书" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="new-point-calibration" class="icon-text-button"><i data-lucide="plus"></i><span>提交校准证据</span></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
   if (!catalog) {
     content.innerHTML = `${toolbar}<div class="empty-state"><i data-lucide="database"></i><strong>该产线没有点位目录快照</strong><span>${escapeHtml(state.plantId)} / ${escapeHtml(state.pointLineId)}</span></div>${pointCalibrationSection()}`;
     bindPointPageEvents(content);
@@ -777,12 +800,13 @@ function renderPoints(): void {
     <div class="point-summary">
       <div><span>来源实例</span><b>${escapeHtml(snapshot.source)} / ${escapeHtml(snapshot.sourceInstance)}</b></div>
       <div><span>来源修订</span><b>${escapeHtml(snapshot.sourceRevision)}</b></div>
-      <div><span>目录点位</span><b>${snapshot.pointCount}</b></div>
+      <div><span>目录总点位</span><b>${snapshot.pointCount}</b></div>
       <div><span>就绪点位</span><b>${snapshot.readyPointCount}</b></div>
       <div><span>观测时间</span><b>${formatTime(snapshot.observedAt)}</b></div>
       <div><span>快照校验和</span><b class="mono-value">${escapeHtml(snapshot.checksum)}</b></div>
     </div>
-    ${rows ? `<div class="table-frame"><table class="point-table"><thead><tr><th>点位</th><th>产品</th><th>设备</th><th>设备状态</th><th>属性</th><th>单位</th><th>来源声明</th><th>MES 校准证据</th><th>源序列</th><th>准入状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="database"></i><strong>快照中没有可用点位</strong><span>${escapeHtml(snapshot.sourceRevision)}</span></div>`}
+    ${rows ? `<div class="table-frame"><table class="point-table"><thead><tr><th>点位</th><th>产品</th><th>设备</th><th>设备状态</th><th>属性</th><th>单位</th><th>来源声明</th><th>MES 校准证据</th><th>源序列</th><th>准入状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="database"></i><strong>${normalizedPointSearch() ? '没有匹配的点位' : '快照中没有可用点位'}</strong><span>${escapeHtml(snapshot.sourceRevision)}</span></div>`}
+    <div class="point-pagination"><span>${formatTime(state.pointCatalogSnapshotAt)} 快照 · 已加载 ${points.length}${normalizedPointSearch() ? ' 条匹配点位' : ` / ${snapshot.pointCount} 条`}</span>${state.pointCatalogNextCursor ? `<button id="load-more-points" type="button" class="button button--secondary" ${state.loadingMorePointCatalog ? 'disabled' : ''}><i data-lucide="chevrons-down"></i>${state.loadingMorePointCatalog ? '加载中' : '加载更多'}</button>` : ''}</div>
     ${pointCalibrationSection()}`;
   bindPointPageEvents(content);
 }
@@ -800,6 +824,7 @@ function bindPointPageEvents(content: HTMLElement): void {
     if (calibration && command) openPointCalibrationCommand(calibration, command);
   }));
   content.querySelector('#load-more-calibrations')?.addEventListener('click', () => void loadMorePointCalibrations());
+  content.querySelector('#load-more-points')?.addEventListener('click', () => void loadMorePointCatalog());
   const load = (): void => {
     const value = content.querySelector<HTMLInputElement>('#point-line')?.value.trim();
     if (!value) return;
@@ -814,8 +839,102 @@ function bindPointPageEvents(content: HTMLElement): void {
   content.querySelector<HTMLInputElement>('#point-search')?.addEventListener('input', (event) => {
     state.pointSearch = (event.target as HTMLInputElement).value;
     applyPointSearch(content);
+    schedulePointCatalogSearch();
   });
   applyPointSearch(content);
+}
+
+function normalizedPointSearch(): string {
+  return state.pointSearch.trim();
+}
+
+function applyPointCatalogPage(response: { data: PointCatalogView | null; meta: ResponseMeta }): void {
+  state.pointCatalog = response.data;
+  state.pointCatalogNextCursor = response.meta.nextCursor || null;
+  state.pointCatalogSnapshotAt = response.meta.snapshotAt;
+  state.meta = response.meta;
+}
+
+function schedulePointCatalogSearch(): void {
+  if (pointSearchTimer !== null) window.clearTimeout(pointSearchTimer);
+  const requestGeneration = ++pointCatalogRequestGeneration;
+  pointSearchTimer = window.setTimeout(() => {
+    pointSearchTimer = null;
+    void reloadPointCatalogForSearch(requestGeneration);
+  }, POINT_SEARCH_DEBOUNCE_MS);
+}
+
+async function reloadPointCatalogForSearch(requestGeneration: number): Promise<void> {
+  const plantId = state.plantId;
+  const lineId = state.pointLineId;
+  const search = normalizedPointSearch();
+  try {
+    const response = await bpiApi.currentPointCatalog(plantId, lineId, {
+      limit: POINT_CATALOG_PAGE_SIZE,
+      search: search || undefined,
+    });
+    if (requestGeneration !== pointCatalogRequestGeneration || state.view !== 'points'
+        || plantId !== state.plantId || lineId !== state.pointLineId
+        || search !== normalizedPointSearch()) return;
+    applyPointCatalogPage(response);
+    renderPoints();
+    refreshIcons();
+    const input = document.querySelector<HTMLInputElement>('#point-search');
+    if (input) {
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  } catch (error) {
+    if (requestGeneration === pointCatalogRequestGeneration) {
+      showToast(error instanceof Error ? error.message : String(error), true);
+    }
+  }
+}
+
+async function loadMorePointCatalog(): Promise<void> {
+  const cursor = state.pointCatalogNextCursor;
+  if (!cursor || state.loadingMorePointCatalog || !state.pointCatalog) return;
+  const plantId = state.plantId;
+  const lineId = state.pointLineId;
+  const search = normalizedPointSearch();
+  const snapshotAt = state.pointCatalogSnapshotAt;
+  const snapshotId = state.pointCatalog.snapshot.id;
+  const requestGeneration = pointCatalogRequestGeneration;
+  state.loadingMorePointCatalog = true;
+  renderPoints();
+  refreshIcons();
+  try {
+    const response = await bpiApi.currentPointCatalog(plantId, lineId, {
+      cursor,
+      limit: POINT_CATALOG_PAGE_SIZE,
+      search: search || undefined,
+    });
+    if (requestGeneration !== pointCatalogRequestGeneration || state.view !== 'points'
+        || plantId !== state.plantId || lineId !== state.pointLineId
+        || search !== normalizedPointSearch() || cursor !== state.pointCatalogNextCursor) return;
+    if (!response.data || response.data.snapshot.id !== snapshotId
+        || (snapshotAt && response.meta.snapshotAt !== snapshotAt)) {
+      throw new Error('点位目录分页快照已变化，请刷新后重试。');
+    }
+    const knownIds = new Set(state.pointCatalog.points.map((point) => point.id));
+    state.pointCatalog = {
+      snapshot: state.pointCatalog.snapshot,
+      points: [
+        ...state.pointCatalog.points,
+        ...response.data.points.filter((point) => !knownIds.has(point.id)),
+      ],
+    };
+    state.pointCatalogNextCursor = response.meta.nextCursor || null;
+    state.pointCatalogSnapshotAt = response.meta.snapshotAt;
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    state.loadingMorePointCatalog = false;
+    if (state.view === 'points') {
+      renderPoints();
+      refreshIcons();
+    }
+  }
 }
 
 function applyPointSearch(content: HTMLElement): void {
@@ -1033,11 +1152,9 @@ async function handlePointCatalogImport(event: SubmitEvent): Promise<void> {
     const response = await bpiApi.importPointCatalog(command, commandId());
     state.pointLineId = command.lineId;
     localStorage.setItem('bpi.lineId', command.lineId);
-    state.pointCatalog = response.data;
-    state.meta = response.meta;
     document.querySelector<HTMLDialogElement>('#point-catalog-dialog')!.close();
     showToast(`点位快照已导入：${response.data.snapshot.readyPointCount}/${response.data.snapshot.pointCount} 就绪`);
-    renderView();
+    await loadView(true);
   } catch (error) {
     showToast(error instanceof Error ? error.message : String(error), true);
   } finally {

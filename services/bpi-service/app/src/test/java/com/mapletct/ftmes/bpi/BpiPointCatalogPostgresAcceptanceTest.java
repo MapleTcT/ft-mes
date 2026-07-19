@@ -22,9 +22,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -330,6 +333,96 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.points[0].sourceSequenceEnabled").value(false));
     }
 
+    @Test
+    void currentPointCatalogCursorPinsImmutableSnapshotAndSearchScope() throws Exception {
+        Instant firstObservedAt = Instant.now().minusSeconds(20);
+        MvcResult imported = importPageCatalog(
+                marker + "_PAGE_FIRST", firstObservedAt, 5, "point-page-first-" + marker);
+        String firstSnapshotId = response(imported).path("data").path("snapshot").path("id").asText();
+
+        MvcResult firstPage = mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "product-page").param("limit", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(firstSnapshotId))
+                .andExpect(jsonPath("$.data.points.length()").value(2))
+                .andExpect(jsonPath("$.meta.nextCursor").isNotEmpty())
+                .andExpect(jsonPath("$.meta.snapshotAt").isNotEmpty())
+                .andReturn();
+        JsonNode firstBody = response(firstPage);
+        String firstCursor = firstBody.path("meta").path("nextCursor").asText();
+        Set<String> ids = pointIds(firstBody);
+
+        MvcResult refreshed = importPageCatalog(
+                marker + "_PAGE_SECOND", firstObservedAt.plusSeconds(10), 1,
+                "point-page-second-" + marker);
+        String refreshedSnapshotId = response(refreshed).path("data").path("snapshot").path("id").asText();
+        assertThat(refreshedSnapshotId).isNotEqualTo(firstSnapshotId);
+
+        MvcResult secondPage = mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "product-page").param("limit", "2")
+                        .param("cursor", firstCursor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(firstSnapshotId))
+                .andExpect(jsonPath("$.data.points.length()").value(2))
+                .andExpect(jsonPath("$.meta.nextCursor").isNotEmpty())
+                .andReturn();
+        JsonNode secondBody = response(secondPage);
+        assertThat(ids.addAll(pointIds(secondBody))).isTrue();
+
+        MvcResult thirdPage = mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "product-page").param("limit", "2")
+                        .param("cursor", secondBody.path("meta").path("nextCursor").asText()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(firstSnapshotId))
+                .andExpect(jsonPath("$.data.points.length()").value(1))
+                .andExpect(jsonPath("$.meta.nextCursor").doesNotExist())
+                .andReturn();
+        assertThat(ids.addAll(pointIds(response(thirdPage)))).isTrue();
+        assertThat(ids).hasSize(5);
+
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "product-page").param("limit", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(refreshedSnapshotId))
+                .andExpect(jsonPath("$.data.points.length()").value(1))
+                .andExpect(jsonPath("$.meta.nextCursor").doesNotExist());
+
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "product-page").param("limit", "2")
+                        .param("cursor", firstCursor + "a"))
+                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("search", "different-search").param("limit", "2")
+                        .param("cursor", firstCursor))
+                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("limit", "201"))
+                .andExpect(status().isUnprocessableEntity());
+
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.id").value(refreshedSnapshotId))
+                .andExpect(jsonPath("$.data.points.length()").value(1));
+        assertThat(count("bpi_point_catalog_snapshots")).isEqualTo(2);
+        assertThat(count("bpi_point_catalog_entries")).isEqualTo(6);
+    }
+
     private UUID createTopology(String code, Map<String, Object> definition, String key) throws Exception {
         MvcResult result = mockMvc.perform(post("/bpi/v1/topologies/drafts")
                         .header("Authorization", "Bearer " + engineerToken)
@@ -404,6 +497,55 @@ class BpiPointCatalogPostgresAcceptanceTest {
                                 Map.entry("calibrationVersion", "CAL-2026-01"),
                                 Map.entry("calibrationStatus", "VERIFIED"),
                                 Map.entry("sourceSequenceEnabled", false)))));
+    }
+
+    private MvcResult importPageCatalog(
+            String sourceRevision,
+            Instant observedAt,
+            int pointCount,
+            String idempotencyKey) throws Exception {
+        List<Map<String, Object>> points = new ArrayList<>();
+        for (int index = 0; index < pointCount; index++) {
+            points.add(Map.ofEntries(
+                    Map.entry("localityGroup", "LOCALITY-PAGE"),
+                    Map.entry("productId", "PRODUCT-PAGE"),
+                    Map.entry("deviceId", "DEVICE-PAGE-" + String.format("%03d", index)),
+                    Map.entry("propertyId", "flow.page." + String.format("%03d", index)),
+                    Map.entry("sourcePropertyId", "pageFlow" + index),
+                    Map.entry("pointName", "分页点位 " + String.format("%03d", index)),
+                    Map.entry("unit", "m3/h"),
+                    Map.entry("dataType", "double"),
+                    Map.entry("deviceState", "ACTIVE"),
+                    Map.entry("registered", true),
+                    Map.entry("propertyPresent", true),
+                    Map.entry("calibrationVersion", "CAL-PAGE-01"),
+                    Map.entry("calibrationStatus", "VERIFIED"),
+                    Map.entry("sourceSequenceEnabled", true)));
+        }
+        byte[] body = objectMapper.writeValueAsBytes(Map.of(
+                "source", "JETLINKS",
+                "sourceInstance", "acceptance-page-jetlinks",
+                "sourceRevision", sourceRevision,
+                "plantId", PLANT_ID,
+                "lineId", LINE_ID,
+                "observedAt", observedAt.toString(),
+                "reason", "验收点位目录稳定游标分页",
+                "points", points));
+        return mockMvc.perform(post("/bpi/v1/point-catalog/snapshots")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .header("Idempotency-Key", idempotencyKey)
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.pointCount").value(pointCount))
+                .andReturn();
+    }
+
+    private Set<String> pointIds(JsonNode body) {
+        Set<String> ids = new HashSet<>();
+        body.path("data").path("points").forEach(point -> ids.add(point.path("id").asText()));
+        return ids;
     }
 
     private Map<String, Object> readyDefinition() {

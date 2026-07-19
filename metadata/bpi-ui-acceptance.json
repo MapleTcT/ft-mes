@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-19T06:48:52Z",
-  "repoCommit": "deee9fe1eedd02cfc727ea5823a131dc9806dc7f",
+  "generatedAt": "2026-07-19T10:42:00Z",
+  "repoCommit": "04c3ccfa60175cd16ad2e62a4b41d2a484b0f7f4",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 10,
-    "pass": 10,
+    "browserTests": 12,
+    "pass": 12,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -154,6 +154,26 @@
       "evidence": "/tmp/bpi-console-point-catalog.png"
     },
     {
+      "id": "desktop-point-catalog-pagination",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/points"
+      ],
+      "operations": [
+        "load a 205-point immutable catalog in pages of 100, 100 and 5 without duplicates",
+        "search the complete server-side catalog for property.0204 rather than only loaded rows",
+        "verify a continuation cursor remains pinned after a newer catalog snapshot is imported",
+        "reject a tampered cursor and a cursor reused with another search scope with HTTP 422"
+      ],
+      "apis": [
+        "POST /bpi/v1/point-catalog/snapshots",
+        "GET /bpi/v1/point-catalog/current?limit=100",
+        "GET /bpi/v1/point-catalog/current?search=property.0204&limit=100"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-point-catalog-pagination.png"
+    },
+    {
       "id": "desktop-point-calibration-governance",
       "viewport": "1440x900",
       "routes": [
@@ -176,6 +196,24 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-point-calibration-governance.png"
+    },
+    {
+      "id": "desktop-point-calibration-pagination",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/points"
+      ],
+      "operations": [
+        "load the first 50 calibration records from a stable snapshot",
+        "append the second page with an opaque cursor without duplicate ids",
+        "preserve point search input while rendering the appended calibration page"
+      ],
+      "apis": [
+        "GET /bpi/v1/point-calibrations?limit=50",
+        "GET /bpi/v1/point-calibrations?limit=50&cursor={opaqueCursor}"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-point-calibration-pagination.png"
     },
     {
       "id": "desktop-topology-rule-productization",

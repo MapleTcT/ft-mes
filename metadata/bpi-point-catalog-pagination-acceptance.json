@@ -1,0 +1,133 @@
+{
+  "generatedAt": "2026-07-19T10:59:38.456Z",
+  "status": "PASS_TARGET_CLEANED",
+  "marker": "ADP_E2E_POINT_PAGE_20260719_1858",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "pageSize": 2,
+  "baseline": {
+    "snapshotId": "ca213975-4b22-4230-8cd9-968b0d1ce61a",
+    "sourceRevision": "sha256:8b4fd91c2b2169b693a7035f9b0a9b3a23d44ab4ac625016cf904486e3148022",
+    "pointCount": 1
+  },
+  "importedSnapshots": [
+    "ef9d7443-3128-41fd-97c8-5143f7d8efdc",
+    "0ac14fc4-c17c-49c7-b400-127eba81db48"
+  ],
+  "api": {
+    "pages": [
+      {
+        "index": 1,
+        "itemCount": 2,
+        "ids": [
+          "44116060-64e8-42b6-ac58-2acff1cd80bf",
+          "257009c4-ca7f-48cc-ba0c-c0d6e49a067c"
+        ],
+        "requestCursorHash": null,
+        "nextCursorHash": "7bd3cc06260783a18d70b3ea1a234578369c970687d68e42b37119f2afa3a7d8"
+      },
+      {
+        "index": 2,
+        "itemCount": 2,
+        "ids": [
+          "8ae7b171-c541-4992-b177-8a154202eca3",
+          "b990ff22-1b1a-4ec7-839b-ca309a1dcabc"
+        ],
+        "requestCursorHash": "7bd3cc06260783a18d70b3ea1a234578369c970687d68e42b37119f2afa3a7d8",
+        "nextCursorHash": "e6b0a8b39089d4040cdb0639746dd5dca5c4893e73890a503acdce06f62909e1"
+      },
+      {
+        "index": 3,
+        "itemCount": 1,
+        "ids": [
+          "55772490-c88b-4572-b443-eacb6f16ce38"
+        ],
+        "requestCursorHash": "e6b0a8b39089d4040cdb0639746dd5dca5c4893e73890a503acdce06f62909e1",
+        "nextCursorHash": null
+      }
+    ],
+    "totalItems": 5,
+    "uniqueItems": 5,
+    "snapshotId": "ef9d7443-3128-41fd-97c8-5143f7d8efdc",
+    "snapshotAt": "2026-07-19T10:59:39.812446Z",
+    "tamperedCursorStatus": 422,
+    "changedSearchStatus": 422,
+    "pinnedContinuationSnapshotId": "ef9d7443-3128-41fd-97c8-5143f7d8efdc",
+    "freshSnapshotId": "0ac14fc4-c17c-49c7-b400-127eba81db48",
+    "legacyPointCount": 1
+  },
+  "browser": {
+    "requests": [
+      {
+        "status": 200,
+        "limit": "2",
+        "search": null,
+        "hasCursor": false,
+        "cursorHash": null
+      },
+      {
+        "status": 200,
+        "limit": "2",
+        "search": "ADP_E2E_POINT_PAGE_20260719_1858",
+        "hasCursor": false,
+        "cursorHash": null
+      },
+      {
+        "status": 200,
+        "limit": "2",
+        "search": "ADP_E2E_POINT_PAGE_20260719_1858",
+        "hasCursor": true,
+        "cursorHash": "7bd3cc06260783a18d70b3ea1a234578369c970687d68e42b37119f2afa3a7d8"
+      },
+      {
+        "status": 200,
+        "limit": "2",
+        "search": "ADP_E2E_POINT_PAGE_20260719_1858",
+        "hasCursor": true,
+        "cursorHash": "e6b0a8b39089d4040cdb0639746dd5dca5c4893e73890a503acdce06f62909e1"
+      }
+    ],
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "loadedIds": [
+      "44116060-64e8-42b6-ac58-2acff1cd80bf",
+      "257009c4-ca7f-48cc-ba0c-c0d6e49a067c",
+      "8ae7b171-c541-4992-b177-8a154202eca3",
+      "b990ff22-1b1a-4ec7-839b-ca309a1dcabc",
+      "55772490-c88b-4572-b443-eacb6f16ce38"
+    ]
+  },
+  "cleanupRequired": false,
+  "cleanup": {
+    "deletedSnapshots": 2,
+    "deletedEntries": 6,
+    "deletedAuditEvents": 2,
+    "deletedIdempotencyRecords": 2,
+    "remainingSnapshots": 0,
+    "remainingEntries": 0,
+    "remainingAuditEvents": 0,
+    "remainingIdempotencyRecords": 0,
+    "restoredSnapshotId": "ca213975-4b22-4230-8cd9-968b0d1ce61a",
+    "postgresBaselineRestored": true,
+    "apiBaselineRestored": true,
+    "postCleanupApiStatus": 200,
+    "postCleanupPointCount": 1
+  },
+  "runtime": {
+    "host": "10.11.100.17",
+    "serviceImage": "ft-mes-bpi-service:20260719-point-catalog-cursor",
+    "serviceHealth": "UP",
+    "adapterHealth": "healthy",
+    "frontendAsset": "assets/index-BHVgjfWe.js",
+    "database": "PostgreSQL 15.18",
+    "flywayVersion": 18,
+    "jarSha256": "14b70c40f8610dd5f071182c1c04ce01872e651e3fd6c914d3f52c003a9392b2"
+  },
+  "screenshot": "metadata/bpi-point-catalog-pagination.png",
+  "screenshotSha256": "6b41b23313675becb02587bd10394ced11e02514c648f9ad47e9ab2edf6b605f",
+  "error": null
+}

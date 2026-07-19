@@ -52,7 +52,7 @@
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
 | 点位准入 | GET | `/bpi/v1/point-catalog/snapshots` | `listPointCatalogSnapshots` | SERVICE_IMPLEMENTED |
-| 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED |
+| 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED；无分页参数保持旧版全量响应；显式分页使用不可变 snapshot + HMAC scope-bound keyset cursor，默认 100、上限 200，支持服务端 search |
 | 点位准入 | POST | `/bpi/v1/point-catalog/snapshots` | `importPointCatalogSnapshot` | SERVICE_IMPLEMENTED |
 | 校准治理 | GET | `/bpi/v1/point-calibrations` | `listPointCalibrations` | SERVICE_IMPLEMENTED；`snapshotAt` + scope-bound keyset cursor，默认 50、上限 200 |
 | 校准治理 | POST | `/bpi/v1/point-calibrations` | `submitPointCalibration` | SERVICE_IMPLEMENTED |

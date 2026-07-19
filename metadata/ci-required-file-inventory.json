@@ -3243,6 +3243,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3634,6 +3640,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/audit-postgres-mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -4971,6 +4983,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-point-catalog-pagination-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-point-catalog-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5296,6 +5314,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-point-catalog-kafka-sync-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-catalog-pagination-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-catalog-pagination.png",
       "state": "tracked",
       "tracked": true
     },
@@ -6412,6 +6442,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogCursorCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogPage.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8018,16 +8060,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 561
+      "tracked": 563
     },
     "docs": {
-      "tracked": 98
+      "tracked": 99
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 142
+      "tracked": 144
     },
     "package.json": {
       "tracked": 1
@@ -8039,7 +8081,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 187
+      "tracked": 189
     },
     "simulation": {
       "tracked": 4
@@ -8051,8 +8093,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1332,
-    "tracked": 1332,
+    "totalFiles": 1339,
+    "tracked": 1339,
     "untracked": 0
   },
   "untrackedByDirectory": []
