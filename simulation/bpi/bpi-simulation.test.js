@@ -9,6 +9,7 @@ const RULE_ID = '78d57d90-fdc8-4a57-a660-a1ae73c2bc96';
 const covered = new Set();
 let server;
 let baseUrl;
+let simulatorState;
 
 async function request(method, route, { headers = {}, body } = {}) {
   const response = await fetch(`${baseUrl}${route}`, {
@@ -26,7 +27,7 @@ function commandHeaders(key, revision) {
 }
 
 before(async () => {
-  ({ server } = createBpiSimulator());
+  ({ server, state: simulatorState } = createBpiSimulator());
   const address = await listen(server);
   baseUrl = `http://127.0.0.1:${address.port}`;
 });
@@ -34,6 +35,85 @@ before(async () => {
 after(async () => {
   await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
   assert.deepEqual([...covered].sort(), [...profile.operationIds].sort(), 'every simulated operation must be exercised');
+});
+
+test('feature flag overrides are scoped, versioned, idempotent and phase locked', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('GET', '/bpi/v1/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.length, 6);
+  let commands = result.json.data.find((item) => item.flagKey === 'bpi.commands');
+  assert.equal(commands.effectiveEnabled, true);
+  assert.equal(commands.effectiveScopeType, 'LINE');
+  assert.equal(commands.overrideActive, true);
+  assert.equal(commands.overrideRevision, 1);
+  const wmsLink = result.json.data.find((item) => item.flagKey === 'bpi.wms-link');
+  assert.equal(wmsLink.effectiveEnabled, false);
+  assert.equal(wmsLink.editable, false);
+  assert.equal(wmsLink.enforcementStatus, 'PHASE_LOCKED');
+
+  const disableHeaders = commandHeaders('feature-commands-disable-0001', 1);
+  const disableBody = {
+    scopeType: 'LINE', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+    mode: 'SET', enabled: false, reason: '验收产线命令开关显式禁用',
+  };
+  result = await request('POST', '/bpi/v1/feature-flags/bpi.commands', {
+    headers: disableHeaders,
+    body: disableBody,
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.effectiveEnabled, false);
+  assert.equal(result.json.data.overrideRevision, 2);
+  const disabledResponse = result.json;
+
+  result = await request('POST', '/bpi/v1/feature-flags/bpi.commands', {
+    headers: disableHeaders,
+    body: disableBody,
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, disabledResponse);
+  assert.equal(simulatorState.featureFlagAudits.length, 1);
+
+  result = await request('POST', '/bpi/v1/feature-flags/bpi.commands', {
+    headers: commandHeaders('feature-commands-stale-0002', 1),
+    body: { ...disableBody, enabled: true, reason: '过期页面尝试重新启用运行命令' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, 2);
+  assert.equal(simulatorState.featureFlagAudits.length, 1);
+
+  result = await request('POST', '/bpi/v1/feature-flags/bpi.commands', {
+    headers: commandHeaders('feature-commands-inherit-0003', 2),
+    body: {
+      scopeType: 'LINE', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+      mode: 'INHERIT', reason: '移除产线覆盖并恢复平台默认继承',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  commands = result.json.data;
+  assert.equal(commands.overrideActive, false);
+  assert.equal(commands.overrideRevision, 3);
+  assert.equal(commands.effectiveEnabled, false);
+  assert.equal(commands.effectiveScopeType, 'GLOBAL');
+  assert.equal(simulatorState.featureFlagAudits.length, 2);
+  assert.deepEqual(simulatorState.featureFlagAudits.map((item) => item.action), [
+    'FEATURE_FLAG_DISABLED',
+    'FEATURE_FLAG_OVERRIDE_REMOVED',
+  ]);
+
+  result = await request('POST', '/bpi/v1/feature-flags/bpi.wms-link', {
+    headers: commandHeaders('feature-wms-locked-0004', 0),
+    body: {
+      scopeType: 'LINE', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+      mode: 'SET', enabled: true, reason: '阶段锁定项不得通过模拟页面启用',
+    },
+  });
+  assert.equal(result.response.status, 422);
+  assert.match(result.json.detail, /Phase 2/);
+  assert.equal(simulatorState.featureFlagAudits.length, 2);
 });
 
 test('candidate confirmation creates exactly one idempotent shadow batch', async () => {

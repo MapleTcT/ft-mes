@@ -8,6 +8,9 @@ import type {
   DataQualityIncidentState,
   DataQualitySummary,
   Evidence,
+  FeatureFlag,
+  FeatureFlagOverrideCommand,
+  FeatureFlagScopeType,
   LineState,
   PointCatalogSnapshotCommand,
   PointCatalogView,
@@ -71,6 +74,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<ApiEnve
 export const bpiApi = {
   overview: (plantId: string, onlyAbnormal: boolean) =>
     request<LineState[]>(`/overview?plantId=${encodeURIComponent(plantId)}&onlyAbnormal=${onlyAbnormal}`),
+  featureFlags: (plantId: string, lineId: string, scopeType: FeatureFlagScopeType) => {
+    const parameters = new URLSearchParams({ plantId, lineId, scopeType });
+    return request<FeatureFlag[]>(`/feature-flags?${parameters.toString()}`);
+  },
+  changeFeatureFlag: (flag: FeatureFlag, command: FeatureFlagOverrideCommand, key: string) =>
+    request<FeatureFlag>(`/feature-flags/${encodeURIComponent(flag.flagKey)}`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(flag.overrideRevision) },
+      body: JSON.stringify(command),
+    }),
   line: (lineId: string) => request<LineState>(`/lines/${encodeURIComponent(lineId)}/current-state`),
   candidates: (plantId: string) =>
     request<Candidate[]>(`/candidates?plantId=${encodeURIComponent(plantId)}&state=PENDING&limit=100`),

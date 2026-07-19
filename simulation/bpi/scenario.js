@@ -314,6 +314,17 @@ function createScenario() {
       { id: 'timescaledb', status: 'DEGRADED', businessImpact: '历史曲线可能延迟，不阻断批次事实查询', lastSuccessAt: '2026-07-12T07:58:00.000Z', lag: 120, revision: 3 },
       { id: 'wom-adapter', status: 'UP', businessImpact: '生产指令上下文有效', lastSuccessAt: FIXED_TIME, lag: 2.1, revision: 4 },
     ],
+    featureFlags: [
+      { id: '00000000-0000-0000-0000-000000000001', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.ui', enabled: false, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Global default deny' },
+      { id: '00000000-0000-0000-0000-000000000002', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.commands', enabled: false, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Global default deny' },
+      { id: '00000000-0000-0000-0000-000000000003', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.shadow-only', enabled: true, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Phase 1 invariant' },
+      { id: '00000000-0000-0000-0000-000000000004', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.rule-management', enabled: false, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Global default deny' },
+      { id: '00000000-0000-0000-0000-000000000005', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.auto-confirm', enabled: false, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Phase 1 lock' },
+      { id: '00000000-0000-0000-0000-000000000006', tenantId: '*', scopeType: 'GLOBAL', scopeKey: '*', flagKey: 'bpi.wms-link', enabled: false, active: true, revision: 1, updatedBy: 'flyway', updatedAt: FIXED_TIME, lastReason: 'Phase 1 lock' },
+      { id: '3d26fd79-dd3a-5b47-ae5b-7eef90ce2101', tenantId: 'TENANT-01', scopeType: 'LINE', scopeKey: 'LINE-S07-01', flagKey: 'bpi.commands', enabled: true, active: true, revision: 1, updatedBy: 'bpi.admin', updatedAt: FIXED_TIME, lastReason: 'Enable pilot line commands' },
+      { id: 'e977f6d8-dc94-5b2f-a5b0-bd4207f80802', tenantId: 'TENANT-01', scopeType: 'LINE', scopeKey: 'LINE-S07-01', flagKey: 'bpi.rule-management', enabled: true, active: true, revision: 1, updatedBy: 'bpi.admin', updatedAt: FIXED_TIME, lastReason: 'Enable pilot line rule management' },
+    ],
+    featureFlagAudits: [],
     idempotency: new Map(),
   };
 }

@@ -72,6 +72,7 @@ def main() -> int:
             "publish",
             "retire",
             "shadow-runs",
+            "feature-flags",
             "batch-reviews",
             "complete",
             "cancel",
@@ -111,8 +112,8 @@ def main() -> int:
 
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         summary = evidence.get("summary", {})
-        if summary.get("tests") != 20 or summary.get("pass") != 20:
-            failures.append("BPI adapter acceptance must record twenty passing tests")
+        if summary.get("tests") != 21 or summary.get("pass") != 21:
+            failures.append("BPI adapter acceptance must record twenty-one passing tests")
         if summary.get("runtimeSmokeChecks") != 2 or summary.get("runtimeSmokePass") != 2:
             failures.append("BPI adapter acceptance must record two passing runtime smoke checks")
         limitations = " ".join(evidence.get("limitations", []))

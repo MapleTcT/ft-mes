@@ -3,6 +3,8 @@
   "description": "Operations implemented and exercised by the deterministic local BPI simulator.",
   "operationIds": [
     "getBpiOverview",
+    "listFeatureFlags",
+    "changeFeatureFlagOverride",
     "getCurrentLineState",
     "listBatchCandidates",
     "getBatchCandidate",

@@ -19,7 +19,8 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 52 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 54 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- 运行开关按 `GLOBAL < TENANT < PLANT < LINE` 解析。租户 API 只允许管理员写 TENANT/PLANT/LINE 覆盖，平台默认值不可改；`bpi.shadow-only`、`bpi.auto-confirm`、`bpi.wms-link` 在 Phase 1 锁定，`bpi.ui` 在旧平台导航接入前只读。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +29,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
-- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation/data-quality/shadow-run 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire、data-quality acknowledge/resolve、shadow-run create/start/review/complete/approve/reject/cancel。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation/data-quality/shadow-run/feature-flags 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire、data-quality acknowledge/resolve、shadow-run create/start/review/complete/approve/reject/cancel、feature-flag override set/inherit。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -37,6 +38,8 @@
 |---|---|---|---|---|
 | 实时态势 | GET | `/bpi/v1/overview` | `getBpiOverview` | SERVICE_IMPLEMENTED |
 | 实时态势 | GET | `/bpi/v1/lines/{lineId}/current-state` | `getCurrentLineState` | SERVICE_IMPLEMENTED |
+| 运行治理 | GET | `/bpi/v1/feature-flags` | `listFeatureFlags` | SERVICE_IMPLEMENTED；同时返回有效值/来源和选中作用域覆盖 |
+| 运行治理 | POST | `/bpi/v1/feature-flags/{flagKey}` | `changeFeatureFlagOverride` | SERVICE_IMPLEMENTED；仅 BPI_ADMIN，可 SET 或 INHERIT，乐观锁和审计落库 |
 | 候选批次 | GET | `/bpi/v1/candidates` | `listBatchCandidates` | SERVICE_IMPLEMENTED |
 | 候选批次 | GET | `/bpi/v1/candidates/{candidateId}` | `getBatchCandidate` | SERVICE_IMPLEMENTED |
 | 候选批次 | POST | `/bpi/v1/candidates/{candidateId}/confirm` | `confirmBatchCandidate` | SERVICE_IMPLEMENTED |

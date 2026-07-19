@@ -32,6 +32,7 @@ MES 顶部标签
    ├─ 边界规则           /bpi/rules
    ├─ 数据质量           /bpi/data-quality
    ├─ 影子验收           /bpi/shadow-runs
+   ├─ 运行开关           /bpi/feature-flags
    ├─ 训练数据集         /bpi/datasets
    ├─ 集成运行           /bpi/integrations
    └─ 审计记录           /bpi/audit
@@ -53,6 +54,7 @@ MES 顶部标签
 | 数据工程师 | 数据质量 | 数据质量处置、生成数据集快照 | 修改生产事实和质量结果 |
 | 审批人 | 待审批规则/修订 | 发布规则、批准重大修订/强制结束、独立批准或驳回影子验收 | 草拟或创建后自行审批 |
 | 系统管理员 | 集成运行 | 导入点位快照、集成配置、服务诊断、权限配置 | 自动获得工艺审批权 |
+| BPI 管理员 | 运行开关 | 设置租户/工厂/产线覆盖、恢复上级继承 | 修改平台默认值、解除 Phase 1 锁定项 |
 | 审计人员 | 审计记录 | 查询、导出审计链 | 任何业务写操作 |
 
 权限判断同时校验 tenant、plant、line 和对象状态。页面隐藏无权限按钮只是体验处理，
@@ -322,7 +324,21 @@ point catalog 时可用。批次复核只列出同 scope、同规则/拓扑版�
 
 **主要 API：** `getIntegrationHealth`、`runIntegrationCheck`。
 
-### 5.12 审计记录 `/bpi/audit`
+### 5.12 运行开关 `/bpi/feature-flags`
+
+页面首屏显示 6 个受控开关的“当前有效值、有效来源、选中层覆盖、执行状态和最近变更”，不能只显示一列
+布尔值。管理员先指定具体工厂和产线作为解析目标，再选择 TENANT、PLANT 或 LINE 作为编辑层；切换编辑层
+不改变解析目标。`SET` 创建显式启用/禁用覆盖，`INHERIT` 只停用当前层覆盖并恢复上级解析，均要求不少于
+8 个字符的变更依据、`Idempotency-Key` 和当前覆盖 `If-Match` revision。
+
+`bpi.commands` 与 `bpi.rule-management` 由 Java 17 服务真实执行，允许管理员变更；`bpi.shadow-only`、
+`bpi.auto-confirm`、`bpi.wms-link` 显示锁定原因且没有操作按钮。`bpi.ui` 标记为“待旧平台接入”，在旧 MES
+导航真正读取该开关前只读，不能把数据库配置存在冒充菜单已经受控。409 冲突时页面刷新服务器 revision，
+403 保留后端权限结论，422 显示阶段门禁原因。所有成功变更必须同时产生功能开关审计和幂等完成记录。
+
+**主要 API：** `listFeatureFlags`、`changeFeatureFlagOverride`。
+
+### 5.13 审计记录 `/bpi/audit`
 
 按 batchId、candidateKey、ruleVersion、user、action、traceId 和时间查询。记录显示命令输入摘要、
 前后 revision、审批链、API 状态和关联 outbox/inbox。原始敏感 payload 默认折叠并按权限脱敏。

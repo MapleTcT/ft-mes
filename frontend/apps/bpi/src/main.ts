@@ -13,11 +13,15 @@ import {
   FlaskConical,
   Gauge,
   ListChecks,
+  LockKeyhole,
   Network,
   Play,
   Plus,
+  Power,
   RefreshCw,
+  RotateCcw,
   Search,
+  Settings2,
   ShieldCheck,
   Upload,
   X,
@@ -32,6 +36,9 @@ import type {
   DataQualityIncidentState,
   DataQualitySummary,
   Evidence,
+  FeatureFlag,
+  FeatureFlagOverrideCommand,
+  FeatureFlagScopeType,
   LineState,
   PointCatalogPointCommand,
   PointCatalogSnapshotCommand,
@@ -55,7 +62,7 @@ import type {
 } from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules';
+type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules' | 'featureFlags';
 const CALIBRATION_PAGE_SIZE = 50;
 const POINT_CATALOG_PAGE_SIZE = 100;
 const POINT_SEARCH_DEBOUNCE_MS = 250;
@@ -91,6 +98,9 @@ const state = {
   topologies: [] as TopologyVersion[],
   pointCatalog: null as PointCatalogView | null,
   calibrations: [] as PointCalibration[],
+  featureFlags: [] as FeatureFlag[],
+  featureFlagLineId: localStorage.getItem('bpi.featureFlagLineId') || 'LINE-S07-01',
+  featureFlagScopeType: (localStorage.getItem('bpi.featureFlagScopeType') || 'LINE') as FeatureFlagScopeType,
   pointSearch: '',
   pointCatalogNextCursor: null as string | null,
   pointCatalogSnapshotAt: null as string | null,
@@ -107,6 +117,7 @@ const state = {
   selectedCalibration: null as PointCalibration | null,
   selectedDataQualityIncident: null as DataQualityIncident | null,
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
+  selectedFeatureFlag: null as FeatureFlag | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
@@ -114,6 +125,7 @@ const state = {
   topologyCommand: null as 'validate' | 'publish' | null,
   calibrationCommand: null as 'approve' | 'reject' | 'revoke' | null,
   dataQualityCommand: null as 'acknowledge' | 'resolve' | null,
+  featureFlagCommand: null as { mode: 'SET' | 'INHERIT'; enabled?: boolean } | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -314,6 +326,7 @@ function shell(): void {
           <button class="nav-item" data-view="dataQuality" title="数据质量">${icon('circle-alert', '数据质量')}</button>
           <button class="nav-item" data-view="points" title="点位准入">${icon('database', '点位准入')}</button>
           <button class="nav-item" data-view="rules" title="规则与拓扑">${icon('network', '规则与拓扑')}</button>
+          <button class="nav-item" data-view="featureFlags" title="运行开关">${icon('settings-2', '运行开关')}</button>
         </nav>
         <div class="mode-flag"><i data-lucide="shield-check"></i><div><strong>SHADOW</strong><span>外部写入关闭</span></div></div>
       </aside>
@@ -445,6 +458,14 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="shadow-review-submit" value="default" class="button button--primary">提交批次复核</button></footer>
         </form>
       </dialog>
+      <dialog id="feature-flag-dialog" class="command-dialog">
+        <form method="dialog" id="feature-flag-form">
+          <header><div><span>运行治理</span><h2 id="feature-flag-dialog-title">变更运行开关</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="command-summary" id="feature-flag-command-summary"></div>
+          <label><span>变更依据</span><textarea id="feature-flag-reason" minlength="8" maxlength="500" required placeholder="填写变更单号、验证范围和回滚依据"></textarea></label>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="feature-flag-submit" value="default" class="button button--primary">确认变更</button></footer>
+        </form>
+      </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>`;
   document.querySelector<HTMLSelectElement>('#plant-id')!.value = state.plantId;
@@ -453,7 +474,7 @@ function shell(): void {
 }
 
 function refreshIcons(): void {
-  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, ChevronsDown, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, Plus, RefreshCw, Search, ShieldCheck, Upload, X } });
+  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, ChevronsDown, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, LockKeyhole, Network, Play, Plus, Power, RefreshCw, RotateCcw, Search, Settings2, ShieldCheck, Upload, X } });
 }
 
 function commandId(): string {
@@ -483,11 +504,16 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#point-calibration-form')?.addEventListener('submit', handlePointCalibrationSubmit);
   document.querySelector<HTMLFormElement>('#shadow-run-form')?.addEventListener('submit', handleShadowRunCreate);
   document.querySelector<HTMLFormElement>('#shadow-review-form')?.addEventListener('submit', handleShadowRunBatchReview);
+  document.querySelector<HTMLFormElement>('#feature-flag-form')?.addEventListener('submit', handleFeatureFlagChange);
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
     setCommandAssigneeVisible(false);
     state.dataQualityCommand = null;
     state.shadowRunCommand = null;
+  });
+  document.querySelector<HTMLDialogElement>('#feature-flag-dialog')?.addEventListener('close', () => {
+    state.selectedFeatureFlag = null;
+    state.featureFlagCommand = null;
   });
   document.querySelector<HTMLSelectElement>('#topology-base')?.addEventListener('change', applyTopologyBase);
   document.querySelector<HTMLSelectElement>('#rule-base')?.addEventListener('change', applyRuleBase);
@@ -581,6 +607,14 @@ async function loadView(silent = false): Promise<void> {
       state.calibrationNextCursor = calibrations.meta.nextCursor || null;
       state.calibrationSnapshotAt = calibrations.meta.snapshotAt;
       state.meta = catalog.meta;
+    } else if (state.view === 'featureFlags') {
+      const response = await bpiApi.featureFlags(
+        state.plantId,
+        state.featureFlagLineId,
+        state.featureFlagScopeType,
+      );
+      state.featureFlags = response.data;
+      state.meta = response.meta;
     } else {
       const [rules, topologies] = await Promise.all([
         bpiApi.rules(state.plantId),
@@ -614,6 +648,7 @@ function renderView(): void {
     dataQuality: ['运行治理', '数据质量事件'],
     points: ['数据准入', '点位目录'],
     rules: ['边界治理', '规则与拓扑'],
+    featureFlags: ['运行治理', '运行开关'],
   };
   document.querySelector('#view-kicker')!.textContent = titles[state.view][0];
   document.querySelector('#view-title')!.textContent = titles[state.view][1];
@@ -629,6 +664,7 @@ function renderView(): void {
   else if (state.view === 'shadowRuns') renderShadowRuns();
   else if (state.view === 'dataQuality') renderDataQuality();
   else if (state.view === 'points') renderPoints();
+  else if (state.view === 'featureFlags') renderFeatureFlags();
   else renderRules();
   refreshIcons();
 }
@@ -926,6 +962,171 @@ function renderShadowRuns(): void {
   content.querySelector('#shadow-run-state-filter')?.addEventListener('change', applyFilter);
   content.querySelector<HTMLInputElement>('#shadow-run-line-filter')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') applyFilter(); });
   content.querySelector('#new-shadow-run')?.addEventListener('click', openShadowRunCreateDialog);
+}
+
+function featureFlagScopeLabel(scopeType: string): string {
+  const labels: Record<string, string> = {
+    GLOBAL: '平台默认',
+    TENANT: '租户',
+    PLANT: '工厂',
+    LINE: '产线',
+    DEFAULT_DENY: '默认拒绝',
+  };
+  return labels[scopeType] || scopeType;
+}
+
+function featureFlagEnforcementLabel(status: string): string {
+  const labels: Record<string, string> = {
+    ENFORCED: '后端已执行',
+    PHASE_LOCKED: '阶段门禁锁定',
+    CODE_INVARIANT: '代码不变量',
+    PENDING_SHELL_INTEGRATION: '待旧平台接入',
+  };
+  return labels[status] || status;
+}
+
+function renderFeatureFlags(): void {
+  const content = document.querySelector<HTMLElement>('#content')!;
+  const counts = {
+    total: state.featureFlags.length,
+    enabled: state.featureFlags.filter((item) => item.effectiveEnabled).length,
+    overridden: state.featureFlags.filter((item) => item.overrideActive).length,
+    locked: state.featureFlags.filter((item) => !item.editable).length,
+  };
+  const rows = state.featureFlags.map((flag) => {
+    const selectedOverride = flag.overrideActive
+      ? `<div class="flag-state ${flag.overrideEnabled ? '' : 'is-disabled'}"><strong>${flag.overrideEnabled ? '显式启用' : '显式禁用'}</strong><small>${escapeHtml(featureFlagScopeLabel(flag.selectedScopeType))} · r${flag.overrideRevision}</small></div>`
+      : `<div class="flag-state"><strong>继承上级</strong><small>${flag.overrideExists ? `覆盖已移除 · r${flag.overrideRevision}` : '当前层未配置'}</small></div>`;
+    const enforcement = flag.editable
+      ? `<div class="flag-source"><strong>${escapeHtml(featureFlagEnforcementLabel(flag.enforcementStatus))}</strong><small>写操作由 BPI 服务强制校验</small></div>`
+      : `<div class="flag-lock"><i data-lucide="lock-keyhole"></i><div><strong>${escapeHtml(featureFlagEnforcementLabel(flag.enforcementStatus))}</strong><small title="${escapeHtml(flag.blockedReason || '')}">${escapeHtml(flag.blockedReason || '当前阶段不可编辑')}</small></div></div>`;
+    const actions = flag.editable
+      ? `<div class="feature-flag-actions">
+          <button class="button button--primary button--compact" data-feature-flag-key="${escapeHtml(flag.flagKey)}" data-feature-flag-action="enable" ${flag.overrideActive && flag.overrideEnabled ? 'disabled' : ''}><i data-lucide="power"></i>启用</button>
+          <button class="button button--danger button--compact" data-feature-flag-key="${escapeHtml(flag.flagKey)}" data-feature-flag-action="disable" ${flag.overrideActive && flag.overrideEnabled === false ? 'disabled' : ''}><i data-lucide="power"></i>禁用</button>
+          <button class="button button--secondary button--compact" data-feature-flag-key="${escapeHtml(flag.flagKey)}" data-feature-flag-action="inherit" ${flag.overrideActive ? '' : 'disabled'}><i data-lucide="rotate-ccw"></i>继承</button>
+        </div>`
+      : '<span class="revision">只读</span>';
+    return `<tr data-feature-flag-row="${escapeHtml(flag.flagKey)}">
+      <td><strong>${escapeHtml(flag.displayName)}</strong><small>${escapeHtml(flag.flagKey)} · ${escapeHtml(flag.riskLevel)}</small><small class="flag-description" title="${escapeHtml(flag.description)}">${escapeHtml(flag.description)}</small></td>
+      <td><div class="flag-state ${flag.effectiveEnabled ? '' : 'is-disabled'}"><strong>${flag.effectiveEnabled ? '已启用' : '已禁用'}</strong><small>${flag.effectiveRevision === null || flag.effectiveRevision === undefined ? '无实体版本' : `r${flag.effectiveRevision}`}</small></div></td>
+      <td><div class="flag-source"><strong>${escapeHtml(featureFlagScopeLabel(flag.effectiveScopeType))}</strong><code title="${escapeHtml(flag.effectiveScopeKey)}">${escapeHtml(flag.effectiveScopeKey)}</code></div></td>
+      <td>${selectedOverride}</td>
+      <td>${enforcement}</td>
+      <td><strong>${escapeHtml(flag.updatedBy || '-')}</strong><small>${formatTime(flag.updatedAt)}${flag.lastReason ? ` · ${escapeHtml(flag.lastReason)}` : ''}</small></td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+  const selectedScopeKey = state.featureFlags[0]?.selectedScopeKey || '-';
+  content.innerHTML = `
+    <div class="feature-flag-summary" aria-label="运行开关汇总">
+      <div><span>受控开关</span><b>${counts.total}</b></div>
+      <div><span>当前有效启用</span><b>${counts.enabled}</b></div>
+      <div><span>当前层显式覆盖</span><b>${counts.overridden}</b></div>
+      <div class="${counts.locked ? 'is-locked' : ''}"><span>阶段锁定 / 只读</span><b>${counts.locked}</b></div>
+    </div>
+    <div class="toolbar feature-flag-toolbar">
+      <div class="toolbar-note"><i data-lucide="shield-check"></i>Phase 1 保持影子运行；开关变更不会开启 WOM / QCS / WMS 写入</div>
+      <div class="toolbar-actions">
+        <label class="line-field"><span>产线</span><input id="feature-flag-line" value="${escapeHtml(state.featureFlagLineId)}" required /></label>
+        <div class="segmented" role="group" aria-label="覆盖作用域">
+          ${(['TENANT', 'PLANT', 'LINE'] as FeatureFlagScopeType[]).map((scope) => `<button data-feature-flag-scope="${scope}" class="${state.featureFlagScopeType === scope ? 'is-selected' : ''}">${featureFlagScopeLabel(scope)}</button>`).join('')}
+        </div>
+        <button id="apply-feature-flag-target" class="icon-button" title="查询" aria-label="查询"><i data-lucide="search"></i></button>
+      </div>
+    </div>
+    <div class="feature-flag-target-note">当前解析目标：${escapeHtml(state.plantId)} / ${escapeHtml(state.featureFlagLineId)}；编辑层：${escapeHtml(featureFlagScopeLabel(state.featureFlagScopeType))} (${escapeHtml(selectedScopeKey)})</div>
+    ${rows ? `<div class="table-frame"><table class="feature-flag-table"><colgroup><col class="flag-col-name" /><col class="flag-col-value" /><col class="flag-col-source" /><col class="flag-col-override" /><col class="flag-col-enforcement" /><col class="flag-col-change" /><col class="flag-col-actions" /></colgroup><thead><tr><th>开关</th><th>当前有效值</th><th>生效来源</th><th>选中层覆盖</th><th>执行状态</th><th>最近变更</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="empty-state"><i data-lucide="settings-2"></i><strong>没有可管理的运行开关</strong><span>请检查 BPI 服务迁移版本和当前租户范围。</span></div>'}`;
+
+  const applyTarget = () => {
+    const lineId = content.querySelector<HTMLInputElement>('#feature-flag-line')!.value.trim();
+    if (!lineId) {
+      showToast('运行开关解析必须指定产线', true);
+      return;
+    }
+    state.featureFlagLineId = lineId;
+    localStorage.setItem('bpi.featureFlagLineId', lineId);
+    localStorage.setItem('bpi.featureFlagScopeType', state.featureFlagScopeType);
+    void loadView();
+  };
+  content.querySelector('#apply-feature-flag-target')?.addEventListener('click', applyTarget);
+  content.querySelector<HTMLInputElement>('#feature-flag-line')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') applyTarget(); });
+  content.querySelectorAll<HTMLButtonElement>('[data-feature-flag-scope]').forEach((button) => button.addEventListener('click', () => {
+    state.featureFlagScopeType = button.dataset.featureFlagScope as FeatureFlagScopeType;
+    applyTarget();
+  }));
+  content.querySelectorAll<HTMLButtonElement>('[data-feature-flag-action]').forEach((button) => button.addEventListener('click', () => {
+    const flag = state.featureFlags.find((item) => item.flagKey === button.dataset.featureFlagKey);
+    if (!flag) return;
+    const action = button.dataset.featureFlagAction;
+    if (action === 'inherit') openFeatureFlagDialog(flag, 'INHERIT');
+    else openFeatureFlagDialog(flag, 'SET', action === 'enable');
+  }));
+}
+
+function openFeatureFlagDialog(flag: FeatureFlag, mode: 'SET' | 'INHERIT', enabled?: boolean): void {
+  if (!flag.editable) {
+    showToast(flag.blockedReason || '当前开关不可编辑', true);
+    return;
+  }
+  state.selectedFeatureFlag = flag;
+  state.featureFlagCommand = { mode, enabled };
+  const actionLabel = mode === 'INHERIT' ? '移除当前层覆盖并继承上级' : (enabled ? '显式启用' : '显式禁用');
+  document.querySelector('#feature-flag-dialog-title')!.textContent = mode === 'INHERIT' ? '恢复上级继承' : `${enabled ? '启用' : '禁用'}运行开关`;
+  document.querySelector('#feature-flag-command-summary')!.innerHTML = `
+    <div><span>开关</span><b>${escapeHtml(flag.displayName)}<small>${escapeHtml(flag.flagKey)}</small></b></div>
+    <div><span>目标作用域</span><b>${escapeHtml(featureFlagScopeLabel(flag.selectedScopeType))} · ${escapeHtml(flag.selectedScopeKey)}</b></div>
+    <div><span>当前有效值</span><b>${flag.effectiveEnabled ? '已启用' : '已禁用'} · ${escapeHtml(featureFlagScopeLabel(flag.effectiveScopeType))}</b></div>
+    <div><span>本次动作</span><b>${escapeHtml(actionLabel)} · If-Match r${flag.overrideRevision}</b></div>`;
+  document.querySelector<HTMLTextAreaElement>('#feature-flag-reason')!.value = '';
+  const submit = document.querySelector<HTMLButtonElement>('#feature-flag-submit')!;
+  submit.className = `button ${mode === 'SET' && enabled === false ? 'button--danger' : 'button--primary'}`;
+  submit.textContent = mode === 'INHERIT' ? '确认恢复继承' : (enabled ? '确认启用' : '确认禁用');
+  document.querySelector<HTMLDialogElement>('#feature-flag-dialog')!.showModal();
+}
+
+async function handleFeatureFlagChange(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  const flag = state.selectedFeatureFlag;
+  const requested = state.featureFlagCommand;
+  if (!flag || !requested) return;
+  const reason = document.querySelector<HTMLTextAreaElement>('#feature-flag-reason')!.value.trim();
+  if (reason.length < 8) {
+    showToast('变更依据至少填写 8 个字符', true);
+    return;
+  }
+  const command: FeatureFlagOverrideCommand = {
+    scopeType: flag.selectedScopeType,
+    plantId: state.plantId,
+    lineId: state.featureFlagLineId,
+    mode: requested.mode,
+    ...(requested.mode === 'SET' ? { enabled: requested.enabled } : {}),
+    reason,
+  };
+  const button = document.querySelector<HTMLButtonElement>('#feature-flag-submit')!;
+  const originalText = button.textContent || '确认变更';
+  button.disabled = true;
+  button.textContent = '提交中...';
+  try {
+    const response = await bpiApi.changeFeatureFlag(flag, command, commandId());
+    state.featureFlags = state.featureFlags.map((item) => item.flagKey === response.data.flagKey ? response.data : item);
+    document.querySelector<HTMLDialogElement>('#feature-flag-dialog')!.close();
+    showToast(`${response.data.displayName} 已${requested.mode === 'INHERIT' ? '恢复继承' : (requested.enabled ? '启用' : '禁用')}`);
+    await loadView(true);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      document.querySelector<HTMLDialogElement>('#feature-flag-dialog')!.close();
+      await loadView(true);
+      showToast(`运行开关已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+    } else {
+      showToast(error instanceof Error ? error.message : String(error), true);
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
 }
 
 async function openShadowRun(runId: string): Promise<void> {
@@ -2554,6 +2755,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules', 'featureFlags'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

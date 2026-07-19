@@ -205,6 +205,67 @@ test('shift lead suspends and resumes a batch from the detail drawer', async () 
   await page.close();
 });
 
+test('administrator governs scoped feature flags while phase locks remain read only', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/featureFlags`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('heading', { name: '运行开关' }).waitFor();
+  assert.equal(await page.locator('.feature-flag-table tbody tr').count(), 6);
+  assert.match(await page.locator('.feature-flag-summary').textContent(), /受控开关6/);
+  assert.match(await page.locator('.feature-flag-target-note').textContent(), /PLANT-01 \/ LINE-S07-01/);
+
+  const commandsRow = page.locator('[data-feature-flag-row="bpi.commands"]');
+  await commandsRow.getByText('已启用', { exact: true }).waitFor();
+  await commandsRow.getByText('显式启用', { exact: true }).waitFor();
+  assert.match(await commandsRow.textContent(), /产线.*r1/);
+
+  const wmsRow = page.locator('[data-feature-flag-row="bpi.wms-link"]');
+  await wmsRow.getByText('阶段门禁锁定', { exact: true }).waitFor();
+  assert.match(await wmsRow.textContent(), /QCS\/WMS Phase 2/);
+  assert.equal(await wmsRow.getByRole('button').count(), 0);
+
+  await commandsRow.getByRole('button', { name: '禁用' }).click();
+  await page.getByRole('heading', { name: '禁用运行开关' }).waitFor();
+  assert.match(await page.locator('#feature-flag-command-summary').textContent(), /If-Match r1/);
+  await page.locator('#feature-flag-reason').fill('ADP_E2E_FEATURE_FLAG 禁用产线人工命令');
+  await page.getByRole('button', { name: '确认禁用' }).click();
+  await page.getByText('批次人工命令 已禁用').waitFor();
+  await commandsRow.getByText('显式禁用', { exact: true }).waitFor();
+  assert.match(await commandsRow.textContent(), /r2/);
+
+  let flags = await fetch(`${simulatorUrl}/bpi/v1/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE`)
+    .then((response) => response.json()).then((body) => body.data);
+  let commands = flags.find((item) => item.flagKey === 'bpi.commands');
+  assert.equal(commands.effectiveEnabled, false);
+  assert.equal(commands.overrideActive, true);
+  assert.equal(commands.overrideRevision, 2);
+
+  await commandsRow.getByRole('button', { name: '继承' }).click();
+  await page.getByRole('heading', { name: '恢复上级继承' }).waitFor();
+  await page.locator('#feature-flag-reason').fill('ADP_E2E_FEATURE_FLAG 移除产线覆盖恢复继承');
+  await page.getByRole('button', { name: '确认恢复继承' }).click();
+  await page.getByText('批次人工命令 已恢复继承').waitFor();
+  await commandsRow.getByText('继承上级', { exact: true }).waitFor();
+  await commandsRow.getByText('平台默认', { exact: true }).waitFor();
+  assert.match(await commandsRow.textContent(), /覆盖已移除 · r3/);
+
+  flags = await fetch(`${simulatorUrl}/bpi/v1/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE`)
+    .then((response) => response.json()).then((body) => body.data);
+  commands = flags.find((item) => item.flagKey === 'bpi.commands');
+  assert.equal(commands.effectiveEnabled, false);
+  assert.equal(commands.effectiveScopeType, 'GLOBAL');
+  assert.equal(commands.overrideActive, false);
+  assert.equal(commands.overrideRevision, 3);
+
+  await page.locator('#toast').evaluate((element) => { element.className = 'toast'; });
+  await page.screenshot({ path: '/tmp/bpi-console-feature-flags.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('team completes a shadow run acceptance and critical data quality blocks approval until resolved', async () => {
   let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(response.status, 200);

@@ -228,6 +228,7 @@ public class BpiPostgresRepository {
                 SELECT enabled
                   FROM bpi.bpi_feature_flags
                  WHERE flag_key = :flagKey
+                   AND active
                    AND tenant_id IN (:tenantId, '*')
                    AND (
                         (tenant_id = :tenantId AND scope_type = 'LINE' AND scope_key = :lineId)

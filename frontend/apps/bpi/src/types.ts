@@ -20,6 +20,40 @@ export interface ProblemDetail {
   currentRevision?: number;
 }
 
+export type FeatureFlagScopeType = 'TENANT' | 'PLANT' | 'LINE';
+
+export interface FeatureFlag {
+  flagKey: string;
+  displayName: string;
+  description: string;
+  riskLevel: 'MEDIUM' | 'HIGH' | 'CRITICAL' | string;
+  effectiveEnabled: boolean;
+  effectiveScopeType: string;
+  effectiveScopeKey: string;
+  effectiveRevision?: number | null;
+  selectedScopeType: FeatureFlagScopeType;
+  selectedScopeKey: string;
+  overrideExists: boolean;
+  overrideActive: boolean;
+  overrideEnabled?: boolean | null;
+  overrideRevision: number;
+  updatedBy?: string | null;
+  updatedAt?: string | null;
+  lastReason?: string | null;
+  enforcementStatus: 'ENFORCED' | 'PHASE_LOCKED' | 'CODE_INVARIANT' | 'PENDING_SHELL_INTEGRATION' | string;
+  editable: boolean;
+  blockedReason?: string | null;
+}
+
+export interface FeatureFlagOverrideCommand {
+  scopeType: FeatureFlagScopeType;
+  plantId: string;
+  lineId: string;
+  mode: 'SET' | 'INHERIT';
+  enabled?: boolean;
+  reason: string;
+}
+
 export type DataQualityIncidentState = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
 
 export interface DataQualityIncident {

@@ -5,6 +5,15 @@ const { FIXED_TIME, clone, createScenario, sha256 } = require('./scenario');
 const JSON_TYPE = 'application/json; charset=utf-8';
 const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
 const POINT_CATALOG_CURSOR_SECRET = 'bpi-simulator-point-catalog-cursor-v1';
+const FEATURE_FLAG_TENANT = 'TENANT-01';
+const FEATURE_FLAG_DEFINITIONS = [
+  { flagKey: 'bpi.ui', displayName: 'BPI 导航入口', description: '控制旧平台是否展示 BPI 导航入口。', riskLevel: 'MEDIUM', enforcementStatus: 'PENDING_SHELL_INTEGRATION', editable: false, blockedReason: '旧平台导航尚未读取该开关，禁止制造已生效的假象。' },
+  { flagKey: 'bpi.commands', displayName: '批次人工命令', description: '控制候选确认、驳回和批次状态命令。', riskLevel: 'HIGH', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
+  { flagKey: 'bpi.rule-management', displayName: '规则与拓扑管理', description: '控制拓扑、规则、回放和发布类写操作。', riskLevel: 'HIGH', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
+  { flagKey: 'bpi.shadow-only', displayName: '影子模式', description: '保证 Phase 1 只生成影子事实，不写生产业务状态。', riskLevel: 'CRITICAL', enforcementStatus: 'CODE_INVARIANT', editable: false, blockedReason: 'Phase 1 必须保持 shadow-only，不能通过运行页面关闭。' },
+  { flagKey: 'bpi.auto-confirm', displayName: '候选自动确认', description: '允许高置信候选绕过人工确认。', riskLevel: 'CRITICAL', enforcementStatus: 'PHASE_LOCKED', editable: false, blockedReason: '未完成真实 7-14 天影子验收，Phase 2 自动确认门禁未开放。' },
+  { flagKey: 'bpi.wms-link', displayName: 'WMS 完工入库联动', description: '允许 BPI 发起幂等 WMS 完工入库命令。', riskLevel: 'CRITICAL', enforcementStatus: 'PHASE_LOCKED', editable: false, blockedReason: 'QCS/WMS Phase 2 契约和真实写回验收尚未完成。' },
+];
 
 function meta(operationId, pagination = {}) {
   return {
@@ -373,6 +382,56 @@ function dataQualitySummary(state, url) {
   };
 }
 
+function featureFlagScopeKey(scopeType, plantId, lineId) {
+  if (scopeType === 'TENANT') return FEATURE_FLAG_TENANT;
+  if (scopeType === 'PLANT') return plantId;
+  if (scopeType === 'LINE') return lineId;
+  return null;
+}
+
+function featureFlagPriority(item) {
+  if (item.tenantId !== FEATURE_FLAG_TENANT) return 10;
+  return { GLOBAL: 20, TENANT: 30, PLANT: 40, LINE: 50 }[item.scopeType] || 0;
+}
+
+function featureFlagApplies(item, plantId, lineId) {
+  if (item.tenantId === '*' && item.scopeType === 'GLOBAL' && item.scopeKey === '*') return true;
+  if (item.tenantId !== FEATURE_FLAG_TENANT) return false;
+  return (item.scopeType === 'GLOBAL' && item.scopeKey === '*')
+    || (item.scopeType === 'TENANT' && item.scopeKey === FEATURE_FLAG_TENANT)
+    || (item.scopeType === 'PLANT' && item.scopeKey === plantId)
+    || (item.scopeType === 'LINE' && item.scopeKey === lineId);
+}
+
+function featureFlagViews(state, plantId, lineId, selectedScopeType) {
+  const selectedScopeKey = featureFlagScopeKey(selectedScopeType, plantId, lineId);
+  return FEATURE_FLAG_DEFINITIONS.map((definition) => {
+    const effective = state.featureFlags
+      .filter((item) => item.active && item.flagKey === definition.flagKey
+        && featureFlagApplies(item, plantId, lineId))
+      .sort((left, right) => featureFlagPriority(right) - featureFlagPriority(left))[0] || null;
+    const selected = state.featureFlags.find((item) => item.tenantId === FEATURE_FLAG_TENANT
+      && item.scopeType === selectedScopeType && item.scopeKey === selectedScopeKey
+      && item.flagKey === definition.flagKey) || null;
+    return {
+      ...definition,
+      effectiveEnabled: Boolean(effective?.enabled),
+      effectiveScopeType: effective?.scopeType || 'DEFAULT_DENY',
+      effectiveScopeKey: effective?.scopeKey || '-',
+      effectiveRevision: effective?.revision ?? null,
+      selectedScopeType,
+      selectedScopeKey,
+      overrideExists: Boolean(selected),
+      overrideActive: Boolean(selected?.active),
+      overrideEnabled: selected ? selected.enabled : null,
+      overrideRevision: selected?.revision || 0,
+      updatedBy: selected?.updatedBy || null,
+      updatedAt: selected?.updatedAt || null,
+      lastReason: selected?.lastReason || null,
+    };
+  });
+}
+
 function match(pathname, pattern) {
   const result = pathname.match(pattern);
   return result ? result.slice(1).map(decodeURIComponent) : null;
@@ -646,6 +705,70 @@ function createHandler(state) {
       }
       if (req.method === 'GET' && path === '/bpi/v1/overview') {
         return send(res, 200, envelope('getBpiOverview', [state.line]), 'getBpiOverview');
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/feature-flags') {
+        const operationId = 'listFeatureFlags';
+        const plantId = url.searchParams.get('plantId');
+        const lineId = url.searchParams.get('lineId');
+        const scopeType = String(url.searchParams.get('scopeType') || 'LINE').toUpperCase();
+        if (plantId !== 'PLANT-01' || lineId !== 'LINE-S07-01'
+            || !['TENANT', 'PLANT', 'LINE'].includes(scopeType)) {
+          return send(res, 422, problem(422, 'Validation Failed', 'A valid plant, line and scope type are required.', operationId), operationId);
+        }
+        return send(res, 200, envelope(operationId,
+          featureFlagViews(state, plantId, lineId, scopeType)), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/feature-flags\/([^/]+)$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'changeFeatureFlagOverride';
+        const definition = FEATURE_FLAG_DEFINITIONS.find((item) => item.flagKey === ids[0]);
+        if (!definition) return send(res, 422, problem(422, 'Validation Failed', 'Unsupported BPI feature flag.', operationId), operationId);
+        if (!definition.editable) return send(res, 422, problem(422, 'Validation Failed', definition.blockedReason, operationId), operationId);
+        const body = await readJson(req);
+        const scopeType = String(body.scopeType || '').toUpperCase();
+        const mode = String(body.mode || '').toUpperCase();
+        const scopeKey = featureFlagScopeKey(scopeType, body.plantId, body.lineId);
+        if (body.plantId !== 'PLANT-01' || body.lineId !== 'LINE-S07-01'
+            || !scopeKey || !['SET', 'INHERIT'].includes(mode)
+            || !body.reason || String(body.reason).trim().length < 8
+            || (mode === 'SET' && typeof body.enabled !== 'boolean')) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Feature flag command is invalid.', operationId), operationId);
+        }
+        const current = state.featureFlags.find((item) => item.tenantId === FEATURE_FLAG_TENANT
+          && item.scopeType === scopeType && item.scopeKey === scopeKey && item.flagKey === ids[0]) || null;
+        const context = commandContext(req, res, operationId, current?.revision || 0, state, path);
+        if (!context) return;
+        if (mode === 'INHERIT' && (!current || !current.active)) {
+          return send(res, 409, problem(409, 'Conflict', 'Feature flag already inherits from its parent scope.', operationId, current?.revision || 0), operationId);
+        }
+        if (mode === 'SET' && current?.active && current.enabled === body.enabled) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Feature flag override already has the requested value.', operationId), operationId);
+        }
+        const before = current ? clone(current) : null;
+        let after = current;
+        if (!after) {
+          after = {
+            id: stableUuid(`${FEATURE_FLAG_TENANT}|${scopeType}|${scopeKey}|${ids[0]}`),
+            tenantId: FEATURE_FLAG_TENANT, scopeType, scopeKey, flagKey: ids[0], enabled: body.enabled,
+            active: true, revision: 1, updatedBy: 'bpi.admin', updatedAt: FIXED_TIME, lastReason: body.reason,
+          };
+          state.featureFlags.push(after);
+        } else {
+          after.enabled = mode === 'SET' ? body.enabled : after.enabled;
+          after.active = mode === 'SET';
+          after.revision += 1;
+          after.updatedBy = 'bpi.admin';
+          after.updatedAt = FIXED_TIME;
+          after.lastReason = body.reason;
+        }
+        state.featureFlagAudits.push({ flagKey: ids[0], scopeType, scopeKey,
+          beforeRevision: before?.revision || 0, afterRevision: after.revision,
+          action: mode === 'INHERIT' ? 'FEATURE_FLAG_OVERRIDE_REMOVED'
+            : body.enabled ? 'FEATURE_FLAG_ENABLED' : 'FEATURE_FLAG_DISABLED', reason: body.reason });
+        const result = featureFlagViews(state, body.plantId, body.lineId, scopeType)
+          .find((item) => item.flagKey === ids[0]);
+        const response = envelope(operationId, result);
+        return rememberAndSend(state, context, res, 200, response, operationId);
       }
       ids = match(path, /^\/bpi\/v1\/lines\/([^/]+)\/current-state$/);
       if (req.method === 'GET' && ids) {

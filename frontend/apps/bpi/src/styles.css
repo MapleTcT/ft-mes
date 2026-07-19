@@ -195,6 +195,36 @@ td > svg { width: 16px; color: #8b96a1; }
 .shadow-run-summary span { color: var(--muted); font-size: 10px; }
 .shadow-run-summary b { font-size: 20px; font-variant-numeric: tabular-nums; }
 .shadow-run-summary .is-blocked b { color: var(--red); }
+.feature-flag-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 10px; background: #fff; border: 1px solid var(--line); }
+.feature-flag-summary > div { min-width: 0; display: grid; gap: 4px; padding: 13px 14px; border-right: 1px solid var(--line); }
+.feature-flag-summary > div:last-child { border-right: 0; }
+.feature-flag-summary span { color: var(--muted); font-size: 10px; }
+.feature-flag-summary b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.feature-flag-summary .is-locked b { color: var(--red); }
+.feature-flag-toolbar { align-items: flex-start; }
+.feature-flag-toolbar .toolbar-actions { flex: 1; justify-content: flex-end; }
+.feature-flag-table { min-width: 1115px; }
+.feature-flag-table .flag-col-name { width: 200px; }
+.feature-flag-table .flag-col-value { width: 100px; }
+.feature-flag-table .flag-col-source { width: 120px; }
+.feature-flag-table .flag-col-override { width: 130px; }
+.feature-flag-table .flag-col-enforcement { width: 210px; }
+.feature-flag-table .flag-col-change { width: 130px; }
+.feature-flag-table .flag-col-actions { width: 225px; }
+.feature-flag-table tbody tr { cursor: default; }
+.feature-flag-table .flag-description { margin-top: 3px; }
+.flag-state, .flag-source, .flag-lock { display: grid; gap: 2px; min-width: 0; }
+.flag-state strong { color: var(--green); }
+.flag-state.is-disabled strong { color: var(--red); }
+.flag-state small, .flag-source small, .flag-lock small { overflow: hidden; text-overflow: ellipsis; }
+.flag-source code { overflow: hidden; text-overflow: ellipsis; color: #31556f; font-size: 10px; }
+.flag-lock { grid-template-columns: 18px minmax(0, 1fr); align-items: center; }
+.flag-lock svg { width: 15px; color: var(--red); }
+.flag-lock div { min-width: 0; display: grid; gap: 2px; }
+.feature-flag-actions { display: flex; align-items: center; gap: 6px; }
+.feature-flag-actions .button { display: inline-flex; align-items: center; }
+.feature-flag-actions .button > svg { margin-right: 4px; }
+.feature-flag-target-note { margin: -2px 0 12px; color: var(--muted); font-size: 11px; }
 .shadow-run-toolbar .toolbar-actions { flex: 1; justify-content: flex-end; }
 .shadow-run-state-field { grid-template-columns: auto minmax(100px, 132px); }
 .shadow-run-state-field select { min-width: 0; border: 0; outline: 0; background: #fff; color: #34414d; font-size: 12px; }
@@ -360,7 +390,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .console-shell { display: block; }
   .side-nav { position: fixed; z-index: 30; top: auto; bottom: 0; width: 100%; height: 58px; display: block; border-top: 1px solid #0d141c; }
   .brand-mark, .mode-flag { display: none; }
-  .side-nav nav { height: 58px; grid-template-columns: repeat(7, 1fr); padding: 4px 4px; }
+  .side-nav nav { height: 58px; grid-template-columns: repeat(8, 1fr); padding: 4px 4px; }
   .nav-item { height: 48px; grid-template-columns: 1fr; justify-items: center; padding: 0; }
   .nav-item span { display: none; }
   .nav-item.is-active::before { left: 25%; bottom: -4px; width: 50%; height: 2px; }
@@ -383,6 +413,12 @@ td > svg { width: 16px; color: #8b96a1; }
   .topology-summary, .point-summary, .metric-grid, .simulation-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .data-quality-state-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .shadow-run-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feature-flag-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feature-flag-summary > div { border-bottom: 1px solid var(--line); }
+  .feature-flag-toolbar .toolbar-actions { grid-template-columns: 1fr 44px; }
+  .feature-flag-toolbar .segmented { grid-column: 1 / -1; width: 100%; }
+  .feature-flag-toolbar .segmented button { min-width: 0; }
+  .feature-flag-toolbar .line-field { min-width: 0; }
   .shadow-run-summary > div { border-bottom: 1px solid var(--line); }
   .shadow-run-toolbar .toolbar-actions { grid-template-columns: 1fr 1fr 44px; }
   .shadow-run-toolbar .icon-text-button { grid-column: 1 / -1; }

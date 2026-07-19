@@ -179,6 +179,40 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsGovernedFeatureFlagQueryAndMutationToTheFixedUpstream() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE"))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":[]}", MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/feature-flags/bpi.commands"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "flag-command-1"))
+                .andExpect(header("If-Match", "1"))
+                .andRespond(withSuccess("{\"data\":{\"flagKey\":\"bpi.commands\"}}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest query = new MockHttpServletRequest("GET", "/bpi-api/feature-flags");
+        query.setQueryString("plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE");
+        query.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), query, null).getStatusCode());
+
+        MockHttpServletRequest mutation = new MockHttpServletRequest(
+                "POST", "/bpi-api/feature-flags/bpi.commands");
+        mutation.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        mutation.addHeader("Idempotency-Key", "flag-command-1");
+        mutation.addHeader("If-Match", "1");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), mutation,
+                "{\"scopeType\":\"LINE\",\"plantId\":\"PLANT-01\",\"lineId\":\"LINE-S07-01\",\"mode\":\"SET\",\"enabled\":false,\"reason\":\"controlled stop\"}"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)).getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
     public void rejectsOrdinaryRequestBodyAbove64KiB() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

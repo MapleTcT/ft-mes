@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T04:40:00Z",
-  "repoCommit": "9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f",
+  "generatedAt": "2026-07-20T03:17:27+08:00",
+  "repoCommit": "c96bd912b663d42de8ff1de670520e59283c0490",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 14,
-    "pass": 14,
+    "browserTests": 15,
+    "pass": 15,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -327,6 +327,27 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-shadow-run-approved.png"
+    },
+    {
+      "id": "desktop-feature-flag-governance",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/featureFlags"
+      ],
+      "operations": [
+        "resolve six governed flags for a concrete plant and line",
+        "distinguish effective value and source from the selected LINE override",
+        "disable bpi.commands with If-Match revision 1 and verify revision 2",
+        "remove the LINE override and verify GLOBAL inheritance at revision 3",
+        "verify bpi.wms-link remains phase locked with no executable button",
+        "verify zero console, page and request failures"
+      ],
+      "apis": [
+        "GET /bpi/v1/feature-flags",
+        "POST /bpi/v1/feature-flags/{flagKey}"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-feature-flags.png"
     }
   ],
   "persistence": {

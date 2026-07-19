@@ -19,6 +19,7 @@
     {"name": "Topologies"},
     {"name": "Rules"},
     {"name": "DataQuality"},
+    {"name": "Feature Flags"},
     {"name": "Datasets"},
     {"name": "Integrations"},
     {"name": "Audit"}
@@ -34,6 +35,41 @@
           {"name": "onlyAbnormal", "in": "query", "schema": {"type": "boolean", "default": false}}
         ],
         "responses": {"200": {"description": "实时态势", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/OverviewResponse"}}}}}
+      }
+    },
+    "/bpi/v1/feature-flags": {
+      "get": {
+        "tags": ["Feature Flags"],
+        "operationId": "listFeatureFlags",
+        "summary": "查询运行开关的有效值和选中作用域覆盖",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string", "maxLength": 128}},
+          {"name": "scopeType", "in": "query", "schema": {"type": "string", "enum": ["TENANT", "PLANT", "LINE"], "default": "LINE"}}
+        ],
+        "responses": {
+          "200": {"description": "运行开关解析结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/FeatureFlagListResponse"}}}},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
+        }
+      }
+    },
+    "/bpi/v1/feature-flags/{flagKey}": {
+      "post": {
+        "tags": ["Feature Flags"],
+        "operationId": "changeFeatureFlagOverride",
+        "summary": "设置或移除租户、工厂或产线运行开关覆盖",
+        "parameters": [
+          {"$ref": "#/components/parameters/FlagKey"},
+          {"$ref": "#/components/parameters/IdempotencyKey"},
+          {"$ref": "#/components/parameters/IfMatch"}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/FeatureFlagOverrideCommand"}}}},
+        "responses": {
+          "200": {"description": "变更后的开关解析结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/FeatureFlagResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
       }
     },
     "/bpi/v1/lines/{lineId}/current-state": {
@@ -679,6 +715,7 @@
       "DatasetId": {"name": "datasetId", "in": "path", "required": true, "schema": {"type": "string"}},
       "SnapshotId": {"name": "snapshotId", "in": "path", "required": true, "schema": {"type": "string"}},
       "IntegrationId": {"name": "integrationId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "FlagKey": {"name": "flagKey", "in": "path", "required": true, "schema": {"type": "string", "enum": ["bpi.ui", "bpi.commands", "bpi.rule-management", "bpi.shadow-only", "bpi.auto-confirm", "bpi.wms-link"]}},
       "AuditId": {"name": "auditId", "in": "path", "required": true, "schema": {"type": "string"}},
       "Cursor": {"name": "cursor", "in": "query", "schema": {"type": "string"}},
       "Limit": {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}},
@@ -708,6 +745,10 @@
       },
       "ReasonCommand": {"type": "object", "required": ["reason"], "properties": {"reason": {"type": "string", "minLength": 3, "maxLength": 500}, "comment": {"type": "string", "maxLength": 2000}}},
       "DataQualityAcknowledgeCommand": {"type": "object", "required": ["assignee", "reason"], "properties": {"assignee": {"type": "string", "minLength": 1, "maxLength": 128}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
+      "FeatureFlagOverrideCommand": {"type": "object", "required": ["scopeType", "plantId", "lineId", "mode", "reason"], "properties": {"scopeType": {"type": "string", "enum": ["TENANT", "PLANT", "LINE"]}, "plantId": {"type": "string", "minLength": 1, "maxLength": 64}, "lineId": {"type": "string", "minLength": 1, "maxLength": 128}, "mode": {"type": "string", "enum": ["SET", "INHERIT"]}, "enabled": {"type": ["boolean", "null"], "description": "Required when mode is SET and ignored when mode is INHERIT"}, "reason": {"type": "string", "minLength": 8, "maxLength": 500}}},
+      "FeatureFlag": {"type": "object", "required": ["flagKey", "displayName", "description", "riskLevel", "effectiveEnabled", "effectiveScopeType", "effectiveScopeKey", "selectedScopeType", "selectedScopeKey", "overrideExists", "overrideActive", "overrideRevision", "enforcementStatus", "editable"], "properties": {"flagKey": {"type": "string"}, "displayName": {"type": "string"}, "description": {"type": "string"}, "riskLevel": {"type": "string", "enum": ["MEDIUM", "HIGH", "CRITICAL"]}, "effectiveEnabled": {"type": "boolean"}, "effectiveScopeType": {"type": "string", "enum": ["DEFAULT_DENY", "GLOBAL", "TENANT", "PLANT", "LINE"]}, "effectiveScopeKey": {"type": "string"}, "effectiveRevision": {"type": ["integer", "null"], "minimum": 1}, "selectedScopeType": {"type": "string", "enum": ["TENANT", "PLANT", "LINE"]}, "selectedScopeKey": {"type": "string"}, "overrideExists": {"type": "boolean"}, "overrideActive": {"type": "boolean"}, "overrideEnabled": {"type": ["boolean", "null"]}, "overrideRevision": {"type": "integer", "minimum": 0}, "updatedBy": {"type": ["string", "null"]}, "updatedAt": {"type": ["string", "null"], "format": "date-time"}, "lastReason": {"type": ["string", "null"]}, "enforcementStatus": {"type": "string", "enum": ["ENFORCED", "PHASE_LOCKED", "CODE_INVARIANT", "PENDING_SHELL_INTEGRATION"]}, "editable": {"type": "boolean"}, "blockedReason": {"type": ["string", "null"]}}},
+      "FeatureFlagResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/FeatureFlag"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "FeatureFlagListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/FeatureFlag"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "ForceCloseCommand": {"allOf": [{"$ref": "#/components/schemas/ReasonCommand"}, {"type": "object", "required": ["boundaryTime"], "properties": {"boundaryTime": {"type": "string", "format": "date-time"}, "approvalMode": {"type": "string", "enum": ["REQUEST", "APPROVE"]}}}]},
       "CorrectionCommand": {
         "type": "object",
