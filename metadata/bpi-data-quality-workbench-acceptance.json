@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-19T12:45:49Z",
-  "repoCommit": "b9aed8c8b524c2fd711307dc0402f55e863e2e5e",
+  "generatedAt": "2026-07-19T13:53:31Z",
+  "repoCommit": "297e0aaffeae69dfe68cb2f3b23a62c4910625d7",
   "worktree": "codex/bpi-data-quality-workbench",
-  "status": "PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING",
+  "status": "PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP",
   "database": "PostgreSQL",
-  "transport": "Embedded Kafka",
+  "transport": "Embedded Kafka + Apache Kafka 4.2 target cluster",
   "runtime": {
     "java": 17,
     "springBoot": "3.4.7",
@@ -13,17 +13,36 @@
     "scopeDefault": "_DENY_ALL_"
   },
   "summary": {
-    "testedFeatures": 12,
-    "pass": 12,
+    "testedFeatures": 13,
+    "pass": 13,
     "fail": 0,
     "blocked": 0,
-    "targetPending": 1
+    "targetPending": 0
   },
   "tests": {
-    "java17": { "tests": 6, "pass": 6, "fail": 0, "errors": 0 },
-    "simulator": { "tests": 9, "pass": 9, "fail": 0 },
-    "browser": { "tests": 13, "pass": 13, "fail": 0, "unexpectedErrors": 0 },
-    "java8Adapter": { "tests": 9, "pass": 9, "fail": 0 },
+    "java17": {
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "errors": 0
+    },
+    "simulator": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0
+    },
+    "browser": {
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "unexpectedErrors": 0
+    },
+    "java8Adapter": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "focusedDataQualityRoutes": 9
+    },
     "frontendBuild": "PASS",
     "serviceVerifier": "PASS"
   },
@@ -33,6 +52,7 @@
     "lifecycleTable": "bpi.bpi_data_quality_incident_actions",
     "auditTable": "bpi.bpi_audit_events",
     "inboxTable": "bpi.bpi_inbox_events",
+    "idempotencyTable": "bpi.bpi_api_idempotency",
     "rawFactsDeletedOnResolve": 0,
     "markerCleanup": "PASS"
   },
@@ -45,11 +65,126 @@
   ],
   "targetEnvironment": {
     "host": "10.11.100.17",
-    "status": "PENDING",
-    "reason": "This acceptance proves the local source/runtime chain only; V19 has not yet been deployed and marker-tested on the target host."
+    "status": "PASS",
+    "deployedCommit": "297e0aaffeae69dfe68cb2f3b23a62c4910625d7",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 19,
+    "backup": "/home/v6/bpi-deploy-backups/20260719-212455-data-quality-v19-297e0aaf",
+    "images": {
+      "service": {
+        "tag": "ft-mes-bpi-service:20260719-data-quality-v19-297e0aaf",
+        "id": "sha256:50355dee4ee2526bb9da364189b10ca7b7469039608565b7e70c2db4c33346a3"
+      },
+      "adapter": {
+        "tag": "ft-mes-bpi-adapter:20260719-data-quality-v19-297e0aaf",
+        "id": "sha256:611881abd3dd444692b506c644f20ac4b029394fded03f2e82d18b2e4f312d37"
+      }
+    },
+    "frontend": {
+      "url": "http://10.11.100.17:18080/bpi/",
+      "httpStatus": 200,
+      "indexSha256": "a1d1919c8d2ff8b70bac6e8b4e16a96e07f5701b120d2af61377d5108601b199",
+      "javascript": "index-CYGrgfzV.js",
+      "javascriptSha256": "13f8e2e1b5630e11c9f4bbfa5af661e26f5036a0c520bb7e3fb125030eae6bd0",
+      "css": "index-Beow3bJt.css",
+      "cssSha256": "d2060c49af167f1c9ca89bc3b6b21b0351bb01f75503839109f7e19d71816d9d"
+    },
+    "kafka": {
+      "sourceTopic": "bpi.data-quality.v1",
+      "dlqTopic": "bpi.data-quality.dlq.v1",
+      "partitions": 6,
+      "replicationFactor": 3,
+      "minimumInSyncReplicas": 2,
+      "historicalMessagesBeforeRollout": 34,
+      "bootstrapOffsets": {
+        "0": 10,
+        "1": 2,
+        "2": 5,
+        "3": 2,
+        "4": 8,
+        "5": 7
+      },
+      "finalCommittedOffsets": {
+        "0": 10,
+        "1": 2,
+        "2": 6,
+        "3": 2,
+        "4": 8,
+        "5": 7
+      }
+    },
+    "marker": {
+      "value": "ADP_E2E_DQ_20260719_215100_297E0AAF",
+      "eventId": "ADP_E2E_DQ_20260719_215100_297E0AAF_EVENT_1",
+      "incidentId": "e2f5e042-5c3a-5370-99a1-935fd56d664d",
+      "topicPartition": 2,
+      "topicOffset": 5,
+      "consumerCommittedOffset": 6,
+      "initialState": "OPEN",
+      "initialRevision": 1,
+      "finalState": "RESOLVED",
+      "finalRevision": 3,
+      "rawEventCount": 1,
+      "lifecycle": [
+        "CREATED",
+        "ACKNOWLEDGED",
+        "RESOLVED"
+      ],
+      "auditCount": 3,
+      "idempotencyCount": 2,
+      "inboxCount": 1
+    },
+    "browser": {
+      "loginStatus": 200,
+      "apiStatuses": "all 2xx",
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "reportSha256": "343c45c47869e142d6a0c055c0996bdf579a2c9abbdc4ebbf1dd20870a7474a7",
+      "screenshotSha256": "e868892b8fa3175255d880b937c029d0a645c0580f89e2fad007e9b05cc61b80"
+    },
+    "finalConsumer": {
+      "enabled": false,
+      "scopeAllowlist": "_DENY_ALL_",
+      "activeMembers": 0,
+      "lag": 0
+    },
+    "dlq": {
+      "partitionEndOffsets": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "totalEndOffset": 0
+    },
+    "cleanup": {
+      "incidents": 0,
+      "rawEvents": 0,
+      "actions": 0,
+      "auditEvents": 0,
+      "idempotencyRecords": 0,
+      "inboxEvents": 0
+    },
+    "health": {
+      "service": "UP",
+      "adapter": "healthy",
+      "composeProjectContainers": 65,
+      "running": 62,
+      "unhealthy": 0,
+      "successfulOneShotExited": 3
+    }
   },
+  "remainingScope": [
+    "Real Flink jobs have not yet been accepted as the automatic producer of data-quality events.",
+    "The selected production line still requires 7-14 days of continuous shadow operation and business sign-off."
+  ],
   "evidence": [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
+    "deploy/docker/scripts/adp-bpi-data-quality-acceptance.js",
     "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
     "simulation/bpi/bpi-simulation.test.js",
     "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",

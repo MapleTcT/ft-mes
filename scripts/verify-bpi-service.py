@@ -89,6 +89,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DataQualityController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/DataQualityKafkaRecordProcessorTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
@@ -130,6 +131,7 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-data-quality-acceptance.js",
     "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
@@ -354,6 +356,31 @@ def main() -> int:
             "RESOLVED",
             "REOPENED",
             "bpi.data-quality.dlq.v1",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
+        [
+            "EnabledIfEnvironmentVariable",
+            "BPI_TARGET_KAFKA_BOOTSTRAP_SERVERS",
+            "BPI_TARGET_MARKER",
+            "bpi.data-quality.v1",
+            "ENABLE_IDEMPOTENCE_CONFIG",
+            "schema_version",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-data-quality-acceptance.js",
+        [
+            "BPI_ACCEPTANCE_MARKER",
+            "/bpi-api/data-quality/",
+            "open-data-quality-acknowledge",
+            "open-data-quality-resolve",
+            "raw marker event was not preserved exactly once",
+            "consoleErrors",
+            "requestFailures",
         ],
         failures,
     )
@@ -792,19 +819,35 @@ def main() -> int:
     data_quality_acceptance = json.loads(
         (ROOT / "metadata/bpi-data-quality-workbench-acceptance.json").read_text(encoding="utf-8")
     )
-    if data_quality_acceptance.get("status") != "PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING":
-        fail("BPI data-quality acceptance must retain explicit local PASS and target pending scope", failures)
+    if data_quality_acceptance.get("status") != "PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP":
+        fail("BPI data-quality acceptance must retain explicit target lifecycle and cleanup PASS", failures)
     if data_quality_acceptance.get("database") != "PostgreSQL":
         fail("BPI data-quality acceptance must identify PostgreSQL", failures)
     if data_quality_acceptance.get("runtime", {}).get("flywayVersion") != 19:
         fail("BPI data-quality acceptance must prove Flyway V19", failures)
     data_quality_summary = data_quality_acceptance.get("summary", {})
-    if data_quality_summary.get("pass") != 12 or data_quality_summary.get("fail") != 0:
-        fail("BPI data-quality acceptance must preserve twelve local passes and zero failures", failures)
+    if (data_quality_summary.get("testedFeatures") != 13
+            or data_quality_summary.get("pass") != 13
+            or data_quality_summary.get("fail") != 0
+            or data_quality_summary.get("targetPending") != 0):
+        fail("BPI data-quality acceptance must preserve thirteen passes and no target pending item", failures)
     if data_quality_acceptance.get("persistence", {}).get("rawFactsDeletedOnResolve") != 0:
         fail("BPI data-quality resolution must preserve immutable raw facts", failures)
-    if data_quality_acceptance.get("targetEnvironment", {}).get("status") != "PENDING":
-        fail("BPI data-quality target deployment must remain pending until target marker evidence exists", failures)
+    data_quality_target = data_quality_acceptance.get("targetEnvironment", {})
+    if data_quality_target.get("status") != "PASS":
+        fail("BPI data-quality target deployment must retain the target marker PASS", failures)
+    if data_quality_target.get("flywayVersion") != 19:
+        fail("BPI data-quality target deployment must retain Flyway V19 evidence", failures)
+    final_consumer = data_quality_target.get("finalConsumer", {})
+    if final_consumer.get("enabled") is not False or final_consumer.get("lag") != 0:
+        fail("BPI data-quality target consumer must finish disabled with zero lag", failures)
+    if final_consumer.get("scopeAllowlist") != "_DENY_ALL_":
+        fail("BPI data-quality target consumer must finish with deny-all scope", failures)
+    if data_quality_target.get("dlq", {}).get("totalEndOffset") != 0:
+        fail("BPI data-quality target DLQ must remain empty for the accepted marker", failures)
+    cleanup = data_quality_target.get("cleanup", {})
+    if not cleanup or any(value != 0 for value in cleanup.values()):
+        fail("BPI data-quality target marker rows must be fully cleaned", failures)
 
     readiness_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-runtime-readiness-acceptance.json").read_text(encoding="utf-8")

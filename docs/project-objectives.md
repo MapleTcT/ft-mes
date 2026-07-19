@@ -165,9 +165,13 @@ service 和 PostgreSQL 上完成 `2+2+1`、5 个唯一 ID、服务端搜索、�
 headers、Protobuf、scope、payload 和时间偏移，非法消息隔离到 DLQ；合法事件按租户、工厂、产线、
 工段、来源、设备、属性和问题类型聚合，并保留不可变 raw fact、生命周期和审计。列表使用 HMAC
 scope-bound keyset cursor，页面支持汇总、筛选、详情、分派、重新分派和解决。真实本地 PostgreSQL +
-Embedded Kafka 6/6、Java 8 adapter 9/9、模拟器 9/9 和浏览器 13/13 已通过。目标测试环境当前仍是
-Flyway V18，V19 部署、真实 Kafka offset、浏览器/API/PostgreSQL marker 与清理复验尚未执行，因此该项
-保持 `PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING`，不得写成目标上线。证据见
+Embedded Kafka 6/6、Java 8 adapter 完整模块 18/18、模拟器 9/9 和浏览器 13/13 已通过。目标测试环境
+又以 `297e0aaf` 升级到 Flyway V19；marker `ADP_E2E_DQ_20260719_215100_297E0AAF` 在真实 Kafka
+partition 2 offset `5 -> 6`、ADP 登录、浏览器/API 和 PostgreSQL 完成
+`OPEN/r1 -> ACKNOWLEDGED/r2 -> RESOLVED/r3`，raw event 保持 1，console/page/request error 均为 0。
+随后 incident、raw、action、audit、idempotency 和 inbox 定向清零，consumer 恢复关闭和 deny-all，
+六个分区 lag 与 DLQ 均为 0。该项状态更新为 `PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP`；真实 Flink
+自动产出和 7-14 天现场影子运行仍未闭合，不能据此把 BPI 总目标写成生产 READY。证据见
 [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)。
 
 权威设计和验收入口：
