@@ -323,6 +323,22 @@ def main() -> int:
                 f"BPI read-only lifecycle evidence contains mutating marker: {forbidden}"
             )
 
+    data_quality_replay = (
+        ROOT / "deploy/bpi-streaming/scripts/run-data-quality-flink-replay.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BpiDataQualityFlinkReplay",
+        "--no-deps",
+        "BPI_DQ_REPLAY_TENANT_ID",
+        "BPI_DQ_REPLAY_PLANT_ID",
+        "BPI_DQ_REPLAY_LINE_ID",
+        "replay.get(\"scope\") != expected_scope",
+        "jobIdUnchangedDuringReplay",
+        "checkpoint ID regressed",
+    ):
+        if marker not in data_quality_replay:
+            failures.append(f"BPI data-quality replay is missing safety marker: {marker}")
+
     cleanup = (
         ROOT / "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql"
     ).read_text(encoding="utf-8")
