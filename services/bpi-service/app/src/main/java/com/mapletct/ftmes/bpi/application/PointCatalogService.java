@@ -158,7 +158,8 @@ public class PointCatalogService {
                 if (point.unit() == null || point.unit().isBlank()) {
                     errors.add(issue("POINT_UNIT_MISSING", path + "/expectedUnit", "ERROR",
                             "The catalog point has no source unit."));
-                } else if (!expectedUnit.isBlank() && !point.unit().equalsIgnoreCase(expectedUnit)) {
+                } else if (!expectedUnit.isBlank()
+                        && !UnitSymbolNormalizer.equivalent(point.unit(), expectedUnit)) {
                     errors.add(issue("POINT_UNIT_MISMATCH", path + "/expectedUnit", "ERROR",
                             "Expected unit " + expectedUnit + " does not match source unit " + point.unit() + "."));
                 }

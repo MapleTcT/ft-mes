@@ -25,7 +25,7 @@ const productId = process.env.BPI_JETLINKS_PRODUCT_ID || "bpi-pilot-product-01";
 const deviceId = process.env.BPI_JETLINKS_DEVICE_ID || "bpi-pilot-device-01";
 const sourcePropertyId = process.env.BPI_JETLINKS_SOURCE_PROPERTY_ID || "instantFlow";
 const propertyId = process.env.BPI_CANONICAL_PROPERTY_ID || "flow.instant";
-const sourceRevision = action === "sync-read"
+const sourceRevision = new Set(["sync-read", "sync-validate"]).has(action)
   ? required("BPI_EXPECTED_POINT_CATALOG_REVISION")
   : `${marker}_JETLINKS_STATUS`;
 const topologyCode = `${marker}_BLOCKED_TOPOLOGY`;
@@ -36,11 +36,22 @@ const expectedPointIssues = [
   "CALIBRATION_NOT_VERIFIED",
   "SOURCE_SEQUENCE_DISABLED",
 ];
-const expectedAutomaticPointIssues = [
-  ...expectedPointIssues.slice(0, 3),
-  "UNIT_MISSING",
-  ...expectedPointIssues.slice(3),
-];
+const pointIssueLabels = {
+  DEVICE_NOT_REGISTERED: "设备未注册",
+  DEVICE_NOT_ACTIVE: "设备未激活",
+  PROPERTY_NOT_AVAILABLE: "设备属性不可用",
+  UNIT_MISSING: "单位缺失",
+  CALIBRATION_NOT_VERIFIED: "标定未验证",
+  SOURCE_SEQUENCE_DISABLED: "来源序列未启用",
+};
+const expectedAutomaticPointIssues = process.env.BPI_EXPECTED_POINT_ISSUES
+  ? process.env.BPI_EXPECTED_POINT_ISSUES.split(",").map((value) => value.trim()).filter(Boolean)
+  : [...expectedPointIssues.slice(0, 3), "UNIT_MISSING", ...expectedPointIssues.slice(3)];
+const expectedAutomaticPointLabels = expectedAutomaticPointIssues.map((issue) => {
+  const label = pointIssueLabels[issue];
+  if (!label) throw new Error(`BPI_EXPECTED_POINT_ISSUES contains unsupported issue: ${issue}`);
+  return label;
+});
 const expectedPointLabels = [
   "设备未注册",
   "设备未激活",
@@ -55,12 +66,25 @@ const expectedTopologyErrors = [
   "POINT_CALIBRATION_NOT_VERIFIED",
   "POINT_SOURCE_SEQUENCE_DISABLED",
 ];
+const pointIssueTopologyErrors = {
+  DEVICE_NOT_REGISTERED: "POINT_DEVICE_NOT_REGISTERED",
+  DEVICE_NOT_ACTIVE: "POINT_DEVICE_NOT_ACTIVE",
+  PROPERTY_NOT_AVAILABLE: "POINT_PROPERTY_NOT_AVAILABLE",
+  UNIT_MISSING: "POINT_UNIT_MISSING",
+  CALIBRATION_NOT_VERIFIED: "POINT_CALIBRATION_NOT_VERIFIED",
+  SOURCE_SEQUENCE_DISABLED: "POINT_SOURCE_SEQUENCE_DISABLED",
+};
+const expectedAutomaticTopologyErrors = expectedAutomaticPointIssues.map((issue) => {
+  const error = pointIssueTopologyErrors[issue];
+  if (!error) throw new Error(`No topology validation error is mapped for point issue: ${issue}`);
+  return error;
+});
 
 if (!/^[A-Za-z0-9_-]{8,80}$/.test(marker)) {
   throw new Error("BPI_ACCEPTANCE_MARKER must use 8-80 letters, digits, underscores or hyphens");
 }
-if (!new Set(["write", "read", "sync-read"]).has(action)) {
-  throw new Error("BPI_BROWSER_ACTION must be write, read or sync-read");
+if (!new Set(["write", "read", "sync-read", "sync-validate"]).has(action)) {
+  throw new Error("BPI_BROWSER_ACTION must be write, read, sync-read or sync-validate");
 }
 
 function required(key) {
@@ -251,7 +275,7 @@ async function importBlockedPointCatalog(page, evidence) {
   evidence.idempotentReplay = replay.replay;
 }
 
-async function validateBlockedTopology(page, evidence) {
+async function validateBlockedTopology(page, evidence, expectedErrors = expectedTopologyErrors) {
   await page.getByRole("button", { name: "规则与拓扑" }).click();
   await page.getByRole("heading", { name: "规则与拓扑" }).waitFor({ timeout: timeoutMs });
   await page.getByRole("button", { name: "新建拓扑" }).click();
@@ -285,7 +309,7 @@ async function validateBlockedTopology(page, evidence) {
   }
   const errorCodes = validated.validationErrors.map((issue) => issue.code);
   const warningCodes = validated.validationWarnings.map((issue) => issue.code);
-  assertExactMembers(errorCodes, expectedTopologyErrors, "topology validation errors");
+  assertExactMembers(errorCodes, expectedErrors, "topology validation errors");
   assertExactMembers(warningCodes, [], "topology validation warnings");
   if (validated.validatedPointCatalogSnapshotId !== evidence.snapshotId) {
     throw new Error("topology validation did not pin the imported point catalog snapshot");
@@ -296,8 +320,8 @@ async function validateBlockedTopology(page, evidence) {
   evidence.topologyWarnings = warningCodes;
   evidence.validatedPointCatalogSnapshotId = validated.validatedPointCatalogSnapshotId;
   evidence.publishAllowed = false;
-  await page.getByText("拓扑校验失败：5 项错误").waitFor();
-  for (const code of expectedTopologyErrors) {
+  await page.getByText(`拓扑校验失败：${expectedErrors.length} 项错误`).waitFor();
+  for (const code of expectedErrors) {
     await page.getByText(code, { exact: true }).waitFor();
   }
   if (await page.getByRole("button", { name: "发布拓扑" }).count()) {
@@ -341,18 +365,40 @@ async function readAutomaticSnapshot(page, evidence) {
   await page.goto(`${bpiBaseUrl}/#/points`, { waitUntil: "networkidle", timeout: timeoutMs });
   await page.getByRole("heading", { name: "点位目录" }).waitFor({ timeout: timeoutMs });
   await page.getByText(sourceRevision, { exact: true }).waitFor();
+  const current = await page.evaluate(async ({ currentPlantId, currentLineId }) => {
+    const query = new URLSearchParams({ plantId: currentPlantId, lineId: currentLineId });
+    const response = await fetch(`/bpi-api/point-catalog/current?${query}`);
+    return { status: response.status, payload: await response.json() };
+  }, { currentPlantId: plantId, currentLineId: lineId });
+  if (current.status !== 200) {
+    throw new Error(`current point catalog returned ${current.status}`);
+  }
+  const currentData = current.payload.data;
+  if (!currentData || currentData.snapshot.sourceRevision !== sourceRevision) {
+    throw new Error("current point catalog revision does not match the expected automatic snapshot");
+  }
+  const currentPoint = currentData.points.find((point) => point.deviceId === deviceId);
+  if (!currentPoint) throw new Error("automatic point is missing from current point catalog API");
+  assertExactMembers(
+    currentPoint.readinessIssues,
+    expectedAutomaticPointIssues,
+    "automatic point readiness issues",
+  );
   const pointRow = page.locator("[data-point-id]").filter({ hasText: deviceId });
   if (await pointRow.count() !== 1) {
     throw new Error("automatically synchronized point is not uniquely visible");
   }
   await pointRow.getByText(`${sourcePropertyId} → ${propertyId}`).waitFor();
-  for (const label of [...expectedPointLabels.slice(0, 3), "单位缺失", ...expectedPointLabels.slice(3)]) {
+  for (const label of expectedAutomaticPointLabels) {
     await pointRow.getByText(new RegExp(label)).waitFor();
   }
   evidence.readiness = "BLOCKED";
   evidence.automaticSnapshotVisible = true;
   evidence.sourceRevision = sourceRevision;
-  evidence.pointIssues = expectedAutomaticPointIssues;
+  evidence.snapshotId = currentData.snapshot.id;
+  evidence.pointCount = currentData.snapshot.pointCount;
+  evidence.readyPointCount = currentData.snapshot.readyPointCount;
+  evidence.pointIssues = currentPoint.readinessIssues;
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
 
@@ -445,6 +491,9 @@ async function main() {
       await validateBlockedTopology(page, report.evidence);
     } else if (action === "sync-read") {
       await readAutomaticSnapshot(page, report.evidence);
+    } else if (action === "sync-validate") {
+      await readAutomaticSnapshot(page, report.evidence);
+      await validateBlockedTopology(page, report.evidence, expectedAutomaticTopologyErrors);
     } else {
       await readPersistedAcceptance(page, report.evidence);
     }

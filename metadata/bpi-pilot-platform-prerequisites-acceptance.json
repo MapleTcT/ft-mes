@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T13:22:45+08:00",
+  "baseCommit": "435ec902192bf68c28ef7d2ddcf8f3892ad93b99",
+  "database": "PostgreSQL",
+  "host": "10.11.100.17",
+  "status": "PASS_PLATFORM_PREREQUISITES_WITH_BLOCKED_FIELD_EVIDENCE",
+  "shadowOnly": true,
+  "iot": {
+    "repository": "MapleTcT/iot",
+    "baseCommit": "c077279ff8d13a809dac31eef126adbe126740ef",
+    "reconciler": "docker/bpi-shadow-pilot/scripts/reconcile-pilot-prerequisites.py",
+    "finalReport": "/data/docker/ft-mes-iot-pilot-c077279f/docker/bpi-shadow-pilot/evidence/pilot-prerequisites-after.json",
+    "protocol": {
+      "id": "2b283b28a16d61e5fc2bdf39ceff34f8",
+      "transport": "MQTT"
+    },
+    "product": {
+      "id": "bpi-pilot-product-01",
+      "active": true,
+      "propertyId": "instantFlow",
+      "propertyType": "double",
+      "unitId": "cubicMeterPerHour"
+    },
+    "device": {
+      "id": "bpi-pilot-device-01",
+      "active": true,
+      "state": "offline"
+    },
+    "catalogReadyClaimed": false,
+    "secretsRecorded": false
+  },
+  "automaticCatalog": {
+    "sourceRevision": "sha256:8b4fd91c2b2169b693a7035f9b0a9b3a23d44ab4ac625016cf904486e3148022",
+    "snapshotId": "ca213975-4b22-4230-8cd9-968b0d1ce61a",
+    "pointCount": 1,
+    "readyPointCount": 0,
+    "point": {
+      "productId": "bpi-pilot-product-01",
+      "deviceId": "bpi-pilot-device-01",
+      "propertyId": "flow.instant",
+      "sourcePropertyId": "instantFlow",
+      "unit": "m³/h",
+      "registered": true,
+      "propertyPresent": true,
+      "deviceState": "ACTIVE",
+      "calibrationStatus": "UNVERIFIED",
+      "sourceSequenceEnabled": false,
+      "readinessIssues": [
+        "CALIBRATION_NOT_VERIFIED",
+        "SOURCE_SEQUENCE_DISABLED"
+      ]
+    }
+  },
+  "unitAlias": {
+    "bindingExpectedUnit": "m3/h",
+    "catalogUnit": "m³/h",
+    "normalization": "NFKC + whitespace removal + case folding",
+    "equivalent": true,
+    "unexpectedErrorAbsent": "POINT_UNIT_MISMATCH",
+    "validationStatus": "FAILED",
+    "validationErrors": [
+      "POINT_CALIBRATION_NOT_VERIFIED",
+      "POINT_SOURCE_SEQUENCE_DISABLED"
+    ],
+    "validationWarnings": []
+  },
+  "deployment": {
+    "service": "bpi-service",
+    "image": "ft-mes-bpi-service:20260719-unit-alias",
+    "imageId": "sha256:ae6facb7931fee84bd8186fd2a315fbe24cbb92b745c3e05ee8e31b1db581e92",
+    "containerId": "f18f85cc133c7f835cd0b38ef48868a517f36bb201af0ed9007fab64ab9a8cc2",
+    "jarSha256": "7ea328f3862cd82327c3ea5278f7fbbf49d8a3dc6376d5ab168d49b6f4cbacf0",
+    "health": "healthy",
+    "rollbackImage": "ft-mes-bpi-service:20260719-repeat-observation"
+  },
+  "browser": {
+    "marker": "ADP_BPI_UNIT_ALIAS_20260719_1325",
+    "action": "sync-validate",
+    "route": "http://10.11.100.17:18080/bpi/#/points",
+    "finalRoute": "http://10.11.100.17:18080/bpi/#/rules",
+    "loginStatus": 200,
+    "pointCatalogStatus": 200,
+    "topologyCreateStatus": 200,
+    "topologyValidateStatus": 200,
+    "status": "PASS",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "report": "/tmp/ADP_BPI_UNIT_ALIAS_20260719_1325-point-unit-alias.json",
+    "screenshot": "/tmp/ADP_BPI_UNIT_ALIAS_20260719_1325-point-unit-alias.png"
+  },
+  "persistence": {
+    "database": "ft_mes_bpi / PostgreSQL 15.18",
+    "tables": [
+      "bpi_point_catalog_snapshots",
+      "bpi_point_catalog_entries",
+      "bpi_topology_versions",
+      "bpi_audit_events",
+      "bpi_api_idempotency"
+    ],
+    "markerCleanup": {
+      "auditRowsDeleted": 2,
+      "idempotencyRowsDeleted": 2,
+      "topologyRowsDeleted": 1,
+      "remainingTopologyRows": 0,
+      "automaticSnapshotStillPresent": true
+    }
+  },
+  "tests": {
+    "unitNormalizer": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    },
+    "reactor": {
+      "contractTests": 17,
+      "runtimeTests": 9,
+      "serviceTests": 55,
+      "skippedIntegrationTests": 27,
+      "failures": 0,
+      "errors": 0
+    },
+    "postgresAcceptance": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "flyway": "V1-V16"
+    },
+    "browserScriptSyntax": "PASS"
+  },
+  "remainingBlockers": [
+    "The reviewed field calibration is not available.",
+    "The pilot mapping does not require source sequence and no fresh monotonic DEVICE/GATEWAY evidence exists.",
+    "Real IoT telemetry and MES production context have not formed a same-scope candidate and batch.",
+    "Cross-component rollback under real business load and the 7-14 day shadow run are incomplete.",
+    "QCS/WMS write-back and training-data phases are incomplete."
+  ],
+  "automaticBatchEnabled": false,
+  "issues": []
+}

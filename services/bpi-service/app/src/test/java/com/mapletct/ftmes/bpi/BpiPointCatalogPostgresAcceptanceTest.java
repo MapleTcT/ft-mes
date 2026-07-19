@@ -366,7 +366,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
                                 Map.entry("propertyId", "flow.instant"),
                                 Map.entry("sourcePropertyId", "instantFlow"),
                                 Map.entry("pointName", "进料瞬时流量"),
-                                Map.entry("unit", "m3/h"),
+                                Map.entry("unit", "m\u00b3/h"),
                                 Map.entry("dataType", "double"),
                                 Map.entry("deviceState", "ACTIVE"),
                                 Map.entry("registered", true),

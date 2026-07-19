@@ -396,7 +396,9 @@ def main() -> int:
         ROOT / "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js"
     ).read_text(encoding="utf-8")
     for marker in (
-        'new Set(["write", "read", "sync-read"])',
+        'new Set(["write", "read", "sync-read", "sync-validate"])',
+        "BPI_EXPECTED_POINT_ISSUES",
+        "expectedAutomaticTopologyErrors",
         "Idempotent-Replay",
         "POINT_DEVICE_NOT_REGISTERED",
         "POINT_DEVICE_NOT_ACTIVE",

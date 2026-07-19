@@ -4935,6 +4935,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-pilot-platform-prerequisites-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5230,6 +5236,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-phase1-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-pilot-platform-prerequisites-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6387,6 +6399,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/UnitSymbolNormalizer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/UuidV5.java",
       "state": "tracked",
       "tracked": true
@@ -7143,6 +7161,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/application/UnitSymbolNormalizerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
       "state": "tracked",
       "tracked": true
@@ -7889,13 +7913,13 @@
       "tracked": 559
     },
     "docs": {
-      "tracked": 95
+      "tracked": 96
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 137
+      "tracked": 138
     },
     "package.json": {
       "tracked": 1
@@ -7907,7 +7931,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 175
+      "tracked": 177
     },
     "simulation": {
       "tracked": 4
@@ -7919,8 +7943,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1310,
-    "tracked": 1310,
+    "totalFiles": 1314,
+    "tracked": 1314,
     "untracked": 0
   },
   "untrackedByDirectory": []

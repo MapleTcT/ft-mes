@@ -165,3 +165,11 @@ For the automatic JetLinks path, run with `BPI_BROWSER_ACTION=sync-read`. This m
 fixture write: it waits for the Kafka-imported source revision in the configured ADP scope and proves
 that the real page reads the same PostgreSQL snapshot. The accepted target evidence is documented in
 `docs/testing/bpi-point-catalog-kafka-sync-acceptance.md`.
+
+Use `BPI_BROWSER_ACTION=sync-validate` when the automatic snapshot must also be exercised through the
+topology hard gate. Set `BPI_EXPECTED_POINT_CATALOG_REVISION` and the exact comma-separated
+`BPI_EXPECTED_POINT_ISSUES`; the script reads the live snapshot, creates one marker-scoped draft through
+the real UI, and requires the topology validation errors to equal the mapped issue set. This is how the
+`m3/h` binding versus JetLinks `m³/h` regression is accepted without hiding calibration or source-sequence
+blockers. The marker draft, its audit rows, and idempotency rows must be deleted with a targeted PostgreSQL
+transaction after evidence capture. See `docs/testing/bpi-pilot-platform-prerequisites-acceptance.md`.
