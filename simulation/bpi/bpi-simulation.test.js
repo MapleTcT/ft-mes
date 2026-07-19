@@ -811,12 +811,84 @@ test('rule simulation checksum gates publication', async () => {
 });
 
 test('data quality and integration impact remain visible', async () => {
-  let result = await request('GET', '/bpi/v1/data-quality/incidents?plantId=PLANT-01');
-  assert.equal(result.json.data[0].issueCode, 'CLOCK_DRIFT');
-  assert.deepEqual(result.json.data[0].affectedRules, ['RULE-S07-START']);
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
 
-  result = await request('GET', '/bpi/v1/data-quality/incidents/DQ-S07-FLOW-001');
-  assert.equal(result.json.data.state, 'OPEN');
+  result = await request('GET', '/bpi/v1/data-quality/incidents?plantId=PLANT-01');
+  assert.equal(result.json.data.length, 6);
+  assert.equal(result.json.data[0].affectedBatchCount, 1);
+
+  result = await request('GET', '/bpi/v1/data-quality/incidents?plantId=PLANT-01&state=OPEN&search=clock');
+  assert.equal(result.json.data.length, 1);
+  const incident = result.json.data[0];
+  assert.equal(incident.issueCode, 'CLOCK_DRIFT');
+  assert.deepEqual(incident.affectedRules, ['RULE-S07-START@1.2.0']);
+
+  result = await request('GET', '/bpi/v1/data-quality/summary?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.deepEqual({
+    open: result.json.data.open,
+    acknowledged: result.json.data.acknowledged,
+    resolved: result.json.data.resolved,
+    critical: result.json.data.critical,
+    affectedBatches: result.json.data.affectedBatches,
+  }, { open: 3, acknowledged: 2, resolved: 1, critical: 1, affectedBatches: 1 });
+  assert.equal(result.json.data.issueCounts.CLOCK_DRIFT, 1);
+
+  result = await request('GET', `/bpi/v1/data-quality/incidents/${incident.id}`);
+  assert.equal(result.json.data.incident.state, 'OPEN');
+  assert.equal(result.json.data.events.length, 4);
+  assert.equal(result.json.data.lifecycle.length, 1);
+  assert.equal(result.json.data.recommendedActions.length, 3);
+
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${incident.id}/acknowledge`, {
+    body: { assignee: 'shift.lead', reason: '确认时钟漂移并分派处理' },
+  });
+  assert.equal(result.response.status, 428);
+
+  const acknowledgeHeaders = commandHeaders('ack-data-quality-0001', 1);
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${incident.id}/acknowledge`, {
+    headers: acknowledgeHeaders,
+    body: { assignee: 'shift.lead', reason: '确认时钟漂移并分派处理' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'ACKNOWLEDGED');
+  assert.equal(result.json.data.revision, 2);
+  const acknowledgedResponse = result.json;
+
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${incident.id}/acknowledge`, {
+    headers: acknowledgeHeaders,
+    body: { assignee: 'shift.lead', reason: '确认时钟漂移并分派处理' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, acknowledgedResponse);
+
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${incident.id}/acknowledge`, {
+    headers: commandHeaders('reassign-data-quality-0002', 2),
+    body: { assignee: 'platform.engineer', reason: '转交平台工程师校时并复核网关' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.assignee, 'platform.engineer');
+  assert.equal(result.json.data.revision, 3);
+
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${incident.id}/resolve`, {
+    headers: commandHeaders('resolve-data-quality-0003', 3),
+    body: { reason: '完成 NTP 校时并连续三个采集周期复核正常' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'RESOLVED');
+  assert.equal(result.json.data.revision, 4);
+
+  result = await request('GET', `/bpi/v1/data-quality/incidents/${incident.id}`);
+  assert.equal(result.json.data.events.length, 4, 'raw events remain immutable after resolution');
+  assert.deepEqual(result.json.data.lifecycle.map((item) => item.action), [
+    'CREATED', 'ACKNOWLEDGED', 'REASSIGNED', 'RESOLVED',
+  ]);
+
+  result = await request('GET', '/bpi/v1/data-quality/summary?plantId=PLANT-01');
+  assert.equal(result.json.data.open, 2);
+  assert.equal(result.json.data.acknowledged, 2);
+  assert.equal(result.json.data.resolved, 2);
+  assert.equal(result.json.data.critical, 0);
 
   result = await request('GET', '/bpi/v1/integrations/health');
   const timescale = result.json.data.find((item) => item.id === 'timescaledb');

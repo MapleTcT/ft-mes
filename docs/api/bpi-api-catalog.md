@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 37 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 42 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +28,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
-- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation/data-quality 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire、data-quality acknowledge/resolve。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -76,10 +76,11 @@
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publish` | `publishRuleVersion` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/publication/retry` | `retryRulePublication` | SERVICE_IMPLEMENTED |
 | 边界规则 | POST | `/bpi/v1/rules/{ruleId}/retire` | `retireRuleVersion` | SERVICE_IMPLEMENTED |
-| 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SIMULATED |
-| 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SIMULATED |
-| 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | CONTRACT_ONLY |
-| 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/resolve` | `resolveDataQualityIncident` | CONTRACT_ONLY |
+| 数据质量 | GET | `/bpi/v1/data-quality/incidents` | `listDataQualityIncidents` | SERVICE_IMPLEMENTED；影响批次、严重度、最后发生时间排序，HMAC scope-bound snapshot-cutoff keyset cursor；截点后变化需刷新 |
+| 数据质量 | GET | `/bpi/v1/data-quality/summary` | `getDataQualitySummary` | SERVICE_IMPLEMENTED |
+| 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SERVICE_IMPLEMENTED；原始事件、生命周期和推荐动作 |
+| 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | SERVICE_IMPLEMENTED；确认或重新分派 |
+| 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/resolve` | `resolveDataQualityIncident` | SERVICE_IMPLEMENTED；仅 ACKNOWLEDGED 可解决 |
 | 训练数据 | GET | `/bpi/v1/datasets` | `listDatasets` | CONTRACT_ONLY |
 | 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | CONTRACT_ONLY |
 | 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | CONTRACT_ONLY |
@@ -139,6 +140,12 @@ P1 批次信号的硬准入条件，缺失时 `ready=false` 且拓扑校验返�
 只有 `applicationStatus=APPLIED` 才能被操作台解释为运行态已应用；`WAITING`、`REJECTED` 和 `NOT_TRACKED` 均不得
 冒充在线生效。
 
+数据质量生产入口是默认关闭的 `bpi.data-quality.v1` Protobuf consumer。它要求精确 topic/key/headers、
+payload 与 headers 身份一致、事件时间不超前，并使用显式 tenant/plant/line allowlist；未配置时 `_DENY_ALL_`
+失败关闭。有效事件按 tenant/plant/line/stage/source/device/property/issue 聚合，原始事件、生命周期和审计均
+append-only。已解决事件只有在新事件 `detectedAt > resolvedAt` 时重新打开；旧迟到事件只保留事实，不改变状态。
+本地 Java 17 + PostgreSQL + Embedded Kafka 已通过，目标环境部署和真实 Flink 数据质量 topic 仍待验收。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
@@ -171,7 +178,8 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `bpi.boundary.rule-application.dlq.v1` | 原 publication key | 原 `BoundaryRuleApplicationV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.batch.candidate.v1` | `lineId+ruleCode` | `BatchCandidateV1` | Flink -> BPI Kafka consumer -> PostgreSQL | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |
-| `bpi.data-quality.v1` | `source+propertyId` | `DataQualityEventV1` | ingest/Flink -> BPI | JOB_WIRED |
+| `bpi.data-quality.v1` | `tenantId|lineId|sourceEventId|propertyId|issueCode` | `DataQualityEventV1`；payload 另含 `plantId/deviceId/headers.stage` | ingest/Flink -> BPI consumer/PostgreSQL | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
+| `bpi.data-quality.dlq.v1` | 原 partition/key | 原 `DataQualityEventV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |
 
@@ -193,7 +201,9 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 11. 查询点位快照列表和当前作用域点位，验证 ready/blocker 结果。
 12. 查询作用域拓扑和测点绑定；只有绑定存在且 ready 的点位时校验通过，并记录快照 ID/checksum。
 13. 回放规则，生成确定性 checksum；只有 checksum 匹配才能发布规则。
-14. 查询数据质量影响和集成降级影响。
+14. 查询六类数据质量影响汇总、筛选队列、原始事件和业务影响。
+15. 对同一事件执行确认分派、重新分派和解决，验证 revision、幂等重放、原始事件不删除和生命周期追加。
+16. 查询集成降级影响。
 
 运行命令：
 

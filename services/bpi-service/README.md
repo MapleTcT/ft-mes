@@ -43,12 +43,31 @@ through the inbox/candidate identities; poison records or exhausted retries are 
 `bpi.batch.candidate.dlq.v1`. Enabling the listener without replacing the `_DENY_ALL_` allowlists
 cannot write business data.
 
+Flyway V19 adds the data-quality incident workbench. The disabled-by-default
+`bpi.data-quality.v1` Protobuf consumer validates exact topic/key/headers, payload size, event time
+and explicit tenant/plant/line allowlists before committing. Valid events aggregate by scoped
+source/device/property/issue identity while retaining immutable raw events. Operators read an
+impact-ordered queue with a signed, scope-bound snapshot-cutoff cursor, then move incidents through
+`OPEN -> ACKNOWLEDGED -> RESOLVED`; reassignment and resolution append lifecycle/audit records.
+A newer event can reopen a resolved incident, while an older late event is retained without
+reopening it. Incidents changed after a cursor's `snapshotAt` are intentionally excluded from that
+old cursor and become visible after a queue refresh; this is a live-work-queue cutoff, not historical
+row versioning. Poison records are routed to `bpi.data-quality.dlq.v1`.
+
 ```bash
 make bpi-service-test
 ```
 
 Real PostgreSQL acceptance additionally requires `BPI_TEST_DATABASE_URL`,
 `BPI_TEST_DATABASE_USER`, and `BPI_TEST_DATABASE_PASSWORD`.
+
+The focused data-quality acceptance uses real PostgreSQL and Embedded Kafka:
+
+```bash
+JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
+  -Dtest=DataQualityKafkaRecordProcessorTest,BpiDataQualityKafkaPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+```
 
 The rule-application consumer has a dedicated Embedded Kafka + real PostgreSQL acceptance test:
 

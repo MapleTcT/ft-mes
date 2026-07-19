@@ -10,7 +10,9 @@ tenant, plant, line, upstream URL, or internal token claims. Missing role or sub
 closed with HTTP 403.
 
 The allowlist includes point-catalog reads, the admin-only snapshot import, and point-calibration
-submission/list/approve/reject/revoke commands. Calibration certificates are referenced by controlled URI
+submission/list/approve/reject/revoke commands. It also exposes the scoped data-quality incident list,
+summary and detail reads plus acknowledge/reassign and resolve commands; the Java 17 service remains
+authoritative for RBAC, revision, idempotency and lifecycle validation. Calibration certificates are referenced by controlled URI
 and SHA-256; binary certificate uploads do not pass through this adapter. Ordinary request bodies
 remain capped at 64 KiB; only `POST /bpi-api/point-catalog/snapshots` has a 5 MiB cap for immutable
 catalog payloads. The Java 17 service still enforces the `BPI_ADMIN` role, tenant/plant/line scope,

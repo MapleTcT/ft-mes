@@ -161,6 +161,15 @@ service 和 PostgreSQL 上完成 `2+2+1`、5 个唯一 ID、服务端搜索、�
 仍只有 1 点、校准和来源序列未就绪，G-021 保持 `PARTIAL`。证据见
 [BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)。
 
+同日源码侧新增 Flyway V19 数据质量事件工作台：严格校验 `bpi.data-quality.v1` 的 topic、key、
+headers、Protobuf、scope、payload 和时间偏移，非法消息隔离到 DLQ；合法事件按租户、工厂、产线、
+工段、来源、设备、属性和问题类型聚合，并保留不可变 raw fact、生命周期和审计。列表使用 HMAC
+scope-bound keyset cursor，页面支持汇总、筛选、详情、分派、重新分派和解决。真实本地 PostgreSQL +
+Embedded Kafka 6/6、Java 8 adapter 9/9、模拟器 9/9 和浏览器 13/13 已通过。目标测试环境当前仍是
+Flyway V18，V19 部署、真实 Kafka offset、浏览器/API/PostgreSQL marker 与清理复验尚未执行，因此该项
+保持 `PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING`，不得写成目标上线。证据见
+[BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -174,6 +183,7 @@ service 和 PostgreSQL 上完成 `2+2+1`、5 个唯一 ID、服务端搜索、�
 - [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)
 - [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)
 - [BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)
+- [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

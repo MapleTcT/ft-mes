@@ -38,7 +38,10 @@
     "retryRulePublication",
     "retireRuleVersion",
     "listDataQualityIncidents",
+    "getDataQualitySummary",
     "getDataQualityIncident",
+    "acknowledgeDataQualityIncident",
+    "resolveDataQualityIncident",
     "getIntegrationHealth"
   ]
 }

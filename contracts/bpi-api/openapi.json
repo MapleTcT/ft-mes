@@ -475,8 +475,15 @@
     "/bpi/v1/data-quality/incidents": {
       "get": {
         "tags": ["DataQuality"], "operationId": "listDataQualityIncidents", "summary": "按业务影响查询数据质量事件",
-        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}, {"name": "state", "in": "query", "schema": {"type": "string"}}, {"$ref": "#/components/parameters/Cursor"}, {"$ref": "#/components/parameters/Limit"}],
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}, {"name": "state", "in": "query", "schema": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}}, {"name": "search", "in": "query", "schema": {"type": "string", "maxLength": 200}}, {"$ref": "#/components/parameters/Cursor"}, {"$ref": "#/components/parameters/Limit"}],
         "responses": {"200": {"description": "事件列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentListResponse"}}}}}
+      }
+    },
+    "/bpi/v1/data-quality/summary": {
+      "get": {
+        "tags": ["DataQuality"], "operationId": "getDataQualitySummary", "summary": "查询数据质量业务影响汇总",
+        "parameters": [{"$ref": "#/components/parameters/PlantId"}, {"$ref": "#/components/parameters/LineIdQuery"}],
+        "responses": {"200": {"description": "事件汇总", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DataQualitySummaryResponse"}}}}}
       }
     },
     "/bpi/v1/data-quality/incidents/{incidentId}": {
@@ -484,7 +491,7 @@
         "tags": ["DataQuality"], "operationId": "getDataQualityIncident", "summary": "查询数据质量事件详情和影响范围",
         "parameters": [{"$ref": "#/components/parameters/IncidentId"}],
         "responses": {
-          "200": {"description": "事件详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentResponse"}}}},
+          "200": {"description": "事件详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentDetailResponse"}}}},
           "404": {"$ref": "#/components/responses/NotFound"}
         }
       }
@@ -493,7 +500,7 @@
       "post": {
         "tags": ["DataQuality"], "operationId": "acknowledgeDataQualityIncident", "summary": "确认并分派数据质量事件",
         "parameters": [{"$ref": "#/components/parameters/IncidentId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
-        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "requestBody": {"$ref": "#/components/requestBodies/DataQualityAcknowledgeCommand"},
         "responses": {
           "200": {"description": "确认结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/IncidentResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
@@ -588,7 +595,7 @@
       "CalibrationId": {"name": "calibrationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "RuleId": {"name": "ruleId", "in": "path", "required": true, "schema": {"type": "string"}},
       "SimulationId": {"name": "simulationId", "in": "path", "required": true, "schema": {"type": "string"}},
-      "IncidentId": {"name": "incidentId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "IncidentId": {"name": "incidentId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "DatasetId": {"name": "datasetId", "in": "path", "required": true, "schema": {"type": "string"}},
       "SnapshotId": {"name": "snapshotId", "in": "path", "required": true, "schema": {"type": "string"}},
       "IntegrationId": {"name": "integrationId", "in": "path", "required": true, "schema": {"type": "string"}},
@@ -599,7 +606,8 @@
       "IfMatch": {"name": "If-Match", "in": "header", "required": true, "description": "Current numeric entity revision", "schema": {"type": "string", "pattern": "^(W/)?\\\"?[0-9]+\\\"?$"}}
     },
     "requestBodies": {
-      "ReasonCommand": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReasonCommand"}}}}
+      "ReasonCommand": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ReasonCommand"}}}},
+      "DataQualityAcknowledgeCommand": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/DataQualityAcknowledgeCommand"}}}}
     },
     "responses": {
       "NotFound": {"description": "对象不存在或无权访问", "content": {"application/problem+json": {"schema": {"$ref": "#/components/schemas/Problem"}}}},
@@ -619,6 +627,7 @@
         "properties": {"type": {"type": "string", "format": "uri-reference"}, "title": {"type": "string"}, "status": {"type": "integer"}, "detail": {"type": "string"}, "traceId": {"type": "string"}, "currentRevision": {"type": ["integer", "null"]}, "errors": {"type": "array", "items": {"type": "object"}}}
       },
       "ReasonCommand": {"type": "object", "required": ["reason"], "properties": {"reason": {"type": "string", "minLength": 3, "maxLength": 500}, "comment": {"type": "string", "maxLength": 2000}}},
+      "DataQualityAcknowledgeCommand": {"type": "object", "required": ["assignee", "reason"], "properties": {"assignee": {"type": "string", "minLength": 1, "maxLength": 128}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
       "ForceCloseCommand": {"allOf": [{"$ref": "#/components/schemas/ReasonCommand"}, {"type": "object", "required": ["boundaryTime"], "properties": {"boundaryTime": {"type": "string", "format": "date-time"}, "approvalMode": {"type": "string", "enum": ["REQUEST", "APPROVE"]}}}]},
       "CorrectionCommand": {
         "type": "object",
@@ -717,9 +726,15 @@
       "VersionChange": {"type": "object", "required": ["path", "changeType"], "properties": {"path": {"type": "string"}, "changeType": {"type": "string", "enum": ["ADDED", "REMOVED", "CHANGED"]}, "beforeValue": {}, "afterValue": {}}},
       "VersionComparison": {"type": "object", "required": ["objectType", "base", "target", "identical", "changeCount", "truncated", "changes"], "properties": {"objectType": {"type": "string", "enum": ["TOPOLOGY_VERSION", "RULE_VERSION"]}, "base": {"$ref": "#/components/schemas/VersionReference"}, "target": {"$ref": "#/components/schemas/VersionReference"}, "identical": {"type": "boolean"}, "changeCount": {"type": "integer", "minimum": 0}, "truncated": {"type": "boolean"}, "changes": {"type": "array", "maxItems": 500, "items": {"$ref": "#/components/schemas/VersionChange"}}}},
       "VersionComparisonResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/VersionComparison"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
-      "Incident": {"type": "object", "required": ["id", "issueCode", "severity", "state", "revision", "affectedLines", "affectedRules", "eventCount"], "properties": {"id": {"type": "string"}, "issueCode": {"type": "string"}, "severity": {"type": "string"}, "state": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}, "revision": {"type": "integer"}, "source": {"type": "string"}, "propertyId": {"type": "string"}, "affectedLines": {"type": "array", "items": {"type": "string"}}, "affectedRules": {"type": "array", "items": {"type": "string"}}, "affectedBatches": {"type": "array", "items": {"type": "string"}}, "eventCount": {"type": "integer"}, "firstSeen": {"type": "string", "format": "date-time"}, "lastSeen": {"type": "string", "format": "date-time"}}},
+      "Incident": {"type": "object", "required": ["id", "issueCode", "severity", "state", "revision", "plantId", "lineId", "source", "affectedLines", "affectedRules", "affectedBatches", "affectedBatchCount", "eventCount", "firstSeen", "lastSeen", "lastDetail"], "properties": {"id": {"type": "string", "format": "uuid"}, "issueCode": {"type": "string"}, "severity": {"type": "string", "enum": ["INFO", "WARNING", "ERROR", "CRITICAL"]}, "state": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}, "revision": {"type": "integer", "minimum": 1}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "source": {"type": "string", "description": "Flink processing stage that emitted the issue"}, "deviceId": {"type": ["string", "null"]}, "propertyId": {"type": ["string", "null"]}, "affectedLines": {"type": "array", "items": {"type": "string"}}, "affectedRules": {"type": "array", "items": {"type": "string"}}, "affectedBatches": {"type": "array", "maxItems": 100, "items": {"type": "string"}}, "affectedBatchCount": {"type": "integer", "minimum": 0}, "eventCount": {"type": "integer", "minimum": 1}, "firstSeen": {"type": "string", "format": "date-time"}, "lastSeen": {"type": "string", "format": "date-time"}, "lastDetail": {"type": "string"}, "assignee": {"type": ["string", "null"]}, "acknowledgedBy": {"type": ["string", "null"]}, "acknowledgedAt": {"type": ["string", "null"], "format": "date-time"}, "acknowledgmentReason": {"type": ["string", "null"]}, "resolvedBy": {"type": ["string", "null"]}, "resolvedAt": {"type": ["string", "null"], "format": "date-time"}, "resolutionReason": {"type": ["string", "null"]}}},
+      "DataQualityEvent": {"type": "object", "required": ["eventId", "severity", "detail", "detectedAt", "receivedAt", "headers"], "properties": {"eventId": {"type": "string"}, "sourceEventId": {"type": ["string", "null"]}, "severity": {"type": "string", "enum": ["INFO", "WARNING", "ERROR", "CRITICAL"]}, "detail": {"type": "string"}, "detectedAt": {"type": "string", "format": "date-time"}, "receivedAt": {"type": "string", "format": "date-time"}, "headers": {"type": "object", "additionalProperties": {"type": "string"}}}},
+      "DataQualityLifecycle": {"type": "object", "required": ["revision", "action", "toState", "actorId", "reason", "at"], "properties": {"revision": {"type": "integer", "minimum": 1}, "action": {"type": "string", "enum": ["CREATED", "REOPENED", "ACKNOWLEDGED", "REASSIGNED", "RESOLVED"]}, "fromState": {"type": ["string", "null"]}, "toState": {"type": "string", "enum": ["OPEN", "ACKNOWLEDGED", "RESOLVED"]}, "actorId": {"type": "string"}, "assignee": {"type": ["string", "null"]}, "reason": {"type": "string"}, "at": {"type": "string", "format": "date-time"}}},
+      "IncidentDetail": {"type": "object", "required": ["incident", "events", "lifecycle", "recommendedActions"], "properties": {"incident": {"$ref": "#/components/schemas/Incident"}, "events": {"type": "array", "maxItems": 100, "items": {"$ref": "#/components/schemas/DataQualityEvent"}}, "lifecycle": {"type": "array", "items": {"$ref": "#/components/schemas/DataQualityLifecycle"}}, "recommendedActions": {"type": "array", "items": {"type": "string"}}}},
+      "DataQualitySummary": {"type": "object", "required": ["open", "acknowledged", "resolved", "critical", "affectedBatches", "issueCounts"], "properties": {"open": {"type": "integer", "minimum": 0}, "acknowledged": {"type": "integer", "minimum": 0}, "resolved": {"type": "integer", "minimum": 0}, "critical": {"type": "integer", "minimum": 0}, "affectedBatches": {"type": "integer", "minimum": 0}, "issueCounts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}}}},
       "IncidentResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Incident"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "IncidentDetailResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/IncidentDetail"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "IncidentListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Incident"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "DataQualitySummaryResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DataQualitySummary"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "DatasetSnapshotCommand": {"type": "object", "required": ["freezeAt", "lineIds", "predictionTimePolicy"], "properties": {"freezeAt": {"type": "string", "format": "date-time"}, "lineIds": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "predictionTimePolicy": {"type": "string"}, "ruleVersions": {"type": "array", "items": {"type": "string"}}, "excludeLowConfidence": {"type": "boolean", "default": true}}},
       "DatasetSnapshot": {"type": "object", "required": ["id", "datasetId", "state", "checksum"], "properties": {"id": {"type": "string"}, "datasetId": {"type": "string"}, "state": {"type": "string", "enum": ["QUEUED", "RUNNING", "PASSED", "FAILED"]}, "checksum": {"type": "string"}, "manifestUri": {"type": ["string", "null"]}, "excluded": {"type": "object"}, "createdAt": {"type": "string", "format": "date-time"}}},
       "DatasetSnapshotResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/DatasetSnapshot"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},

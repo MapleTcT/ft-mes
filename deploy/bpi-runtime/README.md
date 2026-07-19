@@ -29,7 +29,7 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 with the DML-only `bpi_service` account.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`16`). Set it explicitly in the target `.env` when preparing a release;
+latest repository migration (`19`). Set it explicitly in the target `.env` when preparing a release;
 the smoke check fails if the database is behind or unexpectedly ahead of that version.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to

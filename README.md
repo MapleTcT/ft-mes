@@ -87,7 +87,8 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - 规则运行时目录准入：规则发布 Protobuf 固化 `productId` 和 `calibrationVersion`，Java 服务在发布事务内重验当前目录；Flink 订阅 `iot.point-catalog.snapshot.v1`，仅把全部绑定 READY 的规则 UPSERT 到 evaluator。目录降级会 DELETE 规则并清空待决窗口，旧 timer 不再产候选，恢复后从新观测重新累积。控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 已形成独立 Protobuf、Flink sink、Kafka source/DLQ、Flyway V15 字段和 UI 状态列；目标环境已完成 savepoint 有状态升级、规则 `READY -> INACTIVE`、回滚草稿及延迟候选落库复验。
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发、规则应用回执和独立运行时就绪回执。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
-- BPI 操作台、确定性模拟服务和 11 条浏览器 E2E；页面保持 `APPLIED` 时可独立显示 `DEGRADED -> READY`，点位页分栏显示来源声明和可增量加载的 MES 校准证据。
+- BPI 操作台、确定性模拟服务和 13 条浏览器 E2E；页面保持 `APPLIED` 时可独立显示 `DEGRADED -> READY`，点位页分栏显示来源声明和可增量加载的 MES 校准证据。
+- 数据质量事件工作台已在源码侧完成 Flyway V19、Kafka 严格准入/DLQ、PostgreSQL 聚合与不可变原始证据、HMAC keyset 分页、分派/重新分派/解决状态机、Java 8 适配器和桌面/移动页面。本地真实 PostgreSQL + Embedded Kafka 为 6/6、适配器为 9/9、模拟器为 9/9、浏览器为 13/13；目标测试环境仍为 V18，V19 上线与目标 marker 验收保持 `PENDING`。
 - Kafka + PostgreSQL 回执消费验收：`read_committed`、回滚不可见、重启重放、`DEGRADED -> READY` 落库、旧事件抑制、精确幂等和双 source DLQ。
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后 `APPLIED + READY` 可见、未完成事务不可见、停用提交 `APPLIED + INACTIVE`、TaskManager 重启恢复规则终态、同版本规则禁止重新启用且两类回执无重复。
 - 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
@@ -270,6 +271,7 @@ Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`�
 | 点位目录自动同步 | [Kafka 同步验收](metadata/bpi-point-catalog-kafka-sync-acceptance.json) | JetLinks 权威目录、Protobuf、Kafka、MES 消费、PostgreSQL、DLT、重启幂等和真实浏览器读取通过；数据源仍 BLOCKED |
 | 规则运行时就绪回执 | [多层验收](metadata/bpi-rule-runtime-readiness-acceptance.json)、[目标退役链](metadata/bpi-rule-retirement-acceptance.json) | 本地分层验收保留；目标 Flyway V15 已以独立 marker 证明 application `APPLIED` 与 runtime `READY -> INACTIVE`，两者仍不冒充真实设备连续运行 |
 | BPI 浏览器状态交互 | [BPI UI 验收](metadata/bpi-ui-acceptance.json) | 8/8 确定性模拟浏览器，不代表真实 Java/Kafka/Flink |
+| 数据质量事件工作台 | [本地全链验收](metadata/bpi-data-quality-workbench-acceptance.json) | 源码 Flyway V19；本地 PostgreSQL + Embedded Kafka、Java 8 adapter、模拟器和 13 条浏览器 E2E 通过；目标环境部署与 marker 仍待完成 |
 | 回执 PostgreSQL 状态迁移 | [回执落库验收](metadata/bpi-rule-application-receipt-acceptance.json) | 真实 PostgreSQL，不含真实 broker |
 | Kafka 消费重启、幂等与 DLQ | [Kafka/PostgreSQL 联合验收](metadata/bpi-rule-application-kafka-postgres-acceptance.json) | 本地 Embedded Kafka + PostgreSQL/Flyway V13，覆盖 application/readiness 双 source，不含 Flink job |
 | Flink checkpoint、事务可见性与恢复 | [Flink/Kafka 验收](metadata/bpi-rule-application-flink-kafka-acceptance.json) | 真实 Flink MiniCluster + Kafka 4.2，覆盖 application/readiness 双 sink；本地文件 checkpoint，不含 PostgreSQL/MinIO |
@@ -300,6 +302,7 @@ Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`�
 - [后端落库验收报告](docs/backend-table-audit/persistence-acceptance.md)
 - [机器可读落库账本](metadata/persistence-acceptance.json)
 - [BPI 工程测试计划](docs/testing/bpi-engineering-test-plan.md)
+- [BPI 数据质量事件工作台验收](docs/testing/bpi-data-quality-workbench-acceptance.md)
 - [目标缺口总账](docs/goal-gap-register.md)
 
 ## 仓库结构

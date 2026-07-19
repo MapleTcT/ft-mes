@@ -20,6 +20,11 @@ function sha256(value) {
   return createHash('sha256').update(canonicalJson(value)).digest('hex');
 }
 
+function stableEventId(value, index) {
+  const digest = sha256(`${value}|${index}`);
+  return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
+}
+
 function createScenario() {
   const evidence = [
     {
@@ -185,12 +190,101 @@ function createScenario() {
     runtimePointCatalogEventId: null, runtimePointCatalogSourceRevision: null,
   };
 
-  const incident = {
-    id: 'DQ-S07-FLOW-001', issueCode: 'CLOCK_DRIFT', severity: 'WARNING', state: 'OPEN', revision: 2,
-    source: 'JetLinks', propertyId: 'flow.instant', affectedLines: ['LINE-S07-01'],
-    affectedRules: ['RULE-S07-START'], affectedBatches: [], eventCount: 4,
-    firstSeen: '2026-07-12T07:55:00.000Z', lastSeen: '2026-07-12T07:59:50.000Z',
-  };
+  const dataQualityIncidents = [
+    {
+      id: '7d555b9d-2b34-5de9-9a44-2b7bb7550d01', issueCode: 'CLOCK_DRIFT', severity: 'CRITICAL', state: 'OPEN',
+      deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', eventCount: 4,
+      firstSeen: '2026-07-12T07:55:00.000Z', lastSeen: '2026-07-12T07:59:50.000Z',
+      lastDetail: '设备事件时间比接收时间慢 127 秒，已超过边界计算允许偏差。',
+      affectedRules: ['RULE-S07-START@1.2.0'], affectedBatches: ['S07-20260712-000'],
+    },
+    {
+      id: 'e1946a89-523f-5cc8-a0b2-861a94f47c02', issueCode: 'REQUIRED_SIGNAL_UNAVAILABLE', severity: 'ERROR', state: 'OPEN',
+      deviceId: 'DEVICE-S07-01', propertyId: 'tank.level', eventCount: 3,
+      firstSeen: '2026-07-12T07:56:00.000Z', lastSeen: '2026-07-12T07:59:40.000Z',
+      lastDetail: '目标罐液位信号连续三个采集周期不可用，启动边界证据不完整。',
+      affectedRules: ['RULE-S07-START@1.2.0'], affectedBatches: [],
+    },
+    {
+      id: '5639d3c1-7608-5b94-a97c-27cf036cf103', issueCode: 'UNKNOWN_UNIT', severity: 'WARNING', state: 'ACKNOWLEDGED',
+      deviceId: 'DEVICE-S07-02', propertyId: 'density.baume', eventCount: 2,
+      firstSeen: '2026-07-12T07:52:00.000Z', lastSeen: '2026-07-12T07:58:30.000Z',
+      lastDetail: '原料波美值单位未映射到受控单位目录，干物量计算已暂停。',
+      affectedRules: ['RULE-S07-MATERIAL-BALANCE@1.0.0'], affectedBatches: ['S07-20260712-000'], assignee: 'process.engineer',
+    },
+    {
+      id: 'cc5eeed7-c88c-5d73-a3da-839baea48904', issueCode: 'SEQUENCE_GAP', severity: 'WARNING', state: 'OPEN',
+      deviceId: 'EDGE-S07-01', propertyId: 'source.sequence', eventCount: 5,
+      firstSeen: '2026-07-12T07:48:00.000Z', lastSeen: '2026-07-12T07:57:20.000Z',
+      lastDetail: '来源序列号从 81220 跳至 81227，缺失六条测点事件。',
+      affectedRules: ['RULE-S07-START@1.2.0'], affectedBatches: [],
+    },
+    {
+      id: 'a8f9dcb7-adb3-51a1-bda9-81ab87c86005', issueCode: 'SHARED_METER_UNALLOCATED', severity: 'ERROR', state: 'ACKNOWLEDGED',
+      deviceId: 'METER-STEAM-01', propertyId: 'steam.totalized', eventCount: 3,
+      firstSeen: '2026-07-12T07:45:00.000Z', lastSeen: '2026-07-12T07:56:50.000Z',
+      lastDetail: '共享蒸汽表缺少当前生产指令的分摊键，能源耗用未写入批次平衡。',
+      affectedRules: ['RULE-S07-ENERGY-ALLOC@1.0.0'], affectedBatches: ['S07-20260712-000'], assignee: 'energy.engineer',
+    },
+    {
+      id: '4bb6b18f-c374-5aa3-84e0-e22f73edc706', issueCode: 'BUFFER_ALERT', severity: 'WARNING', state: 'RESOLVED',
+      deviceId: 'FLINK-BPI-01', propertyId: 'consumer.lag', eventCount: 2,
+      firstSeen: '2026-07-12T07:30:00.000Z', lastSeen: '2026-07-12T07:40:00.000Z',
+      lastDetail: '数据质量消费积压超过告警阈值，扩容后已恢复。',
+      affectedRules: ['RULE-S07-START@1.2.0'], affectedBatches: [], assignee: 'platform.engineer',
+    },
+  ].map((item) => {
+    const acknowledged = ['ACKNOWLEDGED', 'RESOLVED'].includes(item.state);
+    const resolved = item.state === 'RESOLVED';
+    return {
+      revision: resolved ? 3 : acknowledged ? 2 : 1,
+      plantId: 'PLANT-01', lineId: 'LINE-S07-01', source: 'boundary-evaluation',
+      affectedLines: ['LINE-S07-01'], affectedBatchCount: item.affectedBatches.length,
+      assignee: item.assignee || null,
+      acknowledgedBy: acknowledged ? 'simulated.shift.lead' : null,
+      acknowledgedAt: acknowledged ? '2026-07-12T07:57:00.000Z' : null,
+      acknowledgmentReason: acknowledged ? '确认业务影响并分派责任人处理' : null,
+      resolvedBy: resolved ? 'simulated.shift.lead' : null,
+      resolvedAt: resolved ? '2026-07-12T07:45:00.000Z' : null,
+      resolutionReason: resolved ? '扩容消费任务并确认积压清零' : null,
+      ...item,
+    };
+  });
+  const incident = dataQualityIncidents[0];
+  const dataQualityEvents = new Map(dataQualityIncidents.map((item) => [item.id,
+    Array.from({ length: item.eventCount }, (_, index) => ({
+      eventId: stableEventId(item.id, index),
+      sourceEventId: `DQ-SOURCE-${item.issueCode}-${index + 1}`,
+      severity: item.severity,
+      detail: index === item.eventCount - 1 ? item.lastDetail : `${item.lastDetail}（重复观测 ${index + 1}）`,
+      detectedAt: new Date(Date.parse(item.firstSeen) + index * 60_000).toISOString(),
+      receivedAt: new Date(Date.parse(item.firstSeen) + index * 60_000 + 2_000).toISOString(),
+      headers: {
+        tenant_id: 'TENANT-01', plant_id: item.plantId, line_id: item.lineId,
+        stage_code: 'EVAPORATION', issue_code: item.issueCode,
+        rule_key: item.affectedRules[0] || '', batch_no: item.affectedBatches[0] || '',
+      },
+    }))]));
+  const dataQualityLifecycle = new Map(dataQualityIncidents.map((item) => {
+    const actions = [{
+      revision: 1, action: 'CREATED', fromState: null, toState: 'OPEN', actorId: 'system.data-quality',
+      assignee: null, reason: 'Kafka 数据质量事件首次聚合', at: item.firstSeen,
+    }];
+    if (['ACKNOWLEDGED', 'RESOLVED'].includes(item.state)) actions.push({
+      revision: 2, action: 'ACKNOWLEDGED', fromState: 'OPEN', toState: 'ACKNOWLEDGED', actorId: item.acknowledgedBy,
+      assignee: item.assignee, reason: item.acknowledgmentReason, at: item.acknowledgedAt,
+    });
+    if (item.state === 'RESOLVED') actions.push({
+      revision: 3, action: 'RESOLVED', fromState: 'ACKNOWLEDGED', toState: 'RESOLVED', actorId: item.resolvedBy,
+      assignee: item.assignee, reason: item.resolutionReason, at: item.resolvedAt,
+    });
+    return [item.id, actions];
+  }));
+  const dataQualityRecommendations = new Map(dataQualityIncidents.map((item) => [item.id, [
+    '核对来源设备、网关与服务器时钟或测点元数据。',
+    '确认受影响规则和批次是否需要暂停自动处理。',
+    '修复后观察连续三个采集周期，并保留复核依据。',
+  ]]));
 
   return {
     line,
@@ -207,6 +301,10 @@ function createScenario() {
     rules: [rule],
     simulations: new Map(),
     incident,
+    dataQualityIncidents,
+    dataQualityEvents,
+    dataQualityLifecycle,
+    dataQualityRecommendations,
     runtimeReadinessReceipts: new Map(),
     integrations: [
       { id: 'jetlinks-exporter', status: 'UP', businessImpact: '关键测点可用', lastSuccessAt: FIXED_TIME, lag: 1.2, revision: 5 },

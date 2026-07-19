@@ -27,6 +27,10 @@ import { ApiProblem, bpiApi } from './api';
 import type {
   Batch,
   Candidate,
+  DataQualityIncident,
+  DataQualityIncidentDetail,
+  DataQualityIncidentState,
+  DataQualitySummary,
   Evidence,
   LineState,
   PointCatalogPointCommand,
@@ -46,10 +50,11 @@ import type {
 } from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches' | 'points' | 'rules';
+type View = 'overview' | 'candidates' | 'batches' | 'dataQuality' | 'points' | 'rules';
 const CALIBRATION_PAGE_SIZE = 50;
 const POINT_CATALOG_PAGE_SIZE = 100;
 const POINT_SEARCH_DEBOUNCE_MS = 250;
+const DATA_QUALITY_PAGE_SIZE = 50;
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) throw new Error('BPI app root is missing');
@@ -65,6 +70,14 @@ const state = {
   lines: [] as LineState[],
   candidates: [] as Candidate[],
   batches: [] as Batch[],
+  dataQualityIncidents: [] as DataQualityIncident[],
+  dataQualitySummary: null as DataQualitySummary | null,
+  dataQualityState: (localStorage.getItem('bpi.dataQualityState') || 'OPEN') as DataQualityIncidentState | '',
+  dataQualityLineId: localStorage.getItem('bpi.dataQualityLineId') || '',
+  dataQualitySearch: '',
+  dataQualityNextCursor: null as string | null,
+  dataQualitySnapshotAt: null as string | null,
+  loadingMoreDataQuality: false,
   rules: [] as RuleVersion[],
   topologies: [] as TopologyVersion[],
   pointCatalog: null as PointCatalogView | null,
@@ -82,11 +95,14 @@ const state = {
   selectedTopology: null as TopologyVersion | null,
   selectedSimulation: null as RuleSimulation | null,
   selectedCalibration: null as PointCalibration | null,
+  selectedDataQualityIncident: null as DataQualityIncident | null,
+  selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
   calibrationCommand: null as 'approve' | 'reject' | 'revoke' | null,
+  dataQualityCommand: null as 'acknowledge' | 'resolve' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -124,10 +140,54 @@ function number(value: number | null | undefined, digits = 1): string {
   return value === null || value === undefined ? '-' : value.toFixed(digits);
 }
 
+function formatDuration(from: string, to: string): string {
+  const durationMs = Math.max(0, Date.parse(to) - Date.parse(from));
+  if (!Number.isFinite(durationMs)) return '-';
+  const minutes = Math.floor(durationMs / 60_000);
+  if (minutes < 60) return `${minutes} 分钟`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (hours < 24) return `${hours} 小时${remainder ? ` ${remainder} 分` : ''}`;
+  const days = Math.floor(hours / 24);
+  return `${days} 天 ${hours % 24} 小时`;
+}
+
+function dataQualityIssueLabel(code: string): string {
+  const labels: Record<string, string> = {
+    REQUIRED_SIGNAL_UNAVAILABLE: '必需信号不可用',
+    POINT_CATALOG_BINDING_MISSING: '点位绑定缺失',
+    RULE_BINDING_MISSING: '规则绑定缺失',
+    CLOCK_DRIFT: '设备时钟漂移',
+    UNKNOWN_UNIT: '未知计量单位',
+    UNIT_MISSING: '计量单位缺失',
+    UNIT_MISMATCH: '计量单位不匹配',
+    SEQUENCE_GAP: '事件序列缺口',
+    SHARED_METER_UNALLOCATED: '共享仪表未分摊',
+    BUFFER_ALERT: '消费缓冲告警',
+    BACKPRESSURE: '流处理反压',
+  };
+  return labels[code] || code;
+}
+
+function normalizedDataQualityLine(): string {
+  return state.dataQualityLineId.trim();
+}
+
+function normalizedDataQualitySearch(): string {
+  return state.dataQualitySearch.trim();
+}
+
+function dataQualityCategoryCount(patterns: string[]): number {
+  const counts = state.dataQualitySummary?.issueCounts || {};
+  return Object.entries(counts).reduce((sum, [code, count]) => (
+    patterns.some((pattern) => code.toUpperCase().includes(pattern)) ? sum + count : sum
+  ), 0);
+}
+
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED'].includes(status)) return 'ok';
-  if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE'].includes(status)) return 'warn';
-  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED'].includes(status)) return 'danger';
+  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED'].includes(status)) return 'ok';
+  if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
+  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -236,11 +296,12 @@ function shell(): void {
       <aside class="side-nav" aria-label="智能批次导航">
         <div class="brand-mark"><span class="brand-code">BPI</span><span>智能批次</span></div>
         <nav>
-          <button class="nav-item" data-view="overview">${icon('activity', '实时生产态势')}</button>
-          <button class="nav-item" data-view="candidates">${icon('list-checks', '候选批次')}<b id="candidate-count">0</b></button>
-          <button class="nav-item" data-view="batches">${icon('archive', '批次档案')}</button>
-          <button class="nav-item" data-view="points">${icon('database', '点位准入')}</button>
-          <button class="nav-item" data-view="rules">${icon('network', '规则与拓扑')}</button>
+          <button class="nav-item" data-view="overview" title="实时生产态势">${icon('activity', '实时生产态势')}</button>
+          <button class="nav-item" data-view="candidates" title="候选批次">${icon('list-checks', '候选批次')}<b id="candidate-count">0</b></button>
+          <button class="nav-item" data-view="batches" title="批次档案">${icon('archive', '批次档案')}</button>
+          <button class="nav-item" data-view="dataQuality" title="数据质量">${icon('circle-alert', '数据质量')}</button>
+          <button class="nav-item" data-view="points" title="点位准入">${icon('database', '点位准入')}</button>
+          <button class="nav-item" data-view="rules" title="规则与拓扑">${icon('network', '规则与拓扑')}</button>
         </nav>
         <div class="mode-flag"><i data-lucide="shield-check"></i><div><strong>SHADOW</strong><span>外部写入关闭</span></div></div>
       </aside>
@@ -261,6 +322,7 @@ function shell(): void {
         <form method="dialog" id="confirm-form">
           <header><div><span id="command-kicker">候选批次</span><h2 id="command-title">审核候选边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
           <div class="command-summary" id="command-summary"></div>
+          <label id="command-assignee-field" hidden><span>分派给</span><input id="command-assignee" maxlength="128" autocomplete="off" placeholder="输入责任人账号或岗位" /></label>
           <label><span id="command-reason-label">审核原因</span><textarea id="confirm-reason" minlength="3" maxlength="500" required placeholder="填写现场审核依据"></textarea></label>
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">提交</button></footer>
         </form>
@@ -375,8 +437,21 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#rule-editor-form')?.addEventListener('submit', handleRuleDraft);
   document.querySelector<HTMLFormElement>('#point-catalog-form')?.addEventListener('submit', handlePointCatalogImport);
   document.querySelector<HTMLFormElement>('#point-calibration-form')?.addEventListener('submit', handlePointCalibrationSubmit);
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
+    setCommandAssigneeVisible(false);
+    state.dataQualityCommand = null;
+  });
   document.querySelector<HTMLSelectElement>('#topology-base')?.addEventListener('change', applyTopologyBase);
   document.querySelector<HTMLSelectElement>('#rule-base')?.addEventListener('change', applyRuleBase);
+}
+
+function setCommandAssigneeVisible(visible: boolean, value = ''): void {
+  const field = document.querySelector<HTMLElement>('#command-assignee-field');
+  const input = document.querySelector<HTMLInputElement>('#command-assignee');
+  if (!field || !input) return;
+  field.hidden = !visible;
+  input.required = visible;
+  input.value = visible ? value : '';
 }
 
 function navigate(view: View): void {
@@ -410,6 +485,21 @@ async function loadView(silent = false): Promise<void> {
       const response = await bpiApi.batches(state.plantId);
       state.batches = response.data;
       state.meta = response.meta;
+    } else if (state.view === 'dataQuality') {
+      const [incidents, summary] = await Promise.all([
+        bpiApi.dataQualityIncidents(state.plantId, {
+          lineId: normalizedDataQualityLine() || undefined,
+          state: state.dataQualityState || undefined,
+          search: normalizedDataQualitySearch() || undefined,
+          limit: DATA_QUALITY_PAGE_SIZE,
+        }),
+        bpiApi.dataQualitySummary(state.plantId, normalizedDataQualityLine() || undefined),
+      ]);
+      state.dataQualityIncidents = incidents.data;
+      state.dataQualityNextCursor = incidents.meta.nextCursor || null;
+      state.dataQualitySnapshotAt = incidents.meta.snapshotAt;
+      state.dataQualitySummary = summary.data;
+      state.meta = incidents.meta;
     } else if (state.view === 'points') {
       if (pointSearchTimer !== null) {
         window.clearTimeout(pointSearchTimer);
@@ -459,6 +549,7 @@ function renderView(): void {
     overview: ['生产运行', '实时生产态势'],
     candidates: ['边界审核', '候选批次'],
     batches: ['生产事实', '批次档案'],
+    dataQuality: ['运行治理', '数据质量事件'],
     points: ['数据准入', '点位目录'],
     rules: ['边界治理', '规则与拓扑'],
   };
@@ -473,6 +564,7 @@ function renderView(): void {
   else if (state.view === 'overview') renderOverview();
   else if (state.view === 'candidates') renderCandidates();
   else if (state.view === 'batches') renderBatches();
+  else if (state.view === 'dataQuality') renderDataQuality();
   else if (state.view === 'points') renderPoints();
   else renderRules();
   refreshIcons();
@@ -615,6 +707,10 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   const submitter = event.submitter as HTMLButtonElement | null;
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
+  if (state.dataQualityCommand) {
+    await handleDataQualityCommand();
+    return;
+  }
   if (state.calibrationCommand) {
     await handlePointCalibrationCommand();
     return;
@@ -681,6 +777,186 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
     button.textContent = command === 'reject'
       ? '拒绝候选'
       : candidate.boundaryType === 'END' ? '确认并关闭原始批次' : '确认并生成影子批次';
+  }
+}
+
+function renderDataQuality(): void {
+  const content = document.querySelector<HTMLElement>('#content')!;
+  const summary = state.dataQualitySummary || {
+    open: 0, acknowledged: 0, resolved: 0, critical: 0, affectedBatches: 0, issueCounts: {},
+  };
+  const categoryMetrics = [
+    ['必需信号不可用', dataQualityCategoryCount(['REQUIRED', 'CATALOG_BINDING', 'RULE_BINDING', 'PROPERTY_NOT'])],
+    ['设备时钟漂移', dataQualityCategoryCount(['CLOCK', 'TIME_DRIFT'])],
+    ['计量单位异常', dataQualityCategoryCount(['UNIT'])],
+    ['事件序列缺口', dataQualityCategoryCount(['SEQUENCE', 'GAP'])],
+    ['共享仪表未分摊', dataQualityCategoryCount(['SHARED', 'ALLOCAT'])],
+    ['缓冲与反压告警', dataQualityCategoryCount(['BUFFER', 'BACKPRESSURE'])],
+  ];
+  const rows = state.dataQualityIncidents.map((incident) => `
+    <tr data-data-quality-id="${escapeHtml(incident.id)}" tabindex="0">
+      <td><div class="status-stack">${statusChip(incident.severity)}${statusChip(incident.state)}</div></td>
+      <td><strong>${escapeHtml(dataQualityIssueLabel(incident.issueCode))}</strong><small>${escapeHtml(incident.issueCode)}</small></td>
+      <td><strong>${escapeHtml(incident.deviceId || incident.source)}</strong><small>${escapeHtml(incident.propertyId || incident.source)}</small></td>
+      <td><strong>${formatDuration(incident.firstSeen, incident.lastSeen)}</strong><small>${formatTime(incident.firstSeen)} → ${formatTime(incident.lastSeen)}</small></td>
+      <td class="metric"><b>${incident.eventCount}</b><small>事件</small></td>
+      <td><strong>${incident.affectedBatchCount} 批次</strong><small>${incident.affectedRules.length} 规则 · ${incident.affectedLines.length} 产线</small></td>
+      <td><strong>${escapeHtml(incident.assignee || '-')}</strong><small>${escapeHtml(incident.lineId)}</small></td>
+      <td><strong>${formatTime(incident.lastSeen)}</strong><small>r${incident.revision}</small></td>
+      <td><i data-lucide="chevron-right"></i></td>
+    </tr>`).join('');
+  const stateOptions: Array<[string, string]> = [['', '全部'], ['OPEN', '待确认'], ['ACKNOWLEDGED', '处理中'], ['RESOLVED', '已解决']];
+  content.innerHTML = `
+    <div class="data-quality-state-summary" aria-label="事件状态汇总">
+      <div><span>待确认</span><b>${summary.open}</b></div><div><span>处理中</span><b>${summary.acknowledged}</b></div>
+      <div><span>已解决</span><b>${summary.resolved}</b></div><div class="is-critical"><span>严重事件</span><b>${summary.critical}</b></div>
+      <div><span>受影响批次</span><b>${summary.affectedBatches}</b></div>
+    </div>
+    <div class="data-quality-category-strip" aria-label="质量问题分类">
+      ${categoryMetrics.map(([label, value]) => `<div><span>${label}</span><b>${value}</b></div>`).join('')}
+    </div>
+    <div class="toolbar data-quality-toolbar">
+      <div class="segmented" role="group" aria-label="事件状态">${stateOptions.map(([value, label]) => `<button data-data-quality-state="${value}" class="${state.dataQualityState === value ? 'is-selected' : ''}">${label}</button>`).join('')}</div>
+      <div class="toolbar-actions">
+        <label class="line-field"><span>产线</span><input id="data-quality-line" value="${escapeHtml(state.dataQualityLineId)}" placeholder="全部产线" /></label>
+        <label class="search-field data-quality-search"><i data-lucide="search"></i><input id="data-quality-search" value="${escapeHtml(state.dataQualitySearch)}" placeholder="问题、设备、属性、责任人" /></label>
+        <button id="apply-data-quality-filter" class="icon-text-button data-quality-filter-button" title="查询" aria-label="查询"><i data-lucide="search"></i><span>查询</span></button>
+      </div>
+    </div>
+    ${rows ? `<div class="table-frame"><table class="data-quality-table"><thead><tr><th>级别 / 状态</th><th>质量问题</th><th>来源点位</th><th>持续时间</th><th>事件数</th><th>业务影响</th><th>责任人 / 产线</th><th>最后发生</th><th></th></tr></thead><tbody>${rows}</tbody></table>${state.dataQualityNextCursor ? `<div class="data-quality-pagination"><span>${formatTime(state.dataQualitySnapshotAt)} 快照 · 已加载 ${state.dataQualityIncidents.length} 条</span><button id="load-more-data-quality" class="button button--secondary" ${state.loadingMoreDataQuality ? 'disabled' : ''}><i data-lucide="chevrons-down"></i>${state.loadingMoreDataQuality ? '加载中' : '加载更多'}</button></div>` : ''}</div>` : `<div class="empty-state"><i data-lucide="shield-check"></i><strong>当前筛选范围没有数据质量事件</strong><span>事件由 Kafka 数据质量主题聚合，原始事实不会因处置而删除。</span></div>`}`;
+
+  content.querySelectorAll<HTMLElement>('[data-data-quality-id]').forEach((row) => row.addEventListener('click', () => void openDataQualityIncident(String(row.dataset.dataQualityId))));
+  content.querySelectorAll<HTMLButtonElement>('[data-data-quality-state]').forEach((button) => button.addEventListener('click', () => {
+    state.dataQualityState = (button.dataset.dataQualityState || '') as DataQualityIncidentState | '';
+    localStorage.setItem('bpi.dataQualityState', state.dataQualityState);
+    void loadView();
+  }));
+  const applyFilters = () => {
+    state.dataQualityLineId = document.querySelector<HTMLInputElement>('#data-quality-line')!.value.trim();
+    state.dataQualitySearch = document.querySelector<HTMLInputElement>('#data-quality-search')!.value.trim();
+    localStorage.setItem('bpi.dataQualityLineId', state.dataQualityLineId);
+    void loadView();
+  };
+  content.querySelector('#apply-data-quality-filter')?.addEventListener('click', applyFilters);
+  content.querySelectorAll<HTMLInputElement>('#data-quality-line, #data-quality-search').forEach((input) => input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') applyFilters();
+  }));
+  content.querySelector('#load-more-data-quality')?.addEventListener('click', () => void loadMoreDataQuality());
+}
+
+async function loadMoreDataQuality(): Promise<void> {
+  if (state.loadingMoreDataQuality || !state.dataQualityNextCursor) return;
+  state.loadingMoreDataQuality = true;
+  renderDataQuality();
+  try {
+    const response = await bpiApi.dataQualityIncidents(state.plantId, {
+      lineId: normalizedDataQualityLine() || undefined,
+      state: state.dataQualityState || undefined,
+      search: normalizedDataQualitySearch() || undefined,
+      cursor: state.dataQualityNextCursor,
+      limit: DATA_QUALITY_PAGE_SIZE,
+    });
+    const known = new Set(state.dataQualityIncidents.map((item) => item.id));
+    state.dataQualityIncidents.push(...response.data.filter((item) => !known.has(item.id)));
+    state.dataQualityNextCursor = response.meta.nextCursor || null;
+    state.dataQualitySnapshotAt = response.meta.snapshotAt;
+    state.meta = response.meta;
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    state.loadingMoreDataQuality = false;
+    renderDataQuality();
+    refreshIcons();
+  }
+}
+
+async function openDataQualityIncident(incidentId: string): Promise<void> {
+  try {
+    const detail = (await bpiApi.dataQualityIncident(incidentId)).data;
+    state.selectedDataQualityDetail = detail;
+    state.selectedDataQualityIncident = detail.incident;
+    const incident = detail.incident;
+    const recommendations = detail.recommendedActions.map((action) => `<li><i data-lucide="check-circle-2"></i><span>${escapeHtml(action)}</span></li>`).join('');
+    const events = detail.events.map((item) => `<li><span class="evidence-state evidence-state--${statusTone(item.severity) === 'danger' ? 'bad' : 'ok'}"></span><div><strong>${escapeHtml(item.detail)}</strong><small>${formatTime(item.detectedAt)} · 接收 ${formatTime(item.receivedAt)}</small><code>${escapeHtml(item.sourceEventId || item.eventId)}</code></div><b>${escapeHtml(item.severity)}</b></li>`).join('');
+    const lifecycle = detail.lifecycle.map((item) => `<li><i></i><div><strong>${escapeHtml(item.action)}</strong><span>${escapeHtml(item.reason || '-')}</span><small>${formatTime(item.at)} · ${escapeHtml(item.actorId)}${item.assignee ? ` · 分派 ${escapeHtml(item.assignee)}` : ''}</small></div></li>`).join('');
+    const affectedRules = incident.affectedRules.length ? incident.affectedRules.map((rule) => `<code>${escapeHtml(rule)}</code>`).join('') : '<span>无</span>';
+    const affectedBatches = incident.affectedBatches.length ? incident.affectedBatches.map((batch) => `<code>${escapeHtml(batch)}</code>`).join('') : '<span>无已识别批次</span>';
+    const actions = incident.state === 'OPEN'
+      ? '<button class="button button--primary" id="open-data-quality-acknowledge">确认并分派</button>'
+      : incident.state === 'ACKNOWLEDGED'
+        ? '<button class="button button--secondary" id="open-data-quality-reassign">重新分派</button><button class="button button--primary" id="open-data-quality-resolve">标记已解决</button>'
+        : '';
+    openDrawer(`
+      <header><div><span>数据质量事件</span><h2>${escapeHtml(dataQualityIssueLabel(incident.issueCode))}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header>
+      <div class="batch-state-band"><div>${statusChip(incident.severity)}${statusChip(incident.state)}</div><span>revision ${incident.revision}</span></div>
+      <div class="drawer-section data-quality-detail"><p class="incident-detail">${escapeHtml(incident.lastDetail)}</p><div class="facts-grid"><div><span>工厂 / 产线</span><b>${escapeHtml(incident.plantId)} / ${escapeHtml(incident.lineId)}</b></div><div><span>来源</span><b>${escapeHtml(incident.source)}</b></div><div><span>设备 / 属性</span><b>${escapeHtml(incident.deviceId || '-')} / ${escapeHtml(incident.propertyId || '-')}</b></div><div><span>持续时间 / 事件</span><b>${formatDuration(incident.firstSeen, incident.lastSeen)} / ${incident.eventCount}</b></div><div><span>责任人</span><b>${escapeHtml(incident.assignee || '-')}</b></div><div><span>最后发生</span><b>${formatTime(incident.lastSeen)}</b></div></div></div>
+      <div class="drawer-section"><div class="section-title"><h3>业务影响</h3><span>${incident.affectedBatchCount} 个批次</span></div><div class="impact-groups"><div><span>规则版本</span>${affectedRules}</div><div><span>批次</span>${affectedBatches}</div></div></div>
+      <div class="drawer-section"><div class="section-title"><h3>建议处置</h3><span>${detail.recommendedActions.length} 项</span></div><ul class="check-list data-quality-actions">${recommendations || '<li>暂无自动建议</li>'}</ul></div>
+      <div class="drawer-section"><div class="section-title"><h3>原始事件</h3><span>${detail.events.length} 条，最多显示 100 条</span></div><ul class="evidence-list data-quality-event-list">${events || '<li>暂无事件证据</li>'}</ul></div>
+      <div class="drawer-section"><div class="section-title"><h3>处置时间线</h3><span>审计记录不可变</span></div><ol class="timeline">${lifecycle || '<li><i></i><div><strong>尚无处置记录</strong></div></li>'}</ol></div>
+      <footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${actions}</footer>`);
+    document.querySelector('#open-data-quality-acknowledge')?.addEventListener('click', () => openDataQualityCommandDialog('acknowledge'));
+    document.querySelector('#open-data-quality-reassign')?.addEventListener('click', () => openDataQualityCommandDialog('acknowledge'));
+    document.querySelector('#open-data-quality-resolve')?.addEventListener('click', () => openDataQualityCommandDialog('resolve'));
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  }
+}
+
+function openDataQualityCommandDialog(command: 'acknowledge' | 'resolve'): void {
+  const incident = state.selectedDataQualityIncident;
+  if (!incident) return;
+  const acknowledge = command === 'acknowledge';
+  const reassign = acknowledge && incident.state === 'ACKNOWLEDGED';
+  state.dataQualityCommand = command;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.ruleCommand = null;
+  state.topologyCommand = null;
+  state.calibrationCommand = null;
+  document.querySelector('#command-kicker')!.textContent = '数据质量处置';
+  document.querySelector('#command-title')!.textContent = acknowledge ? (reassign ? '重新分派事件' : '确认并分派事件') : '解决数据质量事件';
+  document.querySelector('#command-reason-label')!.textContent = acknowledge ? (reassign ? '重新分派依据' : '确认依据') : '解决依据';
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>质量问题</span><b>${escapeHtml(dataQualityIssueLabel(incident.issueCode))}</b></div><div><span>产线</span><b>${escapeHtml(incident.lineId)}</b></div><div><span>状态变化</span><b>${acknowledge ? `${incident.state} → ACKNOWLEDGED` : 'ACKNOWLEDGED → RESOLVED'}</b></div><div><span>版本</span><b>r${incident.revision}</b></div>`;
+  setCommandAssigneeVisible(acknowledge, incident.assignee || '');
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = acknowledge ? '填写问题判断、业务影响和责任分派依据' : '填写根因、修复动作和复核证据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = 'button button--primary';
+  button.textContent = acknowledge ? (reassign ? '确认重新分派' : '确认并分派') : '确认已解决';
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  (acknowledge ? document.querySelector<HTMLInputElement>('#command-assignee') : reason)?.focus();
+}
+
+async function handleDataQualityCommand(): Promise<void> {
+  const incident = state.selectedDataQualityIncident;
+  const command = state.dataQualityCommand;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  const assignee = document.querySelector<HTMLInputElement>('#command-assignee')!.value.trim();
+  if (!incident || !command || reason.length < 3 || (command === 'acknowledge' && !assignee)) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.disabled = true;
+  button.textContent = command === 'acknowledge' ? '分派中...' : '解决中...';
+  try {
+    const response = command === 'acknowledge'
+      ? await bpiApi.acknowledgeDataQuality(incident, assignee, reason, commandId())
+      : await bpiApi.resolveDataQuality(incident, reason, commandId());
+    state.selectedDataQualityIncident = response.data;
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    showToast(command === 'acknowledge'
+      ? `事件已确认并分派给 ${response.data.assignee}`
+      : '事件已解决，原始数据和处置审计已保留');
+    await loadView(true);
+    await openDataQualityIncident(response.data.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`事件状态已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openDataQualityIncident(incident.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = command === 'acknowledge' ? '确认并分派' : '确认已解决';
   }
 }
 
@@ -1871,6 +2147,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'points', 'rules'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'dataQuality', 'points', 'rules'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

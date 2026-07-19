@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V16__bpi_point_catalog_repeated_observations.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V19__bpi_data_quality_incident_workbench.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -78,6 +79,16 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateEventMapperTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/CandidateKafkaRecordProcessorTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIncidentCursorCodec.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIncidentService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIngestionService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DataQualityPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataquality/BpiDataQualityKafkaConfiguration.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataquality/DataQualityKafkaRecordProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataquality/DataQualityKafkaListener.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DataQualityController.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/DataQualityKafkaRecordProcessorTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
@@ -113,6 +124,8 @@ REQUIRED_FILES = [
     "docs/testing/bpi-point-catalog-pagination-acceptance.md",
     "metadata/bpi-point-catalog-pagination-acceptance.json",
     "metadata/bpi-point-catalog-pagination.png",
+    "docs/testing/bpi-data-quality-workbench-acceptance.md",
+    "metadata/bpi-data-quality-workbench-acceptance.json",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
@@ -259,6 +272,88 @@ def main() -> int:
             "idx_bpi_point_calibrations_scope_cursor",
             "submitted_at DESC",
             "id DESC",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V19__bpi_data_quality_incident_workbench.sql",
+        [
+            "bpi_data_quality_incidents",
+            "bpi_data_quality_incident_events",
+            "bpi_data_quality_incident_actions",
+            "uq_bpi_data_quality_incident_identity",
+            "ACKNOWLEDGED",
+            "REASSIGNED",
+            "GRANT SELECT, INSERT, UPDATE ON bpi.bpi_data_quality_incidents TO bpi_service",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIncidentCursorCodec.java",
+        ["bpi.data-quality.incident.cursor.v1", "HmacSHA256", "MessageDigest.isEqual", "MAX_CURSOR_LENGTH"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIncidentService.java",
+        [
+            "DEFAULT_PAGE_SIZE = 100",
+            "MAX_PAGE_SIZE = 200",
+            "scopeFingerprint",
+            "limit + 1",
+            "/acknowledge",
+            "/resolve",
+            "repository.find(actor, incidentId)",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/DataQualityPostgresRepository.java",
+        [
+            "ORDER BY affected_batch_count DESC, severity_rank DESC, last_seen DESC, id DESC",
+            "A resolved incident cannot be acknowledged.",
+            "Only an acknowledged incident can be resolved.",
+            "REASSIGNED",
+            "REOPENED",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataquality/BpiDataQualityKafkaConfiguration.java",
+        ["read_committed", "MANUAL_IMMEDIATE", "setCommitRecovered(true)", "setFailIfSendResultIsError(true)"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/dataquality/DataQualityKafkaRecordProcessor.java",
+        [
+            "DataQualityEventV1.parseFrom",
+            "maxPayloadBytes",
+            "detected_at_ms is too far in the future",
+            "must appear exactly once",
+            "rejectSeparator",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DataQualityController.java",
+        [
+            "/bpi/v1/data-quality/incidents",
+            "/bpi/v1/data-quality/summary",
+            "/bpi/v1/data-quality/incidents/{incidentId}/acknowledge",
+            "/bpi/v1/data-quality/incidents/{incidentId}/resolve",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
+        [
+            "kafkaEventsAggregateIntoAuditedOperatorWorkflowWithoutDeletingRawFacts",
+            "incidentQueueUsesSignedScopeBoundSnapshotCutoffPagination",
+            'param("cursor", nextCursor).param("search", "other")',
+            "tamperedCursor",
+            "Idempotent-Replay",
+            "RESOLVED",
+            "REOPENED",
+            "bpi.data-quality.dlq.v1",
         ],
         failures,
     )
@@ -518,6 +613,10 @@ def main() -> int:
             "BPI_RULE_PUBLICATION_OUTBOX_ENABLED:false",
             "BPI_RULE_RUNTIME_READINESS_KAFKA_TOPIC",
             "BPI_RULE_RUNTIME_READINESS_KAFKA_DLQ_TOPIC",
+            "BPI_DATA_QUALITY_KAFKA_ENABLED:false",
+            "BPI_DATA_QUALITY_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_",
+            "BPI_DATA_QUALITY_KAFKA_ALLOWED_PLANT_IDS:_DENY_ALL_",
+            "BPI_DATA_QUALITY_KAFKA_ALLOWED_LINE_IDS:_DENY_ALL_",
         ],
         failures,
     )
@@ -623,6 +722,10 @@ def main() -> int:
             "BPI_RULE_PUBLICATION_TOPIC",
             "BPI_RULE_RUNTIME_READINESS_KAFKA_TOPIC",
             "BPI_RULE_RUNTIME_READINESS_KAFKA_DLQ_TOPIC",
+            "BPI_DATA_QUALITY_KAFKA_ENABLED",
+            "BPI_DATA_QUALITY_KAFKA_TOPIC",
+            "BPI_DATA_QUALITY_KAFKA_DLQ_TOPIC",
+            "BPI_DATA_QUALITY_KAFKA_ALLOWED_TENANT_IDS",
             "profiles: [\"bpi\"]",
         ],
         failures,
@@ -685,6 +788,23 @@ def main() -> int:
         fail("BPI rule publication outbox acceptance must identify Kafka", failures)
     if outbox_acceptance.get("summary", {}).get("fail") != 0:
         fail("BPI rule publication outbox acceptance must not contain failed items", failures)
+
+    data_quality_acceptance = json.loads(
+        (ROOT / "metadata/bpi-data-quality-workbench-acceptance.json").read_text(encoding="utf-8")
+    )
+    if data_quality_acceptance.get("status") != "PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING":
+        fail("BPI data-quality acceptance must retain explicit local PASS and target pending scope", failures)
+    if data_quality_acceptance.get("database") != "PostgreSQL":
+        fail("BPI data-quality acceptance must identify PostgreSQL", failures)
+    if data_quality_acceptance.get("runtime", {}).get("flywayVersion") != 19:
+        fail("BPI data-quality acceptance must prove Flyway V19", failures)
+    data_quality_summary = data_quality_acceptance.get("summary", {})
+    if data_quality_summary.get("pass") != 12 or data_quality_summary.get("fail") != 0:
+        fail("BPI data-quality acceptance must preserve twelve local passes and zero failures", failures)
+    if data_quality_acceptance.get("persistence", {}).get("rawFactsDeletedOnResolve") != 0:
+        fail("BPI data-quality resolution must preserve immutable raw facts", failures)
+    if data_quality_acceptance.get("targetEnvironment", {}).get("status") != "PENDING":
+        fail("BPI data-quality target deployment must remain pending until target marker evidence exists", failures)
 
     readiness_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-runtime-readiness-acceptance.json").read_text(encoding="utf-8")

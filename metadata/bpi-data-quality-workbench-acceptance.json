@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-07-19T12:45:49Z",
+  "repoCommit": "b9aed8c8b524c2fd711307dc0402f55e863e2e5e",
+  "worktree": "codex/bpi-data-quality-workbench",
+  "status": "PASS_LOCAL_POSTGRES_KAFKA_BROWSER_TARGET_PENDING",
+  "database": "PostgreSQL",
+  "transport": "Embedded Kafka",
+  "runtime": {
+    "java": 17,
+    "springBoot": "3.4.7",
+    "flywayVersion": 19,
+    "consumerDefaultEnabled": false,
+    "scopeDefault": "_DENY_ALL_"
+  },
+  "summary": {
+    "testedFeatures": 12,
+    "pass": 12,
+    "fail": 0,
+    "blocked": 0,
+    "targetPending": 1
+  },
+  "tests": {
+    "java17": { "tests": 6, "pass": 6, "fail": 0, "errors": 0 },
+    "simulator": { "tests": 9, "pass": 9, "fail": 0 },
+    "browser": { "tests": 13, "pass": 13, "fail": 0, "unexpectedErrors": 0 },
+    "java8Adapter": { "tests": 9, "pass": 9, "fail": 0 },
+    "frontendBuild": "PASS",
+    "serviceVerifier": "PASS"
+  },
+  "persistence": {
+    "incidentTable": "bpi.bpi_data_quality_incidents",
+    "eventTable": "bpi.bpi_data_quality_incident_events",
+    "lifecycleTable": "bpi.bpi_data_quality_incident_actions",
+    "auditTable": "bpi.bpi_audit_events",
+    "inboxTable": "bpi.bpi_inbox_events",
+    "rawFactsDeletedOnResolve": 0,
+    "markerCleanup": "PASS"
+  },
+  "operations": [
+    "listDataQualityIncidents",
+    "getDataQualitySummary",
+    "getDataQualityIncident",
+    "acknowledgeDataQualityIncident",
+    "resolveDataQualityIncident"
+  ],
+  "targetEnvironment": {
+    "host": "10.11.100.17",
+    "status": "PENDING",
+    "reason": "This acceptance proves the local source/runtime chain only; V19 has not yet been deployed and marker-tested on the target host."
+  },
+  "evidence": [
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
+    "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "simulation/bpi/bpi-simulation.test.js",
+    "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",
+    "docs/testing/bpi-data-quality-workbench-acceptance.md"
+  ]
+}

@@ -3,6 +3,10 @@ import type {
   Batch,
   Candidate,
   CandidateConfirmation,
+  DataQualityIncident,
+  DataQualityIncidentDetail,
+  DataQualityIncidentState,
+  DataQualitySummary,
   Evidence,
   LineState,
   PointCatalogSnapshotCommand,
@@ -94,6 +98,37 @@ export const bpiApi = {
     }),
   evidence: (id: string) => request<{ start: Evidence[]; end: Evidence[] }>(`/batches/${encodeURIComponent(id)}/evidence`),
   timeline: (id: string) => request<StateEvent[]>(`/batches/${encodeURIComponent(id)}/timeline`),
+  dataQualityIncidents: (
+    plantId: string,
+    options?: { lineId?: string; state?: DataQualityIncidentState; search?: string; cursor?: string | null; limit?: number },
+  ) => {
+    const parameters = new URLSearchParams({ plantId });
+    if (options?.lineId) parameters.set('lineId', options.lineId);
+    if (options?.state) parameters.set('state', options.state);
+    if (options?.search) parameters.set('search', options.search);
+    if (options?.cursor) parameters.set('cursor', options.cursor);
+    if (options?.limit !== undefined) parameters.set('limit', String(options.limit));
+    return request<DataQualityIncident[]>(`/data-quality/incidents?${parameters.toString()}`);
+  },
+  dataQualitySummary: (plantId: string, lineId?: string) => {
+    const parameters = new URLSearchParams({ plantId });
+    if (lineId) parameters.set('lineId', lineId);
+    return request<DataQualitySummary>(`/data-quality/summary?${parameters.toString()}`);
+  },
+  dataQualityIncident: (id: string) =>
+    request<DataQualityIncidentDetail>(`/data-quality/incidents/${encodeURIComponent(id)}`),
+  acknowledgeDataQuality: (incident: DataQualityIncident, assignee: string, reason: string, key: string) =>
+    request<DataQualityIncident>(`/data-quality/incidents/${encodeURIComponent(incident.id)}/acknowledge`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(incident.revision) },
+      body: JSON.stringify({ assignee, reason }),
+    }),
+  resolveDataQuality: (incident: DataQualityIncident, reason: string, key: string) =>
+    request<DataQualityIncident>(`/data-quality/incidents/${encodeURIComponent(incident.id)}/resolve`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(incident.revision) },
+      body: JSON.stringify({ reason }),
+    }),
   topologies: (plantId: string) =>
     request<TopologyVersion[]>(`/topologies?plantId=${encodeURIComponent(plantId)}`),
   currentPointCatalog: (

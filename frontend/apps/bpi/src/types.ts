@@ -20,6 +20,73 @@ export interface ProblemDetail {
   currentRevision?: number;
 }
 
+export type DataQualityIncidentState = 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
+
+export interface DataQualityIncident {
+  id: string;
+  issueCode: string;
+  severity: string;
+  state: DataQualityIncidentState;
+  revision: number;
+  plantId: string;
+  lineId: string;
+  source: string;
+  deviceId?: string | null;
+  propertyId?: string | null;
+  affectedLines: string[];
+  affectedRules: string[];
+  affectedBatches: string[];
+  affectedBatchCount: number;
+  eventCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  lastDetail: string;
+  assignee?: string | null;
+  acknowledgedBy?: string | null;
+  acknowledgedAt?: string | null;
+  acknowledgmentReason?: string | null;
+  resolvedBy?: string | null;
+  resolvedAt?: string | null;
+  resolutionReason?: string | null;
+}
+
+export interface DataQualityEvent {
+  eventId: string;
+  sourceEventId: string;
+  severity: string;
+  detail: string;
+  detectedAt: string;
+  receivedAt: string;
+  headers: Record<string, string>;
+}
+
+export interface DataQualityLifecycle {
+  revision: number;
+  action: string;
+  fromState?: string | null;
+  toState: string;
+  actorId: string;
+  assignee?: string | null;
+  reason?: string | null;
+  at: string;
+}
+
+export interface DataQualityIncidentDetail {
+  incident: DataQualityIncident;
+  events: DataQualityEvent[];
+  lifecycle: DataQualityLifecycle[];
+  recommendedActions: string[];
+}
+
+export interface DataQualitySummary {
+  open: number;
+  acknowledged: number;
+  resolved: number;
+  critical: number;
+  affectedBatches: number;
+  issueCounts: Record<string, number>;
+}
+
 export interface LineState {
   lineId: string;
   lineName?: string;

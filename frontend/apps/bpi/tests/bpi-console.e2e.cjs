@@ -223,6 +223,11 @@ test('mobile layout keeps navigation usable without page-level horizontal overfl
   await page.getByRole('heading', { name: '点位目录' }).waitFor();
   const pointDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   assert.ok(pointDimensions.scroll <= pointDimensions.client, `points page overflow: ${JSON.stringify(pointDimensions)}`);
+  await page.locator('[data-view="dataQuality"]').click();
+  await page.getByRole('heading', { name: '数据质量事件' }).waitFor();
+  const dataQualityDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  assert.ok(dataQualityDimensions.scroll <= dataQualityDimensions.client, `data quality page overflow: ${JSON.stringify(dataQualityDimensions)}`);
+  await page.screenshot({ path: '/tmp/bpi-console-data-quality-mobile.png', fullPage: true });
   await page.screenshot({ path: '/tmp/bpi-console-mobile.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
@@ -920,5 +925,62 @@ test('process engineer sees business wording when point readiness blocks publica
   assert.equal(await page.locator('#confirm-dialog').getAttribute('open'), '');
   assert.deepEqual(errors.filter((item) => !item.includes('422')), []);
   await page.screenshot({ path: '/tmp/bpi-console-rule-publication-blocked.png', fullPage: true });
+  await page.close();
+});
+
+test('shift lead closes a data quality incident with preserved evidence and audit history', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/dataQuality`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('heading', { name: '数据质量事件' }).waitFor();
+  assert.equal(await page.locator('.data-quality-table tbody tr').count(), 3, 'OPEN is the default work queue');
+  assert.match(await page.locator('.data-quality-state-summary').textContent(), /待确认3/);
+  assert.match(await page.locator('.data-quality-category-strip').textContent(), /设备时钟漂移1/);
+
+  const clockRow = page.locator('[data-data-quality-id]').filter({ hasText: 'CLOCK_DRIFT' });
+  const incidentId = await clockRow.getAttribute('data-data-quality-id');
+  assert.ok(incidentId);
+  await clockRow.click();
+  await page.getByRole('heading', { name: '设备时钟漂移' }).waitFor();
+  await page.getByText('4 条，最多显示 100 条').waitFor();
+  await page.getByRole('button', { name: '确认并分派' }).click();
+  await page.getByRole('heading', { name: '确认并分派事件' }).waitFor();
+  assert.equal(await page.locator('#command-assignee-field').isVisible(), true);
+  await page.locator('#command-assignee').fill('shift.lead');
+  await page.locator('#confirm-reason').fill('确认网关时钟漂移影响边界计算，交由班长跟进');
+  await page.getByRole('button', { name: '确认并分派', exact: true }).last().click();
+
+  await page.getByText('事件已确认并分派给 shift.lead').waitFor();
+  await page.locator('.batch-state-band').getByText('ACKNOWLEDGED', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '重新分派' }).click();
+  await page.locator('#command-assignee').fill('platform.engineer');
+  await page.locator('#confirm-reason').fill('转交平台工程师完成 NTP 校时和网关复核');
+  await page.getByRole('button', { name: '确认重新分派' }).click();
+  await page.getByText('事件已确认并分派给 platform.engineer').waitFor();
+  await page.getByText('REASSIGNED', { exact: true }).waitFor();
+
+  await page.getByRole('button', { name: '标记已解决' }).click();
+  await page.getByRole('heading', { name: '解决数据质量事件' }).waitFor();
+  assert.equal(await page.locator('#command-assignee-field').isVisible(), false);
+  await page.locator('#confirm-reason').fill('NTP 校时完成，连续三个采集周期时间偏差低于阈值');
+  await page.getByRole('button', { name: '确认已解决' }).click();
+  await page.getByText('事件已解决，原始数据和处置审计已保留').waitFor();
+  await page.locator('.batch-state-band').getByText('RESOLVED', { exact: true }).waitFor();
+  await page.getByText('RESOLVED', { exact: true }).last().waitFor();
+
+  const detail = await fetch(`${simulatorUrl}/bpi/v1/data-quality/incidents/${incidentId}`).then((response) => response.json());
+  assert.equal(detail.data.incident.state, 'RESOLVED');
+  assert.equal(detail.data.incident.revision, 4);
+  assert.equal(detail.data.incident.assignee, 'platform.engineer');
+  assert.equal(detail.data.events.length, 4);
+  assert.deepEqual(detail.data.lifecycle.map((item) => item.action), [
+    'CREATED', 'ACKNOWLEDGED', 'REASSIGNED', 'RESOLVED',
+  ]);
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-data-quality-workbench.png', fullPage: true });
+  assert.deepEqual(errors, []);
   await page.close();
 });

@@ -211,6 +211,33 @@ function candidates(state) {
   return [state.candidate, state.endCandidate].filter(Boolean);
 }
 
+function scopedDataQualityIncidents(state, url) {
+  const plantId = url.searchParams.get('plantId');
+  const lineId = url.searchParams.get('lineId');
+  return state.dataQualityIncidents.filter((item) => (!plantId || item.plantId === plantId)
+    && (!lineId || item.lineId === lineId));
+}
+
+function dataQualitySeverityRank(severity) {
+  return { CRITICAL: 4, ERROR: 3, WARNING: 2, INFO: 1 }[severity] || 0;
+}
+
+function dataQualitySummary(state, url) {
+  const incidents = scopedDataQualityIncidents(state, url);
+  const unresolved = incidents.filter((item) => item.state !== 'RESOLVED');
+  const issueCounts = {};
+  unresolved.forEach((item) => { issueCounts[item.issueCode] = (issueCounts[item.issueCode] || 0) + 1; });
+  const affectedBatches = new Set(unresolved.flatMap((item) => item.affectedBatches));
+  return {
+    open: incidents.filter((item) => item.state === 'OPEN').length,
+    acknowledged: incidents.filter((item) => item.state === 'ACKNOWLEDGED').length,
+    resolved: incidents.filter((item) => item.state === 'RESOLVED').length,
+    critical: unresolved.filter((item) => item.severity === 'CRITICAL').length,
+    affectedBatches: affectedBatches.size,
+    issueCounts,
+  };
+}
+
 function match(pathname, pattern) {
   const result = pathname.match(pattern);
   return result ? result.slice(1).map(decodeURIComponent) : null;
@@ -1225,12 +1252,107 @@ function createHandler(state) {
         return rememberAndSend(state, context, res, 200, envelope(operationId, state.rule), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/data-quality/incidents') {
-        return send(res, 200, envelope('listDataQualityIncidents', [state.incident]), 'listDataQualityIncidents');
+        const operationId = 'listDataQualityIncidents';
+        const plantId = url.searchParams.get('plantId');
+        const incidentState = url.searchParams.get('state');
+        const search = (url.searchParams.get('search') || '').trim().toLowerCase();
+        const limit = Number(url.searchParams.get('limit') || 50);
+        if (!plantId) return send(res, 422, problem(422, 'Validation Failed', 'plantId is required.', operationId), operationId);
+        if (incidentState && !['OPEN', 'ACKNOWLEDGED', 'RESOLVED'].includes(incidentState)) {
+          return send(res, 422, problem(422, 'Validation Failed', 'state must be OPEN, ACKNOWLEDGED or RESOLVED.', operationId), operationId);
+        }
+        if (!Number.isInteger(limit) || limit < 1 || limit > 200) {
+          return send(res, 422, problem(422, 'Validation Failed', 'limit must be between 1 and 200.', operationId), operationId);
+        }
+        const filtered = scopedDataQualityIncidents(state, url)
+          .filter((item) => !incidentState || item.state === incidentState)
+          .filter((item) => !search || [item.issueCode, item.source, item.deviceId, item.propertyId, item.assignee, item.lastDetail]
+            .filter(Boolean).some((value) => String(value).toLowerCase().includes(search)))
+          .sort((left, right) => right.affectedBatchCount - left.affectedBatchCount
+            || dataQualitySeverityRank(right.severity) - dataQualitySeverityRank(left.severity)
+            || Date.parse(right.lastSeen) - Date.parse(left.lastSeen)
+            || right.id.localeCompare(left.id));
+        return send(res, 200, envelope(operationId, filtered.slice(0, limit)), operationId);
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/data-quality/summary') {
+        const operationId = 'getDataQualitySummary';
+        if (!url.searchParams.get('plantId')) {
+          return send(res, 422, problem(422, 'Validation Failed', 'plantId is required.', operationId), operationId);
+        }
+        return send(res, 200, envelope(operationId, dataQualitySummary(state, url)), operationId);
       }
       ids = match(path, /^\/bpi\/v1\/data-quality\/incidents\/([^/]+)$/);
       if (req.method === 'GET' && ids) {
-        if (ids[0] !== state.incident.id) return send(res, 404, problem(404, 'Not Found', 'Incident not found.', 'getDataQualityIncident'), 'getDataQualityIncident');
-        return send(res, 200, envelope('getDataQualityIncident', state.incident), 'getDataQualityIncident');
+        const operationId = 'getDataQualityIncident';
+        const incident = state.dataQualityIncidents.find((item) => item.id === ids[0]);
+        if (!incident) return send(res, 404, problem(404, 'Not Found', 'Incident not found.', operationId), operationId);
+        return send(res, 200, envelope(operationId, {
+          incident,
+          events: state.dataQualityEvents.get(incident.id) || [],
+          lifecycle: state.dataQualityLifecycle.get(incident.id) || [],
+          recommendedActions: state.dataQualityRecommendations.get(incident.id) || [],
+        }), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/data-quality\/incidents\/([^/]+)\/acknowledge$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'acknowledgeDataQualityIncident';
+        const incident = state.dataQualityIncidents.find((item) => item.id === ids[0]);
+        if (!incident) return send(res, 404, problem(404, 'Not Found', 'Incident not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, incident.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const assignee = String(body.assignee || '').trim();
+        const reason = String(body.reason || '').trim();
+        if (!assignee || assignee.length > 128 || reason.length < 3 || reason.length > 500) {
+          const response = problem(422, 'Validation Failed', 'assignee and a reason of at least 3 characters are required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (incident.state === 'RESOLVED') {
+          const response = problem(409, 'Invalid Incident State', 'A resolved incident cannot be acknowledged.', operationId, incident.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const fromState = incident.state;
+        incident.state = 'ACKNOWLEDGED';
+        incident.revision += 1;
+        incident.assignee = assignee;
+        incident.acknowledgedBy = 'simulated.shift.lead';
+        incident.acknowledgedAt = FIXED_TIME;
+        incident.acknowledgmentReason = reason;
+        state.dataQualityLifecycle.get(incident.id).push({
+          revision: incident.revision,
+          action: fromState === 'ACKNOWLEDGED' ? 'REASSIGNED' : 'ACKNOWLEDGED',
+          fromState, toState: 'ACKNOWLEDGED', actorId: incident.acknowledgedBy,
+          assignee, reason, at: FIXED_TIME,
+        });
+        return rememberAndSend(state, context, res, 200, envelope(operationId, incident), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/data-quality\/incidents\/([^/]+)\/resolve$/);
+      if (req.method === 'POST' && ids) {
+        const operationId = 'resolveDataQualityIncident';
+        const incident = state.dataQualityIncidents.find((item) => item.id === ids[0]);
+        if (!incident) return send(res, 404, problem(404, 'Not Found', 'Incident not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, incident.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const reason = String(body.reason || '').trim();
+        if (reason.length < 3 || reason.length > 500) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (incident.state !== 'ACKNOWLEDGED') {
+          const response = problem(409, 'Invalid Incident State', 'Only an acknowledged incident can be resolved.', operationId, incident.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        incident.state = 'RESOLVED';
+        incident.revision += 1;
+        incident.resolvedBy = 'simulated.shift.lead';
+        incident.resolvedAt = FIXED_TIME;
+        incident.resolutionReason = reason;
+        state.dataQualityLifecycle.get(incident.id).push({
+          revision: incident.revision, action: 'RESOLVED', fromState: 'ACKNOWLEDGED', toState: 'RESOLVED',
+          actorId: incident.resolvedBy, assignee: incident.assignee, reason, at: FIXED_TIME,
+        });
+        return rememberAndSend(state, context, res, 200, envelope(operationId, incident), operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/integrations/health') {
         return send(res, 200, envelope('getIntegrationHealth', state.integrations), 'getIntegrationHealth');

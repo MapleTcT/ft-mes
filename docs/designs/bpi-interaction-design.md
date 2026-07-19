@@ -272,9 +272,11 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 事件数、影响产线/规则/批次、当前责任人和处置状态。
 
 详情抽屉展示首次/最近事件、质量时间轴、影响分析和推荐动作。确认、分派、解决均要求备注；
-解决不会删除原事件。超过 10,000 项使用服务端聚合和虚拟列表。
+解决不会删除原事件。列表使用服务端聚合、固定 `snapshotAt` 截点和 HMAC scope-bound keyset cursor；
+截点后发生变化的事件不混入旧游标，操作员刷新后读取最新队列。页面按 cursor 增量加载并按 incident ID
+去重，不使用页码推断实时事件位置，也不把实时工作队列冒充历史版本快照。
 
-**主要 API：** `listDataQualityIncidents`、`getDataQualityIncident`、
+**主要 API：** `listDataQualityIncidents`、`getDataQualitySummary`、`getDataQualityIncident`、
 `acknowledgeDataQualityIncident`、`resolveDataQualityIncident`。
 
 ### 5.9 训练数据集 `/bpi/datasets`
