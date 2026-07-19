@@ -104,8 +104,11 @@ export const bpiApi = {
       headers: { 'Idempotency-Key': key, 'If-Match': '0' },
       body: JSON.stringify(command),
     }),
-  listPointCalibrations: (plantId: string, lineId: string) =>
-    request<PointCalibration[]>(`/point-calibrations?plantId=${encodeURIComponent(plantId)}&lineId=${encodeURIComponent(lineId)}`),
+  listPointCalibrations: (plantId: string, lineId: string, cursor?: string | null, limit = 50) => {
+    const parameters = new URLSearchParams({ plantId, lineId, limit: String(limit) });
+    if (cursor) parameters.set('cursor', cursor);
+    return request<PointCalibration[]>(`/point-calibrations?${parameters.toString()}`);
+  },
   submitPointCalibration: (command: PointCalibrationSubmitCommand, key: string) =>
     request<PointCalibration>('/point-calibrations', {
       method: 'POST',

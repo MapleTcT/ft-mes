@@ -179,6 +179,10 @@ td > svg { width: 16px; color: #8b96a1; }
 .calibration-table { min-width: 1320px; }
 .table-frame--flush { border: 0; }
 .calibration-empty { min-height: 92px; display: grid; place-items: center; padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
+.calibration-pagination { min-height: 54px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 8px 14px; border-top: 1px solid var(--line); }
+.calibration-pagination span { color: var(--muted); font-size: 11px; }
+.calibration-pagination .button { min-width: 112px; }
+.calibration-pagination .button:disabled { cursor: wait; opacity: 0.65; }
 .table-actions { display: flex; align-items: center; gap: 6px; }
 .point-summary { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 12px; background: #fff; border: 1px solid var(--line); }
 .point-summary > div { min-width: 0; display: grid; gap: 5px; padding: 12px; border-right: 1px solid var(--line); }

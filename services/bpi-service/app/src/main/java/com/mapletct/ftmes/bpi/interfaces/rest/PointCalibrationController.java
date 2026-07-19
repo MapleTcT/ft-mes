@@ -2,6 +2,7 @@ package com.mapletct.ftmes.bpi.interfaces.rest;
 
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.CommandResult;
+import com.mapletct.ftmes.bpi.application.PointCalibrationPage;
 import com.mapletct.ftmes.bpi.application.PointCalibrationService;
 import com.mapletct.ftmes.bpi.domain.PointCalibrationView;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,9 +43,13 @@ public class PointCalibrationController {
             @RequestParam(required = false) String productId,
             @RequestParam(required = false) String deviceId,
             @RequestParam(required = false) String propertyId,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Integer limit,
             HttpServletRequest request) {
-        return ApiResponse.of(service.list(
-                actorContextFactory.from(jwt), plantId, lineId, productId, deviceId, propertyId), request);
+        PointCalibrationPage page = service.list(
+                actorContextFactory.from(jwt), plantId, lineId, productId, deviceId, propertyId,
+                cursor, limit);
+        return ApiResponse.of(page.items(), request, page.snapshotAt(), page.nextCursor());
     }
 
     @PostMapping("/bpi/v1/point-calibrations")

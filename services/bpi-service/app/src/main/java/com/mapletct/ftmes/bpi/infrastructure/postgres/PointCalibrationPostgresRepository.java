@@ -34,22 +34,46 @@ public class PointCalibrationPostgresRepository {
         this.jdbc = jdbc;
     }
 
+    public Instant currentTransactionTime() {
+        Timestamp value = jdbc.queryForObject(
+                "SELECT transaction_timestamp()",
+                new MapSqlParameterSource(),
+                Timestamp.class);
+        if (value == null) {
+            throw new IllegalStateException("PostgreSQL did not return transaction_timestamp().");
+        }
+        return value.toInstant();
+    }
+
     public List<PointCalibrationView> list(
             ActorContext actor,
             String plantId,
             String lineId,
             String productId,
             String deviceId,
-            String propertyId) {
+            String propertyId,
+            Instant snapshotAt,
+            Instant cursorSubmittedAt,
+            UUID cursorId,
+            int fetchLimit) {
         StringBuilder sql = new StringBuilder(SELECT)
-                .append(" WHERE tenant_id = :tenantId AND plant_id = :plantId AND line_id = :lineId");
+                .append(" WHERE tenant_id = :tenantId AND plant_id = :plantId AND line_id = :lineId")
+                .append(" AND submitted_at <= :snapshotAt");
         MapSqlParameterSource parameters = new MapSqlParameterSource("tenantId", actor.tenantId())
                 .addValue("plantId", plantId)
-                .addValue("lineId", lineId);
+                .addValue("lineId", lineId)
+                .addValue("snapshotAt", Timestamp.from(snapshotAt))
+                .addValue("fetchLimit", fetchLimit);
         addFilter(sql, parameters, "product_id", "productId", productId);
         addFilter(sql, parameters, "device_id", "deviceId", deviceId);
         addFilter(sql, parameters, "property_id", "propertyId", propertyId);
-        sql.append(" ORDER BY submitted_at DESC, id");
+        if (cursorSubmittedAt != null && cursorId != null) {
+            sql.append(" AND (submitted_at < :cursorSubmittedAt")
+                    .append(" OR (submitted_at = :cursorSubmittedAt AND id < :cursorId))");
+            parameters.addValue("cursorSubmittedAt", Timestamp.from(cursorSubmittedAt))
+                    .addValue("cursorId", cursorId);
+        }
+        sql.append(" ORDER BY submitted_at DESC, id DESC LIMIT :fetchLimit");
         return jdbc.query(sql.toString(), parameters, (rs, rowNum) -> map(rs));
     }
 

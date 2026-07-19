@@ -24,33 +24,69 @@ import java.util.regex.Pattern;
 @Service
 public class PointCalibrationService {
     private static final Pattern REVISION_HEADER = Pattern.compile("^(?:W/)?\\\"?(\\d+)\\\"?$");
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 200;
 
     private final PointCalibrationPostgresRepository repository;
     private final BpiPostgresRepository sharedRepository;
     private final CanonicalJson canonicalJson;
     private final ObjectMapper objectMapper;
+    private final PointCalibrationCursorCodec cursorCodec;
 
     public PointCalibrationService(
             PointCalibrationPostgresRepository repository,
             BpiPostgresRepository sharedRepository,
             CanonicalJson canonicalJson,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            PointCalibrationCursorCodec cursorCodec) {
         this.repository = repository;
         this.sharedRepository = sharedRepository;
         this.canonicalJson = canonicalJson;
         this.objectMapper = objectMapper;
+        this.cursorCodec = cursorCodec;
     }
 
     @Transactional(readOnly = true)
-    public List<PointCalibrationView> list(
+    public PointCalibrationPage list(
             ActorContext actor,
             String plantId,
             String lineId,
             String productId,
             String deviceId,
-            String propertyId) {
+            String propertyId,
+            String encodedCursor,
+            Integer requestedLimit) {
         assertConcreteScope(actor, plantId, lineId);
-        return repository.list(actor, plantId, lineId, productId, deviceId, propertyId);
+        int limit = pageSize(requestedLimit);
+        String scopeFingerprint = scopeFingerprint(
+                actor, plantId, lineId, productId, deviceId, propertyId);
+        PointCalibrationCursorCodec.Cursor cursor = encodedCursor == null || encodedCursor.isBlank()
+                ? null
+                : cursorCodec.decode(encodedCursor, scopeFingerprint);
+        Instant snapshotAt = cursor == null
+                ? repository.currentTransactionTime()
+                : cursor.snapshotAt();
+        List<PointCalibrationView> values = repository.list(
+                actor,
+                plantId,
+                lineId,
+                productId,
+                deviceId,
+                propertyId,
+                snapshotAt,
+                cursor == null ? null : cursor.submittedAt(),
+                cursor == null ? null : cursor.id(),
+                limit + 1);
+        boolean hasMore = values.size() > limit;
+        List<PointCalibrationView> items = hasMore ? values.subList(0, limit) : values;
+        String nextCursor = null;
+        if (hasMore) {
+            PointCalibrationView last = items.get(items.size() - 1);
+            nextCursor = cursorCodec.encode(
+                    new PointCalibrationCursorCodec.Cursor(snapshotAt, last.submittedAt(), last.id()),
+                    scopeFingerprint);
+        }
+        return new PointCalibrationPage(items, snapshotAt, nextCursor);
     }
 
     @Transactional(timeout = 15)
@@ -233,6 +269,38 @@ public class PointCalibrationService {
         if (!actor.canAccess(plantId, lineId)) {
             throw new BpiForbiddenException("Token scope does not allow the requested calibration scope.");
         }
+    }
+
+    private int pageSize(Integer requestedLimit) {
+        int limit = requestedLimit == null ? DEFAULT_PAGE_SIZE : requestedLimit;
+        if (limit < 1 || limit > MAX_PAGE_SIZE) {
+            throw new BpiValidationException("limit must be between 1 and 200.");
+        }
+        return limit;
+    }
+
+    private String scopeFingerprint(
+            ActorContext actor,
+            String plantId,
+            String lineId,
+            String productId,
+            String deviceId,
+            String propertyId) {
+        return Checksums.sha256(String.join("|",
+                fingerprintPart(actor.tenantId()),
+                fingerprintPart(plantId),
+                fingerprintPart(lineId),
+                fingerprintPart(normalizedFilter(productId)),
+                fingerprintPart(normalizedFilter(deviceId)),
+                fingerprintPart(normalizedFilter(propertyId))));
+    }
+
+    private String normalizedFilter(String value) {
+        return value == null || value.isBlank() ? "" : value;
+    }
+
+    private String fingerprintPart(String value) {
+        return value.length() + ":" + value;
     }
 
     private String writeJson(Object value) {

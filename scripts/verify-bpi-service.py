@@ -34,6 +34,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V15__bpi_rule_retirement_lifecycle.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V16__bpi_point_catalog_repeated_observations.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -55,6 +56,8 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationKafkaConfiguration.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleRuntimeReadinessReceiptService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationCursorCodec.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationPage.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
@@ -101,8 +104,12 @@ REQUIRED_FILES = [
     "docs/testing/bpi-point-calibration-governance-acceptance.md",
     "metadata/bpi-point-calibration-governance-acceptance.json",
     "metadata/bpi-point-calibration-governance.png",
+    "docs/testing/bpi-point-calibration-pagination-acceptance.md",
+    "metadata/bpi-point-calibration-pagination-acceptance.json",
+    "metadata/bpi-point-calibration-pagination.png",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
@@ -239,6 +246,15 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
+        [
+            "idx_bpi_point_calibrations_scope_cursor",
+            "submitted_at DESC",
+            "id DESC",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
          "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
@@ -309,6 +325,37 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+        [
+            "DEFAULT_PAGE_SIZE = 50",
+            "MAX_PAGE_SIZE = 200",
+            "scopeFingerprint",
+            "currentTransactionTime",
+            "limit + 1",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationCursorCodec.java",
+        [
+            "bpi.point-calibration.cursor.v1",
+            "HmacSHA256",
+            "MessageDigest.isEqual",
+            "MAX_CURSOR_LENGTH",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
+        [
+            "submitted_at <= :snapshotAt",
+            "submitted_at < :cursorSubmittedAt",
+            "id < :cursorId",
+            "ORDER BY submitted_at DESC, id DESC LIMIT :fetchLimit",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
         [
             "source_claim_ready_point_count",
@@ -327,6 +374,8 @@ def main() -> int:
             "calibration-self-approve-",
             "NOT_YET_EFFECTIVE",
             "calibration-expired-submit-",
+            "calibrationListUsesStableScopeBoundKeysetCursor",
+            "PAGE-AFTER-SNAPSHOT",
             "REVOKED|3|calibration-author|calibration-reviewer|calibration-reviewer",
         ],
         failures,
@@ -443,6 +492,17 @@ def main() -> int:
             "entry.url === selfApprovalResponse.url()",
             "browser emitted unexpected console errors",
             "non-matching calibration version unexpectedly made a real point READY",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
+        [
+            "readAllPages",
+            "tamperedCursor",
+            "changedScopeParameters",
+            "browser lost the point search value while appending a page",
+            "browser follow-up request omitted the cursor",
         ],
         failures,
     )
@@ -698,6 +758,56 @@ def main() -> int:
         screenshot_hash = hashlib.sha256(screenshot_path.read_bytes()).hexdigest()
         if screenshot_hash != calibration_browser.get("screenshotSha256"):
             fail("BPI calibration screenshot hash does not match the acceptance record", failures)
+
+    pagination_acceptance = json.loads(
+        (ROOT / "metadata/bpi-point-calibration-pagination-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if pagination_acceptance.get("status") != "PASS_CONTROLLED_TARGET_READ_ONLY":
+        fail("BPI calibration pagination acceptance must retain controlled read-only PASS", failures)
+    if pagination_acceptance.get("database") != "PostgreSQL":
+        fail("BPI calibration pagination acceptance must identify PostgreSQL", failures)
+    if pagination_acceptance.get("environment", {}).get("flywayVersion") != 18:
+        fail("BPI calibration pagination acceptance must prove Flyway V18", failures)
+    pagination_summary = pagination_acceptance.get("summary", {})
+    if (pagination_summary.get("testedFeatures") != 8
+            or pagination_summary.get("pass") != 8
+            or pagination_summary.get("fail") != 0
+            or pagination_summary.get("blocked") != 0):
+        fail("BPI calibration pagination acceptance must preserve eight passing features", failures)
+    pagination_api = pagination_acceptance.get("api", {})
+    if (len(pagination_api.get("pages", [])) != 2
+            or pagination_api.get("totalItems") != 4
+            or pagination_api.get("uniqueItems") != 4
+            or pagination_api.get("tamperedCursorStatus") != 422
+            or pagination_api.get("changedScopeStatus") != 422):
+        fail("BPI calibration pagination API evidence is incomplete", failures)
+    pagination_browser = pagination_acceptance.get("browser", {})
+    if (pagination_browser.get("loadedItems") != 4
+            or pagination_browser.get("uniqueItems") != 4
+            or pagination_browser.get("cursorRequests") != 1
+            or pagination_browser.get("searchValuePreserved") is not True
+            or any(pagination_browser.get(key) != 0 for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))):
+        fail("BPI calibration pagination browser evidence is incomplete", failures)
+    pagination_persistence = pagination_acceptance.get("persistence", {})
+    if (pagination_persistence.get("rowCountBefore") != 4
+            or pagination_persistence.get("rowCountAfter") != 4
+            or pagination_persistence.get("mutatedRows") != 0
+            or pagination_persistence.get("indexValid") is not True
+            or pagination_persistence.get("indexReady") is not True):
+        fail("BPI calibration pagination must retain read-only indexed PostgreSQL proof", failures)
+    pagination_regression = pagination_acceptance.get("localRegression", {})
+    if (pagination_regression.get("totalJava17Tests") != 83
+            or pagination_regression.get("simulationTests") != 9
+            or pagination_regression.get("browserE2eTests") != 11):
+        fail("BPI calibration pagination regression totals are incomplete", failures)
+    pagination_screenshot_path = ROOT / pagination_browser.get("screenshot", "")
+    if pagination_screenshot_path.is_file():
+        screenshot_hash = hashlib.sha256(pagination_screenshot_path.read_bytes()).hexdigest()
+        if screenshot_hash != pagination_browser.get("screenshotSha256"):
+            fail("BPI calibration pagination screenshot hash does not match", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

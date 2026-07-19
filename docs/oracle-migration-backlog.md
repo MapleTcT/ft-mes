@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-19T05:36:44+00:00`。
-- Repo Commit：`435ec902192bf68c28ef7d2ddcf8f3892ad93b99`。
-- 总引用数：`1575`。
+- Generated At：`2026-07-19T09:12:26+00:00`。
+- Repo Commit：`8afb4647532bb224ef822d34b9097504ff14bc97`。
+- 总引用数：`1579`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -21,7 +21,7 @@
 | decompiled-runtime-backlog | 16 | Decompiled runtime config/source contains Oracle-specific branch or keyword. |
 | documentation-or-workflow | 187 | Documentation/template reference; keep wording aligned with PostgreSQL-first policy. |
 | frontend-row-index-noise | 4 | Frontend rowNum variable naming is not Oracle SQL ROWNUM. |
-| java-row-index-noise | 47 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
+| java-row-index-noise | 51 | Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM. |
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 574 | PostgreSQL compatibility SQL may mention Oracle as source context. |

@@ -145,6 +145,13 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 来源序列尚未完成，G-021 继续保持 `PARTIAL`。证据见
 [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)。
 
+同日 Flyway V18 为校准证据列表增加与 scope 和排序一致的索引，并将读取契约改为 HMAC 签名、
+完整筛选 scope 绑定的稳定快照 keyset cursor。marker `ADP_E2E_CAL_PAGE_20260719_164813`
+在目标真实 adapter/service/PostgreSQL 和 `/bpi/#/points` 页面以 `limit=2` 读取 2+2 条：
+两页 `snapshotAt` 一致、4 个 ID 无重复，篡改和跨 scope 游标均为 `422`，页面搜索保持且浏览器错误为 0；
+验收前后表均为 4 行。证据见
+[BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -156,6 +163,7 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 - [BPI 应用组件回滚验收](testing/bpi-application-rollback-acceptance.md)
 - [BPI 试点平台前置条件与单位别名验收](testing/bpi-pilot-platform-prerequisites-acceptance.md)
 - [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)
+- [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

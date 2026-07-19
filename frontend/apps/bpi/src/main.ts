@@ -4,6 +4,7 @@ import {
   Boxes,
   CheckCircle2,
   ChevronRight,
+  ChevronsDown,
   CircleAlert,
   Clock3,
   Database,
@@ -46,6 +47,7 @@ import type {
 import './styles.css';
 
 type View = 'overview' | 'candidates' | 'batches' | 'points' | 'rules';
+const CALIBRATION_PAGE_SIZE = 50;
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) throw new Error('BPI app root is missing');
@@ -65,6 +67,10 @@ const state = {
   topologies: [] as TopologyVersion[],
   pointCatalog: null as PointCatalogView | null,
   calibrations: [] as PointCalibration[],
+  pointSearch: '',
+  calibrationNextCursor: null as string | null,
+  calibrationSnapshotAt: null as string | null,
+  loadingMoreCalibrations: false,
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
   selectedRule: null as RuleVersion | null,
@@ -333,7 +339,7 @@ function shell(): void {
 }
 
 function refreshIcons(): void {
-  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, Plus, RefreshCw, Search, ShieldCheck, Upload, X } });
+  createIcons({ icons: { Activity, Archive, Boxes, CheckCircle2, ChevronRight, ChevronsDown, CircleAlert, Clock3, Database, Factory, Filter, FlaskConical, Gauge, ListChecks, Network, Play, Plus, RefreshCw, Search, ShieldCheck, Upload, X } });
 }
 
 function commandId(): string {
@@ -394,10 +400,12 @@ async function loadView(silent = false): Promise<void> {
     } else if (state.view === 'points') {
       const [catalog, calibrations] = await Promise.all([
         bpiApi.currentPointCatalog(state.plantId, state.pointLineId),
-        bpiApi.listPointCalibrations(state.plantId, state.pointLineId),
+        bpiApi.listPointCalibrations(state.plantId, state.pointLineId, null, CALIBRATION_PAGE_SIZE),
       ]);
       state.pointCatalog = catalog.data;
       state.calibrations = calibrations.data;
+      state.calibrationNextCursor = calibrations.meta.nextCursor || null;
+      state.calibrationSnapshotAt = calibrations.meta.snapshotAt;
       state.meta = catalog.meta;
     } else {
       const [rules, topologies] = await Promise.all([
@@ -733,17 +741,20 @@ function pointCalibrationSection(): string {
     </tr>`;
   }).join('');
   return `<section class="calibration-workbench">
-    <div class="section-bar"><div><i data-lucide="shield-check"></i><strong>MES 校准证据</strong></div><span>${state.calibrations.length} 条受控记录</span></div>
+    <div class="section-bar"><div><i data-lucide="shield-check"></i><strong>MES 校准证据</strong></div><span>已加载 ${state.calibrations.length} 条</span></div>
     ${rows
       ? `<div class="table-frame table-frame--flush"><table class="calibration-table"><thead><tr><th>点位</th><th>校准版本</th><th>证书 / 校验和</th><th>有效期</th><th>状态</th><th>提交人</th><th>最近处置人</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
       : '<div class="calibration-empty">当前产线没有 MES 批准的校准证据。来源系统的 VERIFIED 声明不会自动放行点位。</div>'}
+    ${state.calibrationNextCursor
+      ? `<div class="calibration-pagination"><span>${formatTime(state.calibrationSnapshotAt)} 快照</span><button id="load-more-calibrations" type="button" class="button button--secondary" ${state.loadingMoreCalibrations ? 'disabled' : ''}><i data-lucide="chevrons-down"></i>${state.loadingMoreCalibrations ? '加载中' : '加载更多'}</button></div>`
+      : ''}
   </section>`;
 }
 
 function renderPoints(): void {
   const content = document.querySelector<HTMLElement>('#content')!;
   const catalog = state.pointCatalog;
-  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" placeholder="产品、设备、属性、证书" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="new-point-calibration" class="icon-text-button"><i data-lucide="plus"></i><span>提交校准证据</span></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
+  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" value="${escapeHtml(state.pointSearch)}" placeholder="产品、设备、属性、证书" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="new-point-calibration" class="icon-text-button"><i data-lucide="plus"></i><span>提交校准证据</span></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
   if (!catalog) {
     content.innerHTML = `${toolbar}<div class="empty-state"><i data-lucide="database"></i><strong>该产线没有点位目录快照</strong><span>${escapeHtml(state.plantId)} / ${escapeHtml(state.pointLineId)}</span></div>${pointCalibrationSection()}`;
     bindPointPageEvents(content);
@@ -788,6 +799,7 @@ function bindPointPageEvents(content: HTMLElement): void {
     const command = button.dataset.calibrationAction as 'approve' | 'reject' | 'revoke' | undefined;
     if (calibration && command) openPointCalibrationCommand(calibration, command);
   }));
+  content.querySelector('#load-more-calibrations')?.addEventListener('click', () => void loadMorePointCalibrations());
   const load = (): void => {
     const value = content.querySelector<HTMLInputElement>('#point-line')?.value.trim();
     if (!value) return;
@@ -800,11 +812,56 @@ function bindPointPageEvents(content: HTMLElement): void {
     if (event.key === 'Enter') load();
   });
   content.querySelector<HTMLInputElement>('#point-search')?.addEventListener('input', (event) => {
-    const keyword = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    content.querySelectorAll<HTMLTableRowElement>('[data-point-id], [data-calibration-row]').forEach((row) => {
-      row.hidden = !row.textContent!.toLowerCase().includes(keyword);
-    });
+    state.pointSearch = (event.target as HTMLInputElement).value;
+    applyPointSearch(content);
   });
+  applyPointSearch(content);
+}
+
+function applyPointSearch(content: HTMLElement): void {
+  const keyword = state.pointSearch.trim().toLowerCase();
+  content.querySelectorAll<HTMLTableRowElement>('[data-point-id], [data-calibration-row]').forEach((row) => {
+    row.hidden = !row.textContent!.toLowerCase().includes(keyword);
+  });
+}
+
+async function loadMorePointCalibrations(): Promise<void> {
+  const cursor = state.calibrationNextCursor;
+  if (!cursor || state.loadingMoreCalibrations) return;
+  const plantId = state.plantId;
+  const lineId = state.pointLineId;
+  const snapshotAt = state.calibrationSnapshotAt;
+  state.loadingMoreCalibrations = true;
+  renderPoints();
+  refreshIcons();
+  try {
+    const response = await bpiApi.listPointCalibrations(
+      plantId,
+      lineId,
+      cursor,
+      CALIBRATION_PAGE_SIZE,
+    );
+    if (plantId !== state.plantId || lineId !== state.pointLineId
+        || cursor !== state.calibrationNextCursor) return;
+    if (snapshotAt && response.meta.snapshotAt !== snapshotAt) {
+      throw new Error('校准证据分页快照已变化，请刷新后重试。');
+    }
+    const knownIds = new Set(state.calibrations.map((calibration) => calibration.id));
+    state.calibrations = [
+      ...state.calibrations,
+      ...response.data.filter((calibration) => !knownIds.has(calibration.id)),
+    ];
+    state.calibrationNextCursor = response.meta.nextCursor || null;
+    state.calibrationSnapshotAt = response.meta.snapshotAt;
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    state.loadingMoreCalibrations = false;
+    if (state.view === 'points') {
+      renderPoints();
+      refreshIcons();
+    }
+  }
 }
 
 function localDateTimeValue(date: Date): string {

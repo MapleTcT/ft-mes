@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T08:48:15.552Z",
+  "repoCommit": "8afb4647532bb224ef822d34b9097504ff14bc97+calibration-cursor-worktree",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_TARGET_READ_ONLY",
+  "marker": "ADP_E2E_CAL_PAGE_20260719_164813",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiPointRoute": "http://10.11.100.17:18080/bpi/#/points",
+    "databaseName": "ft_mes_bpi",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 18,
+    "serviceImage": "ft-mes-bpi-service:20260719-calibration-cursor-v18",
+    "serviceImageId": "sha256:6bbd2dfeea46ba7cd01771e9973a9356b8137be316212cfda6182bcdbfe19867",
+    "serviceJarSha256": "93796f672c8ac8ab494bf1baf3606ad354a8cb6e89de5701ca4b040fb6ccaabb",
+    "serviceHealth": "healthy",
+    "frontendAsset": "index-BgzRErWD.js",
+    "frontendAssetSha256": "bbec0f9da6c722adfc5132068ee56281c372b9e4db6b3b140c2f1b1ab5e49001"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "pageSize": 2
+  },
+  "summary": {
+    "testedFeatures": 8,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "productionReadiness": "PARTIAL_SOURCE_BLOCKED"
+  },
+  "items": [
+    {
+      "id": "flyway-v18",
+      "status": "PASS",
+      "operation": "Apply the scope and ordering index without replacing PostgreSQL",
+      "evidence": "Flyway history records V18 success=true and idx_bpi_point_calibrations_scope_cursor is valid and ready."
+    },
+    {
+      "id": "api-stable-snapshot",
+      "status": "PASS",
+      "operation": "Read every calibration through the real adapter with a two-row page",
+      "request": "GET /bpi-api/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&limit=2",
+      "httpStatus": 200,
+      "evidence": "Two pages returned the same snapshotAt, four unique rows and no duplicate id."
+    },
+    {
+      "id": "cursor-integrity",
+      "status": "PASS",
+      "operation": "Tamper with the opaque cursor",
+      "httpStatus": 422,
+      "evidence": "The HMAC-signed cursor was rejected and no page was returned."
+    },
+    {
+      "id": "cursor-scope-binding",
+      "status": "PASS",
+      "operation": "Reuse a cursor after changing the product filter",
+      "httpStatus": 422,
+      "evidence": "The cursor scope fingerprint did not match and the request failed closed."
+    },
+    {
+      "id": "browser-incremental-loading",
+      "status": "PASS",
+      "operation": "Use the real point page to load the second calibration page",
+      "evidence": "The browser issued one initial and one cursor request, then rendered four unique rows and removed the load-more action."
+    },
+    {
+      "id": "browser-state-preservation",
+      "status": "PASS",
+      "operation": "Keep a point search value while appending a page",
+      "evidence": "ADP_E2E_CAL remained in the search input after the second page was rendered."
+    },
+    {
+      "id": "browser-error-boundary",
+      "status": "PASS",
+      "operation": "Observe browser console, page and request failures",
+      "evidence": "consoleErrors=0, pageErrors=0 and requestFailures=0."
+    },
+    {
+      "id": "postgres-read-only-proof",
+      "status": "PASS",
+      "operation": "Compare the scoped PostgreSQL count before and after acceptance",
+      "evidence": "bpi.bpi_point_calibrations remained at four rows; the acceptance issued only GET requests and changed zero business rows."
+    }
+  ],
+  "api": {
+    "method": "GET",
+    "endpoint": "/bpi-api/point-calibrations",
+    "snapshotAt": "2026-07-19T08:48:14.230477Z",
+    "pageSize": 2,
+    "pages": [
+      {
+        "index": 1,
+        "status": 200,
+        "itemCount": 2,
+        "ids": [
+          "b5132f15-0dfa-4468-baaf-86b269f613e8",
+          "edc2cd3d-1f8c-475b-9ee6-3dffb7db81e6"
+        ],
+        "requestCursorHash": null,
+        "nextCursorHash": "69d1ce9551839fa69b3e7dcda72220d5564e19fc5ca239833d783d511ec2d381"
+      },
+      {
+        "index": 2,
+        "status": 200,
+        "itemCount": 2,
+        "ids": [
+          "7bdb9597-b39f-4120-887e-d1bf6c4f633b",
+          "8d2952f2-b5dd-4bc9-b706-1cf838f06363"
+        ],
+        "requestCursorHash": "69d1ce9551839fa69b3e7dcda72220d5564e19fc5ca239833d783d511ec2d381",
+        "nextCursorHash": null
+      }
+    ],
+    "totalItems": 4,
+    "uniqueItems": 4,
+    "tamperedCursorStatus": 422,
+    "changedScopeStatus": 422
+  },
+  "browser": {
+    "status": "PASS",
+    "loginStatus": 200,
+    "route": "/bpi/#/points",
+    "listRequests": 2,
+    "cursorRequests": 1,
+    "loadedItems": 4,
+    "uniqueItems": 4,
+    "searchValuePreserved": true,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "screenshot": "metadata/bpi-point-calibration-pagination.png",
+    "screenshotSha256": "a054be81790512b721af80c65035b744092bc79937f958bb0feb96273136010d"
+  },
+  "persistence": {
+    "table": "bpi.bpi_point_calibrations",
+    "index": "bpi.idx_bpi_point_calibrations_scope_cursor",
+    "indexValid": true,
+    "indexReady": true,
+    "rowCountBefore": 4,
+    "rowCountAfter": 4,
+    "mutatedRows": 0,
+    "order": "submitted_at DESC, id DESC",
+    "orderedIds": [
+      "b5132f15-0dfa-4468-baaf-86b269f613e8",
+      "edc2cd3d-1f8c-475b-9ee6-3dffb7db81e6",
+      "7bdb9597-b39f-4120-887e-d1bf6c4f633b",
+      "8d2952f2-b5dd-4bc9-b706-1cf838f06363"
+    ],
+    "verificationSql": "SELECT id, submitted_at, state, revision FROM bpi.bpi_point_calibrations WHERE tenant_id = '1000' AND plant_id = 'PLANT-01' AND line_id = 'LINE-S07-01' ORDER BY submitted_at DESC, id DESC;"
+  },
+  "localRegression": {
+    "eventContractTests": 17,
+    "ruleRuntimeTests": 9,
+    "serviceTests": 57,
+    "totalJava17Tests": 83,
+    "simulationTests": 9,
+    "browserE2eTests": 11,
+    "frontendBuild": "PASS",
+    "staticContractGates": "PASS",
+    "database": "PostgreSQL 16"
+  },
+  "rawEvidence": [
+    {
+      "path": "/tmp/ADP_E2E_CAL_PAGE_20260719_164813-point-calibration-pagination.json",
+      "sha256": "322b9c11c77b2bec8995ae7f71b39dc9bf58c5783433658b7f7fd2395de0eec2"
+    },
+    {
+      "path": "metadata/bpi-point-calibration-pagination.png",
+      "sha256": "a054be81790512b721af80c65035b744092bc79937f958bb0feb96273136010d"
+    }
+  ],
+  "boundaries": [
+    "The stable snapshot freezes list membership and ordering, not the mutable state of a row that another command may update while pages are being read.",
+    "This increment paginates the calibration evidence list; the point-catalog snapshot itself remains a separate bounded payload.",
+    "The target acceptance was read-only and created no candidate, batch, WOM, QCS or WMS state.",
+    "G-021 remains PARTIAL because field calibration, authoritative source sequence, same-scope live candidate and the 7-14 day shadow run are still incomplete.",
+    "No credential, ticket, internal JWT secret, database password, dump or runtime binary is stored in this record."
+  ]
+}

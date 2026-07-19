@@ -4,17 +4,40 @@ const { FIXED_TIME, clone, createScenario, sha256 } = require('./scenario');
 const JSON_TYPE = 'application/json; charset=utf-8';
 const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
 
-function meta(operationId) {
+function meta(operationId, pagination = {}) {
   return {
     traceId: `sim-${sha256(operationId).slice(0, 16)}`,
     generatedAt: FIXED_TIME,
-    snapshotAt: FIXED_TIME,
-    nextCursor: null,
+    snapshotAt: pagination.snapshotAt || FIXED_TIME,
+    nextCursor: pagination.nextCursor || null,
   };
 }
 
-function envelope(operationId, data) {
-  return { data: clone(data), meta: meta(operationId) };
+function envelope(operationId, data, pagination = {}) {
+  return { data: clone(data), meta: meta(operationId, pagination) };
+}
+
+function calibrationScopeFingerprint(url) {
+  return sha256(['plantId', 'lineId', 'productId', 'deviceId', 'propertyId']
+    .map((name) => `${name}=${url.searchParams.get(name) || ''}`)
+    .join('|'));
+}
+
+function encodeCalibrationCursor(cursor) {
+  return Buffer.from(JSON.stringify(cursor), 'utf8').toString('base64url');
+}
+
+function decodeCalibrationCursor(value, expectedScopeFingerprint) {
+  if (!value || value.length > 2048) throw new Error('invalid cursor');
+  const decoded = JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
+  if (decoded.version !== 1 || decoded.scopeFingerprint !== expectedScopeFingerprint
+      || !Number.isFinite(Date.parse(decoded.snapshotAt))
+      || !Number.isFinite(Date.parse(decoded.submittedAt))
+      || Date.parse(decoded.submittedAt) > Date.parse(decoded.snapshotAt)
+      || typeof decoded.id !== 'string' || !decoded.id) {
+    throw new Error('invalid cursor');
+  }
+  return decoded;
 }
 
 function problem(status, title, detail, operationId, currentRevision = null) {
@@ -627,12 +650,52 @@ function createHandler(state) {
       }
       if (req.method === 'GET' && path === '/bpi/v1/point-calibrations') {
         refreshPointCatalogReadiness(state);
+        const operationId = 'listPointCalibrations';
+        const rawLimit = url.searchParams.get('limit');
+        const limit = rawLimit === null ? 50 : Number(rawLimit);
+        if (!Number.isInteger(limit) || limit < 1 || limit > 200) {
+          return send(res, 422, problem(422, 'Validation Failed', 'limit must be between 1 and 200.', operationId), operationId);
+        }
+        const scopeFingerprint = calibrationScopeFingerprint(url);
+        let cursor = null;
+        try {
+          const encodedCursor = url.searchParams.get('cursor');
+          cursor = encodedCursor ? decodeCalibrationCursor(encodedCursor, scopeFingerprint) : null;
+        } catch (error) {
+          return send(res, 422, problem(
+            422,
+            'Validation Failed',
+            'Point calibration cursor is invalid or does not match the requested scope.',
+            operationId,
+          ), operationId);
+        }
+        const snapshotAt = cursor?.snapshotAt || new Date().toISOString();
+        const snapshotTime = Date.parse(snapshotAt);
         const filters = ['plantId', 'lineId', 'productId', 'deviceId', 'propertyId'];
-        const calibrations = state.pointCalibrations.filter((calibration) => filters.every((name) => {
-          const expected = url.searchParams.get(name);
-          return !expected || calibration[name] === expected;
-        }));
-        return send(res, 200, envelope('listPointCalibrations', calibrations), 'listPointCalibrations');
+        const calibrations = state.pointCalibrations
+          .filter((calibration) => filters.every((name) => {
+            const expected = url.searchParams.get(name);
+            return !expected || calibration[name] === expected;
+          }))
+          .filter((calibration) => Date.parse(calibration.submittedAt) <= snapshotTime)
+          .filter((calibration) => !cursor
+            || Date.parse(calibration.submittedAt) < Date.parse(cursor.submittedAt)
+            || (Date.parse(calibration.submittedAt) === Date.parse(cursor.submittedAt)
+              && calibration.id.localeCompare(cursor.id) < 0))
+          .sort((left, right) => Date.parse(right.submittedAt) - Date.parse(left.submittedAt)
+            || right.id.localeCompare(left.id));
+        const page = calibrations.slice(0, limit);
+        const last = page.at(-1);
+        const nextCursor = calibrations.length > limit && last
+          ? encodeCalibrationCursor({
+            version: 1,
+            snapshotAt,
+            submittedAt: last.submittedAt,
+            id: last.id,
+            scopeFingerprint,
+          })
+          : null;
+        return send(res, 200, envelope(operationId, page, { snapshotAt, nextCursor }), operationId);
       }
       if (req.method === 'POST' && path === '/bpi/v1/point-calibrations') {
         const operationId = 'submitPointCalibration';

@@ -54,7 +54,7 @@
 | 点位准入 | GET | `/bpi/v1/point-catalog/snapshots` | `listPointCatalogSnapshots` | SERVICE_IMPLEMENTED |
 | 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED |
 | 点位准入 | POST | `/bpi/v1/point-catalog/snapshots` | `importPointCatalogSnapshot` | SERVICE_IMPLEMENTED |
-| 校准治理 | GET | `/bpi/v1/point-calibrations` | `listPointCalibrations` | SERVICE_IMPLEMENTED |
+| 校准治理 | GET | `/bpi/v1/point-calibrations` | `listPointCalibrations` | SERVICE_IMPLEMENTED；`snapshotAt` + scope-bound keyset cursor，默认 50、上限 200 |
 | 校准治理 | POST | `/bpi/v1/point-calibrations` | `submitPointCalibration` | SERVICE_IMPLEMENTED |
 | 校准治理 | POST | `/bpi/v1/point-calibrations/{calibrationId}/approve` | `approvePointCalibration` | SERVICE_IMPLEMENTED |
 | 校准治理 | POST | `/bpi/v1/point-calibrations/{calibrationId}/reject` | `rejectPointCalibration` | SERVICE_IMPLEMENTED |

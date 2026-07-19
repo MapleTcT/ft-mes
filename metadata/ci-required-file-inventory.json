@@ -3231,6 +3231,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4941,6 +4953,18 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-point-calibration-governance-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-point-calibration-pagination-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-point-catalog-kafka-sync-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5242,6 +5266,30 @@
     {
       "ignored": false,
       "path": "metadata/bpi-pilot-platform-prerequisites-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-calibration-governance-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-calibration-governance.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-calibration-pagination-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-calibration-pagination.png",
       "state": "tracked",
       "tracked": true
     },
@@ -6351,6 +6399,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationCursorCodec.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationPage.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCatalogService.java",
       "state": "tracked",
       "tracked": true
@@ -6514,6 +6580,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/OutboxEventClaim.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCalibrationView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -6789,6 +6861,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
       "state": "tracked",
       "tracked": true
@@ -6874,6 +6952,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/OverviewController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationSubmitCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7005,6 +7095,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -7060,6 +7162,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7910,16 +8018,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 559
+      "tracked": 561
     },
     "docs": {
-      "tracked": 96
+      "tracked": 98
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 138
+      "tracked": 142
     },
     "package.json": {
       "tracked": 1
@@ -7931,7 +8039,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 177
+      "tracked": 187
     },
     "simulation": {
       "tracked": 4
@@ -7943,8 +8051,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1314,
-    "tracked": 1314,
+    "totalFiles": 1332,
+    "tracked": 1332,
     "untracked": 0
   },
   "untrackedByDirectory": []

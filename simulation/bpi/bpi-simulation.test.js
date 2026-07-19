@@ -440,6 +440,58 @@ test('point calibration approval is authoritative and revoke immediately removes
   assert.equal(result.json.data.revision, 2);
 });
 
+test('point calibration cursor keeps a stable scope-bound snapshot', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('GET', '/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&limit=1');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.length, 1);
+  assert.ok(result.json.meta.nextCursor);
+  const firstId = result.json.data[0].id;
+  const snapshotAt = result.json.meta.snapshotAt;
+  const cursor = result.json.meta.nextCursor;
+
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  const now = Date.now();
+  result = await request('POST', '/bpi/v1/point-calibrations', {
+    headers: commandHeaders('calibration-pagination-new-0001', 0),
+    body: {
+      plantId: 'PLANT-01',
+      lineId: 'LINE-S07-01',
+      productId: 'PRODUCT-SUGAR',
+      deviceId: 'DEVICE-PAGINATION-NEW',
+      propertyId: 'flow.instant',
+      calibrationVersion: 'CAL-PAGINATION-NEW-1',
+      certificateReference: 'urn:ft-mes:test:calibration:pagination-new-1',
+      certificateChecksum: 'c'.repeat(64),
+      validFrom: new Date(now - 60_000).toISOString(),
+      validUntil: new Date(now + 86_400_000).toISOString(),
+      reason: '验证快照之后提交的记录不会混入后续页',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  const afterSnapshotId = result.json.data.id;
+
+  result = await request('GET', `/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&limit=1&cursor=${encodeURIComponent(cursor)}`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.meta.snapshotAt, snapshotAt);
+  assert.equal(result.json.meta.nextCursor, null);
+  assert.equal(result.json.data.length, 1);
+  assert.notEqual(result.json.data[0].id, firstId);
+  assert.notEqual(result.json.data[0].id, afterSnapshotId);
+
+  result = await request('GET', '/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&limit=1');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data[0].id, afterSnapshotId);
+
+  result = await request('GET', `/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&productId=OTHER&cursor=${encodeURIComponent(cursor)}`);
+  assert.equal(result.response.status, 422);
+  assert.match(result.json.detail, /does not match/);
+  result = await request('GET', '/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01&limit=201');
+  assert.equal(result.response.status, 422);
+});
+
 test('rule simulation checksum gates publication', async () => {
   let pointResult = await request('POST', '/__simulation/reset');
   assert.equal(pointResult.response.status, 200);

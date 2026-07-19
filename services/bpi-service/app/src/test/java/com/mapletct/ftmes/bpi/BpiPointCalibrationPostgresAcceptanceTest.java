@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.Instant;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -331,6 +332,119 @@ class BpiPointCalibrationPostgresAcceptanceTest {
                    AND action IN ('POINT_CALIBRATION_APPROVED', 'POINT_CALIBRATION_REJECTED',
                                   'POINT_CALIBRATION_REVOKED')
                 """, Integer.class, tenantId)).isEqualTo(4);
+    }
+
+    @Test
+    void calibrationListUsesStableScopeBoundKeysetCursor() throws Exception {
+        Instant base = Instant.now().minusSeconds(90);
+        UUID oldestId = submitCalibration("PAGE-OLDEST");
+        UUID middleId = submitCalibration("PAGE-MIDDLE");
+        UUID newestId = submitCalibration("PAGE-NEWEST");
+        setSubmittedAt(oldestId, base);
+        setSubmittedAt(middleId, base);
+        setSubmittedAt(newestId, base);
+        List<UUID> expectedOrder = jdbc.query("""
+                SELECT id
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = ?
+                 ORDER BY submitted_at DESC, id DESC
+                """, (resultSet, rowNum) -> resultSet.getObject("id", UUID.class), tenantId);
+
+        MvcResult firstResult = mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("limit", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.meta.nextCursor").isNotEmpty())
+                .andReturn();
+        JsonNode first = response(firstResult);
+        Instant snapshotAt = Instant.parse(first.path("meta").path("snapshotAt").asText());
+        String nextCursor = first.path("meta").path("nextCursor").asText();
+        assertThat(first.path("data").findValuesAsText("id"))
+                .containsExactly(
+                        expectedOrder.get(0).toString(),
+                        expectedOrder.get(1).toString());
+
+        UUID afterSnapshotId = submitCalibration("PAGE-AFTER-SNAPSHOT");
+        Instant afterSnapshotSubmittedAt = jdbc.queryForObject("""
+                SELECT submitted_at
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = ? AND id = ?
+                """, Timestamp.class, tenantId, afterSnapshotId).toInstant();
+        if (!afterSnapshotSubmittedAt.isAfter(snapshotAt)) {
+            setSubmittedAt(afterSnapshotId, snapshotAt.plusNanos(1_000));
+        }
+
+        MvcResult secondResult = mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("limit", "2").param("cursor", nextCursor))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.meta.nextCursor").doesNotExist())
+                .andReturn();
+        JsonNode second = response(secondResult);
+        assertThat(second.path("meta").path("snapshotAt").asText())
+                .isEqualTo(snapshotAt.toString());
+        assertThat(second.path("data").findValuesAsText("id"))
+                .containsExactly(expectedOrder.get(2).toString())
+                .doesNotContain(afterSnapshotId.toString());
+
+        mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("cursor", nextCursor).param("productId", "OTHER-PRODUCT"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail", containsString("does not match")));
+        mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("cursor", "not-a-cursor"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail", containsString("cursor is invalid")));
+        String tamperedCursor = (nextCursor.startsWith("A") ? "B" : "A") + nextCursor.substring(1);
+        mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("cursor", tamperedCursor))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail", containsString("cursor is invalid")));
+        mockMvc.perform(get("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + viewerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID)
+                        .param("limit", "201"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail", containsString("between 1 and 200")));
+
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*)
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = ?
+                """, Integer.class, tenantId)).isEqualTo(4);
+    }
+
+    private UUID submitCalibration(String suffix) throws Exception {
+        MvcResult result = mockMvc.perform(post("/bpi/v1/point-calibrations")
+                        .header("Authorization", "Bearer " + authorToken)
+                        .header("Idempotency-Key", "calibration-" + suffix + "-" + tenantId)
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(calibrationBody(
+                                calibrationVersion + "-" + suffix,
+                                Instant.now().plusSeconds(86_400))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("PENDING"))
+                .andReturn();
+        return UUID.fromString(response(result).path("data").path("id").asText());
+    }
+
+    private void setSubmittedAt(UUID calibrationId, Instant submittedAt) {
+        jdbc.update("""
+                UPDATE bpi.bpi_point_calibrations
+                   SET submitted_at = ?, updated_at = now()
+                 WHERE tenant_id = ? AND id = ?
+                """, Timestamp.from(submittedAt), tenantId, calibrationId);
     }
 
     private void importSourceClaimedVerifiedSnapshot() throws Exception {

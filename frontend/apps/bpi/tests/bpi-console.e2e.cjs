@@ -377,6 +377,68 @@ test('independent calibration approval and revocation dynamically control point 
   await page.close();
 });
 
+test('calibration workbench incrementally loads a stable cursor page without duplicates', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const now = Date.now();
+  const submissions = await Promise.all(Array.from({ length: 49 }, async (_, index) => fetch(
+    `${simulatorUrl}/bpi/v1/point-calibrations`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotency-Key': `calibration-page-e2e-${String(index).padStart(3, '0')}`,
+        'If-Match': '0',
+      },
+      body: JSON.stringify({
+        plantId: 'PLANT-01',
+        lineId: 'LINE-S07-01',
+        productId: 'PRODUCT-SUGAR',
+        deviceId: `DEVICE-CAL-PAGE-${String(index).padStart(3, '0')}`,
+        propertyId: 'flow.instant',
+        calibrationVersion: `CAL-PAGE-E2E-${String(index).padStart(3, '0')}`,
+        certificateReference: `urn:ft-mes:e2e:calibration:page:${index}`,
+        certificateChecksum: index.toString(16).padStart(64, '0'),
+        validFrom: new Date(now - 86_400_000).toISOString(),
+        validUntil: new Date(now + 365 * 86_400_000).toISOString(),
+        reason: '构造高基数校准证据分页浏览器验收数据',
+      }),
+    },
+  )));
+  assert.ok(submissions.every((response) => response.status === 200));
+
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  const listRequests = [];
+  page.on('response', (response) => {
+    const url = new URL(response.url());
+    if (url.pathname.endsWith('/bpi-api/point-calibrations')) listRequests.push(url);
+  });
+  await page.goto(`${APP_URL}/#/points`, { waitUntil: 'networkidle' });
+
+  await page.getByRole('heading', { name: '点位目录' }).waitFor();
+  assert.equal(await page.locator('[data-calibration-row]').count(), 50);
+  await page.getByText('已加载 50 条', { exact: true }).waitFor();
+  await page.locator('#point-search').fill('CAL-PAGE-E2E');
+  await page.getByRole('button', { name: '加载更多' }).click();
+  await page.getByText('已加载 51 条', { exact: true }).waitFor();
+  assert.equal(await page.locator('#point-search').inputValue(), 'CAL-PAGE-E2E');
+  assert.equal(await page.locator('[data-calibration-row]').count(), 51);
+  assert.equal(await page.getByRole('button', { name: '加载更多' }).count(), 0);
+
+  const calibrationIds = await page.locator('[data-calibration-row]').evaluateAll(
+    (rows) => rows.map((row) => row.getAttribute('data-calibration-row')),
+  );
+  assert.equal(new Set(calibrationIds).size, 51);
+  assert.ok(listRequests.length >= 2);
+  assert.equal(listRequests[0].searchParams.get('limit'), '50');
+  assert.equal(listRequests[0].searchParams.has('cursor'), false);
+  assert.ok(listRequests.at(-1).searchParams.get('cursor'));
+  await page.screenshot({ path: '/tmp/bpi-console-point-calibration-pagination.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('process engineer creates validates and publishes topology before creating a rule draft', async () => {
   const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
   assert.equal(reset.status, 200);

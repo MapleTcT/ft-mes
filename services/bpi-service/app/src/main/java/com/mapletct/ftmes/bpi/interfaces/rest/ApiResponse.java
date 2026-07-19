@@ -12,4 +12,13 @@ public record ApiResponse<T>(@JsonInclude(JsonInclude.Include.ALWAYS) T data, Re
         Instant now = Instant.now();
         return new ApiResponse<>(data, new ResponseMeta(traceId, now, now, null));
     }
+
+    public static <T> ApiResponse<T> of(
+            T data,
+            HttpServletRequest request,
+            Instant snapshotAt,
+            String nextCursor) {
+        String traceId = String.valueOf(request.getAttribute(TraceIdFilter.ATTRIBUTE));
+        return new ApiResponse<>(data, new ResponseMeta(traceId, Instant.now(), snapshotAt, nextCursor));
+    }
 }

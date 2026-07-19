@@ -293,9 +293,14 @@
           {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string"}},
           {"name": "productId", "in": "query", "schema": {"type": "string"}},
           {"name": "deviceId", "in": "query", "schema": {"type": "string"}},
-          {"name": "propertyId", "in": "query", "schema": {"type": "string"}}
+          {"name": "propertyId", "in": "query", "schema": {"type": "string"}},
+          {"$ref": "#/components/parameters/Cursor"},
+          {"$ref": "#/components/parameters/Limit"}
         ],
-        "responses": {"200": {"description": "校准证据列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationListResponse"}}}}}
+        "responses": {
+          "200": {"description": "固定 snapshotAt 的校准证据游标页", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationListResponse"}}}},
+          "422": {"$ref": "#/components/responses/Unprocessable"}
+        }
       },
       "post": {
         "tags": ["Point Calibration"], "operationId": "submitPointCalibration", "summary": "提交点位校准证据并申请独立复核",
