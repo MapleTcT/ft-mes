@@ -182,9 +182,7 @@ public final class BpiDataQualityFlinkReplay {
             ConsumerRecords<byte[], byte[]> records = consumer.poll(Duration.ofSeconds(1));
             for (ConsumerRecord<byte[], byte[]> record : records) {
                 DataQualityEventV1 event = DataQualityEventV1.parseFrom(record.value());
-                if (!event.getTenantId().equals(scenario.tenantId())
-                        || !event.getPlantId().equals(scenario.plantId())
-                        || !event.getLineId().equals(scenario.lineId())) {
+                if (!matchesScenario(event, scenario)) {
                     continue;
                 }
                 counts.merge(event.getIssueCode(), 1, Integer::sum);
@@ -210,6 +208,13 @@ public final class BpiDataQualityFlinkReplay {
             throw new IllegalStateException("matching event was not produced by the Flink telemetry detector");
         }
         return List.copyOf(matched.values());
+    }
+
+    static boolean matchesScenario(DataQualityEventV1 event, Scenario scenario) {
+        return event.getTenantId().equals(scenario.tenantId())
+                && event.getPlantId().equals(scenario.plantId())
+                && event.getLineId().equals(scenario.lineId())
+                && event.getSourceEventId().startsWith(scenario.marker() + "-");
     }
 
     private static void positionAtEnd(

@@ -58,6 +58,26 @@ class BpiDataQualityFlinkReplayTest {
     }
 
     @Test
+    void replayIgnoresConcurrentLineEventsButKeepsEveryMarkerEvent() {
+        String marker = "ADP_E2E_DQ_SHARED_LINE";
+        BpiDataQualityFlinkReplay.Scenario scenario = BpiDataQualityFlinkReplay.scenario(
+                marker, "1000", "PLANT-01", "LINE-S07-01",
+                Instant.parse("2026-07-19T12:00:00Z"));
+        DataQualityEventV1 markerEvent = DataQualityEventV1.newBuilder()
+                .setTenantId("1000")
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-S07-01")
+                .setSourceEventId(marker + "-FAULT")
+                .build();
+        DataQualityEventV1 concurrent = markerEvent.toBuilder()
+                .setSourceEventId("UNRELATED-PRODUCTION-EVENT")
+                .build();
+
+        assertTrue(BpiDataQualityFlinkReplay.matchesScenario(markerEvent, scenario));
+        assertTrue(!BpiDataQualityFlinkReplay.matchesScenario(concurrent, scenario));
+    }
+
+    @Test
     void replayScenarioProducesOnlyTheFourExpectedAutomaticEvents() throws Exception {
         String marker = "ADP_E2E_DQ_FLINK_SCENARIO";
         BpiDataQualityFlinkReplay.Scenario scenario = BpiDataQualityFlinkReplay.scenario(
