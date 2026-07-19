@@ -994,11 +994,14 @@ function renderFeatureFlags(): void {
     locked: state.featureFlags.filter((item) => !item.editable).length,
   };
   const rows = state.featureFlags.map((flag) => {
+    const enforcementDetail = flag.flagKey === 'bpi.ui'
+      ? '旧 MES 菜单由 Java 8 adapter 按当前试点范围解析'
+      : '写操作由 BPI 服务强制校验';
     const selectedOverride = flag.overrideActive
       ? `<div class="flag-state ${flag.overrideEnabled ? '' : 'is-disabled'}"><strong>${flag.overrideEnabled ? '显式启用' : '显式禁用'}</strong><small>${escapeHtml(featureFlagScopeLabel(flag.selectedScopeType))} · r${flag.overrideRevision}</small></div>`
       : `<div class="flag-state"><strong>继承上级</strong><small>${flag.overrideExists ? `覆盖已移除 · r${flag.overrideRevision}` : '当前层未配置'}</small></div>`;
     const enforcement = flag.editable
-      ? `<div class="flag-source"><strong>${escapeHtml(featureFlagEnforcementLabel(flag.enforcementStatus))}</strong><small>写操作由 BPI 服务强制校验</small></div>`
+      ? `<div class="flag-source"><strong>${escapeHtml(featureFlagEnforcementLabel(flag.enforcementStatus))}</strong><small>${escapeHtml(enforcementDetail)}</small></div>`
       : `<div class="flag-lock"><i data-lucide="lock-keyhole"></i><div><strong>${escapeHtml(featureFlagEnforcementLabel(flag.enforcementStatus))}</strong><small title="${escapeHtml(flag.blockedReason || '')}">${escapeHtml(flag.blockedReason || '当前阶段不可编辑')}</small></div></div>`;
     const actions = flag.editable
       ? `<div class="feature-flag-actions">

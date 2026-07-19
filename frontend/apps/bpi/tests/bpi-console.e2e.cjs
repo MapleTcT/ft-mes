@@ -222,6 +222,11 @@ test('administrator governs scoped feature flags while phase locks remain read o
   await commandsRow.getByText('显式启用', { exact: true }).waitFor();
   assert.match(await commandsRow.textContent(), /产线.*r1/);
 
+  const uiRow = page.locator('[data-feature-flag-row="bpi.ui"]');
+  await uiRow.getByText('后端已执行', { exact: true }).waitFor();
+  assert.match(await uiRow.textContent(), /旧 MES 菜单由 Java 8 adapter/);
+  assert.equal(await uiRow.getByRole('button').count(), 3);
+
   const wmsRow = page.locator('[data-feature-flag-row="bpi.wms-link"]');
   await wmsRow.getByText('阶段门禁锁定', { exact: true }).waitFor();
   assert.match(await wmsRow.textContent(), /QCS\/WMS Phase 2/);

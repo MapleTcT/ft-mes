@@ -91,6 +91,10 @@ class BpiFeatureFlagPostgresAcceptanceTest {
                         .value(hasItem(false)))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.shadow-only')].effectiveEnabled")
                         .value(hasItem(true)))
+                .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.ui')].enforcementStatus")
+                        .value(hasItem("ENFORCED")))
+                .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.ui')].editable")
+                        .value(hasItem(true)))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.wms-link')].enforcementStatus")
                         .value(hasItem("PHASE_LOCKED")));
 
@@ -161,6 +165,22 @@ class BpiFeatureFlagPostgresAcceptanceTest {
                 actor("flag-line-admin", Set.of(PLANT_ID), Set.of(LINE_ID)),
                 PLANT_ID, LINE_ID, "bpi.commands")).isFalse();
 
+        mockMvc.perform(post("/bpi/v1/feature-flags/{flagKey}", "bpi.ui")
+                        .header("Authorization", "Bearer " + scopedAdminToken)
+                        .header("Idempotency-Key", "flag-enable-shell-menu-" + tenantId)
+                        .header("If-Match", "0")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(command("LINE", "SET", true,
+                                "Expose the governed BPI menu in the legacy MES shell")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.enforcementStatus").value("ENFORCED"))
+                .andExpect(jsonPath("$.data.editable").value(true))
+                .andExpect(jsonPath("$.data.effectiveEnabled").value(true))
+                .andExpect(jsonPath("$.data.effectiveScopeType").value("LINE"));
+        assertThat(sharedRepository.featureEnabled(
+                actor("flag-line-admin", Set.of(PLANT_ID), Set.of(LINE_ID)),
+                PLANT_ID, LINE_ID, "bpi.ui")).isTrue();
+
         mockMvc.perform(post("/bpi/v1/feature-flags/{flagKey}", "bpi.rule-management")
                         .header("Authorization", "Bearer " + scopedAdminToken)
                         .header("Idempotency-Key", "flag-tenant-denied-" + tenantId)
@@ -180,7 +200,7 @@ class BpiFeatureFlagPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.selectedScopeKey").value(tenantId))
                 .andExpect(jsonPath("$.data.effectiveEnabled").value(true));
 
-        for (String lockedFlag : List.of("bpi.ui", "bpi.shadow-only", "bpi.auto-confirm", "bpi.wms-link")) {
+        for (String lockedFlag : List.of("bpi.shadow-only", "bpi.auto-confirm", "bpi.wms-link")) {
             mockMvc.perform(post("/bpi/v1/feature-flags/{flagKey}", lockedFlag)
                             .header("Authorization", "Bearer " + tenantAdminToken)
                             .header("Idempotency-Key", "flag-locked-" + lockedFlag + "-" + tenantId)
@@ -193,16 +213,16 @@ class BpiFeatureFlagPostgresAcceptanceTest {
 
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM bpi.bpi_feature_flags
-                 WHERE tenant_id = ? AND flag_key IN ('bpi.ui', 'bpi.shadow-only', 'bpi.auto-confirm', 'bpi.wms-link')
+                 WHERE tenant_id = ? AND flag_key IN ('bpi.shadow-only', 'bpi.auto-confirm', 'bpi.wms-link')
                 """, Integer.class, tenantId)).isZero();
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM bpi.bpi_audit_events
                  WHERE tenant_id = ? AND object_type = 'FEATURE_FLAG'
-                """, Integer.class, tenantId)).isEqualTo(4);
+                """, Integer.class, tenantId)).isEqualTo(5);
         assertThat(jdbc.queryForObject("""
                 SELECT count(*) FROM bpi.bpi_api_idempotency
                  WHERE tenant_id = ? AND state = 'COMPLETED' AND response_status = 200
-                """, Integer.class, tenantId)).isEqualTo(4);
+                """, Integer.class, tenantId)).isEqualTo(5);
     }
 
     private byte[] command(String scopeType, String mode, Boolean enabled, String reason) throws Exception {

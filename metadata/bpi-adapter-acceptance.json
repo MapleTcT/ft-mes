@@ -9,8 +9,8 @@
     "upstream": "Java 17 BPI service"
   },
   "summary": {
-    "tests": 21,
-    "pass": 21,
+    "tests": 29,
+    "pass": 29,
     "fail": 0,
     "errors": 0,
     "skipped": 0,
@@ -47,6 +47,11 @@
       "id": "fixed-upstream-proxy",
       "status": "PASS",
       "evidence": "Candidate/batch, feature-flag and shadow-run proxy tests replaced the legacy bearer, kept the fixed BPI upstream, forwarded query/body plus Idempotency-Key and If-Match, and ignored browser-owned scope headers."
+    },
+    {
+      "id": "old-mes-shell-menu-gate",
+      "status": "PASS",
+      "evidence": "The adapter preserved the gateway menu contract, injected or removed only BPI from the native shell, distinguished existing from injected menus, failed closed on BPI scope/service errors, and bypassed cleanly when disabled."
     }
   ],
   "commands": [
@@ -63,7 +68,7 @@
   },
   "limitations": [
     "No live Keycloak JWKS request or real MES login token was used in this unit acceptance.",
-    "No browser-to-adapter-to-Java17-to-PostgreSQL end-to-end run was performed.",
+    "The shell menu bridge is unit-tested here; its browser-to-adapter-to-Java17-to-PostgreSQL target acceptance is recorded separately.",
     "Docker Compose rendered successfully; the adapter container image and healthcheck were not runtime-tested.",
     "The explicit admin/PLANT-01/LINE-S07-01 mapping is a test-environment default and must be replaced by reviewed production scope configuration.",
     "The internal token still uses the Phase 1 shared HS256 key; asymmetric signing and rotation remain pending."

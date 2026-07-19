@@ -7,7 +7,7 @@ const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
 const POINT_CATALOG_CURSOR_SECRET = 'bpi-simulator-point-catalog-cursor-v1';
 const FEATURE_FLAG_TENANT = 'TENANT-01';
 const FEATURE_FLAG_DEFINITIONS = [
-  { flagKey: 'bpi.ui', displayName: 'BPI 导航入口', description: '控制旧平台是否展示 BPI 导航入口。', riskLevel: 'MEDIUM', enforcementStatus: 'PENDING_SHELL_INTEGRATION', editable: false, blockedReason: '旧平台导航尚未读取该开关，禁止制造已生效的假象。' },
+  { flagKey: 'bpi.ui', displayName: 'BPI 导航入口', description: '控制旧平台是否展示 BPI 导航入口。', riskLevel: 'MEDIUM', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
   { flagKey: 'bpi.commands', displayName: '批次人工命令', description: '控制候选确认、驳回和批次状态命令。', riskLevel: 'HIGH', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
   { flagKey: 'bpi.rule-management', displayName: '规则与拓扑管理', description: '控制拓扑、规则、回放和发布类写操作。', riskLevel: 'HIGH', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
   { flagKey: 'bpi.shadow-only', displayName: '影子模式', description: '保证 Phase 1 只生成影子事实，不写生产业务状态。', riskLevel: 'CRITICAL', enforcementStatus: 'CODE_INVARIANT', editable: false, blockedReason: 'Phase 1 必须保持 shadow-only，不能通过运行页面关闭。' },

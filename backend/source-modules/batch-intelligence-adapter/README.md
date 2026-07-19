@@ -9,6 +9,14 @@ The adapter is deliberately stateless. It owns no BPI database tables and accept
 tenant, plant, line, upstream URL, or internal token claims. Missing role or subject-scope mappings fail
 closed with HTTP 403.
 
+The optional old-MES shell bridge owns only navigation visibility. Nginx sends the exact legacy
+`GET /inter-api/rbac/v1/menus/currentUser` request to `/bpi-shell/menus/currentUser`; the adapter first
+retrieves the authoritative ADP menu, resolves `bpi.ui` for its configured server-owned pilot line, and
+then inserts or removes the native `BPI` menu. A disabled or unavailable BPI gate hides only BPI while
+preserving the ADP menu response. Nginx falls back to the gateway when an older or unavailable adapter
+returns `404/5xx`. Direct `/bpi/#/featureFlags` access remains the recovery path and all BPI APIs still
+enforce authentication, RBAC, scope and their own feature flags independently of menu visibility.
+
 The allowlist includes point-catalog reads, the admin-only snapshot import, and point-calibration
 submission/list/approve/reject/revoke commands. It also exposes the scoped data-quality incident list,
 summary and detail reads plus acknowledge/reassign and resolve commands; the Java 17 service remains
@@ -30,6 +38,8 @@ Required configuration:
 - `BPI_ADAPTER_LEGACY_GATEWAY_BASE_URL`
 - `BPI_ADAPTER_INTERNAL_JWT_SECRET` (at least 32 bytes)
 - explicit `bpi.adapter.role-mappings` and `bpi.adapter.subject-scopes`
+- `BPI_ADAPTER_SHELL_MENU_ENABLED`, plus server-owned `BPI_ADAPTER_SHELL_PLANT_ID` and
+  `BPI_ADAPTER_SHELL_LINE_ID` when the shell bridge is enabled
 
 Run its focused tests with:
 

@@ -49,6 +49,10 @@ test('feature flag overrides are scoped, versioned, idempotent and phase locked'
   assert.equal(commands.effectiveScopeType, 'LINE');
   assert.equal(commands.overrideActive, true);
   assert.equal(commands.overrideRevision, 1);
+  const ui = result.json.data.find((item) => item.flagKey === 'bpi.ui');
+  assert.equal(ui.effectiveEnabled, false);
+  assert.equal(ui.editable, true);
+  assert.equal(ui.enforcementStatus, 'ENFORCED');
   const wmsLink = result.json.data.find((item) => item.flagKey === 'bpi.wms-link');
   assert.equal(wmsLink.effectiveEnabled, false);
   assert.equal(wmsLink.editable, false);

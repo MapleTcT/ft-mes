@@ -15,10 +15,12 @@ REQUIRED = [
     "src/main/resources/application.yml",
     "src/main/java/com/mapletct/ftmes/bpiadapter/BpiClaimsMapper.java",
     "src/main/java/com/mapletct/ftmes/bpiadapter/BpiProxyController.java",
+    "src/main/java/com/mapletct/ftmes/bpiadapter/BpiShellMenuController.java",
     "src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java",
     "src/main/java/com/mapletct/ftmes/bpiadapter/InternalJwtIssuer.java",
     "src/main/java/com/mapletct/ftmes/bpiadapter/SecurityConfiguration.java",
     "src/test/java/com/mapletct/ftmes/bpiadapter/BpiProxyControllerTest.java",
+    "src/test/java/com/mapletct/ftmes/bpiadapter/BpiShellMenuControllerTest.java",
 ]
 
 
@@ -52,6 +54,23 @@ def main() -> int:
         for forbidden in ('getHeader("X-Tenant-Id")', 'getHeader("X-Plant-Id")', 'getHeader("X-Line-Id")'):
             if forbidden in proxy:
                 failures.append(f"BPI adapter trusts forbidden browser scope header {forbidden!r}")
+
+        shell_menu = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiShellMenuController.java").read_text(encoding="utf-8")
+        for required in (
+            "/bpi-shell/menus/currentUser",
+            "/inter-api/rbac/v1/menus/currentUser",
+            '"bpi.ui"',
+            '"VISIBLE_INJECTED"',
+            '"VISIBLE_EXISTING"',
+            '"HIDDEN_UPSTREAM_UNAVAILABLE"',
+            "removeBpiMenus",
+            "setBearerAuth(jwtIssuer.issue(actor))",
+        ):
+            if required not in shell_menu:
+                failures.append(f"BPI shell menu bridge is missing {required!r}")
+        for forbidden in ('getHeader("X-Plant-Id")', 'getHeader("X-Line-Id")'):
+            if forbidden in shell_menu:
+                failures.append(f"BPI shell menu bridge trusts forbidden browser scope header {forbidden!r}")
 
         route_policy = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicy.java").read_text(encoding="utf-8")
         for required in (
@@ -103,17 +122,28 @@ def main() -> int:
             "BPI_ADAPTER_ROLE_RULES",
             "systemRole=BPI_ADMIN|BPI_OPERATOR",
             "BPI_ADAPTER_SUBJECT_SCOPE_RULES",
+            "BPI_ADAPTER_SHELL_MENU_ENABLED",
+            "BPI_ADAPTER_SHELL_PLANT_ID",
+            "BPI_ADAPTER_SHELL_LINE_ID",
         ):
             if required not in compose:
                 failures.append(f"BPI adapter Compose wiring is missing {required!r}")
-        for required in ("location ^~ /bpi-api/", "location ^~ /bpi/", "bpi_adapter_upstream"):
+        for required in (
+            "location ^~ /bpi-api/",
+            "location ^~ /bpi/",
+            "location = /inter-api/rbac/v1/menus/currentUser",
+            "@adp_gateway_current_user_menu",
+            "proxy_intercept_errors on",
+            "error_page 404 500 502 503 504",
+            "bpi_adapter_upstream",
+        ):
             if required not in nginx:
                 failures.append(f"BPI adapter Nginx wiring is missing {required!r}")
 
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         summary = evidence.get("summary", {})
-        if summary.get("tests") != 21 or summary.get("pass") != 21:
-            failures.append("BPI adapter acceptance must record twenty-one passing tests")
+        if summary.get("tests") != 29 or summary.get("pass") != 29:
+            failures.append("BPI adapter acceptance must record twenty-nine passing tests")
         if summary.get("runtimeSmokeChecks") != 2 or summary.get("runtimeSmokePass") != 2:
             failures.append("BPI adapter acceptance must record two passing runtime smoke checks")
         limitations = " ".join(evidence.get("limitations", []))

@@ -26,6 +26,9 @@ public class BpiAdapterProperties implements InitializingBean {
     private String internalJwtIssuer = "ft-mes-adapter";
     private String internalJwtAudience = "bpi-service";
     private Duration internalTokenTtl = Duration.ofMinutes(10);
+    private boolean shellMenuEnabled;
+    private String shellPlantId;
+    private String shellLineId;
     private String roleRules;
     private String subjectScopeRules;
     private Map<String, List<String>> roleMappings = new LinkedHashMap<String, List<String>>();
@@ -37,7 +40,13 @@ public class BpiAdapterProperties implements InitializingBean {
         requireHttpUri("keycloak-jwk-set-uri", keycloakJwkSetUri);
         requireText("keycloak-issuer", keycloakIssuer);
         requireText("keycloak-audience", keycloakAudience);
-        if (legacyTicketEnabled) requireHttpUri("legacy-gateway-base-url", legacyGatewayBaseUrl);
+        if (legacyTicketEnabled || shellMenuEnabled) {
+            requireHttpUri("legacy-gateway-base-url", legacyGatewayBaseUrl);
+        }
+        if (shellMenuEnabled) {
+            requireText("shell-plant-id", shellPlantId);
+            requireText("shell-line-id", shellLineId);
+        }
         requireText("internal-jwt-issuer", internalJwtIssuer);
         requireText("internal-jwt-audience", internalJwtAudience);
         if (internalJwtSecret == null || internalJwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8).length < 32) {
@@ -141,6 +150,12 @@ public class BpiAdapterProperties implements InitializingBean {
     public void setInternalJwtAudience(String internalJwtAudience) { this.internalJwtAudience = internalJwtAudience; }
     public Duration getInternalTokenTtl() { return internalTokenTtl; }
     public void setInternalTokenTtl(Duration internalTokenTtl) { this.internalTokenTtl = internalTokenTtl; }
+    public boolean isShellMenuEnabled() { return shellMenuEnabled; }
+    public void setShellMenuEnabled(boolean shellMenuEnabled) { this.shellMenuEnabled = shellMenuEnabled; }
+    public String getShellPlantId() { return shellPlantId; }
+    public void setShellPlantId(String shellPlantId) { this.shellPlantId = shellPlantId; }
+    public String getShellLineId() { return shellLineId; }
+    public void setShellLineId(String shellLineId) { this.shellLineId = shellLineId; }
     public String getRoleRules() { return roleRules; }
     public void setRoleRules(String roleRules) { this.roleRules = roleRules; }
     public String getSubjectScopeRules() { return subjectScopeRules; }

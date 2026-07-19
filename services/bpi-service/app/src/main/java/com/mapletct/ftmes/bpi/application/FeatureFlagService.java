@@ -29,8 +29,7 @@ public class FeatureFlagService {
     private static final List<Definition> DEFINITIONS = List.of(
             new Definition(
                     "bpi.ui", "BPI 导航入口", "控制旧平台是否展示 BPI 导航入口。",
-                    "MEDIUM", "PENDING_SHELL_INTEGRATION", false,
-                    "旧平台导航尚未读取该开关，禁止制造已生效的假象。"),
+                    "MEDIUM", "ENFORCED", true, null),
             new Definition(
                     "bpi.commands", "批次人工命令", "控制候选确认、驳回和批次状态命令。",
                     "HIGH", "ENFORCED", true, null),

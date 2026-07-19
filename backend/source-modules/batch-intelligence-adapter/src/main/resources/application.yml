@@ -26,5 +26,8 @@ bpi:
     internal-jwt-issuer: ${BPI_ADAPTER_INTERNAL_JWT_ISSUER:ft-mes-adapter}
     internal-jwt-audience: ${BPI_ADAPTER_INTERNAL_JWT_AUDIENCE:bpi-service}
     internal-token-ttl: ${BPI_ADAPTER_INTERNAL_TOKEN_TTL:10m}
+    shell-menu-enabled: ${BPI_ADAPTER_SHELL_MENU_ENABLED:false}
+    shell-plant-id: ${BPI_ADAPTER_SHELL_PLANT_ID:}
+    shell-line-id: ${BPI_ADAPTER_SHELL_LINE_ID:}
     role-rules: ${BPI_ADAPTER_ROLE_RULES:}
     subject-scope-rules: ${BPI_ADAPTER_SUBJECT_SCOPE_RULES:}
