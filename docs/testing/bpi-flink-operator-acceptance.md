@@ -54,7 +54,7 @@ descriptor/map 的复制失败，因此数据面改为稳定 Protobuf wire bytes
   `read_committed` 可见、TaskManager 重启恢复和无重复回执；证据见
   `metadata/bpi-rule-application-flink-kafka-acceptance.json`。目标三 broker/MinIO 已在 Flyway V15
   完成 savepoint 有状态升级、规则退役和回滚草稿，见
-  `metadata/bpi-rule-retirement-acceptance.json`；broker 故障和应用镜像回退仍未完成。
+  `metadata/bpi-rule-retirement-acceptance.json`；单 broker 故障恢复随后也已通过，应用镜像回退仍未完成。
 - `LATE_EVENT_REVISION_REQUIRED` 尚未接入持久化修订队列和人工处置消费端。
 - BPIS/v1 到当前 V15 job 的目标集群 savepoint 恢复已实机通过；跨版本兼容仍由发布回归持续验证。
 - 规则更新流已改为版本化 `BPRU/v1` bytes；live Schema Registry 验收仍未完成。

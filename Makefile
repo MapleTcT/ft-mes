@@ -153,7 +153,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -175,6 +175,7 @@ help:
 	@printf '%s\n' '  make bpi-stream-deploy-preflight Run read-only target-host capacity and artifact gates'
 	@printf '%s\n' '  make up-bpi-stream         Start only the isolated BPI Kafka/Flink project after preflight'
 	@printf '%s\n' '  make bpi-stream-cluster-smoke Require replicated topics, RUNNING job and checkpoint'
+	@printf '%s\n' '  make bpi-stream-broker-failure-recovery Stop one broker, prove quorum/checkpoint progress, then restore it'
 	@printf '%s\n' '  make bpi-stream-cluster-replay Publish marker rule/context/telemetry and require one committed candidate'
 	@printf '%s\n' '  make bpi-stream-joint-replay Use the browser-published rule and emit only scoped context/telemetry'
 	@printf '%s\n' '  make bpi-stream-rule-deactivate Publish typed inactive state and require a Flink APPLIED receipt'
@@ -384,6 +385,7 @@ runtime-script-check:
 	sh -n deploy/bpi-streaming/scripts/create-topics.sh
 	sh -n deploy/bpi-streaming/scripts/preflight.sh
 	sh -n deploy/bpi-streaming/scripts/smoke-cluster.sh
+	sh -n deploy/bpi-streaming/scripts/run-broker-failure-recovery.sh
 	sh -n deploy/bpi-streaming/scripts/run-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-joint-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-rule-deactivation.sh
@@ -701,6 +703,10 @@ up-bpi-stream: bpi-stream-deploy-preflight
 bpi-stream-cluster-smoke:
 	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
 	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/smoke-cluster.sh "$(BPI_STREAM_ENV_FILE)"
+
+bpi-stream-broker-failure-recovery:
+	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
+	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/run-broker-failure-recovery.sh "$(BPI_STREAM_ENV_FILE)"
 
 bpi-stream-cluster-replay:
 	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi

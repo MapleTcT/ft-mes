@@ -161,6 +161,19 @@ make bpi-stream-verify-savepoint
 才可临时开启；新增无历史状态的算子不构成开启理由。保存升级前 JAR、savepoint 路径、镜像 ID、
 topic 配置和证据 JSON，禁止覆盖唯一回滚制品。
 
+单 broker 故障恢复使用独立验收 topic，并要求演练前后全部用户分区 ISR=3、故障期间无不可用分区且
+不低于 minISR、`acks=all` marker 恰好一次、Flink job 持续运行并推进 checkpoint：
+
+```bash
+BPI_CHAOS_BROKER_SERVICE=kafka-2 \
+BPI_BROKER_CHAOS_MARKER=ADP_BPI_BROKER_CHAOS_YYYYMMDD_HHMMSS \
+  make bpi-stream-broker-failure-recovery
+```
+
+该命令会真实停止一个 broker，只允许在已确认的测试集群执行。脚本使用退出 trap 自动恢复 broker；
+机器报告默认写入 `/tmp/<marker>.json`，正式验收细节见
+[`docs/testing/bpi-broker-failure-recovery-acceptance.md`](../../docs/testing/bpi-broker-failure-recovery-acceptance.md)。
+
 推荐升级顺序：
 
 1. 通过磁盘、broker、checkpoint 和唯一运行作业预检；
@@ -174,7 +187,8 @@ topic 配置和证据 JSON，禁止覆盖唯一回滚制品。
 若新作业版本失败，保持 Kafka/MinIO volumes 和 PostgreSQL V13 扩展字段，恢复上一版 versioned
 job JAR，把 `.env` 的 restore path 指回升级前 savepoint，再执行带确认的 restore 与 smoke。
 数据库 migration 不做 DROP 降级；旧 runtime 应用镜像只在 consumers/outbox 保持关闭时回退。
-带负载 TaskManager 恢复已经通过；broker 故障和完整业务回滚仍需独立演练。
+带负载 TaskManager 恢复和单 broker 故障恢复已经通过；service、adapter、Flink 应用镜像回退和
+完整业务回滚仍需独立演练。
 
 停止整套测试流环境时才使用：
 

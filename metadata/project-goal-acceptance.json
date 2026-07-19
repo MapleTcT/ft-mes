@@ -910,6 +910,7 @@
         "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
         "deploy/bpi-streaming/scripts/run-joint-replay.sh",
         "deploy/bpi-streaming/scripts/run-rule-deactivation.sh",
+        "deploy/bpi-streaming/scripts/run-broker-failure-recovery.sh",
         "deploy/bpi-runtime/docker-compose.yml",
         "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
         "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
@@ -944,6 +945,8 @@
         "metadata/bpi-source-sequence-readiness-acceptance.json",
         "docs/testing/bpi-point-catalog-repeated-observation-acceptance.md",
         "metadata/bpi-point-catalog-repeated-observation-acceptance.json",
+        "docs/testing/bpi-broker-failure-recovery-acceptance.md",
+        "metadata/bpi-broker-failure-recovery-acceptance.json",
         "docs/testing/bpi-rule-runtime-readiness-acceptance.md",
         "metadata/bpi-rule-runtime-readiness-acceptance.json",
         "docs/testing/bpi-rule-version-lifecycle-acceptance.md",
@@ -976,20 +979,21 @@
         "2026-07-14 使用同一 marker ADP_E2E_20260714_091536_BPI_JOINT 闭合真实浏览器规则模拟/发布、PostgreSQL outbox、Kafka/Flink APPLIED 回执、受控上下文/遥测、唯一候选、浏览器确认、影子批次/边界证据/状态事件/审计；随后完成 typed inactive、单事务 marker 清理、消费者默认关闭和清理后浏览器只读复验，证据记录在 metadata/bpi-browser-kafka-postgres-joint-acceptance.json。",
         "2026-07-15 MapleTcT/iot 提交 41239b4e4f2fdb431f1ec3765e7321b5fdfd0f19 已进入 main：JetLinks 解码后遥测 exporter 继续具备显式映射、稳定身份、持久化缓冲和 Kafka 幂等生产，权威点位目录 publisher 保留内容 SHA-256 revision、10,000 点/5 MiB 门禁、Micrometer/health 和默认关闭开关；来源序列 READY 现在同时要求 requireSourceSequence=true、成对 header、DEVICE/GATEWAY 来源，以及最近真实格式遥测已进入 spool、30m Redis 配置指纹证据未过期。26 个 exporter Java 测试、7 个部署脚本测试、19 模块 reactor 测试及 40 模块完整打包通过。新镜像已只重建目标 JetLinks，真实页面/API/PostgreSQL、overall/exporter health、严重日志、容器隔离和旧镜像回滚往返通过；当前无真实来源流量，证据键为 0，BPI PostgreSQL 保持 1 点/0 READY。",
         "2026-07-19 marker ADP_BPI_REPEAT_SEQUENCE_20260719_1106 闭合点位目录重复观测与准入撤销：sourceRevision 保持内容 SHA-256，event ID 和 Flyway V16 唯一键增加 observedAt，MES 消费者兼容旧 event ID。目标 JetLinks 受控来源序列 false -> true -> false，两个 HTTP 200 使 Kafka partition 2 offset 2 -> 4，最终入口恢复 404；PostgreSQL 同一 false revision 保存 3 次独立观测且最新为 1 点/0 READY。最终真实 ADP 浏览器 marker ADP_BPI_REPEAT_FINAL_20260719_110916 PASS，console/page/request error 均为 0。证据记录在 metadata/bpi-point-catalog-repeated-observation-acceptance.json。",
+        "2026-07-19 marker ADP_BPI_BROKER_CHAOS_20260719_1129 在目标三 broker 集群真实停止 kafka-2：151 个用户分区 unavailable=0、低于 minISR=0，故障期间 acks=all marker offset 1 -> 2 且只消费一次；Flink job 0a2dd090eb290f82d052fc7c0465311f 始终 RUNNING，checkpoint 2481 -> 2482，恢复后 2483，failed=0。kafka-2 恢复 healthy 后全部分区 ISR=3，标准集群 smoke checkpoint=2485；自动恢复 trap 的预演退场也已验证。证据记录在 metadata/bpi-broker-failure-recovery-acceptance.json。",
         "2026-07-14 目标 JetLinks 使用受控 marker ADP_BPI_E2E_20260714_145738_757314 验证 EventBus subscriber、exporter received/enqueued/published 增量 1、Kafka partition 4 offset 3 -> 4、Flink source offset 4/4 和 lag 0；试点入口验收后恢复关闭。该证据只到 Flink source，不声明真实网关/协议设备点位、MES context join、candidate 或 batch。",
         "2026-07-14 MES production context transactional outbox 工程链完成：177 号 PostgreSQL 迁移在 WOM 同事务触发捕获，显式 scope/state 映射和 BLOCKED_* 状态默认拒绝未知语义，Java 8 发布器使用 SKIP LOCKED、稳定 event_id、Kafka 幂等生产、指数重试和 DEAD 终态；合同/模块 23 项测试通过，独立 PostgreSQL 验收确认 BLOCKED_MAPPING、活动/结束 READY、scope revision 1->2 以及 WOM 回滚不残留 outbox。",
         "2026-07-18 目标环境 Flyway V14 以 marker ADP_E2E_20260718_023214_BPI_LIFECYCLE 闭合真实页面拓扑/规则稳定版本比较、两条 PASSED simulation、精确 simulation 证明提交、同 actor 422 拒绝、独立管理员批准发布和独立管理员驳回。PostgreSQL 为 PUBLISHED/r4 + APPROVED/r2 + 1 publication outbox 与 DRAFT/r4 + REJECTED/r2 + 0 publication outbox，6 条审计和 6 条幂等记录准确；非预期浏览器错误和 marker 清理残留均为 0。证据记录在 metadata/bpi-rule-version-lifecycle-acceptance.json。",
         "2026-07-18 目标环境 Flyway V15 以 marker ADP_E2E_20260718_065300_BPI_RETIRE_V15B 闭合受控退役：规则从 PUBLISHED/r4 进入 RETIRED/r5，Kafka ACTIVATE -> RETIRE 控制事件由 Flink job 0a2dd090eb290f82d052fc7c0465311f 返回 APPLIED 与 READY -> INACTIVE；savepoint s3://ft-mes-bpi-checkpoints/savepoints/savepoint-4fe197-969006fb3dbb 已生成。退役后延迟到达的 candidate 仍按事件时有效版本持久化为唯一 PENDING/r1，candidate inbox=1、batch=0；真实 ADP candidate 页面精确显示规则/拓扑 2.0.0、2/2 证据和 drawer，浏览器错误为 0。目标 PostgreSQL/Kafka/Flink/浏览器验收后，11 类 marker 数据单事务清理为 0，证据记录在 metadata/bpi-rule-retirement-acceptance.json。"
       ],
       "blockingIssues": [
-        "拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、Flyway V15 落表、前端状态列和有状态 savepoint 恢复均已在目标环境通过。尚缺 broker 故障演练、service/adapter/Flink 应用镜像回退和产品级回退。",
+        "拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、Flyway V16 落表、前端状态列、有状态 savepoint 恢复和单 broker 故障恢复均已在目标环境通过。尚缺 service/adapter/Flink 应用镜像回退和产品级回退。",
         "JetLinks 自动点位目录已经真实落库并可由页面读取，但试点设备仍未注册/激活，产品 metadata、标定和连续单调 source sequence 未就绪；实时 IoT 遥测与 MES production context 的同一试点 scope marker candidate/batch 仍未完成现场联调。",
         "Phase 1 仍缺选定产线连续 7-14 天影子运行、边界人工认同率和累计量偏差验收。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
         "把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收固定为每次 BPI 发布前的目标环境回归基线。",
-        "保持目标环境 Flyway V15、受控退役、退役后延迟 candidate、typed inactive、savepoint 恢复、点位目录自动同步、真实 ADP 页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、PostgreSQL revision 和重启读取为发布回归；下一步补 broker 故障、service/adapter/Flink 镜像回退和 BPI 整体回滚演练。",
+        "保持目标环境 Flyway V16、受控退役、退役后延迟 candidate、typed inactive、savepoint 恢复、单 broker 故障、点位目录自动同步、真实 ADP 页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、PostgreSQL revision 和重启读取为发布回归；下一步补 service/adapter/Flink 应用镜像回退和 BPI 整体回滚演练。",
         "先在 JetLinks 注册并激活 bpi-pilot-device-01，补 instantFlow metadata、单位、标定和 source sequence；等待自动同步生成新 revision 并重新校验，禁止手工伪造 READY 快照。READY 后再与 MES production context 用同一 marker 闭合 Kafka/Flink/candidate/batch/browser 证据链。",
         "通过 7-14 天影子运行门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ]

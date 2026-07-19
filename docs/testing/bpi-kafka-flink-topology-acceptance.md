@@ -3,10 +3,10 @@
 ## 结论
 
 `streaming/bpi-stream-engine` 已组装 Java 17 / Flink 2.2.1 的可部署 Kafka 作业入口
-`BpiKafkaJob`。本里程碑状态为 **LOCAL_MINICLUSTER_ACCEPTED / TARGET_CLUSTER_PENDING**：生产数据面、
-控制面、候选输出、数据质量输出和规则应用回执已经在作业图中闭合；规则应用回执已通过真实本地 Kafka 4.2
-与 Flink 2.2.1 MiniCluster 的 checkpoint/TaskManager 重启验收，但尚未在目标三 broker、Flink、MinIO
-测试集群完成联合运行验收。
+`BpiKafkaJob`。最初的本地 MiniCluster 里程碑已经通过，后续目标环境又完成三 broker Kafka 4.2、
+Flink 2.2.1、RocksDB/MinIO checkpoint、savepoint 恢复、带负载 TaskManager 重启和单 broker
+故障恢复验收。生产数据面、控制面、候选输出、数据质量输出和规则应用回执已在作业图中闭合；
+目标环境仍不是生产高可用拓扑，JobManager HA、跨主机容灾、Schema Registry 和容量压测继续保持缺口。
 
 常规 Java 17 streaming reactor 测试继续覆盖 wire、拓扑、Harness、checkpoint state 和 replay；
 需要真实运行时的 `BpiRuleApplicationFlinkKafkaAcceptanceTest` 为显式启用测试，已连续通过本地独立 broker/job
@@ -111,14 +111,18 @@ JAVA_HOME=/path/to/jdk17 make bpi-rule-application-flink-acceptance
 Kafka 4.2 KRaft server，checkpoint 存储为测试拥有的本地目录；可通过
 `BPI_TEST_KAFKA_BOOTSTRAP_SERVERS` 使用专用外部测试 broker。
 
-## 尚未完成
+## 目标环境增量验收与尚未完成
 
-- 未在目标环境连接 3 broker Kafka、Schema Registry 或 Flink HA 集群。
-- 目标 checkpoint storage、RocksDB state backend、MinIO/S3 凭据和保留策略尚未实机验证。
-- 本地 TaskManager 重启恢复已经通过；目标 broker/TaskManager 重启、savepoint 升级、事务超时、consumer lag、backpressure 和 10 万点压测仍未执行。
+- 目标环境已连接 3 broker Kafka 4.2、Flink 2.2.1、RocksDB state、MinIO checkpoint/savepoint；
+  TaskManager 带负载恢复和 V12 -> V13 savepoint 升级已经通过。Schema Registry、JobManager HA 和跨主机容灾仍未部署。
+- 2026-07-19 marker `ADP_BPI_BROKER_CHAOS_20260719_1129` 真实停止 `kafka-2`：151 个分区
+  unavailable=0、低于 minISR=0，故障期间 marker 恰好一次，Flink checkpoint `2481 -> 2482`；
+  broker 恢复后 ISR=3、checkpoint `2483`，失败 checkpoint 为 0。证据见
+  [`metadata/bpi-broker-failure-recovery-acceptance.json`](../../metadata/bpi-broker-failure-recovery-acceptance.json)。
+- 事务超时边界、持续 consumer lag/backpressure 和 10 万点压测仍未执行。
 - Flink 到 BPI 业务语义仍是 Kafka at-least-once + BPI inbox 幂等；本次 exactly-once 只描述 Kafka sink
   与 Flink checkpoint 的事务边界。PostgreSQL 消费另有独立真实落库证据，但两份分离测试不替代浏览器到数据库的联合 marker 验收。
 - `LATE_EVENT_REVISION_REQUIRED` 已进入数据质量 topic，但人工修订消费者和页面尚未实现。
-- 规则运行时 READY/DEGRADED 状态尚未形成独立回执和前端状态列；当前必须联合规则应用回执与数据质量事件判断。
-- 真实 JetLinks -> Kafka -> Flink -> BPI -> PostgreSQL -> 浏览器候选确认链必须单独验收后，状态才能提升为
-  `CLUSTER_ACCEPTED`。
+- 规则运行时 READY/DEGRADED/INACTIVE 已形成独立回执和前端状态列；现场点位仍是 1 点/0 READY。
+- 受控 JetLinks、Kafka/Flink、PostgreSQL 和浏览器联合链已经验收；真实网关/协议点位与 WOM context
+  同 scope 的候选确认链仍必须单独完成，才能提升现场数据源状态。

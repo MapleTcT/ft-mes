@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-07-19T03:29:24.595110+00:00",
+  "status": "PASS",
+  "marker": "ADP_BPI_BROKER_CHAOS_20260719_1129",
+  "exercise": {
+    "startedAt": "2026-07-19T03:28:32Z",
+    "recoveredAt": "2026-07-19T03:29:24Z",
+    "recoverySeconds": 52,
+    "stoppedBroker": "kafka-2",
+    "survivingBootstrap": "kafka-1"
+  },
+  "kafka": {
+    "topic": "bpi.acceptance.broker-chaos.v1",
+    "replicationFactor": 3,
+    "minInSyncReplicas": 2,
+    "outage": {
+      "partitions": 151,
+      "unavailablePartitions": 0,
+      "partitionsBelowMinIsr": 0,
+      "underReplicatedPartitions": 151,
+      "offsetBefore": 1,
+      "offsetAfter": 2,
+      "markerCount": 1
+    },
+    "recovered": {
+      "partitions": 151,
+      "unavailablePartitions": 0,
+      "partitionsBelowMinIsr": 0,
+      "underReplicatedPartitions": 0
+    }
+  },
+  "flink": {
+    "jobId": "0a2dd090eb290f82d052fc7c0465311f",
+    "stateThroughout": "RUNNING",
+    "checkpoint": {
+      "baseline": 2481,
+      "duringOutage": 2482,
+      "afterRecovery": 2483,
+      "completedBaseline": 2432,
+      "completedDuringOutage": 2433,
+      "completedAfterRecovery": 2434,
+      "failed": 0
+    }
+  },
+  "cleanup": {
+    "brokerRestored": true,
+    "temporaryBrokerOutageActive": false
+  }
+}

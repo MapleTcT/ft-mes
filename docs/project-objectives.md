@@ -79,9 +79,9 @@ JetLinks 单容器升级、真实页面/API/PostgreSQL、严重日志、容器�
 16.13/Flyway V13 验证 `DEGRADED -> READY`、事件时间排序、精确重放、双 DLQ 和最终
 `APPLIED + READY/r5` 真实落库；操作台 `8/8` E2E 验证两个状态域独立显示。目标环境随后已完成
 Flyway V13 expand-only 迁移，并从 V12 savepoint 有状态恢复到 Flink job
-`40408b7907ca7b97ad750cc7d2bfb345`，当前为 `RUNNING/33-of-33`；来源目录仍为 1 点/0 READY，
-真实规则运行时回执、7-14 天影子运行、broker/应用镜像回退和 QCS/WMS 写回尚未完成，因此
-G-021 保持 `PARTIAL`。
+`40408b7907ca7b97ad750cc7d2bfb345`，该阶段为 `RUNNING/33-of-33`；来源目录仍为 1 点/0 READY。
+后续 V14-V16、规则运行时回执、savepoint 与单 broker 故障恢复已分别闭合，现场来源、7-14 天
+影子运行、应用镜像回退和 QCS/WMS 写回仍未完成，因此 G-021 保持 `PARTIAL`。
 
 2026-07-18 目标环境先扩展到 Flyway V14，并以 marker
 `ADP_E2E_20260718_023214_BPI_LIFECYCLE` 闭合拓扑/规则稳定 JSON Pointer 版本比较、
@@ -98,7 +98,7 @@ marker 定向清理后残留为 0。版本比较与业务审批控制面因此�
 写入 candidate/inbox，真实候选页复显 `PENDING/r1` 和 2/2 证据；未确认候选，因此 batch、WOM、
 QCS、WMS 均未写入。当前 marker 与旧诊断 marker 定向清理后 11 类残留均为 0。版本比较、审批、
 受控退役、typed inactive、savepoint 升级和候选在途语义已成为发布回归基线。G-021 仍保持
-`PARTIAL`：现场来源 READY、真实 END 边界、7-14 天影子运行、broker 故障恢复、应用镜像回退和
+`PARTIAL`：现场来源 READY、真实 END 边界、7-14 天影子运行、应用镜像回退和
 QCS/WMS 写回仍未闭合。证据见
 [BPI 规则版本比较与审批生命周期验收](testing/bpi-rule-version-lifecycle-acceptance.md) 和
 [BPI 规则退役、回滚与延迟候选落库验收](testing/bpi-rule-retirement-acceptance.md)。
@@ -112,6 +112,13 @@ console/page/request error 均为 0。该修复保证运行时证据过期或配
 设备、metadata、单位、标定和真实连续序列尚未就绪的事实。证据见
 [BPI 点位目录重复观测与准入撤销验收](testing/bpi-point-catalog-repeated-observation-acceptance.md)。
 
+同日又以 marker `ADP_BPI_BROKER_CHAOS_20260719_1129` 完成目标三 broker 真实故障恢复：停止
+`kafka-2` 后 151 个分区 unavailable=0、低于 minISR=0，故障期间唯一 marker 以 `acks=all` 写入并
+只消费一次；Flink job 始终 RUNNING，checkpoint `2481 -> 2482`，恢复后推进到 `2483` 且失败数为 0。
+`kafka-2` 恢复 healthy 后全部分区回到 ISR=3，标准集群 smoke 又推进到 checkpoint `2485`。
+因此单 broker 故障演练退出 G-021 阻断项，应用镜像和产品级回退仍未完成。证据见
+[BPI 单 Broker 故障恢复验收](testing/bpi-broker-failure-recovery-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -119,6 +126,7 @@ console/page/request error 均为 0。该修复保证运行时证据过期或配
 - [BPI API 目录](api/bpi-api-catalog.md)
 - [BPI 工程测试计划](testing/bpi-engineering-test-plan.md)
 - [BPI 点位目录重复观测与准入撤销验收](testing/bpi-point-catalog-repeated-observation-acceptance.md)
+- [BPI 单 Broker 故障恢复验收](testing/bpi-broker-failure-recovery-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
@@ -293,8 +301,8 @@ console/page/request error 均为 0。该修复保证运行时证据过期或配
 ### 主线 A：BPI Phase 0/1
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
-2. 保持已通过的目标环境 Flyway V14、V12 savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、PostgreSQL revision 和重启读取作为发布回归；继续受控退役、typed inactive 和产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
-3. 完成 broker 故障、应用镜像回退和 BPI 整体回滚演练；当前目标环境已完成 V13 expand-only 升级、savepoint 恢复、带负载 TaskManager 重启恢复和单 marker 清理恢复。
+2. 保持已通过的目标环境 Flyway V16、V12 savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、typed inactive、PostgreSQL revision 和重启读取作为发布回归；继续产品级回退，日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
+3. 保持已通过的单 broker 故障恢复为发布回归，继续完成 service/adapter/Flink 应用镜像回退和 BPI 整体回滚演练；当前目标环境已完成 V16 expand-only 升级、savepoint 恢复、带负载 TaskManager 与 broker 重启恢复和单 marker 清理恢复。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。
 5. MES 上下文真实链和 IoT source 分段链均已通过；点位准入变为 READY 后，用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链，再连续运行 7-14 天影子批次。
 6. 达到边界人工认同率、累计量偏差和数据质量门槛后，才进入 QCS/WMS 写回。

@@ -87,5 +87,6 @@ candidate、inbox、batch、audit、API idempotency、outbox、规则/拓扑及�
 
 - candidate 保持 `PENDING`，没有生成批次，也没有写 WOM、QCS 或 WMS。
 - 输入是受控上下文与遥测回放，不是现场设备连续运行。
-- 真实来源 READY、END 边界、7-14 天影子运行、broker 故障恢复和生产写回仍待闭合。
+- 真实来源 READY、END 边界、7-14 天影子运行和生产写回仍待闭合；单 broker 故障恢复已由后续
+  `ADP_BPI_BROKER_CHAOS_20260719_1129` 独立验收通过。
 - 仓库只提交摘要和 SHA-256，不提交凭证、数据库 dump 或运行包二进制。
