@@ -163,6 +163,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .button--danger { background: #fff; border-color: #d77b82; color: var(--red); }
 .button--danger:hover { background: #fff0f1; border-color: var(--red); }
 .button > svg { width: 15px; height: 15px; margin-right: 6px; vertical-align: -3px; }
+.button--compact { min-height: 29px; padding: 0 9px; font-size: 11px; white-space: nowrap; }
 .rule-workbench { display: grid; gap: 16px; }
 .rule-workbench > section { min-width: 0; background: #fff; border: 1px solid var(--line); }
 .section-bar { min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line); }
@@ -173,7 +174,12 @@ td > svg { width: 16px; color: #8b96a1; }
 .rule-table { min-width: 980px; }
 .topology-table { min-width: 880px; }
 .binding-table { min-width: 680px; }
-.point-table { min-width: 1180px; }
+.point-table { min-width: 1560px; }
+.calibration-workbench { min-width: 0; margin-top: 16px; background: #fff; border: 1px solid var(--line); }
+.calibration-table { min-width: 1320px; }
+.table-frame--flush { border: 0; }
+.calibration-empty { min-height: 92px; display: grid; place-items: center; padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
+.table-actions { display: flex; align-items: center; gap: 6px; }
 .point-summary { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 12px; background: #fff; border: 1px solid var(--line); }
 .point-summary > div { min-width: 0; display: grid; gap: 5px; padding: 12px; border-right: 1px solid var(--line); }
 .point-summary > div:last-child { border-right: 0; }
@@ -266,6 +272,7 @@ td > svg { width: 16px; color: #8b96a1; }
 .editor-fields label { min-width: 0; display: grid; gap: 6px; color: #4a5662; font-size: 11px; }
 .editor-fields input, .editor-fields select { min-width: 0; height: 38px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; outline: 0; }
 .editor-fields input:focus, .editor-fields select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(23, 105, 170, 0.12); }
+.editor-fields .mono-input { font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; }
 .editor-fields .editor-field--wide { grid-column: 1 / -1; padding: 0; }
 .editor-fields .editor-field--wide textarea { min-height: 82px; }
 .editor-fields .editor-field--wide textarea[id$="definition"], .editor-fields #rule-ast, .editor-fields #point-import-json { min-height: 210px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; line-height: 1.5; }
@@ -311,6 +318,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .editor-fields { grid-template-columns: 1fr; }
   .editor-fields .editor-field--wide { grid-column: auto; }
   .topology-summary, .point-summary, .metric-grid, .simulation-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .calibration-workbench { margin-top: 12px; }
   .version-diff li { grid-template-columns: 1fr; }
   .toast { top: 74px; right: 12px; max-width: calc(100vw - 24px); }
 }

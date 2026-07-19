@@ -38,6 +38,13 @@ def main() -> int:
             if forbidden in pom:
                 failures.append(f"stateless BPI adapter must not declare {forbidden!r}")
 
+        dockerfile = (MODULE / "Dockerfile").read_text(encoding="utf-8")
+        child_build = "mvn -q -f backend/source-modules/batch-intelligence-adapter/pom.xml"
+        if child_build not in dockerfile:
+            failures.append("BPI adapter image must build from the copied child POM")
+        if "mvn -q -f backend/source-modules/pom.xml" in dockerfile:
+            failures.append("BPI adapter image must not invoke the uncopied source-modules reactor")
+
         proxy = (MODULE / "src/main/java/com/mapletct/ftmes/bpiadapter/BpiProxyController.java").read_text(encoding="utf-8")
         for required in ("/bpi-api", "/bpi/v1", "Idempotency-Key", "If-Match", "setBearerAuth", "65_536"):
             if required not in proxy:
@@ -52,6 +59,9 @@ def main() -> int:
             "reject",
             "suspend",
             "resume",
+            "point-calibrations",
+            "approve",
+            "revoke",
             "topologies",
             "rules",
             "rule-simulations",
@@ -60,6 +70,7 @@ def main() -> int:
             "submit-approval",
             "reject-approval",
             "publish",
+            "retire",
         ):
             if required not in route_policy:
                 failures.append(f"BPI adapter route policy is missing approved command {required!r}")

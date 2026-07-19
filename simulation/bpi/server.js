@@ -151,6 +151,52 @@ function stableUuid(value) {
   return `${digest.slice(0, 8)}-${digest.slice(8, 12)}-5${digest.slice(13, 16)}-a${digest.slice(17, 20)}-${digest.slice(20, 32)}`;
 }
 
+function calibrationEffectiveness(calibration, now = Date.now()) {
+  if (calibration.state !== 'APPROVED') return calibration.state;
+  if (now < Date.parse(calibration.validFrom)) return 'NOT_YET_EFFECTIVE';
+  if (now >= Date.parse(calibration.validUntil)) return 'EXPIRED';
+  return 'EFFECTIVE';
+}
+
+function refreshPointCatalogReadiness(state) {
+  const now = Date.now();
+  state.pointCalibrations.forEach((calibration) => {
+    calibration.effectivenessStatus = calibrationEffectiveness(calibration, now);
+    calibration.effective = calibration.effectivenessStatus === 'EFFECTIVE';
+  });
+  if (!state.pointCatalog) return null;
+  const observedAt = Date.parse(state.pointCatalog.snapshot.observedAt);
+  state.pointCatalog.points.forEach((point) => {
+    if (!point.sourceCalibrationStatus) {
+      point.sourceCalibrationStatus = point.calibrationStatus || (point.calibrationVersion ? 'UNVERIFIED' : 'MISSING');
+    }
+    const evidence = state.pointCalibrations
+      .filter((calibration) => calibration.plantId === point.plantId
+        && calibration.lineId === point.lineId
+        && calibration.productId === point.productId
+        && calibration.deviceId === point.deviceId
+        && calibration.propertyId === point.propertyId
+        && calibration.calibrationVersion === point.calibrationVersion
+        && calibration.effectivenessStatus === 'EFFECTIVE'
+        && Date.parse(calibration.validFrom) <= observedAt)
+      .sort((left, right) => Date.parse(right.decidedAt || '') - Date.parse(left.decidedAt || ''))[0];
+    point.calibrationStatus = evidence ? 'VERIFIED' : point.calibrationVersion ? 'UNVERIFIED' : 'MISSING';
+    point.calibrationEvidenceId = evidence?.id || null;
+    point.calibrationValidUntil = evidence?.validUntil || null;
+    const readinessIssues = [];
+    if (!point.registered) readinessIssues.push('DEVICE_NOT_REGISTERED');
+    if (point.deviceState !== 'ACTIVE') readinessIssues.push('DEVICE_NOT_ACTIVE');
+    if (!point.propertyPresent) readinessIssues.push('PROPERTY_NOT_AVAILABLE');
+    if (!point.unit) readinessIssues.push('UNIT_MISSING');
+    if (!point.calibrationVersion || point.calibrationStatus !== 'VERIFIED') readinessIssues.push('CALIBRATION_NOT_VERIFIED');
+    if (!point.sourceSequenceEnabled) readinessIssues.push('SOURCE_SEQUENCE_DISABLED');
+    point.ready = readinessIssues.length === 0;
+    point.readinessIssues = readinessIssues;
+  });
+  state.pointCatalog.snapshot.readyPointCount = state.pointCatalog.points.filter((point) => point.ready).length;
+  return state.pointCatalog;
+}
+
 function compareVersions(objectType, base, target, baseContent, targetContent) {
   const changes = [];
   let changeCount = 0;
@@ -539,12 +585,14 @@ function createHandler(state) {
         return send(res, 200, envelope('listTopologies', state.topologies), 'listTopologies');
       }
       if (req.method === 'GET' && path === '/bpi/v1/point-catalog/current') {
+        refreshPointCatalogReadiness(state);
         const matchesScope = state.pointCatalog
           && state.pointCatalog.snapshot.plantId === url.searchParams.get('plantId')
           && state.pointCatalog.snapshot.lineId === url.searchParams.get('lineId');
         return send(res, 200, envelope('getCurrentPointCatalog', matchesScope ? state.pointCatalog : null), 'getCurrentPointCatalog');
       }
       if (req.method === 'GET' && path === '/bpi/v1/point-catalog/snapshots') {
+        refreshPointCatalogReadiness(state);
         return send(res, 200, envelope('listPointCatalogSnapshots', state.pointCatalog ? [state.pointCatalog.snapshot] : []), 'listPointCatalogSnapshots');
       }
       if (req.method === 'POST' && path === '/bpi/v1/point-catalog/snapshots') {
@@ -558,20 +606,13 @@ function createHandler(state) {
           return send(res, 422, problem(422, 'Validation Failed', `Missing or invalid fields: ${missing.join(', ')}.`, operationId), operationId);
         }
         const snapshotId = stableUuid({ type: 'point-catalog', source: body.source, sourceRevision: body.sourceRevision });
-        const points = body.points.map((point) => {
-          const readinessIssues = [];
-          if (!point.registered) readinessIssues.push('DEVICE_NOT_REGISTERED');
-          if (point.deviceState !== 'ACTIVE') readinessIssues.push('DEVICE_NOT_ACTIVE');
-          if (!point.propertyPresent) readinessIssues.push('PROPERTY_NOT_AVAILABLE');
-          if (!point.unit) readinessIssues.push('UNIT_MISSING');
-          if (!point.calibrationVersion || point.calibrationStatus !== 'VERIFIED') readinessIssues.push('CALIBRATION_NOT_VERIFIED');
-          if (!point.sourceSequenceEnabled) readinessIssues.push('SOURCE_SEQUENCE_DISABLED');
-          return {
+        const points = body.points.map((point) => ({
             id: stableUuid({ type: 'point', snapshotId, productId: point.productId, deviceId: point.deviceId, propertyId: point.propertyId }),
             snapshotId, plantId: body.plantId, lineId: body.lineId, ...clone(point),
-            ready: readinessIssues.length === 0, readinessIssues,
-          };
-        });
+            sourceCalibrationStatus: point.calibrationStatus || (point.calibrationVersion ? 'UNVERIFIED' : 'MISSING'),
+            calibrationStatus: point.calibrationVersion ? 'UNVERIFIED' : 'MISSING',
+            calibrationEvidenceId: null, calibrationValidUntil: null, ready: false, readinessIssues: [],
+          }));
         const { reason: ignoredReason, ...catalogPayload } = body;
         const snapshot = {
           id: snapshotId, source: body.source, sourceInstance: body.sourceInstance,
@@ -581,7 +622,89 @@ function createHandler(state) {
           importedBy: 'simulated.bpi.admin', importedAt: FIXED_TIME,
         };
         state.pointCatalog = { snapshot, points };
+        refreshPointCatalogReadiness(state);
         return rememberAndSend(state, context, res, 200, envelope(operationId, state.pointCatalog), operationId);
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/point-calibrations') {
+        refreshPointCatalogReadiness(state);
+        const filters = ['plantId', 'lineId', 'productId', 'deviceId', 'propertyId'];
+        const calibrations = state.pointCalibrations.filter((calibration) => filters.every((name) => {
+          const expected = url.searchParams.get(name);
+          return !expected || calibration[name] === expected;
+        }));
+        return send(res, 200, envelope('listPointCalibrations', calibrations), 'listPointCalibrations');
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/point-calibrations') {
+        const operationId = 'submitPointCalibration';
+        const context = commandContext(req, res, operationId, 0, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const required = ['plantId', 'lineId', 'productId', 'deviceId', 'propertyId', 'calibrationVersion',
+          'certificateReference', 'certificateChecksum', 'validFrom', 'validUntil', 'reason'];
+        const missing = required.filter((key) => body[key] === undefined || String(body[key]).trim() === '');
+        const validFrom = Date.parse(body.validFrom);
+        const validUntil = Date.parse(body.validUntil);
+        if (missing.length || String(body.reason || '').trim().length < 3
+            || !/^[a-f0-9]{64}$/.test(String(body.certificateChecksum || ''))
+            || !Number.isFinite(validFrom) || !Number.isFinite(validUntil) || validUntil <= validFrom) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Point calibration payload is invalid.', operationId), operationId);
+        }
+        if (validUntil <= Date.now()) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Expired calibration evidence cannot be submitted.', operationId), operationId);
+        }
+        const duplicate = state.pointCalibrations.some((calibration) => calibration.plantId === body.plantId
+          && calibration.lineId === body.lineId && calibration.productId === body.productId
+          && calibration.deviceId === body.deviceId && calibration.propertyId === body.propertyId
+          && calibration.calibrationVersion === body.calibrationVersion);
+        if (duplicate) {
+          return send(res, 409, problem(409, 'Point Calibration Conflict', 'The point calibration version already exists.', operationId), operationId);
+        }
+        const calibration = {
+          id: stableUuid({ type: 'point-calibration', body }), plantId: body.plantId, lineId: body.lineId,
+          productId: body.productId, deviceId: body.deviceId, propertyId: body.propertyId,
+          calibrationVersion: body.calibrationVersion, certificateReference: body.certificateReference,
+          certificateChecksum: body.certificateChecksum, validFrom: new Date(validFrom).toISOString(),
+          validUntil: new Date(validUntil).toISOString(), state: 'PENDING', revision: 1,
+          submittedBy: 'simulated.metrology.engineer', submittedAt: new Date().toISOString(),
+          submitReason: body.reason, decidedBy: null, decidedAt: null, decisionReason: null,
+          revokedBy: null, revokedAt: null, revokeReason: null, effective: false, effectivenessStatus: 'PENDING',
+        };
+        state.pointCalibrations.unshift(calibration);
+        return rememberAndSend(state, context, res, 200, envelope(operationId, calibration), operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/point-calibrations\/([^/]+)\/(approve|reject|revoke)$/);
+      if (req.method === 'POST' && ids) {
+        const action = ids[1];
+        const operationId = `${action}PointCalibration`;
+        const calibration = state.pointCalibrations.find((item) => item.id === ids[0]);
+        if (!calibration) return send(res, 404, problem(404, 'Not Found', 'Point calibration not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, calibration.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          return send(res, 422, problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId), operationId);
+        }
+        const expectedState = action === 'revoke' ? 'APPROVED' : 'PENDING';
+        if (calibration.state !== expectedState) {
+          return send(res, 409, problem(409, 'Invalid Point Calibration State', `Point calibration must be ${expectedState}.`, operationId, calibration.revision), operationId);
+        }
+        if (action === 'approve' && Date.parse(calibration.validUntil) <= Date.now()) {
+          return send(res, 422, problem(422, 'Validation Failed', 'Expired calibration evidence cannot be approved.', operationId), operationId);
+        }
+        calibration.revision += 1;
+        if (action === 'revoke') {
+          calibration.state = 'REVOKED';
+          calibration.revokedBy = 'simulated.bpi.revoker';
+          calibration.revokedAt = new Date().toISOString();
+          calibration.revokeReason = body.reason;
+        } else {
+          calibration.state = action === 'approve' ? 'APPROVED' : 'REJECTED';
+          calibration.decidedBy = 'simulated.bpi.admin';
+          calibration.decidedAt = new Date().toISOString();
+          calibration.decisionReason = body.reason;
+        }
+        refreshPointCatalogReadiness(state);
+        return rememberAndSend(state, context, res, 200, envelope(operationId, calibration), operationId);
       }
       if (req.method === 'POST' && path === '/bpi/v1/topologies/drafts') {
         const operationId = 'createTopologyDraft';
@@ -654,6 +777,12 @@ function createHandler(state) {
         const context = commandContext(req, res, operationId, topology.revision, state, path);
         if (!context) return;
         const body = await readJson(req);
+        refreshPointCatalogReadiness(state);
+        const currentValidation = topologyValidation(topology.definition, state.pointCatalog);
+        if (currentValidation.errors.length) {
+          const codes = [...new Set(currentValidation.errors.map((issue) => issue.code))].sort().join(', ');
+          return send(res, 422, problem(422, 'Validation Failed', `Topology publication requires current READY point catalog bindings: ${codes}.`, operationId, topology.revision), operationId);
+        }
         if (!body.reason || topology.state !== 'DRAFT' || topology.validationStatus !== 'PASSED'
             || !topology.validatedPointCatalogSnapshotId || !topology.validatedPointCatalogChecksum
             || topology.validatedPointCatalogSnapshotId !== state.pointCatalog?.snapshot.id

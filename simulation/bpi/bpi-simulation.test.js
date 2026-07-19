@@ -319,6 +319,127 @@ test('topology and rule comparisons return deterministic JSON Pointer changes', 
   ]);
 });
 
+test('point calibration approval is authoritative and revoke immediately removes readiness', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  const now = Date.now();
+  const validFrom = new Date(now - 60 * 60 * 1000).toISOString();
+  const validUntil = new Date(now + 24 * 60 * 60 * 1000).toISOString();
+  const pointSnapshot = {
+    source: 'JETLINKS',
+    sourceInstance: 'simulation-calibration-governance',
+    sourceRevision: `SIM-CALIBRATION-${now}`,
+    plantId: 'PLANT-01',
+    lineId: 'LINE-S07-01',
+    observedAt: new Date(now).toISOString(),
+    reason: '验证源端校准声明不能绕过 MES 证据审批',
+    points: [{
+      localityGroup: 'LOCALITY-S07-EVAP',
+      productId: 'PRODUCT-SUGAR',
+      deviceId: 'DEVICE-S07-CALIBRATION',
+      propertyId: 'flow.instant',
+      sourcePropertyId: 'instantFlow',
+      pointName: '校准治理验收瞬时流量',
+      unit: 't/h',
+      dataType: 'double',
+      deviceState: 'ACTIVE',
+      registered: true,
+      propertyPresent: true,
+      calibrationVersion: 'CAL-E2E-APPROVE-1',
+      calibrationStatus: 'VERIFIED',
+      sourceSequenceEnabled: true,
+    }],
+  };
+  result = await request('POST', '/bpi/v1/point-catalog/snapshots', {
+    headers: commandHeaders('calibration-import-point-0001', 0),
+    body: pointSnapshot,
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.snapshot.readyPointCount, 0);
+  assert.equal(result.json.data.points[0].sourceCalibrationStatus, 'VERIFIED');
+  assert.equal(result.json.data.points[0].calibrationStatus, 'UNVERIFIED');
+  assert.deepEqual(result.json.data.points[0].readinessIssues, ['CALIBRATION_NOT_VERIFIED']);
+
+  result = await request('GET', '/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(result.response.status, 200);
+  assert.ok(result.json.data.length >= 2);
+
+  const calibrationPayload = {
+    plantId: 'PLANT-01',
+    lineId: 'LINE-S07-01',
+    productId: 'PRODUCT-SUGAR',
+    deviceId: 'DEVICE-S07-CALIBRATION',
+    propertyId: 'flow.instant',
+    calibrationVersion: 'CAL-E2E-APPROVE-1',
+    certificateReference: 'urn:ft-mes:test:calibration:approve-1',
+    certificateChecksum: 'a'.repeat(64),
+    validFrom,
+    validUntil,
+    reason: '提交独立计量证据进行审批',
+  };
+  result = await request('POST', '/bpi/v1/point-calibrations', {
+    headers: commandHeaders('calibration-submit-0002', 0),
+    body: calibrationPayload,
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'PENDING');
+  assert.equal(result.json.data.effectivenessStatus, 'PENDING');
+  const calibrationId = result.json.data.id;
+
+  result = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(result.json.data.snapshot.readyPointCount, 0);
+
+  result = await request('POST', `/bpi/v1/point-calibrations/${calibrationId}/approve`, {
+    headers: commandHeaders('calibration-approve-0003', 1),
+    body: { reason: '独立计量管理员复核证书与点位一致' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'APPROVED');
+  assert.equal(result.json.data.effectivenessStatus, 'EFFECTIVE');
+  assert.equal(result.json.data.revision, 2);
+
+  result = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(result.json.data.snapshot.readyPointCount, 1);
+  assert.equal(result.json.data.points[0].calibrationStatus, 'VERIFIED');
+  assert.equal(result.json.data.points[0].calibrationEvidenceId, calibrationId);
+
+  result = await request('POST', `/bpi/v1/point-calibrations/${calibrationId}/revoke`, {
+    headers: commandHeaders('calibration-revoke-0004', 2),
+    body: { reason: '证书复核发现异常，立即撤销放行资格' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'REVOKED');
+  assert.equal(result.json.data.effectivenessStatus, 'REVOKED');
+  assert.equal(result.json.data.revision, 3);
+
+  result = await request('GET', '/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01');
+  assert.equal(result.json.data.snapshot.readyPointCount, 0);
+  assert.equal(result.json.data.points[0].calibrationStatus, 'UNVERIFIED');
+
+  result = await request('POST', '/bpi/v1/point-calibrations', {
+    headers: commandHeaders('calibration-submit-reject-0005', 0),
+    body: {
+      ...calibrationPayload,
+      calibrationVersion: 'CAL-E2E-REJECT-1',
+      certificateReference: 'urn:ft-mes:test:calibration:reject-1',
+      certificateChecksum: 'b'.repeat(64),
+      reason: '提交一份待拒绝的计量证据',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  const rejectedCalibrationId = result.json.data.id;
+
+  result = await request('POST', `/bpi/v1/point-calibrations/${rejectedCalibrationId}/reject`, {
+    headers: commandHeaders('calibration-reject-0006', 1),
+    body: { reason: '证书校验值与原件不一致，拒绝放行' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'REJECTED');
+  assert.equal(result.json.data.effectivenessStatus, 'REJECTED');
+  assert.equal(result.json.data.revision, 2);
+});
+
 test('rule simulation checksum gates publication', async () => {
   let pointResult = await request('POST', '/__simulation/reset');
   assert.equal(pointResult.response.status, 200);

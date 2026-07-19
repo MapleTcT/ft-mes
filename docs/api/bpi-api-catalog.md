@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 31 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 37 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +28,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
-- 当前允许 GET overview/line/candidate/batch/point-catalog/topology/rule/simulation 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -54,6 +54,11 @@
 | 点位准入 | GET | `/bpi/v1/point-catalog/snapshots` | `listPointCatalogSnapshots` | SERVICE_IMPLEMENTED |
 | 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED |
 | 点位准入 | POST | `/bpi/v1/point-catalog/snapshots` | `importPointCatalogSnapshot` | SERVICE_IMPLEMENTED |
+| 校准治理 | GET | `/bpi/v1/point-calibrations` | `listPointCalibrations` | SERVICE_IMPLEMENTED |
+| 校准治理 | POST | `/bpi/v1/point-calibrations` | `submitPointCalibration` | SERVICE_IMPLEMENTED |
+| 校准治理 | POST | `/bpi/v1/point-calibrations/{calibrationId}/approve` | `approvePointCalibration` | SERVICE_IMPLEMENTED |
+| 校准治理 | POST | `/bpi/v1/point-calibrations/{calibrationId}/reject` | `rejectPointCalibration` | SERVICE_IMPLEMENTED |
+| 校准治理 | POST | `/bpi/v1/point-calibrations/{calibrationId}/revoke` | `revokePointCalibration` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies` | `listTopologies` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}` | `getTopologyVersion` | SERVICE_IMPLEMENTED |
 | 工艺拓扑 | GET | `/bpi/v1/topologies/{topologyId}/compare` | `compareTopologyVersions` | SERVICE_IMPLEMENTED |
@@ -92,7 +97,9 @@
 `importPointCatalogSnapshot` 只允许 `BPI_ADMIN` 通过受控 API 导入来自 JetLinks/exporter 的不可变状态快照，
 不得由 BPI 直连或修改 JetLinks 数据库。每个点记录 product/device、JetLinks 原 `sourcePropertyId`、exporter
 规范化 `propertyId`、设备激活与注册状态、属性存在性、
-单位、校准版本/状态和源序列能力；同一请求可按幂等键安全重放。设备或网关级 source epoch/sequence 是
+单位、校准版本/来源声明和源序列能力；同一请求可按幂等键安全重放。来源的 `calibrationStatus=VERIFIED`
+只作为审计声明，不能放行点位。校准证据必须在 MES 中由工程师提交证书引用、SHA-256、校准版本和有效期，
+再由非提交人管理员批准；过期、未生效、驳回或撤销后都动态变为 `UNVERIFIED`。设备或网关级 source epoch/sequence 是
 P1 批次信号的硬准入条件，缺失时 `ready=false` 且拓扑校验返回 `POINT_SOURCE_SEQUENCE_DISABLED` error，
 不能降级成 warning。`getCurrentPointCatalog` 用于页面和拓扑校验读取当前作用域快照，没有快照时明确返回空数据，
 不能生成伪点位。

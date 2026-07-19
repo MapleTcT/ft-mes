@@ -24,6 +24,11 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.GET, "/point-catalog/current"));
         assertTrue(policy.allows(HttpMethod.GET, "/point-catalog/snapshots"));
         assertTrue(policy.allows(HttpMethod.POST, "/point-catalog/snapshots"));
+        assertTrue(policy.allows(HttpMethod.GET, "/point-calibrations"));
+        assertTrue(policy.allows(HttpMethod.POST, "/point-calibrations"));
+        assertTrue(policy.allows(HttpMethod.POST, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/approve"));
+        assertTrue(policy.allows(HttpMethod.POST, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/reject"));
+        assertTrue(policy.allows(HttpMethod.POST, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/revoke"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START"));
         assertTrue(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare"));
@@ -43,6 +48,8 @@ public class BpiRoutePolicyTest {
         assertFalse(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/update"));
         assertFalse(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare/extra"));
         assertFalse(policy.allows(HttpMethod.POST, "/point-catalog/current"));
+        assertFalse(policy.allows(HttpMethod.DELETE, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertFalse(policy.allows(HttpMethod.POST, "/point-calibrations/9c392d57-7502-4cd8-bc37-e72961bb08b4/update"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
         assertFalse(policy.allows(HttpMethod.GET, "/http://attacker.example"));
         assertFalse(policy.allows(HttpMethod.GET, "/../actuator/env"));

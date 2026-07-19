@@ -19,7 +19,15 @@ scope. A topology validation pins the snapshot ID and checksum and fails closed 
 is unregistered or inactive, its property/unit is unavailable, or its calibration is not verified.
 Publication atomically checks that the pinned snapshot is still current, so a newer source import
 cannot race a previously validated topology into production. The runtime `bpi_service` role has only
-`SELECT` and `INSERT` on the two point-catalog tables.
+the DML privileges required by the catalog and calibration repositories and never owns Flyway DDL.
+
+Flyway V17 separates untrusted source calibration claims from MES-approved evidence. A source
+`VERIFIED` value cannot make a point operationally ready. `BPI_ADMIN` submits certificate reference,
+SHA-256 checksum and validity, a different administrator must approve or reject it, and approved
+evidence can be revoked. Readiness requires an effective `APPROVED` record with the exact tenant,
+plant, line, product, device, property and calibration version at both snapshot observation time and
+current time. The point page exposes the source claim and MES evidence independently; every command
+uses idempotency, optimistic revision and audit records.
 
 Flyway V13 separates control-plane application from evaluator runtime readiness. An `APPLIED`
 publication proves that Flink accepted the rule identity and checksum after checkpoint; it does not

@@ -15,7 +15,7 @@ DO UPDATE SET enabled = true,
 
 INSERT INTO bpi.bpi_point_catalog_snapshots
     (id, tenant_id, source, source_instance, source_revision, plant_id, line_id,
-     checksum, observed_at, point_count, ready_point_count, imported_by)
+     checksum, observed_at, point_count, source_claim_ready_point_count, imported_by)
 VALUES
     (md5(:'marker' || ':catalog')::uuid, '1000', 'JETLINKS', 'BPI-LIFECYCLE-ACCEPTANCE',
      :'marker', 'PLANT-01', 'LINE-S07-01', repeat('c', 64), now(), 2, 2, :'marker');
@@ -34,6 +34,25 @@ VALUES
      'PLANT-01', 'LINE-S07-01', 'LOCALITY-S07-V2', 'PRODUCT-SUGAR', 'DEVICE-S07-01',
      'pump.running', 'pumpRunning', '进料泵运行', 'bool', 'boolean', 'ACTIVE', true, true,
      'CAL-1', 'VERIFIED', true);
+
+INSERT INTO bpi.bpi_point_calibrations
+    (id, tenant_id, plant_id, line_id, product_id, device_id, property_id,
+     calibration_version, certificate_reference, certificate_checksum,
+     valid_from, valid_until, state, revision, submitted_by, submit_reason,
+     decided_by, decided_at, decision_reason)
+VALUES
+    (md5(:'marker' || ':calibration-flow')::uuid, '1000', 'PLANT-01', 'LINE-S07-01',
+     'PRODUCT-SUGAR', 'DEVICE-S07-01', 'flow.instant', 'CAL-1',
+     'urn:adp:acceptance:' || :'marker' || ':flow', repeat('c', 64),
+     now() - interval '1 day', now() + interval '1 year', 'APPROVED', 2,
+     :'marker' || '_CALIBRATION_AUTHOR', '生命周期验收校准证据',
+     :'marker' || '_CALIBRATION_REVIEWER', now(), '独立复核通过'),
+    (md5(:'marker' || ':calibration-pump')::uuid, '1000', 'PLANT-01', 'LINE-S07-01',
+     'PRODUCT-SUGAR', 'DEVICE-S07-01', 'pump.running', 'CAL-1',
+     'urn:adp:acceptance:' || :'marker' || ':pump', repeat('d', 64),
+     now() - interval '1 day', now() + interval '1 year', 'APPROVED', 2,
+     :'marker' || '_CALIBRATION_AUTHOR', '生命周期验收校准证据',
+     :'marker' || '_CALIBRATION_REVIEWER', now(), '独立复核通过');
 
 INSERT INTO bpi.bpi_topology_versions
     (id, tenant_id, topology_code, version, state, checksum, definition, created_by,

@@ -13,6 +13,8 @@
     {"name": "Overview"},
     {"name": "Candidates"},
     {"name": "Batches"},
+    {"name": "Point Catalog"},
+    {"name": "Point Calibration"},
     {"name": "Topologies"},
     {"name": "Rules"},
     {"name": "DataQuality"},
@@ -251,6 +253,7 @@
         "responses": {
           "200": {"description": "发布结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/TopologyResponse"}}}},
           "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
           "428": {"$ref": "#/components/responses/PreconditionRequired"}
         }
       }
@@ -280,6 +283,54 @@
           {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string"}}
         ],
         "responses": {"200": {"description": "当前快照；未导入时 data 为 null", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCatalogCurrentResponse"}}}}}
+      }
+    },
+    "/bpi/v1/point-calibrations": {
+      "get": {
+        "tags": ["Point Calibration"], "operationId": "listPointCalibrations", "summary": "查询产线受控校准证据",
+        "parameters": [
+          {"$ref": "#/components/parameters/PlantId"},
+          {"name": "lineId", "in": "query", "required": true, "schema": {"type": "string"}},
+          {"name": "productId", "in": "query", "schema": {"type": "string"}},
+          {"name": "deviceId", "in": "query", "schema": {"type": "string"}},
+          {"name": "propertyId", "in": "query", "schema": {"type": "string"}}
+        ],
+        "responses": {"200": {"description": "校准证据列表", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationListResponse"}}}}}
+      },
+      "post": {
+        "tags": ["Point Calibration"], "operationId": "submitPointCalibration", "summary": "提交点位校准证据并申请独立复核",
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationSubmitCommand"}}}},
+        "responses": {
+          "200": {"description": "待复核校准证据", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationResponse"}}}},
+          "409": {"$ref": "#/components/responses/Conflict"},
+          "422": {"$ref": "#/components/responses/Unprocessable"},
+          "428": {"$ref": "#/components/responses/PreconditionRequired"}
+        }
+      }
+    },
+    "/bpi/v1/point-calibrations/{calibrationId}/approve": {
+      "post": {
+        "tags": ["Point Calibration"], "operationId": "approvePointCalibration", "summary": "由非提交人管理员批准校准证据",
+        "parameters": [{"$ref": "#/components/parameters/CalibrationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "批准结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/point-calibrations/{calibrationId}/reject": {
+      "post": {
+        "tags": ["Point Calibration"], "operationId": "rejectPointCalibration", "summary": "由非提交人管理员驳回校准证据",
+        "parameters": [{"$ref": "#/components/parameters/CalibrationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "驳回结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/point-calibrations/{calibrationId}/revoke": {
+      "post": {
+        "tags": ["Point Calibration"], "operationId": "revokePointCalibration", "summary": "撤销已批准校准证据并立即重新计算准入",
+        "parameters": [{"$ref": "#/components/parameters/CalibrationId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "撤销结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PointCalibrationResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
       }
     },
     "/bpi/v1/rules": {
@@ -522,6 +573,7 @@
       "CandidateId": {"name": "candidateId", "in": "path", "required": true, "schema": {"type": "string"}},
       "BatchId": {"name": "batchId", "in": "path", "required": true, "schema": {"type": "string"}},
       "TopologyId": {"name": "topologyId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "CalibrationId": {"name": "calibrationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "RuleId": {"name": "ruleId", "in": "path", "required": true, "schema": {"type": "string"}},
       "SimulationId": {"name": "simulationId", "in": "path", "required": true, "schema": {"type": "string"}},
       "IncidentId": {"name": "incidentId", "in": "path", "required": true, "schema": {"type": "string"}},
@@ -625,14 +677,18 @@
         }
       },
       "TopologyValidationIssue": {"type": "object", "required": ["code", "path", "severity", "message"], "properties": {"code": {"type": "string"}, "path": {"type": "string"}, "severity": {"type": "string", "enum": ["ERROR", "WARNING"]}, "message": {"type": "string"}}},
-      "PointCatalogPointCommand": {"type": "object", "required": ["productId", "deviceId", "propertyId", "deviceState", "registered", "propertyPresent", "calibrationStatus", "sourceSequenceEnabled"], "properties": {"localityGroup": {"type": ["string", "null"], "maxLength": 128}, "productId": {"type": "string", "maxLength": 128}, "deviceId": {"type": "string", "maxLength": 128}, "propertyId": {"type": "string", "maxLength": 128, "description": "Canonical property identity emitted by the exporter and consumed by BPI."}, "sourcePropertyId": {"type": ["string", "null"], "maxLength": 128, "description": "Original JetLinks/source property identity before exporter normalization."}, "pointName": {"type": ["string", "null"], "maxLength": 256}, "unit": {"type": ["string", "null"], "maxLength": 32}, "dataType": {"type": ["string", "null"], "maxLength": 64}, "deviceState": {"type": "string", "enum": ["ACTIVE", "INACTIVE", "UNKNOWN"]}, "registered": {"type": "boolean"}, "propertyPresent": {"type": "boolean"}, "calibrationVersion": {"type": ["string", "null"], "maxLength": 128}, "calibrationStatus": {"type": "string", "enum": ["VERIFIED", "UNVERIFIED", "MISSING"]}, "sourceSequenceEnabled": {"type": "boolean", "description": "True only when a reviewed device or gateway source epoch and sequence are available; exporter-generated fallback sequences remain shadow-only and are not ready."}}},
+      "PointCatalogPointCommand": {"type": "object", "required": ["productId", "deviceId", "propertyId", "deviceState", "registered", "propertyPresent", "calibrationStatus", "sourceSequenceEnabled"], "properties": {"localityGroup": {"type": ["string", "null"], "maxLength": 128}, "productId": {"type": "string", "maxLength": 128}, "deviceId": {"type": "string", "maxLength": 128}, "propertyId": {"type": "string", "maxLength": 128, "description": "Canonical property identity emitted by the exporter and consumed by BPI."}, "sourcePropertyId": {"type": ["string", "null"], "maxLength": 128, "description": "Original JetLinks/source property identity before exporter normalization."}, "pointName": {"type": ["string", "null"], "maxLength": 256}, "unit": {"type": ["string", "null"], "maxLength": 32}, "dataType": {"type": ["string", "null"], "maxLength": 64}, "deviceState": {"type": "string", "enum": ["ACTIVE", "INACTIVE", "UNKNOWN"]}, "registered": {"type": "boolean"}, "propertyPresent": {"type": "boolean"}, "calibrationVersion": {"type": ["string", "null"], "maxLength": 128}, "calibrationStatus": {"type": "string", "enum": ["VERIFIED", "UNVERIFIED", "MISSING"], "description": "Source assertion captured at import time only. It never grants operational readiness without independent MES calibration approval."}, "sourceSequenceEnabled": {"type": "boolean", "description": "True only when a reviewed device or gateway source epoch and sequence are available; exporter-generated fallback sequences remain shadow-only and are not ready."}}},
       "PointCatalogSnapshotCommand": {"type": "object", "required": ["source", "sourceInstance", "sourceRevision", "plantId", "lineId", "observedAt", "points", "reason"], "properties": {"source": {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"}, "sourceInstance": {"type": "string", "maxLength": 128}, "sourceRevision": {"type": "string", "maxLength": 128}, "plantId": {"type": "string", "maxLength": 64}, "lineId": {"type": "string", "maxLength": 128}, "observedAt": {"type": "string", "format": "date-time"}, "points": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/components/schemas/PointCatalogPointCommand"}}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
       "PointCatalogSnapshot": {"type": "object", "required": ["id", "source", "sourceInstance", "sourceRevision", "plantId", "lineId", "checksum", "observedAt", "pointCount", "readyPointCount", "importedBy", "importedAt"], "properties": {"id": {"type": "string", "format": "uuid"}, "source": {"type": "string"}, "sourceInstance": {"type": "string"}, "sourceRevision": {"type": "string"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "observedAt": {"type": "string", "format": "date-time"}, "pointCount": {"type": "integer", "minimum": 0}, "readyPointCount": {"type": "integer", "minimum": 0}, "importedBy": {"type": "string"}, "importedAt": {"type": "string", "format": "date-time"}}},
-      "PointCatalogPoint": {"allOf": [{"$ref": "#/components/schemas/PointCatalogPointCommand"}, {"type": "object", "required": ["id", "snapshotId", "plantId", "lineId", "ready", "readinessIssues"], "properties": {"id": {"type": "string", "format": "uuid"}, "snapshotId": {"type": "string", "format": "uuid"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "ready": {"type": "boolean"}, "readinessIssues": {"type": "array", "items": {"type": "string"}}}}]},
+      "PointCatalogPoint": {"allOf": [{"$ref": "#/components/schemas/PointCatalogPointCommand"}, {"type": "object", "required": ["id", "snapshotId", "plantId", "lineId", "sourceCalibrationStatus", "calibrationStatus", "ready", "readinessIssues"], "properties": {"id": {"type": "string", "format": "uuid"}, "snapshotId": {"type": "string", "format": "uuid"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "sourceCalibrationStatus": {"type": "string", "enum": ["VERIFIED", "UNVERIFIED", "MISSING"], "description": "Untrusted source assertion retained for audit."}, "calibrationStatus": {"type": "string", "enum": ["VERIFIED", "UNVERIFIED", "MISSING"], "description": "Authoritative MES status derived from an approved, currently effective evidence record."}, "calibrationEvidenceId": {"type": ["string", "null"], "format": "uuid"}, "calibrationValidUntil": {"type": ["string", "null"], "format": "date-time"}, "ready": {"type": "boolean"}, "readinessIssues": {"type": "array", "items": {"type": "string"}}}}]},
       "PointCatalog": {"type": "object", "required": ["snapshot", "points"], "properties": {"snapshot": {"$ref": "#/components/schemas/PointCatalogSnapshot"}, "points": {"type": "array", "items": {"$ref": "#/components/schemas/PointCatalogPoint"}}}},
       "PointCatalogResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/PointCatalog"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "PointCatalogCurrentResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"oneOf": [{"$ref": "#/components/schemas/PointCatalog"}, {"type": "null"}]}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "PointCatalogSnapshotListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/PointCatalogSnapshot"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "PointCalibrationSubmitCommand": {"type": "object", "required": ["plantId", "lineId", "productId", "deviceId", "propertyId", "calibrationVersion", "certificateReference", "certificateChecksum", "validFrom", "validUntil", "reason"], "properties": {"plantId": {"type": "string", "maxLength": 64}, "lineId": {"type": "string", "maxLength": 128}, "productId": {"type": "string", "maxLength": 128}, "deviceId": {"type": "string", "maxLength": 128}, "propertyId": {"type": "string", "maxLength": 128}, "calibrationVersion": {"type": "string", "maxLength": 128}, "certificateReference": {"type": "string", "maxLength": 512}, "certificateChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "validFrom": {"type": "string", "format": "date-time"}, "validUntil": {"type": "string", "format": "date-time"}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
+      "PointCalibration": {"type": "object", "required": ["id", "plantId", "lineId", "productId", "deviceId", "propertyId", "calibrationVersion", "certificateReference", "certificateChecksum", "validFrom", "validUntil", "state", "revision", "submittedBy", "submittedAt", "submitReason", "effective", "effectivenessStatus"], "properties": {"id": {"type": "string", "format": "uuid"}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "productId": {"type": "string"}, "deviceId": {"type": "string"}, "propertyId": {"type": "string"}, "calibrationVersion": {"type": "string"}, "certificateReference": {"type": "string"}, "certificateChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "validFrom": {"type": "string", "format": "date-time"}, "validUntil": {"type": "string", "format": "date-time"}, "state": {"type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "REVOKED"]}, "revision": {"type": "integer", "minimum": 1}, "submittedBy": {"type": "string"}, "submittedAt": {"type": "string", "format": "date-time"}, "submitReason": {"type": "string"}, "decidedBy": {"type": ["string", "null"]}, "decidedAt": {"type": ["string", "null"], "format": "date-time"}, "decisionReason": {"type": ["string", "null"]}, "revokedBy": {"type": ["string", "null"]}, "revokedAt": {"type": ["string", "null"], "format": "date-time"}, "revokeReason": {"type": ["string", "null"]}, "effective": {"type": "boolean"}, "effectivenessStatus": {"type": "string", "enum": ["PENDING", "REJECTED", "REVOKED", "NOT_YET_EFFECTIVE", "EXPIRED", "EFFECTIVE"]}}},
+      "PointCalibrationResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/PointCalibration"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "PointCalibrationListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/PointCalibration"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "TopologyDraftCommand": {"type": "object", "required": ["code", "version", "plantId", "lineId", "definition", "reason"], "properties": {"code": {"type": "string", "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"}, "version": {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}, "plantId": {"type": "string", "maxLength": 64}, "lineId": {"type": "string", "maxLength": 128}, "baseVersionId": {"type": ["string", "null"], "format": "uuid"}, "definition": {"type": "object", "minProperties": 1}, "reason": {"type": "string", "minLength": 3, "maxLength": 500}}},
       "Topology": {"type": "object", "required": ["id", "code", "version", "state", "revision", "plantId", "lineId", "checksum", "definition", "validationStatus", "validationErrors", "validationWarnings"], "properties": {"id": {"type": "string", "format": "uuid"}, "code": {"type": "string"}, "version": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "PUBLISHED"]}, "revision": {"type": "integer", "minimum": 0}, "plantId": {"type": "string"}, "lineId": {"type": "string"}, "checksum": {"type": "string"}, "definition": {"type": "object"}, "validationStatus": {"type": "string", "enum": ["NOT_VALIDATED", "PASSED", "FAILED"]}, "validationErrors": {"type": "array", "items": {"$ref": "#/components/schemas/TopologyValidationIssue"}}, "validationWarnings": {"type": "array", "items": {"$ref": "#/components/schemas/TopologyValidationIssue"}}, "validatedBy": {"type": ["string", "null"]}, "validatedAt": {"type": ["string", "null"], "format": "date-time"}, "validatedPointCatalogSnapshotId": {"type": ["string", "null"], "format": "uuid"}, "validatedPointCatalogChecksum": {"type": ["string", "null"]}, "publishedBy": {"type": ["string", "null"]}, "publishedAt": {"type": ["string", "null"], "format": "date-time"}}},
       "TopologyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Topology"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},

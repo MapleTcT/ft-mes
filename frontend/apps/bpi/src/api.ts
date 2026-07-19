@@ -7,6 +7,8 @@ import type {
   LineState,
   PointCatalogSnapshotCommand,
   PointCatalogView,
+  PointCalibration,
+  PointCalibrationSubmitCommand,
   ProblemDetail,
   RuleSimulation,
   RuleSimulationCommand,
@@ -101,6 +103,32 @@ export const bpiApi = {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': '0' },
       body: JSON.stringify(command),
+    }),
+  listPointCalibrations: (plantId: string, lineId: string) =>
+    request<PointCalibration[]>(`/point-calibrations?plantId=${encodeURIComponent(plantId)}&lineId=${encodeURIComponent(lineId)}`),
+  submitPointCalibration: (command: PointCalibrationSubmitCommand, key: string) =>
+    request<PointCalibration>('/point-calibrations', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': '0' },
+      body: JSON.stringify(command),
+    }),
+  approvePointCalibration: (calibration: PointCalibration, reason: string, key: string) =>
+    request<PointCalibration>(`/point-calibrations/${encodeURIComponent(calibration.id)}/approve`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(calibration.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  rejectPointCalibration: (calibration: PointCalibration, reason: string, key: string) =>
+    request<PointCalibration>(`/point-calibrations/${encodeURIComponent(calibration.id)}/reject`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(calibration.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  revokePointCalibration: (calibration: PointCalibration, reason: string, key: string) =>
+    request<PointCalibration>(`/point-calibrations/${encodeURIComponent(calibration.id)}/revoke`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(calibration.revision) },
+      body: JSON.stringify({ reason }),
     }),
   topology: (id: string) => request<TopologyVersion>(`/topologies/${encodeURIComponent(id)}`),
   compareTopologies: (id: string, against: string) =>

@@ -46,6 +46,7 @@ MES 顶部标签
 |---|---|---|---|
 | 调度/班长 | 实时生产态势 | 确认/拒绝候选、暂停、恢复、申请强制结束 | 修改或发布规则 |
 | 工艺工程师 | 边界规则 | 拓扑草拟、已准入测点绑定、规则草拟、模拟 | 导入点位快照、单人发布规则、修改原始事件 |
+| 计量/仪表工程师 | 点位准入 | 提交证书引用、SHA-256、校准版本和有效期 | 批准自己提交的证据、改写来源快照 |
 | 质量人员 | 批次档案 | 关联样品、复核质量门、提交处置意见 | 改批次边界和规则 |
 | 仓储人员 | 批次档案 | 复核 WMS 回执、重查幂等单据 | 直接改 BPI 累计量 |
 | 数据工程师 | 数据质量 | 数据质量处置、生成数据集快照 | 修改生产事实和质量结果 |
@@ -184,18 +185,24 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 
 页面按工厂和产线读取当前不可变快照，顶部显示快照 ID、来源 revision、采集时间、checksum，以及
 ready/blocked 数量。点位表固定展示 product、device、JetLinks 原属性、exporter 规范化属性、单位、设备状态、注册状态、属性存在性、
-校准版本/状态、源序列能力和阻断原因。未取得快照时显示“尚未导入点位目录”，不生成默认绑定。
+来源校准声明、MES 权威校准状态/有效截止时间、源序列能力和阻断原因。未取得快照时显示“尚未导入点位目录”，不生成默认绑定。
 
 只有 `BPI_ADMIN` 可打开导入对话框。首期对话框接收 exporter 生成的 JSON 快照，要求来源实例、来源 revision、
 工厂、产线、采集时间、点位清单和导入原因；提交时携带 `Idempotency-Key` 和 `If-Match: 0`。页面不允许直接
 编辑快照条目，也不连接 JetLinks 数据库。现场点位变化必须由 exporter 生成新快照，旧拓扑继续保留已钉扎的
 快照 ID/checksum 作为审计证据。
 
-ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、单位与绑定一致、校准状态为 `VERIFIED`、
+ready 条件必须全部满足：设备 `ACTIVE`、已注册、属性存在、单位与绑定一致、MES 校准状态为 `VERIFIED`、
 设备或网关级来源 epoch/sequence 已启用，且 product/device/property 与拓扑绑定完全一致。Exporter 自增序列
 只允许影子观测，不能把点位提升为 ready。任何一项不满足都显示明确 blocker，并使拓扑校验 fail closed。
 
-**主要 API：** `listPointCatalogSnapshots`、`getCurrentPointCatalog`、`importPointCatalogSnapshot`。
+来源系统的 `calibrationStatus=VERIFIED` 仅保存为审计声明。计量/仪表工程师从点位行提交证书引用、SHA-256、
+校准版本和有效期；记录进入 `PENDING` 后仍不放行。非提交人的 `BPI_ADMIN` 可批准或驳回；已批准证据可撤销。
+点位准入每次读取都按证据状态、当前时间、快照观测时间和有效期动态重算；未生效、过期、驳回和撤销均立即 fail closed。
+
+**主要 API：** `listPointCatalogSnapshots`、`getCurrentPointCatalog`、`importPointCatalogSnapshot`、
+`listPointCalibrations`、`submitPointCalibration`、`approvePointCalibration`、`rejectPointCalibration`、
+`revokePointCalibration`。
 
 ### 5.6 工艺拓扑 `/bpi/topologies`
 
@@ -405,7 +412,9 @@ sequenceDiagram
 7. 从同一详情恢复批次，看到 `ACTIVE/r3`、产线 `RUNNING` 和追加事件。
 8. 查询批次详情、START/END 证据、平衡和谱系。
 9. 查询无点位快照状态；导入并重放不可变点位目录快照，页面展示 ready/blocker。
-10. 绑定 ready 点位后校验拓扑，展示并持久化点位快照 ID/checksum；缺失或不合格点位必须阻断发布。
+10. 导入来源自声明 VERIFIED 的点位，验证它在 MES 证据批准前仍为 BLOCKED。
+11. 提交、独立批准和撤销校准证据，验证点位按 `BLOCKED -> READY -> BLOCKED` 动态转换。
+12. 绑定 ready 点位后校验拓扑，展示并持久化点位快照 ID/checksum；缺失或不合格点位必须阻断发布。
 11. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
 12. 查询数据质量事件并看到受影响的产线、规则和批次。
 

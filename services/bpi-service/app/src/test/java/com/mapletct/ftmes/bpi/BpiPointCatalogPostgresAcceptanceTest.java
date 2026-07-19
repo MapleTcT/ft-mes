@@ -74,6 +74,8 @@ class BpiPointCatalogPostgresAcceptanceTest {
                     (id, tenant_id, scope_type, scope_key, flag_key, enabled, revision, updated_by)
                 VALUES (?, ?, 'LINE', ?, 'bpi.rule-management', true, 1, 'acceptance')
                 """, UUID.randomUUID(), tenantId, LINE_ID);
+        insertApprovedCalibration("DEVICE-S07-01", "flow.instant", "CAL-2026-01");
+        insertApprovedCalibration("DEVICE-S07-03", "flow.sequence-missing", "CAL-2026-01");
     }
 
     @AfterEach
@@ -85,6 +87,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_feature_flags WHERE tenant_id = ?", tenantId);
     }
 
@@ -254,7 +257,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 .andExpect(jsonPath("$.data.validationErrors[0].severity").value("ERROR"));
 
         assertThat(jdbc.queryForObject("""
-                SELECT point_count || '|' || ready_point_count || '|' || checksum
+                SELECT point_count || '|' || source_claim_ready_point_count || '|' || checksum
                   FROM bpi.bpi_point_catalog_snapshots
                  WHERE tenant_id = ? AND id = ?
                 """, String.class, tenantId, currentSnapshotId)).isEqualTo("3|1|" + currentSnapshotChecksum);
@@ -435,6 +438,25 @@ class BpiPointCatalogPostgresAcceptanceTest {
 
     private byte[] reason(String value) throws Exception {
         return objectMapper.writeValueAsBytes(Map.of("reason", value));
+    }
+
+    private void insertApprovedCalibration(
+            String deviceId,
+            String propertyId,
+            String calibrationVersion) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_calibrations
+                    (id, tenant_id, plant_id, line_id, product_id, device_id, property_id,
+                     calibration_version, certificate_reference, certificate_checksum,
+                     valid_from, valid_until, state, revision, submitted_by, submit_reason,
+                     decided_by, decided_at, decision_reason)
+                VALUES (?, ?, ?, ?, 'PRODUCT-SUGAR', ?, ?, ?, ?, ?,
+                        now() - interval '1 day', now() + interval '1 year',
+                        'APPROVED', 2, 'calibration-author', '验收校准证据',
+                        'calibration-reviewer', now(), '独立复核通过')
+                """, UUID.randomUUID(), tenantId, PLANT_ID, LINE_ID, deviceId, propertyId,
+                calibrationVersion, "urn:adp:test:" + deviceId + ":" + propertyId,
+                "c".repeat(64));
     }
 
     private JsonNode response(MvcResult result) throws Exception {

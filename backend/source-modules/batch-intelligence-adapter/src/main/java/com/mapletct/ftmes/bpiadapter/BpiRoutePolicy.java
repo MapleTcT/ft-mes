@@ -13,10 +13,12 @@ public class BpiRoutePolicy {
             "^/(?:overview|lines/" + ID + "/current-state|candidates(?:/" + ID + ")?|"
                     + "batches(?:/" + ID + "(?:/(?:evidence|timeline))?)?|"
                     + "topologies(?:/" + ID + "(?:/compare)?)?|point-catalog/(?:current|snapshots)|"
+                    + "point-calibrations|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
-                    + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|rules/drafts|"
+                    + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|"
+                    + "point-calibrations(?:/" + ID + "/(?:approve|reject|revoke))?|rules/drafts|"
                     + "rules/" + ID + "/(?:simulate|submit-approval|reject-approval|publish|retire|publication/retry))$");
 
     public boolean allows(HttpMethod method, String path) {

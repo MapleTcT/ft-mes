@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import xml.etree.ElementTree as ET
@@ -30,6 +31,9 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V12__bpi_point_catalog_source_property.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V13__bpi_rule_runtime_readiness_receipts.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V14__bpi_rule_approval_workflow.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V15__bpi_rule_retirement_lifecycle.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V16__bpi_point_catalog_repeated_observations.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -50,6 +54,10 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationOutboxDispatcher.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationKafkaConfiguration.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleRuntimeReadinessReceiptService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationController.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleApplicationKafkaListener.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessKafkaRecordProcessor.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/RuleRuntimeReadinessPostgresRepository.java",
@@ -90,7 +98,11 @@ REQUIRED_FILES = [
     "metadata/bpi-rule-version-lifecycle-acceptance.json",
     "docs/testing/bpi-rule-retirement-acceptance.md",
     "metadata/bpi-rule-retirement-acceptance.json",
+    "docs/testing/bpi-point-calibration-governance-acceptance.md",
+    "metadata/bpi-point-calibration-governance-acceptance.json",
+    "metadata/bpi-point-calibration-governance.png",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-cleanup.sql",
@@ -216,6 +228,17 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
+        [
+            "source_claim_ready_point_count",
+            "bpi_point_calibrations",
+            "uq_bpi_point_calibration_version",
+            "chk_bpi_point_calibration_decision",
+            "WHERE state = 'APPROVED'",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
         ["commandsEnabled", "reserveIdempotency", "assertScope(actor, visibleCandidate)",
          "assertIdempotencyReplay", "CANDIDATE_REJECTED", "lockBatchLine", "confirmEnd",
@@ -261,6 +284,50 @@ def main() -> int:
             "RULE_PUBLISHED",
             "insertPublication",
             "publicationEventId",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/PointCalibrationService.java",
+        [
+            "assertConcreteScope",
+            "A new point calibration must use If-Match 0.",
+            "reviewer other than the submitter",
+            "Expired calibration evidence cannot be approved.",
+            "POINT_CALIBRATION_REVOKED",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/PointCalibrationController.java",
+        [
+            "/bpi/v1/point-calibrations",
+            "/bpi/v1/point-calibrations/{calibrationId}/approve",
+            "/bpi/v1/point-calibrations/{calibrationId}/reject",
+            "/bpi/v1/point-calibrations/{calibrationId}/revoke",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
+        [
+            "source_claim_ready_point_count",
+            "bpi.bpi_point_calibrations",
+            "calibration.valid_from <= s.observed_at",
+            "calibration.valid_until > s.observed_at",
+            "calibration.valid_from <= CURRENT_TIMESTAMP",
+            "calibration.valid_until > CURRENT_TIMESTAMP",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
+        [
+            "independentCalibrationApprovalControlsReadinessExpiryAndRevocation",
+            "calibration-self-approve-",
+            "NOT_YET_EFFECTIVE",
+            "calibration-expired-submit-",
+            "REVOKED|3|calibration-author|calibration-reviewer|calibration-reviewer",
         ],
         failures,
     )
@@ -365,6 +432,17 @@ def main() -> int:
             "'candidates'",
             "'inboxEvents'",
             "'auditEvents'",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
+        [
+            "expectedConsoleErrorIndexes",
+            "same-actor approval must return 422",
+            "entry.url === selfApprovalResponse.url()",
+            "browser emitted unexpected console errors",
+            "non-matching calibration version unexpectedly made a real point READY",
         ],
         failures,
     )
@@ -581,6 +659,45 @@ def main() -> int:
             "catalogSnapshots", "goldenBoundaries", "candidates", "batches",
             "inboxEvents", "outboxEvents", "auditEvents")):
         fail("BPI rule retirement cleanup must leave zero marker rows", failures)
+
+    calibration_acceptance = json.loads(
+        (ROOT / "metadata/bpi-point-calibration-governance-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if calibration_acceptance.get("status") != "PASS_CONTROLLED_TARGET_FAIL_CLOSED":
+        fail("BPI calibration acceptance must retain controlled fail-closed target scope", failures)
+    if calibration_acceptance.get("database") != "PostgreSQL":
+        fail("BPI calibration acceptance must identify PostgreSQL", failures)
+    if calibration_acceptance.get("environment", {}).get("flywayVersion") != 17:
+        fail("BPI calibration acceptance must prove Flyway V17", failures)
+    calibration_summary = calibration_acceptance.get("summary", {})
+    if (calibration_summary.get("testedFeatures") != 10
+            or calibration_summary.get("pass") != 10
+            or calibration_summary.get("fail") != 0
+            or calibration_summary.get("blocked") != 0):
+        fail("BPI calibration acceptance must preserve ten passing controlled features", failures)
+    calibration_browser = calibration_acceptance.get("browser", {})
+    if calibration_browser.get("expectedConsoleErrors") != 1:
+        fail("BPI calibration browser acceptance must retain the deliberate same-actor 422", failures)
+    if any(calibration_browser.get(key) != 0 for key in (
+            "unexpectedConsoleErrors", "pageErrors", "requestFailures")):
+        fail("BPI calibration browser acceptance must have zero unexpected errors", failures)
+    calibration_persistence = calibration_acceptance.get("persistence", {})
+    if (calibration_persistence.get("finalState") != "REVOKED"
+            or calibration_persistence.get("finalRevision") != 3
+            or calibration_persistence.get("auditRows") != 3
+            or calibration_persistence.get("completedIdempotencyRows") != 3):
+        fail("BPI calibration persistence must retain the audited r1-r3 lifecycle", failures)
+    if (calibration_persistence.get("matchingEffectiveEvidence") != 0
+            or calibration_persistence.get("operationalReadyPointCount") != 0
+            or calibration_persistence.get("sourceSequenceEnabled") is not False):
+        fail("BPI calibration target record must keep the real pilot fail closed", failures)
+    screenshot_path = ROOT / calibration_browser.get("screenshot", "")
+    if screenshot_path.is_file():
+        screenshot_hash = hashlib.sha256(screenshot_path.read_bytes()).hexdigest()
+        if screenshot_hash != calibration_browser.get("screenshotSha256"):
+            fail("BPI calibration screenshot hash does not match the acceptance record", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

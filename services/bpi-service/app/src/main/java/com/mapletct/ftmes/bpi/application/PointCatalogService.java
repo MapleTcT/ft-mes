@@ -88,13 +88,13 @@ public class PointCatalogService {
 
         UUID snapshotId = UUID.randomUUID();
         String catalogChecksum = Checksums.sha256(canonicalJson.write(catalogPayload(command)));
-        int readyPointCount = (int) command.points().stream()
-                .filter(PointCatalogPostgresRepository::isReady)
+        int sourceClaimReadyPointCount = (int) command.points().stream()
+                .filter(PointCatalogPostgresRepository::isSourceClaimReady)
                 .count();
         repository.insertSnapshot(
                 actor, snapshotId, command.source(), command.sourceInstance(), command.sourceRevision(),
                 command.plantId(), command.lineId(), catalogChecksum, command.observedAt(),
-                command.points().size(), readyPointCount, command.points());
+                command.points().size(), sourceClaimReadyPointCount, command.points());
         PointCatalogSnapshotView snapshot = repository.findSnapshot(actor, snapshotId);
         PointCatalogView result = new PointCatalogView(snapshot, repository.listPoints(actor, snapshot));
         repository.insertAudit(actor, snapshot, command.reason(), traceId);

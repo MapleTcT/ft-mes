@@ -83,11 +83,11 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - MES production context outbox 已实现 `176` 同事务捕获和 `177` 版本时钟下限、显式产线/状态映射、`BLOCKED_*` 失败关闭、Java 8 `SKIP LOCKED` 抢占、Kafka 幂等发送、重试/毒消息终止和 Micrometer 指标；目标机已通过真实 WOM `start/hold`、3 条 `SENT|1` 上下文、Flink join 和影子批次确认。
 - PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认、影子批次、证据和审计。
 - 拓扑/规则产品化：页面可新建或复制版本，拓扑发布前校验路径、环、JetLinks 产品/设备/属性、单位、校准和必需信号；独立管理员发布后版本不可变，规则草稿只能引用已发布拓扑及其绑定信号。Flyway V1-V9、真实 PostgreSQL marker 和 7 条浏览器 E2E 已通过；目标环境 marker `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` 又验证了真实 ADP 会话、V9 落库、创建人发布拒绝、独立发布和服务重启后读取。
-- 点位目录准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；拓扑校验固定快照 ID/checksum，设备注册/激活、属性、单位、标定或设备/网关级来源序列不满足时失败关闭，发布时再次原子检查快照仍为当前版本。Exporter 自增序列只允许影子观测，不能把点位提升为 `READY`。手工 marker `ADP_E2E_20260715_POINTCAT_02` 已验证页面写链；自动链又以 revision `sha256:2a218d...151ce5` 通过 JetLinks、Kafka、MES 消费、PostgreSQL 幂等/DLT/审计、重启和真实页面读取。marker `ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE` 进一步通过本地 PostgreSQL 16.13、8 条浏览器 E2E、目标 PostgreSQL 15.18 和真实 ADP 页面证明来源序列硬门槛已生效；当前试点点位保持 `BLOCKED`。
+- 点位目录与校准准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；V17 又把来源校准声明与 MES 校准证据彻底分开，来源 `VERIFIED` 不能直接提升为 `READY`。真实点位页现已支持证书引用、SHA-256、有效期、独立管理员批准/驳回和撤销，准入按租户/工厂/产线/产品/设备/属性/校准版本精确匹配，并同时按快照观测时间与当前时间判定。marker `ADP_E2E_CAL_20260719_160131` 在目标环境闭合 `PENDING/r1 -> APPROVED/r2 -> REVOKED/r3`、同人审批 `422`、PostgreSQL 审计/幂等和非匹配版本继续 0 READY；当前试点点位仍因真实现场证据和来源序列缺失保持 `BLOCKED`。
 - 规则运行时目录准入：规则发布 Protobuf 固化 `productId` 和 `calibrationVersion`，Java 服务在发布事务内重验当前目录；Flink 订阅 `iot.point-catalog.snapshot.v1`，仅把全部绑定 READY 的规则 UPSERT 到 evaluator。目录降级会 DELETE 规则并清空待决窗口，旧 timer 不再产候选，恢复后从新观测重新累积。控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 已形成独立 Protobuf、Flink sink、Kafka source/DLQ、Flyway V15 字段和 UI 状态列；目标环境已完成 savepoint 有状态升级、规则 `READY -> INACTIVE`、回滚草稿及延迟候选落库复验。
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发、规则应用回执和独立运行时就绪回执。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
-- BPI 操作台、确定性模拟服务和 8 条浏览器 E2E；页面保持 `APPLIED` 时可独立显示 `DEGRADED -> READY`。
+- BPI 操作台、确定性模拟服务和 10 条浏览器 E2E；页面保持 `APPLIED` 时可独立显示 `DEGRADED -> READY`，点位页分栏显示来源声明和 MES 校准证据。
 - Kafka + PostgreSQL 回执消费验收：`read_committed`、回滚不可见、重启重放、`DEGRADED -> READY` 落库、旧事件抑制、精确幂等和双 source DLQ。
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后 `APPLIED + READY` 可见、未完成事务不可见、停用提交 `APPLIED + INACTIVE`、TaskManager 重启恢复规则终态、同版本规则禁止重新启用且两类回执无重复。
 - 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
@@ -97,9 +97,9 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 本地 MiniCluster、目标流处理集群、目标浏览器联合写链、JetLinks EventBus source marker 和 MES context outbox PostgreSQL 验收是相互独立的证据。目标环境 EventBus source 与 WOM context 两端均已真实执行，但尚未接入真实网关/协议设备点位，也未用同一 marker 汇合到 candidate/batch；不能把两个分段 PASS 升级为现场闭环。详细 marker、offset、目标表和清理结果分别记录在 MES 与 IoT 验收报告中。
 
-## 目标测试环境（更新至 2026-07-18）
+## 目标测试环境（更新至 2026-07-19）
 
-当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。运行面只保留一个 ADP Compose project：`adp-mes-newbase`；BPI 作为该环境的独立 Java/PostgreSQL 与 Kafka/Flink/MinIO 侧车运行，不是第二套 ADP。2026-07-18 已通过真实 ADP 页面重新执行规则审批、退役、savepoint 和候选落库链。Flink REST 仅绑定测试机 Tailscale 地址 `100.99.133.43:18081`，不作为业务前端入口。
+当前 ADP/PATROL 运维与验收入口为公司内网 `10.11.100.17`。运行面只保留一个 ADP Compose project：`adp-mes-newbase`；BPI 作为该环境的独立 Java/PostgreSQL 与 Kafka/Flink/MinIO 侧车运行，不是第二套 ADP。当前 BPI PostgreSQL 已到 Flyway V17，Java 17 service 和 Java 8 adapter 均 healthy；真实 ADP 页面已通过规则审批/退役、点位校准治理、savepoint 和候选落库链。Flink REST 仅绑定测试机 Tailscale 地址 `100.99.133.43:18081`，不作为业务前端入口。
 
 | 入口/运行面 | 地址或项目 | 当前结果 |
 |---|---|---|

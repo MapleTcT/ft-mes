@@ -126,6 +126,8 @@ class BpiRulePostgresAcceptanceTest {
                 java.sql.Timestamp.from(boundaryTime.plusMillis(10)), "a".repeat(64));
         insertPoint("RULE-FLOW-001", "flow.instant", "DOUBLE", 18.6, null, "t/h");
         insertPoint("RULE-PUMP-001", "pump.running", "BOOLEAN", null, true, "bool");
+        insertApprovedCalibration("flow.instant");
+        insertApprovedCalibration("pump.running");
         insertCatalogSnapshot(true, boundaryTime.minusSeconds(1));
     }
 
@@ -148,6 +150,7 @@ class BpiRulePostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
     }
 
     @Test
@@ -1160,7 +1163,7 @@ class BpiRulePostgresAcceptanceTest {
                 INSERT INTO bpi.bpi_point_catalog_snapshots
                     (id, tenant_id, source, source_instance, source_revision,
                      plant_id, line_id, checksum, observed_at, point_count,
-                     ready_point_count, imported_by)
+                     source_claim_ready_point_count, imported_by)
                 VALUES (?, ?, 'JETLINKS', 'RULE-ACCEPTANCE', ?,
                         'PLANT-01', 'LINE-S07-01', ?, ?, 2, ?, 'acceptance')
                 """, snapshotId, tenantId, "revision-" + snapshotId,
@@ -1181,6 +1184,22 @@ class BpiRulePostgresAcceptanceTest {
                     "flow.instant".equals(property) ? "double" : "boolean",
                     active ? "ACTIVE" : "INACTIVE");
         }
+    }
+
+    private void insertApprovedCalibration(String propertyId) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_point_calibrations
+                    (id, tenant_id, plant_id, line_id, product_id, device_id, property_id,
+                     calibration_version, certificate_reference, certificate_checksum,
+                     valid_from, valid_until, state, revision, submitted_by, submit_reason,
+                     decided_by, decided_at, decision_reason)
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'PRODUCT-SUGAR', 'DEVICE-S07-01', ?,
+                        'CAL-1', ?, ?, ?, '2027-07-12T00:00:00Z',
+                        'APPROVED', 2, 'calibration-author', '验收校准证据',
+                        'calibration-reviewer', now(), '独立复核通过')
+                """, UUID.randomUUID(), tenantId, propertyId,
+                "urn:adp:test:" + propertyId, "c".repeat(64),
+                java.sql.Timestamp.from(boundaryTime.minusSeconds(3600)));
     }
 
     private String ruleDefinition(int holdSeconds) throws Exception {

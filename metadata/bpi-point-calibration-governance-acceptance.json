@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T08:02:11.453Z",
+  "repoCommit": "deee9fe1eedd02cfc727ea5823a131dc9806dc7f+calibration-worktree",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_TARGET_FAIL_CLOSED",
+  "marker": "ADP_E2E_CAL_20260719_160131",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiPointRoute": "http://10.11.100.17:18080/bpi/#/points",
+    "serviceBaseUrl": "http://10.11.100.17:19091",
+    "databaseName": "ft_mes_bpi",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 17,
+    "serviceImage": "ft-mes-bpi-service:20260719-point-calibration-v17b",
+    "serviceImageId": "sha256:a72c6eea420c6cbecaed880e0f7322b6529bdf6a041a00bf62dab6ca741751d7",
+    "adapterImage": "ft-mes-bpi-adapter:20260719-point-calibration-routes",
+    "adapterImageId": "sha256:76952f25edbeef5e7ba9e7a220fb5136dfc2b3a29d670d183c7c209570674234",
+    "serviceHealth": "healthy",
+    "adapterHealth": "healthy",
+    "frontendAsset": "index-GFB_Uwdn.js"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "snapshotId": "ca213975-4b22-4230-8cd9-968b0d1ce61a",
+    "pointId": "7d4098f4-441e-4d02-aa25-9ac254b0a74b",
+    "productId": "bpi-pilot-product-01",
+    "deviceId": "bpi-pilot-device-01",
+    "propertyId": "flow.instant",
+    "catalogCalibrationVersion": "pilot-unverified-20260714",
+    "acceptanceCalibrationVersion": "ADP_E2E_CAL_20260719_160131_NON_MATCHING"
+  },
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "productionReadiness": "PARTIAL_SOURCE_BLOCKED"
+  },
+  "items": [
+    {
+      "id": "flyway-v17",
+      "status": "PASS",
+      "operation": "Apply the point-calibration governance migration without replacing PostgreSQL",
+      "evidence": "Flyway history records V17 bpi point calibration governance success=true; bpi_point_calibrations exists and point-catalog source claims are stored separately from operational readiness."
+    },
+    {
+      "id": "browser-submit",
+      "status": "PASS",
+      "operation": "Submit immutable calibration evidence from the real point page",
+      "request": "POST /bpi-api/point-calibrations",
+      "httpStatus": 200,
+      "evidence": "The marker was stored as PENDING/r1 by legacy-ticket:admin with certificate reference, SHA-256 checksum and validity interval."
+    },
+    {
+      "id": "same-actor-denial",
+      "status": "PASS",
+      "operation": "Attempt to approve the evidence as its submitter from the real browser dialog",
+      "request": "POST /bpi-api/point-calibrations/b5132f15-0dfa-4468-baaf-86b269f613e8/approve",
+      "httpStatus": 422,
+      "evidence": "The service rejected the action because the reviewer must differ from the submitter; the dialog remained open, the approval button returned to its enabled state, and no approval audit or successful idempotency row was created."
+    },
+    {
+      "id": "independent-approval",
+      "status": "PASS",
+      "operation": "Approve with an independently signed BPI_ADMIN identity",
+      "request": "POST /bpi/v1/point-calibrations/b5132f15-0dfa-4468-baaf-86b269f613e8/approve",
+      "httpStatus": 200,
+      "evidence": "ADP_E2E_CAL_20260719_160131_REVIEWER changed the evidence to APPROVED/r2 and EFFECTIVE."
+    },
+    {
+      "id": "non-matching-readiness-denial",
+      "status": "PASS",
+      "operation": "Re-read the live point catalog after approval of a deliberately non-matching version",
+      "request": "GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01",
+      "httpStatus": 200,
+      "evidence": "The real point remained BLOCKED with readyPointCount=0 and no calibrationEvidenceId; approved evidence cannot attach across calibration versions."
+    },
+    {
+      "id": "browser-revoke",
+      "status": "PASS",
+      "operation": "Revoke approved evidence from the real point page",
+      "request": "POST /bpi-api/point-calibrations/b5132f15-0dfa-4468-baaf-86b269f613e8/revoke",
+      "httpStatus": 200,
+      "evidence": "The marker ended REVOKED/r3 by legacy-ticket:admin and remained visible as an immutable audit record."
+    },
+    {
+      "id": "postgres-state-and-audit",
+      "status": "PASS",
+      "operation": "Query PostgreSQL directly for state, actors, revisions and audit history",
+      "evidence": "One marker row is REVOKED/r3; audit contains exactly SUBMITTED 0->1, APPROVED 1->2 and REVOKED 2->3 with the expected actors."
+    },
+    {
+      "id": "postgres-idempotency",
+      "status": "PASS",
+      "operation": "Query successful command idempotency records",
+      "evidence": "Exactly three COMPLETED/200 rows represent submit PENDING, independent approval APPROVED and revoke REVOKED; the deliberate 422 did not become a successful command record."
+    },
+    {
+      "id": "browser-error-boundary",
+      "status": "PASS",
+      "operation": "Classify only the deliberate same-actor 422 resource message as expected",
+      "evidence": "The exact approval URL emitted one expected 422 console message; unexpectedConsoleErrors=0, pageErrors=0 and requestFailures=0 across 11 captured browser requests."
+    },
+    {
+      "id": "java8-adapter-image-build",
+      "status": "PASS",
+      "operation": "Build the Java 8 adapter image from the copied child POM on the target amd64 host",
+      "evidence": "Image sha256:0fc9ed80eaea78f18c0d59a8732e481a9b8c111fdeb684fef3354b866f70820d built successfully; its app.jar SHA-256 f3f0ecaacf3fab2bd6114c075f548e16bd7b835dff9bacf6c005d61c194a8b00 exactly matches the healthy running adapter."
+    }
+  ],
+  "browser": {
+    "status": "PASS",
+    "loginStatus": 200,
+    "route": "/bpi/#/points",
+    "capturedBpiRequests": 11,
+    "expectedConsoleErrors": 1,
+    "unexpectedConsoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "screenshot": "metadata/bpi-point-calibration-governance.png",
+    "screenshotSha256": "b100eb7a44e719f27b56601311f0dda5253075e1fbe18ed169eb10e6c766ec9a"
+  },
+  "persistence": {
+    "calibrationId": "b5132f15-0dfa-4468-baaf-86b269f613e8",
+    "finalState": "REVOKED",
+    "finalRevision": 3,
+    "submittedBy": "legacy-ticket:admin",
+    "decidedBy": "ADP_E2E_CAL_20260719_160131_REVIEWER",
+    "revokedBy": "legacy-ticket:admin",
+    "auditRows": 3,
+    "completedIdempotencyRows": 3,
+    "matchingEffectiveEvidence": 0,
+    "sourceClaimReadyPointCount": 0,
+    "operationalReadyPointCount": 0,
+    "sourceSequenceEnabled": false
+  },
+  "localRegression": {
+    "eventContractTests": 17,
+    "ruleRuntimeTests": 9,
+    "serviceTests": 56,
+    "totalJava17Tests": 82,
+    "java8AdapterTests": 17,
+    "simulationTests": 8,
+    "browserE2eTests": 10,
+    "frontendBuild": "PASS",
+    "staticContractGates": "PASS",
+    "database": "PostgreSQL 16"
+  },
+  "rawEvidence": [
+    {
+      "path": "/tmp/ADP_E2E_CAL_20260719_160131-point-calibration.json",
+      "sha256": "d44950f07a9a636cbd6e14f1a280afef63eebcfce8f353a3fdcc79b4532281ee"
+    },
+    {
+      "path": "metadata/bpi-point-calibration-governance.png",
+      "sha256": "b100eb7a44e719f27b56601311f0dda5253075e1fbe18ed169eb10e6c766ec9a"
+    }
+  ],
+  "boundaries": [
+    "This proves the calibration governance workflow in the controlled target environment; it is not a field calibration certificate.",
+    "The acceptance version deliberately does not match pilot-unverified-20260714 and ended REVOKED, so it cannot make the real pilot point READY.",
+    "The pilot still lacks an approved exact-version field calibration and authoritative continuous DEVICE/GATEWAY source sequence evidence.",
+    "No candidate, batch, WOM, QCS or WMS production state was created or changed by this acceptance.",
+    "No credential, ticket, internal JWT secret, database password, dump or runtime binary is stored in this record."
+  ]
+}

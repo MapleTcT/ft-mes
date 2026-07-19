@@ -1,6 +1,7 @@
 package com.mapletct.ftmes.bpi.domain;
 
 import java.util.List;
+import java.time.Instant;
 import java.util.UUID;
 
 public record PointCatalogPointView(
@@ -20,7 +21,10 @@ public record PointCatalogPointView(
         boolean registered,
         boolean propertyPresent,
         String calibrationVersion,
+        String sourceCalibrationStatus,
         String calibrationStatus,
+        UUID calibrationEvidenceId,
+        Instant calibrationValidUntil,
         boolean sourceSequenceEnabled,
         boolean ready,
         List<String> readinessIssues) {

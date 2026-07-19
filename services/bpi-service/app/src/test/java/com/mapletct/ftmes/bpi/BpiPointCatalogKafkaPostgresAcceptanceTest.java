@@ -98,7 +98,7 @@ class BpiPointCatalogKafkaPostgresAcceptanceTest {
 
         assertThat(jdbc.queryForObject("""
                 SELECT source || '|' || source_instance || '|' || source_revision || '|'
-                       || point_count || '|' || ready_point_count || '|' || imported_by
+                       || point_count || '|' || source_claim_ready_point_count || '|' || imported_by
                   FROM bpi.bpi_point_catalog_snapshots
                  WHERE tenant_id = ?
                 """, String.class, tenantId)).isEqualTo(

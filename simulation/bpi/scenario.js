@@ -102,6 +102,30 @@ function createScenario() {
     observedAt: '2026-07-12T07:50:00.000Z', pointCount: 2, readyPointCount: 2,
     importedBy: 'bpi.admin', importedAt: '2026-07-12T07:51:00.000Z',
   };
+  const pointCalibrations = [
+    {
+      id: '10b34ec0-fda2-5f03-a1b9-1b9ee0fa9a01', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+      productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant',
+      calibrationVersion: 'CAL-1', certificateReference: 'urn:ft-mes:calibration:flow-cal-1',
+      certificateChecksum: 'a'.repeat(64), validFrom: '2026-01-01T00:00:00.000Z',
+      validUntil: '2027-07-12T00:00:00.000Z', state: 'APPROVED', revision: 2,
+      submittedBy: 'simulated.metrology.engineer', submittedAt: '2026-07-10T08:00:00.000Z',
+      submitReason: '提交流量计受控校准证书', decidedBy: 'simulated.bpi.admin',
+      decidedAt: '2026-07-10T09:00:00.000Z', decisionReason: '独立复核证书、校验和和有效期',
+      revokedBy: null, revokedAt: null, revokeReason: null, effective: true, effectivenessStatus: 'EFFECTIVE',
+    },
+    {
+      id: 'b1e15a8a-61ba-5859-aafb-22ad58c1f302', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
+      productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running',
+      calibrationVersion: 'CAL-1', certificateReference: 'urn:ft-mes:calibration:pump-cal-1',
+      certificateChecksum: 'b'.repeat(64), validFrom: '2026-01-01T00:00:00.000Z',
+      validUntil: '2027-07-12T00:00:00.000Z', state: 'APPROVED', revision: 2,
+      submittedBy: 'simulated.metrology.engineer', submittedAt: '2026-07-10T08:05:00.000Z',
+      submitReason: '提交泵运行信号受控校准证书', decidedBy: 'simulated.bpi.admin',
+      decidedAt: '2026-07-10T09:05:00.000Z', decisionReason: '独立复核证书、校验和和有效期',
+      revokedBy: null, revokedAt: null, revokeReason: null, effective: true, effectivenessStatus: 'EFFECTIVE',
+    },
+  ];
   const pointCatalog = {
     snapshot: pointCatalogSnapshot,
     points: [
@@ -111,7 +135,9 @@ function createScenario() {
         productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'flow.instant', sourcePropertyId: 'instantFlow',
         pointName: '进料瞬时流量', unit: 't/h', dataType: 'double', deviceState: 'ACTIVE',
         registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
-        calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+        sourceCalibrationStatus: 'VERIFIED', calibrationStatus: 'VERIFIED',
+        calibrationEvidenceId: pointCalibrations[0].id, calibrationValidUntil: pointCalibrations[0].validUntil,
+        sourceSequenceEnabled: true, ready: true, readinessIssues: [],
       },
       {
         id: '27315888-e7ca-56da-a24c-f54e65a9ad91', snapshotId: pointCatalogSnapshot.id,
@@ -119,7 +145,9 @@ function createScenario() {
         productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01', propertyId: 'pump.running', sourcePropertyId: 'pumpRunning',
         pointName: '进料泵运行', unit: 'bool', dataType: 'boolean', deviceState: 'ACTIVE',
         registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
-        calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+        sourceCalibrationStatus: 'VERIFIED', calibrationStatus: 'VERIFIED',
+        calibrationEvidenceId: pointCalibrations[1].id, calibrationValidUntil: pointCalibrations[1].validUntil,
+        sourceSequenceEnabled: true, ready: true, readinessIssues: [],
       },
     ],
   };
@@ -173,6 +201,7 @@ function createScenario() {
     topology,
     topologies: [topology],
     pointCatalog,
+    pointCalibrations,
     rule,
     rules: [rule],
     simulations: new Map(),

@@ -9,7 +9,9 @@ The adapter is deliberately stateless. It owns no BPI database tables and accept
 tenant, plant, line, upstream URL, or internal token claims. Missing role or subject-scope mappings fail
 closed with HTTP 403.
 
-The allowlist includes point-catalog reads and the admin-only snapshot import. Ordinary request bodies
+The allowlist includes point-catalog reads, the admin-only snapshot import, and point-calibration
+submission/list/approve/reject/revoke commands. Calibration certificates are referenced by controlled URI
+and SHA-256; binary certificate uploads do not pass through this adapter. Ordinary request bodies
 remain capped at 64 KiB; only `POST /bpi-api/point-catalog/snapshots` has a 5 MiB cap for immutable
 catalog payloads. The Java 17 service still enforces the `BPI_ADMIN` role, tenant/plant/line scope,
 idempotency key, and `If-Match: 0`. The adapter does not read or write the JetLinks database.

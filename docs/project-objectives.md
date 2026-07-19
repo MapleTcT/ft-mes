@@ -136,6 +136,15 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 现场标定、强制连续单调 DEVICE/GATEWAY 来源序列、同 scope candidate/batch 和影子运行仍未完成。证据见
 [BPI 试点平台前置条件与单位别名验收](testing/bpi-pilot-platform-prerequisites-acceptance.md)。
 
+随后 Flyway V17 将来源声明的 `readyPointCount` 明确降级为
+`source_claim_ready_point_count`，新增独立 `bpi_point_calibrations` 证据表、校准工作台、四眼审批、
+有效期和撤销。目标 marker `ADP_E2E_CAL_20260719_160131` 已从真实 `/bpi/#/points` 页面闭合
+`PENDING/r1 -> APPROVED/r2 -> REVOKED/r3`，同一提交人批准被 `422` 拒绝；PostgreSQL 直查为
+3 条动作审计和 3 条 `COMPLETED/200` 幂等记录。测试证据故意使用非匹配版本，批准期间真实点位仍为
+0 READY，撤销后继续 `BLOCKED`。软件侧校准治理因此退出阻断项，但现场真实证书、精确版本匹配和
+来源序列尚未完成，G-021 继续保持 `PARTIAL`。证据见
+[BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -146,6 +155,7 @@ service/adapter/Flink 应用组件回退因此退出阻断项；真实业务负�
 - [BPI 单 Broker 故障恢复验收](testing/bpi-broker-failure-recovery-acceptance.md)
 - [BPI 应用组件回滚验收](testing/bpi-application-rollback-acceptance.md)
 - [BPI 试点平台前置条件与单位别名验收](testing/bpi-pilot-platform-prerequisites-acceptance.md)
+- [BPI 点位校准治理与失败关闭验收](testing/bpi-point-calibration-governance-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

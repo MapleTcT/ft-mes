@@ -165,6 +165,35 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsPointCalibrationApprovalWithConcurrencyHeaders() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/point-calibrations/" + id + "/approve"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "calibration-approve-1"))
+                .andExpect(header("If-Match", "1"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":{\"state\":\"APPROVED\"}}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/point-calibrations/" + id + "/approve");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        request.addHeader("Idempotency-Key", "calibration-approve-1");
+        request.addHeader("If-Match", "1");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request,
+                "{\"reason\":\"独立复核证书后批准\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
     public void rejectsPointCatalogSnapshotAbove5MiB() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

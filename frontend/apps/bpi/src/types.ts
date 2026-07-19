@@ -170,10 +170,54 @@ export interface PointCatalogPoint {
   registered: boolean;
   propertyPresent: boolean;
   calibrationVersion?: string | null;
+  sourceCalibrationStatus: 'VERIFIED' | 'UNVERIFIED' | 'MISSING';
   calibrationStatus: 'VERIFIED' | 'UNVERIFIED' | 'MISSING';
+  calibrationEvidenceId?: string | null;
+  calibrationValidUntil?: string | null;
   sourceSequenceEnabled: boolean;
   ready: boolean;
   readinessIssues: string[];
+}
+
+export interface PointCalibration {
+  id: string;
+  plantId: string;
+  lineId: string;
+  productId: string;
+  deviceId: string;
+  propertyId: string;
+  calibrationVersion: string;
+  certificateReference: string;
+  certificateChecksum: string;
+  validFrom: string;
+  validUntil: string;
+  state: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REVOKED';
+  revision: number;
+  submittedBy: string;
+  submittedAt: string;
+  submitReason: string;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  decisionReason?: string | null;
+  revokedBy?: string | null;
+  revokedAt?: string | null;
+  revokeReason?: string | null;
+  effective: boolean;
+  effectivenessStatus: 'PENDING' | 'REJECTED' | 'REVOKED' | 'NOT_YET_EFFECTIVE' | 'EXPIRED' | 'EFFECTIVE';
+}
+
+export interface PointCalibrationSubmitCommand {
+  plantId: string;
+  lineId: string;
+  productId: string;
+  deviceId: string;
+  propertyId: string;
+  calibrationVersion: string;
+  certificateReference: string;
+  certificateChecksum: string;
+  validFrom: string;
+  validUntil: string;
+  reason: string;
 }
 
 export interface PointCatalogView {

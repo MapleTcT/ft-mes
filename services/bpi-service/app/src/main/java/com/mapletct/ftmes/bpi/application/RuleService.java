@@ -243,6 +243,23 @@ public class RuleService {
         if (topology.revision() != expectedRevision) {
             throw new BpiConflictException("Topology revision is stale.", topology.revision());
         }
+        PointCatalogService.BindingValidationResult catalog = pointCatalogService.validateBindings(
+                actor, topology.plantId(), topology.lineId(), topology.definition());
+        if (!catalog.errors().isEmpty()) {
+            String codes = catalog.errors().stream()
+                    .map(com.mapletct.ftmes.bpi.domain.TopologyValidationIssue::code)
+                    .distinct()
+                    .sorted()
+                    .reduce((left, right) -> left + ", " + right)
+                    .orElse("UNKNOWN");
+            throw new BpiValidationException(
+                    "Topology publication requires current READY point catalog bindings: " + codes + ".");
+        }
+        if (!java.util.Objects.equals(topology.validatedPointCatalogSnapshotId(), catalog.snapshotId())
+                || !java.util.Objects.equals(topology.validatedPointCatalogChecksum(), catalog.snapshotChecksum())) {
+            throw new BpiConflictException(
+                    "Topology is not validated against the current point catalog snapshot.", topology.revision());
+        }
         String creator = repository.findTopologyCreator(actor.tenantId(), topology.id());
         if (actor.userId().equals(creator)) {
             throw new BpiValidationException("Topology publication requires an administrator other than the creator.");

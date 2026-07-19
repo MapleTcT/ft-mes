@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-15T06:54:00Z",
-  "repoCommit": "7e3fcf185c09e53a3eca763302d9183eda291461",
+  "generatedAt": "2026-07-19T06:48:52Z",
+  "repoCommit": "deee9fe1eedd02cfc727ea5823a131dc9806dc7f",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 8,
-    "pass": 8,
+    "browserTests": 10,
+    "pass": 10,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -101,12 +101,13 @@
       "routes": [
         "/bpi/#/batches",
         "/bpi/#/overview",
-        "/bpi/#/rules"
+        "/bpi/#/rules",
+        "/bpi/#/points"
       ],
       "operations": [
         "use fixed bottom navigation",
         "switch from batches to overview and rules",
-        "verify overview and rule workbench have no page-level horizontal overflow"
+        "verify overview, rule workbench and point-calibration workbench have no page-level horizontal overflow"
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-mobile.png"
@@ -151,6 +152,30 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-point-catalog.png"
+    },
+    {
+      "id": "desktop-point-calibration-governance",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/points"
+      ],
+      "operations": [
+        "import a source-claimed VERIFIED point and verify it remains BLOCKED",
+        "submit certificate reference, SHA-256, calibration version and validity window",
+        "approve evidence through the independent review command",
+        "verify the exact point becomes READY with authoritative evidence identity",
+        "revoke the approved evidence and verify the point immediately returns to BLOCKED"
+      ],
+      "apis": [
+        "POST /bpi/v1/point-catalog/snapshots",
+        "GET /bpi/v1/point-catalog/current",
+        "GET /bpi/v1/point-calibrations",
+        "POST /bpi/v1/point-calibrations",
+        "POST /bpi/v1/point-calibrations/{id}/approve",
+        "POST /bpi/v1/point-calibrations/{id}/revoke"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-point-calibration-governance.png"
     },
     {
       "id": "desktop-topology-rule-productization",
@@ -212,6 +237,26 @@
         "/tmp/bpi-console-rule-publication-retried.png",
         "/tmp/bpi-console-rule-application-rejected.png"
       ]
+    },
+    {
+      "id": "desktop-point-readiness-publication-blocker",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/rules"
+      ],
+      "operations": [
+        "submit a passed replay for approval",
+        "attempt independent publication while required point bindings are not READY",
+        "verify HTTP 422 remains a failed command rather than a false publication",
+        "verify raw POINT_* codes are translated into actionable Chinese business wording"
+      ],
+      "apis": [
+        "POST /bpi/v1/rules/{id}/simulate",
+        "POST /bpi/v1/rules/{id}/submit-approval",
+        "POST /bpi/v1/rules/{id}/publish"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-rule-publication-blocked.png"
     }
   ],
   "persistence": {
@@ -222,8 +267,8 @@
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
-    "The Java 8 authentication adapter and ADP session bridge have prior target evidence; this run did not redeploy the V13 runtime-readiness changes to the target environment.",
-    "The console has isolated Compose/Nginx assets, but the target MES shell menu and RBAC browser path remain pending while the host disk gate is closed.",
+    "The Java 8 authentication adapter and ADP session bridge have separate target evidence; this deterministic browser suite did not retest the target environment.",
+    "Target MES shell, PostgreSQL and RBAC persistence acceptance are tracked separately and are not implied by these simulator results.",
     "Flink application and runtime-readiness states were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]

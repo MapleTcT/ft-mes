@@ -204,6 +204,10 @@ test('mobile layout keeps navigation usable without page-level horizontal overfl
   await page.getByRole('heading', { name: '规则与拓扑' }).waitFor();
   const ruleDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   assert.ok(ruleDimensions.scroll <= ruleDimensions.client, `rules page overflow: ${JSON.stringify(ruleDimensions)}`);
+  await page.locator('[data-view="points"]').click();
+  await page.getByRole('heading', { name: '点位目录' }).waitFor();
+  const pointDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  assert.ok(pointDimensions.scroll <= pointDimensions.client, `points page overflow: ${JSON.stringify(pointDimensions)}`);
   await page.screenshot({ path: '/tmp/bpi-console-mobile.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
@@ -272,11 +276,103 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   await page.getByText('点位快照已导入：0/1 就绪').waitFor();
   await page.getByText('未就绪液位点', { exact: true }).waitFor();
   await page.getByText('BLOCKED', { exact: true }).waitFor();
-  await page.getByText('设备未注册、设备未激活、设备属性不可用、单位缺失、标定未验证、来源序列未启用', { exact: true }).waitFor();
+  await page.getByText('设备未注册、设备未激活、设备属性不可用、单位缺失、校准证据未批准或已失效、来源序列未启用', { exact: true }).waitFor();
   const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
   assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
   assert.equal(current.data.snapshot.readyPointCount, 0);
   await page.screenshot({ path: '/tmp/bpi-console-point-catalog.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('independent calibration approval and revocation dynamically control point readiness', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/points`, { waitUntil: 'networkidle' });
+
+  const calibrationVersion = 'ADP_E2E_CAL_GOVERNANCE_0001';
+  await page.getByRole('button', { name: '导入快照' }).click();
+  await page.locator('#point-source-instance').fill('jetlinks-calibration-e2e');
+  await page.locator('#point-source-revision').fill('ADP_E2E_CAL_CATALOG_0001');
+  await page.locator('#point-import-json').fill(JSON.stringify([{
+    localityGroup: 'LOCALITY-S07-EVAP',
+    productId: 'PRODUCT-SUGAR',
+    deviceId: 'DEVICE-S07-CAL-E2E',
+    propertyId: 'flow.calibration.e2e',
+    sourcePropertyId: 'flowCalibrationE2e',
+    pointName: '校准治理验收流量点',
+    unit: 'm3/h',
+    dataType: 'double',
+    deviceState: 'ACTIVE',
+    registered: true,
+    propertyPresent: true,
+    calibrationVersion,
+    calibrationStatus: 'VERIFIED',
+    sourceSequenceEnabled: true,
+  }], null, 2));
+  await page.locator('#point-import-reason').fill('验证来源 VERIFIED 不能绕过 MES 校准审批');
+  await page.getByRole('button', { name: '导入快照', exact: true }).last().click();
+
+  await page.getByText('点位快照已导入：0/1 就绪').waitFor();
+  const pointRow = page.locator('[data-point-id]').filter({ hasText: '校准治理验收流量点' });
+  await pointRow.getByText('VERIFIED', { exact: true }).waitFor();
+  await pointRow.getByText('UNVERIFIED', { exact: true }).waitFor();
+  await pointRow.getByText('BLOCKED', { exact: true }).waitFor();
+
+  await pointRow.getByRole('button', { name: '提交证据' }).click();
+  await page.getByRole('heading', { name: '提交点位校准证据' }).waitFor();
+  assert.equal(await page.locator('#calibration-version').inputValue(), calibrationVersion);
+  const localInput = (value) => {
+    const date = new Date(value);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 19);
+  };
+  await page.locator('#calibration-certificate').fill('urn:adp:e2e:calibration:governance:0001');
+  await page.locator('#calibration-checksum').fill('c'.repeat(64));
+  await page.locator('#calibration-valid-from').fill(localInput(Date.now() - 86_400_000));
+  await page.locator('#calibration-valid-until').fill(localInput(Date.now() + 365 * 86_400_000));
+  await page.locator('#calibration-reason').fill('提交受控证书并申请独立复核');
+  await page.getByRole('button', { name: '提交复核' }).click();
+  await page.getByText(new RegExp(`校准证据 ${calibrationVersion} 已提交`)).waitFor();
+
+  let calibrationRow = page.locator('[data-calibration-row]').filter({ hasText: calibrationVersion });
+  await calibrationRow.getByText('PENDING', { exact: true }).first().waitFor();
+  await calibrationRow.getByRole('button', { name: '批准', exact: true }).click();
+  await page.getByRole('heading', { name: '批准校准证据' }).waitFor();
+  await page.locator('#confirm-reason').fill('独立管理员复核证书、校验和和有效期');
+  await page.getByRole('button', { name: '批准证据' }).click();
+  await page.getByText('校准证据已批准，系统将按版本、有效期和来源序列重新计算准入').waitFor();
+
+  await pointRow.getByText('READY', { exact: true }).waitFor();
+  calibrationRow = page.locator('[data-calibration-row]').filter({ hasText: calibrationVersion });
+  await calibrationRow.getByText('EFFECTIVE', { exact: true }).waitFor();
+  const approved = await fetch(`${simulatorUrl}/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
+  const approvedEvidence = approved.data.find((item) => item.calibrationVersion === calibrationVersion);
+  assert.equal(approvedEvidence.state, 'APPROVED');
+  assert.equal(approvedEvidence.effective, true);
+
+  await calibrationRow.getByRole('button', { name: '撤销', exact: true }).click();
+  await page.getByRole('heading', { name: '撤销已批准证据' }).waitFor();
+  await page.locator('#confirm-reason').fill('验收撤销后立即重新阻断点位');
+  await page.getByRole('button', { name: '撤销证据' }).click();
+  await page.getByText('校准证据已撤销，相关点位已重新阻断').waitFor();
+  await pointRow.getByText('BLOCKED', { exact: true }).waitFor();
+  calibrationRow = page.locator('[data-calibration-row]').filter({ hasText: calibrationVersion });
+  await calibrationRow.getByText('simulated.bpi.revoker', { exact: true }).waitFor();
+
+  const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
+  const revoked = await fetch(`${simulatorUrl}/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
+  const revokedEvidence = revoked.data.find((item) => item.calibrationVersion === calibrationVersion);
+  assert.equal(current.data.snapshot.readyPointCount, 0);
+  assert.equal(current.data.points[0].sourceCalibrationStatus, 'VERIFIED');
+  assert.equal(current.data.points[0].calibrationStatus, 'UNVERIFIED');
+  assert.equal(current.data.points[0].calibrationEvidenceId, null);
+  assert.equal(revokedEvidence.state, 'REVOKED');
+  assert.equal(revokedEvidence.effective, false);
+  assert.equal(revokedEvidence.revokedBy, 'simulated.bpi.revoker');
+  await page.screenshot({ path: '/tmp/bpi-console-point-calibration-governance.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
 });

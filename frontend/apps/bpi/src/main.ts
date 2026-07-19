@@ -31,6 +31,8 @@ import type {
   PointCatalogPointCommand,
   PointCatalogSnapshotCommand,
   PointCatalogView,
+  PointCalibration,
+  PointCalibrationSubmitCommand,
   ResponseMeta,
   RuleSimulation,
   RuleSimulationCommand,
@@ -62,15 +64,18 @@ const state = {
   rules: [] as RuleVersion[],
   topologies: [] as TopologyVersion[],
   pointCatalog: null as PointCatalogView | null,
+  calibrations: [] as PointCalibration[],
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
   selectedRule: null as RuleVersion | null,
   selectedTopology: null as TopologyVersion | null,
   selectedSimulation: null as RuleSimulation | null,
+  selectedCalibration: null as PointCalibration | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
+  calibrationCommand: null as 'approve' | 'reject' | 'revoke' | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
   timeline: [] as StateEvent[],
   error: null as Error | null,
@@ -106,9 +111,9 @@ function number(value: number | null | undefined, digits = 1): string {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED'].includes(status)) return 'ok';
-  if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED'].includes(status)) return 'warn';
-  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED'].includes(status)) return 'danger';
+  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED'].includes(status)) return 'ok';
+  if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE'].includes(status)) return 'warn';
+  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -303,6 +308,23 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="point-catalog-submit" value="default" class="button button--primary">导入快照</button></footer>
         </form>
       </dialog>
+      <dialog id="point-calibration-dialog" class="command-dialog editor-dialog">
+        <form method="dialog" id="point-calibration-form">
+          <header><div><span>校准治理</span><h2>提交点位校准证据</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="editor-fields">
+            <label><span>产品</span><input id="calibration-product" required maxlength="128" /></label>
+            <label><span>设备</span><input id="calibration-device" required maxlength="128" /></label>
+            <label><span>属性</span><input id="calibration-property" required maxlength="128" /></label>
+            <label><span>校准版本</span><input id="calibration-version" required maxlength="128" /></label>
+            <label class="editor-field--wide"><span>证书引用</span><input id="calibration-certificate" required maxlength="512" placeholder="受控文档编号、MinIO URI 或证书 URI" /></label>
+            <label class="editor-field--wide"><span>证书 SHA-256</span><input id="calibration-checksum" required minlength="64" maxlength="64" pattern="[a-f0-9]{64}" class="mono-input" /></label>
+            <label><span>有效开始</span><input id="calibration-valid-from" type="datetime-local" step="1" required /></label>
+            <label><span>有效截止</span><input id="calibration-valid-until" type="datetime-local" step="1" required /></label>
+            <label class="editor-field--wide"><span>提交原因</span><textarea id="calibration-reason" required minlength="3" maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="point-calibration-submit" value="default" class="button button--primary">提交复核</button></footer>
+        </form>
+      </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>`;
   document.querySelector<HTMLSelectElement>('#plant-id')!.value = state.plantId;
@@ -338,6 +360,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#topology-editor-form')?.addEventListener('submit', handleTopologyDraft);
   document.querySelector<HTMLFormElement>('#rule-editor-form')?.addEventListener('submit', handleRuleDraft);
   document.querySelector<HTMLFormElement>('#point-catalog-form')?.addEventListener('submit', handlePointCatalogImport);
+  document.querySelector<HTMLFormElement>('#point-calibration-form')?.addEventListener('submit', handlePointCalibrationSubmit);
   document.querySelector<HTMLSelectElement>('#topology-base')?.addEventListener('change', applyTopologyBase);
   document.querySelector<HTMLSelectElement>('#rule-base')?.addEventListener('change', applyRuleBase);
 }
@@ -369,9 +392,13 @@ async function loadView(silent = false): Promise<void> {
       state.batches = response.data;
       state.meta = response.meta;
     } else if (state.view === 'points') {
-      const response = await bpiApi.currentPointCatalog(state.plantId, state.pointLineId);
-      state.pointCatalog = response.data;
-      state.meta = response.meta;
+      const [catalog, calibrations] = await Promise.all([
+        bpiApi.currentPointCatalog(state.plantId, state.pointLineId),
+        bpiApi.listPointCalibrations(state.plantId, state.pointLineId),
+      ]);
+      state.pointCatalog = catalog.data;
+      state.calibrations = calibrations.data;
+      state.meta = catalog.meta;
     } else {
       const [rules, topologies] = await Promise.all([
         bpiApi.rules(state.plantId),
@@ -522,6 +549,7 @@ function openCandidateCommandDialog(command: 'confirm' | 'reject'): void {
   state.batchCommand = null;
   state.ruleCommand = null;
   state.topologyCommand = null;
+  state.calibrationCommand = null;
   const isReject = command === 'reject';
   const isEnd = candidate.boundaryType === 'END';
   document.querySelector('#command-kicker')!.textContent = '候选批次';
@@ -556,6 +584,10 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
   const submitter = event.submitter as HTMLButtonElement | null;
   if (submitter?.value === 'cancel') return;
   event.preventDefault();
+  if (state.calibrationCommand) {
+    await handlePointCalibrationCommand();
+    return;
+  }
   if (state.topologyCommand) {
     await handleTopologyCommand();
     return;
@@ -634,7 +666,7 @@ function pointIssueLabel(code: string): string {
     PROPERTY_NOT_AVAILABLE: '设备属性不可用',
     UNIT_MISSING: '单位缺失',
     UNIT_MISMATCH: '单位与规则要求不一致',
-    CALIBRATION_NOT_VERIFIED: '标定未验证',
+    CALIBRATION_NOT_VERIFIED: '校准证据未批准或已失效',
     SOURCE_SEQUENCE_DISABLED: '来源序列未启用',
     CATALOG_BINDING_NOT_FOUND: '点位目录中找不到规则绑定',
     CATALOG_SNAPSHOT_MISSING: '当前产线没有点位目录快照',
@@ -661,12 +693,59 @@ function rulePublicationProblemMessage(error: ApiProblem): string {
   return `规则未发布：当前点位未通过运行准入${reasons}。请先在点位目录修复后重新校验。`;
 }
 
+function calibrationEffectivenessLabel(status: PointCalibration['effectivenessStatus']): string {
+  const labels: Record<PointCalibration['effectivenessStatus'], string> = {
+    PENDING: '待独立复核',
+    REJECTED: '已驳回',
+    REVOKED: '已撤销',
+    NOT_YET_EFFECTIVE: '尚未生效',
+    EXPIRED: '已过期',
+    EFFECTIVE: '当前有效',
+  };
+  return labels[status];
+}
+
+function pointCalibrationSection(): string {
+  const rows = state.calibrations.map((calibration) => {
+    const lifecycleStatus = calibration.state === calibration.effectivenessStatus
+      ? statusChip(calibration.state)
+      : `${statusChip(calibration.state)}${statusChip(calibration.effectivenessStatus)}`;
+    const actions = calibration.state === 'PENDING'
+      ? `<button type="button" class="button button--danger button--compact" data-calibration-action="reject" data-calibration-id="${escapeHtml(calibration.id)}">驳回</button><button type="button" class="button button--primary button--compact" data-calibration-action="approve" data-calibration-id="${escapeHtml(calibration.id)}">批准</button>`
+      : calibration.state === 'APPROVED'
+        ? `<button type="button" class="button button--danger button--compact" data-calibration-action="revoke" data-calibration-id="${escapeHtml(calibration.id)}">撤销</button>`
+        : '-';
+    const latestActor = calibration.state === 'REVOKED'
+      ? calibration.revokedBy
+      : calibration.decidedBy;
+    const latestActionAt = calibration.state === 'REVOKED'
+      ? calibration.revokedAt
+      : calibration.decidedAt;
+    return `<tr data-calibration-row="${escapeHtml(calibration.id)}">
+      <td><strong>${escapeHtml(calibration.productId)} / ${escapeHtml(calibration.deviceId)}</strong><small>${escapeHtml(calibration.propertyId)}</small></td>
+      <td><strong>${escapeHtml(calibration.calibrationVersion)}</strong><small>r${calibration.revision}</small></td>
+      <td><strong>${escapeHtml(calibration.certificateReference)}</strong><small class="mono-value">${escapeHtml(calibration.certificateChecksum)}</small></td>
+      <td><strong>${formatTime(calibration.validFrom)}</strong><small>至 ${formatTime(calibration.validUntil)}</small></td>
+      <td><div class="status-stack">${lifecycleStatus}</div><small>${escapeHtml(calibrationEffectivenessLabel(calibration.effectivenessStatus))}</small></td>
+      <td><strong>${escapeHtml(calibration.submittedBy)}</strong><small>${formatTime(calibration.submittedAt)}</small></td>
+      <td><strong>${escapeHtml(latestActor || '-')}</strong><small>${formatTime(latestActionAt)}</small></td>
+      <td><div class="table-actions">${actions}</div></td>
+    </tr>`;
+  }).join('');
+  return `<section class="calibration-workbench">
+    <div class="section-bar"><div><i data-lucide="shield-check"></i><strong>MES 校准证据</strong></div><span>${state.calibrations.length} 条受控记录</span></div>
+    ${rows
+      ? `<div class="table-frame table-frame--flush"><table class="calibration-table"><thead><tr><th>点位</th><th>校准版本</th><th>证书 / 校验和</th><th>有效期</th><th>状态</th><th>提交人</th><th>最近处置人</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>`
+      : '<div class="calibration-empty">当前产线没有 MES 批准的校准证据。来源系统的 VERIFIED 声明不会自动放行点位。</div>'}
+  </section>`;
+}
+
 function renderPoints(): void {
   const content = document.querySelector<HTMLElement>('#content')!;
   const catalog = state.pointCatalog;
-  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" placeholder="产品、设备、属性" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
+  const toolbar = `<div class="toolbar"><label class="search-field"><i data-lucide="search"></i><input id="point-search" placeholder="产品、设备、属性、证书" /></label><div class="toolbar-actions"><label class="line-field"><span>产线</span><input id="point-line" value="${escapeHtml(state.pointLineId)}" /></label><button id="load-point-line" class="icon-button" title="加载产线" aria-label="加载产线"><i data-lucide="refresh-cw"></i></button><button id="new-point-calibration" class="icon-text-button"><i data-lucide="plus"></i><span>提交校准证据</span></button><button id="import-point-catalog" class="icon-text-button"><i data-lucide="upload"></i><span>导入快照</span></button></div></div>`;
   if (!catalog) {
-    content.innerHTML = `${toolbar}<div class="empty-state"><i data-lucide="database"></i><strong>该产线没有点位目录快照</strong><span>${escapeHtml(state.plantId)} / ${escapeHtml(state.pointLineId)}</span></div>`;
+    content.innerHTML = `${toolbar}<div class="empty-state"><i data-lucide="database"></i><strong>该产线没有点位目录快照</strong><span>${escapeHtml(state.plantId)} / ${escapeHtml(state.pointLineId)}</span></div>${pointCalibrationSection()}`;
     bindPointPageEvents(content);
     return;
   }
@@ -677,9 +756,11 @@ function renderPoints(): void {
       <td>${escapeHtml(point.productId)}</td><td>${escapeHtml(point.deviceId)}</td>
       <td>${statusChip(point.deviceState)}<small>${point.registered ? '已注册' : '未注册'}</small></td>
       <td>${point.propertyPresent ? '已发现' : '缺失'}</td><td>${escapeHtml(point.unit || '-')}</td>
-      <td>${escapeHtml(point.calibrationVersion || '-')}<small>${escapeHtml(point.calibrationStatus)}</small></td>
+      <td>${statusChip(point.sourceCalibrationStatus)}<small>来源系统声明</small></td>
+      <td><strong>${escapeHtml(point.calibrationVersion || '-')}</strong><div class="status-stack">${statusChip(point.calibrationStatus)}</div><small>${point.calibrationValidUntil ? `证据有效至 ${formatTime(point.calibrationValidUntil)}` : '无有效证据'}</small></td>
       <td>${point.sourceSequenceEnabled ? '已启用' : '未启用'}</td>
       <td>${statusChip(point.ready ? 'READY' : 'BLOCKED')}<small>${escapeHtml(point.readinessIssues.map(pointIssueLabel).join('、') || '准入通过')}</small></td>
+      <td><button type="button" class="button button--secondary button--compact" data-point-calibrate="${escapeHtml(point.id)}">提交证据</button></td>
     </tr>`).join('');
   content.innerHTML = `${toolbar}
     <div class="point-summary">
@@ -690,12 +771,23 @@ function renderPoints(): void {
       <div><span>观测时间</span><b>${formatTime(snapshot.observedAt)}</b></div>
       <div><span>快照校验和</span><b class="mono-value">${escapeHtml(snapshot.checksum)}</b></div>
     </div>
-    ${rows ? `<div class="table-frame"><table class="point-table"><thead><tr><th>点位</th><th>产品</th><th>设备</th><th>设备状态</th><th>属性</th><th>单位</th><th>标定</th><th>源序列</th><th>准入状态</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="database"></i><strong>快照中没有可用点位</strong><span>${escapeHtml(snapshot.sourceRevision)}</span></div>`}`;
+    ${rows ? `<div class="table-frame"><table class="point-table"><thead><tr><th>点位</th><th>产品</th><th>设备</th><th>设备状态</th><th>属性</th><th>单位</th><th>来源声明</th><th>MES 校准证据</th><th>源序列</th><th>准入状态</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="database"></i><strong>快照中没有可用点位</strong><span>${escapeHtml(snapshot.sourceRevision)}</span></div>`}
+    ${pointCalibrationSection()}`;
   bindPointPageEvents(content);
 }
 
 function bindPointPageEvents(content: HTMLElement): void {
   content.querySelector('#import-point-catalog')?.addEventListener('click', openPointCatalogImport);
+  content.querySelector('#new-point-calibration')?.addEventListener('click', () => openPointCalibrationSubmit());
+  content.querySelectorAll<HTMLButtonElement>('[data-point-calibrate]').forEach((button) => button.addEventListener('click', () => {
+    const point = state.pointCatalog?.points.find((item) => item.id === button.dataset.pointCalibrate);
+    openPointCalibrationSubmit(point);
+  }));
+  content.querySelectorAll<HTMLButtonElement>('[data-calibration-action]').forEach((button) => button.addEventListener('click', () => {
+    const calibration = state.calibrations.find((item) => item.id === button.dataset.calibrationId);
+    const command = button.dataset.calibrationAction as 'approve' | 'reject' | 'revoke' | undefined;
+    if (calibration && command) openPointCalibrationCommand(calibration, command);
+  }));
   const load = (): void => {
     const value = content.querySelector<HTMLInputElement>('#point-line')?.value.trim();
     if (!value) return;
@@ -709,10 +801,130 @@ function bindPointPageEvents(content: HTMLElement): void {
   });
   content.querySelector<HTMLInputElement>('#point-search')?.addEventListener('input', (event) => {
     const keyword = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    content.querySelectorAll<HTMLTableRowElement>('[data-point-id]').forEach((row) => {
+    content.querySelectorAll<HTMLTableRowElement>('[data-point-id], [data-calibration-row]').forEach((row) => {
       row.hidden = !row.textContent!.toLowerCase().includes(keyword);
     });
   });
+}
+
+function localDateTimeValue(date: Date): string {
+  const value = new Date(date);
+  value.setMinutes(value.getMinutes() - value.getTimezoneOffset());
+  return value.toISOString().slice(0, 19);
+}
+
+function openPointCalibrationSubmit(point?: PointCatalogView['points'][number]): void {
+  state.selectedCalibration = null;
+  state.calibrationCommand = null;
+  document.querySelector<HTMLInputElement>('#calibration-product')!.value = point?.productId || '';
+  document.querySelector<HTMLInputElement>('#calibration-device')!.value = point?.deviceId || '';
+  document.querySelector<HTMLInputElement>('#calibration-property')!.value = point?.propertyId || '';
+  document.querySelector<HTMLInputElement>('#calibration-version')!.value = point?.calibrationVersion || '';
+  document.querySelector<HTMLInputElement>('#calibration-certificate')!.value = '';
+  document.querySelector<HTMLInputElement>('#calibration-checksum')!.value = '';
+  const now = new Date();
+  const nextYear = new Date(now);
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  document.querySelector<HTMLInputElement>('#calibration-valid-from')!.value = localDateTimeValue(now);
+  document.querySelector<HTMLInputElement>('#calibration-valid-until')!.value = localDateTimeValue(nextYear);
+  document.querySelector<HTMLTextAreaElement>('#calibration-reason')!.value = '';
+  document.querySelector<HTMLDialogElement>('#point-calibration-dialog')!.showModal();
+}
+
+async function handlePointCalibrationSubmit(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  const validFrom = new Date(document.querySelector<HTMLInputElement>('#calibration-valid-from')!.value);
+  const validUntil = new Date(document.querySelector<HTMLInputElement>('#calibration-valid-until')!.value);
+  if (Number.isNaN(validFrom.getTime()) || Number.isNaN(validUntil.getTime()) || validUntil <= validFrom) {
+    showToast('校准有效截止时间必须晚于开始时间', true);
+    return;
+  }
+  const command: PointCalibrationSubmitCommand = {
+    plantId: state.plantId,
+    lineId: state.pointLineId,
+    productId: document.querySelector<HTMLInputElement>('#calibration-product')!.value.trim(),
+    deviceId: document.querySelector<HTMLInputElement>('#calibration-device')!.value.trim(),
+    propertyId: document.querySelector<HTMLInputElement>('#calibration-property')!.value.trim(),
+    calibrationVersion: document.querySelector<HTMLInputElement>('#calibration-version')!.value.trim(),
+    certificateReference: document.querySelector<HTMLInputElement>('#calibration-certificate')!.value.trim(),
+    certificateChecksum: document.querySelector<HTMLInputElement>('#calibration-checksum')!.value.trim().toLowerCase(),
+    validFrom: validFrom.toISOString(),
+    validUntil: validUntil.toISOString(),
+    reason: document.querySelector<HTMLTextAreaElement>('#calibration-reason')!.value.trim(),
+  };
+  const button = document.querySelector<HTMLButtonElement>('#point-calibration-submit')!;
+  button.disabled = true;
+  button.textContent = '提交中...';
+  try {
+    const response = await bpiApi.submitPointCalibration(command, commandId());
+    state.calibrations = [response.data, ...state.calibrations];
+    document.querySelector<HTMLDialogElement>('#point-calibration-dialog')!.close();
+    showToast(`校准证据 ${response.data.calibrationVersion} 已提交，等待独立管理员复核`);
+    await loadView(true);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '提交复核';
+  }
+}
+
+function openPointCalibrationCommand(calibration: PointCalibration, command: 'approve' | 'reject' | 'revoke'): void {
+  state.selectedCalibration = calibration;
+  state.calibrationCommand = command;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.ruleCommand = null;
+  state.topologyCommand = null;
+  const labels = command === 'approve'
+    ? { kicker: '校准证据复核', title: '批准校准证据', field: '批准依据', button: '批准证据', danger: false }
+    : command === 'reject'
+      ? { kicker: '校准证据复核', title: '驳回校准证据', field: '驳回原因', button: '驳回证据', danger: true }
+      : { kicker: '校准证据治理', title: '撤销已批准证据', field: '撤销原因', button: '撤销证据', danger: true };
+  document.querySelector('#command-kicker')!.textContent = labels.kicker;
+  document.querySelector('#command-title')!.textContent = labels.title;
+  document.querySelector('#command-reason-label')!.textContent = labels.field;
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>点位</span><b>${escapeHtml(calibration.productId)} / ${escapeHtml(calibration.deviceId)} / ${escapeHtml(calibration.propertyId)}</b></div><div><span>校准版本</span><b>${escapeHtml(calibration.calibrationVersion)}</b></div><div><span>证书</span><b>${escapeHtml(calibration.certificateReference)}</b></div><div><span>有效截止</span><b>${formatTime(calibration.validUntil)}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = command === 'approve' ? '填写证书、校验和和有效期复核依据' : '填写可审计的处置原因';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = `button ${labels.danger ? 'button--danger' : 'button--primary'}`;
+  button.textContent = labels.button;
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handlePointCalibrationCommand(): Promise<void> {
+  const calibration = state.selectedCalibration;
+  const command = state.calibrationCommand;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (!calibration || !command || reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  const buttonLabel = command === 'approve' ? '批准证据' : command === 'reject' ? '驳回证据' : '撤销证据';
+  button.disabled = true;
+  button.textContent = command === 'approve' ? '批准中...' : command === 'reject' ? '驳回中...' : '撤销中...';
+  try {
+    const response = command === 'approve'
+      ? await bpiApi.approvePointCalibration(calibration, reason, commandId())
+      : command === 'reject'
+        ? await bpiApi.rejectPointCalibration(calibration, reason, commandId())
+        : await bpiApi.revokePointCalibration(calibration, reason, commandId());
+    state.selectedCalibration = response.data;
+    state.calibrations = state.calibrations.map((item) => item.id === response.data.id ? response.data : item);
+    state.calibrationCommand = null;
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    showToast(command === 'approve' ? '校准证据已批准，系统将按版本、有效期和来源序列重新计算准入' : command === 'reject' ? '校准证据已驳回' : '校准证据已撤销，相关点位已重新阻断');
+    await loadView(true);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) await loadView(true);
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = buttonLabel;
+  }
 }
 
 function openPointCatalogImport(): void {
@@ -848,6 +1060,7 @@ function openTopologyCommandDialog(command: 'validate' | 'publish'): void {
   state.candidateCommand = null;
   state.batchCommand = null;
   state.ruleCommand = null;
+  state.calibrationCommand = null;
   const publish = command === 'publish';
   document.querySelector('#command-kicker')!.textContent = publish ? '拓扑版本控制' : '拓扑结构校验';
   document.querySelector('#command-title')!.textContent = publish ? '发布不可变拓扑版本' : '校验拓扑与测点绑定';
@@ -1181,6 +1394,7 @@ function openRulePublishDialog(command: 'submit' | 'approve'): void {
   state.batchCommand = null;
   state.topologyCommand = null;
   state.ruleCommand = command;
+  state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = '规则版本控制';
   document.querySelector('#command-title')!.textContent = command === 'submit' ? '提交规则审批' : '批准并发布边界规则';
   document.querySelector('#command-reason-label')!.textContent = command === 'submit' ? '提交依据' : '审批依据';
@@ -1237,6 +1451,7 @@ function openRuleRejectDialog(): void {
   state.batchCommand = null;
   state.topologyCommand = null;
   state.ruleCommand = 'reject';
+  state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = '规则版本审批';
   document.querySelector('#command-title')!.textContent = '驳回规则审批';
   document.querySelector('#command-reason-label')!.textContent = '驳回原因';
@@ -1258,6 +1473,7 @@ function openRuleRetryDialog(): void {
   state.batchCommand = null;
   state.topologyCommand = null;
   state.ruleCommand = 'retry';
+  state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = '规则发布运维';
   document.querySelector('#command-title')!.textContent = '重新入队失败事件';
   document.querySelector('#command-reason-label')!.textContent = '重试依据';
@@ -1279,6 +1495,7 @@ function openRuleRetireDialog(): void {
   state.batchCommand = null;
   state.topologyCommand = null;
   state.ruleCommand = 'retire';
+  state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = '规则生命周期';
   document.querySelector('#command-title')!.textContent = '退役边界规则';
   document.querySelector('#command-reason-label')!.textContent = '退役依据';
@@ -1408,6 +1625,7 @@ function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
   state.batchCommand = command;
   state.ruleCommand = null;
   state.topologyCommand = null;
+  state.calibrationCommand = null;
   document.querySelector('#command-kicker')!.textContent = '批次运行控制';
   document.querySelector('#command-title')!.textContent = isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
   document.querySelector('#command-reason-label')!.textContent = isSuspend ? '暂停原因' : '恢复原因';
