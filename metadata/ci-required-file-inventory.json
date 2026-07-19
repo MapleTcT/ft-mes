@@ -4977,6 +4977,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-feature-flag-governance-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-flink-data-quality-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5296,6 +5302,30 @@
     {
       "ignored": false,
       "path": "metadata/bpi-data-quality-workbench-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-feature-flag-governance-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-feature-flag-governance-disabled.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-feature-flag-governance-final.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-feature-flag-governance-mobile.png",
       "state": "tracked",
       "tracked": true
     },
@@ -6243,6 +6273,12 @@
     },
     {
       "ignored": false,
+      "path": "scripts/verify-bpi-feature-flag-governance.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "scripts/verify-bpi-service.py",
       "state": "tracked",
       "tracked": true
@@ -6537,6 +6573,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/FeatureFlagService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/OverviewService.java",
       "state": "tracked",
       "tracked": true
@@ -6754,6 +6796,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/EvidenceView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/FeatureFlagRecord.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/FeatureFlagView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7113,6 +7167,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/FeatureFlagPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/IdempotencyRecord.java",
       "state": "tracked",
       "tracked": true
@@ -7210,6 +7270,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/DataQualityController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/FeatureFlagController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/FeatureFlagOverrideCommand.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7425,6 +7497,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V21__bpi_feature_flag_governance.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
       "state": "tracked",
       "tracked": true
@@ -7480,6 +7558,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiFeatureFlagPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8405,13 +8489,13 @@
       "tracked": 570
     },
     "docs": {
-      "tracked": 102
+      "tracked": 103
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 148
+      "tracked": 152
     },
     "package.json": {
       "tracked": 1
@@ -8420,10 +8504,10 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 53
+      "tracked": 54
     },
     "services": {
-      "tracked": 224
+      "tracked": 232
     },
     "simulation": {
       "tracked": 4
@@ -8435,8 +8519,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1396,
-    "tracked": 1396,
+    "totalFiles": 1410,
+    "tracked": 1410,
     "untracked": 0
   },
   "untrackedByDirectory": []

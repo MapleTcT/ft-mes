@@ -635,6 +635,19 @@ KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目�
 `docs/testing/bpi-point-catalog-pagination-acceptance.md`。本项只验收读取、快照一致性和清理，不把受控
 marker 点位或目标现有 1 点解释为现场业务就绪。
 
+### BPI 运行开关治理（目标 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| LINE 级显式禁用批次人工命令 | `http://10.11.100.17:18080/bpi/#/featureFlags` | `POST /bpi-api/feature-flags/bpi.commands` | `FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository` | `bpi.bpi_feature_flags`、`bpi.bpi_audit_events`、`bpi.bpi_api_idempotency` | 按 `tenant_id=1000/scope_type=LINE/scope_key=LINE-S07-01/flag_key=bpi.commands` 查询覆盖，并按 marker 查询审计与幂等 | `If-Match: 0`、SET false 返回 200；覆盖为 `enabled=false/active=true/r1`，审计 `FEATURE_FLAG_DISABLED 0->1`，幂等 `COMPLETED/200` | PASS |
+| 恢复上级继承 | 同上 | 同 POST | 同上 | 同上 | 查询覆盖 `active/revision/last_reason`，以及第二条审计和幂等记录 | `If-Match: 1`、INHERIT 返回 200；覆盖为 `active=false/r2`，有效来源恢复 GLOBAL；审计 `FEATURE_FLAG_OVERRIDE_REMOVED 1->2`，第二个幂等键 `COMPLETED/200` | PASS |
+| marker 定向清理并保护基线 | 不适用 | 清理后以同一真实页面 GET 复验 | 目标测试环境专用事务 SQL；随后走正常读取链 | 同上 | 按 marker reason 和两个精确幂等键删除；查询 marker 三表计数、全局开关数和既有规则管理覆盖 | 清理前开关/审计/幂等 `1/2/2`；事务删除 `1/2/2`；清理后 `0/0/0`，全局种子仍为 6，既有 `bpi.rule-management` LINE 覆盖仍为 active/r6 | PASS_TARGET_GOVERNED_CLEANED |
+
+唯一 marker：`ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838`。机器记录：
+`metadata/bpi-feature-flag-governance-acceptance.json`；详细报告：
+`docs/testing/bpi-feature-flag-governance-acceptance.md`。本项只允许修改 BPI 自身治理表；WOM、QCS、
+WMS、PLC/DCS 写入均为 0，Phase 1 三个写回/自动化门禁保持锁定。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

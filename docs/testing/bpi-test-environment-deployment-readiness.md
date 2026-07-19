@@ -6,12 +6,13 @@
 2026-07-15 将拓扑/规则产品化和点位目录自动同步版本部署到同一运行栈，后续以 expand-only
 迁移推进到 Flyway V16。此前的磁盘阻断已经解除，既有 `adp-mes-newbase` Compose 未被替换或停止。
 
-2026-07-19 运行态复查确认 BPI Web、Java 8 adapter、Java 17 service 和 PostgreSQL 已并入唯一的
-`adp-mes-newbase` Compose，正式页面入口为 `http://100.99.133.43:18080/bpi/`；早期独立
+2026-07-20 运行态复查确认 BPI Web、Java 8 adapter、Java 17 service 和 PostgreSQL 已并入唯一的
+`adp-mes-newbase` Compose，当前公司内网页面入口为 `http://10.11.100.17:18080/bpi/`；Tailscale
+`100.99.133.43` 是此前外网办公路径，早期独立
 `:18091` 页面入口不再作为当前地址。Kafka/Flink/MinIO 继续由隔离的 `ft-mes-bpi-streaming`
 Compose 承载。
 
-当前环境结论为 **PASS_PHASE1_APPLICATION_ROLLBACK**：目标环境运行健康，真实浏览器、Kafka/Flink、PostgreSQL、带负载 TaskManager 恢复、单 broker 故障恢复和 service/adapter/Flink 应用组件回退均已通过；同一 marker 的规则发布、应用回执、候选确认和影子批次落库链已经闭合。`MapleTcT/iot@41239b4e` 以独立受控 marker 跑通目标 JetLinks EventBus、exporter、Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生成内容寻址点位目录，经 Kafka 落入 BPI PostgreSQL 后由真实页面读取；来源序列 READY 还要求最近匹配配置的遥测先进入持久化 spool，并存在未过期的 `30m` Redis 证据。2026-07-15 使用 marker `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` 进一步闭合了页面拓扑创建、校验、创建人发布拒绝、独立管理员发布、拓扑绑定规则草稿、PostgreSQL 落库和服务重启后读取。该结论只覆盖受控 Phase 1 技术链；自动目录内仍是 1 点/0 READY，不代表真实网关/协议设备连续单调序列、IoT + MES context 同 marker 候选/批次、连续影子运行或生产投用完成。
+当前环境结论为 **PASS_PHASE1_FEATURE_FLAG_GOVERNANCE**：既有真实浏览器、Kafka/Flink、PostgreSQL、故障恢复和应用组件回退证据继续有效；源码 `0cf61838` 又将运行栈升级到 Flyway V21，并通过真实页面完成分层运行开关禁用、恢复继承、审计、幂等与 marker 清理。`MapleTcT/iot@41239b4e` 以独立受控 marker 跑通目标 JetLinks EventBus、exporter、Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生成内容寻址点位目录，经 Kafka 落入 BPI PostgreSQL 后由真实页面读取；来源序列 READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在未过期的 `30m` Redis 证据。该结论只覆盖受控 Phase 1 技术链；自动目录内仍是 1 点/0 READY，不代表真实网关/协议设备连续单调序列、IoT + MES context 同 marker 候选/批次、连续影子运行或生产投用完成。
 
 机器可读证据见 [`metadata/bpi-test-environment-acceptance.json`](../../metadata/bpi-test-environment-acceptance.json)。
 
@@ -19,8 +20,8 @@ Compose 承载。
 
 | 范围 | Compose project | 入口 | 结果 |
 |---|---|---|---|
-| ADP/MES + BPI Web/Adapter/Service/PostgreSQL | `adp-mes-newbase` | ADP `http://100.99.133.43:18080`；BPI `/bpi/` | 单套运行栈；Nginx、adapter、service、PostgreSQL 均在运行，BPI service/adapter healthy |
-| BPI Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | Flink REST `http://100.99.133.43:18081` | 3 broker、2 TaskManager、MinIO 和 Flink job 正常 |
+| ADP/MES + BPI Web/Adapter/Service/PostgreSQL | `adp-mes-newbase` | ADP `http://10.11.100.17:18080`；BPI `/bpi/` | 单套运行栈；Nginx、adapter、service、PostgreSQL 均在运行，BPI service/adapter healthy |
+| BPI Kafka/Flink/MinIO | `ft-mes-bpi-streaming` | Flink REST 仍按 Compose 绑定 `http://100.99.133.43:18081` | 3 broker、2 TaskManager、MinIO 和 Flink job 正常；该诊断端口未绑定公司内网 `10.11.100.17` |
 
 浏览器正常链路只使用同源 `/bpi-api`，Nginx 再转发到 Java 8 adapter。当前测试机仍将 service
 `19091` 和 adapter `19080` 发布到主机网络，属于测试诊断暴露面；生产部署必须改为回环绑定或由
@@ -30,12 +31,13 @@ Compose 承载。
 
 | 验收项 | 实际结果 | 状态 |
 |---|---|---|
-| Runtime smoke | Java 服务 `UP`、Web `UP`、adapter `UP`；数据库 `ft_mes_bpi` 当前为 Flyway V16 | PASS |
+| Runtime smoke | Java 服务 `UP`、Web `UP`、adapter `UP`；数据库 `ft_mes_bpi` 当前为 Flyway V21 | PASS |
 | 真实浏览器 | ADP 登录 `200`，`suposTicket` cookie 存在；BPI 页面 `200`，标题/品牌/概览/空态/SHADOW 均可见 | PASS |
 | 浏览器 API | `GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false` 返回 `200`；console/page/request error 均为 0 | PASS |
+| 运行开关治理 | `ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838` 在 `/bpi/#/featureFlags` 完成 LINE 禁用和恢复继承；PostgreSQL 清理前 `1/2/2`、清理后 `0/0/0`，桌面/移动 BPI 错误为 0 | PASS_TARGET_GOVERNED_CLEANED |
 | 认证桥接 | 旧平台不透明票据经可信 gateway 验证，服务端映射角色和 tenant/plant/line，再签发短期内部 JWT | PASS |
 | Kafka | 3 broker、12 个配置内 BPI 业务 topic，副本 3，`min.insync.replicas=2`；另保留 1 个 broker-chaos 验收 topic | PASS |
-| Flink | `ft-mes-bpi-batch-boundary-v1` 当前恢复 job `990e6d0d610ebe623f6845706d13f383` 为 `RUNNING`，33/33 task；应用回滚恢复后 checkpoint 2564，独立最终 smoke 推进到 2589、失败数 0 | PASS |
+| Flink | `ft-mes-bpi-batch-boundary-v1` 当前为 `RUNNING`、36/36 task；`100.99.133.43:18081/jobs/overview` 复查通过。历史应用回滚的 33-task checkpoint 证据继续保留 | PASS |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` 输入规则、上下文和 3 条遥测，只产生 1 个 committed candidate，数据质量错误 0 | PASS |
 | TaskManager 恢复 | 带负载重启 `bpi-taskmanager-2` 后 30/30 task 恢复，attempt `0 -> 1`，checkpoint `13 -> 14` | PASS |
 | 单 Broker 故障恢复 | `ADP_BPI_BROKER_CHAOS_20260719_1129` 停止 `kafka-2`；151 个分区无 unavailable/低于 minISR，marker 恰好一次，checkpoint `2481 -> 2482 -> 2483`、失败数 0；恢复后 ISR=3，标准 smoke checkpoint `2485` | PASS |
@@ -60,7 +62,7 @@ Compose 承载。
 ## 下一步验收顺序
 
 1. 把同一 marker 联合验收、单 broker 故障和应用组件双向回退固化为每次 BPI 发布前的目标环境回归基线。
-2. 保持 topology/rule 页面创建、校验、独立发布、版本比较、审批、受控退役、规则绑定和重启读取作为每次发布回归。
+2. 保持 topology/rule 页面创建、校验、独立发布、版本比较、审批、受控退役、规则绑定、运行开关治理和重启读取作为每次发布回归。
 3. 在生产等价维护窗口继续完成 BPI 跨组件整体回切和真实业务负载演练；数据库始终采用 expand-only，不执行破坏性降级。
 4. 把 `MapleTcT/iot@41239b4e` 接到真实网关/协议设备点位，补齐设备激活、属性 metadata、标定，并用多条真实事件证明持久来源序列连续单调和重连语义，等待自动目录生成新 revision；禁止手工伪造 READY。
 5. 用同一 marker 闭合真实设备 EventBus、exporter、Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链。
@@ -84,5 +86,8 @@ Compose 承载。
 - `/tmp/ADP_BPI_FLINK_ROLLBACK_20260719_120659.json`
 - `/data/docker/bpi-upgrade-backups/ADP_BPI_RUNTIME_ROLLBACK_20260719_120102`
 - `/data/docker/bpi-upgrade-backups/ADP_BPI_FLINK_ROLLBACK_20260719_120659`
+- `/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260719T194145Z_DEPLOY.txt`
+- `/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838-db-before-cleanup.txt`
+- `/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838-db-cleanup.txt`
 
-本地浏览器报告为 `/tmp/bpi-target-browser-smoke.json`、`/tmp/bpi-joint-browser-publish.json`、`/tmp/bpi-joint-browser-confirm.json`、`/tmp/bpi-joint-browser-read-after-cleanup.json`、`/tmp/bpi-point-catalog-sync-scope-20260715.json`、`/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-author.json`、`/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-finalize.json` 和 `/tmp/ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET-read.json`。联合验收细节见 [BPI 浏览器、Kafka/Flink 与 PostgreSQL 联合验收](bpi-browser-kafka-postgres-joint-acceptance.md)，点位目录自动同步见 [BPI 点位目录自动同步验收](bpi-point-catalog-kafka-sync-acceptance.md)，产品化配置验收见 [BPI 目标环境拓扑与规则产品化验收](bpi-target-topology-rule-acceptance.md)，应用组件回退见 [BPI 应用组件回滚验收](bpi-application-rollback-acceptance.md)。这些报告不包含密码、token、cookie 值或数据库连接密钥。
+本地浏览器报告包括 `/tmp/bpi-target-browser-smoke.json`、`/tmp/bpi-joint-browser-publish.json`、`/tmp/bpi-joint-browser-confirm.json`、`/tmp/bpi-joint-browser-read-after-cleanup.json`、`/tmp/bpi-feature-flags-browser-set.json`、`/tmp/bpi-feature-flags-browser-inherit.json`、`/tmp/bpi-feature-flags-browser-post-relabel.json` 和 `/tmp/bpi-feature-flags-browser-post-relabel-mobile.json`。联合验收细节见 [BPI 浏览器、Kafka/Flink 与 PostgreSQL 联合验收](bpi-browser-kafka-postgres-joint-acceptance.md)，点位目录自动同步见 [BPI 点位目录自动同步验收](bpi-point-catalog-kafka-sync-acceptance.md)，产品化配置验收见 [BPI 目标环境拓扑与规则产品化验收](bpi-target-topology-rule-acceptance.md)，应用组件回退见 [BPI 应用组件回滚验收](bpi-application-rollback-acceptance.md)，运行开关见 [BPI 运行开关治理目标验收](bpi-feature-flag-governance-acceptance.md)。这些报告不包含密码、token、cookie 值或数据库连接密钥。

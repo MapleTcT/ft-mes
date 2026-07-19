@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-18T08:15:00Z",
-  "repoCommit": "07b26131a319857429ae2e8f5803d5a4af3f910d+acceptance-worktree",
+  "generatedAt": "2026-07-19T19:57:18.898Z",
+  "repoCommit": "0cf61838e31623c29fadbc1dbca6b44854716079+target-acceptance-worktree",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-18T08:15:00Z",
+    "generatedAt": "2026-07-19T19:57:18.898Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -106,11 +106,17 @@
       "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
       "evidence": "metadata/bpi-rule-retirement-acceptance.json",
       "assertions": "real browser retire and candidate read; typed ACTIVATE/RETIRE; APPLIED and READY->INACTIVE; savepoint restore; delayed candidate/inbox 1/1 with batch 0; 11 cleanup categories zero"
+    },
+    "bpiFeatureFlagGovernance": {
+      "status": "PASS_TARGET_GOVERNED_CLEANED",
+      "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
+      "evidence": "metadata/bpi-feature-flag-governance-acceptance.json",
+      "assertions": "real ADP login and desktop/mobile feature-flag page; LINE SET false and INHERIT; PostgreSQL feature/audit/idempotency 1/2/2 before cleanup and 0/0/0 after cleanup; six global flags and pre-existing rule-management override preserved; no production-system writes"
     }
   },
   "summary": {
-    "testedFeatures": 178,
-    "pass": 175,
+    "testedFeatures": 179,
+    "pass": 176,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3809,9 +3815,35 @@
       "issues": [
         "Controlled Phase 1 replay only: the candidate was intentionally not confirmed, and this item does not claim real-device continuous operation, END boundary, WOM/QCS/WMS writeback or production readiness."
       ]
+    },
+    {
+      "module": "BPI 运行开关治理",
+      "route": "/bpi/#/featureFlags",
+      "operation": "LINE 级显式禁用批次人工命令，恢复上级继承并定向清理 marker",
+      "api": "POST /bpi-api/feature-flags/bpi.commands; GET /bpi-api/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
+      "verificationSql": "SELECT tenant_id,scope_type,scope_key,flag_key,enabled,active,revision,updated_by,last_reason FROM bpi.bpi_feature_flags WHERE last_reason LIKE 'ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838%'; SELECT action,before_revision,after_revision,actor,reason FROM bpi.bpi_audit_events WHERE reason LIKE 'ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838%'; SELECT idempotency_key,status,response_status FROM bpi.bpi_api_idempotency WHERE idempotency_key IN ('28139cdb-550b-497e-bc26-90dbfce5f51b','959f73f6-2c4c-4da5-b995-b39fa94f2915');",
+      "status": "PASS",
+      "evidence": "metadata/bpi-feature-flag-governance-acceptance.json. Target 10.11.100.17 ran PostgreSQL 15.18/Flyway V21 with exact revision 0cf61838e31623c29fadbc1dbca6b44854716079. Real login and /bpi/#/featureFlags performed SET false and INHERIT with HTTP 200, revisions 0->1->2 and two completed idempotency records. PostgreSQL showed feature/audit/idempotency 1/2/2 before cleanup and 0/0/0 after cleanup; six global flags and the pre-existing rule-management LINE override survived. Final desktop/mobile browser runs had zero BPI console/page/request/HTTP errors.",
+      "issues": [
+        "bpi.ui remains PENDING_SHELL_INTEGRATION because the legacy ADP shell does not consume this flag; Phase 1 locks keep shadow-only enabled and automatic confirmation plus WMS writeback disabled."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
+      "artifact": "metadata/bpi-feature-flag-governance-acceptance.json",
+      "summary": "Target ADP login, desktop/mobile feature-flag page, Java 8 adapter, Java 17 service and PostgreSQL 15.18/Flyway V21 closed LINE disable and inheritance restoration with feature/audit/idempotency 1/2/2 before cleanup and 0/0/0 after cleanup, while preserving the six global flags and production write locks."
+    },
     {
       "marker": "ADP_E2E_20260718_065300_BPI_RETIRE_V15B",
       "artifact": "metadata/bpi-rule-retirement-acceptance.json",

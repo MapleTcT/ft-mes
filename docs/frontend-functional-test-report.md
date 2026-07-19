@@ -624,6 +624,21 @@ marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：
 `metadata/bpi-point-catalog-pagination.png`、
 `docs/testing/bpi-point-catalog-pagination-acceptance.md`。
 
+### BPI 运行开关治理（2026-07-20）
+
+本节使用目标环境 `10.11.100.17` 的真实 ADP 登录页、Java 8 adapter、Java 17 service、
+PostgreSQL 15.18/Flyway V21 和 `/bpi/#/featureFlags`。唯一 marker 已定向清理，不使用 mock。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 运行开关 | `http://10.11.100.17:18080/bpi/#/featureFlags` | LINE 级禁用 `bpi.commands` | `GET /bpi-api/feature-flags?...`；`POST /bpi-api/feature-flags/bpi.commands` | 真实登录 200；6 个开关和 8 个导航项可见；WMS 锁定行无动作；禁用后页面显示 LINE 显式禁用/r1；BPI console/page/HTTP error 为 0 | `If-Match: 0`、唯一幂等键，POST 200；服务执行点立即禁止批次人工命令 | `bpi_feature_flags`、`bpi_audit_events`、`bpi_api_idempotency` | PASS | 登录成功跳转时 2 个旧装饰资源 `ERR_ABORTED` 被精确分类为预期导航中止，unexpected failure 为 0 |
+| BPI 运行开关 | 同上 | 恢复上级继承 | `POST /bpi-api/feature-flags/bpi.commands` | 页面显示平台默认、继承上级；POST/GET 均为 200，BPI 四类浏览器错误为 0 | `If-Match: 1`；覆盖变为 inactive/r2，有效值回到 GLOBAL；审计与幂等成功落库 | 同上 | PASS | `bpi.ui` 仍为只读 `PENDING_SHELL_INTEGRATION`，不计为已接入旧壳 |
+| BPI 运行开关 | 同上 | 最终桌面和移动复验 | 只读 GET | 桌面 `1440x900` 与移动 `390x844` 均显示 6 个开关、8 个导航；移动 document/body `390/390`，无页面级横向溢出；BPI 错误均为 0 | marker 清理后 API 不再返回该 LINE 覆盖；全局 6 个种子和既有规则管理覆盖保留 | 同上 | PASS_TARGET_GOVERNED_CLEANED | Phase 1 继续禁止自动确认和 WMS 写回 |
+
+marker：`ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838`。机器证据：
+`metadata/bpi-feature-flag-governance-acceptance.json`；详细报告：
+`docs/testing/bpi-feature-flag-governance-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

@@ -201,6 +201,16 @@ QCS/WMS 写回仍未完成，G-021 继续保持 `PARTIAL`。证据见
 candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完成，G-021 保持 `PARTIAL`。证据见
 [BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)。
 
+同日继续完成 Flyway V21 运行开关治理。新增 `/bpi/#/featureFlags`、分层覆盖表、审计与幂等写链，
+以 `GLOBAL < TENANT < PLANT < LINE` 解析 6 个开关。`bpi.commands` 与 `bpi.rule-management` 已在
+真实后端执行点强制校验；`bpi.shadow-only=true`、`bpi.auto-confirm=false` 和 `bpi.wms-link=false`
+保持 Phase 1 不可编辑门禁；`bpi.ui` 明确标为 `PENDING_SHELL_INTEGRATION`，不把旧 ADP 壳未接入
+伪报为完成。目标 marker `ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838` 经真实页面完成 LINE 级
+禁用和恢复继承，PostgreSQL 清理前为开关/审计/幂等 `1/2/2`，定向清理后为 `0/0/0`；桌面和
+移动页面错误均为 0，WOM/QCS/WMS/PLC/DCS 写入均为 0。该治理能力已成为发布回归门禁，但不改变
+现场连续影子运行和生产写回尚未完成的结论。证据见
+[BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -217,6 +227,7 @@ candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完
 - [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)
 - [BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)
 - [BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)
+- [BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
@@ -391,7 +402,7 @@ candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完
 ### 主线 A：BPI Phase 0/1
 
 1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收，以及 `selected telemetry -> Flink data quality -> Kafka -> PostgreSQL -> browser` 自动质量链，作为每次发布的回归基线。
-2. 保持已通过的目标环境 Flyway V16、savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、typed inactive、PostgreSQL revision 和重启读取作为发布回归；日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
+2. 保持已通过的目标环境 Flyway V21、savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、typed inactive、PostgreSQL revision、运行开关治理和重启读取作为发布回归；日常配置不得回退到 SQL fixture、直接改表或手工伪造 READY 快照。
 3. 保持已通过的单 broker 故障、service/adapter 镜像往返和 Flink JAR 双向状态回退为发布回归；下一步只补生产等价维护窗口下的跨组件整体回切、入口流量恢复和真实业务 marker 签字。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。
 5. MES 上下文真实链和 IoT source 分段链均已通过；点位准入变为 READY 后，用真实设备事件替换受控 EventBus marker，并与 WOM context 使用同一 marker 完成 Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链，再连续运行 7-14 天影子批次。

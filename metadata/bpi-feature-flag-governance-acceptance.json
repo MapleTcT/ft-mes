@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T19:57:18.898Z",
+  "status": "PASS_TARGET_GOVERNED_CLEANED",
+  "repoCommit": "0cf61838e31623c29fadbc1dbca6b44854716079",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "route": "/bpi/#/featureFlags",
+    "composeProject": "adp-mes-newbase",
+    "streamingComposeProject": "ft-mes-bpi-streaming",
+    "database": {
+      "engine": "PostgreSQL",
+      "version": "15.18",
+      "database": "ft_mes_bpi",
+      "schema": "bpi",
+      "flywayVersion": 21
+    }
+  },
+  "deployment": {
+    "releaseSource": "/home/v6/adp-bpi-release-0cf61838-20260720",
+    "serviceImage": "ft-mes-bpi-service:20260720-feature-flags-v21-0cf61838",
+    "adapterImage": "ft-mes-bpi-adapter:20260720-feature-flags-v21-0cf61838",
+    "serviceImageId": "sha256:947ba182f835673e736197760f869e04c4751c66aee87a3b18205cbb07301418",
+    "adapterImageId": "sha256:72c0112680fafa379493fa7de7c23b367d66aeb1eed3a44990bb2edf95bd0ffc",
+    "ociRevision": "0cf61838e31623c29fadbc1dbca6b44854716079",
+    "serviceHealth": "UP",
+    "adapterHealth": "UP",
+    "frontendAssets": [
+      "index-DWcXazLM.js",
+      "index-Ev1pzJ-s.css"
+    ],
+    "backup": {
+      "path": "/home/v6/adp-backups/bpi-feature-flags-v21-runtime-20260719T194145Z/ft_mes_bpi-pre-v21.dump",
+      "sha256": "246a97363d8ba42fef3ec4150281b56a2bb5f5f6e0a66018e23e4f515d390249"
+    },
+    "releaseEvidence": {
+      "path": "/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260719T194145Z_DEPLOY.txt",
+      "sha256": "9c729543557545597bb551ee683648fd2edea30b300d9c20f50fb20fa5bccaa9"
+    },
+    "releaseMetadataCorrection": "The first handwritten OCI revision label was detected as incorrect during self-review. Cached final image layers were rebuilt with the exact Git SHA, both containers were recreated, and health plus desktop/mobile browser checks were repeated. No database or business-content change was involved."
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "selectedScopeType": "LINE",
+    "precedence": [
+      "GLOBAL",
+      "TENANT",
+      "PLANT",
+      "LINE"
+    ]
+  },
+  "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
+  "featureFlags": {
+    "count": 6,
+    "editable": [
+      "bpi.commands",
+      "bpi.rule-management"
+    ],
+    "lockedOrReadOnly": [
+      "bpi.ui",
+      "bpi.shadow-only",
+      "bpi.auto-confirm",
+      "bpi.wms-link"
+    ],
+    "enforced": [
+      "bpi.commands",
+      "bpi.rule-management"
+    ],
+    "pendingShellIntegration": [
+      "bpi.ui"
+    ],
+    "phaseLocks": {
+      "bpi.shadow-only": true,
+      "bpi.auto-confirm": false,
+      "bpi.wms-link": false
+    }
+  },
+  "browserActions": [
+    {
+      "action": "SET_FALSE",
+      "method": "POST",
+      "endpoint": "/bpi-api/feature-flags/bpi.commands",
+      "ifMatch": 0,
+      "idempotencyKey": "28139cdb-550b-497e-bc26-90dbfce5f51b",
+      "payload": {
+        "scopeType": "LINE",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "mode": "SET",
+        "enabled": false,
+        "reason": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838_SET_FALSE target page disable acceptance"
+      },
+      "responseStatus": 200,
+      "effectiveEnabled": false,
+      "effectiveScopeType": "LINE",
+      "overrideActive": true,
+      "overrideRevision": 1,
+      "updatedBy": "legacy-ticket:admin"
+    },
+    {
+      "action": "INHERIT",
+      "method": "POST",
+      "endpoint": "/bpi-api/feature-flags/bpi.commands",
+      "ifMatch": 1,
+      "idempotencyKey": "959f73f6-2c4c-4da5-b995-b39fa94f2915",
+      "payload": {
+        "scopeType": "LINE",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "mode": "INHERIT",
+        "reason": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838_INHERIT target page rollback acceptance"
+      },
+      "responseStatus": 200,
+      "effectiveEnabled": false,
+      "effectiveScopeType": "GLOBAL",
+      "overrideActive": false,
+      "overrideRevision": 2,
+      "updatedBy": "legacy-ticket:admin"
+    }
+  ],
+  "persistence": {
+    "backendEntry": "FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository",
+    "tables": [
+      "bpi.bpi_feature_flags",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_api_idempotency"
+    ],
+    "verificationSql": "SELECT tenant_id,scope_type,scope_key,flag_key,enabled,active,revision,updated_by,last_reason FROM bpi.bpi_feature_flags WHERE last_reason LIKE 'ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838%'; SELECT action,before_revision,after_revision,actor,reason FROM bpi.bpi_audit_events WHERE reason LIKE 'ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838%'; SELECT idempotency_key,status,response_status FROM bpi.bpi_api_idempotency WHERE idempotency_key IN ('28139cdb-550b-497e-bc26-90dbfce5f51b','959f73f6-2c4c-4da5-b995-b39fa94f2915');",
+    "beforeCleanup": {
+      "featureFlagRows": 1,
+      "auditRows": 2,
+      "idempotencyRows": 2,
+      "featureFlagRevision": 2,
+      "featureFlagActive": false,
+      "auditActions": [
+        "FEATURE_FLAG_DISABLED",
+        "FEATURE_FLAG_OVERRIDE_REMOVED"
+      ],
+      "idempotencyStatuses": [
+        "COMPLETED/200",
+        "COMPLETED/200"
+      ]
+    },
+    "afterCleanup": {
+      "featureFlagRows": 0,
+      "auditRows": 0,
+      "idempotencyRows": 0,
+      "globalBaselineRows": 6,
+      "preExistingRuleManagementOverridePreserved": true
+    }
+  },
+  "browser": {
+    "authentication": {
+      "performedThroughLoginPage": true,
+      "loginStatus": 200,
+      "ticketCookiePresent": true,
+      "credentialValueRecorded": false,
+      "expectedNavigationAborts": 2,
+      "unexpectedConsoleErrors": 0,
+      "unexpectedPageErrors": 0,
+      "unexpectedHttpErrors": 0,
+      "unexpectedRequestFailures": 0
+    },
+    "setAction": {
+      "flagRows": 6,
+      "lockedWmsActionControls": 0,
+      "responseStatus": 200,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "failedResponses": 0,
+      "navigationAbortRequestFailures": 4,
+      "navigationAbortClassification": "The first action script moved from the legacy login shell to BPI immediately, aborting two decorative assets and two in-flight legacy i18n requests. A clean isolated login rerun recorded exactly two expected decorative aborts and zero unexpected failures."
+    },
+    "inheritAction": {
+      "responseStatus": 200,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "failedResponses": 0
+    },
+    "finalDesktop": {
+      "viewport": "1440x900",
+      "flagRows": 6,
+      "navItems": 8,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "httpErrors": 0,
+      "overrideExists": false,
+      "effectiveScopeType": "GLOBAL"
+    },
+    "finalMobile": {
+      "viewport": "390x844",
+      "flagRows": 6,
+      "navItems": 8,
+      "documentScrollWidth": 390,
+      "documentClientWidth": 390,
+      "bodyScrollWidth": 390,
+      "bodyClientWidth": 390,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "httpErrors": 0
+    }
+  },
+  "productionWriteBoundary": {
+    "womWrites": 0,
+    "qcsWrites": 0,
+    "wmsWrites": 0,
+    "plcDcsWrites": 0,
+    "statement": "Phase 1 remains shadow-only; feature-flag governance cannot enable production writeback."
+  },
+  "summary": {
+    "assertions": 20,
+    "pass": 20,
+    "fail": 0,
+    "browserActions": 2,
+    "apiWrites": 2,
+    "markerResidueAfterCleanup": 0
+  },
+  "residualRisks": [
+    "bpi.ui is intentionally read-only with PENDING_SHELL_INTEGRATION because the legacy ADP shell does not yet consume this flag.",
+    "The target host is a test environment; this acceptance does not replace continuous 7-14 day shadow evidence or production sign-off.",
+    "Phase 1 locks keep shadow-only enabled and automatic confirmation plus WMS writeback disabled."
+  ],
+  "evidence": [
+    {
+      "artifact": "metadata/bpi-feature-flag-governance-disabled.png",
+      "sha256": "cb97e3ca38bff9e6c47b2afc1b2f89c1571ba5927314af4162da14542eaf5fa1"
+    },
+    {
+      "artifact": "metadata/bpi-feature-flag-governance-final.png",
+      "sha256": "101420b48a74d1bd773fad7748289a941a900d589da26cd20793651e5e96e855"
+    },
+    {
+      "artifact": "metadata/bpi-feature-flag-governance-mobile.png",
+      "sha256": "ef53075097d3a4c73a9cf1eebd77413a536b5b0125f5f8012e5d208beefb86f0"
+    },
+    {
+      "artifact": "/tmp/bpi-feature-flags-browser-set.json",
+      "sha256": "a1f10282508c4c3b25bb86ccad9f54cbd872f58de7613ef1b5d37aad3f6fde42"
+    },
+    {
+      "artifact": "/tmp/bpi-feature-flags-browser-inherit.json",
+      "sha256": "5af562c08cb8fa8ecc177f5d3ae587f670f1cd804b1423ab3f68f1fd8572ae55"
+    },
+    {
+      "artifact": "/tmp/bpi-feature-flags-browser-post-relabel.json",
+      "sha256": "2aabfdb9d076ba32f9a85639f1a4974ca1bb1cd228166cdbc6e1368278379386"
+    },
+    {
+      "artifact": "/tmp/bpi-feature-flags-browser-post-relabel-mobile.json",
+      "sha256": "acd01c2944f00bda2e2a386702eeb57f59cf6d6a2c87b28a2dab16422b660464"
+    },
+    {
+      "artifact": "/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838-db-before-cleanup.txt",
+      "sha256": "45d50189c2ebe119483067f84d9872166d862553b3608a74a77191b9a94bed32"
+    },
+    {
+      "artifact": "/home/v6/adp-evidence/ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838-db-cleanup.txt",
+      "sha256": "c48801db459538878d25eac3aa6c278cc6b8bda86671a0783cf81b8b0e5b6002"
+    }
+  ]
+}
