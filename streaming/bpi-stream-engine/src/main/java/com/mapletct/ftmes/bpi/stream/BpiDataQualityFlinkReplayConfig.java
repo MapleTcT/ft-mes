@@ -15,6 +15,9 @@ record BpiDataQualityFlinkReplayConfig(
         String contextTopic,
         String dataQualityTopic,
         String marker,
+        String tenantId,
+        String plantId,
+        String lineId,
         Duration timeout,
         Duration contextSettle,
         Duration telemetrySpacing,
@@ -23,6 +26,7 @@ record BpiDataQualityFlinkReplayConfig(
 
     private static final Pattern SAFE_TOPIC = Pattern.compile("[A-Za-z0-9._-]+");
     private static final Pattern SAFE_MARKER = Pattern.compile("[A-Za-z0-9._-]{8,80}");
+    private static final Pattern SAFE_SCOPE = Pattern.compile("[A-Za-z0-9._:-]{1,128}");
     private static final DateTimeFormatter MARKER_TIME = DateTimeFormatter
             .ofPattern("yyyyMMdd_HHmmss")
             .withZone(ZoneOffset.UTC);
@@ -35,6 +39,9 @@ record BpiDataQualityFlinkReplayConfig(
         if (!SAFE_MARKER.matcher(marker).matches()) {
             throw new IllegalArgumentException("marker must be 8-80 safe token characters");
         }
+        scope(tenantId, "tenantId");
+        scope(plantId, "plantId");
+        scope(lineId, "lineId");
         positive(timeout, "timeout");
         nonNegative(contextSettle, "contextSettle");
         nonNegative(telemetrySpacing, "telemetrySpacing");
@@ -45,12 +52,16 @@ record BpiDataQualityFlinkReplayConfig(
     }
 
     static BpiDataQualityFlinkReplayConfig fromEnvironment(Map<String, String> environment) {
+        String marker = marker(environment.get("BPI_DQ_REPLAY_MARKER"));
         return new BpiDataQualityFlinkReplayConfig(
                 value(environment, "BPI_KAFKA_BOOTSTRAP_SERVERS", null),
                 value(environment, "BPI_TELEMETRY_TOPIC", "iot.telemetry.selected.v1"),
                 value(environment, "BPI_CONTEXT_TOPIC", "mes.production.context.v1"),
                 value(environment, "BPI_DATA_QUALITY_TOPIC", "bpi.data-quality.v1"),
-                marker(environment.get("BPI_DQ_REPLAY_MARKER")),
+                marker,
+                value(environment, "BPI_DQ_REPLAY_TENANT_ID", "TENANT-E2E"),
+                value(environment, "BPI_DQ_REPLAY_PLANT_ID", "PLANT-E2E"),
+                value(environment, "BPI_DQ_REPLAY_LINE_ID", "LINE-" + marker),
                 seconds(environment, "BPI_DQ_REPLAY_TIMEOUT_SECONDS", 180),
                 millis(environment, "BPI_DQ_REPLAY_CONTEXT_SETTLE_MS", 2_000),
                 millis(environment, "BPI_DQ_REPLAY_TELEMETRY_SPACING_MS", 250),
@@ -95,6 +106,13 @@ record BpiDataQualityFlinkReplayConfig(
     private static void topic(String value, String field) {
         required(value, field);
         if (!SAFE_TOPIC.matcher(value).matches()) {
+            throw new IllegalArgumentException(field + " contains unsupported characters");
+        }
+    }
+
+    private static void scope(String value, String field) {
+        required(value, field);
+        if (!SAFE_SCOPE.matcher(value).matches()) {
             throw new IllegalArgumentException(field + " contains unsupported characters");
         }
     }

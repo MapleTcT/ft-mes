@@ -45,7 +45,9 @@ public final class BpiDataQualityFlinkReplay {
     public static void main(String[] args) throws Exception {
         BpiDataQualityFlinkReplayConfig config = BpiDataQualityFlinkReplayConfig
                 .fromEnvironment(System.getenv());
-        Scenario scenario = scenario(config.marker(), Instant.now().minusSeconds(2));
+        Scenario scenario = scenario(
+                config.marker(), config.tenantId(), config.plantId(), config.lineId(),
+                Instant.now().minusSeconds(2));
         try {
             ReplayResult result = execute(config, scenario);
             writeReport(config, scenario, result, "PASS", null);
@@ -84,9 +86,15 @@ public final class BpiDataQualityFlinkReplay {
     }
 
     static Scenario scenario(String marker, Instant baseTime) {
-        String tenantId = "TENANT-E2E";
-        String plantId = "PLANT-E2E";
-        String lineId = "LINE-" + marker;
+        return scenario(marker, "TENANT-E2E", "PLANT-E2E", "LINE-" + marker, baseTime);
+    }
+
+    static Scenario scenario(
+            String marker,
+            String tenantId,
+            String plantId,
+            String lineId,
+            Instant baseTime) {
         String gatewayId = "GATEWAY-" + marker;
         String deviceId = "DEVICE-" + marker;
         ProductionContextEventV1 active = ProductionContextEventV1.newBuilder()

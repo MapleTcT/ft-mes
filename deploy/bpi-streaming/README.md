@@ -84,6 +84,9 @@ selected telemetry topic 写入唯一 marker，要求运行中的 Flink 状态�
 `telemetry-data-quality`。报告默认写入
 `${BPI_REPLAY_EVIDENCE_DIR}/bpi-data-quality-flink-replay.json`；该证据用于证明自动检测链，不能替代
 BPI consumer、PostgreSQL 和真实页面的联合验收。
+目标页面验收可通过 `BPI_DQ_REPLAY_TENANT_ID`、`BPI_DQ_REPLAY_PLANT_ID` 和
+`BPI_DQ_REPLAY_LINE_ID` 将 marker 放入当前登录主体有权查看的精确范围；三个值仍须同时纳入 consumer
+allowlist，禁止使用 `*` 绕过租户隔离。
 
 `bpi-stream-postgres-replay` 在上述回放外再要求运行中的 BPI 服务已显式启用 candidate consumer，
 并且仅允许测试租户/工厂：

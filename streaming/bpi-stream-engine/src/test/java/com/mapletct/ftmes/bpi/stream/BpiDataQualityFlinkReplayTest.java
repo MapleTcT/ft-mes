@@ -27,6 +27,9 @@ class BpiDataQualityFlinkReplayTest {
         assertTrue(config.marker().startsWith("ADP_E2E_DQ_FLINK_"));
         assertEquals(Duration.ofMinutes(3), config.timeout());
         assertEquals(Duration.ofSeconds(2), config.contextSettle());
+        assertEquals("TENANT-E2E", config.tenantId());
+        assertEquals("PLANT-E2E", config.plantId());
+        assertEquals("LINE-" + config.marker(), config.lineId());
         assertEquals("ft-mes-bpi-dq-acceptance-" + config.marker(), config.consumerGroup());
 
         Map<String, String> invalid = new HashMap<>();
@@ -34,6 +37,24 @@ class BpiDataQualityFlinkReplayTest {
         invalid.put("BPI_DQ_REPLAY_REPORT", "relative.json");
         assertThrows(IllegalArgumentException.class,
                 () -> BpiDataQualityFlinkReplayConfig.fromEnvironment(invalid));
+    }
+
+    @Test
+    void targetScopeCanBeExplicitWithoutWeakeningMarkerIsolation() {
+        BpiDataQualityFlinkReplayConfig config = BpiDataQualityFlinkReplayConfig.fromEnvironment(Map.of(
+                "BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092",
+                "BPI_DQ_REPLAY_MARKER", "ADP_E2E_DQ_TARGET_SCOPE",
+                "BPI_DQ_REPLAY_TENANT_ID", "1000",
+                "BPI_DQ_REPLAY_PLANT_ID", "PLANT-01",
+                "BPI_DQ_REPLAY_LINE_ID", "LINE-ADP-E2E-DQ"));
+
+        assertEquals("1000", config.tenantId());
+        assertEquals("PLANT-01", config.plantId());
+        assertEquals("LINE-ADP-E2E-DQ", config.lineId());
+        assertThrows(IllegalArgumentException.class, () ->
+                BpiDataQualityFlinkReplayConfig.fromEnvironment(Map.of(
+                        "BPI_KAFKA_BOOTSTRAP_SERVERS", "kafka-1:19092",
+                        "BPI_DQ_REPLAY_TENANT_ID", "*")));
     }
 
     @Test

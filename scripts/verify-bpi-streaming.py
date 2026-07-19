@@ -51,6 +51,7 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiDataQualityFlinkReplayTest.java",
     "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
     "deploy/bpi-streaming/scripts/run-data-quality-flink-replay.sh",
+    "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
