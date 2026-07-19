@@ -127,6 +127,8 @@ REQUIRED_FILES = [
     "metadata/bpi-point-catalog-pagination.png",
     "docs/testing/bpi-data-quality-workbench-acceptance.md",
     "metadata/bpi-data-quality-workbench-acceptance.json",
+    "docs/testing/bpi-flink-data-quality-acceptance.md",
+    "metadata/bpi-flink-data-quality-acceptance.json",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
@@ -819,7 +821,7 @@ def main() -> int:
     data_quality_acceptance = json.loads(
         (ROOT / "metadata/bpi-data-quality-workbench-acceptance.json").read_text(encoding="utf-8")
     )
-    if data_quality_acceptance.get("status") != "PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP":
+    if data_quality_acceptance.get("status") != "PASS_TARGET_FLINK_KAFKA_POSTGRES_BROWSER_CLEANUP":
         fail("BPI data-quality acceptance must retain explicit target lifecycle and cleanup PASS", failures)
     if data_quality_acceptance.get("database") != "PostgreSQL":
         fail("BPI data-quality acceptance must identify PostgreSQL", failures)
@@ -839,15 +841,37 @@ def main() -> int:
     if data_quality_target.get("flywayVersion") != 19:
         fail("BPI data-quality target deployment must retain Flyway V19 evidence", failures)
     final_consumer = data_quality_target.get("finalConsumer", {})
-    if final_consumer.get("enabled") is not False or final_consumer.get("lag") != 0:
-        fail("BPI data-quality target consumer must finish disabled with zero lag", failures)
+    if (final_consumer.get("enabled") is not False
+            or final_consumer.get("activeMembers") != 0
+            or final_consumer.get("businessRecordLag") != 0):
+        fail("BPI data-quality target consumer must finish disabled with zero members and zero business lag", failures)
+    if final_consumer.get("reportedLag", 0) > 0 and not final_consumer.get("lagExplanation"):
+        fail("BPI data-quality target consumer must explain non-business transaction-control lag", failures)
     if final_consumer.get("scopeAllowlist") != "_DENY_ALL_":
         fail("BPI data-quality target consumer must finish with deny-all scope", failures)
-    if data_quality_target.get("dlq", {}).get("totalEndOffset") != 0:
-        fail("BPI data-quality target DLQ must remain empty for the accepted marker", failures)
+    target_dlq = data_quality_target.get("dlq", {})
+    if target_dlq.get("finalFlinkMarkerRecords") != 0:
+        fail("BPI data-quality target DLQ must remain empty for the accepted Flink marker", failures)
+    if target_dlq.get("totalEndOffset", 0) > 0 and (
+            not target_dlq.get("retainedDiagnosticMarker")
+            or not target_dlq.get("retainedReason")):
+        fail("BPI data-quality target DLQ diagnostics must remain attributable and explained", failures)
     cleanup = data_quality_target.get("cleanup", {})
     if not cleanup or any(value != 0 for value in cleanup.values()):
         fail("BPI data-quality target marker rows must be fully cleaned", failures)
+
+    automatic_producer = data_quality_acceptance.get("automaticProducerAcceptance", {})
+    flink_data_quality = json.loads(
+        (ROOT / "metadata/bpi-flink-data-quality-acceptance.json").read_text(encoding="utf-8")
+    )
+    if (automatic_producer.get("status") != "PASS"
+            or automatic_producer.get("marker") != flink_data_quality.get("finalMarker", {}).get("value")
+            or automatic_producer.get("automaticEvents") != 4
+            or automatic_producer.get("postgresIncidents") != 4
+            or automatic_producer.get("browserRows") != 4
+            or automatic_producer.get("browserErrors") != 0
+            or automatic_producer.get("markerCleanup") != "PASS"):
+        fail("BPI data-quality automatic producer acceptance must preserve Flink, persistence, browser and cleanup proof", failures)
 
     readiness_acceptance = json.loads(
         (ROOT / "metadata/bpi-rule-runtime-readiness-acceptance.json").read_text(encoding="utf-8")

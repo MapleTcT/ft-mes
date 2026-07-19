@@ -59,6 +59,7 @@ REQUIRED_FILES = [
     "docs/testing/bpi-stream-replay-acceptance.md",
     "docs/testing/bpi-kafka-flink-topology-acceptance.md",
     "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
+    "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-operator-acceptance.json",
     "metadata/bpi-rule-timing-acceptance.json",
     "metadata/bpi-rule-publication-routing-acceptance.json",
@@ -67,6 +68,7 @@ REQUIRED_FILES = [
     "metadata/bpi-kafka-flink-topology-acceptance.json",
     "metadata/bpi-rule-application-flink-kafka-acceptance.json",
     "metadata/bpi-kafka-cluster-replay-acceptance.json",
+    "metadata/bpi-flink-data-quality-acceptance.json",
 ]
 
 
@@ -289,6 +291,48 @@ def main() -> int:
         failures.append("BPI Kafka cluster replay cannot claim live cluster acceptance")
     if cluster_replay.get("summary", {}).get("postgresMarkerAccepted") is not False:
         failures.append("BPI Kafka cluster replay cannot claim PostgreSQL marker acceptance")
+
+    target_data_quality = json.loads(
+        (ROOT / "metadata/bpi-flink-data-quality-acceptance.json").read_text(encoding="utf-8")
+    )
+    if target_data_quality.get("status") != "PASS_TARGET_FLINK_KAFKA_POSTGRES_BROWSER_CLEANUP":
+        failures.append("BPI target Flink data-quality acceptance must remain an explicit PASS")
+    marker = target_data_quality.get("finalMarker", {})
+    if marker.get("jobIdBefore") != marker.get("jobIdAfter"):
+        failures.append("BPI target data-quality replay must preserve the running Flink job ID")
+    expected_issues = {
+        "SOURCE_SEQUENCE_GAP",
+        "POINT_QUALITY_BAD",
+        "CLOCK_DRIFT",
+        "SOURCE_SEQUENCE_DUPLICATE",
+    }
+    actual_issues = {item.get("issueCode") for item in marker.get("outputs", [])}
+    if actual_issues != expected_issues or marker.get("exactlyOnceOutputCount") != 4:
+        failures.append("BPI target data-quality replay must retain the four exact automatic issues")
+    persistence = target_data_quality.get("persistence", {})
+    for key in ("incidents", "rawEvents", "inboxEvents", "createdActions", "auditEvents"):
+        if persistence.get(key) != 4:
+            failures.append(f"BPI target data-quality persistence must record four {key}")
+    browser = target_data_quality.get("browser", {})
+    if browser.get("markerRows") != 4 or any(
+        browser.get(key) != 0
+        for key in ("consoleErrors", "pageErrors", "requestFailures")
+    ):
+        failures.append("BPI target data-quality browser acceptance must retain four rows and zero errors")
+    cleanup = target_data_quality.get("cleanup", {})
+    for key in (
+        "remainingIncidents",
+        "remainingRawEvents",
+        "remainingInboxEvents",
+        "remainingAuditMarkerRows",
+        "remainingApiIdempotencyRows",
+        "orphanActions",
+    ):
+        if cleanup.get(key) != 0:
+            failures.append(f"BPI target data-quality cleanup must retain zero {key}")
+    final_consumer = target_data_quality.get("finalConsumer", {})
+    if final_consumer.get("enabled") is not False or final_consumer.get("activeMembers") != 0:
+        failures.append("BPI target data-quality consumer must finish disabled with zero members")
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

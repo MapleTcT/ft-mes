@@ -170,9 +170,23 @@ Embedded Kafka 6/6、Java 8 adapter 完整模块 18/18、模拟器 9/9 和浏览
 partition 2 offset `5 -> 6`、ADP 登录、浏览器/API 和 PostgreSQL 完成
 `OPEN/r1 -> ACKNOWLEDGED/r2 -> RESOLVED/r3`，raw event 保持 1，console/page/request error 均为 0。
 随后 incident、raw、action、audit、idempotency 和 inbox 定向清零，consumer 恢复关闭和 deny-all，
-六个分区 lag 与 DLQ 均为 0。该项状态更新为 `PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP`；真实 Flink
-自动产出和 7-14 天现场影子运行仍未闭合，不能据此把 BPI 总目标写成生产 READY。证据见
+六个分区 lag 与 DLQ 均为 0。该工作台阶段状态为 `PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP`；当时真实 Flink
+自动产出和 7-14 天现场影子运行尚未闭合，不能据此把 BPI 总目标写成生产 READY。证据见
 [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)。
+
+随后同日完成真实 Flink 自动数据质量全链验收。源码 `ddec7709` 增加来源序列缺口/重复/冲突/乱序、
+source epoch 回退、时钟漂移、点质量和 max-silence 状态检测，并从 canonical savepoint
+`savepoint-990e6d-74b13f8ce600` 以 `allowNonRestoredState=false` 将目标作业从 33 扩展到 36 tasks。
+最终 marker `ADP_E2E_DQ_FLINK_20260719_2344_3ca0fff3` 在真实
+`1000 / PLANT-01 / LINE-S07-01` 范围内由 selected telemetry 触发，Flink 恰好提交
+`SOURCE_SEQUENCE_GAP`、`POINT_QUALITY_BAD`、`CLOCK_DRIFT`、`SOURCE_SEQUENCE_DUPLICATE` 四条事件；
+Java 17 consumer 将其落为 4 个 `OPEN/r1/event_count=1` incident、4 个 raw、4 个 inbox、4 个 action
+和 4 个 audit，真实 BPI 页面精确显示 4 行并打开 raw 详情，所有 API 为 2xx 且浏览器错误为 0。
+验收脚本同时修复 scope 透传、Compose 意外重启和共享产线 context revision 三项问题，并强制回放前后
+job ID 不变；consumer 最终恢复关闭和 deny-all，13 组诊断/最终 marker 数据定向清理为 0。由此“真实
+Flink 自动 producer 未验收”退出缺口；现场 READY 点位、同 scope candidate/batch、7-14 天影子运行和
+QCS/WMS 写回仍未完成，G-021 继续保持 `PARTIAL`。证据见
+[BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)。
 
 权威设计和验收入口：
 
@@ -188,6 +202,7 @@ partition 2 offset `5 -> 6`、ADP 登录、浏览器/API 和 PostgreSQL 完成
 - [BPI 点位校准高基数分页验收](testing/bpi-point-calibration-pagination-acceptance.md)
 - [BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)
 - [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)
+- [BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
@@ -361,7 +376,7 @@ partition 2 offset `5 -> 6`、ADP 登录、浏览器/API 和 PostgreSQL 完成
 
 ### 主线 A：BPI Phase 0/1
 
-1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收作为每次发布的回归基线。
+1. 保持已通过的同一 marker `UI -> Outbox -> Kafka -> Flink -> application receipt -> PostgreSQL -> candidate confirm -> batch/evidence/audit` 联合验收，以及 `selected telemetry -> Flink data quality -> Kafka -> PostgreSQL -> browser` 自动质量链，作为每次发布的回归基线。
 2. 保持已通过的目标环境 Flyway V16、savepoint 恢复、点位目录自动同步、真实 ADP 会话、页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、typed inactive、PostgreSQL revision 和重启读取作为发布回归；日常配置不得回退到 SQL fixture 或手工伪造 READY 快照。
 3. 保持已通过的单 broker 故障、service/adapter 镜像往返和 Flink JAR 双向状态回退为发布回归；下一步只补生产等价维护窗口下的跨组件整体回切、入口流量恢复和真实业务 marker 签字。
 4. 以 `MapleTcT/iot@41239b4e` 和已实现的 `mes-production-context-outbox` 为基线配置试点产线；当前 `bpi-pilot-device-01` 已自动进入点位目录，但必须先完成 JetLinks 注册/激活、`instantFlow` metadata、单位、标定，并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调及重连语义，等待新 revision 自动同步后重新校验拓扑。

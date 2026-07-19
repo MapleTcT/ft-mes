@@ -13,8 +13,10 @@ Java 17 API -> Java 8 adapter -> 真实 ADP 登录后的 BPI 页面`。唯一 ma
 `OPEN/r1 -> ACKNOWLEDGED/r2 -> RESOLVED/r3`，随后数据库定向清理、consumer 关闭并恢复
 `_DENY_ALL_`。Kafka 追加日志中的 marker 按消息系统语义保留，不以破坏性方式删除。
 
-该 PASS 证明数据质量事件工作台在测试环境可部署、可处置、可落库和可清理；不代表真实 Flink 作业
-已经自动产生此类事件，也不替代选定产线 7-14 天连续影子运行和业务签字。
+该阶段 PASS 证明数据质量事件工作台在测试环境可部署、可处置、可落库和可清理；该 marker 本身由
+受控 producer 发送，不单独证明真实 Flink 自动产出，也不替代选定产线 7-14 天连续影子运行和业务签字。
+后续已由独立 marker 闭合真实自动 producer，见
+[`bpi-flink-data-quality-acceptance.md`](bpi-flink-data-quality-acceptance.md)。
 
 ## 功能结论
 
@@ -138,6 +140,6 @@ BPI_DATA_QUALITY_KAFKA_ALLOWED_LINE_IDS=_DENY_ALL_
 
 ## 仍未闭合
 
-1. 真实 Flink 作业自动产生数据质量事件的生产路径尚未验收；本轮 marker 由受控 Protobuf producer 发送。
+1. 真实 Flink 自动 producer 已由后续独立验收闭合，不再属于当前缺口。
 2. 选定真实产线仍需 7-14 天连续影子运行、告警质量统计、运维演练和业务签字。
-3. 上述两项不影响工作台目标环境验收 PASS，但继续阻止 BPI 总目标升级为生产 READY。
+3. 影子运行和业务签字不影响工作台目标环境验收 PASS，但继续阻止 BPI 总目标升级为生产 READY。

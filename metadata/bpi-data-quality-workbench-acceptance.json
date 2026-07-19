@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-19T13:53:31Z",
+  "generatedAt": "2026-07-19T16:00:48Z",
   "repoCommit": "297e0aaffeae69dfe68cb2f3b23a62c4910625d7",
   "worktree": "codex/bpi-data-quality-workbench",
-  "status": "PASS_TARGET_POSTGRES_KAFKA_BROWSER_CLEANUP",
+  "status": "PASS_TARGET_FLINK_KAFKA_POSTGRES_BROWSER_CLEANUP",
   "database": "PostgreSQL",
   "transport": "Embedded Kafka + Apache Kafka 4.2 target cluster",
   "runtime": {
@@ -147,18 +147,23 @@
       "enabled": false,
       "scopeAllowlist": "_DENY_ALL_",
       "activeMembers": 0,
-      "lag": 0
+      "reportedLag": 6,
+      "businessRecordLag": 0,
+      "lagExplanation": "One exactly-once transaction control batch follows the final business record in each partition."
     },
     "dlq": {
       "partitionEndOffsets": [
         0,
         0,
-        0,
-        0,
-        0,
-        0
+        1,
+        1,
+        1,
+        1
       ],
-      "totalEndOffset": 0
+      "totalEndOffset": 4,
+      "finalFlinkMarkerRecords": 0,
+      "retainedDiagnosticMarker": "ADP_E2E_DQ_FLINK_20260719_2332_1c5a2d02",
+      "retainedReason": "Fail-closed out-of-scope records from the scope-passthrough diagnostic run."
     },
     "cleanup": {
       "incidents": 0,
@@ -177,8 +182,24 @@
       "successfulOneShotExited": 3
     }
   },
+  "automaticProducerAcceptance": {
+    "status": "PASS",
+    "sourceCommit": "ddec7709aae01c1f1217fdf8d372d320a8e03a7f",
+    "acceptanceCommit": "a680844ed188f4ed41a3f9d96773af14fd6dad25",
+    "marker": "ADP_E2E_DQ_FLINK_20260719_2344_3ca0fff3",
+    "scope": "1000 / PLANT-01 / LINE-S07-01",
+    "flinkJobId": "1e981b842f4693e49f3c3def0fb98cb6",
+    "tasks": "36/36",
+    "checkpointBefore": 3906,
+    "checkpointAfter": 3908,
+    "automaticEvents": 4,
+    "postgresIncidents": 4,
+    "browserRows": 4,
+    "browserErrors": 0,
+    "markerCleanup": "PASS",
+    "evidence": "metadata/bpi-flink-data-quality-acceptance.json"
+  },
   "remainingScope": [
-    "Real Flink jobs have not yet been accepted as the automatic producer of data-quality events.",
     "The selected production line still requires 7-14 days of continuous shadow operation and business sign-off."
   ],
   "evidence": [
@@ -188,6 +209,10 @@
     "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
     "simulation/bpi/bpi-simulation.test.js",
     "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",
-    "docs/testing/bpi-data-quality-workbench-acceptance.md"
+    "docs/testing/bpi-data-quality-workbench-acceptance.md",
+    "docs/testing/bpi-flink-data-quality-acceptance.md",
+    "metadata/bpi-flink-data-quality-acceptance.json",
+    "deploy/bpi-streaming/scripts/run-data-quality-flink-replay.sh",
+    "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js"
   ]
 }

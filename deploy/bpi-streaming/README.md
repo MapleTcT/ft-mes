@@ -87,6 +87,9 @@ BPI consumer、PostgreSQL 和真实页面的联合验收。
 目标页面验收可通过 `BPI_DQ_REPLAY_TENANT_ID`、`BPI_DQ_REPLAY_PLANT_ID` 和
 `BPI_DQ_REPLAY_LINE_ID` 将 marker 放入当前登录主体有权查看的精确范围；三个值仍须同时纳入 consumer
 allowlist，禁止使用 `*` 绕过租户隔离。
+需要用新版验收 helper 验证旧版运行作业时，通过 `BPI_DQ_REPLAY_JOB_JAR` 指向单独的绝对 JAR 路径；
+脚本只把该路径注入 `--no-deps` 一次性容器，并在报告中记录 SHA-256，不修改或重建运行中的
+JobManager/TaskManager。脚本会比较回放前后 job ID 和 checkpoint，发现重启或状态回退即失败。
 
 `bpi-stream-postgres-replay` 在上述回放外再要求运行中的 BPI 服务已显式启用 candidate consumer，
 并且仅允许测试租户/工厂：
