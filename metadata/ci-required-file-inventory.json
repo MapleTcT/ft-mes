@@ -147,6 +147,12 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/BpiShellMenuController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/main/java/com/mapletct/ftmes/bpiadapter/InternalJwtIssuer.java",
       "state": "tracked",
       "tracked": true
@@ -196,6 +202,12 @@
     {
       "ignored": false,
       "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiRoutePolicyTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/batch-intelligence-adapter/src/test/java/com/mapletct/ftmes/bpiadapter/BpiShellMenuControllerTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -5103,6 +5115,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-shell-menu-gate-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-source-sequence-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5536,6 +5554,30 @@
     {
       "ignored": false,
       "path": "metadata/bpi-shadow-run-acceptance.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shell-menu-gate-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shell-menu-gate-feature-flag.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shell-menu-gate-final.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shell-menu-gate-mobile.png",
       "state": "tracked",
       "tracked": true
     },
@@ -6280,6 +6322,12 @@
     {
       "ignored": false,
       "path": "scripts/verify-bpi-service.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "scripts/verify-bpi-shell-menu-gate.py",
       "state": "tracked",
       "tracked": true
     },
@@ -8480,7 +8528,7 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 160
+      "tracked": 162
     },
     "contracts": {
       "tracked": 19
@@ -8489,13 +8537,13 @@
       "tracked": 570
     },
     "docs": {
-      "tracked": 103
+      "tracked": 104
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 152
+      "tracked": 156
     },
     "package.json": {
       "tracked": 1
@@ -8504,7 +8552,7 @@
       "tracked": 1
     },
     "scripts": {
-      "tracked": 54
+      "tracked": 55
     },
     "services": {
       "tracked": 232
@@ -8519,8 +8567,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1410,
-    "tracked": 1410,
+    "totalFiles": 1418,
+    "tracked": 1418,
     "untracked": 0
   },
   "untrackedByDirectory": []

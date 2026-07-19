@@ -648,6 +648,23 @@ marker 点位或目标现有 1 点解释为现场业务就绪。
 `docs/testing/bpi-feature-flag-governance-acceptance.md`。本项只允许修改 BPI 自身治理表；WOM、QCS、
 WMS、PLC/DCS 写入均为 0，Phase 1 三个写回/自动化门禁保持锁定。
 
+### BPI 旧 MES 原生菜单开关（目标 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| LINE 启用旧 MES 原生 BPI 菜单 | `http://10.11.100.17:18080/bpi/#/featureFlags` | `POST /bpi-api/feature-flags/bpi.ui`；随后 `GET /inter-api/rbac/v1/menus/currentUser` | 写：`FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository`；读：`BpiShellMenuController.currentUserMenus -> FeatureFlagController.list -> FeatureFlagService.resolve` | `bpi.bpi_feature_flags`、`bpi.bpi_audit_events`、`bpi.bpi_api_idempotency` | 按 `tenant_id=1000/scope_type=LINE/scope_key=LINE-S07-01/flag_key=bpi.ui` 查询覆盖，并按 marker 查询 `actor_id/revision/reason` 与幂等状态 | 页面 SET true 使用 `If-Match: 0` 返回 `200/r1`；PostgreSQL 为 enabled/active；旧 MES 菜单从 `28/0` 变为 `29/1`、header 为 `VISIBLE_INJECTED`，iframe 显示“实时生产态势” | PASS |
+| 显式禁用并恢复继承 | 同上 | 同一 POST，先 SET false 再 INHERIT | 同上 | 同上 | 查询 revision `1 -> 2 -> 3`、三个审计动作和三个 `COMPLETED/200` 幂等记录 | 两个 POST 均为 200；菜单在禁用/继承后均为 `28/0`，原 28 个 gateway 菜单不变；有效来源恢复 GLOBAL false | PASS |
+| marker 定向清理 | 不适用；清理后真实页面重读 | 测试环境专用事务 SQL；随后正常 GET | PostgreSQL 单事务；adapter/service 正常读取链 | 同上 | 按精确 marker reason 和关联响应删除；查询三表 marker 计数 | 清理前开关/审计/幂等 `1/3/3`，事务删除 `1/3/3`，清理后 `0/0/0`；六条 GLOBAL 种子及既有 rule-management r6 覆盖保留 | PASS |
+| 保留测试环境正式导航配置 | 同一真实页面 | `POST /bpi-api/feature-flags/bpi.ui`，LINE SET true | 同上 | 同上 | 直查 scope、enabled、active、revision、updated_by、reason，并统计对应审计/幂等 | 最终为 `enabled=true/active=true/r1`，审计/幂等各 1；菜单为 `29/1`。该非 marker 行是测试环境有意配置，回滚方式为页面 LINE INHERIT | PASS |
+| adapter 故障时菜单回退 | 旧 MES `/` | `GET /inter-api/rbac/v1/menus/currentUser` | Nginx adapter 精确路由失败后 `error_page` 回退 gateway | 不适用 | 不适用 | 仅停止 adapter 时仍返回 HTTP 200、`28/0`，无 gate header；adapter 恢复 healthy 后治理 header 重现；无数据库或 Flink 变更 | NOT_APPLICABLE |
+
+唯一测试 marker：`ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e`。机器记录：
+`metadata/bpi-shell-menu-gate-acceptance.json`；详细报告：
+`docs/testing/bpi-shell-menu-gate-acceptance.md`。本项部署提交为
+`df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4`，目标保持 PostgreSQL 15.18/Flyway V21，
+Flink job `1e981b842f4693e49f3c3def0fb98cb6` 未重启且为 `RUNNING 36/36`。WOM、QCS、WMS、
+PLC/DCS 写入均为 0。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

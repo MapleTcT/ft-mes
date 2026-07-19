@@ -332,9 +332,13 @@ point catalog 时可用。批次复核只列出同 scope、同规则/拓扑版�
 8 个字符的变更依据、`Idempotency-Key` 和当前覆盖 `If-Match` revision。
 
 `bpi.commands` 与 `bpi.rule-management` 由 Java 17 服务真实执行，允许管理员变更；`bpi.shadow-only`、
-`bpi.auto-confirm`、`bpi.wms-link` 显示锁定原因且没有操作按钮。`bpi.ui` 标记为“待旧平台接入”，在旧 MES
-导航真正读取该开关前只读，不能把数据库配置存在冒充菜单已经受控。409 冲突时页面刷新服务器 revision，
-403 保留后端权限结论，422 显示阶段门禁原因。所有成功变更必须同时产生功能开关审计和幂等完成记录。
+`bpi.auto-confirm`、`bpi.wms-link` 显示锁定原因且没有操作按钮。`bpi.ui` 由 Java 8 adapter 在旧 MES
+`/inter-api/rbac/v1/menus/currentUser` 原生菜单读取点真实执行：有效值为 true 时只注入一个“智能批次”
+菜单及工作台子项，为 false、scope 拒绝、开关缺失或服务异常时移除 BPI 菜单并失败关闭；Nginx 在 adapter
+进程不可用时回退 gateway 原菜单合同。该开关只控制导航可见性，不替代 API 授权。固定
+`/bpi/#/featureFlags` 直达入口作为管理员恢复路径，避免错误配置造成自锁。409 冲突时页面刷新服务器
+revision，403 保留后端权限结论，422 显示阶段门禁原因。所有成功变更必须同时产生功能开关审计和幂等
+完成记录。
 
 **主要 API：** `listFeatureFlags`、`changeFeatureFlagOverride`。
 

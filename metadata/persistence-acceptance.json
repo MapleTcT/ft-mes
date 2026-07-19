@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-19T19:57:18.898Z",
-  "repoCommit": "0cf61838e31623c29fadbc1dbca6b44854716079+target-acceptance-worktree",
+  "generatedAt": "2026-07-19T21:10:26.000Z",
+  "repoCommit": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4+target-acceptance-worktree",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
-    "generatedAt": "2026-07-19T19:57:18.898Z",
+    "generatedAt": "2026-07-19T21:10:26.000Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -112,11 +112,17 @@
       "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
       "evidence": "metadata/bpi-feature-flag-governance-acceptance.json",
       "assertions": "real ADP login and desktop/mobile feature-flag page; LINE SET false and INHERIT; PostgreSQL feature/audit/idempotency 1/2/2 before cleanup and 0/0/0 after cleanup; six global flags and pre-existing rule-management override preserved; no production-system writes"
+    },
+    "bpiShellMenuGate": {
+      "status": "PASS_TARGET_NATIVE_SHELL_GOVERNED",
+      "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
+      "evidence": "metadata/bpi-shell-menu-gate-acceptance.json",
+      "assertions": "real old MES native menu and direct recovery page; ENABLE/DISABLE/INHERIT; menu 28/0 -> 29/1 -> 28/0; iframe overview; PostgreSQL feature/audit/idempotency 1/3/3 before cleanup and 0/0/0 after cleanup; adapter-down Nginx fallback; final LINE bpi.ui active/enabled r1; no production-system writes"
     }
   },
   "summary": {
-    "testedFeatures": 179,
-    "pass": 176,
+    "testedFeatures": 180,
+    "pass": 177,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3834,11 +3840,37 @@
       "status": "PASS",
       "evidence": "metadata/bpi-feature-flag-governance-acceptance.json. Target 10.11.100.17 ran PostgreSQL 15.18/Flyway V21 with exact revision 0cf61838e31623c29fadbc1dbca6b44854716079. Real login and /bpi/#/featureFlags performed SET false and INHERIT with HTTP 200, revisions 0->1->2 and two completed idempotency records. PostgreSQL showed feature/audit/idempotency 1/2/2 before cleanup and 0/0/0 after cleanup; six global flags and the pre-existing rule-management LINE override survived. Final desktop/mobile browser runs had zero BPI console/page/request/HTTP errors.",
       "issues": [
-        "bpi.ui remains PENDING_SHELL_INTEGRATION because the legacy ADP shell does not consume this flag; Phase 1 locks keep shadow-only enabled and automatic confirmation plus WMS writeback disabled."
+        "At this historical acceptance point bpi.ui remained PENDING_SHELL_INTEGRATION; the later df6fdb0e target acceptance closes that shell gap. Phase 1 locks still keep shadow-only enabled and automatic confirmation plus WMS writeback disabled."
+      ]
+    },
+    {
+      "module": "BPI 旧 MES 原生菜单门禁",
+      "route": "/ + /bpi/#/featureFlags",
+      "operation": "真实页面启用、禁用和恢复继承 bpi.ui，验证旧 MES 原生菜单/iframe、adapter 故障回退、PostgreSQL marker 清理并保留测试环境正式配置",
+      "api": "GET /inter-api/rbac/v1/menus/currentUser; GET /bpi-api/feature-flags?plantId=PLANT-01&lineId=LINE-S07-01&scopeType=LINE; POST /bpi-api/feature-flags/bpi.ui",
+      "method": "GET/POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiShellMenuController.currentUserMenus -> FeatureFlagController.list -> FeatureFlagService.resolve; FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
+      "verificationSql": "SELECT tenant_id,scope_type,scope_key,flag_key,enabled,active,revision,updated_by,last_reason FROM bpi.bpi_feature_flags WHERE last_reason LIKE 'ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%'; SELECT action,before_revision,after_revision,actor_id,reason FROM bpi.bpi_audit_events WHERE reason LIKE 'ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%'; SELECT method,path,status,response_status FROM bpi.bpi_api_idempotency WHERE path='/bpi/v1/feature-flags/bpi.ui' AND response_body::text LIKE '%ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-shell-menu-gate-acceptance.json. Target 10.11.100.17 ran exact revision df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4 on PostgreSQL 15.18/Flyway V21. The real page performed ENABLE, DISABLE and INHERIT with HTTP 200/revisions 1,2,3; the native shell changed 28/0 -> 29/1 -> 28/0 and opened the BPI overview iframe. PostgreSQL returned feature/audit/idempotency 1/3/3 before cleanup and 0/0/0 after one transaction. Adapter-down Nginx fallback returned the unchanged 28-menu gateway contract; the adapter was restored healthy. A final non-marker LINE bpi.ui active/enabled r1 config was created through the real page. Desktop/mobile BPI action errors and WOM/QCS/WMS/PLC/DCS writes were zero.",
+      "issues": [
+        "The old portal userPortal request still returns an unrelated 401 after login and remains a separate platform issue; bpi.ui governs native navigation only, while Phase 1 automatic confirmation and production writeback remain locked."
       ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
+      "artifact": "metadata/bpi-shell-menu-gate-acceptance.json",
+      "summary": "Target old MES login/native menu, direct BPI recovery page, Java 8 adapter, Java 17 service and PostgreSQL 15.18/Flyway V21 closed bpi.ui ENABLE/DISABLE/INHERIT, iframe entry, 1/3/3 to 0/0/0 marker cleanup, adapter-down gateway fallback and a final active LINE test configuration without production-system writes."
+    },
     {
       "marker": "ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838",
       "artifact": "metadata/bpi-feature-flag-governance-acceptance.json",

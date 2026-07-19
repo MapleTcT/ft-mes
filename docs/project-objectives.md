@@ -211,6 +211,19 @@ candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完
 现场连续影子运行和生产写回尚未完成的结论。证据见
 [BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)。
 
+同日继续关闭 `bpi.ui` 的旧平台执行缺口。提交
+`df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4` 在 Java 8 adapter 接管旧 MES
+`/inter-api/rbac/v1/menus/currentUser` 读取点，按认证主体的服务端 tenant/plant/line scope 解析
+Java 17 `bpi.ui` 有效值，只注入或移除 BPI 菜单，并保留 Nginx 到 gateway 原菜单的进程级回退。
+marker `ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e` 经真实页面闭合
+`ENABLE -> DISABLE -> INHERIT`，PostgreSQL 清理前为开关/审计/幂等 `1/3/3`、清理后
+`0/0/0`；原生菜单同步为 `28/0 -> 29/1 -> 28/0`，iframe 打开“实时生产态势”。只停止
+adapter 的回退演练仍返回 gateway 的 28 个原菜单，恢复后 adapter healthy。最终测试环境又通过真实页面
+保留 LINE `bpi.ui=true/active/r1`，桌面与移动 BPI 动作错误为 0，Flink job 保持
+`RUNNING 36/36`。登录后旧 portal 的 `userPortal 401` 作为独立既有问题保留，不计入 BPI 零错误结论。
+该闭环只完成导航治理，不改变现场连续影子运行和生产写回仍未完成的结论；G-021 继续保持 `PARTIAL`。
+证据见 [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -228,6 +241,7 @@ candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完
 - [BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)
 - [BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)
 - [BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)
+- [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

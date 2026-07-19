@@ -1,5 +1,23 @@
 # 前端功能测试报告
 
+## 2026-07-20 BPI 旧 MES 原生菜单开关
+
+本轮在 `http://10.11.100.17:18080` 使用真实旧 MES 登录、原生菜单和 BPI 页面验收提交
+`df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4`。唯一测试 marker 为
+`ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e`；机器记录见
+`metadata/bpi-shell-menu-gate-acceptance.json`。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 导航初始门禁/恢复入口 | 旧 MES `/`；`/bpi/#/featureFlags` | GLOBAL false 时读取菜单，再从固定恢复路径打开运行开关 | `GET /inter-api/rbac/v1/menus/currentUser`；`GET /bpi-api/feature-flags...` | 原菜单 `28`、BPI `0`、`HIDDEN_DISABLED`；恢复页显示 `bpi.ui` ENFORCED/可编辑；BPI 动作错误 `0/0/0/0` | Java 8 adapter 以服务端 tenant/plant/line 调 Java 17 开关解析，失败关闭 | 只读 `bpi_feature_flags` | PASS | 登录后的旧 portal `userPortal` 仍有一个独立 `401`，不属于 BPI 动作链 |
+| BPI 导航启用与进入 | 运行开关页；旧 MES 原生菜单 | LINE SET true，刷新后点击“智能批次工作台” | `POST /bpi-api/feature-flags/bpi.ui`；菜单 GET | POST `200/r1`；菜单 `29/1`、`VISIBLE_INJECTED`；iframe 精确打开 BPI 概览并显示“实时生产态势” | 开关、审计、幂等同事务落库；菜单只新增一项且保留 gateway 原合同 | 三张 BPI 治理表 | PASS | `bpi.ui` 只控制导航，不替代 API 授权 |
+| BPI 导航禁用与继承 | 同上 | LINE SET false，再执行 INHERIT | 同一 POST，`If-Match: 1/2` | 两次均 `200`；菜单恢复 `28/0` 和 `HIDDEN_DISABLED`；28 个原菜单保持不变 | 覆盖推进到 r2 后停用为 r3，有效来源恢复 GLOBAL false | 三张 BPI 治理表 | PASS | 无 |
+| adapter 故障回退 | 旧 MES `/` | 仅停止 adapter 后刷新，再恢复 adapter | 原生菜单 GET | adapter 不可用时仍 `200`、`28/0`，无伪造 gate header；恢复后 header 重现 | Nginx 精确路由回退到 gateway；adapter 恢复 healthy | 不落库 | NOT_APPLICABLE | 回退演练未停止 gateway/service/PostgreSQL/Flink |
+| marker 清理与最终配置 | 运行开关页 | 清理测试 marker 后，从真实页面为测试环境 SET true | 同一 POST，`If-Match: 0` | 最终菜单 `29/1`、`VISIBLE_INJECTED`；桌面无溢出；移动恢复页 `390/390`；BPI 错误为 0 | marker 清理前 `1/3/3`、后 `0/0/0`；最终非 marker 配置为 active/enabled r1，审计/幂等各 1 | 三张 BPI 治理表 | PASS | 最终配置为有意保留；退场方式是 LINE 层 INHERIT |
+
+该轮没有 WOM、QCS、WMS、PLC 或 DCS 写入。完整请求、SQL、截图、部署备份和原始证据哈希见
+[`BPI 旧 MES 原生菜单开关目标验收`](testing/bpi-shell-menu-gate-acceptance.md)。
+
 ## 2026-07-18 BPI 规则退役与延迟候选复显
 
 本轮使用真实 ADP 登录访问 `http://10.11.100.17:18080/bpi/`，唯一 marker 为

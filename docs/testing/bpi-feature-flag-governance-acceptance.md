@@ -99,8 +99,11 @@ console/page/HTTP 错误，这一差异保留在机器证据中，没有被删�
 
 ![运行开关移动端](../../metadata/bpi-feature-flag-governance-mobile.png)
 
-## 尚未关闭
+## 本报告当时尚未关闭
 
-- `bpi.ui` 保持只读 `PENDING_SHELL_INTEGRATION`：旧 ADP 菜单壳尚未读取该开关，不能伪报为已执行。
+- 本报告验收时 `bpi.ui` 保持只读 `PENDING_SHELL_INTEGRATION`：旧 ADP 菜单壳当时尚未读取该开关，
+  因此本报告没有伪报为已执行。该缺口随后已由提交 `df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4`
+  在 Java 8 adapter 的旧 MES 原生菜单读取点关闭，独立证据见
+  [BPI 旧 MES 原生菜单开关目标验收](bpi-shell-menu-gate-acceptance.md)。
 - `bpi.shadow-only=true`、`bpi.auto-confirm=false`、`bpi.wms-link=false` 是 Phase 1 不可编辑门禁。
 - 本轮证明治理页面、接口、执行点和 PostgreSQL 落库，不代替现场连续 7-14 天影子运行与生产签字。

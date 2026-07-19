@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:37:31+00:00",
-  "repoCommit": "a04671b6efeea02c7cfdd140c0cd20a583163b4d",
+  "generatedAt": "2026-07-19T21:33:33+00:00",
+  "repoCommit": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4",
   "database": "PostgreSQL",
   "purpose": "Production migration runtime patch and Nacos configuration checksum manifest.",
   "summary": {
     "totalFiles": 366,
-    "totalBytes": 54981521,
+    "totalBytes": 54982561,
     "byCategory": {
       "nacos-config-template": 44,
       "nginx-runtime-config": 2,
@@ -18,7 +18,7 @@
     },
     "bytesByCategory": {
       "nacos-config-template": 42353,
-      "nginx-runtime-config": 25715,
+      "nginx-runtime-config": 26755,
       "postgres-init-sql": 54075329,
       "runtime-binary-patch": 29988,
       "runtime-patch-source": 82246,
@@ -303,8 +303,8 @@
     {
       "path": "deploy/docker/nginx/adp.conf",
       "category": "nginx-runtime-config",
-      "sizeBytes": 25495,
-      "sha256": "893def0b8aaf5dc3d0173b80b3caf151617779e64c05773d14a3dc66bc9a8ff4"
+      "sizeBytes": 26535,
+      "sha256": "3633bb65303fdf13a2887ffddffaa584c60c04fa007ab7c772468b11b85aaf8a"
     },
     {
       "path": "deploy/docker/nginx/gzip.conf",

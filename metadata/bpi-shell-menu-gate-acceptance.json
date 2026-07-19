@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-20T05:10:26+08:00",
+  "repoCommit": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4",
+  "status": "PASS_TARGET_NATIVE_SHELL_GOVERNED",
+  "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
+  "environment": {
+    "host": "10.11.100.17",
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "database": {
+      "engine": "PostgreSQL",
+      "version": "15.18",
+      "flywayVersion": 21
+    },
+    "streaming": {
+      "composeProject": "ft-mes-bpi-streaming",
+      "jobId": "1e981b842f4693e49f3c3def0fb98cb6",
+      "jobName": "ft-mes-bpi-batch-boundary-v1",
+      "state": "RUNNING",
+      "runningTasks": 36,
+      "totalTasks": 36
+    }
+  },
+  "deployment": {
+    "sourceStaging": "/home/v6/bpi-builds/df6fdb0e",
+    "backup": {
+      "path": "/home/v6/bpi-deploy-backups/20260720-044859-shell-menu-df6fdb0e",
+      "databaseDump": "ft_mes_bpi.dump",
+      "databaseDumpBytes": 139076,
+      "sha256": "fe4df8543cee09a83df2546869e23686bae4b72228e083b299e29ba949ba1c08",
+      "restoreListValidated": true
+    },
+    "service": {
+      "image": "ft-mes-bpi-service:20260720-shell-menu-df6fdb0e",
+      "imageId": "sha256:b4c2e5881d4ef0055d99ec3c873f424f00305daef5443681ee5331e24587d586",
+      "ociRevision": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4",
+      "health": "healthy"
+    },
+    "adapter": {
+      "image": "ft-mes-bpi-adapter:20260720-shell-menu-df6fdb0e",
+      "imageId": "sha256:622320e45c943739851e6f87049faf1782ae75076b3ff80ba0b1b4ee86550da1",
+      "ociRevision": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4",
+      "health": "healthy"
+    },
+    "nginx": {
+      "image": "nginx:1.24.0",
+      "configurationTest": "PASS",
+      "state": "running"
+    },
+    "databaseMigrationApplied": false,
+    "streamingRestarted": false
+  },
+  "browserActions": [
+    {
+      "action": "ENABLE",
+      "page": "/bpi/#/featureFlags",
+      "method": "POST",
+      "endpoint": "/bpi-api/feature-flags/bpi.ui",
+      "payload": {
+        "scopeType": "LINE",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "mode": "SET",
+        "enabled": true,
+        "reason": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e enable old MES native navigation; rollback by INHERIT"
+      },
+      "ifMatch": 0,
+      "idempotencyKeyPresent": true,
+      "idempotencyKeyValueRecorded": false,
+      "responseStatus": 200,
+      "result": "LINE enabled=true active=true revision=1"
+    },
+    {
+      "action": "DISABLE",
+      "page": "/bpi/#/featureFlags",
+      "method": "POST",
+      "endpoint": "/bpi-api/feature-flags/bpi.ui",
+      "payload": {
+        "scopeType": "LINE",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "mode": "SET",
+        "enabled": false,
+        "reason": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e explicit disable rollback verification"
+      },
+      "ifMatch": 1,
+      "idempotencyKeyPresent": true,
+      "idempotencyKeyValueRecorded": false,
+      "responseStatus": 200,
+      "result": "LINE enabled=false active=true revision=2"
+    },
+    {
+      "action": "INHERIT",
+      "page": "/bpi/#/featureFlags",
+      "method": "POST",
+      "endpoint": "/bpi-api/feature-flags/bpi.ui",
+      "payload": {
+        "scopeType": "LINE",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "mode": "INHERIT",
+        "reason": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e restore inherited global default after acceptance"
+      },
+      "ifMatch": 2,
+      "idempotencyKeyPresent": true,
+      "idempotencyKeyValueRecorded": false,
+      "responseStatus": 200,
+      "result": "LINE enabled=false active=false revision=3; effective source GLOBAL false"
+    }
+  ],
+  "browser": {
+    "authentication": {
+      "performedThroughLoginPage": true,
+      "loginStatus": 200,
+      "credentialValueRecorded": false,
+      "unauthenticatedMenuStatus": 401,
+      "existingIssue": "GET /inter-api/portal/v1/homePage/userPortal returned 401 after login; it is outside the BPI menu action chain and remains recorded for separate platform repair"
+    },
+    "initialHidden": {
+      "menuStatus": 200,
+      "menuCount": 28,
+      "bpiMenuCount": 0,
+      "gateHeader": "HIDDEN_DISABLED"
+    },
+    "directRecovery": {
+      "route": "/bpi/#/featureFlags",
+      "bpiUiEnforcement": "ENFORCED",
+      "editable": true,
+      "actionButtons": 3,
+      "status": "PASS"
+    },
+    "enabled": {
+      "menuStatus": 200,
+      "menuCount": 29,
+      "bpiMenuCount": 1,
+      "gateHeader": "VISIBLE_INJECTED",
+      "childLabel": "智能批次工作台",
+      "iframeUrl": "/bpi/#/overview?&workFlowMenuCode=BPI_1.0.0_console&openType=page",
+      "iframeHeading": "实时生产态势"
+    },
+    "disabled": {
+      "menuCount": 28,
+      "bpiMenuCount": 0,
+      "gateHeader": "HIDDEN_DISABLED",
+      "legacyBaseMenusUnchanged": true
+    },
+    "inherited": {
+      "menuCount": 28,
+      "bpiMenuCount": 0,
+      "gateHeader": "HIDDEN_DISABLED",
+      "effectiveSource": "GLOBAL"
+    },
+    "final": {
+      "menuStatus": 200,
+      "menuCount": 29,
+      "bpiMenuCount": 1,
+      "gateHeader": "VISIBLE_INJECTED",
+      "childLabel": "智能批次工作台",
+      "iframeUrl": "/bpi/#/overview?&workFlowMenuCode=BPI_1.0.0_console&openType=page",
+      "iframeHeading": "实时生产态势"
+    },
+    "desktop": {
+      "viewport": "1440x900",
+      "documentScrollWidth": 1440,
+      "documentClientWidth": 1440,
+      "documentScrollHeight": 900,
+      "documentClientHeight": 900,
+      "pageHorizontalOverflow": 0,
+      "pageVerticalOverflow": 0
+    },
+    "mobile": {
+      "route": "/bpi/#/featureFlags",
+      "viewport": "390x844",
+      "documentScrollWidth": 390,
+      "documentClientWidth": 390,
+      "bodyScrollWidth": 390,
+      "bodyClientWidth": 390,
+      "pageHorizontalOverflow": 0,
+      "bpiUiActiveRevision": 1,
+      "enforcementText": "旧 MES 菜单由 Java 8 adapter 按当前试点范围解析"
+    },
+    "bpiActionErrors": {
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "httpErrors": 0
+    }
+  },
+  "fallback": {
+    "rehearsal": "stop only bpi-adapter, reload native shell, then restart adapter",
+    "menuStatus": 200,
+    "menuCount": 28,
+    "bpiMenuCount": 0,
+    "gateHeaderPresent": false,
+    "legacyBaseMenusUnchanged": true,
+    "browserErrors": 0,
+    "adapterRestoredHealthy": true,
+    "postRestoreGateHeader": "HIDDEN_DISABLED"
+  },
+  "persistence": {
+    "tables": [
+      "bpi.bpi_feature_flags",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_api_idempotency"
+    ],
+    "backendEntry": "BpiShellMenuController.currentUserMenus -> FeatureFlagController.list -> FeatureFlagService.resolve; writes use FeatureFlagController.change -> FeatureFlagService.change -> FeatureFlagPostgresRepository/BpiPostgresRepository",
+    "verificationSql": "SELECT tenant_id,scope_type,scope_key,flag_key,enabled,active,revision,updated_by,last_reason FROM bpi.bpi_feature_flags WHERE last_reason LIKE 'ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%'; SELECT action,before_revision,after_revision,actor_id,reason FROM bpi.bpi_audit_events WHERE reason LIKE 'ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%'; SELECT method,path,status,response_status FROM bpi.bpi_api_idempotency WHERE path='/bpi/v1/feature-flags/bpi.ui' AND response_body::text LIKE '%ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e%';",
+    "preCleanup": {
+      "featureFlagRows": 1,
+      "auditRows": 3,
+      "idempotencyRows": 3,
+      "actions": [
+        "FEATURE_FLAG_ENABLED 0->1",
+        "FEATURE_FLAG_DISABLED 1->2",
+        "FEATURE_FLAG_OVERRIDE_REMOVED 2->3"
+      ],
+      "idempotencyStatus": "3 x COMPLETED/200"
+    },
+    "cleanup": {
+      "transactional": true,
+      "deletedFeatureFlagRows": 1,
+      "deletedAuditRows": 3,
+      "deletedIdempotencyRows": 3,
+      "remainingFeatureFlagRows": 0,
+      "remainingAuditRows": 0,
+      "remainingIdempotencyRows": 0
+    },
+    "finalConfiguration": {
+      "tenantId": "1000",
+      "scopeType": "LINE",
+      "scopeKey": "LINE-S07-01",
+      "flagKey": "bpi.ui",
+      "enabled": true,
+      "active": true,
+      "revision": 1,
+      "updatedBy": "legacy-ticket:admin",
+      "reason": "测试环境智能批次导航正式启用，范围 PLANT-01/LINE-S07-01，回滚方式为 LINE 层 INHERIT",
+      "auditRows": 1,
+      "idempotencyRows": 1,
+      "globalBaselineRows": 6,
+      "preExistingRuleManagementOverridePreserved": true
+    }
+  },
+  "productionWriteBoundary": {
+    "womWrites": 0,
+    "qcsWrites": 0,
+    "wmsWrites": 0,
+    "plcWrites": 0,
+    "dcsWrites": 0
+  },
+  "summary": {
+    "checks": 18,
+    "pass": 18,
+    "fail": 0,
+    "blocked": 0
+  },
+  "items": [
+    {"id": "artifact-provenance", "status": "PASS", "evidence": "Both deployed images carry exact OCI revision df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4."},
+    {"id": "pre-deploy-backup", "status": "PASS", "evidence": "The PostgreSQL custom-format dump is non-empty, hashed and its restore list was validated before switching containers."},
+    {"id": "initial-hidden", "status": "PASS", "evidence": "GLOBAL false produced 28 native menus, zero BPI menus and X-BPI-UI-Gate=HIDDEN_DISABLED."},
+    {"id": "direct-recovery-route", "status": "PASS", "evidence": "Direct /bpi/#/featureFlags remained reachable and rendered bpi.ui as ENFORCED/editable while hidden from the native menu."},
+    {"id": "ui-enable-write", "status": "PASS", "evidence": "The real page issued SET true with If-Match 0 and received HTTP 200/r1."},
+    {"id": "native-menu-visible", "status": "PASS", "evidence": "The normal old MES menu endpoint returned 29 menus with exactly one BPI entry and VISIBLE_INJECTED."},
+    {"id": "native-iframe-navigation", "status": "PASS", "evidence": "Clicking the native child menu opened the BPI overview iframe and rendered 实时生产态势."},
+    {"id": "ui-disable-write", "status": "PASS", "evidence": "The real page issued SET false with If-Match 1 and the native BPI menu disappeared."},
+    {"id": "legacy-menu-preservation", "status": "PASS", "evidence": "All 28 gateway-owned base menus stayed byte-semantic equivalent across disable and inherit phases."},
+    {"id": "ui-inherit-write", "status": "PASS", "evidence": "The real page issued INHERIT with If-Match 2 and resolved back to GLOBAL false/r3 inactive override."},
+    {"id": "postgres-pre-cleanup", "status": "PASS", "evidence": "Direct PostgreSQL queries returned feature/audit/idempotency counts 1/3/3 with the expected revision sequence."},
+    {"id": "marker-cleanup", "status": "PASS", "evidence": "One transaction deleted 1/3/3 marker rows and direct queries returned 0/0/0 residue."},
+    {"id": "nginx-fallback", "status": "PASS", "evidence": "With only the adapter stopped, Nginx served the original gateway menu as HTTP 200 without a gate header or BPI injection."},
+    {"id": "adapter-restore", "status": "PASS", "evidence": "The adapter returned healthy and the governed header resumed after the rehearsal."},
+    {"id": "durable-test-config", "status": "PASS", "evidence": "A non-marker LINE SET true was created through the real page and is persisted as active revision 1 with audit/idempotency rows."},
+    {"id": "desktop-layout", "status": "PASS", "evidence": "The final 1440x900 old-shell iframe view had zero page overflow and zero BPI browser errors."},
+    {"id": "mobile-layout", "status": "PASS", "evidence": "The 390x844 direct recovery page had document/body width 390 and zero page-level horizontal overflow."},
+    {"id": "runtime-isolation", "status": "PASS", "evidence": "Only service, adapter, Nginx and static UI were switched; Flyway stayed V21 and the existing Flink job remained RUNNING 36/36 without restart."}
+  ],
+  "rawEvidence": [
+    {
+      "path": "/home/v6/adp-evidence/ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e_PRE_CLEAN.txt",
+      "sha256": "32e602393f1c8b59fff6a8762bbc8d817a3b1c185c2684d9777df7abcba24d2a"
+    },
+    {
+      "path": "/home/v6/adp-evidence/ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e_CLEANUP.txt",
+      "sha256": "b402be53dca1e2601c5d1ec197c96ec9e1d143bfc64383c5dd5dd997a0c3083d"
+    },
+    {
+      "path": "/home/v6/adp-evidence/BPI_SHELL_MENU_FINAL_20260720_df6fdb0e_PASS.txt",
+      "sha256": "b7343863ff3ba854b649c6ec8455c5f1b235d71ef3e18d4b6cb6fd6a4784d647"
+    }
+  ],
+  "screenshots": [
+    {
+      "artifact": "metadata/bpi-shell-menu-gate-final.png",
+      "sha256": "317b3097d1eb62c35532689a729c099fb115a15c207054de860dfdead2e989db"
+    },
+    {
+      "artifact": "metadata/bpi-shell-menu-gate-feature-flag.png",
+      "sha256": "ae8c53ab46e9d696499ca193278779cbff916ebbe5939b8a1227f835945f76f5"
+    },
+    {
+      "artifact": "metadata/bpi-shell-menu-gate-mobile.png",
+      "sha256": "cbb5f0ebe65afa05b906de430e467972ef9aee5f91563902bd70997de3885d7c"
+    }
+  ],
+  "limitations": [
+    "The old portal home request still returns an unrelated 401 after login; this report records it and claims zero errors only for the BPI action phases.",
+    "bpi.ui controls old MES navigation visibility, not API authorization; the direct feature-flag route is intentionally retained as an administrative recovery path.",
+    "The final LINE override is a deliberate test-environment configuration, not marker residue. Roll it back through the page with LINE INHERIT.",
+    "Phase 1 remains shadow-only. Automatic confirmation, QCS/WMS production writeback and PLC/DCS commands are not enabled by this acceptance."
+  ]
+}
