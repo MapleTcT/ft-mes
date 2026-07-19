@@ -97,6 +97,7 @@ public final class BpiDataQualityFlinkReplay {
             Instant baseTime) {
         String gatewayId = "GATEWAY-" + marker;
         String deviceId = "DEVICE-" + marker;
+        long contextRevision = baseTime.getEpochSecond();
         ProductionContextEventV1 active = ProductionContextEventV1.newBuilder()
                 .setEventId(marker + "-CONTEXT-ACTIVE")
                 .setTenantId(tenantId)
@@ -107,14 +108,14 @@ public final class BpiDataQualityFlinkReplay {
                 .setMaterialCode("MATERIAL-E2E")
                 .setRecipeVersion("RECIPE-E2E-1")
                 .setEffectiveFromMs(baseTime.minus(Duration.ofMinutes(20)).toEpochMilli())
-                .setContextRevision(1)
+                .setContextRevision(contextRevision)
                 .setActive(true)
                 .putAttributes("acceptance_marker", marker)
                 .build();
         ProductionContextEventV1 inactive = active.toBuilder()
                 .setEventId(marker + "-CONTEXT-INACTIVE")
                 .setEffectiveFromMs(baseTime.plusSeconds(5).toEpochMilli())
-                .setContextRevision(2)
+                .setContextRevision(contextRevision + 1)
                 .setActive(false)
                 .build();
         TelemetryEnvelopeV1 baseline = telemetry(

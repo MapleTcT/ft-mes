@@ -78,6 +78,30 @@ class BpiDataQualityFlinkReplayTest {
     }
 
     @Test
+    void sharedLineScenarioSupersedesAnOlderClosedContextAndClosesItself() {
+        Instant baseTime = Instant.parse("2026-07-19T12:00:00Z");
+        BpiDataQualityFlinkReplay.Scenario scenario = BpiDataQualityFlinkReplay.scenario(
+                "ADP_E2E_DQ_SHARED_CONTEXT", "1000", "PLANT-01", "LINE-S07-01", baseTime);
+        var olderClosed = scenario.inactiveContext().toBuilder()
+                .setEventId("ADP_E2E_DQ_OLDER-CONTEXT-CLOSED")
+                .setEffectiveFromMs(baseTime.minus(Duration.ofHours(1)).toEpochMilli())
+                .setContextRevision(baseTime.minus(Duration.ofHours(1)).getEpochSecond())
+                .build();
+
+        ProductionContextTimeline timeline = new ProductionContextTimeline()
+                .apply(olderClosed)
+                .apply(scenario.activeContext())
+                .apply(scenario.inactiveContext());
+
+        assertEquals(baseTime.getEpochSecond(), scenario.activeContext().getContextRevision());
+        assertEquals(baseTime.getEpochSecond() + 1, scenario.inactiveContext().getContextRevision());
+        assertEquals(scenario.activeContext(), timeline.resolve(
+                scenario.tenantId(), scenario.plantId(), scenario.lineId(), baseTime).orElseThrow());
+        assertTrue(timeline.resolve(
+                scenario.tenantId(), scenario.plantId(), scenario.lineId(), baseTime.plusSeconds(6)).isEmpty());
+    }
+
+    @Test
     void replayScenarioProducesOnlyTheFourExpectedAutomaticEvents() throws Exception {
         String marker = "ADP_E2E_DQ_FLINK_SCENARIO";
         BpiDataQualityFlinkReplay.Scenario scenario = BpiDataQualityFlinkReplay.scenario(
