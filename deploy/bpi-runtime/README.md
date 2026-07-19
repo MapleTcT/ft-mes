@@ -1,12 +1,16 @@
 # BPI Runtime Deployment
 
-This Compose project runs the BPI console, Java 8 authentication adapter, Java 17 BPI service, and
-its PostgreSQL database without changing the legacy ADP/MES Compose project. The adapter joins the
-existing ADP network only to validate Keycloak JWKS; it never joins the old application JVMs or
-database. Kafka/Flink/MinIO remain in `deploy/bpi-streaming` and are reached through the configured
-private bootstrap addresses.
+This directory is the isolated BPI runtime template. The current target environment no longer runs a
+separate `ft-mes-bpi-runtime` project: BPI Web, the Java 8 authentication adapter, the Java 17 service
+and PostgreSQL are composed with the single `adp-mes-newbase` stack from `deploy/docker`. The official
+test page is the same-origin `/bpi/` path on ADP port `18080`; the former standalone `:18091` page is
+not a current target entry. Kafka/Flink/MinIO remain isolated in `deploy/bpi-streaming`.
 
-## Start
+Keep this Compose file for isolated development and migration rehearsal. Target runtime changes must
+use the integrated `deploy/docker/docker-compose.yml` composition and must not start a second BPI Web,
+service, adapter or PostgreSQL beside it.
+
+## Isolated start
 
 ```bash
 make bpi-service-package
@@ -25,7 +29,7 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 with the DML-only `bpi_service` account.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`13`). Set it explicitly in the target `.env` when preparing a release;
+latest repository migration (`16`). Set it explicitly in the target `.env` when preparing a release;
 the smoke check fails if the database is behind or unexpectedly ahead of that version.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
@@ -70,8 +74,8 @@ BPI_RUNTIME_UPGRADE_CONFIRM=UPGRADE_BPI_RUNTIME_EXPAND_ONLY \
   make bpi-runtime-upgrade-expand-only
 ```
 
-For the V12 to V13 readiness upgrade, set `BPI_EXPECTED_FLYWAY_VERSION=13` first. The helper builds
-the new service image, runs only `bpi-migrate`, verifies the exact Flyway version, recreates only
+Set `BPI_EXPECTED_FLYWAY_VERSION` to the exact target migration before each expand-only upgrade. The
+helper builds the new service image, runs only `bpi-migrate`, verifies that version, recreates only
 `bpi-service`, waits up to 180 seconds for its Docker health check, and then runs the runtime smoke.
 It does not recreate PostgreSQL, the adapter, the web container or any named volume. Override the
 bounded wait with `BPI_RUNTIME_UPGRADE_HEALTH_TIMEOUT_SECONDS` only when a measured cold start needs
@@ -83,10 +87,28 @@ after migration, service recreation and final smoke. If a later phase fails, kee
 report and its referenced artifacts: `phase=MIGRATION_APPLIED` means the schema must stay expanded
 even if the previous application image is restored.
 
-Rollback is application-only: keep the expanded V13 schema, keep rule publication/application and
+Rollback is application-only: keep the expanded schema, keep rule publication/application and
 candidate consumers disabled, select the tagged rollback service image recorded in the report,
 recreate only `bpi-service`, and rerun the runtime smoke. Schema downgrade or `DROP` rollback is
 intentionally unsupported.
+
+## Integrated target image rollback
+
+The target service and adapter rollback rehearsal uses the integrated ADP Compose stack. It requires
+explicit confirmation and two pre-existing rollback images, captures the current image tags and IDs,
+keeps Flyway V16 expanded, checks core-table counts, runs a real ADP login and `/bpi/#/points` browser
+smoke on the rollback images, then restores the exact current images and repeats all checks:
+
+```bash
+BPI_RUNTIME_ROLLBACK_CONFIRM=ROLLBACK_BPI_RUNTIME_IMAGES_AND_RESTORE \
+BPI_ROLLBACK_SERVICE_IMAGE=<previous-service-image> \
+BPI_ROLLBACK_ADAPTER_IMAGE=<previous-adapter-image> \
+  make bpi-runtime-image-rollback-rehearsal
+```
+
+Do not run this against a production stack without a maintenance window and a separately approved
+traffic plan. The accepted target rehearsal is recorded in
+[`docs/testing/bpi-application-rollback-acceptance.md`](../../docs/testing/bpi-application-rollback-acceptance.md).
 
 ## Controlled joint acceptance
 

@@ -102,6 +102,9 @@ WOM_REJECT_MATERIAL_PERSISTENCE_OUTPUT ?= /tmp/adp-wom-reject-material-persisten
 CORE_FLOW_RUNTIME_ROLLBACK_OUTPUT ?= metadata/core-flow-runtime-rollback-rehearsal.json
 CORE_FLOW_REMOTE_ROOT ?= /home/v6/adp-mes-docker-newbase-20260611-181921
 CORE_FLOW_BACKUP_TAG ?= 20260710-coreflow
+BPI_RUNTIME_ROLLBACK_OUTPUT ?= metadata/bpi-runtime-image-rollback-acceptance.json
+BPI_ROLLBACK_SERVICE_IMAGE ?=
+BPI_ROLLBACK_ADAPTER_IMAGE ?=
 WOM_PUBLIC_PRODUCE_TASK_CREATED_NOOP_OUTPUT ?= metadata/wom-public-produce-task-created-noop-probe.json
 WOM_QRCODE_ROUTE_PROBE_OUTPUT ?= metadata/wom-qrcode-route-probe.json
 WOM_QRCODE_PERSISTENCE_OUTPUT ?= metadata/wom-qrcode-persistence-acceptance.json
@@ -149,11 +152,11 @@ BPI_STREAM_COMPOSE_ENV := $(if $(wildcard $(BPI_STREAM_ENV_FILE)),$(BPI_STREAM_E
 BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(BPI_STREAM_DEPLOY_DIR)/docker-compose.yml
 
 .PHONY: help ci ci-java17 verify verify-pom compose-config runtime-script-check sustainable-check ci-required-file-inventory ci-required-file-inventory-check ci-required-file-strict-check project-goal-acceptance-check goal-gap-register goal-gap-register-check backend-table-audit-handoff-check basic-config-coverage-check basic-config-action-matrix-check entity-model-config-crud-readiness-check test-environment-address-check test-environment-static-bundle-link-check persistence-acceptance-check production-testcase-check wom-toolbar-action-coverage-check production-blocker-check production-module-backlog-check production-action-map-check platform-validation-check runtime-smoke-reports-check business-dependency-readiness-check business-dependency-contract-check business-module-intake-requirements-check business-package-scan-check production-export-readiness-check production-export-gap-breakdown production-export-gap-breakdown-check production-source-evidence-refresh production-source-evidence-refresh-check production-migration-readiness-check production-cutover-gate-doc production-cutover-gate-check production-rehearsal-plan production-rehearsal-plan-check production-evidence-ready-gate-regression-check runtime-patch-manifest runtime-patch-manifest-check bpi-contracts-test source-module-check module-intake-precheck-regression-check module-intake-candidate-report-check source-module-test create-backend-module module-intake-check material-wms-test material-wms-package material-wms-stage-runtime acceptance-material-wms-persistence process-analysis-test process-analysis-package process-analysis-stage-runtime acceptance-process-analysis-persistence inventory inventory-check backend-dependency-inventory backend-dependency-check oracle-audit oracle-audit-check postgres-migration-index postgres-migration-check oracle-replacement-status oracle-replacement-check production-source-inventory production-target-preflight production-rowcount-compare production-checksum-compare production-db-migration-evidence-check production-db-migration-ready-check production-minio-source-inventory production-minio-target-inventory production-minio-compare production-minio-migration-evidence-check production-minio-migration-ready-check production-keycloak-source-export production-keycloak-target-export production-keycloak-compare production-keycloak-migration-evidence-check production-keycloak-migration-ready-check production-rollback-evidence-check production-rollback-ready-check production-license-strategy-check production-license-ready-check production-network-tls-check production-network-tls-ready-check production-security-hardening-check production-security-hardening-ready-check production-business-smoke-signoff-check production-business-smoke-signoff-ready-check production-nacos-runtime-patch-check production-nacos-runtime-patch-ready-check render-config prepare-runtime up-infra up down ps logs smoke-platform smoke-api smoke-menu smoke-todo smoke-organization smoke-test-environment smoke-postgres-runtime smoke-nacos-config smoke-keycloak-jwt smoke-minio-runtime smoke-business-dependencies business-package-scan smoke-production-export-readiness acceptance-organization-persistence acceptance-organization-group-persistence acceptance-organization-position-persistence acceptance-organization-position-role-persistence acceptance-organization-company-persistence acceptance-organization-person-persistence acceptance-organization-person-user-persistence acceptance-auth-user-persistence acceptance-rbac-permission-persistence acceptance-systemcode-persistence acceptance-systemconfig-persistence smoke-systemconfig-builtins acceptance-systemconfig-controlled-runtime-config smoke-runtime-configuration smoke-entity-model-config-crud-readiness acceptance-custom-property-persistence acceptance-patrol-input-standard-persistence acceptance-patrol-route-persistence acceptance-patrol-area-persistence acceptance-patrol-item-persistence acceptance-wom-manufacturing-order-persistence acceptance-wom-start-persistence acceptance-wom-hold-restart-persistence smoke-wom-toolbar-row acceptance-wom-stop-persistence acceptance-wom-stop-output-persistence acceptance-wom-advance-release-persistence acceptance-wom-prepare-need-persistence acceptance-wom-active-persistence acceptance-wom-active-end-persistence acceptance-wom-easy-active-persistence acceptance-wom-putin-active-persistence acceptance-wom-check-active-persistence acceptance-wom-process-start-persistence acceptance-wom-process-end-persistence acceptance-wom-process-unit-persistence acceptance-wom-manu-inspect-persistence acceptance-wom-checkoutbill-persistence acceptance-wom-reject-material-persistence probe-wom-public-produce-task-created-noop probe-wom-qrcode-route acceptance-qcs-report-chain-persistence acceptance-teaminfo-scheduleplan-persistence acceptance-craftgraph-persistence smoke-rbac-authority smoke-business smoke-business-page discover-production-actions audit-postgres-mappings audit-postgres-report
-.PHONY: rehearse-core-flow-runtime-rollback
+.PHONY: rehearse-core-flow-runtime-rollback bpi-runtime-image-rollback-rehearsal
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -176,6 +179,7 @@ help:
 	@printf '%s\n' '  make up-bpi-stream         Start only the isolated BPI Kafka/Flink project after preflight'
 	@printf '%s\n' '  make bpi-stream-cluster-smoke Require replicated topics, RUNNING job and checkpoint'
 	@printf '%s\n' '  make bpi-stream-broker-failure-recovery Stop one broker, prove quorum/checkpoint progress, then restore it'
+	@printf '%s\n' '  make bpi-stream-flink-rollback-rehearsal Restore previous JAR from savepoint, capture state, then restore current JAR'
 	@printf '%s\n' '  make bpi-stream-cluster-replay Publish marker rule/context/telemetry and require one committed candidate'
 	@printf '%s\n' '  make bpi-stream-joint-replay Use the browser-published rule and emit only scoped context/telemetry'
 	@printf '%s\n' '  make bpi-stream-rule-deactivate Publish typed inactive state and require a Flink APPLIED receipt'
@@ -233,6 +237,7 @@ help:
 	@printf '%s\n' '  make runtime-patch-manifest Regenerate runtime patch checksum manifest'
 	@printf '%s\n' '  make runtime-patch-manifest-check Check runtime patch checksum manifest is fresh'
 	@printf '%s\n' '  make rehearse-core-flow-runtime-rollback Roll back and restore WOM core runtime patches on the test host'
+	@printf '%s\n' '  make bpi-runtime-image-rollback-rehearsal Roll back BPI service/adapter, browser-smoke, then restore current images'
 	@printf '%s\n' '  make source-module-check     Validate promoted backend source modules'
 	@printf '%s\n' '  make source-module-test      Compile and test promoted backend source modules'
 	@printf '%s\n' '  make create-backend-module MODULE=platform-auth [PACKAGE=com.example]'
@@ -386,6 +391,7 @@ runtime-script-check:
 	sh -n deploy/bpi-streaming/scripts/preflight.sh
 	sh -n deploy/bpi-streaming/scripts/smoke-cluster.sh
 	sh -n deploy/bpi-streaming/scripts/run-broker-failure-recovery.sh
+	sh -n deploy/bpi-streaming/scripts/run-flink-job-rollback-rehearsal.sh
 	sh -n deploy/bpi-streaming/scripts/run-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-joint-replay.sh
 	sh -n deploy/bpi-streaming/scripts/run-rule-deactivation.sh
@@ -403,6 +409,7 @@ runtime-script-check:
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	sh -n deploy/docker/scripts/prepare-runtime-patches.sh
@@ -707,6 +714,10 @@ bpi-stream-cluster-smoke:
 bpi-stream-broker-failure-recovery:
 	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
 	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/run-broker-failure-recovery.sh "$(BPI_STREAM_ENV_FILE)"
+
+bpi-stream-flink-rollback-rehearsal:
+	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
+	sh $(BPI_STREAM_DEPLOY_DIR)/scripts/run-flink-job-rollback-rehearsal.sh "$(BPI_STREAM_ENV_FILE)"
 
 bpi-stream-cluster-replay:
 	@if [ ! -f "$(BPI_STREAM_ENV_FILE)" ]; then printf '%s\n' 'ERROR: deploy/bpi-streaming/.env is required' >&2; exit 1; fi
@@ -1135,6 +1146,16 @@ acceptance-custom-property-persistence:
 
 rehearse-core-flow-runtime-rollback:
 	ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_REMOTE_DEPLOY_ROOT=$(CORE_FLOW_REMOTE_ROOT) ADP_CORE_FLOW_BACKUP_TAG=$(CORE_FLOW_BACKUP_TAG) ADP_CORE_FLOW_ROLLBACK_OUTPUT=$(CORE_FLOW_RUNTIME_ROLLBACK_OUTPUT) $(NODE) deploy/docker/scripts/adp-core-flow-runtime-rollback-rehearsal.js
+
+bpi-runtime-image-rollback-rehearsal:
+	@ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) \
+	ADP_REMOTE_DEPLOY_ROOT=$(CORE_FLOW_REMOTE_ROOT) \
+	ADP_BASE_URL=$(ADP_BASE_URL) BPI_BROWSER_BASE_URL=$(ADP_BASE_URL)/bpi \
+	ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) \
+	BPI_ROLLBACK_SERVICE_IMAGE=$(BPI_ROLLBACK_SERVICE_IMAGE) \
+	BPI_ROLLBACK_ADAPTER_IMAGE=$(BPI_ROLLBACK_ADAPTER_IMAGE) \
+	BPI_RUNTIME_ROLLBACK_OUTPUT=$(BPI_RUNTIME_ROLLBACK_OUTPUT) \
+	$(NODE) deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 
 acceptance-wom-manufacturing-order-persistence:
 	ADP_BASE_URL=$(ADP_BASE_URL) ADP_USERNAME=$(ADP_USERNAME) ADP_PASSWORD=$(ADP_PASSWORD) ADP_DB_SSH_TARGET=$(ADP_SSH_USER)@$(ADP_SSH_HOST) ADP_OUTPUT_PATH=$(WOM_MANUFACTURING_ORDER_PERSISTENCE_OUTPUT) $(NODE) deploy/docker/scripts/adp-wom-manufacturing-order-persistence-acceptance.js

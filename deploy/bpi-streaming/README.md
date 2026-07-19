@@ -63,7 +63,7 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 十二个 BPI topic（包含点位目录 source/DLT、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
+2. 十二个配置内 BPI 业务 topic（包含点位目录 source/DLT、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 
@@ -161,6 +161,20 @@ make bpi-stream-verify-savepoint
 才可临时开启；新增无历史状态的算子不构成开启理由。保存升级前 JAR、savepoint 路径、镜像 ID、
 topic 配置和证据 JSON，禁止覆盖唯一回滚制品。
 
+应用 JAR 双向回滚使用独立确认入口。它先抓取当前 JAR 的 canonical savepoint，从该状态恢复上一版
+JAR，再抓取上一版状态并恢复当前 JAR；任一阶段失败或收到中断信号都会尝试把当前 JAR 从最新安全
+savepoint 恢复。备份目录和上一版 JAR 必须是绝对路径：
+
+```bash
+BPI_FLINK_ROLLBACK_CONFIRM=ROLLBACK_BPI_FLINK_JOB_AND_RESTORE \
+BPI_FLINK_ROLLBACK_JAR=/absolute/path/to/previous-job.jar \
+BPI_FLINK_ROLLBACK_BACKUP_DIR=/absolute/protected/rollback-directory \
+  make bpi-stream-flink-rollback-rehearsal
+```
+
+2026-07-19 目标环境已通过该双向演练，详见
+[`docs/testing/bpi-application-rollback-acceptance.md`](../../docs/testing/bpi-application-rollback-acceptance.md)。
+
 单 broker 故障恢复使用独立验收 topic，并要求演练前后全部用户分区 ISR=3、故障期间无不可用分区且
 不低于 minISR、`acks=all` marker 恰好一次、Flink job 持续运行并推进 checkpoint：
 
@@ -179,16 +193,16 @@ BPI_BROKER_CHAOS_MARKER=ADP_BPI_BROKER_CHAOS_YYYYMMDD_HHMMSS \
 1. 通过磁盘、broker、checkpoint 和唯一运行作业预检；
 2. 抓取旧作业 canonical savepoint，并确认作业继续运行；
 3. 备份 BPI PostgreSQL，执行 expand-only Flyway migration；
-4. 创建新增 topic，部署 V13 runtime，但保持 candidate/rule consumers deny-all；
+4. 创建新增 topic，部署目标 runtime，但保持 candidate/rule consumers deny-all；
 5. 从旧 savepoint 恢复新 Flink JAR，完成 restore smoke；
 6. 使用唯一 marker 完成页面、API、Kafka、Flink、PostgreSQL 联合验收；
 7. 清理 marker 并重新关闭验收消费者。
 
-若新作业版本失败，保持 Kafka/MinIO volumes 和 PostgreSQL V13 扩展字段，恢复上一版 versioned
+若新作业版本失败，保持 Kafka/MinIO volumes 和 PostgreSQL expand-only 扩展字段，恢复上一版 versioned
 job JAR，把 `.env` 的 restore path 指回升级前 savepoint，再执行带确认的 restore 与 smoke。
 数据库 migration 不做 DROP 降级；旧 runtime 应用镜像只在 consumers/outbox 保持关闭时回退。
-带负载 TaskManager 恢复和单 broker 故障恢复已经通过；service、adapter、Flink 应用镜像回退和
-完整业务回滚仍需独立演练。
+带负载 TaskManager 恢复、单 broker 故障恢复以及 service、adapter、Flink 应用组件回退均已通过；
+跨组件同时回切、真实业务负载和生产流量切换仍需独立演练。
 
 停止整套测试流环境时才使用：
 

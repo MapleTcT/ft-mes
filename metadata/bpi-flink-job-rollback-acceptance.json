@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-07-19T04:10:02.988328+00:00",
+  "status": "PASS",
+  "phase": "COMPLETE",
+  "marker": "ADP_BPI_FLINK_ROLLBACK_20260719_120659",
+  "strategy": "CURRENT_SAVEPOINT_TO_PREVIOUS_JAR_TO_CURRENT_JAR",
+  "statePolicy": {
+    "savepointFormat": "CANONICAL",
+    "allowNonRestoredState": false,
+    "databaseDowngrade": false
+  },
+  "artifacts": {
+    "currentJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-993b99ff-job.jar",
+    "currentJarSha256": "10ddc3dc0a213a79cfa889ac07c70e635714788139c8154f0950c5cb3d8ce32f",
+    "rollbackJar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-ec850619-job.jar",
+    "rollbackJarSha256": "b74f25affb06b1c750d8a7f1a7ca998b00b37d83ccb2cd6c0c1fe209a7c11f41",
+    "environmentBackup": "/data/docker/bpi-upgrade-backups/ADP_BPI_FLINK_ROLLBACK_20260719_120659/bpi-streaming.env.before",
+    "backupDirectory": "/data/docker/bpi-upgrade-backups/ADP_BPI_FLINK_ROLLBACK_20260719_120659"
+  },
+  "savepoints": {
+    "currentBeforeRollback": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-0a2dd0-6ea7eff0e1f0",
+    "capturedFromRollbackJar": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-c866ff-a510d1adf61b"
+  },
+  "stages": {
+    "currentCapture": {
+      "generatedAt": "2026-07-19T04:07:23.367300+00:00",
+      "status": "PASS",
+      "operation": "CAPTURE_ONLY",
+      "job": {
+        "name": "ft-mes-bpi-batch-boundary-v1",
+        "id": "0a2dd090eb290f82d052fc7c0465311f",
+        "restUrl": "http://100.99.133.43:18081",
+        "latestCompletedCheckpointId": 2558,
+        "jar": "/home/v6/adp-bpi-stream-v15/deploy/bpi-streaming/../../streaming/bpi-stream-engine/target/bpi-stream-engine-993b99ff-job.jar",
+        "jarSha256": "10ddc3dc0a213a79cfa889ac07c70e635714788139c8154f0950c5cb3d8ce32f"
+      },
+      "savepoint": {
+        "path": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-0a2dd0-6ea7eff0e1f0",
+        "format": "CANONICAL",
+        "jobCancelled": false
+      },
+      "kafka": {
+        "businessTopicCount": 13,
+        "underReplicatedPartitions": 0
+      },
+      "destructiveActionsPerformed": false
+    },
+    "rollbackRestore": {
+      "generatedAt": "2026-07-19T04:08:46.928588+00:00",
+      "status": "PASS",
+      "job": {
+        "name": "ft-mes-bpi-batch-boundary-v1",
+        "id": "c866ffcd6ba91fcbf3fc32dd2e84b557",
+        "restUrl": "http://100.99.133.43:18081",
+        "startTime": 1784434057588,
+        "restoredFrom": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-0a2dd0-6ea7eff0e1f0",
+        "postRestoreCheckpointId": 2561,
+        "postRestoreCheckpointTriggerTime": 1784434086646
+      },
+      "requiredOperators": {
+        "pointCatalogSource": "PRESENT",
+        "runtimeReadinessSink": "PRESENT"
+      },
+      "clusterSmoke": "PASS"
+    },
+    "rollbackCapture": {
+      "generatedAt": "2026-07-19T04:08:55.359106+00:00",
+      "status": "PASS",
+      "operation": "CAPTURE_ONLY",
+      "job": {
+        "name": "ft-mes-bpi-batch-boundary-v1",
+        "id": "c866ffcd6ba91fcbf3fc32dd2e84b557",
+        "restUrl": "http://100.99.133.43:18081",
+        "latestCompletedCheckpointId": 2562,
+        "jar": "/home/v6/adp-bpi-stream-v15/streaming/bpi-stream-engine/target/bpi-stream-engine-ec850619-job.jar",
+        "jarSha256": "b74f25affb06b1c750d8a7f1a7ca998b00b37d83ccb2cd6c0c1fe209a7c11f41"
+      },
+      "savepoint": {
+        "path": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-c866ff-a510d1adf61b",
+        "format": "CANONICAL",
+        "jobCancelled": false
+      },
+      "kafka": {
+        "businessTopicCount": 13,
+        "underReplicatedPartitions": 0
+      },
+      "destructiveActionsPerformed": false
+    },
+    "currentRestore": {
+      "generatedAt": "2026-07-19T04:10:02.706838+00:00",
+      "status": "PASS",
+      "job": {
+        "name": "ft-mes-bpi-batch-boundary-v1",
+        "id": "990e6d0d610ebe623f6845706d13f383",
+        "restUrl": "http://100.99.133.43:18081",
+        "startTime": 1784434147907,
+        "restoredFrom": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-c866ff-a510d1adf61b",
+        "postRestoreCheckpointId": 2564,
+        "postRestoreCheckpointTriggerTime": 1784434163537
+      },
+      "requiredOperators": {
+        "pointCatalogSource": "PRESENT",
+        "runtimeReadinessSink": "PRESENT"
+      },
+      "clusterSmoke": "PASS"
+    },
+    "recoveryRestore": null
+  },
+  "recoveryGuard": {
+    "status": "NOT_REQUIRED",
+    "currentJarRestored": true
+  },
+  "persistence": {
+    "required": false,
+    "status": "NOT_APPLICABLE",
+    "reason": "The rehearsal changes only Flink application artifacts and savepoint state."
+  }
+}

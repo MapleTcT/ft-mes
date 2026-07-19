@@ -1209,6 +1209,18 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-broker-failure-recovery.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-streaming/scripts/run-flink-job-rollback-rehearsal.sh",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-streaming/scripts/run-joint-replay.sh",
       "state": "tracked",
       "tracked": true
@@ -3225,6 +3237,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4857,7 +4875,19 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-application-rollback-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-boundary-runtime-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-broker-failure-recovery-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -4912,6 +4942,12 @@
     {
       "ignored": false,
       "path": "docs/testing/bpi-point-catalog-readiness-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "docs/testing/bpi-point-catalog-repeated-observation-acceptance.md",
       "state": "tracked",
       "tracked": true
     },
@@ -5127,6 +5163,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-broker-failure-recovery-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-browser-kafka-postgres-joint-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -5140,6 +5182,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-candidate-protobuf-persistence-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-flink-job-rollback-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5194,6 +5242,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-point-catalog-readiness-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-point-catalog-repeated-observation-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -5272,6 +5326,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-rule-version-lifecycle-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-runtime-image-rollback-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6921,6 +6981,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V16__bpi_point_catalog_repeated_observations.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
       "state": "tracked",
       "tracked": true
@@ -7820,16 +7886,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 556
+      "tracked": 559
     },
     "docs": {
-      "tracked": 92
+      "tracked": 95
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 133
+      "tracked": 137
     },
     "package.json": {
       "tracked": 1
@@ -7841,7 +7907,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 174
+      "tracked": 175
     },
     "simulation": {
       "tracked": 4
@@ -7853,8 +7919,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1299,
-    "tracked": 1299,
+    "totalFiles": 1310,
+    "tracked": 1310,
     "untracked": 0
   },
   "untrackedByDirectory": []

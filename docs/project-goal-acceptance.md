@@ -65,7 +65,7 @@ gate，防止把局部通过项手工改成整体 READY：
 
 | ID | 目标项 | 状态 | 当前证据 | 缺口 |
 | --- | --- | --- | --- | --- |
-| G-001 | 可持续开发仓库基础 | READY | 父 POM、Makefile、`.gitignore`、CI、库存和门禁已建立；`metadata/ci-required-file-inventory.json` 当前记录 1299 个 CI/治理/runtime 依赖资产，其中 1299 tracked、0 untracked、0 missing references，覆盖全部可维护 source-module、PostgreSQL 迁移、真实验收和 verifier，本轮新增 BPI V15 规则退役、延迟 candidate、真实页面与 PostgreSQL/Kafka/Flink 验收资产也已跟踪；`make ci` 包含 strict tracking，必需文件游离在 Git 外会直接失败。 | 继续随模块提升补测试；新增或移动治理资产后继续运行 `make ci` |
+| G-001 | 可持续开发仓库基础 | READY | 父 POM、Makefile、`.gitignore`、CI、库存和门禁已建立；`metadata/ci-required-file-inventory.json` 当前记录 1310 个 CI/治理/runtime 依赖资产，其中 1310 tracked、0 untracked、0 missing references，覆盖全部可维护 source-module、PostgreSQL 迁移、真实验收和 verifier，本轮新增 BPI V15 规则退役、延迟 candidate、单 broker 故障及应用组件回退验收资产也已跟踪；`make ci` 包含 strict tracking，必需文件游离在 Git 外会直接失败。 | 继续随模块提升补测试；新增或移动治理资产后继续运行 `make ci` |
 | G-002 | 当前内容迁移 | PARTIAL | `docs/current-content-inventory.md` 和源码恢复目录 | 业务模块动作级源码/表关系仍需继续排查 |
 | G-003 | Oracle 替换为 PostgreSQL 默认路径 | PARTIAL | Docker/POM 默认 PostgreSQL；`metadata/oracle-replacement-status.json` 当前汇总 `blockingIssueCount=0`、`runtimeConfigActiveOracleLineCount=0`、`directOracleDependencyCount=2`、`oracleBacklogReferenceCount=1575`、`postgresMigrationHighRiskCount=0`、`postgresMapperAuditErrorCount=0`；Oracle 只允许 legacy/profile/backlog；`metadata/oracle-migration-audit.json` 当前记录 1575 条已分类引用、0 条未分类引用；PATROL 运行元数据引用归类为 `postgres-compat-reference`，Java `rowNum` 回调/索引和 JavaScript `rowNum` / `Number(...)` 均按非 SQL 噪声分类，真实 SQL 方言仍被阻断；模块准入门禁继续阻断不可检查包和 Oracle 默认路径 | Oracle backlog 仍有引用，需要逐模块迁移 |
 | G-004 | 项目目标与交接说明 | READY | `docs/project-objectives.md`、`docs/sustainable-development.md` | 随真实验收继续更新 |
@@ -85,7 +85,7 @@ gate，防止把局部通过项手工改成整体 READY：
 | G-018 | 业务模块完整测试用例 | PARTIAL | 53 个既有业务页面 smoke 已有证据；生产模块矩阵当前 `44 PASS / 0 BLOCKED / 0 NOT_RUN`；落库总账当前 `175 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`。独立不良数量 marker `ADP_E2E_20260717141017_WOM_BAD_QTY` 已形成 WOM/QCS/WMS/PostgreSQL 完整证据；历史 WOM 工具栏基线 `ADP_E2E_20260622131959_WOMSTART_HOLD_RESTART`、taskId `9000006343993284`、generatedAt `2026-06-22T13:21:24.930Z` 继续保留。PATROL 计划/取消、配置 CRUD、执行、异常隐患、统计/监控和 Kafka 消费均有真实证据；material/WMS、ProcessAnalysis、生产列表导出、二维码、手工新建和 RM Web 编辑已闭合；BPI V15 受控退役及延迟 candidate 已补入同一落库验收总账。 | PATROL 技术消费链已通过，但测试库 `tmm_tags=0` 且无测点历史，无法验收 `gather_data` 中位数落库和误差图表；GIS 定位/轨迹缺 `SESGISConfig`，完整整改/复查/销项缺真实 SESH；public `produceTaskCreated` 产品范围决定、现场 Batch/DCS 切换确认和业务负责人签字未完成。 |
 | G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `178` 项，其中 `175 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；迁移库存为 `191 scripts`，191 新增 WOM 报告/事件账本、WMS 分配/事件账本、合格/冻结数量拆分和 WOM/QCS 可见入口；BPI Flyway V16 由独立 Java 17 服务维护，不计入 ADP init SQL 的 191 项库存；`metadata/production-module-backlog.json` 当前只保留 1 个 public `produceTaskCreated` 产品范围项，其中 `0 FAIL_BACKLOG / 1 BLOCKED`。 | 不能证明所有未来发现项已闭环，需要持续记录 |
 | G-020 | 生产迁移前置项 | BLOCKED | 生产迁移 readiness、cutover 总闸门、9 轨 rehearsal、数据库行数/checksum 对账、MinIO/Keycloak/Nacos/runtime patch、回滚、license、network/TLS、安全加固和 business smoke 签字门禁均已建立；当前 cutover 为 `NOT_READY_FOR_PRODUCTION_CUTOVER`，9 个 gate 中 8 个 PLANNED、1 个 BLOCKED，生产账本为 0 个 blocker、1 个 backlog；rehearsal 为 `REHEARSAL_BLOCKED`，9 个 track 中 8 个 PLANNED、1 个 BLOCKED。独立不良数量已退出阻断账本；business smoke signoff 校验器继续要求剩余 backlog 和未解决导出 target 逐项解决或提供结构化风险接受。 | 数据迁移/回滚演练、真实 license 决策、真实 MinIO/Keycloak 迁移、真实生产域名/TLS、安全加固、public `produceTaskCreated` 产品范围、现场 Batch/DCS 投递确认和真实业务 smoke 签字均未 READY；当前门禁只能证明“不允许切生产”及账本一致性。 |
-| G-021 | 智能批次与工艺数据中心（BPI） | PARTIAL | BPI 设计、契约、Java 8 adapter、Java 17 PostgreSQL 服务、操作台、Flink 数据面、transactional outbox、回执和审计已建立；目标环境已完成 Flyway V16，当前 Flink job `0a2dd090eb290f82d052fc7c0465311f` 为 `RUNNING/33-of-33`。规则退役、savepoint、延迟 candidate、重复目录观测与准入撤销均已闭合；marker `ADP_BPI_BROKER_CHAOS_20260719_1129` 又证明单 broker 停机时 151 个分区无不可用/低于 minISR、marker 恰好一次、checkpoint 连续推进且 ISR 完整恢复，Phase 1 仍保持 shadow-only。 | 目标点位仍为 1 点/0 READY，试点设备未注册/激活且 metadata/单位/标定/连续单调 sequence 未就绪；真实来源遥测 + MES context 同一试点 scope 的 candidate/batch、service/adapter/Flink 镜像及产品级回退、7-14 天影子运行、QCS/WMS 写回和训练数据阶段仍未完成。 |
+| G-021 | 智能批次与工艺数据中心（BPI） | PARTIAL | BPI 设计、契约、Java 8 adapter、Java 17 PostgreSQL 服务、操作台、Flink 数据面、transactional outbox、回执和审计已建立；目标环境已完成 Flyway V16。规则退役、savepoint、延迟 candidate、重复目录观测与准入撤销均已闭合；marker `ADP_BPI_BROKER_CHAOS_20260719_1129` 证明单 broker 停机时 151 个分区无不可用/低于 minISR、marker 恰好一次、checkpoint 连续推进且 ISR 完整恢复。marker `ADP_BPI_RUNTIME_ROLLBACK_20260719_120102` 与 `ADP_BPI_FLINK_ROLLBACK_20260719_120659` 又闭合 service/adapter 镜像和 Flink JAR 双向回退，当前恢复 job `990e6d0d610ebe623f6845706d13f383` 为 `RUNNING/33-of-33`，Phase 1 仍保持 shadow-only。 | 目标点位仍为 1 点/0 READY，试点设备未注册/激活且 metadata/单位/标定/连续单调 sequence 未就绪；真实来源遥测 + MES context 同一试点 scope 的 candidate/batch、真实业务负载下跨组件整体回切、7-14 天影子运行、QCS/WMS 写回和训练数据阶段仍未完成。 |
 
 ## 本轮 WOM 工具栏最新证据
 
@@ -108,8 +108,8 @@ ProcessAnalysis 追溯已在 2026-07-10 由源码模块、真实 WOM 按钮和 P
 ## 当前最高优先级缺口
 
 1. 把已通过的 BPI 同一 marker 联合验收、目标环境 Flyway V16、自动点位目录、topology/rule
-   产品化、版本比较、职责分离审批、受控退役、savepoint 和单 broker 故障验收固化为发布回归基线，
-   继续补 service/adapter/Flink 应用镜像及产品级回退。
+   产品化、版本比较、职责分离审批、受控退役、savepoint、单 broker 故障和应用组件双向回退固化为
+   发布回归基线，继续补真实业务负载下的跨组件整体回切。
 2. 先在 JetLinks 注册并激活 `bpi-pilot-device-01`，补 `instantFlow` metadata、单位、标定和 source sequence，导入新快照重新校验；READY 后与 MES production context 用同一 marker 闭合 candidate/batch，再进入 7-14 天影子运行。
 3. 处理既有生产矩阵剩余 BLOCKED，继续制造指令、报工、请检、质量处置、完工入库和批次追溯核心链，不扩散到低优先级模块。
 4. 扩展基础配置与生产迁移 rehearsal，但在真实业务 smoke 签字前保持 `NOT_READY_FOR_PRODUCTION_MIGRATION` 和 `NOT_READY_FOR_PRODUCTION_CUTOVER`。

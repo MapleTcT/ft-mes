@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T04:01:12.415Z",
+  "repoCommit": "336255ac7afb8101e50e59e1a257cdbb772922f7",
+  "database": "PostgreSQL",
+  "marker": "ADP_BPI_RUNTIME_ROLLBACK_20260719_120102",
+  "status": "PASS",
+  "target": {
+    "sshHost": "10.11.100.17",
+    "remoteRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiBaseUrl": "http://10.11.100.17:18080/bpi",
+    "backupDir": "/data/docker/bpi-upgrade-backups/ADP_BPI_RUNTIME_ROLLBACK_20260719_120102"
+  },
+  "rollbackImages": {
+    "service": "ft-mes-bpi-service:20260718-07b26131",
+    "adapter": "ft-mes-bpi-adapter:20260718-v15"
+  },
+  "stages": {
+    "precheck": {
+      "serviceImage": "ft-mes-bpi-service:20260719-repeat-observation",
+      "serviceImageId": "sha256:9eb1b0bc8ecadd31899ed2fc06722555ae70a2806c5d21696d7146706684a07b",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260718-v15b",
+      "adapterImageId": "sha256:81c22c0b6dccd7965e3f95c235454645cf6440c6cb179059b3e45cef94532998",
+      "adapterHealth": "healthy",
+      "databaseState": "16|5|5|0|0|0|0|0|0|22",
+      "pageHttp": "200"
+    },
+    "rollback": {
+      "serviceImage": "ft-mes-bpi-service:20260718-07b26131",
+      "serviceImageId": "sha256:fa34bd6c2a737f8453507f6197d6f64af979259ea37b5725efb502ee2f6c339a",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260718-v15",
+      "adapterImageId": "sha256:c28b5ccc665955e1b7fb39ffd431d78f58e05238dbb9234e972f7885952a819c",
+      "adapterHealth": "healthy",
+      "databaseState": "16|5|5|0|0|0|0|0|0|22",
+      "pageHttp": "200"
+    },
+    "restored": {
+      "serviceImage": "ft-mes-bpi-service:20260719-repeat-observation",
+      "serviceImageId": "sha256:9eb1b0bc8ecadd31899ed2fc06722555ae70a2806c5d21696d7146706684a07b",
+      "serviceHealth": "healthy",
+      "adapterImage": "ft-mes-bpi-adapter:20260718-v15b",
+      "adapterImageId": "sha256:81c22c0b6dccd7965e3f95c235454645cf6440c6cb179059b3e45cef94532998",
+      "adapterHealth": "healthy",
+      "databaseState": "16|5|5|0|0|0|0|0|0|22",
+      "pageHttp": "200"
+    }
+  },
+  "browser": {
+    "rollback": {
+      "phase": "rollback",
+      "pageUrl": "http://10.11.100.17:18080/bpi/#/points",
+      "loginStatus": 200,
+      "heading": "点位目录",
+      "apiResponses": [
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/point-catalog/current",
+          "status": 200
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/tmp/bpi-runtime-rollback/ADP_BPI_RUNTIME_ROLLBACK_20260719_120102-rollback.png"
+    },
+    "restored": {
+      "phase": "restored",
+      "pageUrl": "http://10.11.100.17:18080/bpi/#/points",
+      "loginStatus": 200,
+      "heading": "点位目录",
+      "apiResponses": [
+        {
+          "method": "GET",
+          "url": "http://10.11.100.17:18080/bpi-api/point-catalog/current",
+          "status": 200
+        }
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "screenshot": "/tmp/bpi-runtime-rollback/ADP_BPI_RUNTIME_ROLLBACK_20260719_120102-restored.png"
+    }
+  },
+  "checks": [
+    {
+      "name": "precheck runtime ready",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260719-repeat-observation",
+        "serviceImageId": "sha256:9eb1b0bc8ecadd31899ed2fc06722555ae70a2806c5d21696d7146706684a07b",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260718-v15b",
+        "adapterImageId": "sha256:81c22c0b6dccd7965e3f95c235454645cf6440c6cb179059b3e45cef94532998",
+        "adapterHealth": "healthy",
+        "databaseState": "16|5|5|0|0|0|0|0|0|22",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "rollback service image differs from current",
+      "passed": true,
+      "detail": "ft-mes-bpi-service:20260719-repeat-observation"
+    },
+    {
+      "name": "rollback adapter image differs from current",
+      "passed": true,
+      "detail": "ft-mes-bpi-adapter:20260718-v15b"
+    },
+    {
+      "name": "rollback runtime ready",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260718-07b26131",
+        "serviceImageId": "sha256:fa34bd6c2a737f8453507f6197d6f64af979259ea37b5725efb502ee2f6c339a",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260718-v15",
+        "adapterImageId": "sha256:c28b5ccc665955e1b7fb39ffd431d78f58e05238dbb9234e972f7885952a819c",
+        "adapterHealth": "healthy",
+        "databaseState": "16|5|5|0|0|0|0|0|0|22",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "rollback service image selected",
+      "passed": true,
+      "detail": "ft-mes-bpi-service:20260718-07b26131"
+    },
+    {
+      "name": "rollback adapter image selected",
+      "passed": true,
+      "detail": "ft-mes-bpi-adapter:20260718-v15"
+    },
+    {
+      "name": "rollback database state unchanged",
+      "passed": true,
+      "detail": {
+        "before": "16|5|5|0|0|0|0|0|0|22",
+        "rollback": "16|5|5|0|0|0|0|0|0|22"
+      }
+    },
+    {
+      "name": "restored runtime ready",
+      "passed": true,
+      "detail": {
+        "serviceImage": "ft-mes-bpi-service:20260719-repeat-observation",
+        "serviceImageId": "sha256:9eb1b0bc8ecadd31899ed2fc06722555ae70a2806c5d21696d7146706684a07b",
+        "serviceHealth": "healthy",
+        "adapterImage": "ft-mes-bpi-adapter:20260718-v15b",
+        "adapterImageId": "sha256:81c22c0b6dccd7965e3f95c235454645cf6440c6cb179059b3e45cef94532998",
+        "adapterHealth": "healthy",
+        "databaseState": "16|5|5|0|0|0|0|0|0|22",
+        "pageHttp": "200"
+      }
+    },
+    {
+      "name": "current service image restored",
+      "passed": true,
+      "detail": "ft-mes-bpi-service:20260719-repeat-observation"
+    },
+    {
+      "name": "current adapter image restored",
+      "passed": true,
+      "detail": "ft-mes-bpi-adapter:20260718-v15b"
+    },
+    {
+      "name": "restored database state unchanged",
+      "passed": true,
+      "detail": {
+        "before": "16|5|5|0|0|0|0|0|0|22",
+        "restored": "16|5|5|0|0|0|0|0|0|22"
+      }
+    }
+  ],
+  "issues": []
+}
