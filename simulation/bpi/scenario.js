@@ -292,6 +292,8 @@ function createScenario() {
     endCandidate: null,
     batches: [],
     batchEvents: [],
+    shadowRuns: [],
+    shadowRunReviews: [],
     topology,
     topologies: [topology],
     pointCatalog,

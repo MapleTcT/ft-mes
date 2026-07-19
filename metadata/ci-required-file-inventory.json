@@ -3279,6 +3279,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-shadow-run-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3664,6 +3670,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-shadow-run-acceptance-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5067,6 +5091,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-shadow-run-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-source-sequence-readiness-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5464,6 +5494,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-runtime-image-rollback-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shadow-run-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-shadow-run-acceptance.png",
       "state": "tracked",
       "tracked": true
     },
@@ -6567,6 +6609,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ShadowRunService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
       "state": "tracked",
       "tracked": true
@@ -6796,6 +6844,42 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/RuleVersionView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunBatchReviewView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunBatchSource.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunMetrics.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunReadiness.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunReviewResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ShadowRunView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7059,6 +7143,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/security/BpiSecurityProperties.java",
       "state": "tracked",
       "tracked": true
@@ -7215,6 +7305,24 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunBatchReviewCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunCreateCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/TelemetryEnvelopeRequest.java",
       "state": "tracked",
       "tracked": true
@@ -7306,6 +7414,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V20__bpi_shadow_run_acceptance.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -7414,6 +7528,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiShadowRunPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8282,16 +8402,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 566
+      "tracked": 570
     },
     "docs": {
-      "tracked": 101
+      "tracked": 102
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 146
+      "tracked": 148
     },
     "package.json": {
       "tracked": 1
@@ -8303,7 +8423,7 @@
       "tracked": 53
     },
     "services": {
-      "tracked": 211
+      "tracked": 224
     },
     "simulation": {
       "tracked": 4
@@ -8315,8 +8435,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1376,
-    "tracked": 1376,
+    "totalFiles": 1396,
+    "tracked": 1396,
     "untracked": 0
   },
   "untrackedByDirectory": []

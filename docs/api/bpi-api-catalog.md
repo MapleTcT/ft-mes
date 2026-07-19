@@ -19,7 +19,7 @@
 - `LOCAL_FLINK_MINICLUSTER_KAFKA_ACCEPTED` 表示真实本地 Flink MiniCluster 和 Kafka 已验证 checkpoint
   事务可见性与任务重启恢复；它不包含目标集群、MinIO、浏览器或 PostgreSQL 联合链路。
 - `SERVICE_IMPLEMENTED` 表示确定性模拟器和 Java 17/PostgreSQL 服务均已实现；它仍不等于目标环境浏览器联合验收。
-- Java 17 服务当前实现 `service-phase1-profile.json` 中的 42 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
+- Java 17 服务当前实现 `service-phase1-profile.json` 中的 52 个公开操作，以及候选 JSON、候选 Protobuf、遥测 3 个内部接入端点；其余模拟操作仍不能视为后端已实现。
 
 ### 1.1 Java 8 适配器边界
 
@@ -28,7 +28,7 @@
 - `tenant_id` 只从受信 JWT claim 映射；`plant_ids`、`line_ids` 和 BPI roles 只来自服务端 subject/role 配置。浏览器自报的 tenant、plant、line header 一律不转发。
 - 内部 JWT 使用固定 issuer/audience，TTL 不超过 15 分钟；浏览器永远看不到内部签名密钥。
 - 上游地址固定为 `BPI_ADAPTER_UPSTREAM_BASE_URL`，客户端不能控制；普通请求体上限为 64 KiB，只有点位目录快照导入 `/point-catalog/snapshots` 可使用 5 MiB 上限。
-- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation/data-quality 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire、data-quality acknowledge/resolve。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
+- 当前允许 GET overview/line/candidate/batch/point-catalog/point-calibration/topology/rule/simulation/data-quality/shadow-run 读取及 topology/rule 版本比较，以及 POST candidate confirm/reject、batch suspend/resume、point-catalog snapshot import、point-calibration submit/approve/reject/revoke、topology draft/validate/publish、rule draft/simulate/submit-approval/publish/reject-approval/retry/retire、data-quality acknowledge/resolve、shadow-run create/start/review/complete/approve/reject/cancel。Java 17 服务继续执行角色、租户、工厂、产线和功能开关校验。
 - 缺失 subject scope、tenant 不匹配或无批准角色映射时 fail closed 返回 403。
 
 ## 2. 同步 API
@@ -81,6 +81,16 @@
 | 数据质量 | GET | `/bpi/v1/data-quality/incidents/{incidentId}` | `getDataQualityIncident` | SERVICE_IMPLEMENTED；原始事件、生命周期和推荐动作 |
 | 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/acknowledge` | `acknowledgeDataQualityIncident` | SERVICE_IMPLEMENTED；确认或重新分派 |
 | 数据质量 | POST | `/bpi/v1/data-quality/incidents/{incidentId}/resolve` | `resolveDataQualityIncident` | SERVICE_IMPLEMENTED；仅 ACKNOWLEDGED 可解决 |
+| 影子验收 | GET | `/bpi/v1/shadow-runs` | `listShadowRuns` | SERVICE_IMPLEMENTED；按受信 scope/state 读取，默认 100、上限 200 |
+| 影子验收 | POST | `/bpi/v1/shadow-runs` | `createShadowRun` | SERVICE_IMPLEMENTED；钉扎 PUBLISHED rule、topology 和 point-catalog snapshot，时长 7-14 天 |
+| 影子验收 | GET | `/bpi/v1/shadow-runs/{shadowRunId}` | `getShadowRun` | SERVICE_IMPLEMENTED；运行时重新计算就绪、指标和 blocker |
+| 影子验收 | GET | `/bpi/v1/shadow-runs/{shadowRunId}/batch-reviews` | `listShadowRunBatchReviews` | SERVICE_IMPLEMENTED；默认只返回 ACTIVE 人工复核，可显式包含 SUPERSEDED |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/batch-reviews` | `reviewShadowRunBatch` | SERVICE_IMPLEMENTED；只接受同 scope/版本且在运行窗口内的 CLOSED_RAW shadow batch |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/start` | `startShadowRun` | SERVICE_IMPLEMENTED；publication/APPLIED/runtime READY/topology/current operational point catalog 全部通过才启动 |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/complete` | `completeShadowRun` | SERVICE_IMPLEMENTED；最低时长与批次样本数通过才进入 EVALUATING |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/approve` | `approveShadowRun` | SERVICE_IMPLEMENTED；独立管理员审批，全部指标和 CRITICAL 数据质量门通过才批准 |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/reject` | `rejectShadowRun` | SERVICE_IMPLEMENTED；独立管理员可在 EVALUATING 驳回并保留证据 |
+| 影子验收 | POST | `/bpi/v1/shadow-runs/{shadowRunId}/cancel` | `cancelShadowRun` | SERVICE_IMPLEMENTED；仅 DRAFT/RUNNING，可审计取消 |
 | 训练数据 | GET | `/bpi/v1/datasets` | `listDatasets` | CONTRACT_ONLY |
 | 训练数据 | POST | `/bpi/v1/datasets/{datasetId}/snapshots` | `createDatasetSnapshot` | CONTRACT_ONLY |
 | 训练数据 | GET | `/bpi/v1/dataset-snapshots/{snapshotId}` | `getDatasetSnapshot` | CONTRACT_ONLY |
@@ -145,6 +155,13 @@ payload 与 headers 身份一致、事件时间不超前，并使用显式 tenan
 失败关闭。有效事件按 tenant/plant/line/stage/source/device/property/issue 聚合，原始事件、生命周期和审计均
 append-only。已解决事件只有在新事件 `detectedAt > resolvedAt` 时重新打开；旧迟到事件只保留事实，不改变状态。
 本地 Java 17 + PostgreSQL + Embedded Kafka 已通过，目标环境部署和真实 Flink 数据质量 topic 仍待验收。
+
+影子验收不是定时把规则“自动转正”。`createShadowRun` 固定规则、拓扑和点位目录证据；`startShadowRun`
+实时复核发布、Flink 应用、运行态和 MES 校准证据。运行中每个 `reviewShadowRunBatch` 保存自动/人工起止边界、
+偏差秒数、自动/参考数量、单位和复核人，重复复核采用 `ACTIVE/SUPERSEDED` 保留历史。`completeShadowRun`
+只检查最短连续时长与样本量；`approveShadowRun` 再检查边界人工认同率不低于配置值且最低为 95%、累计数量偏差、
+未解决 CRITICAL 数据质量事件和独立审批。任何一项失败都返回 `422`，不会写 WOM、QCS、WMS、PLC 或 DCS。
+受控时间压缩测试只能验证状态机、API 和 PostgreSQL 证据，不能替代真实 7-14 天现场连续运行。
 
 ## 3. 内部受信接入 API
 

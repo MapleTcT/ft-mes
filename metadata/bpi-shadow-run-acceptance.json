@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-19T18:04:39.658Z",
+  "repoCommit": "9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f+shadow-run-worktree",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_TARGET_TIME_COMPRESSED_CLEANED",
+  "marker": "ADP_E2E_SHADOW_20260720_0152_V20",
+  "environment": {
+    "host": "10.11.100.17",
+    "adpBaseUrl": "http://10.11.100.17:18080",
+    "bpiRoute": "http://10.11.100.17:18080/bpi/#/shadowRuns",
+    "serviceBaseUrl": "http://10.11.100.17:19091",
+    "databaseName": "ft_mes_bpi",
+    "databaseVersion": "PostgreSQL 15.18",
+    "flywayVersion": 20,
+    "serviceImage": "ft-mes-bpi-service:20260720-shadow-run-v20-r2",
+    "serviceImageId": "sha256:55159c5abe3a54f9144d925eaf3aa74abcd43e8550aa481b3da976504627b5ac",
+    "serviceJarSha256": "40defefe4768cc50713ee09f298c78b5bc9e617be8f24b1265b6abdcfbd6141e",
+    "adapterImage": "ft-mes-bpi-adapter:20260720-shadow-run-v20-r2",
+    "adapterImageId": "sha256:ac5d70f62cfa86161822e1ac2d1cac6ad6ff1e81cb50663155c3c48268730d41",
+    "adapterJarSha256": "25b5ee37a1525c907359e1c4e25c1c9b5f1a2fabb899d5bfc72ce055ba019a14",
+    "serviceHealth": "healthy",
+    "adapterHealth": "healthy",
+    "recentServiceErrorLogs": 0,
+    "recentAdapterErrorLogs": 0,
+    "frontendAsset": "index-CdkM5UnR.js",
+    "preMigrationBackup": {
+      "path": "/home/v6/adp-backups/ft_mes_bpi-pre-v20-20260720-014559.dump",
+      "sha256": "5c0b75291db7ff6a9beb1bfba3cdb8465709401b1980f11a0d629ca585d8bffc"
+    }
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "runId": "82194684-b67e-4307-a285-fabcd6def41e",
+    "ruleVersionId": "2efe0344-5219-92f8-08b7-f5bc53d9bd7f",
+    "topologyVersionId": "eb90f0a7-be09-fbe0-9a46-331f3d5c4966",
+    "pointCatalogSnapshotId": "76f51fa0-9af3-7dad-006d-7cc5200ad469",
+    "criticalIncidentId": "c8c34ead-c6f2-edb2-241c-cedc71a94b54"
+  },
+  "summary": {
+    "testedFeatures": 15,
+    "pass": 15,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "productionReadiness": "PARTIAL_FIELD_DURATION_PENDING"
+  },
+  "items": [
+    {
+      "id": "flyway-v20",
+      "status": "PASS",
+      "operation": "Apply the expand-only shadow-run migration on the target PostgreSQL database",
+      "evidence": "Flyway validated 21 migrations and recorded V20 success=true before the runtime service was replaced."
+    },
+    {
+      "id": "create-pinned-draft",
+      "status": "PASS",
+      "operation": "Create a DRAFT shadow run with an independent engineer identity",
+      "request": "POST /bpi/v1/shadow-runs",
+      "httpStatus": 200,
+      "evidence": "DRAFT/r1 pinned one PUBLISHED and active rule, its published topology, the validated current point-catalog snapshot and all nine start-readiness checks."
+    },
+    {
+      "id": "browser-start",
+      "status": "PASS",
+      "operation": "Start the run from the real ADP BPI page",
+      "request": "POST /bpi-api/shadow-runs/82194684-b67e-4307-a285-fabcd6def41e/start",
+      "httpStatus": 200,
+      "evidence": "The page persisted RUNNING/r2 by legacy-ticket:admin and rendered the updated state."
+    },
+    {
+      "id": "human-batch-reviews",
+      "status": "PASS",
+      "operation": "Review ten matching CLOSED_RAW shadow batches",
+      "request": "POST /bpi-api/shadow-runs/82194684-b67e-4307-a285-fabcd6def41e/batch-reviews",
+      "httpStatus": 200,
+      "evidence": "One review was submitted through the page and nine through the same adapter contract; activeReviews=10, acceptedBoundaries=19/20 and boundaryAgreement=0.95."
+    },
+    {
+      "id": "quantity-gate",
+      "status": "PASS",
+      "operation": "Compare automatic and reference quantities",
+      "evidence": "Automatic and reference totals are both 1000 t; cumulative, mean and maximum quantity deviation are all 0 percent."
+    },
+    {
+      "id": "complete-evaluation",
+      "status": "PASS",
+      "operation": "Complete observation from the real page",
+      "request": "POST /bpi-api/shadow-runs/82194684-b67e-4307-a285-fabcd6def41e/complete",
+      "httpStatus": 200,
+      "evidence": "The run entered EVALUATING/r13 only after the configured duration and ten-review gates were satisfied."
+    },
+    {
+      "id": "critical-quality-block",
+      "status": "PASS",
+      "operation": "Attempt approval while a CRITICAL data-quality incident is unresolved",
+      "request": "POST /bpi-api/shadow-runs/82194684-b67e-4307-a285-fabcd6def41e/approve",
+      "httpStatus": 422,
+      "evidence": "The page disabled approval and the service returned UNRESOLVED_CRITICAL_DATA_QUALITY without changing the run revision."
+    },
+    {
+      "id": "incident-resolution",
+      "status": "PASS",
+      "operation": "Acknowledge, assign and resolve the controlled incident from the real data-quality page",
+      "evidence": "The incident ended RESOLVED/r3 with preserved event, action and audit history; the approval action reopened only after resolution."
+    },
+    {
+      "id": "independent-approval",
+      "status": "PASS",
+      "operation": "Approve from the real page with an administrator different from the creator",
+      "request": "POST /bpi-api/shadow-runs/82194684-b67e-4307-a285-fabcd6def41e/approve",
+      "httpStatus": 200,
+      "evidence": "The final state is APPROVED/r14; creator is the controlled engineer and approver is legacy-ticket:admin."
+    },
+    {
+      "id": "postgres-state",
+      "status": "PASS",
+      "operation": "Query PostgreSQL directly for the accepted lifecycle and metrics",
+      "evidence": "The pre-cleanup query returned APPROVED/r14, 691202 observed seconds, 10 reviews, 0.95 boundary agreement, 0 quantity deviation and zero unresolved CRITICAL incidents."
+    },
+    {
+      "id": "postgres-audit-idempotency",
+      "status": "PASS",
+      "operation": "Query action audit and successful command idempotency",
+      "evidence": "PostgreSQL contained 16 attributable audit rows and exactly 10 COMPLETED/200 idempotency rows; the deliberate 422 was not stored as a successful command."
+    },
+    {
+      "id": "external-write-isolation",
+      "status": "PASS",
+      "operation": "Verify the shadow workflow does not perform production write-back",
+      "evidence": "All ten source batches remained CLOSED_RAW with qualityGate=NOT_APPLICABLE and wmsStatus=NOT_REQUESTED; no WOM, QCS, WMS, PLC or DCS command was issued."
+    },
+    {
+      "id": "browser-errors",
+      "status": "PASS",
+      "operation": "Capture real browser network and runtime errors",
+      "evidence": "The page captured 57 BPI responses (51 GET and 6 POST), all 2xx, with zero console errors, page errors and request failures."
+    },
+    {
+      "id": "runtime-artifact-repair",
+      "status": "PASS",
+      "operation": "Replace stale target service and adapter artifacts with byte-for-byte verified builds",
+      "evidence": "The service r2 JAR removed the retired snapshot.ready_point_count reference; the adapter r2 JAR added the shadow-runs collection/action allowlist. Both target containers are healthy with zero recent ERROR logs."
+    },
+    {
+      "id": "marker-cleanup",
+      "status": "PASS",
+      "operation": "Delete only the controlled tenant and marker fixtures after evidence capture",
+      "evidence": "Shadow runs, reviews, incidents, batches, outbox rows, rules, topologies, catalogs, calibrations and idempotency all returned zero remaining rows."
+    }
+  ],
+  "timeCompression": {
+    "applied": true,
+    "days": 8,
+    "databaseResult": "82194684-b67e-4307-a285-fabcd6def41e|RUNNING|2|691200",
+    "classification": "CONTROLLED_GATE_TEST_ONLY",
+    "fieldDurationEvidence": false
+  },
+  "browser": {
+    "status": "PASS",
+    "loginStatus": 200,
+    "route": "/bpi/#/shadowRuns",
+    "capturedBpiRequests": 57,
+    "getRequests": 51,
+    "postRequests": 6,
+    "non2xxResponses": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "screenshot": "metadata/bpi-shadow-run-acceptance.png",
+    "screenshotSha256": "55d0d59b7efdbf6628f5f6374d0027d97073bd0d82428c4450cb6d9f596f208b"
+  },
+  "persistence": {
+    "finalStateBeforeCleanup": "APPROVED",
+    "finalRevisionBeforeCleanup": 14,
+    "createdBy": "ADP_E2E_SHADOW_20260720_0152_V20_ENGINEER",
+    "startedBy": "legacy-ticket:admin",
+    "completedBy": "legacy-ticket:admin",
+    "decidedBy": "legacy-ticket:admin",
+    "observedDurationSeconds": 691202,
+    "activeReviews": 10,
+    "acceptedBoundaries": 19,
+    "totalBoundaries": 20,
+    "boundaryAgreement": 0.95,
+    "automaticQuantityTotal": 1000,
+    "referenceQuantityTotal": 1000,
+    "quantityUnit": "t",
+    "cumulativeQuantityDeviationPercent": 0,
+    "auditRows": 16,
+    "completedIdempotencyRows": 10,
+    "criticalIncidentFinalState": "RESOLVED",
+    "criticalIncidentFinalRevision": 3,
+    "closedRawBatches": 10,
+    "qualityNotApplicableBatches": 10,
+    "wmsNotRequestedBatches": 10
+  },
+  "cleanup": {
+    "shadowRuns": 0,
+    "reviews": 0,
+    "incidents": 0,
+    "batches": 0,
+    "outbox": 0,
+    "rules": 0,
+    "topologies": 0,
+    "catalogs": 0,
+    "calibrations": 0,
+    "idempotency": 0
+  },
+  "runtimeDefectsFoundAndFixed": [
+    {
+      "symptom": "POST /bpi/v1/shadow-runs returned 500",
+      "rootCause": "The first target image contained a stale JAR compiled before the V17 operational readiness query stopped referencing snapshot.ready_point_count.",
+      "fix": "Rebuilt the current Java 17 source, proved the focused PostgreSQL lifecycle test, verified the class bytes and deployed the r2 service image."
+    },
+    {
+      "symptom": "GET /bpi-api/shadow-runs returned 403 and the real page could not render the created run",
+      "rootCause": "The first target adapter image contained a stale Java 8 JAR built before shadow-run routes were added to BpiRoutePolicy.",
+      "fix": "Ran 20 Java 8 adapter tests, verified the packaged route regex and deployed the r2 adapter image."
+    }
+  ],
+  "localRegression": {
+    "eventContractTests": 17,
+    "ruleRuntimeTests": 9,
+    "serviceTests": 66,
+    "serviceSkipped": 1,
+    "totalJava17Tests": 92,
+    "java8AdapterTests": 20,
+    "simulationTests": 10,
+    "browserE2eTests": 14,
+    "frontendBuild": "PASS",
+    "staticContractGates": "PASS",
+    "database": "PostgreSQL 16.13",
+    "testDatasourceMaximumPoolSize": 2
+  },
+  "rawEvidence": [
+    {
+      "path": "/home/v6/adp-evidence/ADP_E2E_SHADOW_20260720_0152_V20-shadow-run.json",
+      "sha256": "7911afebe3d30975e6de4a6d41b1b77e1b222870ec13118749f320206fee51a7"
+    },
+    {
+      "path": "/home/v6/adp-evidence/ADP_E2E_SHADOW_20260720_0152_V20-shadow-run-db.txt",
+      "sha256": "39869cf86b1ef5be15e1fc7a2c78b02ea1b4bc37c0924d610f90d405521486ca"
+    },
+    {
+      "path": "metadata/bpi-shadow-run-acceptance.png",
+      "sha256": "55d0d59b7efdbf6628f5f6374d0027d97073bd0d82428c4450cb6d9f596f208b"
+    }
+  ],
+  "boundaries": [
+    "The eight-day database time compression proves deterministic gate behavior only; it is not seven to fourteen days of continuous field operation.",
+    "The rule, topology, point catalog, incident and ten batches were controlled target fixtures, not authoritative real-device and WOM same-marker production facts.",
+    "The workflow is deliberately shadow-only and did not write WOM, QCS, WMS, PLC or DCS production state.",
+    "Real field calibration, continuous monotonic DEVICE or GATEWAY source sequence, real END boundaries and same-scope candidate or batch creation remain open.",
+    "No credential, ticket, internal JWT secret, database password, dump or runtime binary is stored in this record."
+  ]
+}

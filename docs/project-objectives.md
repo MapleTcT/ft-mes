@@ -188,6 +188,19 @@ Flink 自动 producer 未验收”退出缺口；现场 READY 点位、同 scope
 QCS/WMS 写回仍未完成，G-021 继续保持 `PARTIAL`。证据见
 [BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)。
 
+2026-07-20 继续完成 Flyway V20 和影子运行验收产品闭环。新增 `/bpi/#/shadowRuns` 页面、10 个
+版本化 API、`bpi_shadow_runs` 与 `bpi_shadow_run_batch_reviews`，把规则/拓扑/点位目录固定、9 项
+启动准入、7-14 天观察、人工边界与参考量复核、关键数据质量阻断、四眼批准、revision、幂等和审计
+纳入同一任务。目标 marker `ADP_E2E_SHADOW_20260720_0152_V20` 从真实页面闭合
+`DRAFT/r1 -> RUNNING/r2 -> EVALUATING/r13 -> APPROVED/r14`：10 批有效复核、19/20 边界通过、
+认同率 `0.95`、自动量/参考量均 `1000 t`、累计量偏差 0；未解决 CRITICAL 事件使批准返回 `422`，
+页面处置为 `RESOLVED/r3` 后才允许独立管理员批准。PostgreSQL 直查为 16 条审计、10 条成功幂等，
+10 个来源批次继续保持 `CLOSED_RAW / NOT_APPLICABLE / NOT_REQUESTED`，没有 WOM/QCS/WMS 写回；
+57 个浏览器响应均为 2xx，浏览器错误为 0，最终十类 marker 残留均为 0。该验收使用数据库受控压缩
+8 天，只关闭软件门槛和产品交互，不构成现场连续运行证据；真实 READY 点位、同 scope 实时
+candidate/batch、真实 END 边界、连续 7-14 天和 QCS/WMS 写回仍未完成，G-021 保持 `PARTIAL`。证据见
+[BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -203,6 +216,7 @@ QCS/WMS 写回仍未完成，G-021 继续保持 `PARTIAL`。证据见
 - [BPI 点位目录高基数分页验收](testing/bpi-point-catalog-pagination-acceptance.md)
 - [BPI 数据质量事件工作台验收](testing/bpi-data-quality-workbench-acceptance.md)
 - [BPI Flink 自动数据质量全链验收](testing/bpi-flink-data-quality-acceptance.md)
+- [BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

@@ -71,6 +71,10 @@ def main() -> int:
             "reject-approval",
             "publish",
             "retire",
+            "shadow-runs",
+            "batch-reviews",
+            "complete",
+            "cancel",
         ):
             if required not in route_policy:
                 failures.append(f"BPI adapter route policy is missing approved command {required!r}")
@@ -107,8 +111,8 @@ def main() -> int:
 
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         summary = evidence.get("summary", {})
-        if summary.get("tests") != 8 or summary.get("pass") != 8:
-            failures.append("BPI adapter acceptance must record eight passing tests")
+        if summary.get("tests") != 20 or summary.get("pass") != 20:
+            failures.append("BPI adapter acceptance must record twenty passing tests")
         if summary.get("runtimeSmokeChecks") != 2 or summary.get("runtimeSmokePass") != 2:
             failures.append("BPI adapter acceptance must record two passing runtime smoke checks")
         limitations = " ".join(evidence.get("limitations", []))

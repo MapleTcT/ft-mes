@@ -13,6 +13,7 @@
     {"name": "Overview"},
     {"name": "Candidates"},
     {"name": "Batches"},
+    {"name": "Shadow Runs"},
     {"name": "Point Catalog"},
     {"name": "Point Calibration"},
     {"name": "Topologies"},
@@ -198,6 +199,84 @@
         "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
         "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/CorrectionCommand"}}}},
         "responses": {"202": {"$ref": "#/components/responses/TaskAccepted"}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs": {
+      "get": {
+        "tags": ["Shadow Runs"], "operationId": "listShadowRuns", "summary": "查询影子运行验收清单和实时准入指标",
+        "parameters": [
+          {"name": "plantId", "in": "query", "schema": {"type": "string"}},
+          {"$ref": "#/components/parameters/LineIdQuery"},
+          {"name": "state", "in": "query", "schema": {"type": "string", "enum": ["DRAFT", "RUNNING", "EVALUATING", "APPROVED", "REJECTED", "CANCELLED"]}},
+          {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50}}
+        ],
+        "responses": {"200": {"description": "影子运行清单", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunListResponse"}}}}}
+      },
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "createShadowRun", "summary": "创建并固定规则、拓扑和点位目录版本的影子运行",
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunCreateCommand"}}}},
+        "responses": {"200": {"description": "已创建影子运行", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}": {
+      "get": {
+        "tags": ["Shadow Runs"], "operationId": "getShadowRun", "summary": "查询影子运行及动态准入结论",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}],
+        "responses": {"200": {"description": "影子运行详情", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "404": {"$ref": "#/components/responses/NotFound"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/batch-reviews": {
+      "get": {
+        "tags": ["Shadow Runs"], "operationId": "listShadowRunBatchReviews", "summary": "查询影子运行的人工批次复核记录",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"name": "includeSuperseded", "in": "query", "schema": {"type": "boolean", "default": false}}],
+        "responses": {"200": {"description": "批次复核记录", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunBatchReviewListResponse"}}}}, "404": {"$ref": "#/components/responses/NotFound"}}
+      },
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "reviewShadowRunBatch", "summary": "以人工边界和参考数量复核单个影子批次",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunBatchReviewCommand"}}}},
+        "responses": {"200": {"description": "复核结果和最新运行指标", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunReviewResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/start": {
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "startShadowRun", "summary": "在全部固定版本运行就绪后启动影子运行",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "启动结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/complete": {
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "completeShadowRun", "summary": "达到最短周期和复核样本后进入评估",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "评估结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/approve": {
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "approveShadowRun", "summary": "由非创建人管理员在全部门禁通过后批准影子运行",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "批准结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/reject": {
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "rejectShadowRun", "summary": "由非创建人管理员驳回影子运行",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "驳回结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
+    "/bpi/v1/shadow-runs/{runId}/cancel": {
+      "post": {
+        "tags": ["Shadow Runs"], "operationId": "cancelShadowRun", "summary": "取消尚未终结的影子运行",
+        "parameters": [{"$ref": "#/components/parameters/ShadowRunId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "取消结果", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/ShadowRunResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "422": {"$ref": "#/components/responses/Unprocessable"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
       }
     },
     "/bpi/v1/topologies": {
@@ -591,6 +670,7 @@
       "LineIdQuery": {"name": "lineId", "in": "query", "schema": {"type": "string"}},
       "CandidateId": {"name": "candidateId", "in": "path", "required": true, "schema": {"type": "string"}},
       "BatchId": {"name": "batchId", "in": "path", "required": true, "schema": {"type": "string"}},
+      "ShadowRunId": {"name": "runId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "TopologyId": {"name": "topologyId", "in": "path", "required": true, "schema": {"type": "string"}},
       "CalibrationId": {"name": "calibrationId", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
       "RuleId": {"name": "ruleId", "in": "path", "required": true, "schema": {"type": "string"}},
@@ -673,6 +753,94 @@
       },
       "BatchResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/Batch"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "BatchListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/Batch"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "ShadowRunCreateCommand": {
+        "type": "object",
+        "required": ["runCode", "name", "plantId", "lineId", "ruleVersionId", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "reason"],
+        "properties": {
+          "runCode": {"type": "string", "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+          "name": {"type": "string", "maxLength": 256},
+          "plantId": {"type": "string", "maxLength": 64},
+          "lineId": {"type": "string", "maxLength": 128},
+          "ruleVersionId": {"type": "string", "format": "uuid"},
+          "minimumDurationDays": {"type": "integer", "minimum": 7, "maximum": 14},
+          "minimumReviewedBatches": {"type": "integer", "minimum": 10, "maximum": 10000},
+          "boundaryToleranceSeconds": {"type": "integer", "minimum": 0, "maximum": 3600},
+          "minimumBoundaryAgreement": {"type": "number", "minimum": 0.95, "maximum": 1},
+          "quantityTolerancePercent": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
+          "reason": {"type": "string", "minLength": 3, "maxLength": 500}
+        }
+      },
+      "ShadowRunBatchReviewCommand": {
+        "type": "object",
+        "required": ["batchId", "manualStartTime", "manualEndTime", "referenceQuantity", "quantityUnit", "reason"],
+        "properties": {
+          "batchId": {"type": "string", "format": "uuid"},
+          "manualStartTime": {"type": "string", "format": "date-time"},
+          "manualEndTime": {"type": "string", "format": "date-time"},
+          "referenceQuantity": {"type": "number", "exclusiveMinimum": 0},
+          "quantityUnit": {"type": "string", "maxLength": 32},
+          "reason": {"type": "string", "minLength": 3, "maxLength": 500}
+        }
+      },
+      "ShadowRunReadiness": {
+        "type": "object",
+        "required": ["rulePublished", "ruleActive", "publicationConfirmed", "applicationApplied", "runtimeReady", "topologyPublished", "topologySnapshotPinned", "pointCatalogCurrent", "pointCatalogReady", "ready"],
+        "properties": {
+          "rulePublished": {"type": "boolean"}, "ruleActive": {"type": "boolean"}, "publicationConfirmed": {"type": "boolean"},
+          "applicationApplied": {"type": "boolean"}, "runtimeReady": {"type": "boolean"}, "topologyPublished": {"type": "boolean"},
+          "topologySnapshotPinned": {"type": "boolean"}, "pointCatalogCurrent": {"type": "boolean"}, "pointCatalogReady": {"type": "boolean"},
+          "ready": {"type": "boolean"}
+        }
+      },
+      "ShadowRunMetrics": {
+        "type": "object",
+        "required": ["observedDurationSeconds", "reviewedBatchCount", "acceptedBoundaryCount", "totalBoundaryCount", "boundaryAgreement", "quantitySampleCount", "automaticQuantityTotal", "referenceQuantityTotal", "quantityUnit", "cumulativeQuantityDeviationPercent", "meanQuantityDeviationPercent", "maximumQuantityDeviationPercent", "unresolvedCriticalIncidentCount", "durationGatePassed", "reviewCountGatePassed", "boundaryAgreementGatePassed", "quantityGatePassed", "dataQualityGatePassed"],
+        "properties": {
+          "observedDurationSeconds": {"type": "integer", "minimum": 0}, "reviewedBatchCount": {"type": "integer", "minimum": 0},
+          "acceptedBoundaryCount": {"type": "integer", "minimum": 0}, "totalBoundaryCount": {"type": "integer", "minimum": 0},
+          "boundaryAgreement": {"type": "number", "minimum": 0, "maximum": 1}, "quantitySampleCount": {"type": "integer", "minimum": 0},
+          "automaticQuantityTotal": {"type": "number"}, "referenceQuantityTotal": {"type": "number"}, "quantityUnit": {"type": ["string", "null"]},
+          "cumulativeQuantityDeviationPercent": {"type": "number"}, "meanQuantityDeviationPercent": {"type": "number"}, "maximumQuantityDeviationPercent": {"type": "number"},
+          "unresolvedCriticalIncidentCount": {"type": "integer", "minimum": 0}, "durationGatePassed": {"type": "boolean"},
+          "reviewCountGatePassed": {"type": "boolean"}, "boundaryAgreementGatePassed": {"type": "boolean"}, "quantityGatePassed": {"type": "boolean"}, "dataQualityGatePassed": {"type": "boolean"}
+        }
+      },
+      "ShadowRun": {
+        "type": "object",
+        "required": ["id", "runCode", "name", "tenantId", "plantId", "lineId", "state", "revision", "ruleVersionId", "ruleVersion", "topologyVersionId", "topologyVersion", "pointCatalogSnapshotId", "pointCatalogChecksum", "minimumDurationDays", "minimumReviewedBatches", "boundaryToleranceSeconds", "minimumBoundaryAgreement", "quantityTolerancePercent", "createdBy", "createdAt", "readiness", "metrics", "blockers", "readyForApproval"],
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}, "runCode": {"type": "string"}, "name": {"type": "string"}, "tenantId": {"type": "string"},
+          "plantId": {"type": "string"}, "lineId": {"type": "string"}, "state": {"type": "string", "enum": ["DRAFT", "RUNNING", "EVALUATING", "APPROVED", "REJECTED", "CANCELLED"]},
+          "revision": {"type": "integer", "minimum": 1}, "ruleVersionId": {"type": "string", "format": "uuid"}, "ruleVersion": {"type": "string"},
+          "topologyVersionId": {"type": "string", "format": "uuid"}, "topologyVersion": {"type": "string"}, "pointCatalogSnapshotId": {"type": "string", "format": "uuid"},
+          "pointCatalogChecksum": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "minimumDurationDays": {"type": "integer"}, "minimumReviewedBatches": {"type": "integer"},
+          "boundaryToleranceSeconds": {"type": "integer"}, "minimumBoundaryAgreement": {"type": "number"}, "quantityTolerancePercent": {"type": "number"},
+          "createdBy": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "startedBy": {"type": ["string", "null"]}, "startedAt": {"type": ["string", "null"], "format": "date-time"},
+          "completedBy": {"type": ["string", "null"]}, "completedAt": {"type": ["string", "null"], "format": "date-time"}, "decidedBy": {"type": ["string", "null"]}, "decidedAt": {"type": ["string", "null"], "format": "date-time"},
+          "decisionReason": {"type": ["string", "null"]}, "cancelledBy": {"type": ["string", "null"]}, "cancelledAt": {"type": ["string", "null"], "format": "date-time"}, "cancellationReason": {"type": ["string", "null"]},
+          "readiness": {"$ref": "#/components/schemas/ShadowRunReadiness"}, "metrics": {"$ref": "#/components/schemas/ShadowRunMetrics"},
+          "blockers": {"type": "array", "items": {"type": "string"}}, "readyForApproval": {"type": "boolean"}
+        }
+      },
+      "ShadowRunBatchReview": {
+        "type": "object",
+        "required": ["id", "shadowRunId", "batchId", "batchNo", "reviewSequence", "state", "automaticStartTime", "automaticEndTime", "manualStartTime", "manualEndTime", "startDeviationSeconds", "endDeviationSeconds", "startBoundaryAccepted", "endBoundaryAccepted", "automaticQuantity", "referenceQuantity", "quantityUnit", "quantityDeviationPercent", "quantityWithinTolerance", "reviewedBy", "reviewReason", "reviewedAt", "supersededAt"],
+        "properties": {
+          "id": {"type": "string", "format": "uuid"}, "shadowRunId": {"type": "string", "format": "uuid"}, "batchId": {"type": "string", "format": "uuid"}, "batchNo": {"type": "string"},
+          "reviewSequence": {"type": "integer", "minimum": 1}, "state": {"type": "string", "enum": ["ACTIVE", "SUPERSEDED"]},
+          "automaticStartTime": {"type": "string", "format": "date-time"}, "automaticEndTime": {"type": "string", "format": "date-time"},
+          "manualStartTime": {"type": "string", "format": "date-time"}, "manualEndTime": {"type": "string", "format": "date-time"},
+          "startDeviationSeconds": {"type": "integer", "minimum": 0}, "endDeviationSeconds": {"type": "integer", "minimum": 0},
+          "startBoundaryAccepted": {"type": "boolean"}, "endBoundaryAccepted": {"type": "boolean"}, "automaticQuantity": {"type": "number"}, "referenceQuantity": {"type": "number"},
+          "quantityUnit": {"type": "string"}, "quantityDeviationPercent": {"type": "number"}, "quantityWithinTolerance": {"type": "boolean"},
+          "reviewedBy": {"type": "string"}, "reviewReason": {"type": "string"}, "reviewedAt": {"type": "string", "format": "date-time"}, "supersededAt": {"type": ["string", "null"], "format": "date-time"}
+        }
+      },
+      "ShadowRunReviewResult": {"type": "object", "required": ["run", "review"], "properties": {"run": {"$ref": "#/components/schemas/ShadowRun"}, "review": {"$ref": "#/components/schemas/ShadowRunBatchReview"}}},
+      "ShadowRunResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/ShadowRun"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "ShadowRunListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/ShadowRun"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "ShadowRunBatchReviewListResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "array", "items": {"$ref": "#/components/schemas/ShadowRunBatchReview"}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
+      "ShadowRunReviewResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"$ref": "#/components/schemas/ShadowRunReviewResult"}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "EvidenceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "properties": {"start": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceItem"}}, "end": {"type": "array", "items": {"$ref": "#/components/schemas/EvidenceItem"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "BalanceResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["input", "output", "difference", "status"], "properties": {"input": {"type": "number"}, "output": {"type": "number"}, "difference": {"type": "number"}, "differencePercent": {"type": "number"}, "status": {"type": "string"}, "allocations": {"type": "array", "items": {"type": "object"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},
       "GenealogyResponse": {"type": "object", "required": ["data", "meta"], "properties": {"data": {"type": "object", "required": ["nodes", "edges"], "properties": {"nodes": {"type": "array", "items": {"type": "object"}}, "edges": {"type": "array", "items": {"type": "object"}}}}, "meta": {"$ref": "#/components/schemas/ResponseMeta"}}},

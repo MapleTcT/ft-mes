@@ -12,12 +12,14 @@ public class BpiRoutePolicy {
     private static final Pattern GET_ROUTE = Pattern.compile(
             "^/(?:overview|lines/" + ID + "/current-state|candidates(?:/" + ID + ")?|"
                     + "batches(?:/" + ID + "(?:/(?:evidence|timeline))?)?|"
+                    + "shadow-runs(?:/" + ID + "(?:/batch-reviews)?)?|"
                     + "topologies(?:/" + ID + "(?:/compare)?)?|point-catalog/(?:current|snapshots)|"
                     + "point-calibrations|"
                     + "data-quality/(?:summary|incidents(?:/" + ID + ")?)|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
             "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
+                    + "shadow-runs(?:/" + ID + "/(?:batch-reviews|start|complete|approve|reject|cancel))?|"
                     + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|"
                     + "point-calibrations(?:/" + ID + "/(?:approve|reject|revoke))?|rules/drafts|"
                     + "data-quality/incidents/" + ID + "/(?:acknowledge|resolve)|"

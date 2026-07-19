@@ -31,6 +31,7 @@ MES 顶部标签
    ├─ 工艺拓扑           /bpi/topologies
    ├─ 边界规则           /bpi/rules
    ├─ 数据质量           /bpi/data-quality
+   ├─ 影子验收           /bpi/shadow-runs
    ├─ 训练数据集         /bpi/datasets
    ├─ 集成运行           /bpi/integrations
    └─ 审计记录           /bpi/audit
@@ -45,12 +46,12 @@ MES 顶部标签
 | 角色 | 默认首页 | 可执行命令 | 明确禁止 |
 |---|---|---|---|
 | 调度/班长 | 实时生产态势 | 确认/拒绝候选、暂停、恢复、申请强制结束 | 修改或发布规则 |
-| 工艺工程师 | 边界规则 | 拓扑草拟、已准入测点绑定、规则草拟、模拟 | 导入点位快照、单人发布规则、修改原始事件 |
+| 工艺工程师 | 边界规则 | 拓扑草拟、已准入测点绑定、规则草拟、模拟、创建/启动/复核/完成影子验收 | 导入点位快照、单人发布规则、批准自己创建的影子验收、修改原始事件 |
 | 计量/仪表工程师 | 点位准入 | 提交证书引用、SHA-256、校准版本和有效期 | 批准自己提交的证据、改写来源快照 |
 | 质量人员 | 批次档案 | 关联样品、复核质量门、提交处置意见 | 改批次边界和规则 |
 | 仓储人员 | 批次档案 | 复核 WMS 回执、重查幂等单据 | 直接改 BPI 累计量 |
 | 数据工程师 | 数据质量 | 数据质量处置、生成数据集快照 | 修改生产事实和质量结果 |
-| 审批人 | 待审批规则/修订 | 发布规则、批准重大修订/强制结束 | 草拟后自行审批 |
+| 审批人 | 待审批规则/修订 | 发布规则、批准重大修订/强制结束、独立批准或驳回影子验收 | 草拟或创建后自行审批 |
 | 系统管理员 | 集成运行 | 导入点位快照、集成配置、服务诊断、权限配置 | 自动获得工艺审批权 |
 | 审计人员 | 审计记录 | 查询、导出审计链 | 任何业务写操作 |
 
@@ -279,7 +280,28 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 **主要 API：** `listDataQualityIncidents`、`getDataQualitySummary`、`getDataQualityIncident`、
 `acknowledgeDataQualityIncident`、`resolveDataQualityIncident`。
 
-### 5.9 训练数据集 `/bpi/datasets`
+### 5.9 影子验收 `/bpi/shadow-runs`
+
+首屏是可扫描的验收队列，不是大屏。顶部按状态筛选；每行显示运行编码、产线、钉扎规则版本、
+计划时长、已复核批次、边界认同率、累计量偏差和 blocker 数。创建时只允许选择当前作用域内的
+`PUBLISHED` 规则，系统自动钉扎其已发布拓扑和校验时的点位目录；最短时长限制为 7-14 天，最少
+10 批，边界人工认同率不能低于 95%。
+
+详情抽屉分为四块：不可变版本证据、9 个运行前准入门、5 个批准指标门、批次复核记录。启动按钮只有在
+规则业务发布、Kafka 发布、Flink `APPLIED`、运行态 `READY`、拓扑发布且仍钉扎 current operational
+point catalog 时可用。批次复核只列出同 scope、同规则/拓扑版本、运行窗口内的 `CLOSED_RAW` 影子批次；
+保存自动/人工起止时间、边界偏差、自动/参考量、单位和原因。重复复核不覆盖历史，旧记录标记
+`SUPERSEDED`。
+
+达到时长和样本量后，工程师将运行推进到 `EVALUATING`。批准按钮只对管理员开放，且管理员不能是创建人；
+边界认同率、累计量偏差或 CRITICAL 数据质量任一不达标都显示业务说明与原始 blocker code，并返回 422。
+驳回和取消都要求原因。批准只改变 BPI 验收状态，不自动写 WOM、QCS、WMS，也不控制 PLC/DCS。
+
+**主要 API：** `listShadowRuns`、`createShadowRun`、`getShadowRun`、
+`listShadowRunBatchReviews`、`reviewShadowRunBatch`、`startShadowRun`、`completeShadowRun`、
+`approveShadowRun`、`rejectShadowRun`、`cancelShadowRun`。
+
+### 5.10 训练数据集 `/bpi/datasets`
 
 数据集定义列表显示特征版本、标签版本、prediction time、允许批次状态、排除规则和最近快照。
 创建快照时选择冻结时间、工厂/产线/工段、规则版本和数据范围。预检必须显示：低置信度批次数、
@@ -290,7 +312,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 
 **主要 API：** `listDatasets`、`createDatasetSnapshot`、`getDatasetSnapshot`。
 
-### 5.10 集成运行 `/bpi/integrations`
+### 5.11 集成运行 `/bpi/integrations`
 
 展示 JetLinks exporter、Kafka、Flink、WOM、QCS、WMS、TimescaleDB、PostgreSQL 和 MinIO 的健康、
 最后成功时间、lag、spool 使用率和降级影响。健康值与业务影响分开：例如 TimescaleDB 曲线不可用
@@ -300,7 +322,7 @@ Kafka 确认时间和最后错误。只有发布链路进入 `FAILED` 才显示�
 
 **主要 API：** `getIntegrationHealth`、`runIntegrationCheck`。
 
-### 5.11 审计记录 `/bpi/audit`
+### 5.12 审计记录 `/bpi/audit`
 
 按 batchId、candidateKey、ruleVersion、user、action、traceId 和时间查询。记录显示命令输入摘要、
 前后 revision、审批链、API 状态和关联 outbox/inbox。原始敏感 payload 默认折叠并按权限脱敏。
@@ -377,6 +399,20 @@ sequenceDiagram
   UI->>UI: 打开批次详情，显示 START/END 证据与关闭时间线
 ```
 
+### 6.5 影子运行到独立批准
+
+```mermaid
+stateDiagram-v2
+  [*] --> DRAFT: 钉扎规则/拓扑/目录
+  DRAFT --> RUNNING: 九项运行就绪门全部通过
+  RUNNING --> RUNNING: CLOSED_RAW 批次人工复核
+  RUNNING --> EVALUATING: 7-14天且样本量达标
+  EVALUATING --> APPROVED: 第二人批准且五项指标门通过
+  EVALUATING --> REJECTED: 第二人驳回
+  DRAFT --> CANCELLED: 工程师取消
+  RUNNING --> CANCELLED: 工程师取消
+```
+
 ## 7. 异常与恢复
 
 | 场景 | 用户看到 | 可恢复动作 |
@@ -417,8 +453,13 @@ sequenceDiagram
 10. 导入来源自声明 VERIFIED 的点位，验证它在 MES 证据批准前仍为 BLOCKED。
 11. 提交、独立批准和撤销校准证据，验证点位按 `BLOCKED -> READY -> BLOCKED` 动态转换。
 12. 绑定 ready 点位后校验拓扑，展示并持久化点位快照 ID/checksum；缺失或不合格点位必须阻断发布。
-11. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
-12. 查询数据质量事件并看到受影响的产线、规则和批次。
+13. 提交规则模拟，得到可复现 checksum，并以该 simulation 发布规则。
+14. 查询数据质量事件并看到受影响的产线、规则和批次。
+15. 创建并启动钉扎 PUBLISHED/APPLIED/READY 和 operational point catalog 的 7 天影子验收。
+16. 复核 10 个 `CLOSED_RAW` 影子批次，得到精确 95% 边界认同率和合格累计量偏差。
+17. 证明未解决 CRITICAL 数据质量事件以 `UNRESOLVED_CRITICAL_DATA_QUALITY` 阻断批准，处置后再评估。
+18. 由不同于创建人的管理员批准，验证 revision 和审计推进，且 `externalWrites=false`。
 
 模拟验收不证明真实 JetLinks、Kafka、Flink 或 PostgreSQL 已接通；真实环境仍需执行
-浏览器、API、PostgreSQL marker 和回滚验收。
+浏览器、API、PostgreSQL marker 和回滚验收。模拟器对 7 天时钟采用确定性时间压缩，不得作为现场
+连续 7-14 天运行证据。

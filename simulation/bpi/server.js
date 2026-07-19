@@ -173,6 +173,141 @@ function batchFromCandidate(candidate) {
   };
 }
 
+function shadowRunReadiness(state, run) {
+  const rule = state.rules.find((item) => item.id === run.ruleVersionId);
+  const topology = state.topologies.find((item) => item.id === run.topologyVersionId);
+  const catalog = state.pointCatalog;
+  const readiness = {
+    rulePublished: rule?.state === 'PUBLISHED',
+    ruleActive: rule?.lifecycleAction === 'ACTIVATE' && rule?.lifecycleActive === true,
+    publicationConfirmed: rule?.publicationStatus === 'PUBLISHED',
+    applicationApplied: rule?.applicationStatus === 'APPLIED',
+    runtimeReady: rule?.runtimeReadinessStatus === 'READY',
+    topologyPublished: topology?.state === 'PUBLISHED',
+    topologySnapshotPinned: topology?.validatedPointCatalogSnapshotId === run.pointCatalogSnapshotId
+      && topology?.validatedPointCatalogChecksum === run.pointCatalogChecksum,
+    pointCatalogCurrent: catalog?.snapshot.id === run.pointCatalogSnapshotId
+      && catalog?.snapshot.checksum === run.pointCatalogChecksum,
+    pointCatalogReady: Boolean(catalog?.points.length)
+      && catalog.points.every((point) => point.ready),
+  };
+  readiness.ready = Object.values(readiness).every(Boolean);
+  return readiness;
+}
+
+function shadowRunMetrics(state, run) {
+  const activeReviews = state.shadowRunReviews.filter((item) => item.shadowRunId === run.id && item.state === 'ACTIVE');
+  const endTime = run.completedAt || run.decidedAt || run.cancelledAt || FIXED_TIME;
+  const observedDurationSeconds = run.startedAt
+    ? Math.max(0, Math.floor((Date.parse(endTime) - Date.parse(run.startedAt)) / 1000))
+    : 0;
+  const acceptedBoundaryCount = activeReviews.reduce((sum, review) => sum
+    + Number(review.startBoundaryAccepted) + Number(review.endBoundaryAccepted), 0);
+  const totalBoundaryCount = activeReviews.length * 2;
+  const automaticQuantityTotal = activeReviews.reduce((sum, review) => sum + review.automaticQuantity, 0);
+  const referenceQuantityTotal = activeReviews.reduce((sum, review) => sum + review.referenceQuantity, 0);
+  const deviations = activeReviews.map((review) => review.quantityDeviationPercent);
+  const boundaryAgreement = totalBoundaryCount ? acceptedBoundaryCount / totalBoundaryCount : 0;
+  const cumulativeQuantityDeviationPercent = referenceQuantityTotal
+    ? Math.abs(automaticQuantityTotal - referenceQuantityTotal) / referenceQuantityTotal * 100
+    : 0;
+  const unresolvedCriticalIncidentCount = run.startedAt
+    ? state.dataQualityIncidents.filter((incident) => incident.severity === 'CRITICAL'
+      && incident.state !== 'RESOLVED' && incident.lineId === run.lineId
+      && incident.affectedRules.includes(run.ruleVersion)
+      && Date.parse(incident.lastSeen) >= Date.parse(run.startedAt)).length
+    : 0;
+  return {
+    observedDurationSeconds,
+    reviewedBatchCount: activeReviews.length,
+    acceptedBoundaryCount,
+    totalBoundaryCount,
+    boundaryAgreement,
+    quantitySampleCount: activeReviews.length,
+    automaticQuantityTotal,
+    referenceQuantityTotal,
+    quantityUnit: activeReviews[0]?.quantityUnit || null,
+    cumulativeQuantityDeviationPercent,
+    meanQuantityDeviationPercent: deviations.length
+      ? deviations.reduce((sum, value) => sum + value, 0) / deviations.length : 0,
+    maximumQuantityDeviationPercent: deviations.length ? Math.max(...deviations) : 0,
+    unresolvedCriticalIncidentCount,
+    durationGatePassed: observedDurationSeconds >= run.minimumDurationDays * 86_400,
+    reviewCountGatePassed: activeReviews.length >= run.minimumReviewedBatches,
+    boundaryAgreementGatePassed: boundaryAgreement >= run.minimumBoundaryAgreement,
+    quantityGatePassed: activeReviews.length > 0
+      && cumulativeQuantityDeviationPercent <= run.quantityTolerancePercent,
+    dataQualityGatePassed: unresolvedCriticalIncidentCount === 0,
+  };
+}
+
+function hydrateShadowRun(state, run) {
+  const readiness = shadowRunReadiness(state, run);
+  const metrics = shadowRunMetrics(state, run);
+  const blockers = [];
+  const readinessBlockers = [
+    ['rulePublished', 'RULE_NOT_PUBLISHED'], ['ruleActive', 'RULE_NOT_ACTIVE'],
+    ['publicationConfirmed', 'RULE_PUBLICATION_NOT_CONFIRMED'], ['applicationApplied', 'RULE_APPLICATION_NOT_APPLIED'],
+    ['runtimeReady', 'RULE_RUNTIME_NOT_READY'], ['topologyPublished', 'TOPOLOGY_NOT_PUBLISHED'],
+    ['topologySnapshotPinned', 'TOPOLOGY_POINT_CATALOG_MISMATCH'], ['pointCatalogCurrent', 'POINT_CATALOG_NOT_CURRENT'],
+    ['pointCatalogReady', 'POINT_CATALOG_NOT_READY'],
+  ];
+  readinessBlockers.forEach(([field, code]) => { if (!readiness[field]) blockers.push(code); });
+  if (!metrics.durationGatePassed) blockers.push('MINIMUM_DURATION_NOT_REACHED');
+  if (!metrics.reviewCountGatePassed) blockers.push('MINIMUM_BATCH_REVIEWS_NOT_REACHED');
+  if (!metrics.boundaryAgreementGatePassed) blockers.push('BOUNDARY_AGREEMENT_BELOW_THRESHOLD');
+  if (!metrics.quantityGatePassed) blockers.push('CUMULATIVE_QUANTITY_DEVIATION_OUT_OF_TOLERANCE');
+  if (!metrics.dataQualityGatePassed) blockers.push('UNRESOLVED_CRITICAL_DATA_QUALITY');
+  return {
+    ...run,
+    readiness,
+    metrics,
+    blockers,
+    readyForApproval: run.state === 'EVALUATING' && readiness.ready
+      && metrics.durationGatePassed && metrics.reviewCountGatePassed
+      && metrics.boundaryAgreementGatePassed && metrics.quantityGatePassed
+      && metrics.dataQualityGatePassed,
+  };
+}
+
+function prepareShadowRunAcceptance(state) {
+  Object.assign(state.rule, {
+    state: 'PUBLISHED', revision: 12,
+    approvalStatus: 'APPROVED', approvalRevision: 2,
+    approvalSubmittedBy: 'simulated.process.engineer', approvalSubmittedAt: '2026-07-11T06:00:00.000Z',
+    approvalDecidedBy: 'simulated.bpi.admin', approvalDecidedAt: '2026-07-11T06:10:00.000Z',
+    lifecycleAction: 'ACTIVATE', lifecycleSequence: 1, lifecycleActive: true,
+    publicationStatus: 'PUBLISHED', publicationRevision: 14,
+    publicationAttemptCount: 1, publicationTotalAttemptCount: 1,
+    publicationPublishedAt: '2026-07-11T06:11:00.000Z', publicationLastError: null,
+    applicationStatus: 'APPLIED', applicationDeploymentId: 'flink-shadow-control-1',
+    applicationObservedAt: '2026-07-11T06:12:00.000Z', applicationReceivedAt: '2026-07-11T06:12:01.000Z',
+    applicationErrorCode: null, applicationErrorDetail: null,
+    runtimeReadinessStatus: 'READY', runtimeReadinessDeploymentId: 'flink-shadow-evaluator-1',
+    runtimeReadinessObservedAt: '2026-07-11T06:13:00.000Z', runtimeReadinessReceivedAt: '2026-07-11T06:13:01.000Z',
+    runtimeReadinessReasonCode: null, runtimeReadinessDetail: null,
+    runtimePointCatalogEventId: 'catalog-shadow-ready-1',
+    runtimePointCatalogSourceRevision: state.pointCatalog.snapshot.sourceRevision,
+  });
+  state.batches = Array.from({ length: 10 }, (_, index) => {
+    const start = new Date(Date.parse('2026-07-05T10:00:00.000Z') + index * 14 * 60 * 60 * 1000);
+    const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+    return {
+      id: stableUuid(`shadow-acceptance-batch-${index + 1}`),
+      batchNo: `SHADOW-ACCEPT-${String(index + 1).padStart(3, '0')}`,
+      lineId: state.rule.lineId, stageCode: 'EVAPORATION', orderId: `MO-SHADOW-${String(index + 1).padStart(3, '0')}`,
+      materialCode: 'MAT-SYRUP-001', state: 'CLOSED_RAW', revision: 2, shadow: true,
+      startTime: start.toISOString(), endTime: end.toISOString(), quantity: 100 + index,
+      quantityUnit: 't', dryMatter: 63 + index * 0.5, qualityGate: 'PENDING', wmsStatus: 'NOT_REQUESTED',
+      ruleVersion: `${state.rule.code}@${state.rule.version}`, topologyVersion: state.rule.topologyVersion,
+    };
+  });
+  state.shadowRuns = [];
+  state.shadowRunReviews = [];
+  state.idempotency = new Map();
+  return { ruleId: state.rule.id, preparedBatchCount: state.batches.length };
+}
+
 function endCandidateFromStart(candidate) {
   const boundaryTime = '2026-07-12T08:29:40.000Z';
   return {
@@ -392,6 +527,10 @@ function createHandler(state) {
       if (req.method === 'POST' && path === '/__simulation/reset') {
         Object.assign(state, createScenario());
         return send(res, 200, { status: 'RESET' }, 'simulationReset');
+      }
+      if (req.method === 'POST' && path === '/__simulation/prepare-shadow-run') {
+        const prepared = prepareShadowRunAcceptance(state);
+        return send(res, 200, { status: 'SHADOW_RUN_READY', ...prepared }, 'simulationPrepareShadowRun');
       }
       if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
         if (!['PUBLISHED', 'RETIRED'].includes(state.rule.state)
@@ -677,6 +816,203 @@ function createHandler(state) {
           timeline: state.batchEvents,
         }[ids[1]];
         return send(res, 200, envelope(operationId, data), operationId);
+      }
+      if (req.method === 'GET' && path === '/bpi/v1/shadow-runs') {
+        const plantId = url.searchParams.get('plantId');
+        const lineId = url.searchParams.get('lineId');
+        const requestedState = url.searchParams.get('state');
+        const runs = state.shadowRuns
+          .filter((run) => (!plantId || run.plantId === plantId)
+            && (!lineId || run.lineId === lineId)
+            && (!requestedState || run.state === requestedState))
+          .map((run) => hydrateShadowRun(state, run));
+        return send(res, 200, envelope('listShadowRuns', runs), 'listShadowRuns');
+      }
+      if (req.method === 'POST' && path === '/bpi/v1/shadow-runs') {
+        const operationId = 'createShadowRun';
+        const context = commandContext(req, res, operationId, 0, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const rule = state.rules.find((item) => item.id === body.ruleVersionId);
+        const topology = rule
+          ? state.topologies.find((item) => `${item.code}@${item.version}` === rule.topologyVersion)
+          : null;
+        const validThresholds = Number.isInteger(body.minimumDurationDays)
+          && body.minimumDurationDays >= 7 && body.minimumDurationDays <= 14
+          && Number.isInteger(body.minimumReviewedBatches) && body.minimumReviewedBatches >= 10
+          && Number.isInteger(body.boundaryToleranceSeconds) && body.boundaryToleranceSeconds >= 0
+          && Number(body.minimumBoundaryAgreement) >= 0.95 && Number(body.minimumBoundaryAgreement) <= 1
+          && Number(body.quantityTolerancePercent) > 0;
+        if (!body.runCode || !body.name || !body.plantId || !body.lineId || !body.reason
+            || String(body.reason).trim().length < 3 || !validThresholds) {
+          const response = problem(422, 'Validation Failed', 'Shadow run fields and acceptance thresholds are invalid.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (!rule || rule.state !== 'PUBLISHED' || rule.plantId !== body.plantId || rule.lineId !== body.lineId) {
+          const response = problem(422, 'Rule Not Eligible', 'A shadow run must pin a PUBLISHED rule in the same scope.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (!topology || topology.state !== 'PUBLISHED' || !topology.validatedPointCatalogSnapshotId) {
+          const response = problem(422, 'Topology Not Eligible', 'The rule must pin a published topology and point catalog snapshot.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (state.shadowRuns.some((item) => item.runCode === body.runCode)) {
+          const response = problem(409, 'Shadow Run Exists', 'runCode already exists in the tenant.', operationId, 0);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const run = {
+          id: stableUuid(`shadow-run|${body.runCode}`), runCode: body.runCode, name: body.name,
+          tenantId: 'TENANT-01', plantId: body.plantId, lineId: body.lineId, state: 'DRAFT', revision: 1,
+          ruleVersionId: rule.id, ruleVersion: `${rule.code}@${rule.version}`,
+          topologyVersionId: topology.id, topologyVersion: `${topology.code}@${topology.version}`,
+          pointCatalogSnapshotId: topology.validatedPointCatalogSnapshotId,
+          pointCatalogChecksum: topology.validatedPointCatalogChecksum,
+          minimumDurationDays: body.minimumDurationDays,
+          minimumReviewedBatches: body.minimumReviewedBatches,
+          boundaryToleranceSeconds: body.boundaryToleranceSeconds,
+          minimumBoundaryAgreement: Number(body.minimumBoundaryAgreement),
+          quantityTolerancePercent: Number(body.quantityTolerancePercent),
+          createdBy: 'simulated.process.engineer', createdAt: FIXED_TIME,
+          startedBy: null, startedAt: null, completedBy: null, completedAt: null,
+          decidedBy: null, decidedAt: null, decisionReason: null,
+          cancelledBy: null, cancelledAt: null, cancellationReason: null,
+        };
+        state.shadowRuns.push(run);
+        const response = envelope(operationId, hydrateShadowRun(state, run));
+        return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/shadow-runs\/([^/]+)$/);
+      if (req.method === 'GET' && ids) {
+        const run = state.shadowRuns.find((item) => item.id === ids[0]);
+        if (!run) return send(res, 404, problem(404, 'Not Found', 'Shadow run not found.', 'getShadowRun'), 'getShadowRun');
+        return send(res, 200, envelope('getShadowRun', hydrateShadowRun(state, run)), 'getShadowRun');
+      }
+      ids = match(path, /^\/bpi\/v1\/shadow-runs\/([^/]+)\/batch-reviews$/);
+      if (req.method === 'GET' && ids) {
+        const run = state.shadowRuns.find((item) => item.id === ids[0]);
+        if (!run) return send(res, 404, problem(404, 'Not Found', 'Shadow run not found.', 'listShadowRunBatchReviews'), 'listShadowRunBatchReviews');
+        const includeSuperseded = url.searchParams.get('includeSuperseded') === 'true';
+        const reviews = state.shadowRunReviews.filter((item) => item.shadowRunId === run.id
+          && (includeSuperseded || item.state === 'ACTIVE'));
+        return send(res, 200, envelope('listShadowRunBatchReviews', reviews), 'listShadowRunBatchReviews');
+      }
+      if (req.method === 'POST' && ids) {
+        const operationId = 'reviewShadowRunBatch';
+        const run = state.shadowRuns.find((item) => item.id === ids[0]);
+        if (!run) return send(res, 404, problem(404, 'Not Found', 'Shadow run not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, run.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const batch = state.batches.find((item) => item.id === body.batchId);
+        const manualStart = Date.parse(body.manualStartTime);
+        const manualEnd = Date.parse(body.manualEndTime);
+        const referenceQuantity = Number(body.referenceQuantity);
+        if (run.state !== 'RUNNING') {
+          const response = problem(409, 'Invalid Shadow Run State', 'Only a RUNNING shadow run accepts batch reviews.', operationId, run.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        if (!batch || !batch.shadow || batch.state !== 'CLOSED_RAW' || batch.lineId !== run.lineId
+            || batch.ruleVersion !== run.ruleVersion || batch.topologyVersion !== run.topologyVersion
+            || !batch.endTime || Date.parse(batch.startTime) < Date.parse(run.startedAt)) {
+          const response = problem(422, 'Batch Not Eligible', 'The batch must be CLOSED_RAW and match the pinned run scope and versions.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (!Number.isFinite(manualStart) || !Number.isFinite(manualEnd) || manualEnd <= manualStart
+            || !Number.isFinite(referenceQuantity) || referenceQuantity <= 0
+            || body.quantityUnit !== batch.quantityUnit || !body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'Manual boundaries, quantity, unit and reason are invalid.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const existing = state.shadowRunReviews.find((item) => item.shadowRunId === run.id
+          && item.batchId === batch.id && item.state === 'ACTIVE');
+        if (existing) {
+          existing.state = 'SUPERSEDED';
+          existing.supersededAt = FIXED_TIME;
+        }
+        const previousSequence = state.shadowRunReviews
+          .filter((item) => item.shadowRunId === run.id && item.batchId === batch.id)
+          .reduce((maximum, item) => Math.max(maximum, item.reviewSequence), 0);
+        const startDeviationSeconds = Math.ceil(Math.abs(Date.parse(batch.startTime) - manualStart) / 1000);
+        const endDeviationSeconds = Math.ceil(Math.abs(Date.parse(batch.endTime) - manualEnd) / 1000);
+        const quantityDeviationPercent = Math.abs(batch.quantity - referenceQuantity) / referenceQuantity * 100;
+        const review = {
+          id: stableUuid(`${run.id}|${batch.id}|${previousSequence + 1}`), shadowRunId: run.id,
+          batchId: batch.id, batchNo: batch.batchNo, reviewSequence: previousSequence + 1, state: 'ACTIVE',
+          automaticStartTime: batch.startTime, automaticEndTime: batch.endTime,
+          manualStartTime: new Date(manualStart).toISOString(), manualEndTime: new Date(manualEnd).toISOString(),
+          startDeviationSeconds, endDeviationSeconds,
+          startBoundaryAccepted: startDeviationSeconds <= run.boundaryToleranceSeconds,
+          endBoundaryAccepted: endDeviationSeconds <= run.boundaryToleranceSeconds,
+          automaticQuantity: batch.quantity, referenceQuantity, quantityUnit: body.quantityUnit,
+          quantityDeviationPercent, quantityWithinTolerance: quantityDeviationPercent <= run.quantityTolerancePercent,
+          reviewedBy: 'simulated.shift.lead', reviewReason: body.reason, reviewedAt: FIXED_TIME, supersededAt: null,
+        };
+        state.shadowRunReviews.push(review);
+        run.revision += 1;
+        const response = envelope(operationId, { run: hydrateShadowRun(state, run), review });
+        return rememberAndSend(state, context, res, 200, response, operationId);
+      }
+      ids = match(path, /^\/bpi\/v1\/shadow-runs\/([^/]+)\/(start|complete|approve|reject|cancel)$/);
+      if (req.method === 'POST' && ids) {
+        const run = state.shadowRuns.find((item) => item.id === ids[0]);
+        const action = ids[1];
+        const operationIds = {
+          start: 'startShadowRun', complete: 'completeShadowRun', approve: 'approveShadowRun',
+          reject: 'rejectShadowRun', cancel: 'cancelShadowRun',
+        };
+        const operationId = operationIds[action];
+        if (!run) return send(res, 404, problem(404, 'Not Found', 'Shadow run not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, run.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        const current = hydrateShadowRun(state, run);
+        if (action === 'start') {
+          if (run.state !== 'DRAFT') {
+            const response = problem(409, 'Invalid Shadow Run State', 'Only a DRAFT shadow run can start.', operationId, run.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          if (!current.readiness.ready) {
+            const response = problem(422, 'Runtime Not Ready', 'Pinned rule, topology and point catalog are not operationally ready.', operationId);
+            return rememberAndSend(state, context, res, 422, response, operationId);
+          }
+          run.state = 'RUNNING'; run.revision += 1;
+          run.startedBy = 'simulated.process.engineer'; run.startedAt = '2026-07-05T08:00:00.000Z';
+        } else if (action === 'complete') {
+          if (run.state !== 'RUNNING') {
+            const response = problem(409, 'Invalid Shadow Run State', 'Only a RUNNING shadow run can enter evaluation.', operationId, run.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          if (!current.metrics.durationGatePassed || !current.metrics.reviewCountGatePassed) {
+            const response = problem(422, 'Acceptance Window Incomplete', 'Minimum duration and batch review count must pass first.', operationId);
+            return rememberAndSend(state, context, res, 422, response, operationId);
+          }
+          run.state = 'EVALUATING'; run.revision += 1;
+          run.completedBy = 'simulated.process.engineer'; run.completedAt = FIXED_TIME;
+        } else if (action === 'approve' || action === 'reject') {
+          if (run.state !== 'EVALUATING') {
+            const response = problem(409, 'Invalid Shadow Run State', 'Only an EVALUATING shadow run can be decided.', operationId, run.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          if (action === 'approve' && !current.readyForApproval) {
+            const response = problem(422, 'Acceptance Gates Blocked', `Approval blocked by: ${current.blockers.join(', ')}`, operationId);
+            return rememberAndSend(state, context, res, 422, response, operationId);
+          }
+          run.state = action === 'approve' ? 'APPROVED' : 'REJECTED'; run.revision += 1;
+          run.decidedBy = 'simulated.bpi.admin'; run.decidedAt = FIXED_TIME; run.decisionReason = body.reason;
+        } else {
+          if (!['DRAFT', 'RUNNING'].includes(run.state)) {
+            const response = problem(409, 'Invalid Shadow Run State', 'Only a DRAFT or RUNNING shadow run can be cancelled.', operationId, run.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          run.state = 'CANCELLED'; run.revision += 1;
+          run.cancelledBy = 'simulated.process.engineer'; run.cancelledAt = FIXED_TIME; run.cancellationReason = body.reason;
+        }
+        const response = envelope(operationId, hydrateShadowRun(state, run));
+        return rememberAndSend(state, context, res, 200, response, operationId);
       }
       if (req.method === 'GET' && path === '/bpi/v1/topologies') {
         return send(res, 200, envelope('listTopologies', state.topologies), 'listTopologies');

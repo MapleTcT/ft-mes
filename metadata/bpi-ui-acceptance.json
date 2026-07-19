@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-19T10:42:00Z",
-  "repoCommit": "04c3ccfa60175cd16ad2e62a4b41d2a484b0f7f4",
+  "generatedAt": "2026-07-20T04:40:00Z",
+  "repoCommit": "9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f",
   "workingTree": "uncommitted",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 12,
-    "pass": 12,
+    "browserTests": 14,
+    "pass": 14,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -102,12 +102,13 @@
         "/bpi/#/batches",
         "/bpi/#/overview",
         "/bpi/#/rules",
-        "/bpi/#/points"
+        "/bpi/#/points",
+        "/bpi/#/shadowRuns"
       ],
       "operations": [
         "use fixed bottom navigation",
         "switch from batches to overview and rules",
-        "verify overview, rule workbench and point-calibration workbench have no page-level horizontal overflow"
+        "verify overview, rule workbench, point-calibration workbench and shadow-run workbench have no page-level horizontal overflow"
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-mobile.png"
@@ -295,19 +296,50 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-rule-publication-blocked.png"
+    },
+    {
+      "id": "desktop-shadow-run-acceptance",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/shadowRuns",
+        "/bpi/#/dataQuality"
+      ],
+      "operations": [
+        "create a 7-day shadow-run plan pinned to an immutable rule, topology and point-catalog snapshot",
+        "start only after publication APPLIED, runtime READY and operational point readiness all pass",
+        "review ten CLOSED_RAW shadow batches and deliberately record one 61-second boundary deviation",
+        "verify exactly 95 percent boundary agreement and cumulative quantity deviation inside tolerance",
+        "complete the run and prove an unresolved CRITICAL data-quality incident blocks approval with HTTP 422",
+        "acknowledge and resolve the incident through the data-quality workbench",
+        "approve through an administrator other than the creator and verify revision 14",
+        "verify simulator externalWrites remains false for WOM, QCS, WMS, PLC and DCS"
+      ],
+      "apis": [
+        "GET /bpi/v1/shadow-runs",
+        "POST /bpi/v1/shadow-runs",
+        "POST /bpi/v1/shadow-runs/{id}/start",
+        "POST /bpi/v1/shadow-runs/{id}/batch-reviews",
+        "POST /bpi/v1/shadow-runs/{id}/complete",
+        "POST /bpi/v1/shadow-runs/{id}/approve",
+        "GET /bpi/v1/shadow-runs/{id}/batch-reviews",
+        "POST /bpi/v1/data-quality/incidents/{id}/acknowledge",
+        "POST /bpi/v1/data-quality/incidents/{id}/resolve"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-shadow-run-approved.png"
     }
   ],
   "persistence": {
     "performed": false,
     "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
-    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json and metadata/bpi-topology-rule-productization-acceptance.json"
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json, metadata/bpi-topology-rule-productization-acceptance.json and metadata/bpi-shadow-run-acceptance.json"
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
     "The Java 8 authentication adapter and ADP session bridge have separate target evidence; this deterministic browser suite did not retest the target environment.",
     "Target MES shell, PostgreSQL and RBAC persistence acceptance are tracked separately and are not implied by these simulator results.",
-    "Flink application and runtime-readiness states were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
+    "Flink application, runtime readiness and the time-compressed 7-day shadow-run clock were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]
 }

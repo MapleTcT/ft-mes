@@ -18,6 +18,10 @@ remain capped at 64 KiB; only `POST /bpi-api/point-catalog/snapshots` has a 5 Mi
 catalog payloads. The Java 17 service still enforces the `BPI_ADMIN` role, tenant/plant/line scope,
 idempotency key, and `If-Match: 0`. The adapter does not read or write the JetLinks database.
 
+The same explicit allowlist exposes the shadow-run acceptance lifecycle: list/detail, create, start,
+batch review, complete, independent approve/reject, and cancel. These routes remain shadow-only; the
+adapter cannot add arbitrary BPI paths and the Java 17 service never writes WOM, QCS, WMS, PLC, or DCS.
+
 Required configuration:
 
 - `BPI_ADAPTER_KEYCLOAK_JWK_SET_URI`

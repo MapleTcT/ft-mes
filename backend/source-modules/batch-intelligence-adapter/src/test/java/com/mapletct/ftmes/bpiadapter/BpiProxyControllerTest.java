@@ -124,6 +124,61 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsShadowRunListQueryOnlyToTheFixedUpstream() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/shadow-runs?plantId=PLANT-01&state=RUNNING"))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":[]}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bpi-api/shadow-runs");
+        request.setQueryString("plantId=PLANT-01&state=RUNNING");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
+    public void forwardsShadowRunBatchReviewWithConcurrencyHeaders() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/shadow-runs/" + id + "/batch-reviews"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "shadow-review-1"))
+                .andExpect(header("If-Match", "4"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":{\"run\":{\"revision\":5}}}", MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/shadow-runs/" + id + "/batch-reviews");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        request.addHeader("Idempotency-Key", "shadow-review-1");
+        request.addHeader("If-Match", "4");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request,
+                ("{\"batchId\":\"" + id + "\",\"manualStartTime\":\"2026-07-12T09:00:00Z\","
+                        + "\"manualEndTime\":\"2026-07-12T10:00:00Z\",\"referenceQuantity\":100,"
+                        + "\"quantityUnit\":\"t\",\"reason\":\"controlled review\"}")
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
     public void rejectsOrdinaryRequestBodyAbove64KiB() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

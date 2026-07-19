@@ -43,6 +43,11 @@ import type {
   RuleSimulationCommand,
   RuleDraftCommand,
   RuleVersion,
+  ShadowRun,
+  ShadowRunBatchReview,
+  ShadowRunBatchReviewCommand,
+  ShadowRunCreateCommand,
+  ShadowRunState,
   StateEvent,
   TopologyVersion,
   TopologyDraftCommand,
@@ -50,7 +55,7 @@ import type {
 } from './types';
 import './styles.css';
 
-type View = 'overview' | 'candidates' | 'batches' | 'dataQuality' | 'points' | 'rules';
+type View = 'overview' | 'candidates' | 'batches' | 'shadowRuns' | 'dataQuality' | 'points' | 'rules';
 const CALIBRATION_PAGE_SIZE = 50;
 const POINT_CATALOG_PAGE_SIZE = 100;
 const POINT_SEARCH_DEBOUNCE_MS = 250;
@@ -70,6 +75,10 @@ const state = {
   lines: [] as LineState[],
   candidates: [] as Candidate[],
   batches: [] as Batch[],
+  shadowRuns: [] as ShadowRun[],
+  shadowRunState: (localStorage.getItem('bpi.shadowRunState') || '') as ShadowRunState | '',
+  shadowRunLineId: localStorage.getItem('bpi.shadowRunLineId') || '',
+  shadowRunReviews: [] as ShadowRunBatchReview[],
   dataQualityIncidents: [] as DataQualityIncident[],
   dataQualitySummary: null as DataQualitySummary | null,
   dataQualityState: (localStorage.getItem('bpi.dataQualityState') || 'OPEN') as DataQualityIncidentState | '',
@@ -91,6 +100,7 @@ const state = {
   loadingMoreCalibrations: false,
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
+  selectedShadowRun: null as ShadowRun | null,
   selectedRule: null as RuleVersion | null,
   selectedTopology: null as TopologyVersion | null,
   selectedSimulation: null as RuleSimulation | null,
@@ -99,6 +109,7 @@ const state = {
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
   batchCommand: null as 'suspend' | 'resume' | null,
+  shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
   calibrationCommand: null as 'approve' | 'reject' | 'revoke' | null,
@@ -185,9 +196,9 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED'].includes(status)) return 'ok';
-  if (['PENDING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
-  if (['FAILED', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR'].includes(status)) return 'danger';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED'].includes(status)) return 'ok';
+  if (['PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
+  if (['FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -299,6 +310,7 @@ function shell(): void {
           <button class="nav-item" data-view="overview" title="实时生产态势">${icon('activity', '实时生产态势')}</button>
           <button class="nav-item" data-view="candidates" title="候选批次">${icon('list-checks', '候选批次')}<b id="candidate-count">0</b></button>
           <button class="nav-item" data-view="batches" title="批次档案">${icon('archive', '批次档案')}</button>
+          <button class="nav-item" data-view="shadowRuns" title="影子验收">${icon('flask-conical', '影子验收')}</button>
           <button class="nav-item" data-view="dataQuality" title="数据质量">${icon('circle-alert', '数据质量')}</button>
           <button class="nav-item" data-view="points" title="点位准入">${icon('database', '点位准入')}</button>
           <button class="nav-item" data-view="rules" title="规则与拓扑">${icon('network', '规则与拓扑')}</button>
@@ -401,6 +413,38 @@ function shell(): void {
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="point-calibration-submit" value="default" class="button button--primary">提交复核</button></footer>
         </form>
       </dialog>
+      <dialog id="shadow-run-dialog" class="command-dialog editor-dialog">
+        <form method="dialog" id="shadow-run-form">
+          <header><div><span>运行验收</span><h2>新建影子运行</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="editor-fields">
+            <label><span>验收编码</span><input id="shadow-run-code" required maxlength="128" pattern="[A-Za-z0-9](?:[A-Za-z0-9._:]|-)*" /></label>
+            <label><span>验收名称</span><input id="shadow-run-name" required maxlength="256" /></label>
+            <label><span>产线</span><input id="shadow-run-line" required maxlength="128" /></label>
+            <label><span>已发布规则版本</span><select id="shadow-run-rule" required></select></label>
+            <label><span>最短运行天数</span><input id="shadow-run-duration" type="number" min="7" max="14" value="7" required /></label>
+            <label><span>最少复核批次</span><input id="shadow-run-batches" type="number" min="10" max="10000" value="10" required /></label>
+            <label><span>边界容差（秒）</span><input id="shadow-run-boundary-tolerance" type="number" min="0" max="3600" value="60" required /></label>
+            <label><span>最低边界一致率</span><input id="shadow-run-boundary-agreement" type="number" min="0.95" max="1" step="0.001" value="0.95" required /></label>
+            <label><span>累计数量偏差容差（%）</span><input id="shadow-run-quantity-tolerance" type="number" min="0.000001" max="100" step="0.000001" value="2" required /></label>
+            <label class="editor-field--wide"><span>创建依据</span><textarea id="shadow-run-reason" required minlength="3" maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="shadow-run-submit" value="default" class="button button--primary">创建验收任务</button></footer>
+        </form>
+      </dialog>
+      <dialog id="shadow-review-dialog" class="command-dialog editor-dialog">
+        <form method="dialog" id="shadow-review-form">
+          <header><div><span>逐批比对</span><h2>复核影子批次</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
+          <div class="editor-fields">
+            <label class="editor-field--wide"><span>已关闭影子批次</span><select id="shadow-review-batch" required></select></label>
+            <label><span>人工开始时间</span><input id="shadow-review-start" type="datetime-local" step="1" required /></label>
+            <label><span>人工结束时间</span><input id="shadow-review-end" type="datetime-local" step="1" required /></label>
+            <label><span>参考数量</span><input id="shadow-review-quantity" type="number" min="0.000001" step="0.000001" required /></label>
+            <label><span>数量单位</span><input id="shadow-review-unit" required maxlength="32" /></label>
+            <label class="editor-field--wide"><span>复核依据</span><textarea id="shadow-review-reason" required minlength="3" maxlength="500"></textarea></label>
+          </div>
+          <footer><button value="cancel" class="button button--secondary">取消</button><button id="shadow-review-submit" value="default" class="button button--primary">提交批次复核</button></footer>
+        </form>
+      </dialog>
       <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>`;
   document.querySelector<HTMLSelectElement>('#plant-id')!.value = state.plantId;
@@ -437,9 +481,13 @@ function bindShellEvents(): void {
   document.querySelector<HTMLFormElement>('#rule-editor-form')?.addEventListener('submit', handleRuleDraft);
   document.querySelector<HTMLFormElement>('#point-catalog-form')?.addEventListener('submit', handlePointCatalogImport);
   document.querySelector<HTMLFormElement>('#point-calibration-form')?.addEventListener('submit', handlePointCalibrationSubmit);
+  document.querySelector<HTMLFormElement>('#shadow-run-form')?.addEventListener('submit', handleShadowRunCreate);
+  document.querySelector<HTMLFormElement>('#shadow-review-form')?.addEventListener('submit', handleShadowRunBatchReview);
+  document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
     setCommandAssigneeVisible(false);
     state.dataQualityCommand = null;
+    state.shadowRunCommand = null;
   });
   document.querySelector<HTMLSelectElement>('#topology-base')?.addEventListener('change', applyTopologyBase);
   document.querySelector<HTMLSelectElement>('#rule-base')?.addEventListener('change', applyRuleBase);
@@ -485,6 +533,19 @@ async function loadView(silent = false): Promise<void> {
       const response = await bpiApi.batches(state.plantId);
       state.batches = response.data;
       state.meta = response.meta;
+    } else if (state.view === 'shadowRuns') {
+      const [runs, rules, batches] = await Promise.all([
+        bpiApi.shadowRuns(state.plantId, {
+          lineId: state.shadowRunLineId.trim() || undefined,
+          state: state.shadowRunState,
+        }),
+        bpiApi.rules(state.plantId),
+        bpiApi.batches(state.plantId),
+      ]);
+      state.shadowRuns = runs.data;
+      state.rules = rules.data;
+      state.batches = batches.data;
+      state.meta = runs.meta;
     } else if (state.view === 'dataQuality') {
       const [incidents, summary] = await Promise.all([
         bpiApi.dataQualityIncidents(state.plantId, {
@@ -549,6 +610,7 @@ function renderView(): void {
     overview: ['生产运行', '实时生产态势'],
     candidates: ['边界审核', '候选批次'],
     batches: ['生产事实', '批次档案'],
+    shadowRuns: ['运行验收', '影子运行验收'],
     dataQuality: ['运行治理', '数据质量事件'],
     points: ['数据准入', '点位目录'],
     rules: ['边界治理', '规则与拓扑'],
@@ -564,6 +626,7 @@ function renderView(): void {
   else if (state.view === 'overview') renderOverview();
   else if (state.view === 'candidates') renderCandidates();
   else if (state.view === 'batches') renderBatches();
+  else if (state.view === 'shadowRuns') renderShadowRuns();
   else if (state.view === 'dataQuality') renderDataQuality();
   else if (state.view === 'points') renderPoints();
   else renderRules();
@@ -711,6 +774,10 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
     await handleDataQualityCommand();
     return;
   }
+  if (state.shadowRunCommand) {
+    await handleShadowRunCommand();
+    return;
+  }
   if (state.calibrationCommand) {
     await handlePointCalibrationCommand();
     return;
@@ -777,6 +844,346 @@ async function handleConfirm(event: SubmitEvent): Promise<void> {
     button.textContent = command === 'reject'
       ? '拒绝候选'
       : candidate.boundaryType === 'END' ? '确认并关闭原始批次' : '确认并生成影子批次';
+  }
+}
+
+function shadowRunBlockerLabel(code: string): string {
+  const labels: Record<string, string> = {
+    RULE_NOT_PUBLISHED: '固定规则版本尚未发布',
+    RULE_NOT_ACTIVE: '固定规则版本不是当前激活版本',
+    RULE_PUBLICATION_NOT_CONFIRMED: 'Kafka 尚未确认规则发布事件',
+    RULE_APPLICATION_NOT_APPLIED: 'Flink 控制面尚未返回 APPLIED',
+    RULE_RUNTIME_NOT_READY: '流式评估器尚未返回 READY',
+    TOPOLOGY_NOT_PUBLISHED: '固定拓扑版本尚未发布',
+    TOPOLOGY_POINT_CATALOG_MISMATCH: '拓扑校验使用了不同的点位目录快照',
+    POINT_CATALOG_NOT_CURRENT: '固定点位目录已不是产线当前快照',
+    POINT_CATALOG_NOT_READY: '固定点位目录仍有未准入点位',
+    MINIMUM_DURATION_NOT_REACHED: '尚未达到最短影子运行周期',
+    MINIMUM_BATCH_REVIEWS_NOT_REACHED: '人工复核批次数不足',
+    BOUNDARY_AGREEMENT_BELOW_THRESHOLD: '边界一致率低于验收阈值',
+    CUMULATIVE_QUANTITY_DEVIATION_OUT_OF_TOLERANCE: '累计数量偏差超过验收阈值',
+    UNRESOLVED_CRITICAL_DATA_QUALITY: '运行窗口内仍有未解决的严重数据质量事件',
+  };
+  return labels[code] || code;
+}
+
+function formatObservedDays(seconds: number): string {
+  const days = Math.max(0, seconds) / 86_400;
+  return `${number(days, days >= 10 ? 0 : 1)} 天`;
+}
+
+function renderShadowRuns(): void {
+  const content = document.querySelector<HTMLElement>('#content')!;
+  const counts = {
+    draft: state.shadowRuns.filter((item) => item.state === 'DRAFT').length,
+    running: state.shadowRuns.filter((item) => item.state === 'RUNNING').length,
+    evaluating: state.shadowRuns.filter((item) => item.state === 'EVALUATING').length,
+    approved: state.shadowRuns.filter((item) => item.state === 'APPROVED').length,
+    blocked: state.shadowRuns.filter((item) => item.blockers.length > 0 && !['REJECTED', 'CANCELLED'].includes(item.state)).length,
+  };
+  const rows = state.shadowRuns.map((run) => `
+    <tr data-shadow-run-id="${escapeHtml(run.id)}" tabindex="0">
+      <td><strong>${escapeHtml(run.name)}</strong><small>${escapeHtml(run.runCode)}</small></td>
+      <td><strong>${escapeHtml(run.lineId)}</strong><small>${escapeHtml(run.plantId)}</small></td>
+      <td>${statusChip(run.state)}</td>
+      <td><strong>${formatObservedDays(run.metrics.observedDurationSeconds)}</strong><small>目标 ${run.minimumDurationDays} 天</small></td>
+      <td><strong>${run.metrics.reviewedBatchCount} / ${run.minimumReviewedBatches}</strong><small>${run.metrics.acceptedBoundaryCount} / ${run.metrics.totalBoundaryCount} 边界通过</small></td>
+      <td><strong>${number(run.metrics.boundaryAgreement * 100, 1)}%</strong><small>阈值 ${number(run.minimumBoundaryAgreement * 100, 1)}%</small></td>
+      <td><strong>${number(run.metrics.cumulativeQuantityDeviationPercent, 2)}%</strong><small>容差 ${number(run.quantityTolerancePercent, 2)}%</small></td>
+      <td>${run.readiness.ready ? statusChip('READY') : statusChip('BLOCKED')}<small>${run.blockers.length} 个阻断项</small></td>
+      <td>${run.readyForApproval ? statusChip('READY') : run.state === 'APPROVED' ? statusChip('APPROVED') : '<span class="revision">待满足门禁</span>'}</td>
+      <td><span class="revision">r${run.revision}</span></td><td><i data-lucide="chevron-right"></i></td>
+    </tr>`).join('');
+  const stateOptions: Array<[string, string]> = [
+    ['', '全部状态'], ['DRAFT', '草稿'], ['RUNNING', '运行中'], ['EVALUATING', '待审批'],
+    ['APPROVED', '已批准'], ['REJECTED', '已驳回'], ['CANCELLED', '已取消'],
+  ];
+  content.innerHTML = `
+    <div class="shadow-run-summary" aria-label="影子运行验收汇总">
+      <div><span>草稿</span><b>${counts.draft}</b></div><div><span>运行中</span><b>${counts.running}</b></div>
+      <div><span>待审批</span><b>${counts.evaluating}</b></div><div><span>已批准</span><b>${counts.approved}</b></div>
+      <div class="${counts.blocked ? 'is-blocked' : ''}"><span>存在阻断</span><b>${counts.blocked}</b></div>
+    </div>
+    <div class="toolbar shadow-run-toolbar">
+      <div class="toolbar-note"><i data-lucide="shield-check"></i>批准只代表影子验收结论，不开启 WOM / QCS / WMS 写入</div>
+      <div class="toolbar-actions">
+        <label class="line-field"><span>产线</span><input id="shadow-run-line-filter" value="${escapeHtml(state.shadowRunLineId)}" placeholder="全部产线" /></label>
+        <label class="line-field shadow-run-state-field"><span>状态</span><select id="shadow-run-state-filter">${stateOptions.map(([value, label]) => `<option value="${value}" ${state.shadowRunState === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>
+        <button id="apply-shadow-run-filter" class="icon-button" title="查询" aria-label="查询"><i data-lucide="search"></i></button>
+        <button id="new-shadow-run" class="icon-text-button"><i data-lucide="plus"></i><span>新建影子运行</span></button>
+      </div>
+    </div>
+    ${rows ? `<div class="table-frame"><table class="shadow-run-table"><thead><tr><th>验收任务</th><th>产线</th><th>状态</th><th>观察周期</th><th>复核批次</th><th>边界一致率</th><th>累计数量偏差</th><th>运行准入</th><th>审批门禁</th><th>版本</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty-state"><i data-lucide="flask-conical"></i><strong>当前筛选范围没有影子运行</strong><span>从已发布、已应用且运行就绪的规则版本创建受控验收任务。</span></div>`}`;
+  content.querySelectorAll<HTMLElement>('[data-shadow-run-id]').forEach((row) => row.addEventListener('click', () => void openShadowRun(String(row.dataset.shadowRunId))));
+  const applyFilter = () => {
+    state.shadowRunLineId = document.querySelector<HTMLInputElement>('#shadow-run-line-filter')!.value.trim();
+    state.shadowRunState = document.querySelector<HTMLSelectElement>('#shadow-run-state-filter')!.value as ShadowRunState | '';
+    localStorage.setItem('bpi.shadowRunLineId', state.shadowRunLineId);
+    localStorage.setItem('bpi.shadowRunState', state.shadowRunState);
+    void loadView();
+  };
+  content.querySelector('#apply-shadow-run-filter')?.addEventListener('click', applyFilter);
+  content.querySelector('#shadow-run-state-filter')?.addEventListener('change', applyFilter);
+  content.querySelector<HTMLInputElement>('#shadow-run-line-filter')?.addEventListener('keydown', (event) => { if (event.key === 'Enter') applyFilter(); });
+  content.querySelector('#new-shadow-run')?.addEventListener('click', openShadowRunCreateDialog);
+}
+
+async function openShadowRun(runId: string): Promise<void> {
+  try {
+    const [runResponse, reviewResponse] = await Promise.all([
+      bpiApi.shadowRun(runId),
+      bpiApi.shadowRunReviews(runId),
+    ]);
+    const run = runResponse.data;
+    state.selectedShadowRun = run;
+    state.shadowRunReviews = reviewResponse.data;
+    state.shadowRuns = state.shadowRuns.map((item) => item.id === run.id ? run : item);
+    const readinessChecks: Array<[string, boolean]> = [
+      ['规则版本已发布', run.readiness.rulePublished], ['规则版本当前激活', run.readiness.ruleActive],
+      ['Kafka 发布已确认', run.readiness.publicationConfirmed], ['Flink 控制面已应用', run.readiness.applicationApplied],
+      ['流式评估器已就绪', run.readiness.runtimeReady], ['拓扑版本已发布', run.readiness.topologyPublished],
+      ['拓扑固定同一目录快照', run.readiness.topologySnapshotPinned], ['点位目录仍为当前版本', run.readiness.pointCatalogCurrent],
+      ['全部固定点位运行就绪', run.readiness.pointCatalogReady],
+    ];
+    const readinessHtml = readinessChecks.map(([label, passed]) => `<li><span class="evidence-state evidence-state--${passed ? 'ok' : 'bad'}"></span><span>${label}</span><b>${passed ? '通过' : '阻断'}</b></li>`).join('');
+    const metricChecks: Array<[string, string, boolean]> = [
+      ['观察周期', `${formatObservedDays(run.metrics.observedDurationSeconds)} / ${run.minimumDurationDays} 天`, run.metrics.durationGatePassed],
+      ['人工复核批次', `${run.metrics.reviewedBatchCount} / ${run.minimumReviewedBatches}`, run.metrics.reviewCountGatePassed],
+      ['边界一致率', `${number(run.metrics.boundaryAgreement * 100, 2)}% / ${number(run.minimumBoundaryAgreement * 100, 2)}%`, run.metrics.boundaryAgreementGatePassed],
+      ['累计数量偏差', `${number(run.metrics.cumulativeQuantityDeviationPercent, 3)}% / ±${number(run.quantityTolerancePercent, 3)}%`, run.metrics.quantityGatePassed],
+      ['严重数据质量事件', `${run.metrics.unresolvedCriticalIncidentCount} 个未解决`, run.metrics.dataQualityGatePassed],
+    ];
+    const metricHtml = metricChecks.map(([label, value, passed]) => `<div class="${passed ? 'is-pass' : 'is-fail'}"><span>${label}</span><b>${value}</b><small>${passed ? 'PASS' : 'BLOCKED'}</small></div>`).join('');
+    const blockers = run.blockers.map((code) => `<li><i data-lucide="circle-alert"></i><div><strong>${escapeHtml(shadowRunBlockerLabel(code))}</strong><code>${escapeHtml(code)}</code></div></li>`).join('');
+    const reviews = state.shadowRunReviews.map((review) => `<tr><td><strong>${escapeHtml(review.batchNo)}</strong><small>#${review.reviewSequence}</small></td><td>${formatTime(review.reviewedAt)}</td><td>${review.startDeviationSeconds}s / ${review.endDeviationSeconds}s</td><td>${review.startBoundaryAccepted && review.endBoundaryAccepted ? statusChip('PASS') : statusChip('FAIL')}</td><td>${number(review.automaticQuantity, 3)} / ${number(review.referenceQuantity, 3)} ${escapeHtml(review.quantityUnit)}</td><td>${number(review.quantityDeviationPercent, 3)}%</td><td>${review.quantityWithinTolerance ? statusChip('PASS') : statusChip('FAIL')}</td><td>${escapeHtml(review.reviewedBy)}</td></tr>`).join('');
+    let actions = '';
+    if (run.state === 'DRAFT') actions = `<button class="button button--danger" id="cancel-shadow-run">取消任务</button><button class="button button--primary" id="start-shadow-run" ${run.readiness.ready ? '' : 'disabled'}>启动影子运行</button>`;
+    if (run.state === 'RUNNING') actions = `<button class="button button--danger" id="cancel-shadow-run">取消任务</button><button class="button button--secondary" id="review-shadow-batch">复核批次</button><button class="button button--primary" id="complete-shadow-run" ${run.metrics.durationGatePassed && run.metrics.reviewCountGatePassed ? '' : 'disabled'}>结束观察并评估</button>`;
+    if (run.state === 'EVALUATING') actions = `<button class="button button--danger" id="reject-shadow-run">管理员驳回</button><button class="button button--primary" id="approve-shadow-run" ${run.readyForApproval ? '' : 'disabled'}>独立批准验收</button>`;
+    openDrawer(`
+      <header><div><span>影子运行验收</span><h2>${escapeHtml(run.name)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header>
+      <div class="batch-state-band"><div>${statusChip(run.state)}<span class="shadow-label">SHADOW ONLY</span></div><span>revision ${run.revision}</span></div>
+      <div class="drawer-section facts-grid"><div><span>验收编码</span><b>${escapeHtml(run.runCode)}</b></div><div><span>工厂 / 产线</span><b>${escapeHtml(run.plantId)} / ${escapeHtml(run.lineId)}</b></div><div><span>固定规则</span><b>${escapeHtml(run.ruleVersion)}</b></div><div><span>固定拓扑</span><b>${escapeHtml(run.topologyVersion)}</b></div><div><span>点位目录快照</span><b class="mono-value">${escapeHtml(run.pointCatalogSnapshotId)}</b></div><div><span>创建人 / 时间</span><b>${escapeHtml(run.createdBy)} · ${formatTime(run.createdAt)}</b></div></div>
+      <div class="drawer-section"><div class="section-title"><h3>固定运行版本准入</h3>${run.readiness.ready ? statusChip('READY') : statusChip('BLOCKED')}</div><ul class="shadow-readiness-list">${readinessHtml}</ul></div>
+      <div class="drawer-section"><div class="section-title"><h3>验收指标</h3>${run.readyForApproval ? statusChip('READY') : '<span>全部通过后才能批准</span>'}</div><div class="shadow-metric-grid">${metricHtml}</div><div class="facts-grid shadow-metric-detail"><div><span>数量样本</span><b>${run.metrics.quantitySampleCount}</b></div><div><span>自动 / 参考累计</span><b>${number(run.metrics.automaticQuantityTotal, 3)} / ${number(run.metrics.referenceQuantityTotal, 3)} ${escapeHtml(run.metrics.quantityUnit || '')}</b></div><div><span>单批平均偏差</span><b>${number(run.metrics.meanQuantityDeviationPercent, 3)}%</b></div><div><span>单批最大偏差</span><b>${number(run.metrics.maximumQuantityDeviationPercent, 3)}%</b></div></div></div>
+      ${blockers ? `<div class="drawer-section shadow-blockers"><div class="section-title"><h3>当前阻断</h3><span>${run.blockers.length} 项</span></div><ul>${blockers}</ul></div>` : ''}
+      <div class="drawer-section"><div class="section-title"><h3>批次复核记录</h3><span>${state.shadowRunReviews.length} 个当前样本</span></div>${reviews ? `<div class="table-frame shadow-review-frame"><table class="shadow-review-table"><thead><tr><th>批次</th><th>复核时间</th><th>起止偏差</th><th>边界</th><th>自动 / 参考数量</th><th>偏差</th><th>数量</th><th>复核人</th></tr></thead><tbody>${reviews}</tbody></table></div>` : '<div class="simulation-empty">尚未提交人工批次复核</div>'}</div>
+      <div class="drawer-section"><div class="section-title"><h3>审批责任</h3><span>双人控制</span></div><p>批准人必须是不同于创建人的 BPI 管理员；系统重新计算全部指标和数据质量门禁，不接受前端提交的“通过”结论。</p>${run.decidedBy ? `<div class="facts-grid"><div><span>决定人</span><b>${escapeHtml(run.decidedBy)}</b></div><div><span>决定时间</span><b>${formatTime(run.decidedAt)}</b></div><div><span>决定依据</span><b>${escapeHtml(run.decisionReason || '-')}</b></div></div>` : ''}</div>
+      <footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${actions}</footer>`);
+    document.querySelector('#start-shadow-run')?.addEventListener('click', () => openShadowRunCommandDialog('start'));
+    document.querySelector('#complete-shadow-run')?.addEventListener('click', () => openShadowRunCommandDialog('complete'));
+    document.querySelector('#approve-shadow-run')?.addEventListener('click', () => openShadowRunCommandDialog('approve'));
+    document.querySelector('#reject-shadow-run')?.addEventListener('click', () => openShadowRunCommandDialog('reject'));
+    document.querySelector('#cancel-shadow-run')?.addEventListener('click', () => openShadowRunCommandDialog('cancel'));
+    document.querySelector('#review-shadow-batch')?.addEventListener('click', openShadowReviewDialog);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  }
+}
+
+function openShadowRunCreateDialog(): void {
+  const published = state.rules.filter((rule) => rule.state === 'PUBLISHED');
+  if (!published.length) {
+    showToast('当前工厂没有可固定的已发布规则版本', true);
+    return;
+  }
+  const now = new Date();
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+  const firstLine = state.shadowRunLineId || published[0]!.lineId;
+  document.querySelector<HTMLInputElement>('#shadow-run-code')!.value = `SHADOW-${stamp}`;
+  document.querySelector<HTMLInputElement>('#shadow-run-name')!.value = `${firstLine} 影子运行验收`;
+  document.querySelector<HTMLInputElement>('#shadow-run-line')!.value = firstLine;
+  document.querySelector<HTMLTextAreaElement>('#shadow-run-reason')!.value = '';
+  updateShadowRunRuleOptions();
+  document.querySelector<HTMLInputElement>('#shadow-run-line')!.oninput = updateShadowRunRuleOptions;
+  document.querySelector<HTMLDialogElement>('#shadow-run-dialog')!.showModal();
+}
+
+function updateShadowRunRuleOptions(): void {
+  const lineId = document.querySelector<HTMLInputElement>('#shadow-run-line')?.value.trim() || '';
+  const rules = state.rules.filter((rule) => rule.state === 'PUBLISHED' && (!lineId || rule.lineId === lineId));
+  const select = document.querySelector<HTMLSelectElement>('#shadow-run-rule');
+  if (!select) return;
+  select.innerHTML = rules.map((rule) => `<option value="${escapeHtml(rule.id)}">${escapeHtml(rule.code)}@${escapeHtml(rule.version)} · ${escapeHtml(rule.runtimeReadinessStatus)}</option>`).join('');
+}
+
+async function handleShadowRunCreate(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  const command: ShadowRunCreateCommand = {
+    runCode: document.querySelector<HTMLInputElement>('#shadow-run-code')!.value.trim(),
+    name: document.querySelector<HTMLInputElement>('#shadow-run-name')!.value.trim(),
+    plantId: state.plantId,
+    lineId: document.querySelector<HTMLInputElement>('#shadow-run-line')!.value.trim(),
+    ruleVersionId: document.querySelector<HTMLSelectElement>('#shadow-run-rule')!.value,
+    minimumDurationDays: Number(document.querySelector<HTMLInputElement>('#shadow-run-duration')!.value),
+    minimumReviewedBatches: Number(document.querySelector<HTMLInputElement>('#shadow-run-batches')!.value),
+    boundaryToleranceSeconds: Number(document.querySelector<HTMLInputElement>('#shadow-run-boundary-tolerance')!.value),
+    minimumBoundaryAgreement: Number(document.querySelector<HTMLInputElement>('#shadow-run-boundary-agreement')!.value),
+    quantityTolerancePercent: Number(document.querySelector<HTMLInputElement>('#shadow-run-quantity-tolerance')!.value),
+    reason: document.querySelector<HTMLTextAreaElement>('#shadow-run-reason')!.value.trim(),
+  };
+  if (!command.ruleVersionId || command.reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#shadow-run-submit')!;
+  button.disabled = true;
+  button.textContent = '创建中...';
+  try {
+    const response = await bpiApi.createShadowRun(command, commandId());
+    document.querySelector<HTMLDialogElement>('#shadow-run-dialog')!.close();
+    showToast(`影子运行 ${response.data.runCode} 已创建并固定运行版本`);
+    await loadView(true);
+    await openShadowRun(response.data.id);
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '创建验收任务';
+  }
+}
+
+function toLocalDateTimeValue(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 19);
+}
+
+function eligibleShadowReviewBatches(run: ShadowRun): Batch[] {
+  const reviewed = new Set(state.shadowRunReviews.map((item) => item.batchId));
+  return state.batches
+    .filter((batch) => batch.shadow && batch.state === 'CLOSED_RAW' && batch.lineId === run.lineId
+      && batch.ruleVersion === run.ruleVersion && batch.topologyVersion === run.topologyVersion
+      && Boolean(batch.endTime) && (!run.startedAt || Date.parse(batch.startTime) >= Date.parse(run.startedAt)))
+    .sort((left, right) => Number(reviewed.has(left.id)) - Number(reviewed.has(right.id)) || Date.parse(right.startTime) - Date.parse(left.startTime));
+}
+
+function openShadowReviewDialog(): void {
+  const run = state.selectedShadowRun;
+  if (!run) return;
+  const batches = eligibleShadowReviewBatches(run);
+  if (!batches.length) {
+    showToast('当前没有与固定规则、拓扑和运行窗口一致的 CLOSED_RAW 影子批次', true);
+    return;
+  }
+  const reviewed = new Set(state.shadowRunReviews.map((item) => item.batchId));
+  document.querySelector<HTMLSelectElement>('#shadow-review-batch')!.innerHTML = batches.map((batch) => `<option value="${escapeHtml(batch.id)}">${escapeHtml(batch.batchNo)}${reviewed.has(batch.id) ? ' · 已复核，可修订' : ''}</option>`).join('');
+  document.querySelector<HTMLTextAreaElement>('#shadow-review-reason')!.value = '';
+  applyShadowReviewBatch();
+  document.querySelector<HTMLDialogElement>('#shadow-review-dialog')!.showModal();
+}
+
+function applyShadowReviewBatch(): void {
+  const id = document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.value;
+  const batch = state.batches.find((item) => item.id === id);
+  if (!batch || !batch.endTime) return;
+  document.querySelector<HTMLInputElement>('#shadow-review-start')!.value = toLocalDateTimeValue(batch.startTime);
+  document.querySelector<HTMLInputElement>('#shadow-review-end')!.value = toLocalDateTimeValue(batch.endTime);
+  document.querySelector<HTMLInputElement>('#shadow-review-quantity')!.value = String(batch.quantity);
+  document.querySelector<HTMLInputElement>('#shadow-review-unit')!.value = batch.quantityUnit;
+}
+
+async function handleShadowRunBatchReview(event: SubmitEvent): Promise<void> {
+  const submitter = event.submitter as HTMLButtonElement | null;
+  if (submitter?.value === 'cancel') return;
+  event.preventDefault();
+  const run = state.selectedShadowRun;
+  if (!run) return;
+  const command: ShadowRunBatchReviewCommand = {
+    batchId: document.querySelector<HTMLSelectElement>('#shadow-review-batch')!.value,
+    manualStartTime: new Date(document.querySelector<HTMLInputElement>('#shadow-review-start')!.value).toISOString(),
+    manualEndTime: new Date(document.querySelector<HTMLInputElement>('#shadow-review-end')!.value).toISOString(),
+    referenceQuantity: Number(document.querySelector<HTMLInputElement>('#shadow-review-quantity')!.value),
+    quantityUnit: document.querySelector<HTMLInputElement>('#shadow-review-unit')!.value.trim(),
+    reason: document.querySelector<HTMLTextAreaElement>('#shadow-review-reason')!.value.trim(),
+  };
+  if (Date.parse(command.manualEndTime) <= Date.parse(command.manualStartTime)) {
+    showToast('人工结束时间必须晚于人工开始时间', true);
+    return;
+  }
+  const button = document.querySelector<HTMLButtonElement>('#shadow-review-submit')!;
+  button.disabled = true;
+  button.textContent = '复核中...';
+  try {
+    const response = await bpiApi.reviewShadowRunBatch(run, command, commandId());
+    state.selectedShadowRun = response.data.run;
+    document.querySelector<HTMLDialogElement>('#shadow-review-dialog')!.close();
+    showToast(`批次 ${response.data.review.batchNo} 已复核，边界一致率 ${number(response.data.run.metrics.boundaryAgreement * 100, 2)}%`);
+    await loadView(true);
+    await openShadowRun(run.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`影子运行已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openShadowRun(run.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '提交批次复核';
+  }
+}
+
+function openShadowRunCommandDialog(command: 'start' | 'complete' | 'approve' | 'reject' | 'cancel'): void {
+  const run = state.selectedShadowRun;
+  if (!run) return;
+  const labels = {
+    start: ['启动影子运行', '启动依据', '确认启动', 'DRAFT → RUNNING'],
+    complete: ['结束观察并进入评估', '评估依据', '确认进入评估', 'RUNNING → EVALUATING'],
+    approve: ['独立批准影子验收', '批准依据', '批准验收', 'EVALUATING → APPROVED'],
+    reject: ['驳回影子验收', '驳回原因', '确认驳回', 'EVALUATING → REJECTED'],
+    cancel: ['取消影子运行', '取消原因', '确认取消', `${run.state} → CANCELLED`],
+  } as const;
+  const [title, reasonLabel, buttonLabel, transition] = labels[command];
+  state.shadowRunCommand = command;
+  state.candidateCommand = null;
+  state.batchCommand = null;
+  state.ruleCommand = null;
+  state.topologyCommand = null;
+  state.calibrationCommand = null;
+  state.dataQualityCommand = null;
+  setCommandAssigneeVisible(false);
+  document.querySelector('#command-kicker')!.textContent = '影子运行验收';
+  document.querySelector('#command-title')!.textContent = title;
+  document.querySelector('#command-reason-label')!.textContent = reasonLabel;
+  document.querySelector('#command-summary')!.innerHTML = `<div><span>验收任务</span><b>${escapeHtml(run.runCode)}</b></div><div><span>产线</span><b>${escapeHtml(run.lineId)}</b></div><div><span>状态变化</span><b>${transition}</b></div><div><span>版本</span><b>r${run.revision}</b></div>`;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
+  reason.value = '';
+  reason.placeholder = command === 'approve' ? '填写独立复核结论、指标和风险接受依据' : '填写可审计的现场或治理依据';
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.className = `button ${['reject', 'cancel'].includes(command) ? 'button--danger' : 'button--primary'}`;
+  button.textContent = buttonLabel;
+  document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
+  reason.focus();
+}
+
+async function handleShadowRunCommand(): Promise<void> {
+  const run = state.selectedShadowRun;
+  const command = state.shadowRunCommand;
+  const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
+  if (!run || !command || reason.length < 3) return;
+  const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
+  button.disabled = true;
+  button.textContent = '提交中...';
+  try {
+    const handlers = {
+      start: bpiApi.startShadowRun,
+      complete: bpiApi.completeShadowRun,
+      approve: bpiApi.approveShadowRun,
+      reject: bpiApi.rejectShadowRun,
+      cancel: bpiApi.cancelShadowRun,
+    };
+    const response = await handlers[command](run, reason, commandId());
+    state.selectedShadowRun = response.data;
+    document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
+    const messages = { start: '影子运行已启动', complete: '观察期已结束，等待独立审批', approve: '影子验收已批准', reject: '影子验收已驳回', cancel: '影子运行已取消' };
+    showToast(messages[command]);
+    await loadView(true);
+    await openShadowRun(run.id);
+  } catch (error) {
+    if (error instanceof ApiProblem && error.problem.status === 409) {
+      showToast(`影子运行已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      await openShadowRun(run.id);
+    } else showToast(error instanceof Error ? error.message : String(error), true);
+  } finally {
+    button.disabled = false;
   }
 }
 
@@ -2147,6 +2554,6 @@ function showToast(message: string, error = false): void {
 
 shell();
 const initialView = location.hash.replace('#/', '') as View;
-if (['overview', 'candidates', 'batches', 'dataQuality', 'points', 'rules'].includes(initialView)) state.view = initialView;
+if (['overview', 'candidates', 'batches', 'shadowRuns', 'dataQuality', 'points', 'rules'].includes(initialView)) state.view = initialView;
 void loadView();
 window.setInterval(() => { if (!document.hidden && state.view === 'overview') void loadView(true); }, 5_000);

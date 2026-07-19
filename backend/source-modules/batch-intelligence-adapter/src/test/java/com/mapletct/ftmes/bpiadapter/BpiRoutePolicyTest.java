@@ -18,6 +18,16 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/reject"));
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/suspend"));
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/resume"));
+        assertTrue(policy.allows(HttpMethod.GET, "/shadow-runs"));
+        assertTrue(policy.allows(HttpMethod.GET, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertTrue(policy.allows(HttpMethod.GET, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/batch-reviews"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/batch-reviews"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/start"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/complete"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/approve"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/reject"));
+        assertTrue(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/cancel"));
         assertTrue(policy.allows(HttpMethod.GET, "/topologies"));
         assertTrue(policy.allows(HttpMethod.GET, "/topologies/TOPO-S07-3"));
         assertTrue(policy.allows(HttpMethod.GET, "/topologies/TOPO-S07-3/compare"));
@@ -50,6 +60,9 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/publish"));
         assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
+        assertFalse(policy.allows(HttpMethod.DELETE, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
+        assertFalse(policy.allows(HttpMethod.POST, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/delete"));
+        assertFalse(policy.allows(HttpMethod.GET, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4/batch-reviews/export"));
         assertFalse(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/update"));
         assertFalse(policy.allows(HttpMethod.GET, "/rules/RULE-S07-START/compare/extra"));
         assertFalse(policy.allows(HttpMethod.POST, "/point-catalog/current"));

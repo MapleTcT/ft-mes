@@ -205,6 +205,137 @@ test('shift lead suspends and resumes a batch from the detail drawer', async () 
   await page.close();
 });
 
+test('team completes a shadow run acceptance and critical data quality blocks approval until resolved', async () => {
+  let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  response = await fetch(`${simulatorUrl}/__simulation/prepare-shadow-run`, { method: 'POST' });
+  assert.equal(response.status, 200);
+
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/shadowRuns`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '影子运行验收' }).waitFor();
+  await page.getByText('当前筛选范围没有影子运行').waitFor();
+
+  await page.getByRole('button', { name: '新建影子运行' }).click();
+  await page.getByRole('heading', { name: '新建影子运行' }).waitFor();
+  await page.locator('#shadow-run-code').fill('SHADOW-E2E-UI');
+  await page.locator('#shadow-run-name').fill('影子运行端到端验收');
+  assert.match(await page.locator('#shadow-run-rule').inputValue(), /^[0-9a-f-]{36}$/);
+  await page.locator('#shadow-run-reason').fill('固定规则、拓扑和点位目录版本进行七天影子运行验收');
+  await page.getByRole('button', { name: '创建验收任务' }).click();
+
+  await page.getByRole('heading', { name: '影子运行端到端验收' }).waitFor();
+  await page.getByText('RULE-S07-START@1.2.0', { exact: true }).waitFor();
+  await page.getByText('TOPO-S07@3', { exact: true }).waitFor();
+  const runId = await page.locator('[data-shadow-run-id]').getAttribute('data-shadow-run-id');
+  assert.ok(runId);
+  await page.getByRole('button', { name: '启动影子运行' }).click();
+  await page.getByRole('heading', { name: '启动影子运行' }).waitFor();
+  await page.locator('#confirm-reason').fill('确认固定版本的 Kafka、Flink 和点位准入均已就绪');
+  await page.getByRole('button', { name: '确认启动' }).click();
+  await page.getByText('影子运行已启动').waitFor();
+  await page.locator('.batch-state-band').getByText('RUNNING', { exact: true }).waitFor();
+
+  await page.getByRole('button', { name: '复核批次' }).click();
+  await page.getByRole('heading', { name: '复核影子批次' }).waitFor();
+  await page.locator('#shadow-review-end').evaluate((element) => {
+    const parsed = new Date(element.value);
+    parsed.setSeconds(parsed.getSeconds() + 61);
+    const local = new Date(parsed.getTime() - parsed.getTimezoneOffset() * 60_000).toISOString().slice(0, 19);
+    element.value = local;
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.locator('#shadow-review-reason').fill('人工复核首批，结束边界偏差六十一秒用于容差验收');
+  await page.getByRole('button', { name: '提交批次复核' }).click();
+  await page.getByText(/边界一致率 50\.00%/).waitFor();
+
+  let run = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}`).then((item) => item.json()).then((body) => body.data);
+  const reviews = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}/batch-reviews`).then((item) => item.json()).then((body) => body.data);
+  const reviewedIds = new Set(reviews.map((item) => item.batchId));
+  const batches = await fetch(`${simulatorUrl}/bpi/v1/batches?plantId=PLANT-01`).then((item) => item.json()).then((body) => body.data);
+  let reviewIndex = 2;
+  for (const batch of batches.filter((item) => !reviewedIds.has(item.id))) {
+    response = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}/batch-reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Idempotency-Key': `ui-shadow-review-${reviewIndex}`, 'If-Match': String(run.revision) },
+      body: JSON.stringify({
+        batchId: batch.id,
+        manualStartTime: batch.startTime,
+        manualEndTime: batch.endTime,
+        referenceQuantity: batch.quantity,
+        quantityUnit: batch.quantityUnit,
+        reason: `人工复核第 ${reviewIndex} 个影子批次`,
+      }),
+    });
+    assert.equal(response.status, 200);
+    run = (await response.json()).data.run;
+    reviewIndex += 1;
+  }
+  assert.equal(run.metrics.reviewedBatchCount, 10);
+  assert.equal(run.metrics.boundaryAgreement, 0.95);
+
+  await page.locator('#detail-drawer [data-close-drawer]').first().click();
+  await page.getByRole('button', { name: '刷新' }).click();
+  await page.locator(`[data-shadow-run-id="${runId}"]`).click();
+  await page.getByRole('heading', { name: '影子运行端到端验收' }).waitFor();
+  await page.locator('.shadow-metric-grid').getByText('10 / 10', { exact: true }).waitFor();
+  await page.locator('.shadow-metric-grid').getByText('95.00% / 95.00%', { exact: true }).waitFor();
+  await page.getByRole('button', { name: '结束观察并评估' }).click();
+  await page.locator('#confirm-reason').fill('十个批次和七天观察周期均已完成，提交独立评估');
+  await page.getByRole('button', { name: '确认进入评估' }).click();
+  await page.getByText('观察期已结束，等待独立审批').waitFor();
+  await page.locator('.batch-state-band').getByText('EVALUATING', { exact: true }).waitFor();
+  await page.getByText('UNRESOLVED_CRITICAL_DATA_QUALITY', { exact: true }).waitFor();
+  assert.equal(await page.getByRole('button', { name: '独立批准验收' }).isDisabled(), true);
+
+  run = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}`).then((item) => item.json()).then((body) => body.data);
+  response = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Idempotency-Key': 'ui-shadow-approve-blocked', 'If-Match': String(run.revision) },
+    body: JSON.stringify({ reason: '验证严重数据质量事件未关闭时审批必须失败' }),
+  });
+  assert.equal(response.status, 422);
+
+  await page.locator('[data-view="dataQuality"]').click();
+  await page.getByRole('heading', { name: '数据质量事件' }).waitFor();
+  await page.locator('[data-data-quality-id]').first().click();
+  await page.getByRole('heading', { name: '设备时钟漂移' }).waitFor();
+  await page.getByRole('button', { name: '确认并分派' }).click();
+  await page.locator('#command-assignee').fill('platform.engineer');
+  await page.locator('#confirm-reason').fill('确认设备时钟漂移并分派平台工程师完成校时');
+  await page.getByRole('button', { name: '确认并分派', exact: true }).last().click();
+  await page.getByText('事件已确认并分派给 platform.engineer').waitFor();
+  await page.getByRole('button', { name: '标记已解决' }).click();
+  await page.locator('#confirm-reason').fill('完成 NTP 校时并连续三个采集周期复核正常');
+  await page.getByRole('button', { name: '确认已解决' }).click();
+  await page.getByText('事件已解决，原始数据和处置审计已保留').waitFor();
+
+  await page.locator('[data-view="shadowRuns"]').click();
+  await page.locator(`[data-shadow-run-id="${runId}"]`).click();
+  await page.getByRole('button', { name: '独立批准验收' }).waitFor();
+  assert.equal(await page.getByRole('button', { name: '独立批准验收' }).isEnabled(), true);
+  await page.getByRole('button', { name: '独立批准验收' }).click();
+  await page.locator('#confirm-reason').fill('独立管理员复核版本、边界、数量偏差和数据质量后批准');
+  await page.getByRole('button', { name: '批准验收', exact: true }).click();
+  await page.getByText('影子验收已批准').waitFor();
+  await page.locator('.batch-state-band').getByText('APPROVED', { exact: true }).waitFor();
+
+  run = await fetch(`${simulatorUrl}/bpi/v1/shadow-runs/${runId}`).then((item) => item.json()).then((body) => body.data);
+  assert.equal(run.state, 'APPROVED');
+  assert.equal(run.revision, 14);
+  assert.equal(run.metrics.reviewedBatchCount, 10);
+  assert.equal(run.metrics.boundaryAgreement, 0.95);
+  assert.equal(run.metrics.unresolvedCriticalIncidentCount, 0);
+  assert.equal(run.decidedBy, 'simulated.bpi.admin');
+  const health = await fetch(`${simulatorUrl}/health`).then((item) => item.json());
+  assert.equal(health.externalWrites, false);
+  await page.screenshot({ path: '/tmp/bpi-console-shadow-run-approved.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
 test('mobile layout keeps navigation usable without page-level horizontal overflow', async () => {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const errors = observe(page);
@@ -227,6 +358,10 @@ test('mobile layout keeps navigation usable without page-level horizontal overfl
   await page.getByRole('heading', { name: '数据质量事件' }).waitFor();
   const dataQualityDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   assert.ok(dataQualityDimensions.scroll <= dataQualityDimensions.client, `data quality page overflow: ${JSON.stringify(dataQualityDimensions)}`);
+  await page.locator('[data-view="shadowRuns"]').click();
+  await page.getByRole('heading', { name: '影子运行验收' }).waitFor();
+  const shadowRunDimensions = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  assert.ok(shadowRunDimensions.scroll <= shadowRunDimensions.client, `shadow run page overflow: ${JSON.stringify(shadowRunDimensions)}`);
   await page.screenshot({ path: '/tmp/bpi-console-data-quality-mobile.png', fullPage: true });
   await page.screenshot({ path: '/tmp/bpi-console-mobile.png', fullPage: true });
   assert.deepEqual(errors, []);

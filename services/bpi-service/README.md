@@ -54,12 +54,29 @@ reopening it. Incidents changed after a cursor's `snapshotAt` are intentionally 
 old cursor and become visible after a queue refresh; this is a live-work-queue cutoff, not historical
 row versioning. Poison records are routed to `bpi.data-quality.dlq.v1`.
 
+Flyway V20 adds auditable shadow-run acceptance. A run pins one published rule, topology and point-
+catalog snapshot, then recomputes publication, application, runtime and operational point readiness
+before start. Engineers review only matching `CLOSED_RAW` shadow batches against human boundaries and
+reference quantities. Completion requires 7-14 days and the configured sample count; independent admin
+approval additionally requires at least 95% boundary agreement, cumulative quantity tolerance and zero
+unresolved CRITICAL data-quality incidents. Re-review supersedes rather than deletes history, every
+command uses idempotency plus optimistic revision, and approval can never be performed by the creator.
+This workflow changes only BPI PostgreSQL state; it does not write WOM, QCS, WMS, PLC or DCS.
+
 ```bash
 make bpi-service-test
 ```
 
 Real PostgreSQL acceptance additionally requires `BPI_TEST_DATABASE_URL`,
 `BPI_TEST_DATABASE_USER`, and `BPI_TEST_DATABASE_PASSWORD`.
+
+The focused shadow-run lifecycle test uses a fresh PostgreSQL schema migrated through V20:
+
+```bash
+JAVA_HOME=/path/to/jdk17 mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiShadowRunPostgresAcceptanceTest \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+```
 
 The focused data-quality acceptance uses real PostgreSQL and Embedded Kafka:
 

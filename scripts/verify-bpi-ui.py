@@ -42,7 +42,7 @@ def main() -> int:
                 failures.append(f"BPI UI package is missing {name!r} script")
 
         api = (UI / "src/api.ts").read_text(encoding="utf-8")
-        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration"):
+        for required in ("const API_ROOT = '/bpi-api'", "localStorage.getItem('ticket')", "Idempotency-Key", "If-Match", "rejectCandidate", "suspendBatch", "resumeBatch", "simulateRule", "publishRule", "topologies", "createTopologyDraft", "validateTopology", "publishTopology", "createRuleDraft", "currentPointCatalog", "options?.cursor", "options?.search", "listPointCalibrations", "submitPointCalibration", "approvePointCalibration", "rejectPointCalibration", "revokePointCalibration", "shadowRuns", "createShadowRun", "reviewShadowRunBatch", "startShadowRun", "completeShadowRun", "approveShadowRun", "rejectShadowRun", "cancelShadowRun"):
             if required not in api:
                 failures.append(f"BPI UI API client is missing {required!r}")
         forbidden = ("BPI_INTERNAL_JWT_SECRET", "http://bpi-service", "https://bpi-service")
@@ -54,7 +54,7 @@ def main() -> int:
                         failures.append(f"{path.relative_to(ROOT)} exposes forbidden marker {marker!r}")
 
         e2e = (UI / "tests/bpi-console.e2e.cjs").read_text(encoding="utf-8")
-        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "document.documentElement.scrollWidth"):
+        for required in ("console", "pageerror", "requestfailed", "/tmp/bpi-console-desktop.png", "/tmp/bpi-console-candidate-rejected.png", "/tmp/bpi-console-batch-lifecycle.png", "/tmp/bpi-console-end-boundary.png", "/tmp/bpi-console-point-catalog-pagination.png", "/tmp/bpi-console-point-calibration-governance.png", "/tmp/bpi-console-rule-published.png", "/tmp/bpi-console-rule-application-applied.png", "/tmp/bpi-console-rule-publication-blocked.png", "/tmp/bpi-console-shadow-run-approved.png", "CLOSED_RAW", "END_BOUNDARY_CONFIRMED", "sourceCalibrationStatus", "calibrationEvidenceId", "REVOKED", "point catalog incrementally loads a pinned snapshot", "property.0204", "wrongSearch.status, 422", "rule-runtime-readiness", "DEGRADED", "runtimeReadinessStatus", "UNRESOLVED_CRITICAL_DATA_QUALITY", "boundaryAgreement", "externalWrites", "document.documentElement.scrollWidth"):
             if required not in e2e:
                 failures.append(f"BPI UI E2E is missing {required!r} evidence")
 
@@ -63,8 +63,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must declare its deterministic simulator scope")
         summary = acceptance.get("summary", {})
         browser_tests = summary.get("browserTests", 0)
-        if browser_tests < 10 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
-            failures.append("BPI UI acceptance must record at least ten browser tests with every test passing")
+        if browser_tests < 14 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
+            failures.append("BPI UI acceptance must record at least fourteen browser tests with every test passing")
         item_ids = {item.get("id") for item in acceptance.get("items", [])}
         if "desktop-topology-rule-productization" not in item_ids:
             failures.append("BPI UI acceptance must cover topology and rule productization")
@@ -76,6 +76,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must cover independent point-calibration governance")
         if "desktop-point-readiness-publication-blocker" not in item_ids:
             failures.append("BPI UI acceptance must cover point-readiness publication blocking")
+        if "desktop-shadow-run-acceptance" not in item_ids:
+            failures.append("BPI UI acceptance must cover the shadow-run approval workbench")
         rule_item = next(
             (item for item in acceptance.get("items", [])
              if item.get("id") == "desktop-rule-replay-and-publication"),

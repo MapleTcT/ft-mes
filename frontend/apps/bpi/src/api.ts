@@ -18,6 +18,12 @@ import type {
   RuleSimulationCommand,
   RuleDraftCommand,
   RuleVersion,
+  ShadowRun,
+  ShadowRunBatchReview,
+  ShadowRunBatchReviewCommand,
+  ShadowRunCreateCommand,
+  ShadowRunReviewResult,
+  ShadowRunState,
   StateEvent,
   TopologyVersion,
   TopologyDraftCommand,
@@ -94,6 +100,57 @@ export const bpiApi = {
     request<Batch>(`/batches/${encodeURIComponent(batch.id)}/resume`, {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  shadowRuns: (plantId: string, options?: { lineId?: string; state?: ShadowRunState | '' }) => {
+    const parameters = new URLSearchParams({ plantId, limit: '100' });
+    if (options?.lineId) parameters.set('lineId', options.lineId);
+    if (options?.state) parameters.set('state', options.state);
+    return request<ShadowRun[]>(`/shadow-runs?${parameters.toString()}`);
+  },
+  shadowRun: (id: string) => request<ShadowRun>(`/shadow-runs/${encodeURIComponent(id)}`),
+  shadowRunReviews: (id: string, includeSuperseded = false) =>
+    request<ShadowRunBatchReview[]>(`/shadow-runs/${encodeURIComponent(id)}/batch-reviews?includeSuperseded=${includeSuperseded}`),
+  createShadowRun: (command: ShadowRunCreateCommand, key: string) =>
+    request<ShadowRun>('/shadow-runs', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': '0' },
+      body: JSON.stringify(command),
+    }),
+  reviewShadowRunBatch: (run: ShadowRun, command: ShadowRunBatchReviewCommand, key: string) =>
+    request<ShadowRunReviewResult>(`/shadow-runs/${encodeURIComponent(run.id)}/batch-reviews`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
+      body: JSON.stringify(command),
+    }),
+  startShadowRun: (run: ShadowRun, reason: string, key: string) =>
+    request<ShadowRun>(`/shadow-runs/${encodeURIComponent(run.id)}/start`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  completeShadowRun: (run: ShadowRun, reason: string, key: string) =>
+    request<ShadowRun>(`/shadow-runs/${encodeURIComponent(run.id)}/complete`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  approveShadowRun: (run: ShadowRun, reason: string, key: string) =>
+    request<ShadowRun>(`/shadow-runs/${encodeURIComponent(run.id)}/approve`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  rejectShadowRun: (run: ShadowRun, reason: string, key: string) =>
+    request<ShadowRun>(`/shadow-runs/${encodeURIComponent(run.id)}/reject`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
+      body: JSON.stringify({ reason }),
+    }),
+  cancelShadowRun: (run: ShadowRun, reason: string, key: string) =>
+    request<ShadowRun>(`/shadow-runs/${encodeURIComponent(run.id)}/cancel`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(run.revision) },
       body: JSON.stringify({ reason }),
     }),
   evidence: (id: string) => request<{ start: Evidence[]; end: Evidence[] }>(`/batches/${encodeURIComponent(id)}/evidence`),

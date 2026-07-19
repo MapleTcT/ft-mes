@@ -36,6 +36,7 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V17__bpi_point_calibration_governance.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V19__bpi_data_quality_incident_workbench.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V20__bpi_shadow_run_acceptance.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -90,6 +91,12 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/DataQualityKafkaRecordProcessorTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityKafkaPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiDataQualityTargetMarkerProducerTest.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/ShadowRunService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunCreateCommand.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunBatchReviewCommand.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiShadowRunPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
@@ -127,6 +134,9 @@ REQUIRED_FILES = [
     "metadata/bpi-point-catalog-pagination.png",
     "docs/testing/bpi-data-quality-workbench-acceptance.md",
     "metadata/bpi-data-quality-workbench-acceptance.json",
+    "docs/testing/bpi-shadow-run-acceptance.md",
+    "metadata/bpi-shadow-run-acceptance.json",
+    "metadata/bpi-shadow-run-acceptance.png",
     "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-data-quality-acceptance.json",
     "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
@@ -134,6 +144,10 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/adp-bpi-point-calibration-pagination-acceptance.js",
     "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
     "deploy/docker/scripts/adp-bpi-data-quality-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-shadow-run-acceptance.js",
+    "deploy/docker/scripts/bpi-shadow-run-acceptance-fixture.sql",
+    "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
+    "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
     "deploy/docker/scripts/bpi-point-catalog-pagination-cleanup.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-fixture.sql",
     "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
@@ -293,6 +307,75 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V20__bpi_shadow_run_acceptance.sql",
+        [
+            "bpi_shadow_runs",
+            "bpi_shadow_run_batch_reviews",
+            "minimum_duration_days BETWEEN 7 AND 14",
+            "minimum_boundary_agreement BETWEEN 0.950000 AND 1.000000",
+            "uq_bpi_shadow_run_active_scope",
+            "WHERE state = 'RUNNING'",
+            "uq_bpi_shadow_review_active_batch",
+            "WHERE state = 'ACTIVE'",
+            "GRANT SELECT, INSERT, UPDATE ON bpi.bpi_shadow_runs TO bpi_service",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/ShadowRunService.java",
+        [
+            "A new shadow run must use If-Match 0.",
+            "A shadow run must pin a PUBLISHED rule version.",
+            "Only a CLOSED_RAW shadow batch can be reviewed.",
+            "minimum duration and batch review count",
+            "Shadow run decisions require an administrator other than the creator.",
+            "Shadow run approval gates are not satisfied",
+            "reserveIdempotency",
+            "completeIdempotency",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/ShadowRunPostgresRepository.java",
+        [
+            '"PUBLISHED".equals(rs.getString("publication_status"))',
+            '"APPLIED".equals(rs.getString("application_status"))',
+            '"READY".equals(rs.getString("runtime_readiness_status"))',
+            "BOUNDARY_AGREEMENT_BELOW_THRESHOLD",
+            "CUMULATIVE_QUANTITY_DEVIATION_OUT_OF_TOLERANCE",
+            "UNRESOLVED_CRITICAL_DATA_QUALITY",
+            "bpi.bpi_point_calibrations",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunController.java",
+        [
+            "/bpi/v1/shadow-runs",
+            "/bpi/v1/shadow-runs/{runId}/batch-reviews",
+            "/bpi/v1/shadow-runs/{runId}/start",
+            "/bpi/v1/shadow-runs/{runId}/complete",
+            "/bpi/v1/shadow-runs/{runId}/approve",
+            "/bpi/v1/shadow-runs/{runId}/reject",
+            "/bpi/v1/shadow-runs/{runId}/cancel",
+            "hasRole('BPI_ADMIN')",
+            "Idempotent-Replay",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiShadowRunPostgresAcceptanceTest.java",
+        [
+            "realShadowRunRequiresPinnedReadinessHumanAgreementQuantityAndIndependentApproval",
+            "UNRESOLVED_CRITICAL_DATA_QUALITY",
+            'jsonPath("$.data.metrics.boundaryAgreement").value(0.95)',
+            'isEqualTo("APPROVED|14|shadow-author|shadow-admin")',
+            "DELETE FROM bpi.bpi_shadow_run_batch_reviews",
+            "DELETE FROM bpi.bpi_shadow_runs",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/DataQualityIncidentCursorCodec.java",
         ["bpi.data-quality.incident.cursor.v1", "HmacSHA256", "MessageDigest.isEqual", "MAX_CURSOR_LENGTH"],
         failures,
@@ -383,6 +466,41 @@ def main() -> int:
             "raw marker event was not preserved exactly once",
             "consoleErrors",
             "requestFailures",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/adp-bpi-shadow-run-acceptance.js",
+        [
+            "BPI_TIME_COMPRESSION_DAYS",
+            "expectedApprover",
+            "/bpi-api/shadow-runs/",
+            "first batch deliberate 61 second end deviation",
+            "UNRESOLVED_CRITICAL_DATA_QUALITY",
+            "qualityGate=NOT_APPLICABLE",
+            "requestFailures",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
+        [
+            "target_shadow_runs",
+            "bpi_shadow_run_batch_reviews",
+            "bpi_api_idempotency",
+            "bpi_point_calibrations",
+            "remaining",
+        ],
+        failures,
+    )
+    require_text(
+        ROOT / "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
+        [
+            "active_reviews",
+            "boundary_agreement",
+            "cumulative_quantity_deviation_percent",
+            "qualityNotApplicable",
+            "wmsNotRequested",
         ],
         failures,
     )
@@ -766,7 +884,12 @@ def main() -> int:
     )
     require_text(
         SERVICE / "app/pom.xml",
-        ["<classifier>exec</classifier>", "<artifactId>spring-kafka</artifactId>"],
+        [
+            "<classifier>exec</classifier>",
+            "<artifactId>spring-kafka</artifactId>",
+            "<spring.datasource.hikari.maximum-pool-size>2</spring.datasource.hikari.maximum-pool-size>",
+            "<spring.datasource.hikari.minimum-idle>0</spring.datasource.hikari.minimum-idle>",
+        ],
         failures,
     )
 
@@ -1022,6 +1145,56 @@ def main() -> int:
         screenshot_hash = hashlib.sha256(screenshot_path.read_bytes()).hexdigest()
         if screenshot_hash != calibration_browser.get("screenshotSha256"):
             fail("BPI calibration screenshot hash does not match the acceptance record", failures)
+
+    shadow_acceptance = json.loads(
+        (ROOT / "metadata/bpi-shadow-run-acceptance.json").read_text(encoding="utf-8")
+    )
+    if shadow_acceptance.get("status") != "PASS_CONTROLLED_TARGET_TIME_COMPRESSED_CLEANED":
+        fail("BPI shadow-run acceptance must retain controlled, time-compressed and cleaned scope", failures)
+    if shadow_acceptance.get("database") != "PostgreSQL":
+        fail("BPI shadow-run acceptance must identify PostgreSQL", failures)
+    shadow_environment = shadow_acceptance.get("environment", {})
+    if (shadow_environment.get("flywayVersion") != 20
+            or shadow_environment.get("serviceHealth") != "healthy"
+            or shadow_environment.get("adapterHealth") != "healthy"):
+        fail("BPI shadow-run target runtime evidence is incomplete", failures)
+    shadow_summary = shadow_acceptance.get("summary", {})
+    if (shadow_summary.get("testedFeatures") != 15
+            or shadow_summary.get("pass") != 15
+            or shadow_summary.get("fail") != 0
+            or shadow_summary.get("blocked") != 0
+            or shadow_summary.get("productionReadiness") != "PARTIAL_FIELD_DURATION_PENDING"):
+        fail("BPI shadow-run acceptance must preserve fifteen passes and the field-duration boundary", failures)
+    shadow_time = shadow_acceptance.get("timeCompression", {})
+    if (shadow_time.get("applied") is not True
+            or shadow_time.get("days") != 8
+            or shadow_time.get("fieldDurationEvidence") is not False):
+        fail("BPI shadow-run acceptance must not present time compression as field evidence", failures)
+    shadow_browser = shadow_acceptance.get("browser", {})
+    if (shadow_browser.get("capturedBpiRequests") != 57
+            or shadow_browser.get("non2xxResponses") != 0
+            or any(shadow_browser.get(key) != 0 for key in (
+                "consoleErrors", "pageErrors", "requestFailures"))):
+        fail("BPI shadow-run browser evidence is incomplete", failures)
+    shadow_persistence = shadow_acceptance.get("persistence", {})
+    if (shadow_persistence.get("finalStateBeforeCleanup") != "APPROVED"
+            or shadow_persistence.get("finalRevisionBeforeCleanup") != 14
+            or shadow_persistence.get("activeReviews") != 10
+            or shadow_persistence.get("boundaryAgreement") != 0.95
+            or shadow_persistence.get("cumulativeQuantityDeviationPercent") != 0
+            or shadow_persistence.get("auditRows") != 16
+            or shadow_persistence.get("completedIdempotencyRows") != 10
+            or shadow_persistence.get("closedRawBatches") != 10
+            or shadow_persistence.get("qualityNotApplicableBatches") != 10
+            or shadow_persistence.get("wmsNotRequestedBatches") != 10):
+        fail("BPI shadow-run PostgreSQL acceptance evidence is incomplete", failures)
+    if any(value != 0 for value in shadow_acceptance.get("cleanup", {}).values()):
+        fail("BPI shadow-run marker cleanup must leave zero fixture rows", failures)
+    shadow_screenshot_path = ROOT / shadow_browser.get("screenshot", "")
+    if shadow_screenshot_path.is_file():
+        screenshot_hash = hashlib.sha256(shadow_screenshot_path.read_bytes()).hexdigest()
+        if screenshot_hash != shadow_browser.get("screenshotSha256"):
+            fail("BPI shadow-run screenshot hash does not match", failures)
 
     pagination_acceptance = json.loads(
         (ROOT / "metadata/bpi-point-calibration-pagination-acceptance.json").read_text(

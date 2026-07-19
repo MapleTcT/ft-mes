@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T16:17:24+00:00",
-  "repoCommit": "a680844ed188f4ed41a3f9d96773af14fd6dad25",
+  "generatedAt": "2026-07-19T18:36:56+00:00",
+  "repoCommit": "9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -22,7 +22,7 @@
     "plannedCount": 1,
     "sourceModuleCount": 9,
     "sourceModuleOraclePolicyPass": true,
-    "oracleBacklogReferenceCount": 1586,
+    "oracleBacklogReferenceCount": 1593,
     "directOracleDependencyCount": 2,
     "postgresMigrationCount": 191,
     "postgresMigrationHighRiskCount": 0,
@@ -82,10 +82,10 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-19T16:16:37+00:00",
-    "repoCommit": "a680844ed188f4ed41a3f9d96773af14fd6dad25",
-    "findingCount": 1586,
-    "categoryTotal": 1586,
+    "generatedAt": "2026-07-19T18:35:49+00:00",
+    "repoCommit": "9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f",
+    "findingCount": 1593,
+    "categoryTotal": 1593,
     "unclassifiedReferenceCount": 0
   },
   "oracleBacklogCategoryCounts": {
@@ -93,11 +93,11 @@
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 187,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 58,
+    "java-row-index-noise": 64,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 574,
-    "postgres-conversion-tooling": 44,
+    "postgres-conversion-tooling": 45,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
     "tooling-or-audit-code": 269
@@ -170,7 +170,7 @@
       "id": "oracle-legacy-only",
       "title": "Oracle 只作为 legacy 路径保留",
       "status": "watch",
-      "evidence": "Oracle migration backlog has 1586 tracked references.",
+      "evidence": "Oracle migration backlog has 1593 tracked references.",
       "nextAction": "逐模块清理 backlog；删除引用前必须保留 PostgreSQL 替代证据。",
       "blocking": false
     },
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-19T16:16:37+00:00, repoCommit=a680844ed188f4ed41a3f9d96773af14fd6dad25, unclassified=0, findingCount=1586, categoryTotal=1586",
+      "evidence": "generatedAt=2026-07-19T18:35:49+00:00, repoCommit=9db76f132e302a995d5cf7ddf3f797dd6ddf7b5f, unclassified=0, findingCount=1593, categoryTotal=1593",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },

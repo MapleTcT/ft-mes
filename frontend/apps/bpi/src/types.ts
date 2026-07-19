@@ -153,6 +153,134 @@ export interface Batch {
   topologyVersion: string;
 }
 
+export type ShadowRunState = 'DRAFT' | 'RUNNING' | 'EVALUATING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+export interface ShadowRunReadiness {
+  rulePublished: boolean;
+  ruleActive: boolean;
+  publicationConfirmed: boolean;
+  applicationApplied: boolean;
+  runtimeReady: boolean;
+  topologyPublished: boolean;
+  topologySnapshotPinned: boolean;
+  pointCatalogCurrent: boolean;
+  pointCatalogReady: boolean;
+  ready: boolean;
+}
+
+export interface ShadowRunMetrics {
+  observedDurationSeconds: number;
+  reviewedBatchCount: number;
+  acceptedBoundaryCount: number;
+  totalBoundaryCount: number;
+  boundaryAgreement: number;
+  quantitySampleCount: number;
+  automaticQuantityTotal: number;
+  referenceQuantityTotal: number;
+  quantityUnit?: string | null;
+  cumulativeQuantityDeviationPercent: number;
+  meanQuantityDeviationPercent: number;
+  maximumQuantityDeviationPercent: number;
+  unresolvedCriticalIncidentCount: number;
+  durationGatePassed: boolean;
+  reviewCountGatePassed: boolean;
+  boundaryAgreementGatePassed: boolean;
+  quantityGatePassed: boolean;
+  dataQualityGatePassed: boolean;
+}
+
+export interface ShadowRun {
+  id: string;
+  runCode: string;
+  name: string;
+  tenantId: string;
+  plantId: string;
+  lineId: string;
+  state: ShadowRunState;
+  revision: number;
+  ruleVersionId: string;
+  ruleVersion: string;
+  topologyVersionId: string;
+  topologyVersion: string;
+  pointCatalogSnapshotId: string;
+  pointCatalogChecksum: string;
+  minimumDurationDays: number;
+  minimumReviewedBatches: number;
+  boundaryToleranceSeconds: number;
+  minimumBoundaryAgreement: number;
+  quantityTolerancePercent: number;
+  createdBy: string;
+  createdAt: string;
+  startedBy?: string | null;
+  startedAt?: string | null;
+  completedBy?: string | null;
+  completedAt?: string | null;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  decisionReason?: string | null;
+  cancelledBy?: string | null;
+  cancelledAt?: string | null;
+  cancellationReason?: string | null;
+  readiness: ShadowRunReadiness;
+  metrics: ShadowRunMetrics;
+  blockers: string[];
+  readyForApproval: boolean;
+}
+
+export interface ShadowRunCreateCommand {
+  runCode: string;
+  name: string;
+  plantId: string;
+  lineId: string;
+  ruleVersionId: string;
+  minimumDurationDays: number;
+  minimumReviewedBatches: number;
+  boundaryToleranceSeconds: number;
+  minimumBoundaryAgreement: number;
+  quantityTolerancePercent: number;
+  reason: string;
+}
+
+export interface ShadowRunBatchReviewCommand {
+  batchId: string;
+  manualStartTime: string;
+  manualEndTime: string;
+  referenceQuantity: number;
+  quantityUnit: string;
+  reason: string;
+}
+
+export interface ShadowRunBatchReview {
+  id: string;
+  shadowRunId: string;
+  batchId: string;
+  batchNo: string;
+  reviewSequence: number;
+  state: 'ACTIVE' | 'SUPERSEDED';
+  automaticStartTime: string;
+  automaticEndTime: string;
+  manualStartTime: string;
+  manualEndTime: string;
+  startDeviationSeconds: number;
+  endDeviationSeconds: number;
+  startBoundaryAccepted: boolean;
+  endBoundaryAccepted: boolean;
+  automaticQuantity: number;
+  referenceQuantity: number;
+  quantityUnit: string;
+  quantityDeviationPercent: number;
+  quantityWithinTolerance: boolean;
+  reviewedBy: string;
+  reviewReason: string;
+  reviewedAt: string;
+  supersededAt?: string | null;
+}
+
+export interface ShadowRunReviewResult {
+  run: ShadowRun;
+  review: ShadowRunBatchReview;
+}
+
 export interface CandidateConfirmation {
   candidate: Candidate;
   batch: Batch;

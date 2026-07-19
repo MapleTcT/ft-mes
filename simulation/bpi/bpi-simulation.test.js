@@ -895,3 +895,165 @@ test('data quality and integration impact remain visible', async () => {
   assert.equal(timescale.status, 'DEGRADED');
   assert.match(timescale.businessImpact, /不阻断批次事实查询/);
 });
+
+test('shadow run acceptance is version-pinned, review-driven and fail-closed on critical data quality', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+  result = await request('POST', '/__simulation/prepare-shadow-run');
+  assert.equal(result.json.preparedBatchCount, 10);
+
+  const batches = (await request('GET', '/bpi/v1/batches?plantId=PLANT-01')).json.data;
+  assert.equal(batches.length, 10);
+
+  async function createRun(code) {
+    const response = await request('POST', '/bpi/v1/shadow-runs', {
+      headers: commandHeaders(`create-${code}`, 0),
+      body: {
+        runCode: code,
+        name: `${code} acceptance`,
+        plantId: 'PLANT-01',
+        lineId: 'LINE-S07-01',
+        ruleVersionId: RULE_ID,
+        minimumDurationDays: 7,
+        minimumReviewedBatches: 10,
+        boundaryToleranceSeconds: 60,
+        minimumBoundaryAgreement: 0.95,
+        quantityTolerancePercent: 2,
+        reason: '建立受控影子运行验收任务',
+      },
+    });
+    assert.equal(response.response.status, 200);
+    assert.equal(response.json.data.state, 'DRAFT');
+    assert.equal(response.json.data.readiness.ready, true);
+    return response.json.data;
+  }
+
+  async function startAndReviewAll(run, keyPrefix) {
+    let response = await request('POST', `/bpi/v1/shadow-runs/${run.id}/start`, {
+      headers: commandHeaders(`${keyPrefix}-start`, run.revision),
+      body: { reason: '确认固定版本运行就绪并启动观察' },
+    });
+    assert.equal(response.response.status, 200);
+    run = response.json.data;
+    assert.equal(run.state, 'RUNNING');
+    assert.equal(run.metrics.durationGatePassed, true);
+
+    response = await request('GET', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`);
+    assert.deepEqual(response.json.data, []);
+
+    for (let index = 0; index < batches.length; index += 1) {
+      const batch = batches[index];
+      const headers = commandHeaders(`${keyPrefix}-review-${index + 1}`, run.revision);
+      response = await request('POST', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`, {
+        headers,
+        body: {
+          batchId: batch.id,
+          manualStartTime: batch.startTime,
+          manualEndTime: batch.endTime,
+          referenceQuantity: batch.quantity,
+          quantityUnit: batch.quantityUnit,
+          reason: `人工复核第 ${index + 1} 个批次边界与累计量`,
+        },
+      });
+      assert.equal(response.response.status, 200);
+      run = response.json.data.run;
+      assert.equal(response.json.data.review.startBoundaryAccepted, true);
+      assert.equal(response.json.data.review.quantityWithinTolerance, true);
+      if (index === 0) {
+        const replay = await request('POST', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`, {
+          headers,
+          body: {
+            batchId: batch.id,
+            manualStartTime: batch.startTime,
+            manualEndTime: batch.endTime,
+            referenceQuantity: batch.quantity,
+            quantityUnit: batch.quantityUnit,
+            reason: '人工复核第 1 个批次边界与累计量',
+          },
+        });
+        assert.equal(replay.response.headers.get('idempotent-replay'), 'true');
+        assert.equal(replay.json.data.run.revision, run.revision);
+      }
+    }
+    assert.equal(run.metrics.reviewedBatchCount, 10);
+    assert.equal(run.metrics.boundaryAgreement, 1);
+    assert.equal(run.metrics.cumulativeQuantityDeviationPercent, 0);
+    response = await request('GET', `/bpi/v1/shadow-runs/${run.id}/batch-reviews`);
+    assert.equal(response.json.data.length, 10);
+    return run;
+  }
+
+  result = await request('GET', '/bpi/v1/shadow-runs?plantId=PLANT-01');
+  assert.deepEqual(result.json.data, []);
+  let approvedRun = await createRun('SHADOW-ACCEPT-APPROVE');
+  result = await request('GET', `/bpi/v1/shadow-runs/${approvedRun.id}`);
+  assert.equal(result.json.data.ruleVersion, 'RULE-S07-START@1.2.0');
+  assert.equal(result.json.data.pointCatalogSnapshotId, '4d9c5df8-7ee0-58e2-a143-9ca5d37a7b21');
+
+  approvedRun = await startAndReviewAll(approvedRun, 'approve-flow');
+  result = await request('POST', `/bpi/v1/shadow-runs/${approvedRun.id}/complete`, {
+    headers: commandHeaders('approve-flow-complete', approvedRun.revision),
+    body: { reason: '观察周期和人工复核样本均已满足' },
+  });
+  assert.equal(result.response.status, 200);
+  approvedRun = result.json.data;
+  assert.equal(approvedRun.state, 'EVALUATING');
+  assert.equal(approvedRun.readyForApproval, false);
+  assert.ok(approvedRun.blockers.includes('UNRESOLVED_CRITICAL_DATA_QUALITY'));
+
+  result = await request('POST', `/bpi/v1/shadow-runs/${approvedRun.id}/approve`, {
+    headers: commandHeaders('approve-flow-blocked', approvedRun.revision),
+    body: { reason: '尝试在严重数据质量事件未解决时批准' },
+  });
+  assert.equal(result.response.status, 422);
+  assert.match(result.json.detail, /UNRESOLVED_CRITICAL_DATA_QUALITY/);
+
+  const critical = (await request('GET', '/bpi/v1/data-quality/incidents?plantId=PLANT-01&state=OPEN&search=clock')).json.data[0];
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${critical.id}/acknowledge`, {
+    headers: commandHeaders('shadow-critical-ack', critical.revision),
+    body: { assignee: 'platform.engineer', reason: '确认时钟漂移并安排校时' },
+  });
+  assert.equal(result.response.status, 200);
+  result = await request('POST', `/bpi/v1/data-quality/incidents/${critical.id}/resolve`, {
+    headers: commandHeaders('shadow-critical-resolve', result.json.data.revision),
+    body: { reason: '完成 NTP 校时并连续采集复核通过' },
+  });
+  assert.equal(result.response.status, 200);
+
+  result = await request('GET', `/bpi/v1/shadow-runs/${approvedRun.id}`);
+  approvedRun = result.json.data;
+  assert.equal(approvedRun.readyForApproval, true);
+  result = await request('POST', `/bpi/v1/shadow-runs/${approvedRun.id}/approve`, {
+    headers: commandHeaders('approve-flow-final', approvedRun.revision),
+    body: { reason: '独立管理员复核版本、样本、指标和数据质量后批准' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'APPROVED');
+  assert.equal(result.json.data.revision, 14);
+
+  let rejectedRun = await createRun('SHADOW-ACCEPT-REJECT');
+  rejectedRun = await startAndReviewAll(rejectedRun, 'reject-flow');
+  result = await request('POST', `/bpi/v1/shadow-runs/${rejectedRun.id}/complete`, {
+    headers: commandHeaders('reject-flow-complete', rejectedRun.revision),
+    body: { reason: '完成观察并提交独立评估' },
+  });
+  rejectedRun = result.json.data;
+  result = await request('POST', `/bpi/v1/shadow-runs/${rejectedRun.id}/reject`, {
+    headers: commandHeaders('reject-flow-final', rejectedRun.revision),
+    body: { reason: '独立管理员认为当前样本代表性不足，驳回本轮验收' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'REJECTED');
+
+  const cancelledRun = await createRun('SHADOW-ACCEPT-CANCEL');
+  result = await request('POST', `/bpi/v1/shadow-runs/${cancelledRun.id}/cancel`, {
+    headers: commandHeaders('cancel-flow-final', cancelledRun.revision),
+    body: { reason: '生产计划切换，取消尚未启动的验收任务' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.state, 'CANCELLED');
+
+  result = await request('GET', '/bpi/v1/shadow-runs?plantId=PLANT-01&state=APPROVED');
+  assert.equal(result.json.data.length, 1);
+  assert.equal(result.json.data[0].runCode, 'SHADOW-ACCEPT-APPROVE');
+});
