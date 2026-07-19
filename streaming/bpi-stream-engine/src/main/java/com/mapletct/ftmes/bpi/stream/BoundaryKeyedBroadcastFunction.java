@@ -181,6 +181,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
                     null,
                     null,
                     null,
+                    null,
                     context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(),
                     error.getMessage()));
             return;
@@ -202,6 +203,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
                         "RULE_VERSION_CONFLICT",
                         null,
                         update.ruleRef().key(),
+                        null,
                         null,
                         context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(),
                         "published rule versions are immutable; use a new version"));
@@ -250,6 +252,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
         BoundaryRuleDefinition rule = BoundaryRuleCodec.decode(encodedRule);
         BoundaryWindowResult evaluated = BoundaryWindowEvaluator.advanceEventTime(
                 rule, current.windowState(), Instant.ofEpochMilli(timestamp), 0);
+        emitSilenceIssues(context, current, rule, evaluated.state(), timestamp);
         if (evaluated.newlyEligible()) {
             output.collect(BoundaryCandidateProjector.project(
                     rule, current.context(), evaluated, Instant.ofEpochMilli(timestamp)).toByteArray());
@@ -451,7 +454,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
                     earliest = Math.min(earliest, ceilEpochMilli(matureAt));
                 }
             }
-            if (signal.status() == ConditionStatus.PENDING || signal.status() == ConditionStatus.TRUE) {
+            if (signal.status() != ConditionStatus.UNKNOWN) {
                 Instant staleThreshold = signal.lastEventTime().plus(condition.maxSilence());
                 long staleAt = Math.addExact(staleThreshold.toEpochMilli(), 1);
                 if (Instant.ofEpochMilli(staleAt).isAfter(now)) {
@@ -477,6 +480,7 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
                 input.keyedLocality(),
                 input.ruleRef().key(),
                 input.observation().eventId(),
+                null,
                 input.observation().eventTime().toEpochMilli(),
                 message));
     }
@@ -491,8 +495,36 @@ public final class BoundaryKeyedBroadcastFunction extends KeyedBroadcastProcessF
                 context.getCurrentKey(),
                 state.ruleRef().key(),
                 null,
+                null,
                 context.timestamp() == null ? Long.MIN_VALUE : context.timestamp(),
                 message));
+    }
+
+    private static void emitSilenceIssues(
+            OnTimerContext context,
+            BoundaryOperatorState current,
+            BoundaryRuleDefinition rule,
+            BoundaryWindowState updated,
+            long timestamp) {
+        for (EvidenceCondition condition : rule.conditions()) {
+            EvidenceSignalState before = current.windowState().signals().get(condition.signal());
+            EvidenceSignalState after = updated.signals().get(condition.signal());
+            if (before == null || after == null || before.status() == ConditionStatus.UNKNOWN
+                    || after.status() != ConditionStatus.UNKNOWN) {
+                continue;
+            }
+            String code = condition.classification().name() + "_SIGNAL_SILENCE";
+            context.output(ISSUES, new BoundaryProcessingIssue(
+                    code,
+                    context.getCurrentKey(),
+                    current.ruleRef().key(),
+                    before.lastEventId(),
+                    condition.signal(),
+                    timestamp,
+                    "signal " + condition.signal() + " exceeded maxSilence="
+                            + condition.maxSilence().toMillis() + " ms for "
+                            + condition.classification().name() + " evidence"));
+        }
     }
 
     private static boolean blank(String value) {

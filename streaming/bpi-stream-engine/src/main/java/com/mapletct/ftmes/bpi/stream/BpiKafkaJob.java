@@ -46,6 +46,14 @@ public final class BpiKafkaJob {
                 .assignTimestampsAndWatermarks(telemetryWatermarks(config))
                 .name("Telemetry event-time watermarks")
                 .uid("bpi-telemetry-watermarks-v1");
+        SingleOutputStreamOperator<byte[]> telemetryQuality = decodedTelemetry
+                .getSideOutput(TelemetryKafkaDecodeFunction.ACCEPTED_ENVELOPES)
+                .keyBy(TelemetryDataQualityFunction::sourceKey)
+                .process(new TelemetryDataQualityFunction(
+                        config.dataQualityMaxClockSkew(),
+                        config.dataQualitySequenceStateTtl()))
+                .name("Detect telemetry sequence, clock and point-quality incidents")
+                .uid("bpi-telemetry-data-quality-v1");
 
         SingleOutputStreamOperator<byte[]> pointCatalogs = environment
                 .fromSource(
@@ -181,7 +189,7 @@ public final class BpiKafkaJob {
                 .returns(byte[].class);
 
         decodeQuality
-                .union(joinQuality, routingQuality, evaluationQuality)
+                .union(telemetryQuality, joinQuality, routingQuality, evaluationQuality)
                 .sinkTo(BpiKafkaIO.dataQualitySink(config))
                 .name("Kafka exactly-once data-quality sink")
                 .uid("bpi-kafka-data-quality-sink-v1");

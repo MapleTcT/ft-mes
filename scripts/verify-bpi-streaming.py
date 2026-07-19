@@ -31,6 +31,10 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ContextualTelemetryPointCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJob.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaJobConfig.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryDataQualityFunction.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryDataQualityIssue.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetrySequenceStateCodec.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiDataQualityFlinkReplay.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplayConfig.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenario.java",
@@ -43,7 +47,10 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryReplayEngineTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceScenarioTest.java",
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiRuleApplicationFlinkKafkaAcceptanceTest.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/TelemetryDataQualityFunctionTest.java",
+    "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiDataQualityFlinkReplayTest.java",
     "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
+    "deploy/bpi-streaming/scripts/run-data-quality-flink-replay.sh",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
     "docs/testing/bpi-rule-publication-routing-acceptance.md",
@@ -160,6 +167,7 @@ def main() -> int:
         "bpi-rule-lifecycle-v1",
         "bpi-boundary-indexed-routing-v1",
         "bpi-kafka-point-catalog-source-v1",
+        "bpi-telemetry-data-quality-v1",
         "BoundaryRoutingControlCodec::pointCatalog",
         "PointCatalogKafkaDecodeFunction.ISSUES",
         "BpiKafkaIO.candidateSink",
@@ -172,6 +180,31 @@ def main() -> int:
     ):
         if marker not in job_source:
             failures.append(f"BpiKafkaJob is missing production topology marker {marker!r}")
+
+    detector_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/TelemetryDataQualityFunction.java").read_text(encoding="utf-8")
+    for marker in (
+        "SOURCE_SEQUENCE_GAP",
+        "SOURCE_SEQUENCE_DUPLICATE",
+        "SOURCE_SEQUENCE_CONFLICT",
+        "SOURCE_EPOCH_REGRESSION",
+        "CLOCK_DRIFT",
+        "POINT_QUALITY_",
+        "hasAuthoritativeSequence",
+        "StateTtlConfig",
+    ):
+        if marker not in detector_source:
+            failures.append(f"TelemetryDataQualityFunction is missing detector marker {marker!r}")
+
+    replay_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiDataQualityFlinkReplay.java").read_text(encoding="utf-8")
+    for marker in (
+        'ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed"',
+        "positionAtEnd",
+        "matching data-quality records are not exactly once",
+        "telemetry-data-quality",
+        "inactiveContext",
+    ):
+        if marker not in replay_source:
+            failures.append(f"BPI Flink data-quality replay is missing marker {marker!r}")
 
     replay_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BpiKafkaAcceptanceReplay.java").read_text(encoding="utf-8")
     for marker in (

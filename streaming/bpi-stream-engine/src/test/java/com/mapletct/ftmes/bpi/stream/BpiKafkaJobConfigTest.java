@@ -21,6 +21,8 @@ class BpiKafkaJobConfigTest {
         assertEquals("ft-mes-bpi-prod-a-candidate-", config.transactionalIdPrefix("candidate"));
         assertEquals(Duration.ofSeconds(30), config.checkpointInterval());
         assertEquals(Duration.ofDays(30), config.boundaryStateTtl());
+        assertEquals(Duration.ofMinutes(5), config.dataQualityMaxClockSkew());
+        assertEquals(Duration.ofDays(7), config.dataQualitySequenceStateTtl());
         assertEquals("iot.telemetry.selected.v1", config.telemetryTopic());
         assertEquals("iot.point-catalog.snapshot.v1", config.pointCatalogTopic());
         assertEquals(6_291_456, config.pointCatalogMaxMessageBytes());

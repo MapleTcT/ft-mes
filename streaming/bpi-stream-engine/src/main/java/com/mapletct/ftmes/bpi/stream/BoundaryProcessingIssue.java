@@ -5,6 +5,7 @@ public record BoundaryProcessingIssue(
         String keyedLocality,
         String ruleKey,
         String eventId,
+        String propertyId,
         long eventTimeMs,
         String message) {
 }

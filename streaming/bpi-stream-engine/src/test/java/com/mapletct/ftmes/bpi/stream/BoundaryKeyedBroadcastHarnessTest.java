@@ -170,6 +170,41 @@ class BoundaryKeyedBroadcastHarnessTest {
     }
 
     @Test
+    void maxSilenceTimerEmitsOneClassifiedSignalIncident() throws Exception {
+        BoundaryRuleDefinition silenceRule = new BoundaryRuleDefinition(
+                "START-SILENCE", "1", BoundaryKind.START, 1, 1.0, 0,
+                List.of(
+                        new EvidenceCondition(
+                                "feed.flow", ConditionOperator.GREATER_THAN, new BigDecimal("5"),
+                                Duration.ZERO, Duration.ofSeconds(30), EvidenceClass.REQUIRED, 50),
+                        new EvidenceCondition(
+                                "feed.pump", ConditionOperator.EQUALS_TRUE, null,
+                                Duration.ZERO, Duration.ofSeconds(30), EvidenceClass.QUORUM, 50)));
+        try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
+                     harness = harness()) {
+            harness.open();
+            harness.processBroadcastElement(update(silenceRule), T0.toEpochMilli());
+            harness.processElement(
+                    input(silenceRule, SignalObservation.numeric(
+                            "FLOW-SILENCE", "feed.flow", new BigDecimal("3"),
+                            SignalQuality.GOOD, T0)),
+                    T0.toEpochMilli());
+
+            harness.watermark(T0.plusSeconds(31).toEpochMilli());
+            harness.watermark(T0.plusSeconds(60).toEpochMilli());
+
+            ConcurrentLinkedQueue<StreamRecord<BoundaryProcessingIssue>> issues =
+                    harness.getSideOutput(BoundaryKeyedBroadcastFunction.ISSUES);
+            assertEquals(1, issues.size());
+            BoundaryProcessingIssue issue = issues.peek().getValue();
+            assertEquals("REQUIRED_SIGNAL_SILENCE", issue.code());
+            assertEquals("feed.flow", issue.propertyId());
+            assertEquals("FLOW-SILENCE", issue.eventId());
+            assertTrue(candidates(harness.getOutput()).isEmpty());
+        }
+    }
+
+    @Test
     void sameRuleVersionCannotBeOverwrittenWithDifferentSemantics() throws Exception {
         try (KeyedBroadcastOperatorTestHarness<String, BoundaryStreamInput, byte[], byte[]>
                      harness = harness()) {

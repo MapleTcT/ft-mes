@@ -51,6 +51,11 @@ class KafkaDecodeFunctionsHarnessTest {
             TelemetryPointEvent accepted = TelemetryPointEventCodec.decode(output.get(0));
             assertEquals(envelope, accepted.envelope());
             assertEquals(0, accepted.pointIndex());
+            assertEquals(
+                    envelope,
+                    TelemetryEnvelopeV1.parseFrom(
+                            harness.getSideOutput(TelemetryKafkaDecodeFunction.ACCEPTED_ENVELOPES)
+                                    .peek().getValue()));
 
             KafkaDecodeIssue issue = onlyIssue(harness, TelemetryKafkaDecodeFunction.ISSUES);
             assertIssue(issue, "TELEMETRY_POINT_REJECTED", "telemetry.v1", 2, 31L, "EVENT-1");

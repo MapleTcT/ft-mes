@@ -32,6 +32,7 @@ class DataQualityKafkaSerializationSchemaTest {
         assertEquals("PLANT-01", event.getPlantId());
         assertEquals("LINE-01", event.getLineId());
         assertEquals("CONTEXT_WAIT_EXPIRED", event.getIssueCode());
+        assertEquals("DQ-120b34e6198417e17db8935c78120acb", event.getEventId());
         assertEquals(
                 "TENANT-A|LINE-01|TEL-1|flow|CONTEXT_WAIT_EXPIRED",
                 new String(record.key(), StandardCharsets.UTF_8));

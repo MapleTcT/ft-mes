@@ -52,6 +52,7 @@ checkpoint，不替代下面的三 broker、MinIO 和目标环境验收。
 make up-bpi-stream
 make bpi-stream-cluster-smoke
 make bpi-stream-cluster-replay
+make bpi-stream-data-quality-replay
 make bpi-stream-postgres-replay
 make down-bpi-stream
 ```
@@ -75,6 +76,14 @@ broker、topic 和部署检查，不能只放宽单侧限制。
 数据质量错误；遥测默认间隔 2 秒以覆盖真实调度，随后发布同版本 `INACTIVE` 规则移除测试路由。输入和输出 partition/offset、
 candidate key、Flink job ID 和 checkpoint ID 写入
 `${BPI_REPLAY_EVIDENCE_DIR}/bpi-kafka-replay.json`。
+
+`bpi-stream-data-quality-replay` 不直接写 `bpi.data-quality.v1`。它只向 production-context 和
+selected telemetry topic 写入唯一 marker，要求运行中的 Flink 状态算子通过 checkpoint 后恰好产生
+`SOURCE_SEQUENCE_GAP`、`CLOCK_DRIFT`、`POINT_QUALITY_BAD` 和
+`SOURCE_SEQUENCE_DUPLICATE` 四条 committed 事件，并验证事件头中的 producer stage 为
+`telemetry-data-quality`。报告默认写入
+`${BPI_REPLAY_EVIDENCE_DIR}/bpi-data-quality-flink-replay.json`；该证据用于证明自动检测链，不能替代
+BPI consumer、PostgreSQL 和真实页面的联合验收。
 
 `bpi-stream-postgres-replay` 在上述回放外再要求运行中的 BPI 服务已显式启用 candidate consumer，
 并且仅允许测试租户/工厂：

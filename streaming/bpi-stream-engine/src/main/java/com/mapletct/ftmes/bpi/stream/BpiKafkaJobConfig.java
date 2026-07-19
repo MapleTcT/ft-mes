@@ -27,6 +27,8 @@ public record BpiKafkaJobConfig(
         Duration contextRetention,
         Duration watermarkDelay,
         Duration sourceIdleness,
+        Duration dataQualityMaxClockSkew,
+        Duration dataQualitySequenceStateTtl,
         Duration boundaryStateTtl,
         Duration transactionTimeout,
         int pointCatalogMaxMessageBytes,
@@ -59,6 +61,8 @@ public record BpiKafkaJobConfig(
         positive(contextRetention, "contextRetention");
         nonNegative(watermarkDelay, "watermarkDelay");
         positive(sourceIdleness, "sourceIdleness");
+        nonNegative(dataQualityMaxClockSkew, "dataQualityMaxClockSkew");
+        positive(dataQualitySequenceStateTtl, "dataQualitySequenceStateTtl");
         positive(boundaryStateTtl, "boundaryStateTtl");
         positive(transactionTimeout, "transactionTimeout");
         if (pointCatalogMaxMessageBytes < 1_048_576 || pointCatalogMaxMessageBytes > 8 * 1024 * 1024) {
@@ -105,6 +109,8 @@ public record BpiKafkaJobConfig(
                 millis(values, "context-retention-ms", 86_400_000),
                 millis(values, "watermark-delay-ms", 30_000),
                 millis(values, "source-idleness-ms", 60_000),
+                millis(values, "data-quality-max-clock-skew-ms", 300_000),
+                millis(values, "data-quality-sequence-state-ttl-ms", 604_800_000),
                 millis(values, "boundary-state-ttl-ms", 2_592_000_000L),
                 millis(values, "transaction-timeout-ms", 900_000),
                 integer(values, "point-catalog-max-message-bytes", 6_291_456),
@@ -141,6 +147,8 @@ public record BpiKafkaJobConfig(
         copy(environment, result, "BPI_CONTEXT_RETENTION_MS", "context-retention-ms");
         copy(environment, result, "BPI_WATERMARK_DELAY_MS", "watermark-delay-ms");
         copy(environment, result, "BPI_SOURCE_IDLENESS_MS", "source-idleness-ms");
+        copy(environment, result, "BPI_DATA_QUALITY_MAX_CLOCK_SKEW_MS", "data-quality-max-clock-skew-ms");
+        copy(environment, result, "BPI_DATA_QUALITY_SEQUENCE_STATE_TTL_MS", "data-quality-sequence-state-ttl-ms");
         copy(environment, result, "BPI_BOUNDARY_STATE_TTL_MS", "boundary-state-ttl-ms");
         copy(environment, result, "BPI_TRANSACTION_TIMEOUT_MS", "transaction-timeout-ms");
         copy(environment, result, "BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "point-catalog-max-message-bytes");

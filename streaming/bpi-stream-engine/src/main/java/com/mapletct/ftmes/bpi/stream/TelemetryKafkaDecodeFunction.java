@@ -15,6 +15,9 @@ public final class TelemetryKafkaDecodeFunction extends ProcessFunction<byte[], 
     public static final OutputTag<KafkaDecodeIssue> ISSUES =
             new OutputTag<>("bpi-telemetry-kafka-decode-issues") {
             };
+    public static final OutputTag<byte[]> ACCEPTED_ENVELOPES =
+            new OutputTag<>("bpi-telemetry-accepted-envelopes") {
+            };
 
     @Override
     public void processElement(byte[] bytes, Context context, Collector<byte[]> output) {
@@ -43,6 +46,7 @@ public final class TelemetryKafkaDecodeFunction extends ProcessFunction<byte[], 
                     violations(validation.getEnvelopeViolations()));
             return;
         }
+        context.output(ACCEPTED_ENVELOPES, record.value());
         for (PointRejection rejection : validation.getPointRejections()) {
             issue(context, record, "TELEMETRY_POINT_REJECTED", envelope.getEventId(),
                     "point[" + rejection.getPointIndex() + "]: " + violations(rejection.getViolations()));
