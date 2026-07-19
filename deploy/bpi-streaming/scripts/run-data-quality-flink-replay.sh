@@ -31,6 +31,7 @@ MARKER=${BPI_DQ_REPLAY_MARKER:-ADP_E2E_DQ_FLINK_$(date -u +%Y%m%d_%H%M%S)_$$}
 TENANT_ID=${BPI_DQ_REPLAY_TENANT_ID:-TENANT-E2E}
 PLANT_ID=${BPI_DQ_REPLAY_PLANT_ID:-PLANT-E2E}
 LINE_ID=${BPI_DQ_REPLAY_LINE_ID:-LINE-$MARKER}
+REPLAY_JOB_JAR=${BPI_DQ_REPLAY_JOB_JAR:-$BPI_JOB_JAR}
 EVIDENCE_DIR=${BPI_REPLAY_EVIDENCE_DIR:-/tmp/bpi-streaming-evidence}
 CONTAINER_REPORT=${BPI_DQ_REPLAY_REPORT:-/evidence/bpi-data-quality-flink-replay.json}
 for scope_value in "$TENANT_ID" "$PLANT_ID" "$LINE_ID"; do
@@ -38,6 +39,14 @@ for scope_value in "$TENANT_ID" "$PLANT_ID" "$LINE_ID"; do
         ""|"*") printf 'ERROR: data-quality replay scope must be explicit and cannot use *\n' >&2; exit 1 ;;
     esac
 done
+case $REPLAY_JOB_JAR in
+    /*) ;;
+    *) printf 'ERROR: BPI_DQ_REPLAY_JOB_JAR must be absolute\n' >&2; exit 1 ;;
+esac
+if [ ! -f "$REPLAY_JOB_JAR" ]; then
+    printf 'ERROR: data-quality replay JAR not found: %s\n' "$REPLAY_JOB_JAR" >&2
+    exit 1
+fi
 case $EVIDENCE_DIR in
     /*) ;;
     *) printf 'ERROR: BPI_REPLAY_EVIDENCE_DIR must be absolute\n' >&2; exit 1 ;;
@@ -62,7 +71,8 @@ trap 'rm -f "$SMOKE_BEFORE" "$SMOKE_AFTER"' EXIT HUP INT TERM
 
 BPI_SMOKE_REPORT=$SMOKE_BEFORE sh "$SCRIPT_DIR/smoke-cluster.sh" "$ENV_FILE"
 
-docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" \
+env BPI_JOB_JAR="$REPLAY_JOB_JAR" \
+    docker compose --env-file "$ENV_FILE" -f "$DEPLOY_DIR/docker-compose.yml" \
     --profile acceptance run --rm -T --no-deps \
     --entrypoint java \
     -e "BPI_DQ_REPLAY_MARKER=$MARKER" \
@@ -81,8 +91,9 @@ fi
 
 BPI_SMOKE_REPORT=$SMOKE_AFTER sh "$SCRIPT_DIR/smoke-cluster.sh" "$ENV_FILE"
 
+REPLAY_JOB_JAR_SHA256=$(sha256sum "$REPLAY_JOB_JAR" | awk '{print $1}')
 python3 - "$HOST_REPORT" "$SMOKE_BEFORE" "$SMOKE_AFTER" \
-    "$TENANT_ID" "$PLANT_ID" "$LINE_ID" <<'PY'
+    "$TENANT_ID" "$PLANT_ID" "$LINE_ID" "$REPLAY_JOB_JAR" "$REPLAY_JOB_JAR_SHA256" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -95,6 +106,8 @@ expected_scope = {
     "plantId": sys.argv[5],
     "lineId": sys.argv[6],
 }
+replay_job_jar = sys.argv[7]
+replay_job_jar_sha256 = sys.argv[8]
 replay = json.loads(replay_path.read_text(encoding="utf-8"))
 smoke_before = json.loads(smoke_before_path.read_text(encoding="utf-8"))
 smoke_after = json.loads(smoke_after_path.read_text(encoding="utf-8"))
@@ -121,6 +134,11 @@ replay["clusterSmoke"] = {
     "taskManagers": after_flink["taskManagers"],
     "jobIdUnchangedDuringReplay": True,
     "checkpointBeforeReplay": before_flink["latestCompletedCheckpointId"],
+}
+replay["replayJob"] = {
+    "jar": replay_job_jar,
+    "sha256": replay_job_jar_sha256,
+    "isolatedFromRuntimeComposeEnv": True,
 }
 replay_path.write_text(json.dumps(replay, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"BPI Flink data-quality replay evidence: {replay_path}")

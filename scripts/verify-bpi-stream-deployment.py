@@ -332,6 +332,8 @@ def main() -> int:
         "BPI_DQ_REPLAY_TENANT_ID",
         "BPI_DQ_REPLAY_PLANT_ID",
         "BPI_DQ_REPLAY_LINE_ID",
+        "BPI_DQ_REPLAY_JOB_JAR",
+        'env BPI_JOB_JAR="$REPLAY_JOB_JAR"',
         "replay.get(\"scope\") != expected_scope",
         "jobIdUnchangedDuringReplay",
         "checkpoint ID regressed",
