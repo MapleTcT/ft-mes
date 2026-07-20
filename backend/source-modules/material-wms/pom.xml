@@ -61,6 +61,7 @@
                 <directory>${project.basedir}/../../../deploy/docker/postgres/init</directory>
                 <includes>
                     <include>174-material-wms-completion-inbound.sql</include>
+                    <include>192-material-wms-bpi-idempotency.sql</include>
                 </includes>
             </testResource>
         </testResources>

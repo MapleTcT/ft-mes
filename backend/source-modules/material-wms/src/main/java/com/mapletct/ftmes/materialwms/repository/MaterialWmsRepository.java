@@ -31,12 +31,27 @@ public class MaterialWmsRepository {
     }
 
     public Map<String, Object> findDocumentBySource(
-            String tenantId, DocumentType type, String sourceDocumentId, String warehouseCode) {
+            String tenantId,
+            DocumentType type,
+            String sourceSystem,
+            String sourceDocumentId,
+            String warehouseCode) {
         List<Map<String, Object>> rows = jdbc.queryForList(
             "SELECT * FROM wms_stock_documents "
-                + "WHERE tenant_id = ? AND document_type = ? AND source_system = 'WOM' "
+                + "WHERE tenant_id = ? AND document_type = ? AND source_system = ? "
                 + "AND source_document_id = ? AND warehouse_code = ?",
-            tenantId, type.name(), sourceDocumentId, warehouseCode
+            tenantId, type.name(), sourceSystem, sourceDocumentId, warehouseCode
+        );
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    public Map<String, Object> findDocumentByIdempotency(
+            String tenantId, DocumentType type, String sourceSystem, String idempotencyKey) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+            "SELECT * FROM wms_stock_documents "
+                + "WHERE tenant_id = ? AND document_type = ? AND source_system = ? "
+                + "AND idempotency_key = ?",
+            tenantId, type.name(), sourceSystem, idempotencyKey
         );
         return rows.isEmpty() ? null : rows.get(0);
     }
@@ -52,22 +67,25 @@ public class MaterialWmsRepository {
     public boolean insertDocumentIfAbsent(
             String tenantId,
             DocumentType type,
+            String sourceSystem,
+            String idempotencyKey,
             String documentNo,
             StockDocumentRequest request,
             LocalDate storageDate,
             String requestPayload) {
         String baseSql = "INSERT INTO wms_stock_documents ("
             + "tenant_id, document_no, document_type, source_system, source_document_id, "
-            + "source_document_no, directive_no, company_code, department_code, staff_code, "
+            + "idempotency_key, source_document_no, directive_no, company_code, department_code, staff_code, "
             + "user_name, warehouse_code, storage_date, status, quality_status, memo, request_payload"
-            + ") VALUES (?, ?, ?, 'WOM', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'POSTED', 'PENDING', ?, ?)";
+            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'POSTED', 'PENDING', ?, ?)";
         Object[] args = {
-            tenantId, documentNo, type.name(), request.getSourceDocumentId(), request.getSrcTableNo(),
+            tenantId, documentNo, type.name(), sourceSystem, request.getSourceDocumentId(), idempotencyKey,
+            request.getSrcTableNo(),
             request.getDirectiveNo(), request.getCompanyCode(), request.getDeptCode(), request.getStaffCode(),
             request.getUserName(), request.getWareCode(), Date.valueOf(storageDate), request.getMemo(), requestPayload
         };
         if (isPostgres()) {
-            return jdbc.update(baseSql + " ON CONFLICT (tenant_id, document_type, source_system, source_document_id, warehouse_code) DO NOTHING", args) == 1;
+            return jdbc.update(baseSql + " ON CONFLICT DO NOTHING", args) == 1;
         }
         try {
             jdbc.update(baseSql, args);
@@ -81,6 +99,7 @@ public class MaterialWmsRepository {
             long documentId,
             String tenantId,
             DocumentType type,
+            String sourceSystem,
             int lineNo,
             String sourceLineId,
             String warehouseCode,
@@ -90,19 +109,20 @@ public class MaterialWmsRepository {
             BigDecimal badQuantity,
             LocalDate productionDate) {
         String sql = "INSERT INTO wms_stock_document_lines ("
-            + "document_id, tenant_id, document_type, line_no, source_line_id, material_code, "
+            + "document_id, tenant_id, document_type, source_system, line_no, source_line_id, material_code, "
             + "batch_no, production_batch_no, warehouse_code, location_code, quantity, "
-            + "reported_quantity, good_quantity, bad_quantity, production_date, quality_status, memo"
-            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "unit_code, reported_quantity, good_quantity, bad_quantity, production_date, quality_status, memo"
+            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Object[] args = {
-            documentId, tenantId, type.name(), lineNo, sourceLineId, line.getGoodCode(),
+            documentId, tenantId, type.name(), sourceSystem, lineNo, sourceLineId, line.getGoodCode(),
             normalizeDimension(line.getBatchText()), normalizeDimension(line.getProductionBatchNo()),
             warehouseCode, normalizeDimension(line.getPlaceSetCode()), line.getQuantity(),
+            normalizeDimension(line.getUnitCode()),
             line.getQuantity(), goodQuantity, badQuantity,
             productionDate == null ? null : Date.valueOf(productionDate), qualityStatus.name(), line.getMemo()
         };
         if (isPostgres()) {
-            return jdbc.update(sql + " ON CONFLICT (tenant_id, document_type, source_line_id) DO NOTHING", args) == 1;
+            return jdbc.update(sql + " ON CONFLICT DO NOTHING", args) == 1;
         }
         try {
             jdbc.update(sql, args);
@@ -113,11 +133,11 @@ public class MaterialWmsRepository {
     }
 
     public Map<String, Object> findLineBySource(
-            String tenantId, DocumentType type, String sourceLineId) {
+            String tenantId, DocumentType type, String sourceSystem, String sourceLineId) {
         List<Map<String, Object>> rows = jdbc.queryForList(
             "SELECT * FROM wms_stock_document_lines "
-                + "WHERE tenant_id = ? AND document_type = ? AND source_line_id = ?",
-            tenantId, type.name(), sourceLineId
+                + "WHERE tenant_id = ? AND document_type = ? AND source_system = ? AND source_line_id = ?",
+            tenantId, type.name(), sourceSystem, sourceLineId
         );
         return rows.isEmpty() ? null : rows.get(0);
     }
@@ -309,6 +329,7 @@ public class MaterialWmsRepository {
             String tenantId,
             String eventKey,
             String transactionType,
+            String sourceSystem,
             long documentId,
             long lineId,
             String sourceDocumentId,
@@ -318,19 +339,21 @@ public class MaterialWmsRepository {
             String materialCode,
             String batchNo,
             String productionBatchNo,
+            String unitCode,
             BigDecimal onHandDelta,
             BigDecimal availableDelta,
             BigDecimal holdDelta,
             Map<String, Object> balance) {
         String sql = "INSERT INTO wms_inventory_transactions ("
-            + "tenant_id, event_key, transaction_type, document_id, line_id, source_document_id, source_line_id, "
+            + "tenant_id, event_key, transaction_type, source_system, document_id, line_id, source_document_id, source_line_id, "
             + "warehouse_code, location_code, material_code, batch_no, production_batch_no, "
-            + "on_hand_delta, available_delta, hold_delta, balance_on_hand, balance_available, balance_hold"
-            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "unit_code, on_hand_delta, available_delta, hold_delta, balance_on_hand, balance_available, balance_hold"
+            + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Object[] args = {
-            tenantId, eventKey, transactionType, documentId, lineId, sourceDocumentId, sourceLineId,
+            tenantId, eventKey, transactionType, sourceSystem, documentId, lineId, sourceDocumentId, sourceLineId,
             warehouseCode, normalizeDimension(locationCode), materialCode, normalizeDimension(batchNo),
-            normalizeDimension(productionBatchNo), onHandDelta, availableDelta, holdDelta,
+            normalizeDimension(productionBatchNo), normalizeDimension(unitCode),
+            onHandDelta, availableDelta, holdDelta,
             balance.get("on_hand_quantity"), balance.get("available_quantity"), balance.get("hold_quantity")
         };
         if (isPostgres()) {
@@ -394,7 +417,7 @@ public class MaterialWmsRepository {
             "SELECT l.*, d.source_document_id FROM wms_stock_document_lines l "
                 + "JOIN wms_stock_documents d ON d.id = l.document_id "
                 + "WHERE l.tenant_id = ? AND l.document_type = 'COMPLETION_INBOUND' "
-                + "AND l.source_line_id = ? FOR UPDATE",
+                + "AND l.source_system = 'WOM' AND l.source_line_id = ? FOR UPDATE",
             tenantId, sourceLineId
         );
     }
@@ -453,7 +476,7 @@ public class MaterialWmsRepository {
             String tenantId, String keyword, int page, int size) {
         String pattern = "%" + (keyword == null ? "" : keyword.trim().toLowerCase()) + "%";
         return jdbc.queryForList(
-            "SELECT id, document_no, source_document_no, directive_no, company_code, warehouse_code, "
+            "SELECT id, document_no, source_system, source_document_no, directive_no, company_code, warehouse_code, "
                 + "storage_date, quality_status, status, user_name, created_at "
                 + "FROM wms_stock_documents WHERE tenant_id = ? AND document_type = 'COMPLETION_INBOUND' "
                 + "AND (LOWER(document_no) LIKE ? OR LOWER(COALESCE(source_document_no, '')) LIKE ? "

@@ -66,6 +66,18 @@ create_topic "${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}" "$DATA_PARTITIONS"
 create_topic "${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}" "$DATA_PARTITIONS" \
     --config retention.ms=2592000000
 create_topic "${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}" "$DATA_PARTITIONS"
+create_topic "${BPI_QCS_TOPIC:-qcs.batch.quality-gate.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_QCS_DLQ_TOPIC:-qcs.batch.quality-gate.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
+create_topic "${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
 
 # kafka-topics --if-not-exists does not reconcile configuration on existing topics.
 alter_topic_config \

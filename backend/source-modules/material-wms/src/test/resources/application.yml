@@ -5,7 +5,7 @@ spring:
     password:
     driver-class-name: org.h2.Driver
     initialization-mode: always
-    schema: classpath:174-material-wms-completion-inbound.sql,classpath:191-material-wms-quality-allocation-h2.sql
+    schema: classpath:174-material-wms-completion-inbound.sql,classpath:191-material-wms-quality-allocation-h2.sql,classpath:192-material-wms-bpi-idempotency.sql
   cloud:
     nacos:
       discovery:
@@ -18,3 +18,7 @@ management:
   health:
     defaults:
       enabled: false
+
+material:
+  wms:
+    bpi-api-key: test-bpi-key

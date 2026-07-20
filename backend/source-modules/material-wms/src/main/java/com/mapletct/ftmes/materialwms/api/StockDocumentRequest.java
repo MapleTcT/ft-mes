@@ -11,6 +11,8 @@ public class StockDocumentRequest {
 
     @JsonAlias({"srcID", "srcId"})
     private String sourceDocumentId;
+    private String sourceSystem;
+    private String idempotencyKey;
     private String srcTableNo;
     private String directiveNo;
     private String companyCode;
@@ -31,6 +33,22 @@ public class StockDocumentRequest {
 
     public void setSourceDocumentId(String sourceDocumentId) {
         this.sourceDocumentId = sourceDocumentId;
+    }
+
+    public String getSourceSystem() {
+        return sourceSystem;
+    }
+
+    public void setSourceSystem(String sourceSystem) {
+        this.sourceSystem = sourceSystem;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
     public String getSrcTableNo() {

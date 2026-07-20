@@ -156,7 +156,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -170,6 +170,8 @@ help:
 	@printf '%s\n' '  make bpi-service-static-check Validate BPI Java 17/PostgreSQL service boundaries'
 	@printf '%s\n' '  make bpi-service-test      Run BPI service tests (Java 17; live PG test needs BPI_TEST_DATABASE_URL)'
 	@printf '%s\n' '  make bpi-service-package   Build the executable BPI service JAR with Java 17'
+	@printf '%s\n' '  make bpi-wms-adapter-test  Test query-first BPI to material-wms delivery with Java 17'
+	@printf '%s\n' '  make bpi-wms-adapter-package Build the executable BPI WMS adapter JAR'
 	@printf '%s\n' '  make bpi-stream-static-check Validate the Java 17/Flink streaming module boundaries'
 	@printf '%s\n' '  make bpi-stream-test       Run deterministic BPI stream replay tests with Java 17'
 	@printf '%s\n' '  make bpi-stream-package    Build the deployable BPI Flink job JAR with Java 17'
@@ -691,6 +693,12 @@ bpi-service-test:
 bpi-service-package:
 	$(MVN) -f services/bpi-service/pom.xml -DskipTests package
 
+bpi-wms-adapter-test:
+	$(MVN) -f services/bpi-service/pom.xml -pl wms-adapter -am test
+
+bpi-wms-adapter-package:
+	$(MVN) -f services/bpi-service/pom.xml -pl wms-adapter -am -DskipTests package
+
 bpi-stream-static-check:
 	$(PYTHON) scripts/verify-bpi-streaming.py
 
@@ -813,7 +821,7 @@ bpi-shell-menu-gate-acceptance-check:
 	$(PYTHON) scripts/verify-bpi-shell-menu-gate.py
 
 up-bpi: bpi-ui-build
-	$(COMPOSE) --profile bpi up -d --build bpi-service bpi-adapter nginx
+	$(COMPOSE) --profile bpi up -d --build bpi-service bpi-adapter bpi-wms-adapter nginx
 
 source-module-check:
 	$(PYTHON) scripts/verify-source-modules.py

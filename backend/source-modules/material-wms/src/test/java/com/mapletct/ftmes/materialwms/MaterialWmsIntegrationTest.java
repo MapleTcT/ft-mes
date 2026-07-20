@@ -254,6 +254,77 @@ public class MaterialWmsIntegrationTest {
             .andExpect(content().string(containsString("/wms/completion-inbounds")));
     }
 
+    @Test
+    public void bpiCompletionInboundCanBeQueriedExactlyBeforeRetry() throws Exception {
+        String idempotencyKey = "WMS_COMPLETION_INBOUND|COMP|BATCH-1|GATE-1|1";
+        String commandEventId = "2ea229c2-f2bb-5da8-b84c-5b4bd00148ce";
+        String inbound = bpiInboundJson(commandEventId, idempotencyKey, "10");
+
+        mockMvc.perform(get("/material/wms/completion-inbounds/by-idempotency")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .param("sourceSystem", "BPI")
+                .param("idempotencyKey", idempotencyKey))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(404));
+
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON).content(inbound))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.idempotent").value(false));
+
+        mockMvc.perform(get("/material/wms/completion-inbounds/by-idempotency")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .param("sourceSystem", "BPI")
+                .param("idempotencyKey", idempotencyKey))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.document.source_system").value("BPI"))
+            .andExpect(jsonPath("$.data.document.source_document_id").value(commandEventId))
+            .andExpect(jsonPath("$.data.document.idempotency_key").value(idempotencyKey))
+            .andExpect(jsonPath("$.data.lines[0].source_system").value("BPI"))
+            .andExpect(jsonPath("$.data.lines[0].unit_code").value("kg"))
+            .andExpect(jsonPath("$.data.lines[0].quality_status").value("QUALIFIED"));
+
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON).content(inbound))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(200))
+            .andExpect(jsonPath("$.data.idempotent").value(true));
+
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .header("X-BPI-WMS-Key", "test-bpi-key")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiInboundJson(
+                    "53b38104-0f6a-59bf-a05b-5057ce399e30", idempotencyKey, "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(409));
+
+        assertEquals(1L, count("wms_stock_documents"));
+        assertEquals(1L, count("wms_stock_document_lines"));
+        assertEquals(1L, count("wms_inventory_transactions"));
+        assertStock("10.000000", "10.000000", "0.000000");
+    }
+
+    @Test
+    public void bpiCompletionInboundFailsClosedWithoutIntegrationKey() throws Exception {
+        mockMvc.perform(post("/material/produceInSingles/produceInSingl/generateProductInSingle")
+                .header("X-Tenant-Id", "COMP")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(bpiInboundJson(
+                    "2ea229c2-f2bb-5da8-b84c-5b4bd00148ce", "BPI-IDEMPOTENCY", "10")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(403));
+        assertEquals(0L, count("wms_stock_documents"));
+    }
+
     private String inboundJson(String sourceId, String sourceLineId, String quantity) {
         return "{"
             + "\"srcID\":\"" + sourceId + "\",\"srcTableNo\":\"IN-1\",\"directiveNo\":\"MO-1\","
@@ -261,6 +332,18 @@ public class MaterialWmsIntegrationTest {
             + "\"comeType\":\"produceIn\",\"redBlue\":\"blue\",\"detailList\":[{"
             + "\"srcPartId\":\"" + sourceLineId + "\",\"goodCode\":\"MAT\",\"batchText\":\"BATCH\","
             + "\"produceBatchNum\":\"PB\",\"placeSetCode\":\"LOC\",\"quantity\":" + quantity + "}]}";
+    }
+
+    private String bpiInboundJson(String commandEventId, String idempotencyKey, String quantity) {
+        return "{"
+            + "\"sourceSystem\":\"BPI\",\"idempotencyKey\":\"" + idempotencyKey + "\","
+            + "\"srcID\":\"" + commandEventId + "\",\"srcTableNo\":\"BATCH-1\","
+            + "\"directiveNo\":\"MO-1\",\"companyCode\":\"COMP\",\"wareCode\":\"WARE\","
+            + "\"storageDate\":\"2026-07-20\",\"comeType\":\"produceIn\",\"redBlue\":\"blue\","
+            + "\"detailList\":[{\"srcPartId\":\"" + commandEventId + ":1\","
+            + "\"goodCode\":\"MAT\",\"batchText\":\"BATCH-1\",\"produceBatchNum\":\"BATCH-1\","
+            + "\"placeSetCode\":\"LOC\",\"quantity\":" + quantity + ",\"unitCode\":\"kg\","
+            + "\"checkResult\":\"BaseSet_checkResult/qualified\"}]}";
     }
 
     private String allocationJson(

@@ -15,6 +15,14 @@ NS = {"m": "http://maven.apache.org/POM/4.0.0"}
 REQUIRED_FILES = [
     "services/bpi-service/pom.xml",
     "services/bpi-service/Dockerfile",
+    "services/bpi-service/wms-adapter/pom.xml",
+    "services/bpi-service/wms-adapter/Dockerfile",
+    "services/bpi-service/wms-adapter/Dockerfile.runtime",
+    "services/bpi-service/wms-adapter/src/main/resources/application.yml",
+    "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessor.java",
+    "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClient.java",
+    "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
+    "deploy/docker/postgres/init/192-material-wms-bpi-idempotency.sql",
     "services/bpi-service/app/pom.xml",
     "services/bpi-service/app/src/main/resources/application.yml",
     "services/bpi-service/app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",
@@ -201,8 +209,29 @@ def main() -> int:
         fail(f"BPI Java version must remain 17, found {java_version!r}", failures)
     if boot_version != "3.4.7":
         fail(f"BPI Spring Boot baseline must remain 3.4.7, found {boot_version!r}", failures)
-    if modules != {"../../contracts/bpi-events", "batch-rule-runtime", "app"}:
+    if modules != {"../../contracts/bpi-events", "batch-rule-runtime", "app", "wms-adapter"}:
         fail(f"unexpected BPI reactor modules: {sorted(modules)}", failures)
+
+    require_text(
+        SERVICE / "wms-adapter/src/main/resources/application.yml",
+        [
+            "BPI_WMS_ADAPTER_ENABLED:false",
+            "BPI_WMS_ADAPTER_MATERIAL_API_KEY:_DISABLED_",
+            "BPI_WMS_ADAPTER_ROUTES:_DENY_ALL_",
+            "bpi.wms.completion-inbound-command.dlq.v1",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessor.java",
+        [
+            "findByIdempotency",
+            "createCompletionInbound",
+            "WMS_IDEMPOTENCY_CONFLICT",
+            "material-wms acknowledged creation but exact lookup did not find the document",
+        ],
+        failures,
+    )
 
     require_text(
         SERVICE / "app/src/main/resources/db/migration/V1__bpi_phase1_baseline.sql",

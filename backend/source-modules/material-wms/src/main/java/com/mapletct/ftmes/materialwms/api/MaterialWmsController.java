@@ -1,6 +1,7 @@
 package com.mapletct.ftmes.materialwms.api;
 
 import com.mapletct.ftmes.materialwms.service.MaterialInventoryService;
+import com.mapletct.ftmes.materialwms.support.BpiIntegrationKeyVerifier;
 import com.mapletct.ftmes.materialwms.support.TenantResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,12 +24,15 @@ public class MaterialWmsController {
 
     private final MaterialInventoryService inventoryService;
     private final TenantResolver tenantResolver;
+    private final BpiIntegrationKeyVerifier bpiIntegrationKeyVerifier;
 
     public MaterialWmsController(
             MaterialInventoryService inventoryService,
-            TenantResolver tenantResolver) {
+            TenantResolver tenantResolver,
+            BpiIntegrationKeyVerifier bpiIntegrationKeyVerifier) {
         this.inventoryService = inventoryService;
         this.tenantResolver = tenantResolver;
+        this.bpiIntegrationKeyVerifier = bpiIntegrationKeyVerifier;
     }
 
     @PostMapping({
@@ -36,7 +41,9 @@ public class MaterialWmsController {
     })
     public LegacyResult<Map<String, Object>> createCompletionInbound(
             HttpServletRequest servletRequest,
+            @RequestHeader(value = "X-BPI-WMS-Key", required = false) String bpiApiKey,
             @RequestBody StockDocumentRequest request) {
+        bpiIntegrationKeyVerifier.verifyIfBpi(request.getSourceSystem(), bpiApiKey);
         return LegacyResult.success(inventoryService.createCompletionInbound(
             tenantResolver.resolve(servletRequest, request.getCompanyCode()), request).toMap());
     }
@@ -98,5 +105,16 @@ public class MaterialWmsController {
             @PathVariable("documentId") long documentId) {
         return LegacyResult.success(inventoryService.completionInboundDetail(
             tenantResolver.resolve(servletRequest, null), documentId));
+    }
+
+    @GetMapping("/material/wms/completion-inbounds/by-idempotency")
+    public LegacyResult<Map<String, Object>> completionInboundByIdempotency(
+            HttpServletRequest servletRequest,
+            @RequestHeader(value = "X-BPI-WMS-Key", required = false) String bpiApiKey,
+            @RequestParam("sourceSystem") String sourceSystem,
+            @RequestParam("idempotencyKey") String idempotencyKey) {
+        bpiIntegrationKeyVerifier.verifyIfBpi(sourceSystem, bpiApiKey);
+        return LegacyResult.success(inventoryService.completionInboundByIdempotency(
+            tenantResolver.resolve(servletRequest, null), sourceSystem, idempotencyKey));
     }
 }

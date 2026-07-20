@@ -1,0 +1,14 @@
+ARG JAVA_IMAGE=m.daocloud.io/docker.io/eclipse-temurin:17-jre-jammy
+
+FROM ${JAVA_IMAGE}
+ARG BPI_WMS_ADAPTER_JAR=services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar
+
+RUN groupadd --system --gid 10001 bpi \
+    && useradd --system --uid 10001 --gid bpi --home-dir /opt/bpi bpi
+
+WORKDIR /opt/bpi
+COPY --chown=bpi:bpi ${BPI_WMS_ADAPTER_JAR} /opt/bpi/bpi-wms-adapter.jar
+
+USER 10001:10001
+EXPOSE 19092
+ENTRYPOINT ["java", "-jar", "/opt/bpi/bpi-wms-adapter.jar"]

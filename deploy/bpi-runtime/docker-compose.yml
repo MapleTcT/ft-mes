@@ -203,6 +203,46 @@ services:
       - bpi-runtime
       - adp-runtime
 
+  bpi-wms-adapter:
+    image: ${BPI_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:local}
+    build:
+      context: ../..
+      dockerfile: services/bpi-service/wms-adapter/Dockerfile.runtime
+      args:
+        JAVA_IMAGE: ${BPI_WMS_ADAPTER_JAVA_IMAGE:-m.daocloud.io/docker.io/eclipse-temurin:17-jre-jammy}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      BPI_WMS_ADAPTER_PORT: "19092"
+      BPI_WMS_ADAPTER_ENABLED: ${BPI_WMS_ADAPTER_ENABLED:-false}
+      BPI_WMS_ADAPTER_BOOTSTRAP_SERVERS: ${BPI_KAFKA_BOOTSTRAP_SERVERS:?BPI_KAFKA_BOOTSTRAP_SERVERS is required}
+      BPI_WMS_ADAPTER_COMMAND_TOPIC: ${BPI_WMS_ADAPTER_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}
+      BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC: ${BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}
+      BPI_WMS_ADAPTER_RECEIPT_TOPIC: ${BPI_WMS_ADAPTER_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}
+      BPI_WMS_ADAPTER_GROUP_ID: ${BPI_WMS_ADAPTER_GROUP_ID:-ft-mes-bpi-wms-adapter-v1}
+      BPI_WMS_ADAPTER_CLIENT_ID: ${BPI_WMS_ADAPTER_CLIENT_ID:-ft-mes-bpi-wms-adapter}
+      BPI_WMS_ADAPTER_MATERIAL_BASE_URL: ${BPI_WMS_ADAPTER_MATERIAL_BASE_URL:-http://material:8080}
+      BPI_WMS_ADAPTER_MATERIAL_API_KEY: ${MATERIAL_WMS_BPI_API_KEY:-_DISABLED_}
+      BPI_WMS_ADAPTER_ROUTES: ${BPI_WMS_ADAPTER_ROUTES:-_DENY_ALL_}
+      BPI_WMS_ADAPTER_MAX_ATTEMPTS: ${BPI_WMS_ADAPTER_MAX_ATTEMPTS:-5}
+      BPI_WMS_ADAPTER_CONCURRENCY: ${BPI_WMS_ADAPTER_CONCURRENCY:-1}
+      BPI_WMS_ADAPTER_RETRY_BACKOFF: ${BPI_WMS_ADAPTER_RETRY_BACKOFF:-5s}
+      BPI_WMS_ADAPTER_REQUEST_TIMEOUT: ${BPI_WMS_ADAPTER_REQUEST_TIMEOUT:-10s}
+      BPI_WMS_ADAPTER_PUBLISH_TIMEOUT: ${BPI_WMS_ADAPTER_PUBLISH_TIMEOUT:-30s}
+    ports:
+      - "${BPI_BIND_ADDRESS:-127.0.0.1}:${BPI_WMS_ADAPTER_HTTP_PORT:-19092}:19092"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/19092'"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+    depends_on:
+      bpi-service:
+        condition: service_healthy
+    networks:
+      - bpi-runtime
+      - adp-runtime
+
   bpi-web:
     image: ${BPI_NGINX_IMAGE:-m.daocloud.io/docker.io/library/nginx:1.24.0}
     restart: unless-stopped

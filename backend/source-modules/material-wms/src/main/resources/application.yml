@@ -37,3 +37,7 @@ management:
 logging:
   level:
     com.mapletct.ftmes.materialwms: INFO
+
+material:
+  wms:
+    bpi-api-key: ${MATERIAL_WMS_BPI_API_KEY:_DISABLED_}

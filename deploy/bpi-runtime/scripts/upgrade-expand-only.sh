@@ -47,8 +47,13 @@ esac
 
 postgres_id=$(compose ps -q bpi-postgres)
 service_id=$(compose ps -q bpi-service)
+wms_adapter_id=$(compose ps -q bpi-wms-adapter)
 if [ -z "$postgres_id" ] || [ -z "$service_id" ]; then
     printf 'ERROR: BPI PostgreSQL and service must be running before an expand-only upgrade\n' >&2
+    exit 1
+fi
+if [ "$(env_value BPI_WMS_ADAPTER_ENABLED false)" != "false" ]; then
+    printf 'ERROR: BPI_WMS_ADAPTER_ENABLED must remain false during expand-only upgrade\n' >&2
     exit 1
 fi
 
@@ -58,9 +63,10 @@ query_version() {
 }
 
 wait_for_service_health() {
+    service_name=${1:-bpi-service}
     deadline=$(( $(date +%s) + HEALTH_TIMEOUT_SECONDS ))
     while [ "$(date +%s)" -lt "$deadline" ]; do
-        current_id=$(compose ps -q bpi-service)
+        current_id=$(compose ps -q "$service_name")
         if [ -n "$current_id" ]; then
             health_status=$(docker inspect --format \
                 '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \
@@ -68,8 +74,8 @@ wait_for_service_health() {
             case "$health_status" in
                 healthy) return 0 ;;
                 exited|dead)
-                    printf 'ERROR: BPI service stopped while waiting for readiness\n' >&2
-                    compose logs --tail 120 bpi-service >&2 || true
+                    printf 'ERROR: %s stopped while waiting for readiness\n' "$service_name" >&2
+                    compose logs --tail 120 "$service_name" >&2 || true
                     return 1
                     ;;
             esac
@@ -77,10 +83,10 @@ wait_for_service_health() {
         sleep 2
     done
 
-    printf 'ERROR: BPI service did not become healthy within %s seconds\n' \
-        "$HEALTH_TIMEOUT_SECONDS" >&2
-    compose ps bpi-service >&2 || true
-    compose logs --tail 120 bpi-service >&2 || true
+    printf 'ERROR: %s did not become healthy within %s seconds\n' \
+        "$service_name" "$HEALTH_TIMEOUT_SECONDS" >&2
+    compose ps "$service_name" >&2 || true
+    compose logs --tail 120 "$service_name" >&2 || true
     return 1
 }
 
@@ -89,9 +95,12 @@ write_report() {
     UPGRADE_PHASE=$2
     SMOKE_STATUS=$3
     AFTER_IMAGE_ID=${4:-}
+    AFTER_WMS_ADAPTER_IMAGE_ID=${5:-}
     export REPORT UPGRADE_STATUS UPGRADE_PHASE SMOKE_STATUS
     export BEFORE_VERSION AFTER_VERSION EXPECTED_VERSION BACKUP_FILE ENV_BACKUP
     export ROLLBACK_IMAGE BEFORE_IMAGE_ID AFTER_IMAGE_ID JAR JAR_SHA256
+    export WMS_ADAPTER_JAR WMS_ADAPTER_JAR_SHA256
+    export BEFORE_WMS_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID ROLLBACK_WMS_ADAPTER_IMAGE
     python3 <<'PY'
 import datetime
 import json
@@ -126,6 +135,14 @@ report = {
         "environmentBackup": os.environ["ENV_BACKUP"],
         "smoke": os.environ["SMOKE_STATUS"],
     },
+    "wmsAdapter": {
+        "jar": os.environ["WMS_ADAPTER_JAR"],
+        "jarSha256": os.environ["WMS_ADAPTER_JAR_SHA256"],
+        "beforeImageId": os.environ.get("BEFORE_WMS_ADAPTER_IMAGE_ID") or None,
+        "afterImageId": os.environ.get("AFTER_WMS_ADAPTER_IMAGE_ID") or None,
+        "rollbackImage": os.environ.get("ROLLBACK_WMS_ADAPTER_IMAGE") or None,
+        "enabledDuringUpgrade": False,
+    },
     "rollbackBoundary": {
         "schemaDowngrade": False,
         "method": "Restore the tagged application image and keep the expanded schema.",
@@ -155,7 +172,16 @@ BACKUP_FILE="$BACKUP_DIR/ft_mes_bpi-before-v${EXPECTED_VERSION}-${timestamp}.dum
 ENV_BACKUP="$BACKUP_DIR/bpi-runtime-before-v${EXPECTED_VERSION}-${timestamp}.env"
 ROLLBACK_IMAGE="ft-mes-bpi-service:rollback-v${BEFORE_VERSION}-${timestamp}"
 BEFORE_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$service_id")
+BEFORE_WMS_ADAPTER_IMAGE_ID=
+ROLLBACK_WMS_ADAPTER_IMAGE=
+if [ -n "$wms_adapter_id" ]; then
+    BEFORE_WMS_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$wms_adapter_id")
+    ROLLBACK_WMS_ADAPTER_IMAGE="ft-mes-bpi-wms-adapter:rollback-v${BEFORE_VERSION}-${timestamp}"
+fi
 docker image tag "$BEFORE_IMAGE_ID" "$ROLLBACK_IMAGE"
+if [ -n "$BEFORE_WMS_ADAPTER_IMAGE_ID" ]; then
+    docker image tag "$BEFORE_WMS_ADAPTER_IMAGE_ID" "$ROLLBACK_WMS_ADAPTER_IMAGE"
+fi
 cp "$ENV_FILE" "$ENV_BACKUP"
 chmod 600 "$ENV_BACKUP"
 compose exec -T bpi-postgres pg_dump -Fc -U "$POSTGRES_USER" -d "$DATABASE_NAME" >"$BACKUP_FILE"
@@ -171,10 +197,16 @@ test -f "$JAR" || {
     exit 1
 }
 JAR_SHA256=$(sha256sum "$JAR" | awk '{print $1}')
+WMS_ADAPTER_JAR="$ROOT_DIR/services/bpi-service/wms-adapter/target/bpi-wms-adapter-0.1.0-SNAPSHOT-exec.jar"
+test -f "$WMS_ADAPTER_JAR" || {
+    printf 'ERROR: package BPI WMS adapter before upgrade: %s\n' "$WMS_ADAPTER_JAR" >&2
+    exit 1
+}
+WMS_ADAPTER_JAR_SHA256=$(sha256sum "$WMS_ADAPTER_JAR" | awk '{print $1}')
 AFTER_VERSION=
 write_report PREPARED BACKUP_COMPLETE NOT_RUN
 
-compose build bpi-service
+compose build bpi-service bpi-wms-adapter
 compose up --no-deps --force-recreate --abort-on-container-exit \
     --exit-code-from bpi-migrate bpi-migrate
 
@@ -189,9 +221,13 @@ write_report IN_PROGRESS MIGRATION_APPLIED NOT_RUN
 compose up -d --no-deps --force-recreate bpi-service
 AFTER_SERVICE_ID=$(compose ps -q bpi-service)
 AFTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$AFTER_SERVICE_ID")
-write_report IN_PROGRESS SERVICE_RECREATED NOT_RUN "$AFTER_IMAGE_ID"
-wait_for_service_health
+compose up -d --no-deps --force-recreate bpi-wms-adapter
+AFTER_WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
+AFTER_WMS_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$AFTER_WMS_ADAPTER_ID")
+write_report IN_PROGRESS SERVICES_RECREATED NOT_RUN "$AFTER_IMAGE_ID" "$AFTER_WMS_ADAPTER_IMAGE_ID"
+wait_for_service_health bpi-service
+wait_for_service_health bpi-wms-adapter
 sh "$SCRIPT_DIR/smoke.sh" "$ENV_FILE"
-write_report PASS COMPLETE PASS "$AFTER_IMAGE_ID"
+write_report PASS COMPLETE PASS "$AFTER_IMAGE_ID" "$AFTER_WMS_ADAPTER_IMAGE_ID"
 printf 'BPI runtime expand-only upgrade: PASS (%s)\n' "$REPORT"
 printf 'Rollback image: %s\n' "$ROLLBACK_IMAGE"

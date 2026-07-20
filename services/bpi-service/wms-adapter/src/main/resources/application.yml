@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: bpi-wms-adapter
+
+server:
+  port: ${BPI_WMS_ADAPTER_PORT:19092}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+bpi:
+  wms-adapter:
+    enabled: ${BPI_WMS_ADAPTER_ENABLED:false}
+    bootstrap-servers: ${BPI_WMS_ADAPTER_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+    command-topic: ${BPI_WMS_ADAPTER_COMMAND_TOPIC:bpi.wms.completion-inbound-command.v1}
+    command-dlq-topic: ${BPI_WMS_ADAPTER_COMMAND_DLQ_TOPIC:bpi.wms.completion-inbound-command.dlq.v1}
+    receipt-topic: ${BPI_WMS_ADAPTER_RECEIPT_TOPIC:wms.completion-inbound.receipt.v1}
+    group-id: ${BPI_WMS_ADAPTER_GROUP_ID:ft-mes-bpi-wms-adapter-v1}
+    client-id: ${BPI_WMS_ADAPTER_CLIENT_ID:ft-mes-bpi-wms-adapter}
+    material-base-url: ${BPI_WMS_ADAPTER_MATERIAL_BASE_URL:http://material:8080}
+    material-api-key: ${BPI_WMS_ADAPTER_MATERIAL_API_KEY:_DISABLED_}
+    time-zone: ${BPI_WMS_ADAPTER_TIME_ZONE:Asia/Shanghai}
+    max-payload-bytes: ${BPI_WMS_ADAPTER_MAX_PAYLOAD_BYTES:65536}
+    max-attempts: ${BPI_WMS_ADAPTER_MAX_ATTEMPTS:5}
+    concurrency: ${BPI_WMS_ADAPTER_CONCURRENCY:1}
+    retry-backoff: ${BPI_WMS_ADAPTER_RETRY_BACKOFF:5s}
+    request-timeout: ${BPI_WMS_ADAPTER_REQUEST_TIMEOUT:10s}
+    publish-timeout: ${BPI_WMS_ADAPTER_PUBLISH_TIMEOUT:30s}
+    routes: ${BPI_WMS_ADAPTER_ROUTES:_DENY_ALL_}
+
+logging:
+  level:
+    com.mapletct.ftmes.bpiwmsadapter: INFO

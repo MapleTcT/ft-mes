@@ -53,7 +53,13 @@ ${BPI_RULE_RUNTIME_READINESS_TOPIC:-bpi.boundary.rule-runtime-readiness.v1}
 ${BPI_RULE_RUNTIME_READINESS_DLQ_TOPIC:-bpi.boundary.rule-runtime-readiness.dlq.v1}
 ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
 ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
-${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}"
+${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+${BPI_QCS_TOPIC:-qcs.batch.quality-gate.v1}
+${BPI_QCS_DLQ_TOPIC:-qcs.batch.quality-gate.dlq.v1}
+${BPI_WMS_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}
+${BPI_WMS_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}
+${BPI_WMS_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}
+${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}"
 
 DESCRIBE=/tmp/bpi-streaming-topics.$$.txt
 POINT_CATALOG_CONFIGS=/tmp/bpi-point-catalog-topic-configs.$$.txt
@@ -67,16 +73,16 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
         --topic "$topic" </dev/null
 done >"$DESCRIBE"
 
-if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 14 ]; then
+if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 20 ]; then
     printf 'ERROR: one or more BPI topics do not have replication factor 3\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 14 ]; then
+if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 20 ]; then
     printf 'ERROR: one or more BPI topics do not have min.insync.replicas=2\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 3 ]; then
-    printf 'ERROR: candidate and source-sequence DLQ topics must retain records for 30 days\n' >&2
+if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 10 ]; then
+    printf 'ERROR: BPI replay, Phase 2 command/receipt and DLQ topics must retain records for 30 days\n' >&2
     exit 1
 fi
 for topic in \
@@ -163,7 +169,7 @@ report = {
     "status": "PASS",
     "kafka": {
         "brokers": 3,
-        "topics": 14,
+        "topics": 20,
         "replicationFactor": 3,
         "minInSyncReplicas": 2,
         "pointCatalogMaxMessageBytes": int(os.environ.get("BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "6291456")),

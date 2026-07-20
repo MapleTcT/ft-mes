@@ -161,6 +161,12 @@ services:
       BPI_CANDIDATE_TOPIC: ${BPI_CANDIDATE_TOPIC:-bpi.batch.candidate.v1}
       BPI_CANDIDATE_DLQ_TOPIC: ${BPI_CANDIDATE_DLQ_TOPIC:-bpi.batch.candidate.dlq.v1}
       BPI_DATA_QUALITY_TOPIC: ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}
+      BPI_QCS_TOPIC: ${BPI_QCS_TOPIC:-qcs.batch.quality-gate.v1}
+      BPI_QCS_DLQ_TOPIC: ${BPI_QCS_DLQ_TOPIC:-qcs.batch.quality-gate.dlq.v1}
+      BPI_WMS_COMMAND_TOPIC: ${BPI_WMS_COMMAND_TOPIC:-bpi.wms.completion-inbound-command.v1}
+      BPI_WMS_COMMAND_DLQ_TOPIC: ${BPI_WMS_COMMAND_DLQ_TOPIC:-bpi.wms.completion-inbound-command.dlq.v1}
+      BPI_WMS_RECEIPT_TOPIC: ${BPI_WMS_RECEIPT_TOPIC:-wms.completion-inbound.receipt.v1}
+      BPI_WMS_RECEIPT_DLQ_TOPIC: ${BPI_WMS_RECEIPT_DLQ_TOPIC:-wms.completion-inbound.receipt.dlq.v1}
       BPI_DATA_PARTITIONS: ${BPI_DATA_PARTITIONS:-6}
       BPI_CONTROL_PARTITIONS: ${BPI_CONTROL_PARTITIONS:-3}
     volumes:

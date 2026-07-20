@@ -195,10 +195,17 @@ public class BatchReleaseService {
         assertBatchIdentity(batch, event.getPlantId(), event.getLineId());
         WmsInboundTarget target = releaseRepository.lockWmsInbound(
                 actor.tenantId(), batchId, commandEventId);
+        String receiptIdempotencyKey = requireText(
+                event.getIdempotencyKey(), "idempotency_key", 256);
+        if (!target.idempotencyKey().equals(receiptIdempotencyKey)) {
+            throw new BpiConflictException(
+                    "WMS receipt idempotency_key does not match the durable command.",
+                    target.linkRevision());
+        }
 
         boolean firstDelivery = repository.recordInbox(
                 UuidV5.from(WMS_INBOX_NAMESPACE, actor.tenantId() + "|" + WMS_SOURCE + "|" + event.getEventId()),
-                actor.tenantId(), WMS_SOURCE, requireText(event.getIdempotencyKey(), "idempotency_key", 256),
+                actor.tenantId(), WMS_SOURCE, receiptIdempotencyKey,
                 requireText(event.getEventId(), "event_id", 256), payloadChecksum);
         if (!firstDelivery) return view(actor, repository.findBatch(actor, batchId));
 

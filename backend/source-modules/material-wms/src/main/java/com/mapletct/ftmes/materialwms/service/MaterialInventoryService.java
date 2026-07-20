@@ -22,11 +22,14 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class MaterialInventoryService {
 
     private static final BigDecimal ZERO = BigDecimal.ZERO;
+    private static final String DEFAULT_SOURCE_SYSTEM = "WOM";
+    private static final Pattern SOURCE_SYSTEM_PATTERN = Pattern.compile("[A-Z][A-Z0-9_-]{0,31}");
 
     private final MaterialWmsRepository repository;
     private final ObjectMapper objectMapper;
@@ -103,6 +106,7 @@ public class MaterialInventoryService {
                 tenantId,
                 "QUALITY:" + normalizedSourceLineId + ":" + revision,
                 requestedStatus == QualityStatus.QUALIFIED ? "QUALITY_RELEASE" : "QUALITY_HOLD",
+                DEFAULT_SOURCE_SYSTEM,
                 documentId,
                 lineId,
                 string(line.get("source_document_id")),
@@ -112,6 +116,7 @@ public class MaterialInventoryService {
                 string(line.get("material_code")),
                 string(line.get("batch_no")),
                 string(line.get("production_batch_no")),
+                string(line.get("unit_code")),
                 ZERO,
                 availableDelta,
                 holdDelta,
@@ -243,26 +248,68 @@ public class MaterialInventoryService {
         return detail;
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> completionInboundByIdempotency(
+            String tenantId, String requestedSourceSystem, String requestedIdempotencyKey) {
+        String sourceSystem = sourceSystem(requestedSourceSystem);
+        String idempotencyKey = requiredWithMaximum(
+            requestedIdempotencyKey, "idempotencyKey", 256);
+        Map<String, Object> document = repository.findDocumentByIdempotency(
+            tenantId, DocumentType.COMPLETION_INBOUND, sourceSystem, idempotencyKey);
+        if (document == null) {
+            throw new MaterialWmsBusinessException(404,
+                "完工入库单不存在: " + sourceSystem + "/" + idempotencyKey);
+        }
+        return repository.completionInboundDetail(
+            tenantId, number(document.get("id")).longValue());
+    }
+
     private StockDocumentResult createDocument(
             String tenantId, StockDocumentRequest request, DocumentType documentType) {
         validateRequest(request, documentType);
         String sourceDocumentId = request.getSourceDocumentId().trim();
+        String sourceSystem = sourceSystem(request.getSourceSystem());
+        String idempotencyKey = optionalWithMaximum(request.getIdempotencyKey(), "idempotencyKey", 256);
+        if (!DEFAULT_SOURCE_SYSTEM.equals(sourceSystem) && idempotencyKey == null) {
+            throw new MaterialWmsBusinessException(400,
+                "非 WOM 来源必须提交 idempotencyKey");
+        }
         String warehouseCode = request.getWareCode().trim();
-        Map<String, Object> existing = repository.findDocumentBySource(
-            tenantId, documentType, sourceDocumentId, warehouseCode);
+        Map<String, Object> sourceDocument = repository.findDocumentBySource(
+            tenantId, documentType, sourceSystem, sourceDocumentId, warehouseCode);
+        Map<String, Object> idempotentDocument = idempotencyKey == null ? null
+            : repository.findDocumentByIdempotency(
+                tenantId, documentType, sourceSystem, idempotencyKey);
+        Map<String, Object> existing = idempotentDocument == null ? sourceDocument : idempotentDocument;
+        if (existing != null) {
+            verifyIdempotentDocument(
+                existing, sourceSystem, sourceDocumentId, warehouseCode, idempotencyKey);
+        }
 
         LocalDate storageDate = parseDate(request.getStorageDate(), "storageDate", true);
         String documentNo = documentType.getNumberPrefix() + "-"
             + documentNumberPart(sourceDocumentId + "-" + warehouseCode);
         if (existing == null) {
             repository.insertDocumentIfAbsent(
-                tenantId, documentType, documentNo, request, storageDate, json(request));
+                tenantId, documentType, sourceSystem, idempotencyKey,
+                documentNo, request, storageDate, json(request));
         }
-        Map<String, Object> document = repository.findDocumentBySource(
-            tenantId, documentType, sourceDocumentId, warehouseCode);
+        Map<String, Object> document = idempotencyKey == null
+            ? repository.findDocumentBySource(
+                tenantId, documentType, sourceSystem, sourceDocumentId, warehouseCode)
+            : repository.findDocumentByIdempotency(
+                tenantId, documentType, sourceSystem, idempotencyKey);
+        if (document == null && idempotencyKey != null) {
+            // A concurrent request can win on the source-document key with a different
+            // idempotency key. Resolve that row so the caller gets a durable 409.
+            document = repository.findDocumentBySource(
+                tenantId, documentType, sourceSystem, sourceDocumentId, warehouseCode);
+        }
         if (document == null) {
             throw new MaterialWmsBusinessException(500, "库存单据创建后无法读取");
         }
+        verifyIdempotentDocument(
+            document, sourceSystem, sourceDocumentId, warehouseCode, idempotencyKey);
 
         long documentId = number(document.get("id")).longValue();
         repository.lockDocument(documentId);
@@ -275,7 +322,7 @@ public class MaterialInventoryService {
                 sourceLineId = sourceDocumentId + ":" + (index + 1);
             }
             Map<String, Object> existingLine = repository.findLineBySource(
-                tenantId, documentType, sourceLineId);
+                tenantId, documentType, sourceSystem, sourceLineId);
             if (existingLine != null) {
                 verifyIdempotentLine(existingLine, request, line);
                 continue;
@@ -283,6 +330,7 @@ public class MaterialInventoryService {
             BigDecimal goodQuantity = line.getQuantity();
             BigDecimal badQuantity = ZERO;
             Map<String, Object> allocation = documentType == DocumentType.COMPLETION_INBOUND
+                    && DEFAULT_SOURCE_SYSTEM.equals(sourceSystem)
                 ? repository.findActiveAllocation(tenantId, sourceLineId) : null;
             if (allocation != null) {
                 verifyAllocationQuantity(allocation, line.getQuantity());
@@ -291,7 +339,7 @@ public class MaterialInventoryService {
             }
             QualityStatus qualityStatus = documentType == DocumentType.PRODUCTION_ISSUE
                 ? QualityStatus.QUALIFIED
-                : resolveInitialQuality(tenantId, sourceLineId, line.getCheckResult());
+                : resolveInitialQuality(tenantId, sourceSystem, sourceLineId, line.getCheckResult());
             if (qualityStatus == QualityStatus.QUALIFIED && badQuantity.compareTo(ZERO) > 0) {
                 qualityStatus = QualityStatus.PARTIAL;
             }
@@ -300,6 +348,7 @@ public class MaterialInventoryService {
                 documentId,
                 tenantId,
                 documentType,
+                sourceSystem,
                 repository.nextLineNo(documentId),
                 sourceLineId,
                 warehouseCode,
@@ -310,7 +359,7 @@ public class MaterialInventoryService {
                 productionDate
             );
             Map<String, Object> persistedLine = repository.findLineBySource(
-                tenantId, documentType, sourceLineId);
+                tenantId, documentType, sourceSystem, sourceLineId);
             if (!lineInserted) {
                 verifyIdempotentLine(persistedLine, request, line);
                 continue;
@@ -351,8 +400,9 @@ public class MaterialInventoryService {
             );
             repository.insertTransaction(
                 tenantId,
-                documentType.name() + ":" + sourceLineId,
+                documentType.name() + ":" + sourceSystem + ":" + sourceLineId,
                 documentType.name(),
+                sourceSystem,
                 documentId,
                 lineId,
                 sourceDocumentId,
@@ -362,6 +412,7 @@ public class MaterialInventoryService {
                 line.getGoodCode().trim(),
                 line.getBatchText(),
                 line.getProductionBatchNo(),
+                line.getUnitCode(),
                 onHandDelta,
                 availableDelta,
                 holdDelta,
@@ -378,6 +429,7 @@ public class MaterialInventoryService {
             throw new MaterialWmsBusinessException(400, "请求体不能为空");
         }
         required(request.getSourceDocumentId(), "srcID/srcId");
+        requiredWithMaximum(request.getSourceDocumentId(), "srcID/srcId", 128);
         required(request.getCompanyCode(), "companyCode");
         required(request.getWareCode(), "wareCode");
         if (request.getDetailList() == null || request.getDetailList().isEmpty()) {
@@ -396,6 +448,8 @@ public class MaterialInventoryService {
                 throw new MaterialWmsBusinessException(400,
                     "detailList[" + index + "].quantity 必须大于 0");
             }
+            optionalWithMaximum(line.getUnitCode(),
+                "detailList[" + index + "].unitCode", 64);
         }
         if (documentType == DocumentType.COMPLETION_INBOUND
                 && "produceOut".equalsIgnoreCase(trim(request.getComeType()))) {
@@ -403,8 +457,10 @@ public class MaterialInventoryService {
         }
     }
 
-    private QualityStatus resolveInitialQuality(String tenantId, String sourceLineId, String requestResult) {
-        QualityStatus callbackStatus = repository.findQualityStatus(tenantId, sourceLineId);
+    private QualityStatus resolveInitialQuality(
+            String tenantId, String sourceSystem, String sourceLineId, String requestResult) {
+        QualityStatus callbackStatus = DEFAULT_SOURCE_SYSTEM.equals(sourceSystem)
+            ? repository.findQualityStatus(tenantId, sourceLineId) : null;
         if (callbackStatus != null && callbackStatus != QualityStatus.PENDING) {
             return callbackStatus;
         }
@@ -421,6 +477,7 @@ public class MaterialInventoryService {
                 || !string(existingLine.get("material_code")).equals(line.getGoodCode().trim())
                 || !string(existingLine.get("batch_no")).equals(MaterialWmsRepository.normalizeDimension(line.getBatchText()))
                 || !string(existingLine.get("production_batch_no")).equals(MaterialWmsRepository.normalizeDimension(line.getProductionBatchNo()))
+                || !string(existingLine.get("unit_code")).equals(MaterialWmsRepository.normalizeDimension(line.getUnitCode()))
                 || decimal(existingLine.get("quantity")).compareTo(line.getQuantity()) != 0) {
             throw new MaterialWmsBusinessException(409, "来源明细幂等键重复，但库存维度或数量不一致");
         }
@@ -525,6 +582,7 @@ public class MaterialInventoryService {
                 "QUALITY_ALLOCATION:" + eventKey + ":" + lineId,
                 action == QualityAllocationAction.APPLY
                     ? "QUALITY_ALLOCATION_HOLD" : "QUALITY_ALLOCATION_RELEASE",
+                DEFAULT_SOURCE_SYSTEM,
                 documentId,
                 lineId,
                 string(line.get("source_document_id")),
@@ -534,6 +592,7 @@ public class MaterialInventoryService {
                 string(line.get("material_code")),
                 string(line.get("batch_no")),
                 string(line.get("production_batch_no")),
+                string(line.get("unit_code")),
                 ZERO,
                 availableDelta,
                 holdDelta,
@@ -600,6 +659,55 @@ public class MaterialInventoryService {
             throw new MaterialWmsBusinessException(400, field + " 不能为空");
         }
         return normalized;
+    }
+
+    private static String requiredWithMaximum(String value, String field, int maximum) {
+        String normalized = required(value, field);
+        if (normalized.length() > maximum) {
+            throw new MaterialWmsBusinessException(400,
+                field + " 长度不能超过 " + maximum);
+        }
+        return normalized;
+    }
+
+    private static String optionalWithMaximum(String value, String field, int maximum) {
+        String normalized = trim(value);
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        if (normalized.length() > maximum) {
+            throw new MaterialWmsBusinessException(400,
+                field + " 长度不能超过 " + maximum);
+        }
+        return normalized;
+    }
+
+    private static String sourceSystem(String value) {
+        String normalized = trim(value).toUpperCase(java.util.Locale.ROOT);
+        if (normalized.isEmpty()) {
+            return DEFAULT_SOURCE_SYSTEM;
+        }
+        if (!SOURCE_SYSTEM_PATTERN.matcher(normalized).matches()) {
+            throw new MaterialWmsBusinessException(400,
+                "sourceSystem 必须是 1-32 位大写字母、数字、下划线或连字符");
+        }
+        return normalized;
+    }
+
+    private static void verifyIdempotentDocument(
+            Map<String, Object> document,
+            String sourceSystem,
+            String sourceDocumentId,
+            String warehouseCode,
+            String idempotencyKey) {
+        if (!sourceSystem.equals(string(document.get("source_system")))
+                || !sourceDocumentId.equals(string(document.get("source_document_id")))
+                || !warehouseCode.equals(string(document.get("warehouse_code")))
+                || (idempotencyKey != null
+                    && !idempotencyKey.equals(string(document.get("idempotency_key"))))) {
+            throw new MaterialWmsBusinessException(409,
+                "幂等键已被不同的完工入库单据使用");
+        }
     }
 
     private static String trim(String value) {

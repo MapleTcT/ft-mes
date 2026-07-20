@@ -15,6 +15,7 @@ public class StockDocumentLineRequest {
     private String productionBatchNo;
     private String placeSetCode;
     private BigDecimal quantity;
+    private String unitCode;
     @JsonAlias({"pruductDate", "productDate"})
     private String productionDate;
     private String checkResult;
@@ -67,6 +68,14 @@ public class StockDocumentLineRequest {
 
     public void setQuantity(BigDecimal quantity) {
         this.quantity = quantity;
+    }
+
+    public String getUnitCode() {
+        return unitCode;
+    }
+
+    public void setUnitCode(String unitCode) {
+        this.unitCode = unitCode;
     }
 
     public String getProductionDate() {

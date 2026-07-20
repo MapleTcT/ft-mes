@@ -106,7 +106,7 @@ wait_for_health() {
 }
 
 replace_env_images() {
-    python3 - "$ENV_FILE" "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$EXPECTED_VERSION" <<'PY'
+    python3 - "$ENV_FILE" "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" "$EXPECTED_VERSION" <<'PY'
 import os
 import stat
 import sys
@@ -117,7 +117,8 @@ path = Path(sys.argv[1])
 updates = {
     "BPI_SERVICE_IMAGE": sys.argv[2],
     "BPI_ADAPTER_IMAGE": sys.argv[3],
-    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[4],
+    "BPI_WMS_ADAPTER_IMAGE": sys.argv[4],
+    "BPI_EXPECTED_FLYWAY_VERSION": sys.argv[5],
 }
 lines = path.read_text(encoding="utf-8").splitlines()
 seen = set()
@@ -147,8 +148,10 @@ write_report() {
     report_phase=$2
     export REPORT report_status report_phase
     export RELEASE_COMMIT EXPECTED_VERSION BEFORE_VERSION AFTER_VERSION
-    export SERVICE_IMAGE ADAPTER_IMAGE BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID
-    export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE
+    export SERVICE_IMAGE ADAPTER_IMAGE WMS_ADAPTER_IMAGE
+    export BEFORE_SERVICE_IMAGE_ID BEFORE_ADAPTER_IMAGE_ID BEFORE_WMS_ADAPTER_IMAGE_ID
+    export AFTER_SERVICE_IMAGE_ID AFTER_ADAPTER_IMAGE_ID AFTER_WMS_ADAPTER_IMAGE_ID
+    export ROLLBACK_SERVICE_IMAGE ROLLBACK_ADAPTER_IMAGE ROLLBACK_WMS_ADAPTER_IMAGE
     export DATABASE_BACKUP ENV_BACKUP UI_BACKUP UI_SHA256
     python3 <<'PY'
 import datetime
@@ -190,6 +193,12 @@ report = {
             "releaseImage": value("ADAPTER_IMAGE"),
             "rollbackImage": value("ROLLBACK_ADAPTER_IMAGE"),
         },
+        "wmsAdapter": {
+            "beforeImageId": value("BEFORE_WMS_ADAPTER_IMAGE_ID"),
+            "afterImageId": value("AFTER_WMS_ADAPTER_IMAGE_ID"),
+            "releaseImage": value("WMS_ADAPTER_IMAGE"),
+            "rollbackImage": value("ROLLBACK_WMS_ADAPTER_IMAGE"),
+        },
         "environmentBackup": value("ENV_BACKUP"),
         "uiBackup": value("UI_BACKUP"),
         "uiIndexSha256": value("UI_SHA256"),
@@ -197,7 +206,8 @@ report = {
     "safety": {
         "phase2IntegrationDefault": False,
         "wmsOutboxDefault": False,
-        "rollbackMethod": "Restore the recorded service/adapter images and UI backup; keep the expanded schema.",
+        "wmsAdapterDefault": False,
+        "rollbackMethod": "Restore recorded images and UI; stop the WMS adapter if this was its first release; keep the expanded schema.",
     },
 }
 path = Path(os.environ["REPORT"])
@@ -213,11 +223,13 @@ RELEASE_COMMIT=$(git -C "$RELEASE_ROOT" rev-parse HEAD)
 short_commit=$(printf '%s' "$RELEASE_COMMIT" | cut -c1-12)
 SERVICE_IMAGE=${BPI_INTEGRATED_SERVICE_IMAGE:-ft-mes-bpi-service:${release_suffix}-${short_commit}}
 ADAPTER_IMAGE=${BPI_INTEGRATED_ADAPTER_IMAGE:-ft-mes-bpi-adapter:${release_suffix}-${short_commit}}
+WMS_ADAPTER_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_IMAGE:-ft-mes-bpi-wms-adapter:${release_suffix}-${short_commit}}
 REPORT=${BPI_INTEGRATED_UPGRADE_REPORT:-$BACKUP_DIR/bpi-integrated-upgrade-${timestamp}.json}
 
 POSTGRES_ID=$(compose ps -q postgres)
 SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
+WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
 NGINX_ID=$(compose ps -q nginx)
 if [ -z "$POSTGRES_ID" ] || [ -z "$SERVICE_ID" ] || [ -z "$ADAPTER_ID" ] || [ -z "$NGINX_ID" ]; then
     printf 'ERROR: postgres, bpi-service, bpi-adapter and nginx must all be running\n' >&2
@@ -235,6 +247,8 @@ SERVICE_MAVEN_IMAGE=${BPI_INTEGRATED_SERVICE_MAVEN_IMAGE:-$(env_value BPI_MAVEN_
 SERVICE_JAVA_IMAGE=${BPI_INTEGRATED_SERVICE_JAVA_IMAGE:-$(env_value BPI_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
 ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_ADAPTER_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-8)}
 ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_ADAPTER_JAVA_IMAGE:-$(env_value BPI_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:8-jre-jammy)}
+WMS_ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_WMS_ADAPTER_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
+WMS_ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_WMS_ADAPTER_JAVA_IMAGE:-$(env_value BPI_WMS_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
 if [ -z "$MIGRATOR_PASSWORD" ]; then
     printf 'ERROR: BPI_MIGRATOR_PASSWORD is missing\n' >&2
     exit 1
@@ -243,7 +257,8 @@ for disabled_key in \
     BPI_PHASE2_INTEGRATION_ENABLED \
     BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED \
     BPI_PHASE2_KAFKA_ENABLED \
-    BPI_WMS_OUTBOX_ENABLED; do
+    BPI_WMS_OUTBOX_ENABLED \
+    BPI_WMS_ADAPTER_ENABLED; do
     if [ "$(env_value "$disabled_key" false)" != "false" ]; then
         printf 'ERROR: %s must remain false during the integrated expand-only upgrade\n' \
             "$disabled_key" >&2
@@ -271,14 +286,23 @@ phase=BUILDING
 AFTER_VERSION=
 AFTER_SERVICE_IMAGE_ID=
 AFTER_ADAPTER_IMAGE_ID=
+AFTER_WMS_ADAPTER_IMAGE_ID=
 DATABASE_BACKUP=
 ENV_BACKUP=
 UI_BACKUP=
 UI_SHA256=
 BEFORE_SERVICE_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$SERVICE_ID")
 BEFORE_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$ADAPTER_ID")
+BEFORE_WMS_ADAPTER_IMAGE_ID=
+if [ -n "$WMS_ADAPTER_ID" ]; then
+    BEFORE_WMS_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$WMS_ADAPTER_ID")
+fi
 ROLLBACK_SERVICE_IMAGE="ft-mes-bpi-service:rollback-v${BEFORE_VERSION}-${release_suffix}"
 ROLLBACK_ADAPTER_IMAGE="ft-mes-bpi-adapter:rollback-v${BEFORE_VERSION}-${release_suffix}"
+ROLLBACK_WMS_ADAPTER_IMAGE=
+if [ -n "$BEFORE_WMS_ADAPTER_IMAGE_ID" ]; then
+    ROLLBACK_WMS_ADAPTER_IMAGE="ft-mes-bpi-wms-adapter:rollback-v${BEFORE_VERSION}-${release_suffix}"
+fi
 trap 'exit_code=$?; if [ "$exit_code" -ne 0 ]; then write_report FAIL "$phase" || true; fi' EXIT HUP INT TERM
 
 if [ "$BUILD_UI" = "true" ]; then
@@ -305,6 +329,12 @@ docker build \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/backend/source-modules/batch-intelligence-adapter/Dockerfile" \
     -t "$ADAPTER_IMAGE" "$RELEASE_ROOT"
+docker build \
+    --build-arg "MAVEN_IMAGE=$WMS_ADAPTER_MAVEN_IMAGE" \
+    --build-arg "JAVA_IMAGE=$WMS_ADAPTER_JAVA_IMAGE" \
+    --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
+    -f "$RELEASE_ROOT/services/bpi-service/wms-adapter/Dockerfile" \
+    -t "$WMS_ADAPTER_IMAGE" "$RELEASE_ROOT"
 
 phase=BACKUP
 mkdir -p "$BACKUP_DIR"
@@ -314,6 +344,9 @@ ENV_BACKUP="$BACKUP_DIR/adp-compose-before-v${EXPECTED_VERSION}-${timestamp}.env
 UI_BACKUP="$BACKUP_DIR/bpi-ui-before-v${EXPECTED_VERSION}-${timestamp}.tar.gz"
 docker image tag "$BEFORE_SERVICE_IMAGE_ID" "$ROLLBACK_SERVICE_IMAGE"
 docker image tag "$BEFORE_ADAPTER_IMAGE_ID" "$ROLLBACK_ADAPTER_IMAGE"
+if [ -n "$BEFORE_WMS_ADAPTER_IMAGE_ID" ]; then
+    docker image tag "$BEFORE_WMS_ADAPTER_IMAGE_ID" "$ROLLBACK_WMS_ADAPTER_IMAGE"
+fi
 cp "$ENV_FILE" "$ENV_BACKUP"
 chmod 600 "$ENV_BACKUP"
 docker exec "$POSTGRES_ID" pg_dump -Fc -U "$POSTGRES_USER" -d "$DATABASE_NAME" >"$DATABASE_BACKUP"
@@ -363,10 +396,14 @@ compose up -d --no-deps --force-recreate bpi-service
 wait_for_health bpi-service
 compose up -d --no-deps --force-recreate bpi-adapter
 wait_for_health bpi-adapter
+compose up -d --no-deps --force-recreate bpi-wms-adapter
+wait_for_health bpi-wms-adapter
 SERVICE_ID=$(compose ps -q bpi-service)
 ADAPTER_ID=$(compose ps -q bpi-adapter)
+WMS_ADAPTER_ID=$(compose ps -q bpi-wms-adapter)
 AFTER_SERVICE_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$SERVICE_ID")
 AFTER_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$ADAPTER_ID")
+AFTER_WMS_ADAPTER_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$WMS_ADAPTER_ID")
 write_report IN_PROGRESS APPLICATIONS_HEALTHY
 
 phase=UI_DEPLOY
@@ -381,6 +418,9 @@ printf '%s' "$service_health" | grep -q '"status":"UP"'
 adapter_health=$(curl -fsS --connect-timeout 5 --max-time 20 \
     "http://127.0.0.1:$(env_value BPI_ADAPTER_HTTP_PORT 19080)/actuator/health")
 printf '%s' "$adapter_health" | grep -q '"status":"UP"'
+wms_adapter_health=$(curl -fsS --connect-timeout 5 --max-time 20 \
+    "http://127.0.0.1:$(env_value BPI_WMS_ADAPTER_HTTP_PORT 19092)/actuator/health")
+printf '%s' "$wms_adapter_health" | grep -q '"status":"UP"'
 flag_state=$(docker exec "$POSTGRES_ID" psql -X -At -U "$POSTGRES_USER" -d "$DATABASE_NAME" \
     -c "SELECT string_agg(flag_key || '=' || enabled::text, ',' ORDER BY flag_key) FROM bpi.bpi_feature_flags WHERE tenant_id = '*' AND scope_type = 'GLOBAL' AND flag_key IN ('bpi.auto-confirm','bpi.qcs-link','bpi.shadow-only','bpi.wms-link')")
 printf '%s' "$flag_state" | grep -q 'bpi.auto-confirm=false'
@@ -392,5 +432,5 @@ write_report PASS COMPLETE
 trap - EXIT HUP INT TERM
 printf 'Integrated BPI expand-only upgrade: PASS (Flyway %s, release %s)\n' \
     "$AFTER_VERSION" "$RELEASE_COMMIT"
-printf 'Service image: %s\nAdapter image: %s\nReport: %s\n' \
-    "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$REPORT"
+printf 'Service image: %s\nAdapter image: %s\nWMS adapter image: %s\nReport: %s\n' \
+    "$SERVICE_IMAGE" "$ADAPTER_IMAGE" "$WMS_ADAPTER_IMAGE" "$REPORT"

@@ -217,6 +217,19 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .isEqualTo(batchId.toString());
         assertThat(wmsOutboxRepository.markPublished(commandEventId, claims.get(0).claimToken())).isTrue();
 
+        WmsCompletionInboundReceiptV1 wrongCommandIdentity = receipt(
+                commandEventId, "WMS-WRONG-IDEMPOTENCY-" + batchId,
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_ACCEPTED,
+                "WMS-IN-WRONG-" + batchId, "").toBuilder()
+                .setIdempotencyKey(command.getIdempotencyKey() + "|WRONG")
+                .build();
+        postWmsReceipt(wrongCommandIdentity)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail")
+                        .value(org.hamcrest.Matchers.containsString("idempotency_key")));
+        assertThat(count("bpi_inbox_events")).isEqualTo(2);
+        assertThat(batchProjection()).isEqualTo("RELEASED|3|ACCEPTED|PENDING");
+
         postWmsReceipt(receipt)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.batch.state").value("INBOUNDED"))
@@ -396,7 +409,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
             String errorCode) {
         return WmsCompletionInboundReceiptV1.newBuilder()
                 .setEventId(eventId)
-                .setIdempotencyKey("IDEMPOTENCY-" + eventId)
+                .setIdempotencyKey(commandIdempotency(commandEventId))
                 .setCommandEventId(commandEventId.toString())
                 .setTenantId(tenantId)
                 .setPlantId(PLANT_ID)
@@ -410,6 +423,14 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .setObservedAtMs(Instant.now().toEpochMilli())
                 .putHeaders("trace_id", "TRACE-" + eventId)
                 .build();
+    }
+
+    private String commandIdempotency(UUID commandEventId) {
+        return jdbc.queryForObject("""
+                SELECT idempotency_key
+                  FROM bpi.bpi_wms_inbound_links
+                 WHERE tenant_id = ? AND command_event_id = ?
+                """, String.class, tenantId, commandEventId);
     }
 
     private void seedFlag(String flagKey, boolean enabled) {
