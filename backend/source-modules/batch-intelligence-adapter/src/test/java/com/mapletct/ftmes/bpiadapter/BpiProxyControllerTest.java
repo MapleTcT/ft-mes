@@ -124,6 +124,39 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsWmsReconciliationWithConcurrencyAndReplayHeaders() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        HttpHeaders upstreamResponseHeaders = new HttpHeaders();
+        upstreamResponseHeaders.add("Idempotent-Replay", "true");
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/batches/" + id + "/wms/reconcile"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "wms-reconciliation-1"))
+                .andExpect(header("If-Match", "1"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":{\"wmsInbound\":{\"revision\":2}}}",
+                        MediaType.APPLICATION_JSON).headers(upstreamResponseHeaders));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST", "/bpi-api/batches/" + id + "/wms/reconcile");
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        request.addHeader("Idempotency-Key", "wms-reconciliation-1");
+        request.addHeader("If-Match", "1");
+
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), request,
+                "{\"reason\":\"receipt timeout\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("true", response.getHeaders().getFirst("Idempotent-Replay"));
+        upstream.verify();
+    }
+
+    @Test
     public void forwardsShadowRunListQueryOnlyToTheFixedUpstream() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

@@ -19,7 +19,7 @@ public class BpiRoutePolicy {
                     + "data-quality/(?:summary|incidents(?:/" + ID + ")?)|"
                     + "rules(?:/" + ID + "(?:/compare)?)?|rule-simulations/" + ID + ")$");
     private static final Pattern POST_ROUTE = Pattern.compile(
-            "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume)|"
+            "^/(?:candidates/" + ID + "/(?:confirm|reject)|batches/" + ID + "/(?:suspend|resume|wms/reconcile)|"
                     + "shadow-runs(?:/" + ID + "/(?:batch-reviews|start|complete|approve|reject|cancel))?|"
                     + "feature-flags/" + ID + "|"
                     + "topologies/drafts|topologies/" + ID + "/(?:validate|publish)|point-catalog/snapshots|"
