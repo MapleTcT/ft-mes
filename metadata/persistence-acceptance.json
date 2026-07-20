@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T17:57:40.068Z",
-  "repoCommit": "3a00d69274b0019a42edd30abf024bce406157bc",
+  "generatedAt": "2026-07-20T19:34:01.326Z",
+  "repoCommit": "23e98051fc266c2d9653f4240b7327cb2607009b",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -144,8 +144,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 191,
-    "pass": 188,
+    "testedFeatures": 192,
+    "pass": 189,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4170,9 +4170,42 @@
       "issues": [
         "The controlled target flow requeued the original internal outbox event; external ERP/WMS outage, lookup, reversal and compensation were not exercised."
       ]
+    },
+    {
+      "module": "BPI WMS停机恢复",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "受控停止目标material-wms，证明首次Kafka投递进入命令DLQ；恢复服务后从真实页面重新核对原单，并验证同一命令最终只形成一套完工入库事实",
+      "api": "Kafka bpi.wms.completion-inbound-command.v1/DLQ/receipt; POST /bpi-api/batches/37278a8e-33fd-4993-8876-6df5e9721cad/wms/reconcile",
+      "method": "KAFKA/POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BatchController -> BatchReleaseService -> BatchReleasePostgresRepository -> WMS outbox -> WmsCommandKafkaListener -> WmsCommandProcessor -> MaterialWmsController/MaterialInventoryService/MaterialWmsRepository -> WmsReceiptKafkaListener",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_E2E_20260720193226_WMS_OUTAGE",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-outage-recovery-verification.sql and bpi-wms-outage-recovery-material-verification.sql; verify batch INBOUNDED/r4, link ACCEPTED/r3, one original outbox, manual/total attempts 1/2, one material document/line/transaction/stock at 12.345 kg; cleanup scripts require total residual_rows=0",
+      "status": "PASS",
+      "evidence": "metadata/bpi-wms-outage-recovery-target-acceptance.json and screenshot; material exited during first delivery, command DLQ +1 with original event header, material rows 0; browser POST 200 with zero errors; same event/key recovered to durable receipt, both PostgreSQL databases matched, consumer lag 0, environment/services restored and marker residual 0",
+      "issues": [
+        "This closes the controlled internal material-wms outage path only; external ERP/WMS lookup protocol, response loss, rejection, reversal and compensation remain untested."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260720193226_WMS_OUTAGE",
+      "artifact": "metadata/bpi-wms-outage-recovery-target-acceptance.json",
+      "summary": "Target material-wms was really stopped, first delivery produced exactly one command DLQ and no material document, service recovery plus the real batch-page reconciliation reused the original command event/key and created one durable 12.345 kg document/line/transaction/stock; browser errors, final consumer lag, marker residue and cleanup errors were all zero, and all write switches/routes were restored closed."
+    },
     {
       "marker": "ADP_E2E_20260721_015610_WMS_RECON",
       "artifact": "metadata/bpi-wms-reconciliation-target-acceptance.json",

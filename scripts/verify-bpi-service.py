@@ -164,6 +164,9 @@ REQUIRED_FILES = [
     "docs/testing/bpi-wms-reconciliation-acceptance.md",
     "metadata/bpi-wms-reconciliation-target-acceptance.json",
     "metadata/bpi-wms-reconciliation-target.png",
+    "docs/testing/bpi-wms-outage-recovery-acceptance.md",
+    "metadata/bpi-wms-outage-recovery-target-acceptance.json",
+    "metadata/bpi-wms-outage-recovery-target.png",
     "metadata/bpi-shadow-run-acceptance.png",
     "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-data-quality-acceptance.json",
@@ -178,6 +181,15 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/bpi-wms-reconciliation-fixture.sql",
     "deploy/docker/scripts/bpi-wms-reconciliation-verification.sql",
     "deploy/docker/scripts/bpi-wms-reconciliation-cleanup.sql",
+    "deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js",
+    "deploy/docker/scripts/generate-bpi-wms-outage-fixture.js",
+    "deploy/docker/scripts/test-bpi-wms-outage-fixture.js",
+    "deploy/docker/scripts/run-bpi-wms-outage-recovery-target.js",
+    "deploy/docker/scripts/bpi-wms-outage-recovery-fixture.sql",
+    "deploy/docker/scripts/bpi-wms-outage-recovery-verification.sql",
+    "deploy/docker/scripts/bpi-wms-outage-recovery-cleanup.sql",
+    "deploy/docker/scripts/bpi-wms-outage-recovery-material-verification.sql",
+    "deploy/docker/scripts/bpi-wms-outage-recovery-material-cleanup.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-fixture.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
@@ -1569,6 +1581,87 @@ def main() -> int:
             fail(f"BPI target screenshot is missing: {screenshot.get('path', '')}", failures)
         elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
             fail(f"BPI target screenshot hash does not match: {screenshot.get('path', '')}", failures)
+
+    outage_recovery = json.loads(
+        (ROOT / "metadata/bpi-wms-outage-recovery-target-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    outage_target = outage_recovery.get("target", {})
+    outage_fixture = outage_recovery.get("fixture", {})
+    first_delivery = outage_recovery.get("firstDelivery", {})
+    outage_browser = outage_recovery.get("browser", {})
+    outage_kafka = outage_recovery.get("kafka", {})
+    outage_cleanup = outage_recovery.get("cleanup", {})
+    if (outage_recovery.get("status") != "PASS_TARGET_OUTAGE_RECOVERY_CLEANED"
+            or outage_recovery.get("database") != "PostgreSQL"
+            or outage_target.get("host") != "10.11.100.17"
+            or outage_target.get("composeProject") != "adp-mes-newbase"
+            or not outage_fixture.get("batchId")
+            or not outage_fixture.get("commandEventId")
+            or not outage_fixture.get("wmsIdempotencyKey")
+            or len(outage_fixture.get("payloadSha256", "")) != 64):
+        fail("BPI WMS outage recovery target or fixture evidence is incomplete", failures)
+    if (first_delivery.get("materialServiceState") != "exited"
+            or first_delivery.get("outbox") != "PUBLISHED|3|1|0"
+            or sum(first_delivery.get("commandDlqDelta", {}).values()) != 1
+            or first_delivery.get("commandEventHeaderVerified") is not True
+            or first_delivery.get("materialDocumentRows") != 0):
+        fail("BPI WMS outage first-delivery fail-closed evidence is incomplete", failures)
+    outage_after = outage_browser.get("after", {})
+    outage_batch = outage_after.get("batch", {})
+    outage_wms = outage_after.get("wmsInbound", {})
+    outage_errors = outage_browser.get("browser", {})
+    if (outage_browser.get("status") != "PASS_BROWSER_API_DURABLE_RECEIPT"
+            or outage_browser.get("loginStatus") != 200
+            or outage_browser.get("reconciliation", {}).get("status") != 200
+            or outage_browser.get("commandEventId") != outage_fixture.get("commandEventId")
+            or outage_browser.get("wmsIdempotencyKey") != outage_fixture.get("wmsIdempotencyKey")
+            or outage_batch.get("state") != "INBOUNDED"
+            or outage_batch.get("revision") != 4
+            or outage_wms.get("status") != "ACCEPTED"
+            or outage_wms.get("revision") != 3
+            or outage_wms.get("deliveryAttemptCount") != 2
+            or outage_wms.get("reconciliationCount") != 1
+            or not outage_wms.get("documentId")
+            or any(outage_errors.get(key) for key in (
+                "consoleErrors", "pageErrors", "requestFailures", "bpiHttpErrors"))):
+        fail("BPI WMS outage recovery browser or durable-receipt evidence is incomplete", failures)
+    outage_deltas = outage_kafka.get("deltas", {})
+    outage_lag = outage_kafka.get("consumerLag", {})
+    if (outage_deltas != {"command": 2, "commandDlq": 1, "receipt": 1}
+            or outage_lag.get("wms") != 0
+            or outage_lag.get("receipt") != 0):
+        fail("BPI WMS outage recovery Kafka offsets or final lag are incomplete", failures)
+    outage_persistence = outage_recovery.get("persistence", {})
+    bpi_evidence = str(outage_persistence.get("bpi", ""))
+    material_evidence = str(outage_persistence.get("material", ""))
+    for fragment in (
+            '"batchState" : "INBOUNDED"',
+            '"manualRetryCount" : 1',
+            '"totalAttemptCount" : 2',
+            '"outboxRows" : 1'):
+        if fragment not in bpi_evidence:
+            fail(f"BPI WMS outage PostgreSQL evidence is missing: {fragment}", failures)
+    for fragment in (
+            '"documents" : 1',
+            '"lines" : 1',
+            '"transactions" : 1',
+            '"stockRows" : 1',
+            '"onHandQuantity" : 12.345000'):
+        if fragment not in material_evidence:
+            fail(f"BPI WMS outage material PostgreSQL evidence is missing: {fragment}", failures)
+    if (outage_cleanup.get("environmentRestored") is not True
+            or outage_cleanup.get("servicesRestored") is not True
+            or outage_cleanup.get("residualRows") != 0
+            or outage_cleanup.get("errors") != []):
+        fail("BPI WMS outage recovery cleanup evidence is incomplete", failures)
+    outage_screenshot = ROOT / outage_browser.get("screenshot", "")
+    if not outage_screenshot.is_file():
+        fail("BPI WMS outage recovery screenshot is missing", failures)
+    elif hashlib.sha256(outage_screenshot.read_bytes()).hexdigest() != outage_browser.get(
+            "screenshotSha256"):
+        fail("BPI WMS outage recovery screenshot hash does not match", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

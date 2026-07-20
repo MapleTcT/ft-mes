@@ -762,6 +762,23 @@ QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 机器证据：`metadata/bpi-wms-reconciliation-target-acceptance.json`。本项仅关闭内部原命令核对的软件
 合同，不代表外部 ERP/WMS 查单、宕机、冲销或补偿已经完成。
 
+### BPI WMS 停机、DLQ 与恢复落库（目标 PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260720193226_WMS_OUTAGE`。验收编排器先确认五个写开关均关闭、
+route 为 `_DENY_ALL_`、待发 WMS outbox 和 consumer lag 均为 0，再临时启用精确 scope 并停止
+`material-wms`；恢复服务后由真实页面重新核对原单，最后恢复环境并清理双库 marker。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| `material-wms` 停机时首次投递 | `/bpi/#/batches` 的受控前置批次 | Kafka `bpi.wms.completion-inbound-command.v1` | `WmsCommandKafkaListener -> WmsCommandProcessor -> MaterialWmsHttpClient` | `bpi_outbox_events`、`bpi_wms_inbound_links`；物料四表 | 查询 outbox/link attempt；查询 command DLQ offset 和 event header；按 source document 查物料四表 | `material` 为 exited；outbox `PUBLISHED/r3/attempt=1`；command DLQ partition 2 增加 1 且保留原 event header；物料 document 为 0 | PASS_FAIL_CLOSED |
+| 恢复后核对并重排原命令 | `/bpi/#/batches` 质量与库存详情 | `POST /bpi-api/batches/37278a8e-33fd-4993-8876-6df5e9721cad/wms/reconcile` | `BpiProxyController -> BatchController -> BatchReleaseService -> BatchReleasePostgresRepository -> outbox publisher -> WMS adapter` | `bpi_batch_instances`、`bpi_wms_inbound_links`、`bpi_outbox_events`、`bpi_api_idempotency`、`bpi_audit_events` | `deploy/docker/scripts/bpi-wms-outage-recovery-verification.sql` | HTTP 200；原 command event `f3e9ccc0-...` 和原 key 不变；batch `INBOUNDED/r4`、link `ACCEPTED/r3`、outbox `PUBLISHED/r6`、manual/total attempt `1/2`，审计/inbox/idempotency/原 outbox 均各 1 | PASS_TARGET_OUTAGE_RECOVERY |
+| durable material 完工入库 | 同上，页面最终读取 | Kafka receipt + material REST | `MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository -> receipt publisher -> WmsReceiptKafkaListener` | `wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`、`wms_batch_stocks` | `deploy/docker/scripts/bpi-wms-outage-recovery-material-verification.sql` | 单据/明细/事务/库存各 1；单据 `POSTED/QUALIFIED`，数量与 on-hand/available 均为 `12.345 kg`，hold=0 | PASS |
+| 双库 marker 清理和安全恢复 | 不适用 | 双库 cleanup SQL；Compose/env restore | 受保护编排器 `finally` | 上述表、临时 feature flag 和运行配置 | 两个 cleanup SQL 后再按 marker/event 精确计数；读取五个开关、route 和服务状态 | BPI/物料总残留 0；环境和服务恢复 true；五开关 false、route `_DENY_ALL_`、consumer lag 0、cleanup error 0 | PASS_CLEANED |
+
+机器证据：`metadata/bpi-wms-outage-recovery-target-acceptance.json`；完整操作、Kafka offset、双库
+SQL 和边界见 `docs/testing/bpi-wms-outage-recovery-acceptance.md`。该项只关闭目标内部
+`material-wms` 宕机恢复，不代表外部 ERP/WMS 查单、响应丢失、冲销或补偿已完成。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

@@ -156,7 +156,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -172,6 +172,7 @@ help:
 	@printf '%s\n' '  make bpi-service-package   Build the executable BPI service JAR with Java 17'
 	@printf '%s\n' '  make bpi-wms-adapter-test  Test query-first BPI to material-wms delivery with Java 17'
 	@printf '%s\n' '  make bpi-wms-adapter-package Build the executable BPI WMS adapter JAR'
+	@printf '%s\n' '  make bpi-wms-outage-fixture-test Validate the real Protobuf outage-recovery fixture'
 	@printf '%s\n' '  make bpi-stream-static-check Validate the Java 17/Flink streaming module boundaries'
 	@printf '%s\n' '  make bpi-stream-test       Run deterministic BPI stream replay tests with Java 17'
 	@printf '%s\n' '  make bpi-stream-package    Build the deployable BPI Flink job JAR with Java 17'
@@ -192,6 +193,8 @@ help:
 	@printf '%s\n' '  make bpi-integrated-upgrade-expand-only Upgrade BPI inside the single ADP Compose stack with protected backups'
 	@printf '%s\n' '  make acceptance-bpi-quality-release-target Test the real ADP batch release page and adapter boundary'
 	@printf '%s\n' '  make acceptance-bpi-wms-reconciliation-target Test the real admin WMS original-command reconciliation flow'
+	@printf '%s\n' '  make acceptance-bpi-wms-outage-recovery-target Test browser recovery after material-wms command DLQ'
+	@printf '%s\n' '  make rehearse-bpi-wms-outage-recovery-target Run the guarded target outage, recovery and cleanup rehearsal'
 	@printf '%s\n' '  make bpi-stream-capture-savepoint Capture a non-cancelling canonical upgrade savepoint'
 	@printf '%s\n' '  make bpi-stream-restore-savepoint Recreate only Flink from the persisted savepoint path'
 	@printf '%s\n' '  make bpi-stream-verify-savepoint Verify restored state, new operators, topics and checkpoint'
@@ -422,6 +425,11 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
+	$(NODE) --check deploy/docker/scripts/generate-bpi-wms-outage-fixture.js
+	$(NODE) --check deploy/docker/scripts/test-bpi-wms-outage-fixture.js
+	$(NODE) --check deploy/docker/scripts/run-bpi-wms-outage-recovery-target.js
+	$(NODE) --test deploy/docker/scripts/test-bpi-wms-outage-fixture.js
 	$(NODE) --check deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	$(PYTHON) -m py_compile scripts/verify-bpi-feature-flag-governance.py
@@ -700,6 +708,9 @@ bpi-wms-adapter-test:
 bpi-wms-adapter-package:
 	$(MVN) -f services/bpi-service/pom.xml -pl wms-adapter -am -DskipTests package
 
+bpi-wms-outage-fixture-test:
+	$(NODE) --test deploy/docker/scripts/test-bpi-wms-outage-fixture.js
+
 bpi-stream-static-check:
 	$(PYTHON) scripts/verify-bpi-streaming.py
 
@@ -715,6 +726,12 @@ acceptance-bpi-quality-release-target:
 
 acceptance-bpi-wms-reconciliation-target:
 	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-wms-reconciliation-acceptance.js
+
+acceptance-bpi-wms-outage-recovery-target:
+	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-wms-outage-recovery-acceptance.js
+
+rehearse-bpi-wms-outage-recovery-target:
+	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/run-bpi-wms-outage-recovery-target.js
 
 bpi-stream-test:
 	$(MVN) -f streaming/pom.xml -pl bpi-stream-engine -am test

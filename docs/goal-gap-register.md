@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-20T18:26:56+00:00` |
-| Repo Commit | `3a00d69274b0019a42edd30abf024bce406157bc` |
+| Generated At | `2026-07-20T19:49:17+00:00` |
+| Repo Commit | `23e98051fc266c2d9653f4240b7327cb2607009b` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条已全部 PASS；public produceTaskCreated 产品范围、现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。 | 保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量闭环、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续 public produceTaskCreated 产品范围验收、现场 Batch/DCS 切换确认，并补齐 before/after SQL 和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、同指令 START/END、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4，以及同 event/同幂等键 WMS 原单核对与重新排队均已在目标环境通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源、真实业务负载跨组件整体回切、外部 QCS 实例主动事件和外部 ERP/WMS 冲销/宕机补偿。 | 把 BPI_LIVE_20260720_123058、ADP_E2E_20260720_215500_BPI_WMS 和 ADP_E2E_20260721_015610_WMS_RECON 固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再接入外部 QCS 主动事件及外部 ERP/WMS 冲销/宕机补偿。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则、点位目录/校准治理、影子验收、运行回执、savepoint、数据质量、broker/组件回退、同指令 START/END、受控 QCS -> Kafka -> query-first material-wms -> durable receipt -> INBOUNDED/r4、同 event/同幂等键 WMS 原单核对与重新排队，以及目标内部 material-wms 停机/DLQ/恢复均已通过。Phase 2 最终继续关闭；尚缺真实连续 7-14 天、物理设备来源、真实业务负载跨组件整体回切、外部 QCS 实例主动事件和外部 ERP/WMS 冲销及外部协议补偿。 | 把 BPI_LIVE_20260720_123058、ADP_E2E_20260720_215500_BPI_WMS、ADP_E2E_20260721_015610_WMS_RECON 和 ADP_E2E_20260720193226_WMS_OUTAGE 固定为发布回归基线；保持 Phase 2 关闭，先在选定产线用物理来源和正式校准连续运行 7-14 天，再接入外部 QCS 主动事件及外部 ERP/WMS 冲销/查单/响应丢失/补偿。 |
 
 ## Production Blockers
 

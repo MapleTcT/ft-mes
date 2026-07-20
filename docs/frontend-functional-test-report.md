@@ -758,6 +758,20 @@ Java 17 service 和 `ft_mes_bpi` PostgreSQL 15/Flyway V23。页面动作不是 m
 `metadata/bpi-wms-reconciliation-target.png`；详细报告：
 `docs/testing/bpi-wms-reconciliation-acceptance.md`。
 
+### BPI WMS 停机恢复（2026-07-21）
+
+本节在当前唯一测试环境 `http://10.11.100.17:18080` 真实停止目标 `material-wms`，证明首次
+Kafka 投递失败和 DLQ，再恢复服务并从真实批次页执行“重新核对原单”。夹具、开关和服务均由受保护
+编排器恢复，取证后双库 marker 残留为 0。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 完工入库恢复 | `http://10.11.100.17:18080/bpi/#/batches` | 停止 `material-wms` 触发首次失败；恢复服务，打开 `ADP_E2E_20260720193226_WMS_OUTAGE` 并点击“重新核对原单” | Kafka command/DLQ/receipt；`POST /bpi-api/batches/37278a8e-33fd-4993-8876-6df5e9721cad/wms/reconcile` | 登录 200、POST 200；最终页面显示 `ACCEPTED/INBOUNDED` 和 `CIN-f3e9ccc0-5792-4cb3-801f-b6b2b9cef731-WARE-E2E`；console/page/request/BPI HTTP error 均为 0 | 停机时物料单据 0 且 command DLQ +1；恢复后保留原 event/key，attempt=2、manual retry=1；BPI batch `INBOUNDED/r4`，物料单据/明细/事务/库存各 1、数量 `12.345 kg` | BPI batch/link/outbox/inbox/idempotency/audit；material document/line/transaction/stock | PASS_TARGET_OUTAGE_RECOVERY_CLEANED | 仅覆盖内部 `material-wms`；外部 ERP/WMS 协议、冲销和补偿未验收 |
+
+机器证据：`metadata/bpi-wms-outage-recovery-target-acceptance.json`；截图：
+`metadata/bpi-wms-outage-recovery-target.png`；详细报告：
+`docs/testing/bpi-wms-outage-recovery-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

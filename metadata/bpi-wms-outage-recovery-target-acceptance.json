@@ -1,0 +1,324 @@
+{
+  "generatedAt": "2026-07-20T19:34:01.326Z",
+  "status": "PASS_TARGET_OUTAGE_RECOVERY_CLEANED",
+  "database": "PostgreSQL",
+  "marker": "ADP_E2E_20260720193226_WMS_OUTAGE",
+  "target": {
+    "host": "10.11.100.17",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01"
+  },
+  "outage": {
+    "service": "material",
+    "expectedCommandDlqDelta": 1,
+    "expectedCommandTopicDelta": 2,
+    "expectedReceiptTopicDelta": 1
+  },
+  "fixture": {
+    "batchId": "37278a8e-33fd-4993-8876-6df5e9721cad",
+    "commandEventId": "f3e9ccc0-5792-4cb3-801f-b6b2b9cef731",
+    "wmsIdempotencyKey": "ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1",
+    "payloadSha256": "bf9ff70ad67f9ab7ecd0596862be8f25bc0ec71a275ced444819e32802d2cdc1"
+  },
+  "preflight": {
+    "switches": {
+      "BPI_PHASE2_INTEGRATION_ENABLED": "false",
+      "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED": "false",
+      "BPI_PHASE2_KAFKA_ENABLED": "false",
+      "BPI_WMS_OUTBOX_ENABLED": "false",
+      "BPI_WMS_ADAPTER_ENABLED": "false"
+    },
+    "route": "_DENY_ALL_",
+    "materialApiKeyConfigured": true,
+    "activeWmsOutboxRows": 0,
+    "conflictingFeatureFlags": 0,
+    "markerRows": 0,
+    "consumerLag": {
+      "wms": 0,
+      "receipt": 0
+    },
+    "offsets": {
+      "command": {
+        "0": 0,
+        "1": 1,
+        "2": 1
+      },
+      "commandDlq": {
+        "0": 0,
+        "1": 0,
+        "2": 0
+      },
+      "receipt": {
+        "0": 0,
+        "1": 1,
+        "2": 2
+      }
+    }
+  },
+  "firstDelivery": {
+    "materialServiceState": "exited",
+    "outbox": "PUBLISHED|3|1|0",
+    "commandDlqDelta": {
+      "2": 1
+    },
+    "commandEventHeaderVerified": true,
+    "materialDocumentRows": 0
+  },
+  "browser": {
+    "generatedAt": "2026-07-20T19:33:25.698Z",
+    "status": "PASS_BROWSER_API_DURABLE_RECEIPT",
+    "database": "PostgreSQL",
+    "marker": "ADP_E2E_20260720193226_WMS_OUTAGE",
+    "scope": {
+      "tenantId": "1000",
+      "plantId": "PLANT-01",
+      "lineId": "LINE-S07-01"
+    },
+    "route": "/bpi/#/batches",
+    "batchId": "37278a8e-33fd-4993-8876-6df5e9721cad",
+    "commandEventId": "f3e9ccc0-5792-4cb3-801f-b6b2b9cef731",
+    "wmsIdempotencyKey": "ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1",
+    "loginStatus": 200,
+    "before": {
+      "batch": {
+        "id": "37278a8e-33fd-4993-8876-6df5e9721cad",
+        "batchNo": "ADP_E2E_20260720193226_WMS_OUTAGE",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "stageCode": "PACKING",
+        "orderId": "ADP_E2E_20260720193226_WMS_OUTAGE_ORDER",
+        "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+        "state": "RELEASED",
+        "revision": 3,
+        "shadow": false,
+        "startTime": "2026-07-20T17:32:45.661991Z",
+        "endTime": "2026-07-20T18:32:45.661991Z",
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "PENDING",
+        "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+        "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+      },
+      "qualityGate": {
+        "id": "dd06ff25-cc89-4548-9ad8-5648b0ba31c0",
+        "externalGateId": "ADP_E2E_20260720193226_WMS_OUTAGE_GATE",
+        "externalRevision": 1,
+        "sourceEventId": "ADP_E2E_20260720193226_WMS_OUTAGE_QUALITY_EVENT",
+        "state": "ACCEPTED",
+        "releaseQuantity": 12.345,
+        "quantityUnit": "kg",
+        "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+        "observedAt": "2026-07-20T19:12:45.661991Z",
+        "inspections": [
+          {
+            "inspectionCode": "FINAL_RELEASE",
+            "inspectionRecordId": "ADP_E2E_20260720193226_WMS_OUTAGE_INSPECTION",
+            "required": true,
+            "disposition": "ACCEPTED",
+            "finalResult": true,
+            "observedAt": "2026-07-20T19:12:45.661991Z"
+          }
+        ]
+      },
+      "wmsInbound": {
+        "id": "0b698e3f-32d9-4986-abb5-fdfc1709c48a",
+        "commandEventId": "f3e9ccc0-5792-4cb3-801f-b6b2b9cef731",
+        "idempotencyKey": "ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1",
+        "status": "PENDING",
+        "revision": 1,
+        "outboxStatus": "PUBLISHED",
+        "deliveryAttemptCount": 1,
+        "reconciliationCount": 0,
+        "commandPublishedAt": "2026-07-20T19:32:59.435286Z",
+        "reconcileAfter": "2026-07-20T19:33:01.435286Z",
+        "reconciliationAllowed": true
+      }
+    },
+    "reconciliation": {
+      "status": 200,
+      "request": {
+        "idempotencyKey": "8e636204-9f73-47c9-ab36-f3c3616bb790",
+        "ifMatch": "1",
+        "reason": "ADP_E2E_20260720193226_WMS_OUTAGE material-wms outage recovered; query original command"
+      },
+      "response": {
+        "batch": {
+          "id": "37278a8e-33fd-4993-8876-6df5e9721cad",
+          "batchNo": "ADP_E2E_20260720193226_WMS_OUTAGE",
+          "tenantId": "1000",
+          "plantId": "PLANT-01",
+          "lineId": "LINE-S07-01",
+          "stageCode": "PACKING",
+          "orderId": "ADP_E2E_20260720193226_WMS_OUTAGE_ORDER",
+          "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+          "state": "RELEASED",
+          "revision": 3,
+          "shadow": false,
+          "startTime": "2026-07-20T17:32:45.661991Z",
+          "endTime": "2026-07-20T18:32:45.661991Z",
+          "quantity": 12.345,
+          "quantityUnit": "kg",
+          "qualityGate": "ACCEPTED",
+          "wmsStatus": "PENDING",
+          "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+          "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+        },
+        "qualityGate": {
+          "id": "dd06ff25-cc89-4548-9ad8-5648b0ba31c0",
+          "externalGateId": "ADP_E2E_20260720193226_WMS_OUTAGE_GATE",
+          "externalRevision": 1,
+          "sourceEventId": "ADP_E2E_20260720193226_WMS_OUTAGE_QUALITY_EVENT",
+          "state": "ACCEPTED",
+          "releaseQuantity": 12.345,
+          "quantityUnit": "kg",
+          "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+          "observedAt": "2026-07-20T19:12:45.661991Z",
+          "inspections": [
+            {
+              "inspectionCode": "FINAL_RELEASE",
+              "inspectionRecordId": "ADP_E2E_20260720193226_WMS_OUTAGE_INSPECTION",
+              "required": true,
+              "disposition": "ACCEPTED",
+              "finalResult": true,
+              "observedAt": "2026-07-20T19:12:45.661991Z"
+            }
+          ]
+        },
+        "wmsInbound": {
+          "id": "0b698e3f-32d9-4986-abb5-fdfc1709c48a",
+          "commandEventId": "f3e9ccc0-5792-4cb3-801f-b6b2b9cef731",
+          "idempotencyKey": "ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1",
+          "status": "PENDING",
+          "revision": 2,
+          "outboxStatus": "PENDING",
+          "deliveryAttemptCount": 1,
+          "reconciliationCount": 1,
+          "lastReconciledAt": "2026-07-20T19:33:22.599787Z",
+          "lastReconciledBy": "legacy-ticket:admin",
+          "reconcileAfter": "2026-07-20T19:33:24.599787Z",
+          "reconciliationAllowed": false,
+          "reconciliationBlockedReason": "OUTBOX_BUSY"
+        }
+      }
+    },
+    "after": {
+      "batch": {
+        "id": "37278a8e-33fd-4993-8876-6df5e9721cad",
+        "batchNo": "ADP_E2E_20260720193226_WMS_OUTAGE",
+        "tenantId": "1000",
+        "plantId": "PLANT-01",
+        "lineId": "LINE-S07-01",
+        "stageCode": "PACKING",
+        "orderId": "ADP_E2E_20260720193226_WMS_OUTAGE_ORDER",
+        "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+        "state": "INBOUNDED",
+        "revision": 4,
+        "shadow": false,
+        "startTime": "2026-07-20T17:32:45.661991Z",
+        "endTime": "2026-07-20T18:32:45.661991Z",
+        "quantity": 12.345,
+        "quantityUnit": "kg",
+        "qualityGate": "ACCEPTED",
+        "wmsStatus": "INBOUNDED",
+        "ruleVersion": "BPI_LIVE_20260720_123058_START@1.0.0",
+        "topologyVersion": "BPI_LIVE_20260720_123058_TOPOLOGY@1.0.0"
+      },
+      "qualityGate": {
+        "id": "dd06ff25-cc89-4548-9ad8-5648b0ba31c0",
+        "externalGateId": "ADP_E2E_20260720193226_WMS_OUTAGE_GATE",
+        "externalRevision": 1,
+        "sourceEventId": "ADP_E2E_20260720193226_WMS_OUTAGE_QUALITY_EVENT",
+        "state": "ACCEPTED",
+        "releaseQuantity": 12.345,
+        "quantityUnit": "kg",
+        "materialCode": "ADP_E2E_20260720193226_WMS_OUTAGE_MATERIAL",
+        "observedAt": "2026-07-20T19:12:45.661991Z",
+        "inspections": [
+          {
+            "inspectionCode": "FINAL_RELEASE",
+            "inspectionRecordId": "ADP_E2E_20260720193226_WMS_OUTAGE_INSPECTION",
+            "required": true,
+            "disposition": "ACCEPTED",
+            "finalResult": true,
+            "observedAt": "2026-07-20T19:12:45.661991Z"
+          }
+        ]
+      },
+      "wmsInbound": {
+        "id": "0b698e3f-32d9-4986-abb5-fdfc1709c48a",
+        "commandEventId": "f3e9ccc0-5792-4cb3-801f-b6b2b9cef731",
+        "idempotencyKey": "ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1",
+        "status": "ACCEPTED",
+        "receiptEventId": "817982c9-a6a4-5c44-88d2-58688095b7b1",
+        "documentId": "CIN-f3e9ccc0-5792-4cb3-801f-b6b2b9cef731-WARE-E2E",
+        "detail": "Created durable material-wms document CIN-f3e9ccc0-5792-4cb3-801f-b6b2b9cef731-WARE-E2E (internal id 30).",
+        "observedAt": "2026-07-20T19:33:24.540Z",
+        "revision": 3,
+        "outboxStatus": "PUBLISHED",
+        "deliveryAttemptCount": 2,
+        "reconciliationCount": 1,
+        "commandPublishedAt": "2026-07-20T19:33:23.557975Z",
+        "lastReconciledAt": "2026-07-20T19:33:22.599787Z",
+        "lastReconciledBy": "legacy-ticket:admin",
+        "reconcileAfter": "2026-07-20T19:33:26.720979Z",
+        "reconciliationAllowed": false,
+        "reconciliationBlockedReason": "BATCH_NOT_RELEASED"
+      }
+    },
+    "browser": {
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "bpiHttpErrors": []
+    },
+    "screenshot": "metadata/bpi-wms-outage-recovery-target.png",
+    "screenshotSha256": "6b8ec0ee425586add4ef3a92c07ef22e7a398d5a6c38c9c1441b482eaafce612",
+    "error": null
+  },
+  "persistence": {
+    "bpi": "evidence                                                                                                                                                                                                                                                                                                                                                             \n----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n {\"marker\" : \"ADP_E2E_20260720193226_WMS_OUTAGE\", \"batchId\" : \"37278a8e-33fd-4993-8876-6df5e9721cad\", \"batchState\" : \"INBOUNDED\", \"batchRevision\" : 4, \"batchWmsStatus\" : \"INBOUNDED\", \"commandEventId\" : \"f3e9ccc0-5792-4cb3-801f-b6b2b9cef731\", \"wmsIdempotencyKey\" : \"ADP_E2E_20260720193226_WMS_OUTAGE|WMS|1\", \"linkStatus\" : \"ACCEPTED\", \"linkRevision\" : 3, \"receiptEventId\" : \"817982c9-a6a4-5c44-88d2-58688095b7b1\", \"documentId\" : \"CIN-f3e9ccc0-5792-4cb3-801f-b6b2b9cef731-WARE-E2E\", \"outboxStatus\" : \"PUBLISHED\", \"outboxRevision\" : 6, \"manualRetryCount\" : 1, \"totalAttemptCount\" : 2, \"reconciliationAuditRows\" : 1, \"acceptedAuditRows\" : 1, \"receiptInboxRows\" : 1, \"apiIdempotencyRows\" : 1, \"outboxRows\" : 1}\n(1 row)",
+    "material": "evidence                                                                                \n-----------------------------------------------------------------------------------------------------------------------------------------------------------------------\n {\"documents\" : 1, \"lines\" : 1, \"transactions\" : 1, \"stockRows\" : 1, \"documentId\" : \"CIN-f3e9ccc0-5792-4cb3-801f-b6b2b9cef731-WARE-E2E\", \"onHandQuantity\" : 12.345000}\n(1 row)"
+  },
+  "kafka": {
+    "offsets": {
+      "command": {
+        "0": 0,
+        "1": 1,
+        "2": 3
+      },
+      "commandDlq": {
+        "0": 0,
+        "1": 0,
+        "2": 1
+      },
+      "receipt": {
+        "0": 0,
+        "1": 2,
+        "2": 2
+      }
+    },
+    "deltas": {
+      "command": 2,
+      "commandDlq": 1,
+      "receipt": 1
+    },
+    "consumerLag": {
+      "wms": 0,
+      "receipt": 0
+    }
+  },
+  "cleanup": {
+    "environmentRestored": true,
+    "servicesRestored": true,
+    "residualRows": 0,
+    "errors": []
+  },
+  "error": null
+}
