@@ -231,6 +231,10 @@ if [ -z "$MIGRATOR_PASSWORD" ]; then
     MIGRATOR_PASSWORD=$(container_env_value "$POSTGRES_ID" BPI_MIGRATOR_PASSWORD)
 fi
 FLYWAY_IMAGE=$(env_value BPI_FLYWAY_IMAGE m.daocloud.io/docker.io/flyway/flyway:11-alpine)
+SERVICE_MAVEN_IMAGE=${BPI_INTEGRATED_SERVICE_MAVEN_IMAGE:-$(env_value BPI_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-17)}
+SERVICE_JAVA_IMAGE=${BPI_INTEGRATED_SERVICE_JAVA_IMAGE:-$(env_value BPI_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:17-jre-jammy)}
+ADAPTER_MAVEN_IMAGE=${BPI_INTEGRATED_ADAPTER_MAVEN_IMAGE:-$(env_value BPI_ADAPTER_MAVEN_IMAGE m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-8)}
+ADAPTER_JAVA_IMAGE=${BPI_INTEGRATED_ADAPTER_JAVA_IMAGE:-$(env_value BPI_ADAPTER_JAVA_IMAGE m.daocloud.io/docker.io/library/eclipse-temurin:8-jre-jammy)}
 if [ -z "$MIGRATOR_PASSWORD" ]; then
     printf 'ERROR: BPI_MIGRATOR_PASSWORD is missing\n' >&2
     exit 1
@@ -290,14 +294,14 @@ test -s "$UI_RELEASE/index.html" || {
 }
 
 docker build \
-    --build-arg "MAVEN_IMAGE=$(env_value BPI_MAVEN_IMAGE maven:3.9.9-eclipse-temurin-17)" \
-    --build-arg "JAVA_IMAGE=$(env_value BPI_JAVA_IMAGE eclipse-temurin:17-jre-jammy)" \
+    --build-arg "MAVEN_IMAGE=$SERVICE_MAVEN_IMAGE" \
+    --build-arg "JAVA_IMAGE=$SERVICE_JAVA_IMAGE" \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/services/bpi-service/Dockerfile" \
     -t "$SERVICE_IMAGE" "$RELEASE_ROOT"
 docker build \
-    --build-arg "MAVEN_IMAGE=$(env_value BPI_ADAPTER_MAVEN_IMAGE maven:3.9.9-eclipse-temurin-8)" \
-    --build-arg "JAVA_IMAGE=$(env_value BPI_ADAPTER_JAVA_IMAGE eclipse-temurin:8-jre-jammy)" \
+    --build-arg "MAVEN_IMAGE=$ADAPTER_MAVEN_IMAGE" \
+    --build-arg "JAVA_IMAGE=$ADAPTER_JAVA_IMAGE" \
     --label "org.opencontainers.image.revision=$RELEASE_COMMIT" \
     -f "$RELEASE_ROOT/backend/source-modules/batch-intelligence-adapter/Dockerfile" \
     -t "$ADAPTER_IMAGE" "$RELEASE_ROOT"
