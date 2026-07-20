@@ -27,6 +27,7 @@
 | `bpi-telemetry-ingress.md` | 已恢复并验收 | 遥测 replay 幂等、序列状态、点级拒绝和隔离；HTTP 默认关闭 |
 | `bpi-candidate-protobuf-ingress.md` | 已恢复并验收 | Flink `BatchCandidateV1` 完整证据经 Protobuf bridge 入库，并已由目标环境 Kafka/浏览器联合 marker 复验 |
 | `bpi-candidate-kafka-ingress.md` | 已恢复并验收 | 目标环境三 broker、Flink、candidate listener、DLQ、PostgreSQL 和真实候选页面已闭合；退役前产生、退役后消费的候选按历史发布版本恰好一次落库 |
+| `bpi-quality-release-wms-inbound.md` | 已开始 | 本地 V23 软件链 PASS、目标 BLOCKED；QCS required inspection snapshot、WAIT_QA/RELEASED/REJECTED、WMS transactional outbox、durable document receipt 和影子批次双层阻断已通过 4/4 PostgreSQL/API，真实 QCS/WMS 与浏览器页未激活 |
 | [`../testing/bpi-rule-retirement-acceptance.md`](../testing/bpi-rule-retirement-acceptance.md) | V15 受控影子验收 PASS | 规则退役、typed inactive、savepoint 有状态升级、回滚草稿、延迟候选落库和 11 类 marker 清理；不声明现场 READY 或生产写回 |
 | `bpi-iot-replay-runtime-acceptance.md` | 已恢复并验收 | IoT 信号经边界引擎、Protobuf、候选确认到 PostgreSQL 的跨模块闭环 |
 | `persistence-acceptance.md` | 模板已建立 | 真实前端动作到 PostgreSQL 落库证明 |

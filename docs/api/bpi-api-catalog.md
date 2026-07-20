@@ -50,6 +50,7 @@
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/balance` | `getBatchBalance` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/genealogy` | `getBatchGenealogy` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SERVICE_IMPLEMENTED |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/release` | `getBatchRelease` | SERVICE_IMPLEMENTED；读取 QCS gate/inspection snapshot 与 WMS command/receipt projection，Phase 2 写入口仍默认关闭 |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
@@ -166,6 +167,13 @@ append-only。已解决事件只有在新事件 `detectedAt > resolvedAt` 时重
 未解决 CRITICAL 数据质量事件和独立审批。任何一项失败都返回 `422`，不会写 WOM、QCS、WMS、PLC 或 DCS。
 受控时间压缩测试只能验证状态机、API 和 PostgreSQL 证据，不能替代真实 7-14 天现场连续运行。
 
+Phase 2 质量放行采用 QCS 的完整、单调 revision snapshot，而不是根据单条检验结果或接口 `200`
+推断合格。批次先从 `CLOSED_RAW` 进入 `WAIT_QA`；全部 required inspection 同时 final/accepted
+才进入 `RELEASED`，任一 required final/rejected 则进入 `REJECTED`。只有非影子批次且精确 scope 的
+QCS/WMS 两个 flag 都启用时，RELEASED 事务才会追加一个确定性 WMS command outbox。WMS 回执必须
+对应已经 `PUBLISHED` 的 command；只有 accepted 且带 durable `document_id` 才能进入 `INBOUNDED`。
+代码和本地 PostgreSQL V23 已验收，但真实 QCS/WMS target、Kafka ACL 和浏览器页仍未激活。
+
 ## 3. 内部受信接入 API
 
 | Method | Path | 调用方 | 权限 | 成功/隔离结果 | 持久化 |
@@ -173,6 +181,8 @@ append-only。已解决事件只有在新事件 `detectedAt > resolvedAt` 时重
 | POST | `/internal/bpi/v1/candidates` | Flink/候选适配器 | `BPI_EVENT_INGEST` + tenant/plant/line scope | `201` 候选；重复事件返回原对象；冲突 `409` | inbox、candidate |
 | POST | `/internal/bpi/v1/candidate-events` | Flink/Kafka consumer 的受控验收桥 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 候选；非法 Protobuf/证据 `422`；跨 tenant `403` | inbox、candidate evidence/missing signals |
 | POST | `/internal/bpi/v1/telemetry` | 仅受控 replay/验收工具 | `BPI_EVENT_INGEST` + tenant/plant/line scope + 显式启用 | `201` 接收；幂等重放 `200`；隔离 `202`；身份冲突 `409` | 短期 staging：event、point、point reject、source state、quarantine |
+| POST | `/internal/bpi/v1/qcs-quality-gates` | QCS adapter 的受控 Protobuf bridge | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2/QCS 双门禁 | `201` projection；非法 snapshot `422`；重放冲突 `409`；未启用 `403` | inbox、quality gate/link、batch state、audit、可选 WMS outbox |
+| POST | `/internal/bpi/v1/wms-inbound-receipts` | WMS adapter 的受控 Protobuf bridge | `BPI_INTEGRATION_INGEST` + tenant/plant/line scope + Phase 2 门禁 | `201` projection；PUBLISHED 前回执 `409`；未知状态或 accepted 缺 document id `422` | inbox、WMS link、batch state、audit |
 
 候选 Protobuf 入口消费 `BatchCandidateV1` wire bytes，并要求 v1 兼容新增的完整 `CandidateEvidenceV1`
 快照。它默认关闭，只有设置 `BPI_CANDIDATE_PROTOBUF_HTTP_INGRESS_ENABLED=true` 才能用于 Flink 输出到
@@ -200,6 +210,11 @@ JetLinks exporter 长期直连。生产路径仍是 `iot.telemetry.selected.v1` 
 | `bpi.batch.candidate.dlq.v1` | 原 partition/key | 原 `BatchCandidateV1` bytes + DLT headers | BPI consumer -> 运维处置 | CONSUMER_WIRED_LIVE_BLOCKED |
 | `bpi.data-quality.v1` | `tenantId|lineId|sourceEventId|propertyId|issueCode` | `DataQualityEventV1`；payload 另含 `plantId/deviceId/headers.stage` | ingest/Flink -> BPI consumer/PostgreSQL | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
 | `bpi.data-quality.dlq.v1` | 原 partition/key | 原 `DataQualityEventV1` bytes + DLT headers | BPI consumer -> 运维处置 | LOCAL_KAFKA_POSTGRES_ACCEPTED_TARGET_PENDING |
+| `qcs.batch.quality-gate.v1` | `batchId|qualityGateId` | `QcsQualityGateV1` | QCS adapter -> BPI inbox/PostgreSQL | CONTRACT_AND_LOCAL_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
+| `qcs.batch.quality-gate.dlq.v1` | 原 partition/key | 原 `QcsQualityGateV1` bytes + DLT headers | BPI consumer -> 运维处置 | WIRED_DISABLED_BY_DEFAULT |
+| `bpi.wms.completion-inbound-command.v1` | `tenantId|plantId|batchId` | `WmsCompletionInboundCommandV1` | BPI transactional outbox -> WMS adapter | CONTRACT_AND_LOCAL_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound.receipt.v1` | `commandEventId` | `WmsCompletionInboundReceiptV1` | WMS adapter -> BPI inbox/PostgreSQL | CONTRACT_AND_LOCAL_POSTGRES_ACCEPTED_DISABLED_BY_DEFAULT |
+| `wms.completion-inbound.receipt.dlq.v1` | 原 partition/key | 原 `WmsCompletionInboundReceiptV1` bytes + DLT headers | BPI consumer -> 运维处置 | WIRED_DISABLED_BY_DEFAULT |
 | `bpi.batch.fact.v1` | `batchId` | `BatchFactV1` | BPI -> downstream | PHASE_2_RESERVED |
 | `bpi.training.snapshot.v1` | `datasetId` | `TrainingSnapshotV1` | BPI -> ML pipeline | PHASE_3_RESERVED |
 

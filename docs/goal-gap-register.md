@@ -7,8 +7,8 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 
 | Field | Value |
 | --- | --- |
-| Generated At | `2026-07-20T06:04:26+00:00` |
-| Repo Commit | `f669bb1ee7460a167c52741a877bb8d7131e7396` |
+| Generated At | `2026-07-20T08:42:38+00:00` |
+| Repo Commit | `22ddadebd20ed9ed5d7efd19c3c0ed49967b9c90` |
 | Database Target | `PostgreSQL` |
 | Status | `IN_PROGRESS_NOT_COMPLETE` |
 | Goal Gaps | `12` |
@@ -38,7 +38,7 @@ It summarizes the remaining gaps that prevent the ADP/MES repository from being 
 | `G-018` | `PARTIAL` | 业务模块完整测试用例 | 生产矩阵 44 条已全部 PASS；public produceTaskCreated 产品范围、现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。 | 保持 material/WMS、ProcessAnalysis、生产列表导出、WOM 二维码、可见手工新建指令单、RM Web 配方编辑、独立不良数量闭环、PATROL 配置/执行/异常隐患、统计聚合和 Kafka 消费回归；接入有历史值的真实 TagManagement 测点并配置误差基准巡检项，复验中位数落库和误差图表；取得 SESGISConfig 后恢复 GIS 定位/轨迹，若要求整改、复查和销项则先取得真实 SESH；继续 public produceTaskCreated 产品范围验收、现场 Batch/DCS 切换确认，并补齐 before/after SQL 和业务签字。 |
 | `G-019` | `PARTIAL` | PostgreSQL 缺口进入幂等 SQL/backlog | 只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。 | 每发现新 PostgreSQL 缺口，追加幂等 SQL 或模块 backlog，并重新跑 inventory/audit。 |
 | `G-020` | `BLOCKED` | 生产迁移前置项 | production migration readiness remains NOT_READY_FOR_PRODUCTION_MIGRATION. | 用 production-source-inventory / production-target-preflight / production-rowcount-compare / production-checksum-compare 建立数据库迁移证据。 |
-| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、点位校准治理、Flyway V20 影子运行验收、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、前端状态列、有状态 savepoint 恢复、Flink 自动数据质量 producer、单 broker 故障恢复、service/adapter/Flink 应用组件回退以及受控同指令 START/END 均已在目标环境通过。V20 的 8 天受控时间压缩已证明 10 批复核、19/20 边界认同和累计量偏差 0%，但不构成现场连续运行证据；尚缺真实连续 7-14 天、物理设备来源以及真实业务负载下的跨组件整体回切。 | 把已通过的 BPI_LIVE_20260720_123058 同一 WOM 指令 START/END 真实浏览器/API/JetLinks/Kafka/Flink/PostgreSQL 联合验收、自动数据质量链和 Flyway V20 影子运行闭环，固定为每次 BPI 发布前的目标环境回归基线；随后使用影子运行工作台在选定产线真实连续运行 7-14 天，再决定是否进入 QCS/WMS 写回。 |
+| `G-021` | `PARTIAL` | 智能批次与工艺数据中心（BPI） | 拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、点位校准治理、Flyway V20 影子运行验收、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、前端状态列、有状态 savepoint 恢复、Flink 自动数据质量 producer、单 broker 故障恢复、service/adapter/Flink 应用组件回退以及受控同指令 START/END 均已在目标环境通过。V23 QCS 放行/WMS 入库软件合同已在本地 PostgreSQL/API 通过但仍默认关闭；尚缺真实连续 7-14 天、物理设备来源、真实业务负载下的跨组件整体回切，以及真实 QCS/WMS、目标部署和浏览器验收。 | 把已通过的 BPI_LIVE_20260720_123058 同一 WOM 指令 START/END 真实浏览器/API/JetLinks/Kafka/Flink/PostgreSQL 联合验收、自动数据质量链和 Flyway V20 影子运行闭环，固定为每次 BPI 发布前的目标环境回归基线；保持 V23 的 QCS/WMS 开关关闭，先在选定产线真实连续运行 7-14 天，再接入真实 QCS/WMS 做 marker、补偿和浏览器验收。 |
 
 ## Production Blockers
 

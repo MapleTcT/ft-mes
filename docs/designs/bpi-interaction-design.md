@@ -179,8 +179,15 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 `ACTIVE` 批次。成功后同一批次进入 `CLOSED_RAW`、revision 加一、写入 endTime、END 证据、
 `END_BOUNDARY_CONFIRMED` 状态事件和候选/批次审计。详情页对 `CLOSED_RAW` 不再显示暂停或恢复命令。
 
+Phase 2 的后端 projection 已提供 `getBatchRelease`，但页面尚未实施。后续“质量与库存”标签必须直接展示
+quality gate external revision、每个 required inspection 的 final/disposition、WMS command 状态、回执单据号、
+错误码和时间线，不得把接口 `201/200` 显示为“已放行/已入库”。`WAIT_QA` 显示待检项；`REJECTED`
+显示不合格项；`RELEASED + PENDING` 显示入库处理中；只有 receipt 为 accepted 且存在 `documentId` 才显示
+“已入库”。WMS rejected 保持批次 RELEASED 并显示可查单错误，不提供第二次新建入库命令的按钮。
+
 **主要 API：** `getBatch`、`getBatchEvidence`、`getBatchBalance`、`getBatchGenealogy`、
-`getBatchTimeline`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、`createBatchCorrection`。
+`getBatchTimeline`、`getBatchRelease`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、
+`createBatchCorrection`。
 
 ### 5.5 点位准入 `/bpi/points`
 

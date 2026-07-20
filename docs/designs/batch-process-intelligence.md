@@ -616,6 +616,12 @@ BPI 是 WMS 完工入库命令发起方：RELEASED 事务内写入 deterministic
 `WmsInboundCommand` outbox；WMS 以 idempotency key 处理并回传 documentId/status，BPI
 收到成功回执后进入 INBOUNDED。超时必须先按 key 查单再重试，禁止盲目重复创建单据。
 
+截至提交 `22ddadebd20ed9ed5d7efd19c3c0ed49967b9c90`，上述 QCS snapshot、
+`CLOSED_RAW -> WAIT_QA -> RELEASED/REJECTED`、deterministic WMS outbox、PUBLISHED 回执门禁和
+`documentId -> INBOUNDED`、未知 WMS 回执状态 fail-closed 已由 Flyway V23/Java 17 实现，并在干净 PostgreSQL 16.13 中以 4/4
+真实 API/SQL 用例通过。该实现仍处于 `DISABLED_BY_DEFAULT`：真实 QCS/WMS adapter、Kafka ACL、
+浏览器页和目标单据尚未联合验收，不能据此开启生产写回。
+
 ## 15. 四条数据路径及影子路径
 
 ### Happy Path

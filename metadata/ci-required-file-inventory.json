@@ -1029,6 +1029,12 @@
     },
     {
       "ignored": false,
+      "path": "contracts/bpi-api/service-phase2-profile.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "contracts/bpi-api/simulation-profile.json",
       "state": "tracked",
       "tracked": true
@@ -4629,6 +4635,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/backend-table-audit/bpi-quality-release-wms-inbound.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/backend-table-audit/bpi-rule-management.md",
       "state": "tracked",
       "tracked": true
@@ -5115,6 +5127,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-rule-publication-routing-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5530,6 +5548,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-production-context-join-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-release-wms-inbound-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -6627,6 +6651,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
       "state": "tracked",
       "tracked": true
@@ -6867,6 +6897,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/BatchReleaseView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/BatchState.java",
       "state": "tracked",
       "tracked": true
@@ -6982,6 +7018,24 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/PointCatalogView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/QualityGateState.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/QualityGateView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/QualityInspectionView.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7113,6 +7167,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundTarget.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/application/BpiRuleApplicationKafkaConfiguration.java",
       "state": "tracked",
       "tracked": true
@@ -7233,6 +7299,60 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/BpiPhase2IntegrationProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/BpiWmsOutboxProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaRecordProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxDispatcher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/outbox/RulePublicationKafkaConfiguration.java",
       "state": "tracked",
       "tracked": true
@@ -7282,6 +7402,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/pointcatalog/PointCatalogKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7462,6 +7588,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateEventController.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalPhase2IntegrationController.java",
       "state": "tracked",
       "tracked": true
     },
@@ -7677,6 +7809,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
       "state": "tracked",
       "tracked": true
@@ -7768,6 +7906,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8681,19 +8825,19 @@
       "tracked": 162
     },
     "contracts": {
-      "tracked": 19
+      "tracked": 20
     },
     "deploy": {
       "tracked": 574
     },
     "docs": {
-      "tracked": 106
+      "tracked": 108
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 162
+      "tracked": 163
     },
     "package.json": {
       "tracked": 1
@@ -8705,7 +8849,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 244
+      "tracked": 264
     },
     "simulation": {
       "tracked": 4
@@ -8717,8 +8861,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1443,
-    "tracked": 1443,
+    "totalFiles": 1467,
+    "tracked": 1467,
     "untracked": 0
   },
   "untrackedByDirectory": []

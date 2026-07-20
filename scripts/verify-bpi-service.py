@@ -37,6 +37,9 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V18__bpi_point_calibration_cursor_index.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V19__bpi_data_quality_incident_workbench.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V20__bpi_shadow_run_acceptance.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V21__bpi_feature_flag_governance.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V22__bpi_source_sequence_evidence.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
@@ -97,10 +100,17 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunCreateCommand.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ShadowRunBatchReviewCommand.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiShadowRunPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiQualityReleaseWmsPostgresAcceptanceTest.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/Phase2IntegrationKafkaRecordProcessor.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/integration/WmsInboundOutboxRepository.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalPhase2IntegrationController.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/infrastructure/candidate/BpiCandidateKafkaConfigurationTest.java",
     "services/bpi-service/batch-rule-runtime/src/main/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluator.java",
     "services/bpi-service/batch-rule-runtime/src/test/java/com/mapletct/ftmes/bpi/rules/BoundaryWindowEvaluatorTest.java",
     "contracts/bpi-api/service-phase1-profile.json",
+    "contracts/bpi-api/service-phase2-profile.json",
     "docs/backend-table-audit/bpi-phase1-persistence.md",
     "docs/backend-table-audit/bpi-telemetry-ingress.md",
     "docs/testing/bpi-boundary-runtime-acceptance.md",
@@ -136,6 +146,9 @@ REQUIRED_FILES = [
     "metadata/bpi-data-quality-workbench-acceptance.json",
     "docs/testing/bpi-shadow-run-acceptance.md",
     "metadata/bpi-shadow-run-acceptance.json",
+    "docs/backend-table-audit/bpi-quality-release-wms-inbound.md",
+    "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
+    "metadata/bpi-quality-release-wms-inbound-acceptance.json",
     "metadata/bpi-shadow-run-acceptance.png",
     "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-data-quality-acceptance.json",
@@ -318,6 +331,35 @@ def main() -> int:
             "uq_bpi_shadow_review_active_batch",
             "WHERE state = 'ACTIVE'",
             "GRANT SELECT, INSERT, UPDATE ON bpi.bpi_shadow_runs TO bpi_service",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
+        [
+            "bpi_quality_gates",
+            "bpi_quality_links",
+            "bpi_wms_inbound_links",
+            "fk_bpi_wms_inbound_outbox_tenant",
+            "WMS_COMPLETION_INBOUND_COMMAND",
+            "reject_shadow_wms_command",
+            "trg_bpi_reject_shadow_wms_command",
+            "'bpi.qcs-link', false",
+        ],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
+        [
+            "BatchState.CLOSED_RAW",
+            "BatchState.WAIT_QA",
+            "BatchState.RELEASED",
+            "BatchState.REJECTED",
+            "BatchState.INBOUNDED",
+            "WMS receipt cannot precede durable command publication.",
+            "WMS receipt status must be ACCEPTED or REJECTED.",
+            "Accepted WMS receipts require document_id.",
+            "!batch.shadow()",
         ],
         failures,
     )
@@ -1289,6 +1331,38 @@ def main() -> int:
         screenshot_hash = hashlib.sha256(point_screenshot_path.read_bytes()).hexdigest()
         if screenshot_hash != point_pagination.get("screenshotSha256"):
             fail("BPI point catalog pagination screenshot hash does not match", failures)
+
+    quality_wms_acceptance = json.loads(
+        (ROOT / "metadata/bpi-quality-release-wms-inbound-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if quality_wms_acceptance.get("status") != "PASS_LOCAL_POSTGRES_CONTRACTS_NOT_TARGET_ACTIVATED":
+        fail("BPI QCS/WMS acceptance must retain its local-only non-activated boundary", failures)
+    if (quality_wms_acceptance.get("database") != "PostgreSQL 16.13"
+            or quality_wms_acceptance.get("flywayVersion") != 23
+            or quality_wms_acceptance.get("phase1Mode") != "SHADOW_ONLY"
+            or quality_wms_acceptance.get("phase2Mode") != "DISABLED_BY_DEFAULT"):
+        fail("BPI QCS/WMS PostgreSQL/runtime boundary is incomplete", failures)
+    quality_wms_summary = quality_wms_acceptance.get("summary", {})
+    if (quality_wms_summary.get("testedFeatures") != 10
+            or quality_wms_summary.get("pass") != 8
+            or quality_wms_summary.get("fail") != 0
+            or quality_wms_summary.get("blocked") != 2
+            or quality_wms_summary.get("postgresAcceptanceTests") != 4
+            or quality_wms_summary.get("postgresAcceptanceFailures") != 0):
+        fail("BPI QCS/WMS acceptance summary must preserve eight passes and two target blockers", failures)
+    quality_wms_items = quality_wms_acceptance.get("items", [])
+    if (len(quality_wms_items) != 10
+            or sum(item.get("status") == "PASS" for item in quality_wms_items) != 8
+            or sum(item.get("status") == "BLOCKED" for item in quality_wms_items) != 2):
+        fail("BPI QCS/WMS item statuses do not match the acceptance summary", failures)
+    if any(quality_wms_acceptance.get("defaults", {}).values()):
+        fail("BPI QCS/WMS activation defaults must remain false", failures)
+    if any(quality_wms_acceptance.get("cleanup", {}).values()):
+        fail("BPI QCS/WMS marker cleanup must leave zero fixture rows", failures)
+    if len(quality_wms_acceptance.get("repoCommit", "")) != 40:
+        fail("BPI QCS/WMS acceptance must point to the exact source commit", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)
