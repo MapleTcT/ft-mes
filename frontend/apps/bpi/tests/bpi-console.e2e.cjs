@@ -232,6 +232,14 @@ test('batch detail presents quality release and WMS truth without inferring succ
   assert.equal(await page.locator('[data-batch-id]').count(), 6);
   const drawer = page.locator('#detail-drawer');
 
+  await page.route(`**/bpi-api/batches/${batchIds.inbounded}/evidence`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { start: [], end: [] }, meta: {} }),
+    });
+  });
+
   await page.locator(`[data-batch-id="${batchIds.closedRaw}"]`).click();
   await drawer.getByText('尚未进入质量放行', { exact: true }).waitFor();
   await drawer.getByText('尚未生成入库命令', { exact: true }).waitFor();
@@ -277,6 +285,11 @@ test('batch detail presents quality release and WMS truth without inferring succ
   await drawer.locator('[data-release-wms="ACCEPTED"] .release-facts')
     .getByText('WMS-IN-ADP-E2E-0001', { exact: true }).waitFor();
   await drawer.locator('[data-release-stage="inbounded"]').getByText('WMS-IN-ADP-E2E-0001', { exact: true }).waitFor();
+  const emptyEvidence = drawer.locator('.evidence-empty');
+  await emptyEvidence.getByText('暂无证据', { exact: true }).waitFor();
+  const emptyEvidenceBox = await emptyEvidence.boundingBox();
+  assert.ok(emptyEvidenceBox && emptyEvidenceBox.width > 80 && emptyEvidenceBox.height < 80,
+    `empty evidence must render horizontally: ${JSON.stringify(emptyEvidenceBox)}`);
   await assertDrawerSettled(page);
   await page.screenshot({ path: '/tmp/bpi-console-batch-quality-inventory.png', fullPage: true });
 

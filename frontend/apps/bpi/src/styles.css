@@ -146,6 +146,14 @@ td > svg { width: 16px; color: #8b96a1; }
 .evidence-list, .check-list { list-style: none; margin: 0; padding: 0; }
 .evidence-list li { min-height: 54px; display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; border-bottom: 1px solid #e5e9ed; }
 .evidence-list li:last-child { border-bottom: 0; }
+.evidence-list li.evidence-empty {
+  display: block;
+  min-height: 0;
+  padding: 18px 0;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
 .evidence-list div { min-width: 0; display: grid; gap: 2px; }
 .evidence-list strong { overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
 .evidence-list small { color: var(--muted); font-size: 10px; }
