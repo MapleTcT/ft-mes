@@ -78,6 +78,7 @@ def main() -> int:
             "reject",
             "suspend",
             "resume",
+            "release",
             "point-calibrations",
             "approve",
             "revoke",
