@@ -1,87 +1,132 @@
 {
-  "generatedAt": "2026-07-14T21:42:00Z",
-  "baseCommit": "583dde37af792efb5b1f7ab03bb331842ccb1718",
-  "database": "PostgreSQL 16.13 local acceptance; PostgreSQL 15.18 target",
-  "marker": "ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE",
-  "status": "PASS_TARGET_GATE_WITH_BLOCKED_SOURCE",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T23:50:34Z",
+  "baseCommit": "52eb162b812a9d754970ea80bc31281aa93b1990",
+  "branch": "codex/bpi-source-sequence-evidence-v2",
+  "database": "PostgreSQL",
+  "status": "PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE",
   "contract": {
-    "readyRequiresSourceSequence": true,
-    "acceptedOrigin": "DEVICE_OR_GATEWAY",
-    "exporterFallbackQualification": "SHADOW_ONLY",
-    "readinessIssue": "SOURCE_SEQUENCE_DISABLED",
-    "topologyError": "POINT_SOURCE_SEQUENCE_DISABLED"
+    "qualification": "two_or_more_strictly_increasing_sequences_same_binding_origin_epoch",
+    "states": [
+      "DISABLED",
+      "MISSING",
+      "PENDING",
+      "QUALIFIED",
+      "EXPIRED"
+    ],
+    "readiness": "exact_current_catalog_binding_and_fresh_qualified_evidence",
+    "invalidRecordPolicy": "transaction_rollback_and_dlq",
+    "databaseDefault": "PostgreSQL",
+    "oracleRuntime": false
+  },
+  "localVerification": {
+    "simulator": "PASS_11_OF_11",
+    "postgresTargeted": "PASS_17_OF_17",
+    "backendReactor": "PASS_99_ZERO_FAILURES_ZERO_ERRORS_ONE_EXPECTED_SKIPPED",
+    "frontendBuild": "PASS",
+    "browserE2e": "PASS_15_OF_15",
+    "iotPackage": "PASS_40_OF_40_MODULES",
+    "serviceJarSha256": "6b2eb3e70f4662d150de317e4e9f737214343aaf08a7c9002ad9d501cb8a843f",
+    "iotJarSha256": "1edd2ce048fc46307ee5faedfe40904d29d106368788d95a641ba7dcf8c44e98"
+  },
+  "target": {
+    "host": "10.11.100.17",
+    "adpRoute": "http://10.11.100.17:18080",
+    "bpiRoute": "http://10.11.100.17:18080/bpi/#/points",
+    "adpComposeProject": "adp-mes-newbase",
+    "streamingComposeProject": "ft-mes-bpi-streaming",
+    "iotComposeProject": "ft-mes-iot-pilot",
+    "flywayVersion": 22,
+    "serviceImage": "ft-mes-bpi-service:20260720-source-sequence-v22-6b2eb3e7",
+    "iotImage": "mapletct/jetlinks-bpi-pilot:20260720-source-sequence-beefd1d5",
+    "serviceHealth": "UP",
+    "iotHealth": "UP",
+    "flink": {
+      "jobId": "1e981b842f4693e49f3c3def0fb98cb6",
+      "state": "RUNNING",
+      "runningTasks": 36,
+      "totalTasks": 36
+    },
+    "topics": {
+      "evidence": {
+        "name": "iot.source-sequence.evidence.v1",
+        "partitions": 3,
+        "replicationFactor": 3,
+        "minInSyncReplicas": 2,
+        "cleanupPolicy": "compact",
+        "partition1Offset": 2
+      },
+      "dlq": {
+        "name": "iot.source-sequence.evidence.dlq.v1",
+        "partitions": 3,
+        "replicationFactor": 3,
+        "minInSyncReplicas": 2,
+        "retentionMs": 2592000000,
+        "totalOffsets": 0
+      }
+    },
+    "consumer": {
+      "groupId": "ft-mes-bpi-service-source-sequence-v1",
+      "currentOffset": 2,
+      "logEndOffset": 2,
+      "lag": 0
+    },
+    "pointCatalog": {
+      "snapshotId": "c6c09084-82dd-46f8-81e4-98b336b46e65",
+      "sourceRevision": "sha256:624ea0b665c35cfa911e808d52341f333bb77b4c9a2f2a601cd716b03e7e8f7b",
+      "pointCount": 1,
+      "readyPointCount": 0,
+      "origin": "GATEWAY",
+      "bindingFingerprint": "sha256:d5a753a203342f75c52f8ab412ccbf7cecb8251864017de7985958d90ef6f640"
+    },
+    "backupDir": "/home/v6/adp-deploy-backups/20260720-073058-source-sequence-v22"
   },
   "persistence": {
-    "test": "BpiPointCatalogPostgresAcceptanceTest",
-    "flywayVersion": 12,
-    "tests": 1,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 0,
-    "snapshotPointCount": 3,
-    "snapshotReadyPointCount": 1,
-    "snapshotsAfterRefresh": 2,
-    "entriesAfterRefresh": 6,
-    "idempotencyRecords": 13,
-    "sequenceOnlyBlockedPoint": "DEVICE-S07-03/flow.sequence-missing",
-    "sequenceOnlyValidationErrors": [
-      "POINT_SOURCE_SEQUENCE_DISABLED"
+    "table": "bpi.bpi_source_sequence_evidence_current",
+    "rows": 1,
+    "status": "DISABLED",
+    "revision": 2,
+    "observedAt": "2026-07-20T07:47:18.534+08:00",
+    "eventId": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
+    "inboxRows": 2,
+    "stateChangeAuditRows": 1,
+    "candidateRows": 0,
+    "batchRows": 0,
+    "readinessIssues": [
+      "CALIBRATION_NOT_VERIFIED",
+      "SOURCE_SEQUENCE_DISABLED"
     ]
   },
   "browser": {
-    "route": "/bpi/#/points",
-    "tests": 8,
-    "pass": 8,
-    "fail": 0,
-    "consoleErrors": 0,
-    "pageErrors": 0,
-    "requestFailures": 0,
-    "visibleLabel": "来源序列缺失"
-  },
-  "target": {
-    "host": "100.99.133.43",
-    "route": "http://100.99.133.43:18091/#/points",
-    "composeProject": "ft-mes-bpi-runtime",
-    "serviceImage": "sha256:1cdbbf814a20615307ab4a3adcfe38977a260865d85ef8a3f645be361670345c",
-    "rollbackImage": "sha256:6b336517e2e14711519cc3d6bd786135eb1cf6de1168752c017497e4113160c6",
-    "rollbackPath": "/home/v6/bpi-deploy-backups/20260715-source-sequence-0532",
-    "runtimeSmoke": "PASS",
-    "loginStatus": 200,
+    "login": "PASS",
     "pointCatalogStatus": 200,
-    "sourceRevision": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
-    "snapshotPointCount": 1,
-    "snapshotReadyPointCount": 0,
-    "databaseEvidence": {
-      "registered": false,
-      "deviceState": "INACTIVE",
-      "propertyPresent": false,
-      "calibrationStatus": "UNVERIFIED",
-      "sourceSequenceEnabled": false
-    },
-    "readinessIssues": [
-      "DEVICE_NOT_REGISTERED",
-      "DEVICE_NOT_ACTIVE",
-      "PROPERTY_NOT_AVAILABLE",
-      "CALIBRATION_NOT_VERIFIED",
-      "SOURCE_SEQUENCE_DISABLED"
-    ],
+    "pointCalibrationStatus": 200,
+    "visibleEvidenceStatus": "DISABLED",
+    "visibleEvidenceRevision": 2,
+    "visibleReadiness": "BLOCKED",
     "consoleErrors": 0,
     "pageErrors": 0,
-    "requestFailures": 0,
-    "browserReport": "/tmp/bpi-source-sequence-target-browser.json",
-    "screenshot": "/tmp/bpi-source-sequence-target-browser.png"
+    "horizontalOverflow": false,
+    "interactions": [
+      "point_filter",
+      "evidence_drawer_open",
+      "evidence_drawer_close"
+    ],
+    "screenshot": "metadata/bpi-source-sequence-evidence-v22.png"
   },
-  "regression": {
-    "apiContract": "PASS_42_OPERATIONS",
-    "simulator": "PASS_6_OF_6",
-    "service": "PASS_41_ZERO_FAILURES_20_ENV_SKIPPED",
-    "uiBuild": "PASS",
-    "browserE2e": "PASS_8_OF_8"
+  "rollback": {
+    "databaseStrategy": "expand_only_no_schema_downgrade",
+    "serviceRollbackImage": "ft-mes-bpi-service:rollback-20260720-073058-source-sequence-v22",
+    "serviceRollbackHealth": "UP",
+    "serviceRestoredHealth": "UP",
+    "iotRollbackImageRuntime": "OPENJDK_17_EXECUTABLE",
+    "iotContainerSwitched": false,
+    "iotContainerSwitchReason": "avoid_artificial_collection_gap"
   },
   "remainingBlockers": [
-    "Target pilot device is still inactive and unregistered.",
-    "Target product property metadata, unit and reviewed calibration are missing.",
-    "Target device or gateway source epoch and sequence are not yet available.",
-    "A real IoT and MES production-context marker has not yet formed a candidate and batch."
+    "No real pilot telemetry has supplied monotonic device or gateway sequence evidence.",
+    "The current point calibration is UNVERIFIED.",
+    "A common IoT and MES production marker has not formed a Flink candidate and shadow batch.",
+    "Production WOM, QCS and WMS writeback remains disabled until shadow acceptance passes."
   ]
 }

@@ -404,6 +404,20 @@ export interface PointCatalogPoint {
   calibrationEvidenceId?: string | null;
   calibrationValidUntil?: string | null;
   sourceSequenceEnabled: boolean;
+  sourceSequenceRequired: boolean;
+  sourceSequenceOrigin?: 'DEVICE' | 'GATEWAY' | null;
+  sourceSequenceBindingFingerprint?: string | null;
+  sourceSequenceQualified: boolean;
+  sourceSequenceEvidenceStatus?: 'DISABLED' | 'MISSING' | 'PENDING' | 'QUALIFIED' | 'EXPIRED' | null;
+  sourceSequenceEpoch?: number | null;
+  sourceSequenceFirst?: number | null;
+  sourceSequenceLast?: number | null;
+  sourceSequenceObservationCount?: number | null;
+  sourceSequenceFirstObservedAt?: string | null;
+  sourceSequenceLastObservedAt?: string | null;
+  sourceSequenceValidUntil?: string | null;
+  sourceSequenceEvidenceEventId?: string | null;
+  sourceSequenceEvidenceRevision?: number | null;
   ready: boolean;
   readinessIssues: string[];
 }
@@ -469,6 +483,9 @@ export interface PointCatalogPointCommand {
   calibrationVersion?: string | null;
   calibrationStatus: 'VERIFIED' | 'UNVERIFIED' | 'MISSING';
   sourceSequenceEnabled: boolean;
+  sourceSequenceRequired: boolean;
+  sourceSequenceOrigin?: 'DEVICE' | 'GATEWAY' | null;
+  sourceSequenceBindingFingerprint?: string | null;
 }
 
 export interface PointCatalogSnapshotCommand {

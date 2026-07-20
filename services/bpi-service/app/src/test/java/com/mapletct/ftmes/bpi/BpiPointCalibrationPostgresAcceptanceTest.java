@@ -89,6 +89,7 @@ class BpiPointCalibrationPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        SourceSequenceEvidenceTestFixture.cleanup(jdbc, tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
@@ -474,9 +475,16 @@ class BpiPointCalibrationPostgresAcceptanceTest {
                                         Map.entry("propertyPresent", true),
                                         Map.entry("calibrationVersion", calibrationVersion),
                                         Map.entry("calibrationStatus", "VERIFIED"),
-                                        Map.entry("sourceSequenceEnabled", true)))))))
+                                        Map.entry("sourceSequenceEnabled", true),
+                                        Map.entry("sourceSequenceRequired", true),
+                                        Map.entry("sourceSequenceOrigin", "DEVICE"),
+                                        Map.entry("sourceSequenceBindingFingerprint",
+                                                SourceSequenceEvidenceTestFixture.FINGERPRINT)))))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(0));
+        SourceSequenceEvidenceTestFixture.qualifyCurrentDevice(
+                jdbc, tenantId, PLANT_ID, LINE_ID, PRODUCT_ID, DEVICE_ID,
+                tenantId + "_SOURCE_SEQUENCE");
     }
 
     private UUID createTopology() throws Exception {

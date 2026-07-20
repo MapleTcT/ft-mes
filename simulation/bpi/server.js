@@ -5,6 +5,7 @@ const { FIXED_TIME, clone, createScenario, sha256 } = require('./scenario');
 const JSON_TYPE = 'application/json; charset=utf-8';
 const PROBLEM_TYPE = 'application/problem+json; charset=utf-8';
 const POINT_CATALOG_CURSOR_SECRET = 'bpi-simulator-point-catalog-cursor-v1';
+const SOURCE_SEQUENCE_FINGERPRINT = /^sha256:[0-9a-f]{64}$/;
 const FEATURE_FLAG_TENANT = 'TENANT-01';
 const FEATURE_FLAG_DEFINITIONS = [
   { flagKey: 'bpi.ui', displayName: 'BPI 导航入口', description: '控制旧平台是否展示 BPI 导航入口。', riskLevel: 'MEDIUM', enforcementStatus: 'ENFORCED', editable: true, blockedReason: null },
@@ -449,6 +450,18 @@ function calibrationEffectiveness(calibration, now = Date.now()) {
   return 'EFFECTIVE';
 }
 
+function sourceSequenceEvidenceKey(snapshot, point) {
+  return [snapshot.source, snapshot.sourceInstance, snapshot.plantId, snapshot.lineId,
+    point.productId, point.deviceId, point.sourceSequenceBindingFingerprint].join('|');
+}
+
+function sourceSequenceBindingReady(point) {
+  return point.sourceSequenceEnabled === true
+    && point.sourceSequenceRequired === true
+    && ['DEVICE', 'GATEWAY'].includes(point.sourceSequenceOrigin)
+    && SOURCE_SEQUENCE_FINGERPRINT.test(point.sourceSequenceBindingFingerprint || '');
+}
+
 function refreshPointCatalogReadiness(state) {
   const now = Date.now();
   state.pointCalibrations.forEach((calibration) => {
@@ -474,13 +487,43 @@ function refreshPointCatalogReadiness(state) {
     point.calibrationStatus = evidence ? 'VERIFIED' : point.calibrationVersion ? 'UNVERIFIED' : 'MISSING';
     point.calibrationEvidenceId = evidence?.id || null;
     point.calibrationValidUntil = evidence?.validUntil || null;
+    const sequenceBindingReady = sourceSequenceBindingReady(point);
+    const sequenceEvidence = sequenceBindingReady
+      ? state.sourceSequenceEvidence.get(sourceSequenceEvidenceKey(state.pointCatalog.snapshot, point))
+      : null;
+    const evidenceExpired = sequenceEvidence
+      && ['PENDING', 'QUALIFIED'].includes(sequenceEvidence.status)
+      && Date.parse(sequenceEvidence.validUntil || '') <= now;
+    point.sourceSequenceEvidenceStatus = sequenceBindingReady
+      ? evidenceExpired ? 'EXPIRED' : sequenceEvidence?.status || 'MISSING'
+      : 'DISABLED';
+    point.sourceSequenceQualified = Boolean(sequenceBindingReady
+      && sequenceEvidence?.status === 'QUALIFIED'
+      && sequenceEvidence.sequenceOrigin === point.sourceSequenceOrigin
+      && Date.parse(sequenceEvidence.observedAt) >= observedAt
+      && Date.parse(sequenceEvidence.validUntil) > observedAt
+      && Date.parse(sequenceEvidence.validUntil) > now);
+    point.sourceSequenceEpoch = sequenceEvidence?.sourceEpoch ?? null;
+    point.sourceSequenceFirst = sequenceEvidence?.firstSequence ?? null;
+    point.sourceSequenceLast = sequenceEvidence?.lastSequence ?? null;
+    point.sourceSequenceObservationCount = sequenceEvidence?.observationCount ?? null;
+    point.sourceSequenceFirstObservedAt = sequenceEvidence?.firstObservedAt || null;
+    point.sourceSequenceLastObservedAt = sequenceEvidence?.lastObservedAt || null;
+    point.sourceSequenceValidUntil = sequenceEvidence?.validUntil || null;
+    point.sourceSequenceEvidenceEventId = sequenceEvidence?.eventId || null;
+    point.sourceSequenceEvidenceRevision = sequenceEvidence?.revision ?? null;
     const readinessIssues = [];
     if (!point.registered) readinessIssues.push('DEVICE_NOT_REGISTERED');
     if (point.deviceState !== 'ACTIVE') readinessIssues.push('DEVICE_NOT_ACTIVE');
     if (!point.propertyPresent) readinessIssues.push('PROPERTY_NOT_AVAILABLE');
     if (!point.unit) readinessIssues.push('UNIT_MISSING');
     if (!point.calibrationVersion || point.calibrationStatus !== 'VERIFIED') readinessIssues.push('CALIBRATION_NOT_VERIFIED');
-    if (!point.sourceSequenceEnabled) readinessIssues.push('SOURCE_SEQUENCE_DISABLED');
+    if (!sequenceBindingReady) readinessIssues.push('SOURCE_SEQUENCE_DISABLED');
+    else if (!point.sourceSequenceQualified) {
+      if (point.sourceSequenceEvidenceStatus === 'MISSING') readinessIssues.push('SOURCE_SEQUENCE_EVIDENCE_MISSING');
+      else if (point.sourceSequenceEvidenceStatus === 'EXPIRED') readinessIssues.push('SOURCE_SEQUENCE_EVIDENCE_EXPIRED');
+      else readinessIssues.push('SOURCE_SEQUENCE_EVIDENCE_NOT_QUALIFIED');
+    }
     point.ready = readinessIssues.length === 0;
     point.readinessIssues = readinessIssues;
   });
@@ -567,7 +610,7 @@ function topologyValidation(definition, pointCatalog) {
     if (!point.unit) errors.push({ code: 'POINT_UNIT_MISSING', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'The catalog point has no source unit.' });
     else if (expectedUnit && point.unit.toLowerCase() !== String(expectedUnit).toLowerCase()) errors.push({ code: 'POINT_UNIT_MISMATCH', path: `/bindings/${index}/expectedUnit`, severity: 'ERROR', message: 'Expected and source units do not match.' });
     if (point.calibrationStatus !== 'VERIFIED' || point.calibrationVersion !== binding.calibrationVersion) errors.push({ code: 'POINT_CALIBRATION_NOT_VERIFIED', path: `/bindings/${index}/calibrationVersion`, severity: 'ERROR', message: 'The requested calibration version is not verified.' });
-    if (!point.sourceSequenceEnabled) errors.push({ code: 'POINT_SOURCE_SEQUENCE_DISABLED', path: `/bindings/${index}`, severity: 'ERROR', message: 'A device or gateway source epoch and sequence are required for replay-safe topology binding.' });
+    if (!point.sourceSequenceQualified) errors.push({ code: 'POINT_SOURCE_SEQUENCE_DISABLED', path: `/bindings/${index}`, severity: 'ERROR', message: 'Qualified device or gateway source sequence evidence is required for replay-safe topology binding.' });
   });
   if (!pointCatalog) errors.push({ code: 'POINT_CATALOG_SNAPSHOT_MISSING', path: '/bindings', severity: 'ERROR', message: 'No point catalog snapshot exists for this scope.' });
   return { errors, warnings };
@@ -586,6 +629,69 @@ function createHandler(state) {
       if (req.method === 'POST' && path === '/__simulation/reset') {
         Object.assign(state, createScenario());
         return send(res, 200, { status: 'RESET' }, 'simulationReset');
+      }
+      if (req.method === 'POST' && path === '/__simulation/source-sequence-evidence') {
+        const operationId = 'simulationSourceSequenceEvidence';
+        if (!state.pointCatalog) {
+          return send(res, 409, { status: 'POINT_CATALOG_MISSING' }, operationId);
+        }
+        const body = await readJson(req);
+        const status = String(body.status || '').toUpperCase();
+        if (!body.productId || !body.deviceId
+            || !SOURCE_SEQUENCE_FINGERPRINT.test(body.bindingFingerprint || '')
+            || !['DISABLED', 'MISSING', 'PENDING', 'QUALIFIED', 'EXPIRED'].includes(status)) {
+          return send(res, 422, { status: 'INVALID_SOURCE_SEQUENCE_EVIDENCE' }, operationId);
+        }
+        const points = state.pointCatalog.points.filter((point) => point.productId === body.productId
+          && point.deviceId === body.deviceId
+          && point.sourceSequenceBindingFingerprint === body.bindingFingerprint);
+        if (!points.length) {
+          return send(res, 404, { status: 'SOURCE_SEQUENCE_BINDING_NOT_FOUND' }, operationId);
+        }
+        const hasSequence = !['DISABLED', 'MISSING'].includes(status);
+        const now = Date.now();
+        const observedAt = body.observedAt || new Date(now).toISOString();
+        const firstObservedAt = hasSequence
+          ? body.firstObservedAt || new Date(now - 60_000).toISOString() : null;
+        const lastObservedAt = hasSequence
+          ? body.lastObservedAt || new Date(now).toISOString() : null;
+        const validUntil = hasSequence
+          ? body.validUntil || new Date(now + 86_400_000).toISOString() : null;
+        const sequenceOrigin = hasSequence ? body.sequenceOrigin || points[0].sourceSequenceOrigin : null;
+        const sourceEpoch = hasSequence ? body.sourceEpoch ?? 1 : null;
+        const firstSequence = hasSequence ? body.firstSequence ?? 1 : null;
+        const lastSequence = hasSequence ? body.lastSequence ?? 2 : null;
+        const observationCount = hasSequence ? body.observationCount ?? 2 : null;
+        const timeValues = [observedAt, firstObservedAt, lastObservedAt, validUntil]
+          .filter(Boolean).map(Date.parse);
+        const validSequence = !hasSequence || (
+          ['DEVICE', 'GATEWAY'].includes(sequenceOrigin)
+          && sourceEpoch > 0 && firstSequence > 0 && lastSequence >= firstSequence
+          && observationCount > 0 && Date.parse(lastObservedAt) >= Date.parse(firstObservedAt)
+          && Date.parse(validUntil) > Date.parse(lastObservedAt)
+          && (status !== 'QUALIFIED' || (lastSequence > firstSequence && observationCount >= 2))
+        );
+        if (timeValues.some((value) => !Number.isFinite(value)) || !validSequence) {
+          return send(res, 422, { status: 'INVALID_SOURCE_SEQUENCE_EVIDENCE_SHAPE' }, operationId);
+        }
+        const key = sourceSequenceEvidenceKey(state.pointCatalog.snapshot, points[0]);
+        const current = state.sourceSequenceEvidence.get(key);
+        const evidence = {
+          eventId: body.eventId || `source-sequence-evidence-${sha256({
+            key, status, observedAt, sourceEpoch, firstSequence, lastSequence,
+          })}`,
+          status, sequenceOrigin, sourceEpoch, firstSequence, lastSequence, observationCount,
+          firstObservedAt, lastObservedAt, validUntil, observedAt,
+          revision: (current?.revision || 0) + 1,
+        };
+        state.sourceSequenceEvidence.set(key, evidence);
+        refreshPointCatalogReadiness(state);
+        return send(res, 200, envelope(operationId, {
+          status: 'SOURCE_SEQUENCE_EVIDENCE_APPLIED',
+          affectedPointCount: points.length,
+          evidence,
+          catalog: state.pointCatalog,
+        }), operationId);
       }
       if (req.method === 'POST' && path === '/__simulation/prepare-shadow-run') {
         const prepared = prepareShadowRunAcceptance(state);
@@ -1217,7 +1323,17 @@ function createHandler(state) {
             snapshotId, plantId: body.plantId, lineId: body.lineId, ...clone(point),
             sourceCalibrationStatus: point.calibrationStatus || (point.calibrationVersion ? 'UNVERIFIED' : 'MISSING'),
             calibrationStatus: point.calibrationVersion ? 'UNVERIFIED' : 'MISSING',
-            calibrationEvidenceId: null, calibrationValidUntil: null, ready: false, readinessIssues: [],
+            calibrationEvidenceId: null, calibrationValidUntil: null,
+            sourceSequenceRequired: point.sourceSequenceRequired === true,
+            sourceSequenceOrigin: point.sourceSequenceOrigin || null,
+            sourceSequenceBindingFingerprint: point.sourceSequenceBindingFingerprint || null,
+            sourceSequenceQualified: false,
+            sourceSequenceEvidenceStatus: sourceSequenceBindingReady(point) ? 'MISSING' : 'DISABLED',
+            sourceSequenceEpoch: null, sourceSequenceFirst: null, sourceSequenceLast: null,
+            sourceSequenceObservationCount: null, sourceSequenceFirstObservedAt: null,
+            sourceSequenceLastObservedAt: null, sourceSequenceValidUntil: null,
+            sourceSequenceEvidenceEventId: null, sourceSequenceEvidenceRevision: null,
+            ready: false, readinessIssues: [],
           }));
         const { reason: ignoredReason, ...catalogPayload } = body;
         const snapshot = {

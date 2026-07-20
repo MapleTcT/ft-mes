@@ -1,103 +1,111 @@
-# BPI 来源序列硬准入验收
+# BPI 来源序列证据与硬准入验收
 
 ## 结论
 
-状态：`PASS_TARGET_GATE_WITH_BLOCKED_SOURCE`
+状态：`PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE`
 
-P1 批次规则点位现在必须具备设备或网关级 `sourceEpoch + sequence`。Exporter 生成的回退序列仍可用于
-影子观测，但不会再把点位提升为 `READY`，也不能通过拓扑校验。
+2026-07-20 已把来源序列从目录中的布尔声明升级为可审计运行证据，并部署到
+`10.11.100.17` 当前唯一 ADP 测试环境。JetLinks 根据 Redis 中同一绑定、同一 epoch 的严格递增序列
+生成 `DISABLED / MISSING / PENDING / QUALIFIED / EXPIRED` 证据，经 Kafka Protobuf 进入 MES，
+由 Flyway V22 幂等落入 PostgreSQL。点位准入只接受与当前目录快照精确匹配且未过期的
+`QUALIFIED` 证据；当前现场没有真实遥测，因此页面保持 `DISABLED / BLOCKED / 0 READY`，没有伪造
+生产可用状态。
 
-验收 marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`
+## 实现契约
 
-## 真实 PostgreSQL 验收
+- IoT 资格判定要求同一 `binding fingerprint + source origin + source epoch` 至少两次严格递增序列；
+  重复、倒退或 epoch 变化会重新进入 `PENDING`。
+- Kafka key、Protobuf 内容地址事件 ID、消息头、tenant/plant/line allowlist 和 payload checksum 必须一致；
+  无效消息回滚并进入独立 DLQ。
+- MES 当前证据表以 tenant、来源实例、产线、产品、设备和绑定指纹唯一；重复心跳更新 current revision，
+  首次状态变化写审计，所有交付写 inbox。
+- 拓扑/影子验收要求目录快照、来源 origin、绑定指纹、证据时间和已批准校准全部匹配；默认失败关闭。
+- PostgreSQL 是唯一默认数据库；Oracle 未进入本次运行链。
 
-隔离环境使用 PostgreSQL `16.13`，从空库执行 Flyway `V1-V12`。测试构造三类点位：
+## 本地验证
 
-| 点位 | 设备/属性/单位/标定 | 来源序列 | 结果 |
-|---|---|---|---|
-| `DEVICE-S07-01 / flow.instant` | 全部通过 | 已启用 | `READY` |
-| `DEVICE-S07-02 / tank.level` | 多项缺失 | 未启用 | `BLOCKED` |
-| `DEVICE-S07-03 / flow.sequence-missing` | 全部通过 | 未启用 | `BLOCKED / SOURCE_SEQUENCE_DISABLED` |
+| 验收项 | 结果 |
+|---|---|
+| BPI simulator | `11/11 PASS` |
+| 真实 PostgreSQL 定向验收 | `17/17 PASS`，包含 Kafka 严格校验、幂等、冲突回滚和 V22 落库 |
+| 后端完整 reactor | `99 tests / 0 failures / 0 errors / 1 expected skipped` |
+| 前端构建 | TypeScript/Vite `PASS` |
+| 浏览器 E2E | `15/15 PASS` |
+| IoT 可部署包 | Maven `40/40 modules BUILD SUCCESS`；JAR SHA-256 `1edd2ce048fc46307ee5faedfe40904d29d106368788d95a641ba7dcf8c44e98` |
 
-验收测试：
+## 目标环境证据
+
+| 证据 | 实际结果 | 状态 |
+|---|---|---|
+| Flyway | PostgreSQL `15.18`，`bpi.flyway_schema_history` 当前 V22 | PASS |
+| Kafka | 证据与 DLQ 均为 3 分区、RF=3、minISR=2；证据 topic compact，DLQ 保留 30 天 | PASS |
+| IoT | JetLinks/exporter/Redis/R2DBC 均 `UP`，点位目录第二次同步成功 | PASS |
+| MES consumer | `ft-mes-bpi-service-source-sequence-v1` partition 1 offset `2/2`、lag 0 | PASS |
+| DLQ | 三个分区 offset 均为 0 | PASS |
+| PostgreSQL current | 1 行，`DISABLED`，revision `2`，最新 observedAt `2026-07-20 07:47:18.534+08` | PASS |
+| Inbox / audit | 2 个内容地址 inbox 事件；首次 `DISABLED` 状态写 1 条审计 | PASS |
+| 点位快照 | snapshot `c6c09084-82dd-46f8-81e4-98b336b46e65`，1 点、0 READY | PASS |
+| 防误触发 | tenant `1000` 的 candidate=0、batch=0，外部写入仍关闭 | PASS |
+| Flink | job `1e981b842f4693e49f3c3def0fb98cb6` 为 `RUNNING 36/36` | PASS |
+
+目标目录 entry 已携带：
 
 ```text
-BpiPointCatalogPostgresAcceptanceTest
-tests=1, failures=0, errors=0, skipped=0
+origin=GATEWAY
+bindingFingerprint=sha256:d5a753a203342f75c52f8ab412ccbf7cecb8251864017de7985958d90ef6f640
+sourceSequenceEvidenceStatus=DISABLED
+readinessIssues=CALIBRATION_NOT_VERIFIED,SOURCE_SEQUENCE_DISABLED
 ```
 
-关键查询与断言：
+直接查库 SQL：
 
 ```sql
-SELECT point_count || '|' || ready_point_count || '|' || checksum
+SELECT status, source_event_id, observed_at, revision
+FROM bpi.bpi_source_sequence_evidence_current
+WHERE tenant_id = '1000';
+
+SELECT source, event_id, idempotency_key, processed_at
+FROM bpi.bpi_inbox_events
+WHERE source = 'iot.source-sequence.evidence.v1'
+ORDER BY processed_at;
+
+SELECT id, point_count, source_claim_ready_point_count, observed_at
 FROM bpi.bpi_point_catalog_snapshots
-WHERE tenant_id = :marker AND id = :snapshot_id;
--- 3|1|<snapshot checksum>
-
-SELECT validated_point_catalog_snapshot_id::text || '|' || validated_point_catalog_checksum
-FROM bpi.bpi_topology_versions
-WHERE tenant_id = :marker AND id = :topology_id;
--- only the source-sequence-ready topology is validated and publishable
+ORDER BY imported_at DESC
+LIMIT 1;
 ```
 
-仅缺来源序列的拓扑验证结果为 `FAILED`，且唯一错误为
-`POINT_SOURCE_SEQUENCE_DISABLED / ERROR`。测试同时验证两次不可变快照共 6 条 point entry、13 条幂等命令、
-导入审计、旧快照发布冲突和独立管理员发布；每次测试结束后按 marker 定向清理。
+## 真实浏览器
 
-## 前端验收
+入口：`http://10.11.100.17:18080/bpi/#/points`。
 
-`npm --prefix frontend/apps/bpi run test:e2e` 共 `8/8 PASS`。点位页面把来源序列缺失显示为
-“来源序列缺失”，与后端 `readinessIssues` 一致；console、page、request failure 均为 0。
+- ADP 登录后，`GET /bpi-api/point-catalog/current` 和
+  `GET /bpi-api/point-calibrations` 均为 `200`。
+- 页面显示目录 1 点、就绪 0 点；源序列证据抽屉显示 `DISABLED / r2 / BLOCKED`、来源类型、绑定指纹和
+  内容地址事件 ID。
+- 页面明确说明“系统保持失败关闭，不会仅凭目录中的启用声明放行”。
+- console error=0、page error=0，1600x1000 视口无横向溢出；筛选和抽屉关闭交互可用。
+- 固化截图：[`metadata/bpi-source-sequence-evidence-v22.png`](../../metadata/bpi-source-sequence-evidence-v22.png)。
 
-## 目标环境复验
+## 回滚演练
 
-目标入口为 `http://100.99.133.43:18091/#/points`。本批只重建独立 Compose project
-`ft-mes-bpi-runtime` 的 `bpi-service` 和 `bpi-web`，未停止既有 ADP/MES、Kafka、Flink、JetLinks 或
-BPI PostgreSQL。服务镜像为 `sha256:1cdbbf814a20615307ab4a3adcfe38977a260865d85ef8a3f645be361670345c`，
-回滚镜像为 `sha256:6b336517e2e14711519cc3d6bd786135eb1cf6de1168752c017497e4113160c6`；
-旧 JAR 和前端静态目录保存在 `/home/v6/bpi-deploy-backups/20260715-source-sequence-0532`。
+备份目录：`/home/v6/adp-deploy-backups/20260720-073058-source-sequence-v22`，包含三套 Compose/env、
+前端静态文件和迁移前 PostgreSQL custom-format dump。
 
-真实 ADP 登录后执行 `sync-read`：
+MES 服务已真实执行：
 
-- `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` 返回 `200`；
-- 页面读取 revision `sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5`；
-- 页面显示 1 个点、0 READY，来源序列“未启用”，准入状态 `BLOCKED`；
-- API/页面同时包含 `DEVICE_NOT_REGISTERED`、`DEVICE_NOT_ACTIVE`、`PROPERTY_NOT_AVAILABLE`、
-  `CALIBRATION_NOT_VERIFIED`、`SOURCE_SEQUENCE_DISABLED`；
-- console、page、request failure 均为 0，运行时 smoke 为 PASS。
-
-目标 PostgreSQL `15.18` 只读查询：
-
-```sql
-WITH latest AS (
-  SELECT id, tenant_id, source_revision, point_count, ready_point_count
-  FROM bpi.bpi_point_catalog_snapshots
-  WHERE plant_id = 'PLANT-01' AND line_id = 'LINE-S07-01'
-  ORDER BY observed_at DESC, imported_at DESC
-  LIMIT 1
-)
-SELECT l.source_revision, l.point_count, l.ready_point_count,
-       e.registered, e.device_state, e.property_present,
-       e.calibration_status, e.source_sequence_enabled
-FROM latest l
-JOIN bpi.bpi_point_catalog_entries e
-  ON e.tenant_id = l.tenant_id AND e.snapshot_id = l.id;
--- sha256:2a218d...151ce5 | 1 | 0 | false | INACTIVE | false | UNVERIFIED | false
+```text
+ft-mes-bpi-service:rollback-20260720-073058-source-sequence-v22 -> UP
+ft-mes-bpi-service:20260720-source-sequence-v22-6b2eb3e7 -> UP
 ```
 
-浏览器机器证据和截图为 `/tmp/bpi-source-sequence-target-browser.json`、
-`/tmp/bpi-source-sequence-target-browser.png`。目标验收脚本要求五项拓扑错误全部为 ERROR、warning 为空。
-
-## 回归
-
-- BPI API contract：42 operations，28 simulated，27 service implemented，PASS。
-- BPI simulator：6/6 PASS。
-- BPI service：41 tests，0 failures/errors；20 个依赖外部环境的套件按门禁跳过。
-- BPI UI build：TypeScript/Vite PASS。
-- BPI browser E2E：8/8 PASS。
+V22 为 expand-only，回滚过程中不回退数据库。JetLinks 回滚镜像已验证可执行 Java 17 runtime，未实际切换
+采集容器，以避免人为制造采集空窗。当前 JetLinks 镜像为
+`mapletct/jetlinks-bpi-pilot:20260720-source-sequence-beefd1d5`。
 
 ## 未完成边界
 
-本验收证明硬准入语义、页面呈现、目标部署和 PostgreSQL 落库正确，不代表目标试点设备已经提供真实来源序列。
-目标环境 `bpi-pilot-device-01` 仍必须完成注册/激活、产品 metadata、单位、标定和设备/网关原生序列治理，
-等待 JetLinks 自动生成新目录 revision 后再做拓扑校验。
+- 当前试点没有真实遥测，证据只能是 `DISABLED`；尚未证明真实网关在重连后切换 epoch 并持续单调递增。
+- 当前校准为 `UNVERIFIED`；即使后续序列证据合格，校准未批准时也必须继续 BLOCKED。
+- 尚未用同一生产 marker 闭合 IoT 遥测、MES production context、Flink candidate、影子 batch。
+- 本次处于 SHADOW，禁止 WOM/QCS/WMS 自动写回；需先完成连续 7-14 天影子验收。

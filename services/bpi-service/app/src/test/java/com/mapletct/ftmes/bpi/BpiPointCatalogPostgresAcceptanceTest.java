@@ -88,6 +88,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        SourceSequenceEvidenceTestFixture.cleanup(jdbc, tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
@@ -135,9 +136,11 @@ class BpiPointCatalogPostgresAcceptanceTest {
                         .content(snapshotBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.snapshot.pointCount").value(3))
-                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(0))
                 .andExpect(jsonPath("$.data.points.length()").value(3))
-                .andExpect(jsonPath("$.data.points[0].ready").value(true))
+                .andExpect(jsonPath("$.data.points[0].ready").value(false))
+                .andExpect(jsonPath("$.data.points[0].readinessIssues[*]")
+                        .value(hasItem("SOURCE_SEQUENCE_EVIDENCE_MISSING")))
                 .andExpect(jsonPath("$.data.points[1].ready").value(false))
                 .andExpect(jsonPath("$.data.points[2].ready").value(false))
                 .andExpect(jsonPath("$.data.points[2].readinessIssues[*]")
@@ -145,6 +148,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 .andReturn();
         UUID snapshotId = UUID.fromString(response(imported).path("data").path("snapshot").path("id").asText());
         String snapshotChecksum = response(imported).path("data").path("snapshot").path("checksum").asText();
+        qualifyReadyDevice(marker + "_SEQUENCE_1");
 
         mockMvc.perform(post("/bpi/v1/point-catalog/snapshots")
                         .header("Authorization", "Bearer " + adminToken)
@@ -161,7 +165,9 @@ class BpiPointCatalogPostgresAcceptanceTest {
                         .param("plantId", PLANT_ID).param("lineId", LINE_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.snapshot.id").value(snapshotId.toString()))
-                .andExpect(jsonPath("$.data.snapshot.checksum").value(snapshotChecksum));
+                .andExpect(jsonPath("$.data.snapshot.checksum").value(snapshotChecksum))
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
+                .andExpect(jsonPath("$.data.points[0].sourceSequenceQualified").value(true));
 
         UUID staleTopology = createTopology(
                 marker + "_STALE", readyDefinition(), "stale-create-" + marker);
@@ -190,6 +196,7 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 response(refreshed).path("data").path("snapshot").path("id").asText());
         String currentSnapshotChecksum = response(refreshed)
                 .path("data").path("snapshot").path("checksum").asText();
+        qualifyReadyDevice(marker + "_SEQUENCE_2");
 
         mockMvc.perform(post("/bpi/v1/topologies/{id}/publish", staleTopology)
                         .header("Authorization", "Bearer " + adminToken)
@@ -296,15 +303,24 @@ class BpiPointCatalogPostgresAcceptanceTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .header("Idempotency-Key", "point-cycle-first-" + marker)
                         .header("If-Match", "0")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(pointCatalogBody(sourceRevision, firstObservedAt)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(pointCatalogBody(sourceRevision, firstObservedAt)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1))
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(0))
                 .andReturn();
+        qualifyReadyDevice(marker + "_SEQUENCE_CYCLE");
+        mockMvc.perform(get("/bpi/v1/point-catalog/current")
+                        .header("Authorization", "Bearer " + engineerToken)
+                        .param("plantId", PLANT_ID).param("lineId", LINE_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.snapshot.readyPointCount").value(1));
 
         JsonNode revokedBody = objectMapper.readTree(pointCatalogBody(sourceRevision, secondObservedAt));
-        ((com.fasterxml.jackson.databind.node.ObjectNode) revokedBody.path("points").get(0))
-                .put("sourceSequenceEnabled", false);
+        com.fasterxml.jackson.databind.node.ObjectNode revokedPoint =
+                (com.fasterxml.jackson.databind.node.ObjectNode) revokedBody.path("points").get(0);
+        revokedPoint.put("sourceSequenceEnabled", false);
+        revokedPoint.put("sourceSequenceRequired", false);
+        revokedPoint.remove(List.of("sourceSequenceOrigin", "sourceSequenceBindingFingerprint"));
         MvcResult revoked = mockMvc.perform(post("/bpi/v1/point-catalog/snapshots")
                         .header("Authorization", "Bearer " + adminToken)
                         .header("Idempotency-Key", "point-cycle-revoked-" + marker)
@@ -469,7 +485,11 @@ class BpiPointCatalogPostgresAcceptanceTest {
                                 Map.entry("propertyPresent", true),
                                 Map.entry("calibrationVersion", "CAL-2026-01"),
                                 Map.entry("calibrationStatus", "VERIFIED"),
-                                Map.entry("sourceSequenceEnabled", true)),
+                                Map.entry("sourceSequenceEnabled", true),
+                                Map.entry("sourceSequenceRequired", true),
+                                Map.entry("sourceSequenceOrigin", "DEVICE"),
+                                Map.entry("sourceSequenceBindingFingerprint",
+                                        SourceSequenceEvidenceTestFixture.FINGERPRINT)),
                         Map.ofEntries(
                                 Map.entry("localityGroup", "LOCALITY-S07-EVAP"),
                                 Map.entry("productId", "PRODUCT-SUGAR"),
@@ -520,7 +540,11 @@ class BpiPointCatalogPostgresAcceptanceTest {
                     Map.entry("propertyPresent", true),
                     Map.entry("calibrationVersion", "CAL-PAGE-01"),
                     Map.entry("calibrationStatus", "VERIFIED"),
-                    Map.entry("sourceSequenceEnabled", true)));
+                    Map.entry("sourceSequenceEnabled", true),
+                    Map.entry("sourceSequenceRequired", true),
+                    Map.entry("sourceSequenceOrigin", "DEVICE"),
+                    Map.entry("sourceSequenceBindingFingerprint",
+                            SourceSequenceEvidenceTestFixture.FINGERPRINT)));
         }
         byte[] body = objectMapper.writeValueAsBytes(Map.of(
                 "source", "JETLINKS",
@@ -540,6 +564,11 @@ class BpiPointCatalogPostgresAcceptanceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.snapshot.pointCount").value(pointCount))
                 .andReturn();
+    }
+
+    private void qualifyReadyDevice(String sourceEventId) {
+        SourceSequenceEvidenceTestFixture.qualifyCurrentDevice(
+                jdbc, tenantId, PLANT_ID, LINE_ID, "PRODUCT-SUGAR", "DEVICE-S07-01", sourceEventId);
     }
 
     private Set<String> pointIds(JsonNode body) {

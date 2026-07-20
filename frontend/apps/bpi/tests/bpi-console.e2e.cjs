@@ -9,6 +9,7 @@ const { createBpiSimulator, listen } = require('../../../../simulation/bpi/serve
 const APP_ROOT = path.resolve(__dirname, '..');
 const APP_URL = 'http://127.0.0.1:4173';
 const RULE_ID = '78d57d90-fdc8-4a57-a660-a1ae73c2bc96';
+const SOURCE_SEQUENCE_FINGERPRINT = `sha256:${'2'.repeat(64)}`;
 let simulator;
 let vite;
 let browser;
@@ -471,6 +472,15 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   await page.getByRole('heading', { name: '点位目录' }).waitFor();
   await page.getByText('2', { exact: true }).last().waitFor();
   assert.equal(await page.locator('[data-point-id]').count(), 2);
+  await page.locator('[data-point-id]').first().getByRole('button', { name: '查看来源序列证据' }).click();
+  await assertDrawerSettled(page);
+  const evidenceDrawer = page.locator('#detail-drawer');
+  await evidenceDrawer.getByText('QUALIFIED', { exact: true }).first().waitFor();
+  await evidenceDrawer.getByText('设备原生序列', { exact: true }).first().waitFor();
+  await evidenceDrawer.getByText('1001 - 1016', { exact: true }).waitFor();
+  await evidenceDrawer.getByText('source-sequence-evidence-simulator-device-s07-01', { exact: true }).waitFor();
+  await evidenceDrawer.getByText('当前证据与点位绑定指纹一致、晚于目录快照且仍在有效期内，可参与运行准入。', { exact: true }).waitFor();
+  await evidenceDrawer.getByRole('button', { name: '关闭' }).first().click();
   await page.getByRole('button', { name: '导入快照' }).click();
   await page.getByRole('heading', { name: '导入点位目录快照' }).waitFor();
   await page.locator('#point-source-instance').fill('jetlinks-e2e');
@@ -490,6 +500,7 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
     calibrationVersion: null,
     calibrationStatus: 'MISSING',
     sourceSequenceEnabled: false,
+    sourceSequenceRequired: false,
   }], null, 2));
   await page.locator('#point-import-reason').fill('验收未激活设备和缺失属性的准入阻断');
   await page.getByRole('button', { name: '导入快照', exact: true }).last().click();
@@ -497,7 +508,7 @@ test('administrator imports a point catalog snapshot and sees readiness blockers
   await page.getByText('点位快照已导入：0/1 就绪').waitFor();
   await page.getByText('未就绪液位点', { exact: true }).waitFor();
   await page.getByText('BLOCKED', { exact: true }).waitFor();
-  await page.getByText('设备未注册、设备未激活、设备属性不可用、单位缺失、校准证据未批准或已失效、来源序列未启用', { exact: true }).waitFor();
+  await page.getByText('设备未注册、设备未激活、设备属性不可用、单位缺失、校准证据未批准或已失效、来源序列声明不完整', { exact: true }).waitFor();
   const current = await fetch(`${simulatorUrl}/bpi/v1/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`).then((response) => response.json());
   assert.equal(current.data.snapshot.sourceRevision, 'ADP_E2E_POINT_CATALOG_0001');
   assert.equal(current.data.snapshot.readyPointCount, 0);
@@ -524,6 +535,9 @@ test('point catalog incrementally loads a pinned snapshot and searches the full 
     calibrationVersion: null,
     calibrationStatus: 'MISSING',
     sourceSequenceEnabled: true,
+    sourceSequenceRequired: true,
+    sourceSequenceOrigin: 'DEVICE',
+    sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
   }));
   const importCatalog = (sourceRevision, importedPoints, key) => fetch(
     `${simulatorUrl}/bpi/v1/point-catalog/snapshots`,
@@ -643,11 +657,24 @@ test('independent calibration approval and revocation dynamically control point 
     calibrationVersion,
     calibrationStatus: 'VERIFIED',
     sourceSequenceEnabled: true,
+    sourceSequenceRequired: true,
+    sourceSequenceOrigin: 'DEVICE',
+    sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
   }], null, 2));
   await page.locator('#point-import-reason').fill('验证来源 VERIFIED 不能绕过 MES 校准审批');
   await page.getByRole('button', { name: '导入快照', exact: true }).last().click();
 
   await page.getByText('点位快照已导入：0/1 就绪').waitFor();
+  const sourceEvidence = await fetch(`${simulatorUrl}/__simulation/source-sequence-evidence`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-CAL-E2E',
+      bindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
+      status: 'QUALIFIED', sequenceOrigin: 'DEVICE',
+    }),
+  });
+  assert.equal(sourceEvidence.status, 200);
   const pointRow = page.locator('[data-point-id]').filter({ hasText: '校准治理验收流量点' });
   await pointRow.getByText('VERIFIED', { exact: true }).waitFor();
   await pointRow.getByText('UNVERIFIED', { exact: true }).waitFor();

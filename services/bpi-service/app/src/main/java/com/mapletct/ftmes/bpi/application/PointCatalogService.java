@@ -223,9 +223,9 @@ public class PointCatalogService {
                     errors.add(issue("POINT_CALIBRATION_NOT_VERIFIED", path + "/calibrationVersion", "ERROR",
                             "The requested calibration version is not verified in the point catalog."));
                 }
-                if (!point.sourceSequenceEnabled()) {
+                if (!point.sourceSequenceQualified()) {
                     errors.add(issue("POINT_SOURCE_SEQUENCE_DISABLED", path, "ERROR",
-                            "A device or gateway source epoch and sequence are required for replay-safe topology binding."));
+                            "Fresh structured device or gateway source sequence evidence is required for replay-safe topology binding."));
                 }
             }
         }

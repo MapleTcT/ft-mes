@@ -40,6 +40,7 @@ import type {
   FeatureFlagOverrideCommand,
   FeatureFlagScopeType,
   LineState,
+  PointCatalogPoint,
   PointCatalogPointCommand,
   PointCatalogSnapshotCommand,
   PointCatalogView,
@@ -208,9 +209,9 @@ function dataQualityCategoryCount(patterns: string[]): number {
 }
 
 function statusTone(status: string): string {
-  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED'].includes(status)) return 'ok';
+  if (['RUNNING', 'ACTIVE', 'READY', 'PASS', 'CONFIRMED', 'GOOD', 'RELEASED', 'PUBLISHED', 'APPLIED', 'EFFECTIVE', 'APPROVED', 'RESOLVED', 'QUALIFIED'].includes(status)) return 'ok';
   if (['PENDING', 'EVALUATING', 'DISPATCHING', 'WAITING', 'PARTIAL', 'WAIT_QA', 'DEGRADED', 'NOT_YET_EFFECTIVE', 'ACKNOWLEDGED', 'WARNING'].includes(status)) return 'warn';
-  if (['FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR'].includes(status)) return 'danger';
+  if (['FAILED', 'FAIL', 'BAD', 'REJECTED', 'BLOCKED', 'SUSPENDED', 'REVOKED', 'EXPIRED', 'OPEN', 'CRITICAL', 'ERROR', 'MISSING', 'DISABLED'].includes(status)) return 'danger';
   return 'neutral';
 }
 
@@ -1585,11 +1586,45 @@ function pointIssueLabel(code: string): string {
     UNIT_MISSING: '单位缺失',
     UNIT_MISMATCH: '单位与规则要求不一致',
     CALIBRATION_NOT_VERIFIED: '校准证据未批准或已失效',
-    SOURCE_SEQUENCE_DISABLED: '来源序列未启用',
+    SOURCE_SEQUENCE_DISABLED: '来源序列声明不完整',
+    SOURCE_SEQUENCE_EVIDENCE_MISSING: '来源序列运行证据缺失',
+    SOURCE_SEQUENCE_EVIDENCE_EXPIRED: '来源序列运行证据已过期',
+    SOURCE_SEQUENCE_EVIDENCE_NOT_QUALIFIED: '来源序列运行证据未通过',
     CATALOG_BINDING_NOT_FOUND: '点位目录中找不到规则绑定',
     CATALOG_SNAPSHOT_MISSING: '当前产线没有点位目录快照',
   };
   return labels[normalized] || code;
+}
+
+function sourceSequenceStatus(point: PointCatalogPoint): string {
+  const bindingReady = point.sourceSequenceEnabled
+    && point.sourceSequenceRequired
+    && ['DEVICE', 'GATEWAY'].includes(point.sourceSequenceOrigin || '')
+    && /^sha256:[0-9a-f]{64}$/.test(point.sourceSequenceBindingFingerprint || '');
+  if (!bindingReady) return 'DISABLED';
+  return point.sourceSequenceEvidenceStatus || 'MISSING';
+}
+
+function sourceSequenceOriginLabel(origin?: PointCatalogPoint['sourceSequenceOrigin']): string {
+  if (origin === 'DEVICE') return '设备原生序列';
+  if (origin === 'GATEWAY') return '网关持久序列';
+  return '未声明权威来源';
+}
+
+function openPointSourceSequenceEvidence(point: PointCatalogPoint): void {
+  const status = sourceSequenceStatus(point);
+  const sequenceRange = point.sourceSequenceFirst === null || point.sourceSequenceFirst === undefined
+    ? '-'
+    : `${point.sourceSequenceFirst} - ${point.sourceSequenceLast ?? '-'}`;
+  const evidenceMessage = point.sourceSequenceQualified
+    ? '当前证据与点位绑定指纹一致、晚于目录快照且仍在有效期内，可参与运行准入。'
+    : '该点位没有可用于运行准入的新鲜证据。系统保持失败关闭，不会仅凭目录中的启用声明放行。';
+  openDrawer(`<header><div><span>数据准入</span><h2>${escapeHtml(point.pointName || point.propertyId)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header>
+    <div class="batch-state-band"><div>${statusChip(status)}${statusChip(point.sourceSequenceQualified ? 'READY' : 'BLOCKED')}</div><span>${escapeHtml(sourceSequenceOriginLabel(point.sourceSequenceOrigin))}</span></div>
+    <div class="drawer-section"><h3>绑定声明</h3><div class="facts-grid"><div><span>产品 / 设备</span><b>${escapeHtml(point.productId)} / ${escapeHtml(point.deviceId)}</b></div><div><span>属性</span><b>${escapeHtml(point.propertyId)}</b></div><div><span>要求来源序列</span><b>${point.sourceSequenceRequired ? '是' : '否'}</b></div><div><span>来源类型</span><b>${escapeHtml(sourceSequenceOriginLabel(point.sourceSequenceOrigin))}</b></div><div><span>绑定指纹</span><b class="mono-value">${escapeHtml(point.sourceSequenceBindingFingerprint || '-')}</b></div><div><span>目录声明</span><b>${point.sourceSequenceEnabled ? '已启用' : '未启用'}</b></div></div></div>
+    <div class="drawer-section"><h3>运行证据</h3><div class="facts-grid"><div><span>证据状态</span><b>${escapeHtml(status)}</b></div><div><span>证据修订</span><b>${point.sourceSequenceEvidenceRevision ? `r${point.sourceSequenceEvidenceRevision}` : '-'}</b></div><div><span>来源 epoch</span><b>${escapeHtml(point.sourceSequenceEpoch ?? '-')}</b></div><div><span>序列区间</span><b>${escapeHtml(sequenceRange)}</b></div><div><span>观测数量</span><b>${escapeHtml(point.sourceSequenceObservationCount ?? '-')}</b></div><div><span>首次观测</span><b>${formatTime(point.sourceSequenceFirstObservedAt)}</b></div><div><span>最近观测</span><b>${formatTime(point.sourceSequenceLastObservedAt)}</b></div><div><span>有效截止</span><b>${formatTime(point.sourceSequenceValidUntil)}</b></div><div><span>证据事件</span><b class="mono-value">${escapeHtml(point.sourceSequenceEvidenceEventId || '-')}</b></div></div><p>${escapeHtml(evidenceMessage)}</p></div>
+    <div class="drawer-section"><h3>当前准入结论</h3><div class="status-stack">${statusChip(point.ready ? 'READY' : 'BLOCKED')}</div><p>${escapeHtml(point.readinessIssues.map(pointIssueLabel).join('、') || '点位全部准入条件已通过。')}</p></div>
+    <footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button></footer>`);
 }
 
 function rulePublicationProblemMessage(error: ApiProblem): string {
@@ -1679,7 +1714,7 @@ function renderPoints(): void {
       <td>${point.propertyPresent ? '已发现' : '缺失'}</td><td>${escapeHtml(point.unit || '-')}</td>
       <td>${statusChip(point.sourceCalibrationStatus)}<small>来源系统声明</small></td>
       <td><strong>${escapeHtml(point.calibrationVersion || '-')}</strong><div class="status-stack">${statusChip(point.calibrationStatus)}</div><small>${point.calibrationValidUntil ? `证据有效至 ${formatTime(point.calibrationValidUntil)}` : '无有效证据'}</small></td>
-      <td>${point.sourceSequenceEnabled ? '已启用' : '未启用'}</td>
+      <td><div class="point-sequence-cell"><div>${statusChip(sourceSequenceStatus(point))}<small>${escapeHtml(sourceSequenceOriginLabel(point.sourceSequenceOrigin))}</small></div><button type="button" class="icon-button" data-point-sequence="${escapeHtml(point.id)}" title="查看来源序列证据" aria-label="查看来源序列证据"><i data-lucide="list-checks"></i></button></div></td>
       <td>${statusChip(point.ready ? 'READY' : 'BLOCKED')}<small>${escapeHtml(point.readinessIssues.map(pointIssueLabel).join('、') || '准入通过')}</small></td>
       <td><button type="button" class="button button--secondary button--compact" data-point-calibrate="${escapeHtml(point.id)}">提交证据</button></td>
     </tr>`).join('');
@@ -1704,6 +1739,10 @@ function bindPointPageEvents(content: HTMLElement): void {
   content.querySelectorAll<HTMLButtonElement>('[data-point-calibrate]').forEach((button) => button.addEventListener('click', () => {
     const point = state.pointCatalog?.points.find((item) => item.id === button.dataset.pointCalibrate);
     openPointCalibrationSubmit(point);
+  }));
+  content.querySelectorAll<HTMLButtonElement>('[data-point-sequence]').forEach((button) => button.addEventListener('click', () => {
+    const point = state.pointCatalog?.points.find((item) => item.id === button.dataset.pointSequence);
+    if (point) openPointSourceSequenceEvidence(point);
   }));
   content.querySelectorAll<HTMLButtonElement>('[data-calibration-action]').forEach((button) => button.addEventListener('click', () => {
     const calibration = state.calibrations.find((item) => item.id === button.dataset.calibrationId);

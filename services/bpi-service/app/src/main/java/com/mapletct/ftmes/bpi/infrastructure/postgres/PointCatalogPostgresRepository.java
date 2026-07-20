@@ -18,9 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Repository
 public class PointCatalogPostgresRepository {
+    private static final Pattern SOURCE_SEQUENCE_FINGERPRINT =
+            Pattern.compile("sha256:[0-9a-f]{64}");
     private static final String SNAPSHOT_SELECT = """
             SELECT s.id, s.source, s.source_instance, s.source_revision, s.plant_id, s.line_id,
                    s.checksum, s.observed_at, s.point_count,
@@ -34,6 +37,27 @@ public class PointCatalogPostgresRepository {
                        AND e.unit IS NOT NULL
                        AND btrim(e.unit) <> ''
                        AND e.source_sequence_enabled
+                       AND e.source_sequence_required
+                       AND e.source_sequence_origin IN ('DEVICE', 'GATEWAY')
+                       AND e.source_sequence_binding_fingerprint IS NOT NULL
+                       AND EXISTS (
+                           SELECT 1
+                             FROM bpi.bpi_source_sequence_evidence_current sequence_evidence
+                            WHERE sequence_evidence.tenant_id = e.tenant_id
+                              AND sequence_evidence.source = s.source
+                              AND sequence_evidence.source_instance = s.source_instance
+                              AND sequence_evidence.plant_id = e.plant_id
+                              AND sequence_evidence.line_id = e.line_id
+                              AND sequence_evidence.product_id = e.product_id
+                              AND sequence_evidence.device_id = e.device_id
+                              AND sequence_evidence.binding_fingerprint
+                                  = e.source_sequence_binding_fingerprint
+                              AND sequence_evidence.status = 'QUALIFIED'
+                              AND sequence_evidence.sequence_origin = e.source_sequence_origin
+                              AND sequence_evidence.observed_at >= s.observed_at
+                              AND sequence_evidence.valid_until > s.observed_at
+                              AND sequence_evidence.valid_until > CURRENT_TIMESTAMP
+                       )
                        AND e.calibration_version IS NOT NULL
                        AND btrim(e.calibration_version) <> ''
                        AND EXISTS (
@@ -67,7 +91,34 @@ public class PointCatalogPostgresRepository {
                    END AS calibration_status,
                    c.id AS calibration_evidence_id,
                    c.valid_until AS calibration_valid_until,
-                   e.source_sequence_enabled
+                   e.source_sequence_enabled,
+                   e.source_sequence_required,
+                   e.source_sequence_origin,
+                   e.source_sequence_binding_fingerprint,
+                   CASE
+                       WHEN sequence_evidence.status IN ('PENDING', 'QUALIFIED')
+                            AND sequence_evidence.valid_until <= CURRENT_TIMESTAMP THEN 'EXPIRED'
+                       ELSE sequence_evidence.status
+                   END AS source_sequence_evidence_status,
+                   sequence_evidence.source_epoch AS source_sequence_epoch,
+                   sequence_evidence.first_sequence AS source_sequence_first,
+                   sequence_evidence.last_sequence AS source_sequence_last,
+                   sequence_evidence.observation_count AS source_sequence_observation_count,
+                   sequence_evidence.first_observed_at AS source_sequence_first_observed_at,
+                   sequence_evidence.last_observed_at AS source_sequence_last_observed_at,
+                   sequence_evidence.valid_until AS source_sequence_valid_until,
+                   sequence_evidence.source_event_id AS source_sequence_evidence_event_id,
+                   sequence_evidence.revision AS source_sequence_evidence_revision,
+                   (e.source_sequence_enabled
+                    AND e.source_sequence_required
+                    AND e.source_sequence_origin IN ('DEVICE', 'GATEWAY')
+                    AND e.source_sequence_binding_fingerprint IS NOT NULL
+                    AND sequence_evidence.status = 'QUALIFIED'
+                    AND sequence_evidence.sequence_origin = e.source_sequence_origin
+                    AND sequence_evidence.observed_at >= s.observed_at
+                    AND sequence_evidence.valid_until > s.observed_at
+                    AND sequence_evidence.valid_until > CURRENT_TIMESTAMP)
+                       AS source_sequence_qualified
               FROM bpi.bpi_point_catalog_entries e
               JOIN bpi.bpi_point_catalog_snapshots s
                 ON s.tenant_id = e.tenant_id AND s.id = e.snapshot_id
@@ -89,6 +140,22 @@ public class PointCatalogPostgresRepository {
                    ORDER BY calibration.decided_at DESC, calibration.id
                    LIMIT 1
               ) c ON true
+              LEFT JOIN LATERAL (
+                  SELECT evidence.status, evidence.sequence_origin, evidence.source_epoch,
+                         evidence.first_sequence, evidence.last_sequence, evidence.observation_count,
+                         evidence.first_observed_at, evidence.last_observed_at, evidence.valid_until,
+                         evidence.source_event_id, evidence.observed_at, evidence.revision
+                    FROM bpi.bpi_source_sequence_evidence_current evidence
+                   WHERE evidence.tenant_id = e.tenant_id
+                     AND evidence.source = s.source
+                     AND evidence.source_instance = s.source_instance
+                     AND evidence.plant_id = e.plant_id
+                     AND evidence.line_id = e.line_id
+                     AND evidence.product_id = e.product_id
+                     AND evidence.device_id = e.device_id
+                     AND evidence.binding_fingerprint = e.source_sequence_binding_fingerprint
+                   LIMIT 1
+              ) sequence_evidence ON true
             """;
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -209,11 +276,13 @@ public class PointCatalogPostgresRepository {
                             (id, tenant_id, snapshot_id, plant_id, line_id, locality_group,
                              product_id, device_id, property_id, point_name, unit, data_type,
                              source_property_id, device_state, registered, property_present, calibration_version,
-                             calibration_status, source_sequence_enabled)
+                             calibration_status, source_sequence_enabled, source_sequence_required,
+                             source_sequence_origin, source_sequence_binding_fingerprint)
                         VALUES (:id, :tenantId, :snapshotId, :plantId, :lineId, :localityGroup,
                                 :productId, :deviceId, :propertyId, :pointName, :unit, :dataType,
                                 :sourcePropertyId, :deviceState, :registered, :propertyPresent, :calibrationVersion,
-                                :calibrationStatus, :sourceSequenceEnabled)
+                                :calibrationStatus, :sourceSequenceEnabled, :sourceSequenceRequired,
+                                :sourceSequenceOrigin, :sourceSequenceBindingFingerprint)
                         """, batch);
             }
         } catch (DataIntegrityViolationException exception) {
@@ -279,7 +348,11 @@ public class PointCatalogPostgresRepository {
                 .addValue("propertyPresent", point.propertyPresent())
                 .addValue("calibrationVersion", blankToNull(point.calibrationVersion()))
                 .addValue("calibrationStatus", point.calibrationStatus())
-                .addValue("sourceSequenceEnabled", point.sourceSequenceEnabled());
+                .addValue("sourceSequenceEnabled", point.sourceSequenceEnabled())
+                .addValue("sourceSequenceRequired", point.sourceSequenceRequired())
+                .addValue("sourceSequenceOrigin", blankToNull(point.sourceSequenceOrigin()))
+                .addValue("sourceSequenceBindingFingerprint",
+                        blankToNull(point.sourceSequenceBindingFingerprint()));
     }
 
     private PointCatalogSnapshotView mapSnapshot(java.sql.ResultSet rs) throws java.sql.SQLException {
@@ -300,9 +373,15 @@ public class PointCatalogPostgresRepository {
         String sourceCalibrationStatus = rs.getString("source_calibration_status");
         String calibrationStatus = rs.getString("calibration_status");
         boolean sourceSequenceEnabled = rs.getBoolean("source_sequence_enabled");
+        boolean sourceSequenceRequired = rs.getBoolean("source_sequence_required");
+        String sourceSequenceOrigin = rs.getString("source_sequence_origin");
+        String sourceSequenceBindingFingerprint = rs.getString("source_sequence_binding_fingerprint");
+        boolean sourceSequenceQualified = rs.getBoolean("source_sequence_qualified");
+        String sourceSequenceEvidenceStatus = rs.getString("source_sequence_evidence_status");
         List<String> issues = readinessIssues(
                 registered, propertyPresent, deviceState, unit, calibrationVersion, calibrationStatus,
-                sourceSequenceEnabled);
+                sourceSequenceEnabled, sourceSequenceRequired, sourceSequenceOrigin,
+                sourceSequenceBindingFingerprint, sourceSequenceQualified, sourceSequenceEvidenceStatus);
         return new PointCatalogPointView(
                 rs.getObject("id", UUID.class), rs.getObject("snapshot_id", UUID.class),
                 rs.getString("plant_id"), rs.getString("line_id"), rs.getString("locality_group"),
@@ -312,13 +391,27 @@ public class PointCatalogPostgresRepository {
                 registered, propertyPresent, calibrationVersion, sourceCalibrationStatus,
                 calibrationStatus, rs.getObject("calibration_evidence_id", UUID.class),
                 instant(rs.getTimestamp("calibration_valid_until")),
-                sourceSequenceEnabled, issues.isEmpty(), issues);
+                sourceSequenceEnabled, sourceSequenceRequired, sourceSequenceOrigin,
+                sourceSequenceBindingFingerprint, sourceSequenceQualified,
+                sourceSequenceEvidenceStatus,
+                nullableLong(rs, "source_sequence_epoch"),
+                nullableLong(rs, "source_sequence_first"),
+                nullableLong(rs, "source_sequence_last"),
+                nullableInteger(rs, "source_sequence_observation_count"),
+                instant(rs.getTimestamp("source_sequence_first_observed_at")),
+                instant(rs.getTimestamp("source_sequence_last_observed_at")),
+                instant(rs.getTimestamp("source_sequence_valid_until")),
+                rs.getString("source_sequence_evidence_event_id"),
+                nullableLong(rs, "source_sequence_evidence_revision"),
+                issues.isEmpty(), issues);
     }
 
     public static boolean isSourceClaimReady(PointCatalogPointCommand point) {
         return readinessIssues(
                 point.registered(), point.propertyPresent(), point.deviceState(), point.unit(),
-                point.calibrationVersion(), point.calibrationStatus(), point.sourceSequenceEnabled()).isEmpty();
+                point.calibrationVersion(), point.calibrationStatus(), point.sourceSequenceEnabled(),
+                point.sourceSequenceRequired(), point.sourceSequenceOrigin(),
+                point.sourceSequenceBindingFingerprint(), true, "QUALIFIED").isEmpty();
     }
 
     private static List<String> readinessIssues(
@@ -328,7 +421,12 @@ public class PointCatalogPostgresRepository {
             String unit,
             String calibrationVersion,
             String calibrationStatus,
-            boolean sourceSequenceEnabled) {
+            boolean sourceSequenceEnabled,
+            boolean sourceSequenceRequired,
+            String sourceSequenceOrigin,
+            String sourceSequenceBindingFingerprint,
+            boolean sourceSequenceQualified,
+            String sourceSequenceEvidenceStatus) {
         List<String> issues = new ArrayList<>();
         if (!registered) issues.add("DEVICE_NOT_REGISTERED");
         if (!"ACTIVE".equals(deviceState)) issues.add("DEVICE_NOT_ACTIVE");
@@ -338,7 +436,22 @@ public class PointCatalogPostgresRepository {
                 || !"VERIFIED".equals(calibrationStatus)) {
             issues.add("CALIBRATION_NOT_VERIFIED");
         }
-        if (!sourceSequenceEnabled) issues.add("SOURCE_SEQUENCE_DISABLED");
+        boolean sequenceBindingReady = sourceSequenceEnabled
+                && sourceSequenceRequired
+                && ("DEVICE".equals(sourceSequenceOrigin) || "GATEWAY".equals(sourceSequenceOrigin))
+                && sourceSequenceBindingFingerprint != null
+                && SOURCE_SEQUENCE_FINGERPRINT.matcher(sourceSequenceBindingFingerprint).matches();
+        if (!sequenceBindingReady) {
+            issues.add("SOURCE_SEQUENCE_DISABLED");
+        } else if (!sourceSequenceQualified) {
+            if (sourceSequenceEvidenceStatus == null || "MISSING".equals(sourceSequenceEvidenceStatus)) {
+                issues.add("SOURCE_SEQUENCE_EVIDENCE_MISSING");
+            } else if ("EXPIRED".equals(sourceSequenceEvidenceStatus)) {
+                issues.add("SOURCE_SEQUENCE_EVIDENCE_EXPIRED");
+            } else {
+                issues.add("SOURCE_SEQUENCE_EVIDENCE_NOT_QUALIFIED");
+            }
+        }
         return List.copyOf(issues);
     }
 
@@ -378,5 +491,15 @@ public class PointCatalogPostgresRepository {
 
     private static Instant instant(Timestamp value) {
         return value == null ? null : value.toInstant();
+    }
+
+    private static Long nullableLong(java.sql.ResultSet rs, String column) throws java.sql.SQLException {
+        Number value = (Number) rs.getObject(column);
+        return value == null ? null : value.longValue();
+    }
+
+    private static Integer nullableInteger(java.sql.ResultSet rs, String column) throws java.sql.SQLException {
+        Number value = (Number) rs.getObject(column);
+        return value == null ? null : value.intValue();
     }
 }

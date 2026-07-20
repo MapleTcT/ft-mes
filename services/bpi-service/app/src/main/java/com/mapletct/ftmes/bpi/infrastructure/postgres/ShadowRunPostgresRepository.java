@@ -49,6 +49,27 @@ public class ShadowRunPostgresRepository {
                        AND entry.unit IS NOT NULL
                        AND btrim(entry.unit) <> ''
                        AND entry.source_sequence_enabled
+                       AND entry.source_sequence_required
+                       AND entry.source_sequence_origin IN ('DEVICE', 'GATEWAY')
+                       AND entry.source_sequence_binding_fingerprint IS NOT NULL
+                       AND EXISTS (
+                           SELECT 1
+                             FROM bpi.bpi_source_sequence_evidence_current sequence_evidence
+                            WHERE sequence_evidence.tenant_id = entry.tenant_id
+                              AND sequence_evidence.source = snapshot.source
+                              AND sequence_evidence.source_instance = snapshot.source_instance
+                              AND sequence_evidence.plant_id = entry.plant_id
+                              AND sequence_evidence.line_id = entry.line_id
+                              AND sequence_evidence.product_id = entry.product_id
+                              AND sequence_evidence.device_id = entry.device_id
+                              AND sequence_evidence.binding_fingerprint
+                                  = entry.source_sequence_binding_fingerprint
+                              AND sequence_evidence.status = 'QUALIFIED'
+                              AND sequence_evidence.sequence_origin = entry.source_sequence_origin
+                              AND sequence_evidence.observed_at >= snapshot.observed_at
+                              AND sequence_evidence.valid_until > snapshot.observed_at
+                              AND sequence_evidence.valid_until > CURRENT_TIMESTAMP
+                       )
                        AND entry.calibration_version IS NOT NULL
                        AND btrim(entry.calibration_version) <> ''
                        AND EXISTS (

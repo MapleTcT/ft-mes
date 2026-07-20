@@ -43,6 +43,8 @@ done
 TOPICS="${BPI_TELEMETRY_TOPIC:-iot.telemetry.selected.v1}
 ${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}
 ${BPI_POINT_CATALOG_DLQ_TOPIC:-iot.point-catalog.snapshot.dlq.v1}
+${BPI_SOURCE_SEQUENCE_TOPIC:-iot.source-sequence.evidence.v1}
+${BPI_SOURCE_SEQUENCE_DLQ_TOPIC:-iot.source-sequence.evidence.dlq.v1}
 ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
 ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
 ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}
@@ -55,7 +57,8 @@ ${BPI_DATA_QUALITY_TOPIC:-bpi.data-quality.v1}"
 
 DESCRIBE=/tmp/bpi-streaming-topics.$$.txt
 POINT_CATALOG_CONFIGS=/tmp/bpi-point-catalog-topic-configs.$$.txt
-trap 'rm -f "$DESCRIBE" "$POINT_CATALOG_CONFIGS"' EXIT HUP INT TERM
+SOURCE_SEQUENCE_CONFIGS=/tmp/bpi-source-sequence-topic-configs.$$.txt
+trap 'rm -f "$DESCRIBE" "$POINT_CATALOG_CONFIGS" "$SOURCE_SEQUENCE_CONFIGS"' EXIT HUP INT TERM
 
 printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
     compose exec -T kafka-1 /opt/kafka/bin/kafka-topics.sh \
@@ -64,16 +67,30 @@ printf '%s\n' "$TOPICS" | while IFS= read -r topic; do
         --topic "$topic" </dev/null
 done >"$DESCRIBE"
 
-if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 12 ]; then
+if [ "$(grep -c 'ReplicationFactor: 3' "$DESCRIBE")" -ne 14 ]; then
     printf 'ERROR: one or more BPI topics do not have replication factor 3\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 12 ]; then
+if [ "$(grep -c 'min.insync.replicas=2' "$DESCRIBE")" -ne 14 ]; then
     printf 'ERROR: one or more BPI topics do not have min.insync.replicas=2\n' >&2
     exit 1
 fi
-if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 2 ]; then
-    printf 'ERROR: candidate source and DLQ topics must retain records for 30 days\n' >&2
+if [ "$(grep -c 'retention.ms=2592000000' "$DESCRIBE")" -lt 3 ]; then
+    printf 'ERROR: candidate and source-sequence DLQ topics must retain records for 30 days\n' >&2
+    exit 1
+fi
+for topic in \
+    "${BPI_SOURCE_SEQUENCE_TOPIC:-iot.source-sequence.evidence.v1}" \
+    "${BPI_SOURCE_SEQUENCE_DLQ_TOPIC:-iot.source-sequence.evidence.dlq.v1}"
+do
+    compose exec -T kafka-1 /opt/kafka/bin/kafka-configs.sh \
+        --bootstrap-server kafka-1:19092 \
+        --entity-type topics \
+        --entity-name "$topic" \
+        --describe </dev/null
+done >"$SOURCE_SEQUENCE_CONFIGS"
+if [ "$(grep -Ec '^[[:space:]]+cleanup.policy=compact[[:space:]]' "$SOURCE_SEQUENCE_CONFIGS")" -ne 1 ]; then
+    printf 'ERROR: source sequence evidence topic must use cleanup.policy=compact\n' >&2
     exit 1
 fi
 POINT_CATALOG_MAX_MESSAGE_BYTES=${BPI_POINT_CATALOG_MAX_MESSAGE_BYTES:-6291456}
@@ -134,7 +151,7 @@ fi
 
 TASKMANAGERS=$(compose ps -q bpi-taskmanager | wc -l | tr -d ' ')
 REPORT=${REPORT_OVERRIDE:-${BPI_SMOKE_REPORT:-/tmp/bpi-streaming-cluster-smoke.json}}
-export REPORT JOB_ID CHECKPOINT_ID TASKMANAGERS REST_URL DESCRIBE POINT_CATALOG_CONFIGS
+export REPORT JOB_ID CHECKPOINT_ID TASKMANAGERS REST_URL DESCRIBE POINT_CATALOG_CONFIGS SOURCE_SEQUENCE_CONFIGS
 python3 <<'PY'
 import datetime
 import json
@@ -146,12 +163,13 @@ report = {
     "status": "PASS",
     "kafka": {
         "brokers": 3,
-        "topics": 12,
+        "topics": 14,
         "replicationFactor": 3,
         "minInSyncReplicas": 2,
         "pointCatalogMaxMessageBytes": int(os.environ.get("BPI_POINT_CATALOG_MAX_MESSAGE_BYTES", "6291456")),
         "describeEvidence": Path(os.environ["DESCRIBE"]).read_text(encoding="utf-8"),
         "pointCatalogConfigEvidence": Path(os.environ["POINT_CATALOG_CONFIGS"]).read_text(encoding="utf-8"),
+        "sourceSequenceConfigEvidence": Path(os.environ["SOURCE_SEQUENCE_CONFIGS"]).read_text(encoding="utf-8"),
     },
     "flink": {
         "restUrl": os.environ["REST_URL"],

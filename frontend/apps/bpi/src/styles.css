@@ -175,6 +175,9 @@ td > svg { width: 16px; color: #8b96a1; }
 .topology-table { min-width: 880px; }
 .binding-table { min-width: 680px; }
 .point-table { min-width: 1560px; }
+.point-sequence-cell { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.point-sequence-cell > div { min-width: 0; }
+.point-sequence-cell .icon-button { flex: 0 0 auto; width: 28px; height: 28px; }
 .calibration-workbench { min-width: 0; margin-top: 16px; background: #fff; border: 1px solid var(--line); }
 .calibration-table { min-width: 1320px; }
 .table-frame--flush { border: 0; }

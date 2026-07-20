@@ -17,15 +17,16 @@ Compose 承载。
 `df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4` 在 Flyway V21 上把 `bpi.ui` 接到旧 MES
 原生菜单读取点，并通过真实页面完成启用、禁用、恢复继承、审计、幂等、marker 清理、iframe 进入和
 adapter 故障回退。最终测试环境保留 LINE `bpi.ui=true/active/r1`，Flink job 保持
-`RUNNING 36/36`。`MapleTcT/iot@41239b4e` 以独立受控 marker 跑通目标 JetLinks EventBus、exporter、
-Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生成内容寻址点位目录，经 Kafka
-落入 BPI PostgreSQL 后由真实页面读取；来源序列 READY 仍要求最近匹配配置的遥测先进入持久化 spool，
-并存在未过期的 `30m` Redis 证据。该结论只覆盖受控 Phase 1 技术链；自动目录内仍是 1 点/0 READY，
+`RUNNING 36/36`。`MapleTcT/iot@beefd1d5` 已把 JetLinks EventBus、exporter、持久化序列状态、
+内容寻址点位目录和来源序列证据接入 Kafka；MES Flyway V22 消费证据并落入 PostgreSQL。目标机当前
+真实 evidence 为 `DISABLED / r2`，目录仍是 1 点/0 READY，浏览器证据抽屉明确显示失败关闭；来源序列
+READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在未过期的 `30m` Redis 证据。该结论只覆盖受控 Phase 1 技术链；
 不代表真实网关/协议设备连续单调序列、IoT + MES context 同 marker 候选/批次、连续影子运行或生产投用完成。
 
 早期部署基线见 [`metadata/bpi-test-environment-acceptance.json`](../../metadata/bpi-test-environment-acceptance.json)；
 当前原生菜单增量验收见
-[`metadata/bpi-shell-menu-gate-acceptance.json`](../../metadata/bpi-shell-menu-gate-acceptance.json)。
+[`metadata/bpi-shell-menu-gate-acceptance.json`](../../metadata/bpi-shell-menu-gate-acceptance.json)，来源序列 V22
+证据见 [`metadata/bpi-source-sequence-readiness-acceptance.json`](../../metadata/bpi-source-sequence-readiness-acceptance.json)。
 
 ## 隔离边界
 
@@ -58,7 +59,7 @@ Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生�
 | 同一 marker 联合写链 | `ADP_E2E_20260714_091536_BPI_JOINT` 完成真实浏览器规则模拟/发布、outbox、Kafka、Flink `APPLIED`、唯一候选、浏览器确认和影子批次/证据/审计落库 | PASS |
 | JetLinks EventBus source | `ADP_BPI_E2E_20260714_145738_757314` 触发 exporter received/enqueued/published 增量 `1`，Kafka partition 4 offset `3 -> 4`，Flink consumer offset `4/4`、lag `0`；试点入口恢复关闭 | PASS_SOURCE_ONLY |
 | JetLinks 点位目录自动同步 | revision `sha256:2a218d12...151ce5` 经 `iot.point-catalog.snapshot.v1` 落入 1 个 snapshot、1 个 entry、1 个幂等和 1 个审计；重复/重启不增行，毒消息进入 DLT，真实页面读取 `200` 且浏览器错误为 0 | PASS_CONTROL_WITH_BLOCKED_SOURCE |
-| JetLinks 来源序列运行时证据 | `MapleTcT/iot@41239b4e` 已部署；26 项 exporter 测试、真实页面/API/PostgreSQL、严重日志、容器隔离和旧镜像回滚往返通过；入口关闭且当前证据键为 0，目录保持 1 点/0 READY | PASS_GUARD_WITH_BLOCKED_SOURCE |
+| JetLinks 来源序列运行时证据 | `MapleTcT/iot@beefd1d5` 和 MES Flyway V22 已部署；证据 topic RF=3/minISR=2/compact，consumer lag=0、DLQ=0；PostgreSQL current 为 `DISABLED/r2`，inbox=2，目录 1 点/0 READY；真实页面/API/证据抽屉和 MES 镜像回滚往返通过 | PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE |
 | 拓扑/规则产品化目标验收 | `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` 完成真实 ADP 页面拓扑创建/校验、创建人发布 `422` 门禁、独立管理员发布、规则草稿、4 条审计、4 条幂等、服务重启后页面读取 | PASS |
 | 验收退场与恢复 | 发布 typed inactive 并获 Flink `APPLIED`；单事务清理后 topology/rule/candidate/batch 均为 0；消费者默认关闭，浏览器概览再次 `200` 且错误为 0 | PASS |
 
@@ -76,7 +77,7 @@ Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生�
 1. 把同一 marker 联合验收、单 broker 故障和应用组件双向回退固化为每次 BPI 发布前的目标环境回归基线。
 2. 保持 topology/rule 页面创建、校验、独立发布、版本比较、审批、受控退役、规则绑定、运行开关治理、旧 MES 原生菜单门禁/回退和重启读取作为每次发布回归。
 3. 在生产等价维护窗口继续完成 BPI 跨组件整体回切和真实业务负载演练；数据库始终采用 expand-only，不执行破坏性降级。
-4. 把 `MapleTcT/iot@41239b4e` 接到真实网关/协议设备点位，补齐设备激活、属性 metadata、标定，并用多条真实事件证明持久来源序列连续单调和重连语义，等待自动目录生成新 revision；禁止手工伪造 READY。
+4. 把 `MapleTcT/iot@beefd1d5` 接到真实网关/协议设备点位，补齐真实标定，并用多条真实事件证明持久来源序列连续单调和重连换 epoch 语义，等待自动目录生成新 revision；禁止手工伪造 READY。
 5. 用同一 marker 闭合真实设备 EventBus、exporter、Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链。
 6. 连续运行 7-14 天并达到边界认同率、累计量偏差和数据质量门槛。
 7. 门槛通过后再设计 QCS/WMS 幂等写回、补偿和回滚，禁止提前改写生产状态。
@@ -105,6 +106,7 @@ Kafka 到 Flink source，并从 JetLinks 权威设备/产品 metadata 自动生�
 - `/home/v6/adp-evidence/ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e_CLEANUP.txt`
 - `/home/v6/adp-evidence/BPI_SHELL_MENU_FINAL_20260720_df6fdb0e_PASS.txt`
 - `/home/v6/bpi-deploy-backups/20260720-044859-shell-menu-df6fdb0e`
+- `/home/v6/adp-deploy-backups/20260720-073058-source-sequence-v22`
 
 本地浏览器报告包括 `/tmp/bpi-target-browser-smoke.json`、`/tmp/bpi-joint-browser-publish.json`、
 `/tmp/bpi-joint-browser-confirm.json`、`/tmp/bpi-joint-browser-read-after-cleanup.json`、

@@ -80,6 +80,21 @@ bpi:
     max-attempts: ${BPI_POINT_CATALOG_KAFKA_MAX_ATTEMPTS:4}
     retry-backoff: ${BPI_POINT_CATALOG_KAFKA_RETRY_BACKOFF:2s}
     max-payload-bytes: ${BPI_POINT_CATALOG_KAFKA_MAX_PAYLOAD_BYTES:5242880}
+  source-sequence-kafka:
+    enabled: ${BPI_SOURCE_SEQUENCE_KAFKA_ENABLED:false}
+    bootstrap-servers: ${BPI_SOURCE_SEQUENCE_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_SOURCE_SEQUENCE_KAFKA_TOPIC:iot.source-sequence.evidence.v1}
+    dlq-topic: ${BPI_SOURCE_SEQUENCE_KAFKA_DLQ_TOPIC:iot.source-sequence.evidence.dlq.v1}
+    group-id: ${BPI_SOURCE_SEQUENCE_KAFKA_GROUP_ID:ft-mes-bpi-service-source-sequence-v1}
+    client-id: ${BPI_SOURCE_SEQUENCE_KAFKA_CLIENT_ID:ft-mes-bpi-source-sequence}
+    actor-id: ${BPI_SOURCE_SEQUENCE_KAFKA_ACTOR_ID:jetlinks-source-sequence-sync}
+    allowed-tenant-ids: ${BPI_SOURCE_SEQUENCE_KAFKA_ALLOWED_TENANT_IDS:_DENY_ALL_}
+    allowed-plant-ids: ${BPI_SOURCE_SEQUENCE_KAFKA_ALLOWED_PLANT_IDS:_DENY_ALL_}
+    allowed-line-ids: ${BPI_SOURCE_SEQUENCE_KAFKA_ALLOWED_LINE_IDS:_DENY_ALL_}
+    concurrency: ${BPI_SOURCE_SEQUENCE_KAFKA_CONCURRENCY:1}
+    max-attempts: ${BPI_SOURCE_SEQUENCE_KAFKA_MAX_ATTEMPTS:4}
+    retry-backoff: ${BPI_SOURCE_SEQUENCE_KAFKA_RETRY_BACKOFF:2s}
+    max-payload-bytes: ${BPI_SOURCE_SEQUENCE_KAFKA_MAX_PAYLOAD_BYTES:65536}
   rule-publication-outbox:
     enabled: ${BPI_RULE_PUBLICATION_OUTBOX_ENABLED:false}
     bootstrap-servers: ${BPI_RULE_PUBLICATION_BOOTSTRAP_SERVERS:127.0.0.1:29092}

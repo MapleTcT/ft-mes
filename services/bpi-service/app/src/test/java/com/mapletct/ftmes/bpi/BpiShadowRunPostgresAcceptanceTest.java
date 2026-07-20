@@ -94,11 +94,16 @@ class BpiShadowRunPostgresAcceptanceTest {
                     (id, tenant_id, snapshot_id, plant_id, line_id, product_id, device_id,
                      property_id, source_property_id, point_name, unit, data_type, device_state,
                      registered, property_present, calibration_version, calibration_status,
-                     source_sequence_enabled)
+                     source_sequence_enabled, source_sequence_required, source_sequence_origin,
+                     source_sequence_binding_fingerprint)
                 VALUES (?, ?, ?, ?, ?, 'PRODUCT-SUGAR', 'DEVICE-SHADOW',
                         'flow.instant', 'flow.instant', 'Shadow flow', 't/h', 'DECIMAL', 'ACTIVE',
-                        true, true, 'CAL-SHADOW-1', 'VERIFIED', true)
-                """, UUID.randomUUID(), tenantId, snapshotId, PLANT_ID, LINE_ID);
+                        true, true, 'CAL-SHADOW-1', 'VERIFIED', true, true, 'DEVICE', ?)
+                """, UUID.randomUUID(), tenantId, snapshotId, PLANT_ID, LINE_ID,
+                SourceSequenceEvidenceTestFixture.FINGERPRINT);
+        SourceSequenceEvidenceTestFixture.qualifyCurrentDevice(
+                jdbc, tenantId, PLANT_ID, LINE_ID, "PRODUCT-SUGAR", "DEVICE-SHADOW",
+                tenantId + "_SOURCE_SEQUENCE");
         jdbc.update("""
                 INSERT INTO bpi.bpi_point_calibrations
                     (id, tenant_id, plant_id, line_id, product_id, device_id, property_id,
@@ -159,6 +164,7 @@ class BpiShadowRunPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_batch_instances WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        SourceSequenceEvidenceTestFixture.cleanup(jdbc, tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);

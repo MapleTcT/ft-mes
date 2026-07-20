@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-19T21:10:26.000Z",
-  "repoCommit": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4+target-acceptance-worktree",
+  "generatedAt": "2026-07-19T23:50:34.000Z",
+  "repoCommit": "52eb162b812a9d754970ea80bc31281aa93b1990+codex/bpi-source-sequence-evidence-v2",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -38,6 +38,11 @@
       "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
       "marker": "sha256:2a218d12d6ed8bea024c38f6d2e06656f20703fadf920256dc98b17c2f151ce5",
       "evidence": "metadata/bpi-point-catalog-kafka-sync-acceptance.json"
+    },
+    "bpiSourceSequenceEvidenceV22": {
+      "status": "PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE",
+      "marker": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
+      "evidence": "metadata/bpi-source-sequence-readiness-acceptance.json"
     },
     "patrolRoute": {
       "status": "PASS",
@@ -121,8 +126,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 180,
-    "pass": 177,
+    "testedFeatures": 181,
+    "pass": 178,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3863,9 +3868,37 @@
       "issues": [
         "The old portal userPortal request still returns an unrelated 401 after login and remains a separate platform issue; bpi.ui governs native navigation only, while Phase 1 automatic confirmation and production writeback remain locked."
       ]
+    },
+    {
+      "module": "BPI 来源序列 V22 证据落库",
+      "route": "/bpi/#/points",
+      "operation": "JetLinks 周期资格判定发布来源序列心跳，MES 消费并幂等落库，真实页面读取证据抽屉与失败关闭状态",
+      "api": "Kafka iot.source-sequence.evidence.v1; GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01; GET /bpi-api/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01",
+      "method": "KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "PointCatalogSynchronizer -> KafkaSourceSequenceEvidencePublisher -> SourceSequenceEvidenceKafkaListener -> SourceSequenceEvidenceKafkaRecordProcessor -> SourceSequenceEvidenceIngestionService -> SourceSequenceEvidencePostgresRepository",
+      "tables": [
+        "bpi.bpi_source_sequence_evidence_current",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_point_catalog_snapshots",
+        "bpi.bpi_point_catalog_entries"
+      ],
+      "marker": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
+      "verificationSql": "SELECT status,source_event_id,observed_at,revision FROM bpi.bpi_source_sequence_evidence_current WHERE tenant_id='1000'; SELECT source,event_id,idempotency_key,processed_at FROM bpi.bpi_inbox_events WHERE source='iot.source-sequence.evidence.v1' ORDER BY processed_at; SELECT id,point_count,source_claim_ready_point_count,observed_at FROM bpi.bpi_point_catalog_snapshots ORDER BY imported_at DESC LIMIT 1; SELECT count(*) FROM bpi.bpi_batch_candidates WHERE tenant_id='1000'; SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id='1000';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-source-sequence-readiness-acceptance.json. Target 10.11.100.17 ran PostgreSQL 15.18/Flyway V22, three-broker Kafka and the real ADP /bpi/#/points page. Source consumer offset was 2/2 with lag 0 and the dedicated DLQ had zero total offsets. PostgreSQL held one DISABLED current row at revision 2, two inbox rows and one state-change audit; the latest catalog snapshot c6c09084-82dd-46f8-81e4-98b336b46e65 held one point and zero READY. Browser current/calibration APIs were 200, console/page errors were zero, and the evidence drawer showed DISABLED/r2/BLOCKED. Candidate and batch counts remained zero. Screenshot: metadata/bpi-source-sequence-evidence-v22.png.",
+      "issues": [
+        "Real pilot telemetry has not supplied monotonic device or gateway sequences and calibration remains UNVERIFIED, so the current status is deliberately DISABLED/BLOCKED; this PASS covers the evidence pipeline and fail-closed guard, not production readiness."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
+      "artifact": "metadata/bpi-source-sequence-readiness-acceptance.json",
+      "summary": "Target JetLinks to Kafka to MES to PostgreSQL V22 and the real ADP point page closed auditable source-sequence persistence, idempotent current revision 2, inbox/audit evidence, lag-zero consumption, zero DLQ and fail-closed DISABLED/BLOCKED rendering without creating a candidate or batch."
+    },
     {
       "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
       "artifact": "metadata/bpi-shell-menu-gate-acceptance.json",

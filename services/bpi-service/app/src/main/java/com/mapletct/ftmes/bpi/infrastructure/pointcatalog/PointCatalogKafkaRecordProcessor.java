@@ -7,6 +7,7 @@ import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
+import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.domain.PointCatalogView;
 import com.mapletct.ftmes.bpi.interfaces.rest.PointCatalogPointCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.PointCatalogSnapshotCommand;
@@ -31,6 +32,7 @@ import java.util.regex.Pattern;
 public class PointCatalogKafkaRecordProcessor {
     private static final Pattern REVISION = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Pattern SOURCE = Pattern.compile("[A-Za-z0-9][A-Za-z0-9._:-]*");
+    private static final Pattern BINDING_FINGERPRINT = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final String EVENT_ID = "event_id";
     private static final String TENANT_ID = "tenant_id";
     private static final String SOURCE_REVISION = "source_revision";
@@ -168,6 +170,29 @@ public class PointCatalogKafkaRecordProcessor {
                 || point.getCalibrationStatus() == PointCalibrationStatusV1.UNRECOGNIZED) {
             throw rejected("Point catalog point.calibration_status is required.");
         }
+        validateSourceSequenceBinding(point);
+    }
+
+    private void validateSourceSequenceBinding(PointCatalogPointV1 point) {
+        SequenceOrigin origin = point.getSourceSequenceOrigin();
+        boolean hasOrigin = origin == SequenceOrigin.DEVICE || origin == SequenceOrigin.GATEWAY;
+        boolean hasFingerprint = !point.getSourceSequenceBindingFingerprint().isBlank();
+        if (origin == SequenceOrigin.EXPORTER || origin == SequenceOrigin.UNRECOGNIZED) {
+            throw rejected("Point catalog point.source_sequence_origin must be DEVICE or GATEWAY.");
+        }
+        if (hasOrigin != hasFingerprint) {
+            throw rejected("Point catalog source sequence origin and binding fingerprint must be provided together.");
+        }
+        if (hasFingerprint
+                && !BINDING_FINGERPRINT.matcher(point.getSourceSequenceBindingFingerprint()).matches()) {
+            throw rejected("Point catalog source sequence binding fingerprint is invalid.");
+        }
+        if (point.getSourceSequenceRequired() && !hasOrigin) {
+            throw rejected("Point catalog required source sequence binding is incomplete.");
+        }
+        if (point.getSourceSequenceEnabled() && hasOrigin && !point.getSourceSequenceRequired()) {
+            throw rejected("Point catalog enabled source sequence must be required by the binding.");
+        }
     }
 
     private PointCatalogSnapshotCommand command(PointCatalogSnapshotV1 event) {
@@ -210,7 +235,15 @@ public class PointCatalogKafkaRecordProcessor {
                     case POINT_CALIBRATION_MISSING -> "MISSING";
                     default -> throw rejected("Point catalog point.calibration_status is invalid.");
                 },
-                point.getSourceSequenceEnabled());
+                point.getSourceSequenceEnabled(),
+                point.getSourceSequenceRequired(),
+                switch (point.getSourceSequenceOrigin()) {
+                    case DEVICE -> "DEVICE";
+                    case GATEWAY -> "GATEWAY";
+                    case SEQUENCE_ORIGIN_UNSPECIFIED -> null;
+                    default -> throw rejected("Point catalog point.source_sequence_origin is invalid.");
+                },
+                blankToNull(point.getSourceSequenceBindingFingerprint()));
     }
 
     private void requireHeader(ConsumerRecord<byte[], byte[]> record, String name, String expected) {

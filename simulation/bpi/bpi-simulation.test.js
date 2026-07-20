@@ -6,6 +6,7 @@ const { createBpiSimulator, listen } = require('./server');
 
 const profile = JSON.parse(fs.readFileSync(path.join(__dirname, '../../contracts/bpi-api/simulation-profile.json'), 'utf8'));
 const RULE_ID = '78d57d90-fdc8-4a57-a660-a1ae73c2bc96';
+const SOURCE_SEQUENCE_FINGERPRINT = `sha256:${'2'.repeat(64)}`;
 const covered = new Set();
 let server;
 let baseUrl;
@@ -433,6 +434,9 @@ test('point calibration approval is authoritative and revoke immediately removes
       calibrationVersion: 'CAL-E2E-APPROVE-1',
       calibrationStatus: 'VERIFIED',
       sourceSequenceEnabled: true,
+      sourceSequenceRequired: true,
+      sourceSequenceOrigin: 'DEVICE',
+      sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
     }],
   };
   result = await request('POST', '/bpi/v1/point-catalog/snapshots', {
@@ -443,7 +447,21 @@ test('point calibration approval is authoritative and revoke immediately removes
   assert.equal(result.json.data.snapshot.readyPointCount, 0);
   assert.equal(result.json.data.points[0].sourceCalibrationStatus, 'VERIFIED');
   assert.equal(result.json.data.points[0].calibrationStatus, 'UNVERIFIED');
-  assert.deepEqual(result.json.data.points[0].readinessIssues, ['CALIBRATION_NOT_VERIFIED']);
+  assert.deepEqual(result.json.data.points[0].readinessIssues, [
+    'CALIBRATION_NOT_VERIFIED', 'SOURCE_SEQUENCE_EVIDENCE_MISSING',
+  ]);
+
+  result = await request('POST', '/__simulation/source-sequence-evidence', {
+    body: {
+      productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-CALIBRATION',
+      bindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
+      status: 'QUALIFIED', sequenceOrigin: 'DEVICE',
+    },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data.affectedPointCount, 1);
+  assert.equal(result.json.data.catalog.points[0].sourceSequenceQualified, true);
+  assert.deepEqual(result.json.data.catalog.points[0].readinessIssues, ['CALIBRATION_NOT_VERIFIED']);
 
   result = await request('GET', '/bpi/v1/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01');
   assert.equal(result.response.status, 200);
@@ -594,16 +612,29 @@ test('rule simulation checksum gates publication', async () => {
       propertyId: 'flow.instant', sourcePropertyId: 'instantFlow', pointName: '进料瞬时流量', unit: 't/h', dataType: 'double',
       deviceState: 'ACTIVE', registered: true, propertyPresent: true,
       calibrationVersion: 'CAL-1', calibrationStatus: 'VERIFIED', sourceSequenceEnabled: true,
+      sourceSequenceRequired: true, sourceSequenceOrigin: 'DEVICE',
+      sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
     }],
   };
   const pointHeaders = commandHeaders('import-point-catalog-0001', 0);
   pointResult = await request('POST', '/bpi/v1/point-catalog/snapshots', { headers: pointHeaders, body: pointSnapshot });
   assert.equal(pointResult.response.status, 200);
-  assert.equal(pointResult.json.data.snapshot.readyPointCount, 1);
+  assert.equal(pointResult.json.data.snapshot.readyPointCount, 0);
+  assert.deepEqual(pointResult.json.data.points[0].readinessIssues, ['SOURCE_SEQUENCE_EVIDENCE_MISSING']);
   const firstPointImport = pointResult.json;
   pointResult = await request('POST', '/bpi/v1/point-catalog/snapshots', { headers: pointHeaders, body: pointSnapshot });
   assert.equal(pointResult.response.headers.get('idempotent-replay'), 'true');
   assert.deepEqual(pointResult.json, firstPointImport);
+
+  pointResult = await request('POST', '/__simulation/source-sequence-evidence', {
+    body: {
+      productId: 'PRODUCT-SUGAR', deviceId: 'DEVICE-S07-01',
+      bindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
+      status: 'QUALIFIED', sequenceOrigin: 'DEVICE',
+    },
+  });
+  assert.equal(pointResult.response.status, 200);
+  assert.equal(pointResult.json.data.catalog.snapshot.readyPointCount, 1);
 
   let topologyResult = await request('GET', '/bpi/v1/topologies?plantId=PLANT-01&lineId=LINE-S07-01');
   assert.equal(topologyResult.json.data.length, 1);

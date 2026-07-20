@@ -627,6 +627,22 @@ marker：`ADP_E2E_20260715_0532_BPI_SOURCE_SEQUENCE`。证据：
 `metadata/bpi-source-sequence-readiness-acceptance.json`、
 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。
 
+### BPI 来源序列 V22 真实证据（2026-07-20）
+
+本节在当前唯一 ADP 测试环境 `10.11.100.17` 复验，不沿用旧地址或 V12 的布尔声明结论。JetLinks
+运行证据经 Kafka Protobuf 和 MES consumer 写入 PostgreSQL V22 后，真实 ADP 页面读取同一 current
+evidence。控制链通过，但现场没有真实遥测且校准未批准，因此系统按设计保持失败关闭。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 来源序列 V22 | `http://10.11.100.17:18080/bpi/#/points` | 使用真实 ADP 登录，加载点位目录，筛选点位，打开并关闭来源证据抽屉 | `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`；`GET /bpi-api/point-calibrations?plantId=PLANT-01&lineId=LINE-S07-01` | 两个 API 均 `200`；页面显示 1 点、0 READY、`DISABLED / r2 / BLOCKED` 及来源、指纹、事件 ID；console error=0、page error=0，`1600x1000` 无横向溢出，筛选及抽屉开关可用 | Kafka consumer offset `2/2`、lag 0，DLQ 三分区总 offset 0；current evidence 1 行/r2，inbox 2 行、状态变化审计 1 行；candidate=0、batch=0 | `bpi_source_sequence_evidence_current`、`bpi_inbox_events`、`bpi_audit_events`、`bpi_point_catalog_snapshots`、`bpi_point_catalog_entries` | PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE | 当前 JetLinks 试点没有真实遥测，证据为 `DISABLED`；校准为 `UNVERIFIED`，不得放行为 READY |
+
+内容地址 marker：
+`source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d`。
+机器记录：`metadata/bpi-source-sequence-readiness-acceptance.json`；页面截图：
+`metadata/bpi-source-sequence-evidence-v22.png`；完整实现、查库和回滚证据见
+`docs/testing/bpi-source-sequence-readiness-acceptance.md`。
+
 ### BPI 点位目录高基数分页（2026-07-19）
 
 本节使用目标环境 `10.11.100.17` 的真实 ADP 会话、adapter、Java 17 service、PostgreSQL 15.18

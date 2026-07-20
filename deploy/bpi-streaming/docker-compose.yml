@@ -150,6 +150,8 @@ services:
       BPI_POINT_CATALOG_TOPIC: ${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}
       BPI_POINT_CATALOG_DLQ_TOPIC: ${BPI_POINT_CATALOG_DLQ_TOPIC:-iot.point-catalog.snapshot.dlq.v1}
       BPI_POINT_CATALOG_MAX_MESSAGE_BYTES: ${BPI_POINT_CATALOG_MAX_MESSAGE_BYTES:-6291456}
+      BPI_SOURCE_SEQUENCE_TOPIC: ${BPI_SOURCE_SEQUENCE_TOPIC:-iot.source-sequence.evidence.v1}
+      BPI_SOURCE_SEQUENCE_DLQ_TOPIC: ${BPI_SOURCE_SEQUENCE_DLQ_TOPIC:-iot.source-sequence.evidence.dlq.v1}
       BPI_CONTEXT_TOPIC: ${BPI_CONTEXT_TOPIC:-mes.production.context.v1}
       BPI_RULE_TOPIC: ${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}
       BPI_RULE_APPLICATION_TOPIC: ${BPI_RULE_APPLICATION_TOPIC:-bpi.boundary.rule-application.v1}

@@ -623,6 +623,21 @@ KRaft server、Flink 2.2.1 MiniCluster 和测试拥有的本地 checkpoint 目�
 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。该项不把 exporter 自增回退序列解释为现场来源序列，
 也不改变目标试点设备仍为 `BLOCKED` 的结论。
 
+### BPI 来源序列 V22 可审计落库（目标 Kafka/PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| JetLinks 周期资格判定并发布来源序列心跳 | `http://10.11.100.17:18080/bpi/#/points` | Kafka `iot.source-sequence.evidence.v1`；`GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01` | `PointCatalogSynchronizer -> KafkaSourceSequenceEvidencePublisher -> SourceSequenceEvidenceKafkaListener -> SourceSequenceEvidenceKafkaRecordProcessor -> SourceSequenceEvidenceIngestionService -> SourceSequenceEvidencePostgresRepository` | `bpi.bpi_source_sequence_evidence_current`、`bpi.bpi_inbox_events`、`bpi.bpi_audit_events` | `SELECT status,source_event_id,observed_at,revision FROM bpi.bpi_source_sequence_evidence_current WHERE tenant_id='1000';` | 内容地址事件 `source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d` 已落 current；状态 `DISABLED`、revision 2、最新 observedAt `2026-07-20 07:47:18.534+08` | PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE |
+| 自动目录精确携带来源和绑定证据 | 同上 | Kafka `iot.point-catalog.snapshot.v1`；同一 current GET | `JetLinksPointCatalogSource -> PointCatalogSnapshotMapper -> KafkaPointCatalogPublisher -> PointCatalogKafkaRecordProcessor -> PointCatalogPostgresRepository` | `bpi.bpi_point_catalog_snapshots`、`bpi.bpi_point_catalog_entries`、`bpi.bpi_source_sequence_evidence_current` | `SELECT id,point_count,source_claim_ready_point_count,observed_at FROM bpi.bpi_point_catalog_snapshots ORDER BY imported_at DESC LIMIT 1;` | snapshot `c6c09084-82dd-46f8-81e4-98b336b46e65` 为 1 点/0 READY；entry 精确携带 `GATEWAY` 和 binding fingerprint `sha256:d5a753a203342f75c52f8ab412ccbf7cecb8251864017de7985958d90ef6f640`，阻断项为 `CALIBRATION_NOT_VERIFIED,SOURCE_SEQUENCE_DISABLED` | PASS_TARGET_GUARD_WITH_BLOCKED_SOURCE |
+| 重复心跳幂等更新 current 并保留交付审计 | 不适用；由同一真实页面读回最终状态 | Kafka `iot.source-sequence.evidence.v1` | `SourceSequenceEvidenceKafkaRecordProcessor -> SourceSequenceEvidenceIngestionService -> SourceSequenceEvidencePostgresRepository` | `bpi.bpi_source_sequence_evidence_current`、`bpi.bpi_inbox_events`、`bpi.bpi_audit_events` | `SELECT source,event_id,idempotency_key,processed_at FROM bpi.bpi_inbox_events WHERE source='iot.source-sequence.evidence.v1' ORDER BY processed_at; SELECT action,after_revision FROM bpi.bpi_audit_events WHERE action='SOURCE_SEQUENCE_EVIDENCE_DISABLED';` | 两个内容地址消息形成 2 条 inbox；current 原位更新至 r2；首次状态变化仅有 1 条 `SOURCE_SEQUENCE_EVIDENCE_DISABLED` 审计，consumer group offset `2/2`、lag 0 | PASS |
+| 失败关闭且不产生错误批次 | 同一页面显示 `BLOCKED` | Kafka source topic 与 `iot.source-sequence.evidence.dlq.v1` | readiness join / topology guard；Kafka error handler / DLQ | `bpi.bpi_batch_candidates`、`bpi.bpi_batch_instances`；DLQ 不落业务表 | `SELECT count(*) FROM bpi.bpi_batch_candidates WHERE tenant_id='1000'; SELECT count(*) FROM bpi.bpi_batch_instances WHERE tenant_id='1000';`；核对 DLQ 三分区 end offset | candidate=0、batch=0；来源 DLQ 三分区总 offset=0；没有把 `DISABLED` 或未校准点位解释成 READY | PASS |
+
+机器记录：`metadata/bpi-source-sequence-readiness-acceptance.json`；详细报告：
+`docs/testing/bpi-source-sequence-readiness-acceptance.md`；截图：
+`metadata/bpi-source-sequence-evidence-v22.png`。目标 PostgreSQL 为 15.18/Flyway V22；MES consumer lag 0，
+Flink job `1e981b842f4693e49f3c3def0fb98cb6` 保持 `RUNNING 36/36`。本项证明证据链和失败关闭正确，
+不宣称现场来源或生产自动写回已就绪。
+
 ### BPI 点位目录稳定分页与定向清理（目标 PostgreSQL）
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |

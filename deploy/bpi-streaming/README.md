@@ -64,7 +64,7 @@ make down-bpi-stream
 Smoke 必须同时满足：
 
 1. 三个 Kafka broker 正常运行；
-2. 十二个配置内 BPI 业务 topic（包含点位目录 source/DLT、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
+2. 十四个配置内 BPI 业务 topic（包含点位目录 source/DLQ、来源序列证据 source/DLQ、rule application 回执/DLQ、独立 runtime readiness 回执/DLQ 与 candidate DLQ）均为副本 3、最小同步副本 2；
 3. Flink 作业状态为 `RUNNING`；
 4. 至少存在一个成功 checkpoint。
 
@@ -166,7 +166,7 @@ BPI_STREAM_RESTORE_CONFIRM=RESTORE_BPI_FLINK_FROM_SAVEPOINT \
 ```
 
 恢复验收必须同时看到：Flink `latest.restored.external_path` 等于配置的 savepoint、恢复后至少一个
-新 checkpoint、点位目录 source、runtime-readiness sink、12 个复制主题和零欠副本。可单独复验：
+新 checkpoint、点位目录 source、runtime-readiness sink、14 个复制主题和零欠副本。可单独复验：
 
 ```bash
 make bpi-stream-verify-savepoint

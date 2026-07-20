@@ -1,6 +1,7 @@
 const { createHash } = require('node:crypto');
 
 const FIXED_TIME = '2026-07-12T08:00:00.000Z';
+const SOURCE_SEQUENCE_FINGERPRINT = `sha256:${'1'.repeat(64)}`;
 
 function clone(value) {
   return structuredClone(value);
@@ -142,7 +143,17 @@ function createScenario() {
         registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
         sourceCalibrationStatus: 'VERIFIED', calibrationStatus: 'VERIFIED',
         calibrationEvidenceId: pointCalibrations[0].id, calibrationValidUntil: pointCalibrations[0].validUntil,
-        sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+        sourceSequenceEnabled: true, sourceSequenceRequired: true, sourceSequenceOrigin: 'DEVICE',
+        sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
+        sourceSequenceQualified: true, sourceSequenceEvidenceStatus: 'QUALIFIED',
+        sourceSequenceEpoch: 7, sourceSequenceFirst: 1001, sourceSequenceLast: 1016,
+        sourceSequenceObservationCount: 16,
+        sourceSequenceFirstObservedAt: '2026-07-12T07:40:00.000Z',
+        sourceSequenceLastObservedAt: '2026-07-12T07:50:10.000Z',
+        sourceSequenceValidUntil: '2027-07-12T07:50:10.000Z',
+        sourceSequenceEvidenceEventId: 'source-sequence-evidence-simulator-device-s07-01',
+        sourceSequenceEvidenceRevision: 1,
+        ready: true, readinessIssues: [],
       },
       {
         id: '27315888-e7ca-56da-a24c-f54e65a9ad91', snapshotId: pointCatalogSnapshot.id,
@@ -152,10 +163,34 @@ function createScenario() {
         registered: true, propertyPresent: true, calibrationVersion: 'CAL-1',
         sourceCalibrationStatus: 'VERIFIED', calibrationStatus: 'VERIFIED',
         calibrationEvidenceId: pointCalibrations[1].id, calibrationValidUntil: pointCalibrations[1].validUntil,
-        sourceSequenceEnabled: true, ready: true, readinessIssues: [],
+        sourceSequenceEnabled: true, sourceSequenceRequired: true, sourceSequenceOrigin: 'DEVICE',
+        sourceSequenceBindingFingerprint: SOURCE_SEQUENCE_FINGERPRINT,
+        sourceSequenceQualified: true, sourceSequenceEvidenceStatus: 'QUALIFIED',
+        sourceSequenceEpoch: 7, sourceSequenceFirst: 1001, sourceSequenceLast: 1016,
+        sourceSequenceObservationCount: 16,
+        sourceSequenceFirstObservedAt: '2026-07-12T07:40:00.000Z',
+        sourceSequenceLastObservedAt: '2026-07-12T07:50:10.000Z',
+        sourceSequenceValidUntil: '2027-07-12T07:50:10.000Z',
+        sourceSequenceEvidenceEventId: 'source-sequence-evidence-simulator-device-s07-01',
+        sourceSequenceEvidenceRevision: 1,
+        ready: true, readinessIssues: [],
       },
     ],
   };
+
+  const sourceSequenceEvidence = new Map([[
+    ['JETLINKS', 'jetlinks-simulator', 'PLANT-01', 'LINE-S07-01', 'PRODUCT-SUGAR',
+      'DEVICE-S07-01', SOURCE_SEQUENCE_FINGERPRINT].join('|'),
+    {
+      eventId: 'source-sequence-evidence-simulator-device-s07-01',
+      status: 'QUALIFIED', sequenceOrigin: 'DEVICE', sourceEpoch: 7,
+      firstSequence: 1001, lastSequence: 1016, observationCount: 16,
+      firstObservedAt: '2026-07-12T07:40:00.000Z',
+      lastObservedAt: '2026-07-12T07:50:10.000Z',
+      validUntil: '2027-07-12T07:50:10.000Z',
+      observedAt: '2026-07-12T07:50:10.000Z', revision: 1,
+    },
+  ]]);
 
   const ruleBody = {
     code: 'RULE-S07-START', version: '1.2.0', plantId: 'PLANT-01', lineId: 'LINE-S07-01',
@@ -298,6 +333,7 @@ function createScenario() {
     topologies: [topology],
     pointCatalog,
     pointCatalogHistory: [pointCatalog],
+    sourceSequenceEvidence,
     pointCalibrations,
     rule,
     rules: [rule],

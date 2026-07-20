@@ -89,11 +89,16 @@ class BpiTopologyRuleProductizationPostgresAcceptanceTest {
                     (id, tenant_id, snapshot_id, plant_id, line_id, locality_group,
                      product_id, device_id, property_id, point_name, unit, data_type,
                      device_state, registered, property_present, calibration_version,
-                     calibration_status, source_sequence_enabled)
+                     calibration_status, source_sequence_enabled, source_sequence_required,
+                     source_sequence_origin, source_sequence_binding_fingerprint)
                 VALUES (?, ?, ?, ?, ?, 'LOCALITY-S07-EVAP', 'PRODUCT-SUGAR', 'DEVICE-S07-01',
                         'flow.instant', '进料瞬时流量', 't/h', 'double', 'ACTIVE', true, true,
-                        'CAL-1', 'VERIFIED', true)
-                """, UUID.randomUUID(), tenantId, snapshotId, PLANT_ID, LINE_ID);
+                        'CAL-1', 'VERIFIED', true, true, 'DEVICE', ?)
+                """, UUID.randomUUID(), tenantId, snapshotId, PLANT_ID, LINE_ID,
+                SourceSequenceEvidenceTestFixture.FINGERPRINT);
+        SourceSequenceEvidenceTestFixture.qualifyCurrentDevice(
+                jdbc, tenantId, PLANT_ID, LINE_ID, "PRODUCT-SUGAR", "DEVICE-S07-01",
+                marker + "_SOURCE_SEQUENCE");
     }
 
     @AfterEach
@@ -103,6 +108,7 @@ class BpiTopologyRuleProductizationPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        SourceSequenceEvidenceTestFixture.cleanup(jdbc, tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_entries WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_catalog_snapshots WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_point_calibrations WHERE tenant_id = ?", tenantId);

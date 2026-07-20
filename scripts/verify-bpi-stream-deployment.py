@@ -224,6 +224,13 @@ def main() -> int:
     ):
         if marker not in topic_script:
             failures.append(f"BPI topic initialization is missing point catalog marker: {marker}")
+    for marker in (
+        "iot.source-sequence.evidence.v1",
+        "iot.source-sequence.evidence.dlq.v1",
+        "cleanup.policy=compact",
+    ):
+        if marker not in topic_script:
+            failures.append(f"BPI topic initialization is missing source sequence marker: {marker}")
 
     smoke_script = (ROOT / "deploy/bpi-streaming/scripts/smoke-cluster.sh").read_text(
         encoding="utf-8"
@@ -232,12 +239,14 @@ def main() -> int:
         failures.append(
             "BPI cluster smoke must isolate kafka-topics stdin so every configured topic is checked"
         )
-    if '"topics": 12' not in smoke_script:
-        failures.append("BPI cluster smoke must report all twelve configured topics")
+    if '"topics": 14' not in smoke_script:
+        failures.append("BPI cluster smoke must report all fourteen configured topics")
     for marker in (
         "kafka-configs.sh",
         "POINT_CATALOG_CONFIGS",
         "pointCatalogConfigEvidence",
+        "SOURCE_SEQUENCE_CONFIGS",
+        "sourceSequenceConfigEvidence",
     ):
         if marker not in smoke_script:
             failures.append(

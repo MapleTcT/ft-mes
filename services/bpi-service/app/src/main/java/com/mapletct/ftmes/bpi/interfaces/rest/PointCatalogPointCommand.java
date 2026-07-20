@@ -18,5 +18,9 @@ public record PointCatalogPointCommand(
         boolean propertyPresent,
         @Size(max = 128) String calibrationVersion,
         @NotBlank @Pattern(regexp = "VERIFIED|UNVERIFIED|MISSING") String calibrationStatus,
-        boolean sourceSequenceEnabled) {
+        boolean sourceSequenceEnabled,
+        boolean sourceSequenceRequired,
+        @Pattern(regexp = "DEVICE|GATEWAY") String sourceSequenceOrigin,
+        @Size(max = 71) @Pattern(regexp = "sha256:[0-9a-f]{64}")
+        String sourceSequenceBindingFingerprint) {
 }

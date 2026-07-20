@@ -80,6 +80,35 @@ message PointCatalogPointV1 {
   string calibration_version = 12;
   PointCalibrationStatusV1 calibration_status = 13;
   bool source_sequence_enabled = 14;
+  bool source_sequence_required = 15;
+  SequenceOrigin source_sequence_origin = 16;
+  string source_sequence_binding_fingerprint = 17;
+}
+
+// Device-level control-plane evidence. The Kafka topic is compacted by the
+// stable binding identity so volatile sequence ranges are not duplicated into
+// every point-catalog row.
+message SourceSequenceEvidenceV1 {
+  string event_id = 1;
+  string source = 2;
+  string source_instance = 3;
+  string tenant_id = 4;
+  string plant_id = 5;
+  string line_id = 6;
+  string product_id = 7;
+  string device_id = 8;
+  string binding_fingerprint = 9;
+  SourceSequenceEvidenceStatusV1 status = 10;
+  SequenceOrigin sequence_origin = 11;
+  uint64 source_epoch = 12;
+  uint64 first_sequence = 13;
+  uint64 last_sequence = 14;
+  uint32 observation_count = 15;
+  int64 first_observed_at_ms = 16;
+  int64 last_observed_at_ms = 17;
+  int64 valid_until_ms = 18;
+  int64 observed_at_ms = 19;
+  string reason = 20;
 }
 
 enum PointDeviceStateV1 {
@@ -94,6 +123,15 @@ enum PointCalibrationStatusV1 {
   POINT_CALIBRATION_VERIFIED = 1;
   POINT_CALIBRATION_UNVERIFIED = 2;
   POINT_CALIBRATION_MISSING = 3;
+}
+
+enum SourceSequenceEvidenceStatusV1 {
+  SOURCE_SEQUENCE_EVIDENCE_STATUS_UNSPECIFIED = 0;
+  SOURCE_SEQUENCE_EVIDENCE_DISABLED = 1;
+  SOURCE_SEQUENCE_EVIDENCE_MISSING = 2;
+  SOURCE_SEQUENCE_EVIDENCE_PENDING = 3;
+  SOURCE_SEQUENCE_EVIDENCE_QUALIFIED = 4;
+  SOURCE_SEQUENCE_EVIDENCE_EXPIRED = 5;
 }
 
 // Production context is emitted from the MES outbox and joined to telemetry by event time.

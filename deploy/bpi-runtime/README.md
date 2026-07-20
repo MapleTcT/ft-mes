@@ -29,7 +29,7 @@ The one-shot `bpi-migrate` container uses the same tested application image with
 with the DML-only `bpi_service` account.
 
 `BPI_EXPECTED_FLYWAY_VERSION` is the runtime smoke contract for the release and defaults to the
-latest repository migration (`19`). Set it explicitly in the target `.env` when preparing a release;
+latest repository migration (`22`). Set it explicitly in the target `.env` when preparing a release;
 the smoke check fails if the database is behind or unexpectedly ahead of that version.
 
 The browser reaches only the same-origin `/bpi-api` path on `bpi-web`. Nginx proxies that path to
@@ -50,12 +50,20 @@ URL that happens to reach Keycloak. `BPI_ADAPTER_ROLE_RULES` and
 mapped. The legacy gateway URL must be an internal service address; never point ticket verification
 at a caller-controlled host.
 
-Candidate, point-catalog, rule-publication, rule-application, and runtime-readiness Kafka consumers are disabled by
-default. Enable them only after setting explicit tenant, plant, and line allowlists. `_DENY_ALL_` is
+Candidate, point-catalog, source-sequence evidence, rule-publication, rule-application, and
+runtime-readiness Kafka consumers are disabled by default. Enable them only after setting explicit
+tenant, plant, and line allowlists. `_DENY_ALL_` is
 the fail-closed default; `*` should be used only for a documented test marker scope. The point-catalog
 consumer additionally validates Kafka key, required single-value headers, Protobuf schema version,
 content-addressed revision, 5 MiB payload limit and source identity before persistence; failed records
 use bounded retry and `iot.point-catalog.snapshot.dlq.v1`.
+
+The source-sequence consumer accepts only content-addressed `SourceSequenceEvidenceV1` Protobuf
+events from `iot.source-sequence.evidence.v1`. The record key and single-value headers must match
+the exact tenant/source instance/plant/line/product/device/binding fingerprint identity. A point
+remains blocked until a fresh `QUALIFIED` event matches its current catalog claim; the boolean
+catalog declaration alone never grants readiness. Rejected records use bounded retry and
+`iot.source-sequence.evidence.dlq.v1`.
 
 The rule-application listener consumes both control-plane `APPLIED/REJECTED` receipts and the
 independent evaluator `READY/DEGRADED/INACTIVE` receipts. The two source topics and their DLQs must
@@ -96,7 +104,7 @@ intentionally unsupported.
 
 The target service and adapter rollback rehearsal uses the integrated ADP Compose stack. It requires
 explicit confirmation and two pre-existing rollback images, captures the current image tags and IDs,
-keeps Flyway V16 expanded, checks core-table counts, runs a real ADP login and `/bpi/#/points` browser
+keeps the current expand-only Flyway schema, checks core-table counts, runs a real ADP login and `/bpi/#/points` browser
 smoke on the rollback images, then restores the exact current images and repeats all checks:
 
 ```bash

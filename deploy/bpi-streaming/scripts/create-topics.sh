@@ -42,6 +42,11 @@ create_topic "${BPI_POINT_CATALOG_TOPIC:-iot.point-catalog.snapshot.v1}" "$CONTR
 create_topic "${BPI_POINT_CATALOG_DLQ_TOPIC:-iot.point-catalog.snapshot.dlq.v1}" "$CONTROL_PARTITIONS" \
     --config "max.message.bytes=$POINT_CATALOG_MAX_MESSAGE_BYTES" \
     --config retention.ms=2592000000
+create_topic "${BPI_SOURCE_SEQUENCE_TOPIC:-iot.source-sequence.evidence.v1}" "$CONTROL_PARTITIONS" \
+    --config cleanup.policy=compact \
+    --config delete.retention.ms=86400000
+create_topic "${BPI_SOURCE_SEQUENCE_DLQ_TOPIC:-iot.source-sequence.evidence.dlq.v1}" "$CONTROL_PARTITIONS" \
+    --config retention.ms=2592000000
 create_topic "${BPI_CONTEXT_TOPIC:-mes.production.context.v1}" "$CONTROL_PARTITIONS"
 create_topic "${BPI_RULE_TOPIC:-bpi.boundary.rule-publication.v1}" "$CONTROL_PARTITIONS" \
     --config cleanup.policy=compact \

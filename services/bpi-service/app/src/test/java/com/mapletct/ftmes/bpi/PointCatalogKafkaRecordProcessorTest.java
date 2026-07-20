@@ -7,6 +7,7 @@ import com.mapletct.ftmes.bpi.contract.v1.PointCalibrationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCatalogPointV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointCatalogSnapshotV1;
 import com.mapletct.ftmes.bpi.contract.v1.PointDeviceStateV1;
+import com.mapletct.ftmes.bpi.contract.v1.SequenceOrigin;
 import com.mapletct.ftmes.bpi.domain.PointCatalogView;
 import com.mapletct.ftmes.bpi.infrastructure.pointcatalog.BpiPointCatalogKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.pointcatalog.PointCatalogKafkaListener;
@@ -76,6 +77,10 @@ class PointCatalogKafkaRecordProcessorTest {
         assertThat(command.getValue().points()).hasSize(1);
         assertThat(command.getValue().points().get(0).deviceState()).isEqualTo("ACTIVE");
         assertThat(command.getValue().points().get(0).calibrationStatus()).isEqualTo("VERIFIED");
+        assertThat(command.getValue().points().get(0).sourceSequenceRequired()).isTrue();
+        assertThat(command.getValue().points().get(0).sourceSequenceOrigin()).isEqualTo("DEVICE");
+        assertThat(command.getValue().points().get(0).sourceSequenceBindingFingerprint())
+                .isEqualTo(SourceSequenceEvidenceTestFixture.FINGERPRINT);
     }
 
     @Test
@@ -203,6 +208,9 @@ class PointCatalogKafkaRecordProcessorTest {
                 .setCalibrationVersion("calibration-v1")
                 .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED)
                 .setSourceSequenceEnabled(true)
+                .setSourceSequenceRequired(true)
+                .setSourceSequenceOrigin(SequenceOrigin.DEVICE)
+                .setSourceSequenceBindingFingerprint(SourceSequenceEvidenceTestFixture.FINGERPRINT)
                 .build();
         PointCatalogSnapshotV1 content = PointCatalogSnapshotV1.newBuilder()
                 .setSource("JETLINKS")

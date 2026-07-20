@@ -5583,6 +5583,12 @@
     },
     {
       "ignored": false,
+      "path": "metadata/bpi-source-sequence-evidence-v22.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "metadata/bpi-source-sequence-readiness-acceptance.json",
       "state": "tracked",
       "tracked": true
@@ -6705,6 +6711,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/SourceSequenceEvidenceIngestResult.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/SourceSequenceEvidenceIngestionService.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/TelemetryIngestionService.java",
       "state": "tracked",
       "tracked": true
@@ -7269,6 +7287,42 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/BpiSourceSequenceKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/BpiSourceSequenceKafkaProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/SourceSequenceEvidenceKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/SourceSequenceEvidenceKafkaRecordProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/SourceSequenceEvidenceKafkaRecordRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/SourceSequenceEvidencePostgresRepository.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/telemetry/BpiTelemetryProperties.java",
       "state": "tracked",
       "tracked": true
@@ -7551,6 +7605,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V22__bpi_source_sequence_evidence.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V2__bpi_tenant_and_runtime_hardening.sql",
       "state": "tracked",
       "tracked": true
@@ -7671,6 +7731,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiSourceSequenceKafkaPostgresAcceptanceTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
       "state": "tracked",
       "tracked": true
@@ -7714,6 +7780,18 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/RuleRuntimeReadinessKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/SourceSequenceEvidenceKafkaRecordProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/SourceSequenceEvidenceTestFixture.java",
       "state": "tracked",
       "tracked": true
     },
@@ -8543,7 +8621,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 156
+      "tracked": 157
     },
     "package.json": {
       "tracked": 1
@@ -8555,7 +8633,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 232
+      "tracked": 244
     },
     "simulation": {
       "tracked": 4
@@ -8567,8 +8645,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1418,
-    "tracked": 1418,
+    "totalFiles": 1431,
+    "tracked": 1431,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -8,6 +8,7 @@ import com.mapletct.ftmes.bpi.infrastructure.outbox.RulePublicationOutboxPropert
 import com.mapletct.ftmes.bpi.infrastructure.application.BpiRuleApplicationKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.pointcatalog.BpiPointCatalogKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.dataquality.BpiDataQualityKafkaProperties;
+import com.mapletct.ftmes.bpi.infrastructure.sourcesequence.BpiSourceSequenceKafkaProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,6 +21,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         BpiCandidateKafkaProperties.class,
         BpiDataQualityKafkaProperties.class,
         BpiPointCatalogKafkaProperties.class,
+        BpiSourceSequenceKafkaProperties.class,
         BpiRuleApplicationKafkaProperties.class,
         RulePublicationOutboxProperties.class
 })
