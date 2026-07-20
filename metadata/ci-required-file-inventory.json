@@ -4119,6 +4119,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/upgrade-bpi-integrated-expand-only.sh",
+      "state": "untracked",
+      "tracked": false
+    },
+    {
+      "ignored": false,
       "path": "deploy/keycloak/production-migration/.env.example",
       "state": "tracked",
       "tracked": true
@@ -8840,7 +8846,8 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 574
+      "tracked": 574,
+      "untracked": 1
     },
     "docs": {
       "tracked": 109
@@ -8873,9 +8880,14 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1469,
+    "totalFiles": 1470,
     "tracked": 1469,
-    "untracked": 0
+    "untracked": 1
   },
-  "untrackedByDirectory": []
+  "untrackedByDirectory": [
+    {
+      "count": 1,
+      "pathPrefix": "deploy/docker"
+    }
+  ]
 }

@@ -106,6 +106,28 @@ The Docker profile is PostgreSQL-first. `.env.example` and the built-in Compose 
 
 If a legacy module must temporarily connect to Oracle, copy the relevant values from `.env.oracle-legacy.example` into `.env` and document the reason in the migration notes for that module. Oracle should be explicit, not the silent default.
 
+## Integrated BPI Upgrade
+
+The target environment runs BPI inside this single ADP Compose project. Use the integrated expand-only
+helper from a clean release checkout; do not start the isolated `deploy/bpi-runtime` stack beside it.
+The helper builds immutable service and Java 8 adapter images, then creates a custom-format PostgreSQL
+backup, a mode-0600 `.env` backup, a UI archive and rollback image tags before applying Flyway. It
+never downgrades the schema and it requires the Phase 2 QCS/WMS integration and WMS outbox to remain
+disabled by default.
+
+```bash
+BPI_INTEGRATED_RUNTIME_ROOT=/home/v6/adp-mes-docker-newbase-20260611-181921 \
+BPI_INTEGRATED_BACKUP_DIR=/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23 \
+BPI_EXPECTED_FLYWAY_VERSION=23 \
+BPI_INTEGRATED_UPGRADE_CONFIRM=UPGRADE_INTEGRATED_BPI_EXPAND_ONLY \
+  make bpi-integrated-upgrade-expand-only
+```
+
+The generated JSON report records before/after Flyway versions, exact image IDs, rollback image tags,
+backup paths and the deployed UI checksum. If an application rollback is required, keep the expanded
+PostgreSQL schema, restore the recorded service/adapter images and UI archive, then rerun the browser,
+API and PostgreSQL acceptance checks.
+
 ## RM Web Formula Editor
 
 `rm-formula-editor` replaces the recovered IE ActiveX/localhost `4433` Batch formula editor with an authenticated Web page at `/msService/RM/formula/editor`. It writes the existing `rm_formulas`, `rm_formula_processes` and `rm_process_actives` tables and keeps separate revision/delivery ledgers.
