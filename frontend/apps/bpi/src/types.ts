@@ -187,6 +187,31 @@ export interface Batch {
   topologyVersion: string;
 }
 
+export interface ForceCloseTask {
+  taskId: string;
+  batchId: string;
+  state: 'PENDING_APPROVAL' | 'COMPLETED';
+  revision: number;
+  batchRevision: number;
+  sourceState: 'ACTIVE' | 'SUSPENDED';
+  boundaryTime: string;
+  requestedBy: string;
+  requestedAt: string;
+  requestReason: string;
+  requestComment?: string | null;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  decisionReason?: string | null;
+  decisionComment?: string | null;
+}
+
+export interface ForceCloseCommand {
+  reason: string;
+  boundaryTime: string;
+  approvalMode: 'REQUEST' | 'APPROVE';
+  comment?: string;
+}
+
 export type QualityInspectionDisposition = 'PENDING' | 'ACCEPTED' | 'REJECTED';
 
 export interface QualityInspection {

@@ -353,6 +353,19 @@ td > svg { width: 16px; color: #8b96a1; }
 .batch-detail-loading strong { font-size: 13px; }
 .batch-detail-loading span { color: var(--muted); font-size: 11px; line-height: 1.55; }
 @keyframes release-spin { to { transform: rotate(360deg); } }
+.force-close-task { background: #fff9ed; border-top: 1px solid #e5c27a; border-bottom: 1px solid #e5c27a; }
+.force-close-task--completed { background: #eef8f2; border-color: #9ac8ab; }
+.force-close-task__header { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: start; gap: 10px; }
+.force-close-task__header > svg { width: 21px; color: #ad7415; }
+.force-close-task--completed .force-close-task__header > svg { color: var(--green); }
+.force-close-task__header > div { min-width: 0; display: grid; gap: 4px; }
+.force-close-task__header span { color: var(--muted); font-size: 10px; }
+.force-close-task__header strong { font-size: 13px; }
+.force-close-task__header p { margin: 0; color: #5e5a4d; font-size: 10px; line-height: 1.5; }
+.force-close-task__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(173, 116, 21, 0.24); }
+.force-close-task__facts > div { min-width: 0; display: grid; gap: 3px; }
+.force-close-task__facts span { color: var(--muted); font-size: 9px; }
+.force-close-task__facts b { overflow-wrap: anywhere; font-size: 10px; }
 .batch-release-section { background: #fbfcfd; }
 .release-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 14px 0 18px; border: 1px solid var(--line); background: #fff; }
 .release-stage { min-width: 0; min-height: 76px; display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 7px; padding: 10px 8px; border-right: 1px solid var(--line); }
@@ -487,6 +500,7 @@ td > svg { width: 16px; color: #8b96a1; }
   .release-stage:nth-child(2) { border-right: 0; }
   .release-stage:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
   .release-facts { grid-template-columns: 1fr; }
+  .force-close-task__facts { grid-template-columns: 1fr; }
   .release-reconciliation { grid-template-columns: 1fr; }
   .release-reconciliation .button { justify-self: start; }
   .release-reconciliation--blocked { grid-template-columns: 20px minmax(0, 1fr); }

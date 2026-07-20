@@ -40,6 +40,7 @@ import type {
   FeatureFlag,
   FeatureFlagOverrideCommand,
   FeatureFlagScopeType,
+  ForceCloseTask,
   LineState,
   PointCatalogPoint,
   PointCatalogPointCommand,
@@ -114,6 +115,7 @@ const state = {
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
   selectedBatchRelease: null as BatchRelease | null,
+  selectedForceCloseTask: null as ForceCloseTask | null,
   selectedShadowRun: null as ShadowRun | null,
   selectedRule: null as RuleVersion | null,
   selectedTopology: null as TopologyVersion | null,
@@ -123,7 +125,7 @@ const state = {
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   selectedFeatureFlag: null as FeatureFlag | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
-  batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | null,
+  batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
@@ -356,6 +358,7 @@ function shell(): void {
           <header><div><span id="command-kicker">候选批次</span><h2 id="command-title">审核候选边界</h2></div><button value="cancel" class="icon-button" aria-label="关闭"><i data-lucide="x"></i></button></header>
           <div class="command-summary" id="command-summary"></div>
           <label id="command-assignee-field" hidden><span>分派给</span><input id="command-assignee" maxlength="128" autocomplete="off" placeholder="输入责任人账号或岗位" /></label>
+          <label id="command-boundary-field" hidden><span>强制结束边界时间</span><input id="command-boundary-time" type="datetime-local" step="1" /></label>
           <label><span id="command-reason-label">审核原因</span><textarea id="confirm-reason" minlength="3" maxlength="500" required placeholder="填写现场审核依据"></textarea></label>
           <footer><button value="cancel" class="button button--secondary">取消</button><button id="confirm-submit" value="default" class="button button--primary">提交</button></footer>
         </form>
@@ -516,6 +519,7 @@ function bindShellEvents(): void {
   document.querySelector<HTMLSelectElement>('#shadow-review-batch')?.addEventListener('change', applyShadowReviewBatch);
   document.querySelector<HTMLDialogElement>('#confirm-dialog')?.addEventListener('close', () => {
     setCommandAssigneeVisible(false);
+    setCommandBoundaryVisible(false);
     state.dataQualityCommand = null;
     state.shadowRunCommand = null;
   });
@@ -530,6 +534,15 @@ function bindShellEvents(): void {
 function setCommandAssigneeVisible(visible: boolean, value = ''): void {
   const field = document.querySelector<HTMLElement>('#command-assignee-field');
   const input = document.querySelector<HTMLInputElement>('#command-assignee');
+  if (!field || !input) return;
+  field.hidden = !visible;
+  input.required = visible;
+  input.value = visible ? value : '';
+}
+
+function setCommandBoundaryVisible(visible: boolean, value = ''): void {
+  const field = document.querySelector<HTMLElement>('#command-boundary-field');
+  const input = document.querySelector<HTMLInputElement>('#command-boundary-time');
   if (!field || !input) return;
   field.hidden = !visible;
   input.required = visible;
@@ -2846,19 +2859,41 @@ function batchReleaseSectionHtml(): string {
   </div>`;
 }
 
+function forceCloseTaskHtml(): string {
+  const task = state.selectedForceCloseTask;
+  if (!task) return '';
+  const pending = task.state === 'PENDING_APPROVAL';
+  const title = pending ? '强制结束待独立审批' : '强制结束已完成';
+  const detail = pending
+    ? '批次运行命令已冻结。管理员必须核对同一边界时间，且申请人不能批准自己的申请。'
+    : `批次已按批准边界 ${formatTime(task.boundaryTime)} 关闭。`;
+  return `<div class="drawer-section force-close-task force-close-task--${pending ? 'pending' : 'completed'}" data-force-close-state="${escapeHtml(task.state)}">
+    <div class="force-close-task__header"><i data-lucide="${pending ? 'clock-3' : 'check-circle-2'}"></i><div><span>高风险批次命令</span><strong>${title}</strong><p>${escapeHtml(detail)}</p></div>${statusChip(task.state)}</div>
+    <div class="force-close-task__facts"><div><span>任务 ID</span><b>${escapeHtml(task.taskId)}</b></div><div><span>拟定边界</span><b>${formatTime(task.boundaryTime)}</b></div><div><span>申请人 / 时间</span><b>${escapeHtml(task.requestedBy)} · ${formatTime(task.requestedAt)}</b></div><div><span>申请依据</span><b>${escapeHtml(task.requestReason)}</b></div></div>
+  </div>`;
+}
+
 function renderBatchDrawer(): void {
   const batch = state.selectedBatch;
   if (!batch) return;
   const evidence = [...state.batchEvidence.start, ...state.batchEvidence.end].map((item) => `<li><span class="evidence-state evidence-state--${item.satisfied ? 'ok' : 'bad'}"></span><div><strong>${escapeHtml(item.signal)}</strong><small>${escapeHtml(item.source)} · ${formatTime(item.eventTime)}</small></div><b>${escapeHtml(item.value)}${item.unit ? ` ${escapeHtml(item.unit)}` : ''}</b></li>`).join('');
   const timeline = state.timeline.map((item) => `<li><i></i><div><strong>${escapeHtml(item.action)}</strong><span>${escapeHtml(item.reason || '-')}</span><small>${formatTime(item.at || item.eventTime)} · ${escapeHtml(item.actor || item.actorId || '-')}</small></div></li>`).join('');
-  const command = batch.state === 'ACTIVE'
-    ? '<button class="button button--danger" id="open-suspend">暂停自动处理</button>'
+  const pendingForceClose = state.selectedForceCloseTask?.state === 'PENDING_APPROVAL';
+  const runtimeCommand = pendingForceClose ? '' : batch.state === 'ACTIVE'
+    ? '<button class="button button--secondary" id="open-suspend">暂停自动处理</button>'
     : batch.state === 'SUSPENDED'
-      ? '<button class="button button--primary" id="open-resume">恢复自动处理</button>'
+      ? '<button class="button button--secondary" id="open-resume">恢复自动处理</button>'
       : '';
-  openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div>${batchReleaseSectionHtml()}<div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li class="evidence-empty">暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline || '<li><i></i><div><strong>暂无状态事件</strong></div></li>'}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`, `batch:${batch.id}`);
+  const forceCloseCommand = pendingForceClose
+    ? '<button class="button button--danger" id="open-force-close-approve">批准并强制结束</button>'
+    : (batch.state === 'ACTIVE' || batch.state === 'SUSPENDED')
+      ? '<button class="button button--danger" id="open-force-close-request">申请强制结束</button>'
+      : '';
+  openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div>${forceCloseTaskHtml()}${batchReleaseSectionHtml()}<div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li class="evidence-empty">暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline || '<li><i></i><div><strong>暂无状态事件</strong></div></li>'}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${runtimeCommand}${forceCloseCommand}</footer>`, `batch:${batch.id}`);
   document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
   document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
+  document.querySelector('#open-force-close-request')?.addEventListener('click', () => openBatchCommandDialog('forceCloseRequest'));
+  document.querySelector('#open-force-close-approve')?.addEventListener('click', () => openBatchCommandDialog('forceCloseApprove'));
   document.querySelector('#open-wms-reconcile')?.addEventListener('click', () => openBatchCommandDialog('reconcileWms'));
   document.querySelector('#retry-batch-release')?.addEventListener('click', () => void reloadBatchRelease(batch.id));
 }
@@ -2895,6 +2930,7 @@ async function openBatch(batchId: string): Promise<void> {
   const knownBatch = state.batches.find((batch) => batch.id === batchId) || null;
   state.selectedBatch = knownBatch;
   state.selectedBatchRelease = null;
+  state.selectedForceCloseTask = null;
   state.batchReleaseLoading = true;
   state.batchReleaseError = null;
   state.batchEvidence = { start: [], end: [] };
@@ -2904,15 +2940,17 @@ async function openBatch(batchId: string): Promise<void> {
     const releaseRequest = bpiApi.batchRelease(batchId)
       .then((response) => ({ response, error: null as Error | null }))
       .catch((error) => ({ response: null, error: error instanceof Error ? error : new Error(String(error)) }));
-    const [batchResponse, evidenceResponse, timelineResponse] = await Promise.all([
+    const [batchResponse, evidenceResponse, timelineResponse, forceCloseResponse] = await Promise.all([
       bpiApi.batch(batchId),
       bpiApi.evidence(batchId),
       bpiApi.timeline(batchId),
+      bpiApi.forceCloseTask(batchId),
     ]);
     if (generation !== batchRequestGeneration || activeDrawerKey !== `batch:${batchId}`) return;
     state.selectedBatch = batchResponse.data;
     state.batchEvidence = evidenceResponse.data;
     state.timeline = timelineResponse.data;
+    state.selectedForceCloseTask = forceCloseResponse.data;
     renderBatchDrawer();
 
     const releaseResult = await releaseRequest;
@@ -2932,36 +2970,59 @@ async function openBatch(batchId: string): Promise<void> {
   }
 }
 
-function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms'): void {
+function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms' | 'forceCloseRequest' | 'forceCloseApprove'): void {
   const batch = state.selectedBatch;
   if (!batch) return;
   const isSuspend = command === 'suspend';
   const isReconciliation = command === 'reconcileWms';
+  const isForceCloseRequest = command === 'forceCloseRequest';
+  const isForceCloseApprove = command === 'forceCloseApprove';
+  const isForceClose = isForceCloseRequest || isForceCloseApprove;
   const inbound = state.selectedBatchRelease?.wmsInbound;
+  const forceCloseTask = state.selectedForceCloseTask;
   if (isReconciliation && (!inbound || !inbound.reconciliationAllowed)) return;
+  if (isForceCloseApprove && forceCloseTask?.state !== 'PENDING_APPROVAL') return;
   state.candidateCommand = null;
   state.batchCommand = command;
   state.ruleCommand = null;
   state.topologyCommand = null;
   state.calibrationCommand = null;
-  document.querySelector('#command-kicker')!.textContent = isReconciliation ? '完工入库核对' : '批次运行控制';
+  document.querySelector('#command-kicker')!.textContent = isReconciliation
+    ? '完工入库核对' : isForceClose ? '高风险批次命令' : '批次运行控制';
   document.querySelector('#command-title')!.textContent = isReconciliation
     ? '重新核对原 WMS 单据'
-    : isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
+    : isForceCloseRequest ? '申请强制结束批次'
+      : isForceCloseApprove ? '批准强制结束批次'
+        : isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
   document.querySelector('#command-reason-label')!.textContent = isReconciliation
     ? '核对原因'
-    : isSuspend ? '暂停原因' : '恢复原因';
+    : isForceCloseRequest ? '申请依据'
+      : isForceCloseApprove ? '独立审批依据'
+        : isSuspend ? '暂停原因' : '恢复原因';
   document.querySelector('#command-summary')!.innerHTML = isReconciliation && inbound
     ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>命令事件</span><b>${escapeHtml(inbound.commandEventId)}</b></div><div><span>处理策略</span><b>先查原单 · 同一幂等键</b></div><div><span>入库投影版本</span><b>r${inbound.revision}</b></div>`
-    : `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
+    : isForceClose
+      ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>处理阶段</span><b>${isForceCloseRequest ? `${escapeHtml(batch.state)} → 待独立审批` : `${escapeHtml(batch.state)} → CLOSED_RAW`}</b></div><div><span>批次版本</span><b>r${batch.revision}</b></div>`
+      : `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
+  setCommandBoundaryVisible(
+    isForceClose,
+    isForceCloseApprove && forceCloseTask
+      ? toLocalDateTimeValue(forceCloseTask.boundaryTime)
+      : toLocalDateTimeValue(new Date().toISOString()),
+  );
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
   reason.value = '';
   reason.placeholder = isReconciliation
     ? '填写回执超时、消息失败或人工查单依据'
-    : isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
+    : isForceCloseRequest ? '填写停产、切罐、设备故障或现场异常依据'
+      : isForceCloseApprove ? '填写独立核对边界时间和现场事实的依据'
+        : isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
-  button.className = `button ${isSuspend ? 'button--danger' : 'button--primary'}`;
-  button.textContent = isReconciliation ? '确认核对原单' : isSuspend ? '确认暂停' : '确认恢复';
+  button.className = `button ${isSuspend || isForceClose ? 'button--danger' : 'button--primary'}`;
+  button.textContent = isReconciliation ? '确认核对原单'
+    : isForceCloseRequest ? '提交独立审批'
+      : isForceCloseApprove ? '批准并关闭批次'
+        : isSuspend ? '确认暂停' : '确认恢复';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
 }
@@ -2971,16 +3032,32 @@ async function handleBatchCommand(): Promise<void> {
   const command = state.batchCommand;
   const release = state.selectedBatchRelease;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
-  if (!batch || !command || reason.length < 3 || (command === 'reconcileWms' && !release)) return;
+  const forceCloseTask = state.selectedForceCloseTask;
+  const isForceClose = command === 'forceCloseRequest' || command === 'forceCloseApprove';
+  const boundaryValue = document.querySelector<HTMLInputElement>('#command-boundary-time')!.value;
+  const boundaryTime = boundaryValue ? new Date(boundaryValue).toISOString() : '';
+  if (!batch || !command || reason.length < 3 || (command === 'reconcileWms' && !release)
+      || (command === 'forceCloseApprove' && forceCloseTask?.state !== 'PENDING_APPROVAL')
+      || (isForceClose && !boundaryTime)) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;
-  button.textContent = command === 'reconcileWms' ? '核对排队中...' : command === 'suspend' ? '暂停中...' : '恢复中...';
+  button.textContent = command === 'reconcileWms' ? '核对排队中...'
+    : command === 'forceCloseRequest' ? '提交审批中...'
+      : command === 'forceCloseApprove' ? '审批关闭中...'
+        : command === 'suspend' ? '暂停中...' : '恢复中...';
   try {
     if (command === 'reconcileWms') {
       const response = await bpiApi.reconcileWmsInbound(release!, reason, commandId());
       state.selectedBatchRelease = response.data;
       state.selectedBatch = response.data.batch;
       state.batches = state.batches.map((item) => item.id === response.data.batch.id ? response.data.batch : item);
+    } else if (isForceClose) {
+      const response = await bpiApi.forceCloseBatch(batch, {
+        reason,
+        boundaryTime,
+        approvalMode: command === 'forceCloseRequest' ? 'REQUEST' : 'APPROVE',
+      }, commandId());
+      state.selectedForceCloseTask = response.data;
     } else {
       const response = command === 'suspend'
         ? await bpiApi.suspendBatch(batch, reason, commandId())
@@ -2994,7 +3071,9 @@ async function handleBatchCommand(): Promise<void> {
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
     showToast(command === 'reconcileWms'
       ? '原入库命令已进入重新核对队列'
-      : command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
+      : command === 'forceCloseRequest' ? '强制结束申请已提交，等待独立管理员审批'
+        : command === 'forceCloseApprove' ? '强制结束已批准，批次已关闭为 CLOSED_RAW'
+          : command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
     await loadView(true);
     await openBatch(batch.id);
   } catch (error) {
@@ -3004,8 +3083,11 @@ async function handleBatchCommand(): Promise<void> {
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
-    button.className = `button ${command === 'suspend' ? 'button--danger' : 'button--primary'}`;
-    button.textContent = command === 'reconcileWms' ? '确认核对原单' : command === 'suspend' ? '确认暂停' : '确认恢复';
+    button.className = `button ${command === 'suspend' || isForceClose ? 'button--danger' : 'button--primary'}`;
+    button.textContent = command === 'reconcileWms' ? '确认核对原单'
+      : command === 'forceCloseRequest' ? '提交独立审批'
+        : command === 'forceCloseApprove' ? '批准并关闭批次'
+          : command === 'suspend' ? '确认暂停' : '确认恢复';
   }
 }
 

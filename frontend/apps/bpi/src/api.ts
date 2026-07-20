@@ -12,6 +12,8 @@ import type {
   FeatureFlag,
   FeatureFlagOverrideCommand,
   FeatureFlagScopeType,
+  ForceCloseCommand,
+  ForceCloseTask,
   LineState,
   PointCatalogSnapshotCommand,
   PointCatalogView,
@@ -124,6 +126,14 @@ export const bpiApi = {
       method: 'POST',
       headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
       body: JSON.stringify({ reason }),
+    }),
+  forceCloseTask: (id: string) =>
+    request<ForceCloseTask | null>(`/batches/${encodeURIComponent(id)}/force-close`),
+  forceCloseBatch: (batch: Batch, command: ForceCloseCommand, key: string) =>
+    request<ForceCloseTask>(`/batches/${encodeURIComponent(batch.id)}/force-close`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(batch.revision) },
+      body: JSON.stringify(command),
     }),
   shadowRuns: (plantId: string, options?: { lineId?: string; state?: ShadowRunState | '' }) => {
     const parameters = new URLSearchParams({ plantId, limit: '100' });

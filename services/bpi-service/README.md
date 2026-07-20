@@ -63,12 +63,29 @@ unresolved CRITICAL data-quality incidents. Re-review supersedes rather than del
 command uses idempotency plus optimistic revision, and approval can never be performed by the creator.
 This workflow changes only BPI PostgreSQL state; it does not write WOM, QCS, WMS, PLC or DCS.
 
+Flyway V24 adds recoverable two-person force-close tasks for the exceptional case where an automatic
+END boundary cannot be established. A shift lead or administrator submits the requested boundary and
+reason without closing the batch; the batch revision advances and normal lifecycle or END closure is
+blocked while approval is pending. A different `BPI_ADMIN` must approve the exact stored boundary
+before the batch becomes `CLOSED_RAW`. Request, approval, state events, audit and API idempotency share
+PostgreSQL transactions. `GET /bpi/v1/batches/{batchId}/force-close` recovers the latest task after a
+page refresh or request timeout. The workflow does not emit QCS or WMS side effects.
+
 ```bash
 make bpi-service-test
 ```
 
 Real PostgreSQL acceptance additionally requires `BPI_TEST_DATABASE_URL`,
 `BPI_TEST_DATABASE_USER`, and `BPI_TEST_DATABASE_PASSWORD`.
+
+The phase-one lifecycle acceptance, including V24 force-close approval, runs against real PostgreSQL:
+
+```bash
+JAVA_HOME=/path/to/jdk17 BPI_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/postgres \
+  BPI_TEST_DATABASE_USER=bpi_test BPI_TEST_DATABASE_PASSWORD=... \
+  mvn -f services/bpi-service/pom.xml -pl :bpi-service -am \
+  -Dtest=BpiPostgresAcceptanceTest -Dsurefire.failIfNoSpecifiedTests=false test
+```
 
 The focused shadow-run lifecycle test uses a fresh PostgreSQL schema migrated through V20:
 

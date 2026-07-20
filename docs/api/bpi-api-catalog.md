@@ -54,7 +54,8 @@
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/wms/reconcile` | `reconcileWmsInbound` | SERVICE_IMPLEMENTED；仅 BPI_ADMIN，可对超出安全等待期的 PENDING 原命令执行 query-first 同指令重排，event/payload/WMS 幂等键不可变 |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
-| 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
+| 批次档案 | GET | `/bpi/v1/batches/{batchId}/force-close` | `getBatchForceCloseTask` | SERVICE_IMPLEMENTED；恢复最近一次申请/审批任务，供刷新和请求超时后确认真实结果 |
+| 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | SERVICE_IMPLEMENTED；班长/管理员先 REQUEST，另一名 BPI_ADMIN 使用原边界 APPROVE，审批前不关闭批次 |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/corrections` | `createBatchCorrection` | CONTRACT_ONLY |
 | 点位准入 | GET | `/bpi/v1/point-catalog/snapshots` | `listPointCatalogSnapshots` | SERVICE_IMPLEMENTED |
 | 点位准入 | GET | `/bpi/v1/point-catalog/current` | `getCurrentPointCatalog` | SERVICE_IMPLEMENTED；无分页参数保持旧版全量响应；显式分页使用不可变 snapshot + HMAC scope-bound keyset cursor，默认 100、上限 200，支持服务端 search |

@@ -330,6 +330,7 @@ function createScenario() {
     batchEventsById: new Map(),
     batchEvidenceById: new Map(),
     batchReleases: new Map(),
+    forceCloseTasks: new Map(),
     shadowRuns: [],
     shadowRunReviews: [],
     topology,

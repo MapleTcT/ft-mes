@@ -254,6 +254,82 @@ test('batch lifecycle suspends and resumes with revision and append-only events'
   assert.equal(result.json.data.status, 'RUNNING');
 });
 
+test('force-close is recoverable, idempotent and requires a separate approval step', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('POST', '/bpi/v1/candidates/CAND-START-S07-001/confirm', {
+    headers: commandHeaders('force-close-confirm-0001', 3),
+    body: { reason: '创建批次用于强制结束双人审批验收' },
+  });
+  assert.equal(result.response.status, 200);
+  const batch = result.json.data.batch;
+  const boundaryTime = '2026-07-12T08:20:00.000Z';
+
+  result = await request('GET', `/bpi/v1/batches/${batch.id}/force-close`);
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.data, null);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/force-close`, {
+    body: { reason: '设备故障需按现场停机时间结束', boundaryTime, approvalMode: 'REQUEST' },
+  });
+  assert.equal(result.response.status, 428);
+
+  const requestHeaders = commandHeaders('force-close-request-0002', 1);
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/force-close`, {
+    headers: requestHeaders,
+    body: { reason: '设备故障需按现场停机时间结束', boundaryTime, approvalMode: 'REQUEST' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'PENDING_APPROVAL');
+  assert.equal(result.json.data.batchRevision, 2);
+  const pendingTask = result.json;
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/force-close`, {
+    headers: requestHeaders,
+    body: { reason: '设备故障需按现场停机时间结束', boundaryTime, approvalMode: 'REQUEST' },
+  });
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.deepEqual(result.json, pendingTask);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/suspend`, {
+    headers: commandHeaders('force-close-suspend-blocked-0003', 2),
+    body: { reason: '待审批期间不允许切换运行状态' },
+  });
+  assert.equal(result.response.status, 409);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/force-close`, {
+    headers: commandHeaders('force-close-mismatch-0004', 2),
+    body: { reason: '管理员核对时不得修改边界', boundaryTime: '2026-07-12T08:21:00.000Z', approvalMode: 'APPROVE' },
+  });
+  assert.equal(result.response.status, 409);
+
+  result = await request('POST', `/bpi/v1/batches/${batch.id}/force-close`, {
+    headers: commandHeaders('force-close-approve-0005', 2),
+    body: { reason: '独立复核设备停机记录和流量归零时间', boundaryTime, approvalMode: 'APPROVE' },
+  });
+  assert.equal(result.response.status, 202);
+  assert.equal(result.json.data.state, 'COMPLETED');
+  assert.equal(result.json.data.batchRevision, 3);
+  assert.equal(result.json.data.requestedBy, 'simulated.shift.lead');
+  assert.equal(result.json.data.decidedBy, 'simulated.bpi.admin');
+
+  result = await request('GET', `/bpi/v1/batches/${batch.id}`);
+  assert.equal(result.json.data.state, 'CLOSED_RAW');
+  assert.equal(result.json.data.revision, 3);
+  assert.equal(result.json.data.endTime, boundaryTime);
+
+  result = await request('GET', `/bpi/v1/batches/${batch.id}/timeline`);
+  assert.deepEqual(result.json.data.map((item) => `${item.revision}|${item.action}`), [
+    '1|SHADOW_BATCH_CREATED',
+    '2|BATCH_FORCE_CLOSE_REQUESTED',
+    '3|BATCH_FORCE_CLOSED',
+  ]);
+  result = await request('GET', '/bpi/v1/lines/LINE-S07-01/current-state');
+  assert.equal(result.json.data.status, 'IDLE');
+  assert.equal(result.json.data.currentBatchId, null);
+});
+
 test('batch release projection distinguishes quality and WMS business states', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);

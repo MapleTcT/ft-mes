@@ -10,6 +10,7 @@ import com.mapletct.ftmes.bpi.domain.BatchInstance;
 import com.mapletct.ftmes.bpi.domain.BatchReleaseView;
 import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
 import com.mapletct.ftmes.bpi.domain.EvidenceView;
+import com.mapletct.ftmes.bpi.domain.ForceCloseTaskView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +92,15 @@ public class BatchController {
         return ApiResponse.of(batchReleaseService.get(actorContextFactory.from(jwt), batchId), request);
     }
 
+    @GetMapping("/bpi/v1/batches/{batchId}/force-close")
+    public ApiResponse<ForceCloseTaskView> forceCloseTask(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            HttpServletRequest request) {
+        return ApiResponse.of(
+                batchCommandService.latestForceCloseTask(actorContextFactory.from(jwt), batchId), request);
+    }
+
     @PostMapping("/bpi/v1/batches/{batchId}/wms/reconcile")
     @PreAuthorize("hasRole('BPI_ADMIN')")
     public ResponseEntity<ApiResponse<BatchReleaseView>> reconcileWmsInbound(
@@ -136,6 +146,25 @@ public class BatchController {
         return commandResponse(batchCommandService.resume(
                 actorContextFactory.from(jwt), batchId, idempotencyKey, ifMatch,
                 command, traceId(request)), request);
+    }
+
+    @PostMapping("/bpi/v1/batches/{batchId}/force-close")
+    @PreAuthorize("hasAnyRole('BPI_SHIFT_LEAD', 'BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<ForceCloseTaskView>> forceClose(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ForceCloseCommand command,
+            HttpServletRequest request) {
+        CommandResult<ForceCloseTaskView> result = batchCommandService.forceClose(
+                actorContextFactory.from(jwt), batchId, idempotencyKey, ifMatch,
+                command, traceId(request));
+        ResponseEntity.BodyBuilder response = ResponseEntity.accepted();
+        if (result.replayed()) {
+            response.header("Idempotent-Replay", "true");
+        }
+        return response.body(ApiResponse.of(result.data(), request));
     }
 
     private ResponseEntity<ApiResponse<BatchInstance>> commandResponse(

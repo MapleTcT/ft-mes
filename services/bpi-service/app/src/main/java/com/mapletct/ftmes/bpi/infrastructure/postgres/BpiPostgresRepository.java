@@ -14,6 +14,7 @@ import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
 import com.mapletct.ftmes.bpi.domain.BoundaryType;
 import com.mapletct.ftmes.bpi.domain.CandidateState;
 import com.mapletct.ftmes.bpi.domain.EvidenceView;
+import com.mapletct.ftmes.bpi.domain.ForceCloseTaskView;
 import com.mapletct.ftmes.bpi.domain.ReviewView;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -375,6 +376,13 @@ public class BpiPostgresRepository {
                    AND id = :batchId
                    AND revision = :expectedRevision
                    AND state = 'ACTIVE'
+                   AND NOT EXISTS (
+                       SELECT 1
+                         FROM bpi.bpi_batch_force_close_tasks task
+                        WHERE task.tenant_id = :tenantId
+                          AND task.batch_id = :batchId
+                          AND task.state = 'PENDING_APPROVAL'
+                   )
                 """, new MapSqlParameterSource().addValue("tenantId", tenantId)
                 .addValue("batchId", batchId).addValue("expectedRevision", expectedRevision)
                 .addValue("endTime", Timestamp.from(endTime)));
@@ -535,6 +543,170 @@ public class BpiPostgresRepository {
         }
     }
 
+    public boolean hasPendingForceClose(String tenantId, UUID batchId) {
+        Boolean pending = jdbc.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1
+                      FROM bpi.bpi_batch_force_close_tasks
+                     WHERE tenant_id = :tenantId
+                       AND batch_id = :batchId
+                       AND state = 'PENDING_APPROVAL'
+                )
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", tenantId)
+                .addValue("batchId", batchId), Boolean.class);
+        return Boolean.TRUE.equals(pending);
+    }
+
+    public void touchBatchForForceClose(
+            String tenantId, UUID batchId, long expectedRevision, BatchState expectedState) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_instances
+                   SET revision = revision + 1, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :batchId
+                   AND revision = :expectedRevision
+                   AND state = :expectedState
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", tenantId)
+                .addValue("batchId", batchId)
+                .addValue("expectedRevision", expectedRevision)
+                .addValue("expectedState", expectedState.name()));
+        if (updated != 1) {
+            throw new BpiConflictException("Batch was changed before force-close submission.", expectedRevision);
+        }
+    }
+
+    public ForceCloseTaskView insertForceCloseTask(
+            ActorContext actor,
+            BatchInstance batch,
+            UUID taskId,
+            Instant boundaryTime,
+            String reason,
+            String comment) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_batch_force_close_tasks
+                    (id, tenant_id, batch_id, state, revision, source_state, boundary_time,
+                     requested_by, request_reason, request_comment)
+                VALUES (:id, :tenantId, :batchId, 'PENDING_APPROVAL', 1, :sourceState, :boundaryTime,
+                        :requestedBy, :requestReason, :requestComment)
+                """, new MapSqlParameterSource()
+                .addValue("id", taskId)
+                .addValue("tenantId", actor.tenantId())
+                .addValue("batchId", batch.id())
+                .addValue("sourceState", batch.state().name())
+                .addValue("boundaryTime", Timestamp.from(boundaryTime))
+                .addValue("requestedBy", actor.userId())
+                .addValue("requestReason", reason)
+                .addValue("requestComment", comment));
+        return findForceCloseTask(actor, taskId, false);
+    }
+
+    public ForceCloseTaskView findLatestForceCloseTask(ActorContext actor, UUID batchId) {
+        List<ForceCloseTaskView> tasks = jdbc.query("""
+                SELECT task.*, batch.revision AS batch_revision
+                  FROM bpi.bpi_batch_force_close_tasks task
+                  JOIN bpi.bpi_batch_instances batch
+                    ON batch.tenant_id = task.tenant_id AND batch.id = task.batch_id
+                 WHERE task.tenant_id = :tenantId
+                   AND task.batch_id = :batchId
+                 ORDER BY task.requested_at DESC, task.id DESC
+                 LIMIT 1
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", actor.tenantId())
+                .addValue("batchId", batchId), forceCloseTaskRowMapper());
+        return tasks.isEmpty() ? null : tasks.get(0);
+    }
+
+    public ForceCloseTaskView lockPendingForceClose(ActorContext actor, UUID batchId) {
+        try {
+            return jdbc.queryForObject("""
+                    SELECT task.*, batch.revision AS batch_revision
+                      FROM bpi.bpi_batch_force_close_tasks task
+                      JOIN bpi.bpi_batch_instances batch
+                        ON batch.tenant_id = task.tenant_id AND batch.id = task.batch_id
+                     WHERE task.tenant_id = :tenantId
+                       AND task.batch_id = :batchId
+                       AND task.state = 'PENDING_APPROVAL'
+                     FOR UPDATE OF task
+                    """, new MapSqlParameterSource()
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("batchId", batchId), forceCloseTaskRowMapper());
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiConflictException("Batch has no pending force-close request.", null);
+        }
+    }
+
+    public void approveForceCloseTask(
+            ActorContext actor, ForceCloseTaskView task, String reason, String comment) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_force_close_tasks
+                   SET state = 'COMPLETED', revision = revision + 1,
+                       decided_by = :decidedBy, decided_at = now(),
+                       decision_reason = :decisionReason, decision_comment = :decisionComment,
+                       updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :taskId
+                   AND revision = :expectedRevision
+                   AND state = 'PENDING_APPROVAL'
+                """, new MapSqlParameterSource()
+                .addValue("decidedBy", actor.userId())
+                .addValue("decisionReason", reason)
+                .addValue("decisionComment", comment)
+                .addValue("tenantId", actor.tenantId())
+                .addValue("taskId", task.taskId())
+                .addValue("expectedRevision", task.revision()));
+        if (updated != 1) {
+            throw new BpiConflictException("Force-close request was already decided.", task.batchRevision());
+        }
+    }
+
+    public void forceCloseBatch(
+            String tenantId,
+            UUID batchId,
+            long expectedRevision,
+            BatchState expectedState,
+            Instant boundaryTime) {
+        int updated = jdbc.update("""
+                UPDATE bpi.bpi_batch_instances
+                   SET state = 'CLOSED_RAW', revision = revision + 1,
+                       end_time = :boundaryTime, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :batchId
+                   AND revision = :expectedRevision
+                   AND state = :expectedState
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", tenantId)
+                .addValue("batchId", batchId)
+                .addValue("expectedRevision", expectedRevision)
+                .addValue("expectedState", expectedState.name())
+                .addValue("boundaryTime", Timestamp.from(boundaryTime)));
+        if (updated != 1) {
+            throw new BpiConflictException("Batch was changed before force-close approval.", expectedRevision);
+        }
+    }
+
+    public ForceCloseTaskView findForceCloseTask(ActorContext actor, UUID taskId) {
+        return findForceCloseTask(actor, taskId, false);
+    }
+
+    private ForceCloseTaskView findForceCloseTask(ActorContext actor, UUID taskId, boolean lock) {
+        try {
+            String sql = """
+                    SELECT task.*, batch.revision AS batch_revision
+                      FROM bpi.bpi_batch_force_close_tasks task
+                      JOIN bpi.bpi_batch_instances batch
+                        ON batch.tenant_id = task.tenant_id AND batch.id = task.batch_id
+                     WHERE task.tenant_id = :tenantId AND task.id = :taskId
+                    """ + (lock ? " FOR UPDATE OF task" : "");
+            return jdbc.queryForObject(sql, new MapSqlParameterSource()
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("taskId", taskId), forceCloseTaskRowMapper());
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Force-close task not found.");
+        }
+    }
+
     public List<EvidenceView> findEvidence(ActorContext actor, UUID batchId, BoundaryType boundaryType) {
         findBatch(actor, batchId);
         return jdbc.query("""
@@ -611,6 +783,25 @@ public class BpiPostgresRepository {
                 optionalInstant(rs, "end_time"), rs.getBigDecimal("quantity"), rs.getString("quantity_unit"),
                 rs.getBigDecimal("dry_matter"), rs.getString("quality_gate"), rs.getString("wms_status"),
                 rs.getString("rule_version_ref"), rs.getString("topology_version_ref"));
+    }
+
+    private RowMapper<ForceCloseTaskView> forceCloseTaskRowMapper() {
+        return (rs, rowNum) -> new ForceCloseTaskView(
+                rs.getObject("id", UUID.class),
+                rs.getObject("batch_id", UUID.class),
+                rs.getString("state"),
+                rs.getLong("revision"),
+                rs.getLong("batch_revision"),
+                BatchState.valueOf(rs.getString("source_state")),
+                rs.getTimestamp("boundary_time").toInstant(),
+                rs.getString("requested_by"),
+                rs.getTimestamp("requested_at").toInstant(),
+                rs.getString("request_reason"),
+                rs.getString("request_comment"),
+                rs.getString("decided_by"),
+                optionalInstant(rs, "decided_at"),
+                rs.getString("decision_reason"),
+                rs.getString("decision_comment"));
     }
 
     private MapSqlParameterSource batchParameters(BatchInstance batch) {

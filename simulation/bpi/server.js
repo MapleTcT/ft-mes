@@ -318,6 +318,7 @@ function prepareShadowRunAcceptance(state) {
   state.batchEventsById = new Map();
   state.batchEvidenceById = new Map();
   state.batchReleases = new Map();
+  state.forceCloseTasks = new Map();
   state.idempotency = new Map();
   return { ruleId: state.rule.id, preparedBatchCount: state.batches.length };
 }
@@ -455,6 +456,7 @@ function prepareBatchReleaseAcceptance(state) {
   state.batchEventsById = timelines;
   state.batchEvidenceById = evidenceById;
   state.batchReleases = releases;
+  state.forceCloseTasks = new Map();
   state.shadowRuns = [];
   state.shadowRunReviews = [];
   state.idempotency = new Map();
@@ -1076,6 +1078,10 @@ function createHandler(state) {
             const response = problem(409, 'Active Batch Not Found', 'No matching ACTIVE batch can be closed.', operationId, candidate.revision);
             return rememberAndSend(state, context, res, 409, response, operationId);
           }
+          if (state.forceCloseTasks.get(batch.id)?.state === 'PENDING_APPROVAL') {
+            const response = problem(409, 'Force Close Pending', 'The batch has a pending force-close request.', operationId, batch.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
           if (new Date(candidate.boundaryTime) <= new Date(batch.startTime)) {
             const response = problem(409, 'Invalid End Boundary', 'END boundary must be after START boundary.', operationId, candidate.revision);
             return rememberAndSend(state, context, res, 409, response, operationId);
@@ -1191,6 +1197,108 @@ function createHandler(state) {
         state.batchEventsById.set(batch.id, timeline);
         return rememberAndSend(state, context, res, 200, envelope(operationId, release), operationId);
       }
+      ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/force-close$/);
+      if (req.method === 'GET' && ids) {
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        const operationId = 'getBatchForceCloseTask';
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        return send(res, 200, envelope(operationId, state.forceCloseTasks.get(batch.id) || null), operationId);
+      }
+      if (req.method === 'POST' && ids) {
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        const operationId = 'forceCloseBatch';
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, batch.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        const boundaryTime = Date.parse(body.boundaryTime || '');
+        if (!body.reason || String(body.reason).trim().length < 3
+            || !['REQUEST', 'APPROVE'].includes(body.approvalMode)
+            || !Number.isFinite(boundaryTime)) {
+          const response = problem(422, 'Validation Failed', 'reason, boundaryTime and approvalMode are required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (!['ACTIVE', 'SUSPENDED'].includes(batch.state)) {
+          const response = problem(409, 'Invalid Batch State', 'Only ACTIVE or SUSPENDED batches can enter force-close approval.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const pending = state.forceCloseTasks.get(batch.id);
+        const timeline = state.batchEventsById.get(batch.id) || state.batchEvents;
+        if (body.approvalMode === 'REQUEST') {
+          if (pending?.state === 'PENDING_APPROVAL') {
+            const response = problem(409, 'Force Close Pending', 'Batch already has a pending force-close request.', operationId, batch.revision);
+            return rememberAndSend(state, context, res, 409, response, operationId);
+          }
+          if (boundaryTime < Date.parse(batch.startTime)) {
+            const response = problem(422, 'Invalid Boundary Time', 'boundaryTime cannot be before batch startTime.', operationId, batch.revision);
+            return rememberAndSend(state, context, res, 422, response, operationId);
+          }
+          batch.revision += 1;
+          const task = {
+            taskId: stableUuid(`${batch.id}|force-close|${batch.revision}`),
+            batchId: batch.id,
+            state: 'PENDING_APPROVAL',
+            revision: 1,
+            batchRevision: batch.revision,
+            sourceState: batch.state,
+            boundaryTime: new Date(boundaryTime).toISOString(),
+            requestedBy: 'simulated.shift.lead',
+            requestedAt: FIXED_TIME,
+            requestReason: body.reason,
+            requestComment: body.comment || null,
+            decidedBy: null,
+            decidedAt: null,
+            decisionReason: null,
+            decisionComment: null,
+          };
+          state.forceCloseTasks.set(batch.id, task);
+          timeline.push({
+            revision: batch.revision,
+            action: 'BATCH_FORCE_CLOSE_REQUESTED',
+            at: FIXED_TIME,
+            actor: task.requestedBy,
+            reason: body.reason,
+            fromState: batch.state,
+            toState: batch.state,
+          });
+          state.batchEventsById.set(batch.id, timeline);
+          return rememberAndSend(state, context, res, 202, envelope(operationId, task), operationId);
+        }
+        if (!pending || pending.state !== 'PENDING_APPROVAL') {
+          const response = problem(409, 'Force Close Missing', 'Batch has no pending force-close request.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        if (new Date(boundaryTime).toISOString() !== pending.boundaryTime) {
+          const response = problem(409, 'Boundary Time Changed', 'Approval boundaryTime must match the pending request.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        const previousState = batch.state;
+        batch.state = 'CLOSED_RAW';
+        batch.revision += 1;
+        batch.endTime = pending.boundaryTime;
+        Object.assign(pending, {
+          state: 'COMPLETED',
+          revision: 2,
+          batchRevision: batch.revision,
+          decidedBy: 'simulated.bpi.admin',
+          decidedAt: FIXED_TIME,
+          decisionReason: body.reason,
+          decisionComment: body.comment || null,
+        });
+        timeline.push({
+          revision: batch.revision,
+          action: 'BATCH_FORCE_CLOSED',
+          at: FIXED_TIME,
+          actor: pending.decidedBy,
+          reason: body.reason,
+          fromState: previousState,
+          toState: 'CLOSED_RAW',
+        });
+        state.batchEventsById.set(batch.id, timeline);
+        state.line.currentBatchId = null;
+        state.line.status = 'IDLE';
+        return rememberAndSend(state, context, res, 202, envelope(operationId, pending), operationId);
+      }
       ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/(suspend|resume)$/);
       if (req.method === 'POST' && ids) {
         const batch = state.batches.find((item) => item.id === ids[0]);
@@ -1203,6 +1311,10 @@ function createHandler(state) {
         if (!body.reason || String(body.reason).trim().length < 3) {
           const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
           return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (state.forceCloseTasks.get(batch.id)?.state === 'PENDING_APPROVAL') {
+          const response = problem(409, 'Force Close Pending', 'Batch has a pending force-close request.', operationId, batch.revision);
+          return rememberAndSend(state, context, res, 409, response, operationId);
         }
         const expectedState = isSuspend ? 'ACTIVE' : 'SUSPENDED';
         const nextState = isSuspend ? 'SUSPENDED' : 'ACTIVE';

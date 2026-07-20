@@ -48,14 +48,20 @@ REQUIRED_FILES = [
     "services/bpi-service/app/src/main/resources/db/migration/V21__bpi_feature_flag_governance.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V22__bpi_source_sequence_evidence.sql",
     "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
+    "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiTelemetryPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRulePostgresAcceptanceTest.java",
     "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiRuleOutboxKafkaPostgresAcceptanceTest.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateEventMapper.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/CandidateService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/BatchCommandService.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ForceCloseTaskView.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/IdempotencyRecord.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/CandidateController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/BatchController.java",
+    "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ForceCloseCommand.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/RuleController.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/RuleService.java",
     "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/VersionComparisonService.java",
@@ -402,6 +408,19 @@ def main() -> int:
         failures,
     )
     require_text(
+        SERVICE / "app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
+        [
+            "bpi_batch_force_close_tasks",
+            "PENDING_APPROVAL",
+            "COMPLETED",
+            "uq_bpi_batch_force_close_pending",
+            "chk_bpi_batch_force_close_decision",
+            "FOREIGN KEY (tenant_id, batch_id)",
+            "GRANT SELECT, INSERT, UPDATE, DELETE ON bpi.bpi_batch_force_close_tasks TO bpi_service",
+        ],
+        failures,
+    )
+    require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchReleaseService.java",
         [
             "BatchState.CLOSED_RAW",
@@ -619,12 +638,30 @@ def main() -> int:
     require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/application/BatchCommandService.java",
         ["commandsEnabled", "reserveIdempotency", "lockBatch", "transitionBatch",
-         "BATCH_SUSPENDED", "BATCH_RESUMED", "insertBatchAudit"],
+         "BATCH_SUSPENDED", "BATCH_RESUMED", "insertBatchAudit", "requestForceClose",
+         "approveForceClose", "BATCH_FORCE_CLOSE_REQUESTED", "BATCH_FORCE_CLOSED",
+         "different administrator", "hasPendingForceClose"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BpiPostgresRepository.java",
+        ["bpi_batch_force_close_tasks", "lockPendingForceClose", "approveForceCloseTask",
+         "forceCloseBatch", "NOT EXISTS", "PENDING_APPROVAL"],
         failures,
     )
     require_text(
         SERVICE / "app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/BatchController.java",
-        ["/bpi/v1/batches/{batchId}/suspend", "/bpi/v1/batches/{batchId}/resume"],
+        ["/bpi/v1/batches/{batchId}/suspend", "/bpi/v1/batches/{batchId}/resume",
+         "/bpi/v1/batches/{batchId}/force-close", "latestForceCloseTask",
+         "ResponseEntity.accepted"],
+        failures,
+    )
+    require_text(
+        SERVICE / "app/src/test/java/com/mapletct/ftmes/bpi/BpiPostgresAcceptanceTest.java",
+        ["forceCloseRequiresIndependentApprovalAndPersistsRecoverableTaskAndAuditTrail",
+         "force-close-self-approve-", "force-close-changed-boundary-",
+         "BATCH_FORCE_CLOSE_REQUESTED|ACTIVE|ACTIVE",
+         "BATCH_FORCE_CLOSED|ACTIVE|CLOSED_RAW", "bpi_batch_force_close_tasks"],
         failures,
     )
     require_text(

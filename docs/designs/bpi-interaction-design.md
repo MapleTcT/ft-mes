@@ -179,6 +179,15 @@ END 确认要求 reason、`Idempotency-Key` 和候选 `If-Match`，并锁定同�
 `ACTIVE` 批次。成功后同一批次进入 `CLOSED_RAW`、revision 加一、写入 endTime、END 证据、
 `END_BOUNDARY_CONFIRMED` 状态事件和候选/批次审计。详情页对 `CLOSED_RAW` 不再显示暂停或恢复命令。
 
+自动 END 边界无法形成时，详情页提供受控的双人“强制结束”，但申请动作本身不会关闭批次。
+`BPI_SHIFT_LEAD` 或 `BPI_ADMIN` 先提交 reason、comment 和人工确认的 `boundaryTime`；系统写入
+`PENDING_APPROVAL` 任务、批次 revision 加一，并追加 `BATCH_FORCE_CLOSE_REQUESTED` 事件和审计。
+待审批期间暂停、恢复和普通 END 关闭均被阻止。随后必须由不同账号的 `BPI_ADMIN` 使用完全相同的
+`boundaryTime` 批准，才会把批次置为 `CLOSED_RAW`、写入 endTime，并追加 `BATCH_FORCE_CLOSED`。
+申请和批准分别使用独立的 `Idempotency-Key` 与当前 `If-Match`。页面刷新或 POST 超时后通过
+`getBatchForceCloseTask` 恢复最近任务，以服务端 taskId/state 为准，不猜测命令结果；整个流程不触发
+WOM、QCS、WMS、PLC 或 DCS 写入。
+
 Phase 2 的 `getBatchRelease` 和“质量与库存”详情已经实施，页面直接展示
 quality gate external revision、每个 required inspection 的 final/disposition、WMS command 状态、回执单据号、
 错误码和时间线，不得把接口 `201/200` 显示为“已放行/已入库”。`WAIT_QA` 显示待检项；`REJECTED`
@@ -189,8 +198,8 @@ quality gate external revision、每个 required inspection 的 final/dispositio
 PENDING/DISPATCHING、已 ACCEPTED、已 REJECTED、开关关闭或安全等待期内均不得操作。
 
 **主要 API：** `getBatch`、`getBatchEvidence`、`getBatchBalance`、`getBatchGenealogy`、
-`getBatchTimeline`、`getBatchRelease`、`reconcileWmsInbound`、`suspendBatch`、`resumeBatch`、`forceCloseBatch`、
-`createBatchCorrection`。
+`getBatchTimeline`、`getBatchRelease`、`getBatchForceCloseTask`、`reconcileWmsInbound`、`suspendBatch`、
+`resumeBatch`、`forceCloseBatch`、`createBatchCorrection`。
 
 ### 5.5 点位准入 `/bpi/points`
 

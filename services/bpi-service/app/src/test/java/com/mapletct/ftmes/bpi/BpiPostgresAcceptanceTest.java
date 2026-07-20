@@ -137,6 +137,7 @@ class BpiPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_batch_state_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_boundary_evidence WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_batch_force_close_tasks WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_inbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_batch_candidates WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_batch_instances WHERE tenant_id = ?", tenantId);
@@ -540,6 +541,236 @@ class BpiPostgresAcceptanceTest {
                  ORDER BY after_revision
                 """, String.class, tenantId, batchId))
                 .containsExactly("BATCH_SUSPENDED|1|2", "BATCH_RESUMED|2|3");
+        assertThat(count("bpi_api_idempotency")).isEqualTo(3);
+    }
+
+    @Test
+    void forceCloseRequiresIndependentApprovalAndPersistsRecoverableTaskAndAuditTrail() throws Exception {
+        String ingestToken = token(
+                tenantId, List.of("BPI_EVENT_INGEST"), List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult ingested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(ingestPayload))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID candidateId = UUID.fromString(objectMapper.readTree(
+                ingested.getResponse().getContentAsString()).path("data").path("id").asText());
+
+        String requesterId = "force-close-requester";
+        String approverId = "force-close-approver";
+        String requesterToken = token(
+                requesterId, tenantId, List.of("BPI_SHIFT_LEAD"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+        MvcResult confirmed = mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", candidateId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .header("Idempotency-Key", "force-close-confirm-" + candidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "创建批次用于双人强制结束验收"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.batch.revision").value(1))
+                .andReturn();
+        UUID batchId = UUID.fromString(objectMapper.readTree(confirmed.getResponse().getContentAsString())
+                .path("data").path("batch").path("id").asText());
+
+        Instant boundaryTime = Instant.ofEpochMilli(Instant.now().minusSeconds(30).toEpochMilli());
+        String requestBody = objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("reason", "自动结束边界缺失，申请人工强制结束"),
+                Map.entry("comment", "ADP_E2E_FORCE_CLOSE_REQUEST"),
+                Map.entry("boundaryTime", boundaryTime.toString()),
+                Map.entry("approvalMode", "REQUEST")));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().is(428));
+
+        String requestKey = "force-close-request-" + candidateKey;
+        MvcResult requested = mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", "1")
+                        .header("X-Trace-Id", "TRACE-FORCE-CLOSE-REQUEST-" + candidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.revision").value(1))
+                .andExpect(jsonPath("$.data.batchRevision").value(2))
+                .andExpect(jsonPath("$.data.sourceState").value("ACTIVE"))
+                .andExpect(jsonPath("$.data.requestedBy").value(requesterId))
+                .andReturn();
+        JsonNode requestedBody = objectMapper.readTree(requested.getResponse().getContentAsString());
+        UUID taskId = UUID.fromString(requestedBody.path("data").path("taskId").asText());
+
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .header("Idempotency-Key", requestKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.taskId").value(taskId.toString()));
+        mockMvc.perform(get("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + requesterToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.taskId").value(taskId.toString()))
+                .andExpect(jsonPath("$.data.state").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.data.batchRevision").value(2));
+
+        String blockedSuspendBody = objectMapper.writeValueAsString(Map.of(
+                "reason", "验证待审批期间禁止运行态变更"));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/suspend", batchId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .header("Idempotency-Key", "force-close-block-suspend-" + candidateKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(blockedSuspendBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("pending force-close")));
+
+        UUID endCandidateKey = UUID.randomUUID();
+        MvcResult endIngested = mockMvc.perform(post("/internal/bpi/v1/candidates")
+                        .header("Authorization", "Bearer " + ingestToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(endCandidatePayload(
+                                endCandidateKey, Instant.parse("2026-07-12T08:29:40Z"))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID endCandidateId = UUID.fromString(objectMapper.readTree(
+                endIngested.getResponse().getContentAsString()).path("data").path("id").asText());
+        mockMvc.perform(post("/bpi/v1/candidates/{id}/confirm", endCandidateId)
+                        .header("Authorization", "Bearer " + requesterToken)
+                        .header("Idempotency-Key", "force-close-block-end-" + endCandidateKey)
+                        .header("If-Match", "1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(Map.of(
+                                "reason", "验证待审批期间禁止普通结束边界关闭批次"))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("changed before END")));
+        assertThat(jdbc.queryForObject("""
+                SELECT state
+                  FROM bpi.bpi_batch_candidates
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, endCandidateId)).isEqualTo("PENDING");
+
+        String approvalBody = objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("reason", "管理员复核现场记录后批准强制结束"),
+                Map.entry("comment", "ADP_E2E_FORCE_CLOSE_APPROVE"),
+                Map.entry("boundaryTime", boundaryTime.toString()),
+                Map.entry("approvalMode", "APPROVE")));
+        String samePersonAdminToken = token(
+                requesterId, tenantId, List.of("BPI_ADMIN"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + samePersonAdminToken)
+                        .header("Idempotency-Key", "force-close-self-approve-" + candidateKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(approvalBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("different administrator")));
+
+        String approverToken = token(
+                approverId, tenantId, List.of("BPI_ADMIN"),
+                List.of("PLANT-01"), List.of("LINE-S07-01"));
+        String changedBoundaryBody = objectMapper.writeValueAsString(Map.ofEntries(
+                Map.entry("reason", "尝试篡改结束边界"),
+                Map.entry("boundaryTime", boundaryTime.plusSeconds(1).toString()),
+                Map.entry("approvalMode", "APPROVE")));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + approverToken)
+                        .header("Idempotency-Key", "force-close-changed-boundary-" + candidateKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(changedBoundaryBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("must match")));
+
+        String approvalKey = "force-close-approve-" + candidateKey;
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + approverToken)
+                        .header("Idempotency-Key", approvalKey)
+                        .header("If-Match", "2")
+                        .header("X-Trace-Id", "TRACE-FORCE-CLOSE-APPROVE-" + candidateKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(approvalBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.data.taskId").value(taskId.toString()))
+                .andExpect(jsonPath("$.data.state").value("COMPLETED"))
+                .andExpect(jsonPath("$.data.revision").value(2))
+                .andExpect(jsonPath("$.data.batchRevision").value(3))
+                .andExpect(jsonPath("$.data.requestedBy").value(requesterId))
+                .andExpect(jsonPath("$.data.decidedBy").value(approverId));
+        mockMvc.perform(post("/bpi/v1/batches/{id}/force-close", batchId)
+                        .header("Authorization", "Bearer " + approverToken)
+                        .header("Idempotency-Key", approvalKey)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(approvalBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().string("Idempotent-Replay", "true"))
+                .andExpect(jsonPath("$.data.state").value("COMPLETED"));
+
+        mockMvc.perform(get("/bpi/v1/batches/{id}", batchId)
+                        .header("Authorization", "Bearer " + requesterToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("CLOSED_RAW"))
+                .andExpect(jsonPath("$.data.revision").value(3))
+                .andExpect(jsonPath("$.data.endTime").value(boundaryTime.toString()));
+        mockMvc.perform(get("/bpi/v1/lines/LINE-S07-01/current-state")
+                        .header("Authorization", "Bearer " + requesterToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("IDLE"))
+                .andExpect(jsonPath("$.data.currentBatchId").doesNotExist());
+
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision || '|' || requested_by || '|' || decided_by
+                  FROM bpi.bpi_batch_force_close_tasks
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, taskId))
+                .isEqualTo("COMPLETED|2|" + requesterId + "|" + approverId);
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, batchId)).isEqualTo("CLOSED_RAW|3");
+        assertThat(jdbc.queryForObject("""
+                SELECT floor(extract(epoch from end_time) * 1000)::bigint
+                  FROM bpi.bpi_batch_instances
+                 WHERE tenant_id = ? AND id = ?
+                """, Long.class, tenantId, batchId)).isEqualTo(boundaryTime.toEpochMilli());
+        assertThat(jdbc.queryForList("""
+                SELECT revision || '|' || action || '|' || coalesce(from_state, '-') || '|' || to_state AS event
+                  FROM bpi.bpi_batch_state_events
+                 WHERE tenant_id = ? AND batch_id = ?
+                 ORDER BY revision
+                """, String.class, tenantId, batchId))
+                .containsExactly(
+                        "1|SHADOW_BATCH_CREATED|-|ACTIVE",
+                        "2|BATCH_FORCE_CLOSE_REQUESTED|ACTIVE|ACTIVE",
+                        "3|BATCH_FORCE_CLOSED|ACTIVE|CLOSED_RAW");
+        assertThat(jdbc.queryForList("""
+                SELECT action || '|' || before_revision || '|' || after_revision AS audit
+                  FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ? AND object_type = 'BATCH_INSTANCE' AND object_id = ?
+                 ORDER BY after_revision
+                """, String.class, tenantId, batchId))
+                .containsExactly(
+                        "BATCH_FORCE_CLOSE_REQUESTED|1|2",
+                        "BATCH_FORCE_CLOSED|2|3");
+        assertThat(count("bpi_batch_force_close_tasks")).isEqualTo(1);
+        assertThat(count("bpi_batch_instances")).isEqualTo(1);
+        assertThat(count("bpi_batch_state_events")).isEqualTo(3);
+        assertThat(count("bpi_audit_events")).isEqualTo(3);
         assertThat(count("bpi_api_idempotency")).isEqualTo(3);
     }
 
@@ -979,11 +1210,20 @@ class BpiPostgresAcceptanceTest {
     }
 
     private String token(String tenant, List<String> roles, List<String> plants, List<String> lines) throws Exception {
+        return token("acceptance-user", tenant, roles, plants, lines);
+    }
+
+    private String token(
+            String subject,
+            String tenant,
+            List<String> roles,
+            List<String> plants,
+            List<String> lines) throws Exception {
         Instant now = Instant.now();
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer("ft-mes-adapter")
                 .audience("bpi-service")
-                .subject("acceptance-user")
+                .subject(subject)
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .claim("tenant_id", tenant)

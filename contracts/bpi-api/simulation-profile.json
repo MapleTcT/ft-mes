@@ -20,6 +20,8 @@
     "reconcileWmsInbound",
     "suspendBatch",
     "resumeBatch",
+    "getBatchForceCloseTask",
+    "forceCloseBatch",
     "listShadowRuns",
     "createShadowRun",
     "getShadowRun",

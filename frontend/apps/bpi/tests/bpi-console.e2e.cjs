@@ -216,6 +216,57 @@ test('shift lead suspends and resumes a batch from the detail drawer', async () 
   await page.close();
 });
 
+test('batch detail completes recoverable two-step force-close without console or network errors', async () => {
+  const reset = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(reset.status, 200);
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const errors = observe(page);
+  await page.goto(`${APP_URL}/#/candidates`, { waitUntil: 'networkidle' });
+
+  await page.locator('[data-candidate-id]').click();
+  await page.getByRole('button', { name: '确认候选' }).click();
+  await page.locator('#confirm-reason').fill('班长确认边界并创建强制结束验收批次');
+  await page.getByRole('button', { name: '确认并生成影子批次' }).click();
+  await page.getByRole('heading', { name: 'S07-20260712-001' }).waitFor();
+
+  await page.getByRole('button', { name: '申请强制结束' }).click();
+  await page.getByRole('heading', { name: '申请强制结束批次' }).waitFor();
+  await page.locator('#command-boundary-time').fill('2026-07-12T16:20');
+  await page.locator('#confirm-reason').fill('蒸发循环泵故障停机，按现场流量归零时间申请结束');
+  await page.getByRole('button', { name: '提交独立审批' }).click();
+
+  await page.getByText('强制结束申请已提交，等待独立管理员审批').waitFor();
+  await page.locator('[data-force-close-state="PENDING_APPROVAL"]').waitFor();
+  await page.getByText('BATCH_FORCE_CLOSE_REQUESTED', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 2/);
+  assert.equal(await page.getByRole('button', { name: '暂停自动处理' }).count(), 0);
+  assert.equal(await page.getByRole('button', { name: '恢复自动处理' }).count(), 0);
+
+  await page.getByRole('button', { name: '批准并强制结束' }).click();
+  await page.getByRole('heading', { name: '批准强制结束批次' }).waitFor();
+  assert.match(await page.locator('#command-boundary-time').inputValue(), /^2026-07-12T16:20(?::00)?$/);
+  await page.locator('#confirm-reason').fill('独立复核设备停机记录、阀路状态和流量归零时间');
+  await page.getByRole('button', { name: '批准并关闭批次' }).click();
+
+  await page.getByText('强制结束已批准，批次已关闭为 CLOSED_RAW').waitFor();
+  await page.locator('.batch-state-band').getByText('CLOSED_RAW', { exact: true }).waitFor();
+  await page.getByText('BATCH_FORCE_CLOSED', { exact: true }).waitFor();
+  assert.match(await page.locator('.batch-state-band').textContent(), /revision 3/);
+  assert.equal(await page.getByRole('button', { name: '申请强制结束' }).count(), 0);
+  assert.equal(await page.getByRole('button', { name: '批准并强制结束' }).count(), 0);
+
+  const batch = await fetch(`${simulatorUrl}/bpi/v1/batches/BATCH-S07-20260712-001`).then((response) => response.json());
+  const task = await fetch(`${simulatorUrl}/bpi/v1/batches/BATCH-S07-20260712-001/force-close`).then((response) => response.json());
+  assert.equal(batch.data.state, 'CLOSED_RAW');
+  assert.equal(batch.data.revision, 3);
+  assert.equal(batch.data.endTime, '2026-07-12T08:20:00.000Z');
+  assert.equal(task.data.state, 'COMPLETED');
+  assert.notEqual(task.data.requestedBy, task.data.decidedBy);
+  await page.screenshot({ path: '/tmp/bpi-console-force-close.png', fullPage: true });
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('batch detail presents quality release and WMS truth without inferring success from HTTP status', async () => {
   const batchIds = await prepareBatchReleaseScenario();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
