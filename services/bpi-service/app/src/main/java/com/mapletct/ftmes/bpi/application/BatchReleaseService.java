@@ -214,8 +214,10 @@ public class BatchReleaseService {
             throw new BpiConflictException(
                     "Batch must be RELEASED before a WMS receipt can be applied.", batch.revision());
         }
-        if (event.getStatus() == WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_STATUS_UNSPECIFIED) {
-            throw new BpiValidationException("WMS receipt status is required.");
+        if (!Set.of(
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_ACCEPTED,
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_REJECTED).contains(event.getStatus())) {
+            throw new BpiValidationException("WMS receipt status must be ACCEPTED or REJECTED.");
         }
         boolean accepted = event.getStatus()
                 == WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_ACCEPTED;

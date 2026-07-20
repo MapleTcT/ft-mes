@@ -289,6 +289,24 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         OutboxEventClaim claim = claims.get(0);
         assertThat(wmsOutboxRepository.markPublished(claim.id(), claim.claimToken())).isTrue();
 
+        WmsCompletionInboundReceiptV1 unknownStatus = receipt(
+                claim.id(), "WMS-UNKNOWN-" + batchId,
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_REJECTED,
+                "", "WMS_UNKNOWN_STATUS").toBuilder()
+                .setStatusValue(99)
+                .build();
+        postWmsReceipt(unknownStatus)
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.detail")
+                        .value(org.hamcrest.Matchers.containsString("ACCEPTED or REJECTED")));
+        assertThat(count("bpi_inbox_events")).isEqualTo(1);
+        assertThat(batchProjection()).isEqualTo("RELEASED|3|ACCEPTED|PENDING");
+        assertThat(jdbc.queryForObject("""
+                SELECT status
+                  FROM bpi.bpi_wms_inbound_links
+                 WHERE tenant_id = ? AND batch_id = ?
+                """, String.class, tenantId, batchId)).isEqualTo("PENDING");
+
         postWmsReceipt(receipt(
                 claim.id(), "WMS-REJECTED-" + batchId,
                 WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_REJECTED,

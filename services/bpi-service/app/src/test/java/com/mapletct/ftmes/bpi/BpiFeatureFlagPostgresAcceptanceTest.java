@@ -86,7 +86,7 @@ class BpiFeatureFlagPostgresAcceptanceTest {
                         .param("plantId", PLANT_ID).param("lineId", LINE_ID)
                         .param("scopeType", "LINE"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(6))
+                .andExpect(jsonPath("$.data.length()").value(7))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.commands')].effectiveEnabled")
                         .value(hasItem(false)))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.shadow-only')].effectiveEnabled")
@@ -95,6 +95,8 @@ class BpiFeatureFlagPostgresAcceptanceTest {
                         .value(hasItem("ENFORCED")))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.ui')].editable")
                         .value(hasItem(true)))
+                .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.qcs-link')].enforcementStatus")
+                        .value(hasItem("PHASE_LOCKED")))
                 .andExpect(jsonPath("$.data[?(@.flagKey == 'bpi.wms-link')].enforcementStatus")
                         .value(hasItem("PHASE_LOCKED")));
 

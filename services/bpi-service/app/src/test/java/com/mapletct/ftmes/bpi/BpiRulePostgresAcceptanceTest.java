@@ -782,7 +782,7 @@ class BpiRulePostgresAcceptanceTest {
 
     @Test
     void outboxClaimsRecoverAndReachPublishedOrFailedTerminalState() {
-        UUID publishId = insertOutbox("OUTBOX-PUBLISH", "PENDING", 0, null, null);
+        UUID publishId = insertOutbox(UUID.randomUUID(), "PENDING", 0, null, null);
         List<OutboxEventClaim> firstClaims = outboxRepository.claimPending(10, Duration.ofMinutes(2));
         assertThat(firstClaims).hasSize(1);
         OutboxEventClaim first = firstClaims.get(0);
@@ -801,7 +801,7 @@ class BpiRulePostgresAcceptanceTest {
 
         UUID staleToken = UUID.randomUUID();
         UUID failedId = insertOutbox(
-                "OUTBOX-STALE", "DISPATCHING", 1, staleToken,
+                UUID.randomUUID(), "DISPATCHING", 1, staleToken,
                 java.sql.Timestamp.from(Instant.now().minusSeconds(600)));
         OutboxEventClaim recovered = outboxRepository.claimPending(10, Duration.ofMinutes(2)).get(0);
         assertThat(recovered.id()).isEqualTo(failedId);
@@ -914,7 +914,7 @@ class BpiRulePostgresAcceptanceTest {
                  WHERE tenant_id = ? AND id = ?
                 """, tenantId, ruleId);
         UUID publicationId = insertOutbox(
-                "BOUNDARY_RULE_PUBLISHED", "PUBLISHED", 1, null, null);
+                ruleId, "PUBLISHED", 1, null, null);
         BoundaryRuleApplicationV1 rejected = application(
                 publicationId,
                 "APPLICATION-REJECTED-" + publicationId,
@@ -975,7 +975,7 @@ class BpiRulePostgresAcceptanceTest {
                  WHERE tenant_id = ? AND id = ?
                 """, tenantId, ruleId);
         UUID publicationId = insertOutbox(
-                "BOUNDARY_RULE_PUBLISHED", "PUBLISHED", 1, null, null);
+                ruleId, "PUBLISHED", 1, null, null);
         BoundaryRuleRuntimeReadinessV1 degraded = runtimeReadiness(
                 publicationId,
                 "READINESS-DEGRADED-" + publicationId,
@@ -1180,7 +1180,7 @@ class BpiRulePostgresAcceptanceTest {
     }
 
     private UUID insertOutbox(
-            String eventType,
+            UUID aggregateId,
             String state,
             int attempts,
             UUID claimToken,
@@ -1192,10 +1192,11 @@ class BpiRulePostgresAcceptanceTest {
                      event_type, topic, partition_key, payload, status, attempt_count,
                      total_attempt_count,
                      claim_token, claimed_at)
-                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?, ?,
+                VALUES (?, ?, 'PLANT-01', 'LINE-S07-01', 'RULE_VERSION', ?,
+                        'BOUNDARY_RULE_PUBLISHED',
                         'bpi.boundary.rule-publication.v1', ?, ?, ?, ?, ?, ?, ?)
-                """, id, tenantId, ruleId, eventType,
-                tenantId + ":LINE-S07-01:" + eventType, new byte[] {1, 2, 3},
+                """, id, tenantId, aggregateId,
+                tenantId + ":LINE-S07-01:" + aggregateId, new byte[] {1, 2, 3},
                 state, attempts, attempts, claimToken, claimedAt);
         return id;
     }
