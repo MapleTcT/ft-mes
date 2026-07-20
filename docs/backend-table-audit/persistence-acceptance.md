@@ -697,6 +697,23 @@ PLC/DCS 写入均为 0。
 `docs/testing/bpi-mqtt-ingress-joint-acceptance.md`。来源证据 TTL 为 30 分钟，过期后不能继续解释为
 QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 
+### BPI 真实 MQTT 与 WOM START/END 联合落库（目标 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| WOM 指令开始并发布 active context | `/msService/WOM/produceTask/produceTask/makeTaskList` | `POST .../updateTaskState`，`state=start`；Kafka `mes.production.context.v1` | WOM 状态事务 trigger -> `wom_bpi_production_context_outbox` -> Java 8 dispatcher -> Kafka -> Flink production-context join | ADP `wom_bpi_production_context_outbox`、`wom_bpi_task_state_mappings` | 按 `order_id='BPI_LIVE_20260720_123058_TASK_TN'` 查询 revision、active、source_state、publication_state、attempt_count | waitforrun `1784522614324/inactive/SENT/1`；runing `1784522627276/active/SENT/1`；真实页面/API 错误 0 | PASS |
+| 测试校准、拓扑和 START/END 规则准入 | `/bpi/#/points`、`/bpi/#/rules` | calibration submit/approve/revoke；topology validate/publish；rule simulate/submit/publish | BPI controllers/services -> PostgreSQL；rule outbox -> Kafka -> Flink -> application/readiness receipts | `bpi_point_calibrations`、`bpi_topology_versions`、`bpi_rule_versions`、`bpi_rule_publication_outbox`、application/readiness receipt 与 audit/idempotency 表 | 按 marker 校准版本、拓扑代码、两条规则代码查询 state/revision；查询 ACTIVATE receipt | 校准同人审批和拓扑创建人发布均预期 422；独立审批/发布 200；两条规则 simulation 均 1/0/0/0 并达到 PUBLISHED/APPLIED/READY | PASS |
+| 高流量形成 START candidate 并确认建批 | `/bpi/#/candidates` | MQTT QoS1；Kafka/Flink；`POST /bpi-api/candidates/9b2aade2-a305-55c5-880c-b6a0be61349b/confirm` | JetLinks -> exporter -> Kafka -> Flink evaluator -> candidate Kafka -> BPI listener/service/repository -> browser confirm | JetLinks 属性/日志表；`bpi_batch_candidates`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_boundary_evidence`、inbox/audit | 按 candidate id、candidate key 和 batch id 查询；按 batch id 查询 timeline/evidence | epoch `20260720125701` 的 5 条 `18.6 m3/h` 全部 PUBACK；candidate `CONFIRMED/r2`；batch `52427282-eb88-5645-a246-b76fe6547038` 为 `ACTIVE/r1` | PASS |
+| 低流量形成 END candidate 并确认关批 | `/bpi/#/candidates` | MQTT QoS1；Kafka/Flink；`POST /bpi-api/candidates/3ebc9c81-ec10-596d-9d77-990c83f963fa/confirm` | 同上；END 以 active `batch_id` 形成确定性 identity | 同上 | 按两个 candidate id 查询 batch_id；按 batch id 查询 `state/revision/start_time/end_time/order_id` | epoch `20260720130001` 的 5 条 `0.2 m3/h` 全部 PUBACK；END candidate `CONFIRMED/r2` 并关联同一 batch；batch 变为 `CLOSED_RAW/r2`，保留 WOM order_id | PASS |
+| 处置修复前 UNIT_MISMATCH | `/bpi/#/dataQuality` | `POST /bpi-api/data-quality/incidents/f235795b-2c6b-518f-bfc8-66329bcabba7/acknowledge`、`/resolve` | DataQualityController/Service/Repository | `bpi_data_quality_incidents`、`bpi_data_quality_incident_events`、`bpi_data_quality_incident_actions`、audit/idempotency | 按 incident id 查询 state/revision/event_count/assignee/resolution；按 incident id 查询 raw events/lifecycle | 修复前 5 条事件从 OPEN/r5 -> ACKNOWLEDGED/r6 -> RESOLVED/r7；5 条 raw event 保留；两个页面 POST 200，浏览器错误 0 | PASS |
+| WOM stop 与测试资源受控恢复 | WOM 制造指令页、BPI 规则/开关/点位页 | WOM `state=stop`；rule RETIRE；calibration revoke；feature INHERIT | WOM trigger/dispatcher；BPI lifecycle services；Kafka/Flink retirement receipts | WOM context outbox；BPI rule/calibration/feature/audit 表 | 查询 finished context、规则终态、校准终态、开关 active、pending candidate/active batch 和 fixture 计数 | finished revision `1784524213364/inactive/SENT/1`；2 规则 RETIRED/INACTIVE；测试校准 REVOKED；开关 active=false；task/wait/fixture/pending/active 均 0，CONFIRMED candidate 与 CLOSED_RAW batch 作为审计证据保留 | PASS_CONTROLLED_RESTORED |
+
+唯一 marker：`BPI_LIVE_20260720_123058`。机器记录：
+`metadata/bpi-live-mqtt-wom-start-end-acceptance.json`；详细报告：
+`docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md`。END candidate 按契约使用 `batch_id`，其
+`order_id=NULL`；同一 batch 保留 WOM order_id，因此不属于上下文丢失。来源与校准均为测试专用，
+本项不声明物理设备、现场证书、7-14 天连续运行或生产写回。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

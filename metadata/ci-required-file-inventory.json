@@ -1125,6 +1125,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/bpi-runtime/scripts/browser-live-batch-governance-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -1168,6 +1174,18 @@
     {
       "ignored": false,
       "path": "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/sql/live-batch-rule-simulation-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/bpi-runtime/sql/live-batch-rule-simulation-seed.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5031,6 +5049,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-mes-production-context-runtime-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5398,6 +5422,30 @@
     {
       "ignored": false,
       "path": "metadata/bpi-kafka-postgres-replay-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-mqtt-wom-end-candidate.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-mqtt-wom-start-candidate.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-mqtt-wom-start-end-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-live-mqtt-wom-unit-mismatch-resolved.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8445,6 +8493,12 @@
     },
     {
       "ignored": false,
+      "path": "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/UnitSymbolNormalizer.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BoundaryCodecsTest.java",
       "state": "tracked",
       "tracked": true
@@ -8630,16 +8684,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 571
+      "tracked": 574
     },
     "docs": {
-      "tracked": 105
+      "tracked": 106
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 158
+      "tracked": 162
     },
     "package.json": {
       "tracked": 1
@@ -8657,14 +8711,14 @@
       "tracked": 4
     },
     "streaming": {
-      "tracked": 98
+      "tracked": 99
     }
   },
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1434,
-    "tracked": 1434,
+    "totalFiles": 1443,
+    "tracked": 1443,
     "untracked": 0
   },
   "untrackedByDirectory": []

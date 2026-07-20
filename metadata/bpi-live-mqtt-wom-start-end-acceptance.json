@@ -1,0 +1,437 @@
+{
+  "generatedAt": "2026-07-20T05:31:51.833Z",
+  "repoBaseline": "f669bb1ee7460a167c52741a877bb8d7131e7396",
+  "database": "PostgreSQL",
+  "status": "PASS_CONTROLLED_MQTT_WOM_START_END",
+  "marker": "BPI_LIVE_20260720_123058",
+  "target": {
+    "host": "v6-2288H-V6",
+    "address": "10.11.100.17",
+    "adpUrl": "http://10.11.100.17:18080",
+    "bpiUrl": "http://10.11.100.17:18080/bpi/",
+    "serviceUrl": "http://10.11.100.17:19091",
+    "adpDatabase": "adp",
+    "bpiDatabase": "ft_mes_bpi",
+    "jetLinksDatabase": "jetlinks"
+  },
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "notApplicable": 0,
+    "realAdpBrowser": true,
+    "realWomContext": true,
+    "realMqttProtocol": true,
+    "realJetLinks": true,
+    "realKafkaFlink": true,
+    "realPostgresPersistence": true,
+    "controlledSourceSimulator": true,
+    "physicalDevice": false,
+    "testOnlyCalibrationEvidence": true,
+    "qcsWmsWriteback": false,
+    "productionReady": false,
+    "goalStatus": "PARTIAL"
+  },
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "womLineId": "8388157374858567",
+    "productId": "bpi-mqtt-pilot-product-01",
+    "deviceId": "bpi-mqtt-pilot-device-01",
+    "sourcePropertyId": "instantFlow",
+    "canonicalPropertyId": "flow.instant",
+    "canonicalUnit": "m³/h"
+  },
+  "source": {
+    "kind": "CONTROLLED_MQTT_PILOT",
+    "protocol": "MQTT 3.1.1",
+    "qos": 1,
+    "sessions": [
+      {
+        "purpose": "SOURCE_READY",
+        "sourceEpoch": "20260720123058",
+        "firstSequence": 1,
+        "lastSequence": 3,
+        "messageCount": 3,
+        "pubackCount": 3,
+        "value": 12.5,
+        "unit": "m3/h"
+      },
+      {
+        "purpose": "SOURCE_READY_V2",
+        "sourceEpoch": "20260720123401",
+        "firstSequence": 1,
+        "lastSequence": 3,
+        "messageCount": 3,
+        "pubackCount": 3,
+        "value": 12.5,
+        "unit": "m3/h"
+      },
+      {
+        "purpose": "START_LIVE_PRE_FIX",
+        "sourceEpoch": "20260720124501",
+        "firstSequence": 1,
+        "lastSequence": 5,
+        "messageCount": 5,
+        "pubackCount": 5,
+        "value": 18.6,
+        "unit": "m3/h",
+        "result": "UNIT_MISMATCH_NO_CANDIDATE"
+      },
+      {
+        "purpose": "START_RETRY_POST_FIX",
+        "sourceEpoch": "20260720125701",
+        "firstSequence": 1,
+        "lastSequence": 5,
+        "messageCount": 5,
+        "pubackCount": 5,
+        "value": 18.6,
+        "unit": "m3/h",
+        "result": "START_CANDIDATE"
+      },
+      {
+        "purpose": "END_LIVE",
+        "sourceEpoch": "20260720130001",
+        "firstSequence": 1,
+        "lastSequence": 5,
+        "messageCount": 5,
+        "pubackCount": 5,
+        "value": 0.2,
+        "unit": "m3/h",
+        "result": "END_CANDIDATE"
+      }
+    ],
+    "jetLinksTables": [
+      "public.properties_bpi_mqtt_pilot_product_01",
+      "public.device_log_bpi_mqtt_pilot_product_01"
+    ],
+    "restoredBaseline": {
+      "pointCatalogSnapshotId": "ed92004e-d401-4b4d-8379-8c681afa5674",
+      "sourceRevision": "sha256:7ad9627544e3a7cf67d8a64464f40f319e51e2c0bb6eea7433edaf65840694ab",
+      "observedAt": "2026-07-20T13:12:46.510+08:00",
+      "calibrationVersion": "pilot-unverified-20260714",
+      "calibrationStatus": "UNVERIFIED",
+      "unit": "m³/h",
+      "readyPointCount": 0
+    }
+  },
+  "governance": {
+    "featureFlag": {
+      "key": "bpi.commands",
+      "enable": {
+        "status": 200,
+        "effectiveEnabled": true,
+        "overrideActive": true,
+        "revision": 5
+      },
+      "restore": {
+        "status": 200,
+        "effectiveEnabled": false,
+        "overrideActive": false,
+        "revision": 6
+      }
+    },
+    "calibration": {
+      "id": "49dc2c36-ed03-42c9-97e2-ab8eadb46633",
+      "version": "pilot-test-20260720-123058",
+      "submittedBy": "legacy-ticket:admin",
+      "sameActorApproval": {
+        "status": 422,
+        "detail": "Point calibration decisions require a reviewer other than the submitter."
+      },
+      "approvedBy": "BPI_LIVE_20260720_123058_REVIEWER",
+      "approvedRevision": 2,
+      "readyPointCountAfterApproval": 1,
+      "finalState": "REVOKED",
+      "finalRevision": 3,
+      "readyPointCountAfterRevoke": 0
+    },
+    "topology": {
+      "id": "17c2ab5c-41fd-40ed-a19b-378134c3f53b",
+      "code": "BPI_LIVE_20260720_123058_TOPOLOGY",
+      "version": "1.0.0",
+      "state": "PUBLISHED",
+      "revision": 3,
+      "validationStatus": "PASSED",
+      "creatorPublishStatus": 422,
+      "publishedBy": "BPI_LIVE_20260720_123058_INDEPENDENT_ADMIN",
+      "pointCatalogSnapshotId": "43938674-ed70-4ad5-a9c1-9891725df916"
+    },
+    "rules": [
+      {
+        "id": "1a7e8703-c928-425e-bf91-c6549ccad4fd",
+        "code": "BPI_LIVE_20260720_123058_START",
+        "boundaryType": "START",
+        "simulationId": "b881cc70-49e8-401c-8069-547fc89c2cac",
+        "simulation": {
+          "matched": 1,
+          "missed": 0,
+          "falsePositive": 0,
+          "meanBoundaryErrorSeconds": 0
+        },
+        "runtimeBeforeRetirement": {
+          "publicationStatus": "PUBLISHED",
+          "applicationStatus": "APPLIED",
+          "readinessStatus": "READY"
+        },
+        "finalState": "RETIRED",
+        "finalRevision": 5,
+        "finalRuntimeStatus": "INACTIVE"
+      },
+      {
+        "id": "29eee850-2fa5-4007-8798-dbe3068e1929",
+        "code": "BPI_LIVE_20260720_123058_END",
+        "boundaryType": "END",
+        "simulationId": "11256d89-1883-4dc0-b974-7219ce27b81f",
+        "simulation": {
+          "matched": 1,
+          "missed": 0,
+          "falsePositive": 0,
+          "meanBoundaryErrorSeconds": 0
+        },
+        "runtimeBeforeRetirement": {
+          "publicationStatus": "PUBLISHED",
+          "applicationStatus": "APPLIED",
+          "readinessStatus": "READY"
+        },
+        "finalState": "RETIRED",
+        "finalRevision": 5,
+        "finalRuntimeStatus": "INACTIVE"
+      }
+    ]
+  },
+  "wom": {
+    "route": "/msService/WOM/produceTask/produceTask/makeTaskList",
+    "api": "POST /msService/WOM/produceTask/produceTask/updateTaskState",
+    "taskId": "9007190226136424",
+    "tableNo": "BPI_LIVE_20260720_123058_TASK_TN",
+    "externalBatch": "BPI_LIVE_20260720_123058_BATCH",
+    "outbox": [
+      {
+        "revision": 1784522614324,
+        "active": false,
+        "sourceState": "wom_runstate/waitforrun",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      },
+      {
+        "revision": 1784522627276,
+        "active": true,
+        "sourceState": "wom_runstate/runing",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      },
+      {
+        "revision": 1784524213364,
+        "active": false,
+        "sourceState": "wom_runstate/finished",
+        "publicationState": "SENT",
+        "attemptCount": 1
+      }
+    ],
+    "stateMappings": [
+      {
+        "state": "WOM_runState/runing",
+        "active": true,
+        "enabled": true
+      },
+      {
+        "state": "wom_runstate/finished",
+        "active": false,
+        "enabled": true
+      }
+    ],
+    "cleanup": {
+      "taskRows": 0,
+      "waitRows": 0
+    }
+  },
+  "streamUpgrade": {
+    "defect": "Flink compared m3/h and m³/h literally and emitted five UNIT_MISMATCH events.",
+    "sourceCommit": "308cca82",
+    "acceptanceGateCommit": "f669bb1e",
+    "jarSha256": "7fbcacf8b3a8726b1210d02f7ae122bbb993ef6c84421bfdd96e1f34aaefa11b",
+    "savepoint": "s3://ft-mes-bpi-checkpoints/savepoints/savepoint-d8fdb5-6077b086bf66",
+    "deploymentId": "ubuntu-test-v17-308cca82",
+    "jobId": "ffe9ab719bbf7250b682f77f75641f17",
+    "jobState": "RUNNING",
+    "runningTasks": 36,
+    "totalTasks": 36,
+    "latestCheckpoint": 5533,
+    "checkpointAcknowledgedSubtasks": 36,
+    "completedCheckpoints": 58,
+    "failedCheckpoints": 0,
+    "targetedTests": 21,
+    "fullStreamTests": 125,
+    "fullStreamFailures": 0,
+    "conditionalSkips": 1
+  },
+  "batchAcceptance": {
+    "orderId": "BPI_LIVE_20260720_123058_TASK_TN",
+    "batchId": "52427282-eb88-5645-a246-b76fe6547038",
+    "batchNo": "BPI-LINES0701-20260720-6B74EB1A",
+    "shadow": true,
+    "startCandidate": {
+      "id": "9b2aade2-a305-55c5-880c-b6a0be61349b",
+      "candidateKey": "6b74eb1a-3909-5722-bd95-a85dcff5cfcd",
+      "boundaryType": "START",
+      "orderId": "BPI_LIVE_20260720_123058_TASK_TN",
+      "boundaryTime": "2026-07-20T12:56:52.438+08:00",
+      "state": "CONFIRMED",
+      "revision": 2,
+      "batchStateAfterConfirmation": "ACTIVE"
+    },
+    "endCandidate": {
+      "id": "3ebc9c81-ec10-596d-9d77-990c83f963fa",
+      "candidateKey": "2ea3fcf1-f583-5660-b2ef-89a0f06fe19f",
+      "boundaryType": "END",
+      "orderId": null,
+      "identityContract": "END candidates bind by batch_id; the associated batch retains the WOM order_id.",
+      "boundaryTime": "2026-07-20T13:00:28.902+08:00",
+      "state": "CONFIRMED",
+      "revision": 2,
+      "batchStateAfterConfirmation": "CLOSED_RAW"
+    },
+    "finalBatch": {
+      "state": "CLOSED_RAW",
+      "revision": 2,
+      "startTime": "2026-07-20T12:56:52.438+08:00",
+      "endTime": "2026-07-20T13:00:28.902+08:00"
+    },
+    "stateEvents": [
+      {
+        "revision": 1,
+        "action": "SHADOW_BATCH_CREATED",
+        "fromState": null,
+        "toState": "ACTIVE"
+      },
+      {
+        "revision": 2,
+        "action": "END_BOUNDARY_CONFIRMED",
+        "fromState": "ACTIVE",
+        "toState": "CLOSED_RAW"
+      }
+    ],
+    "evidence": [
+      {
+        "boundaryType": "START",
+        "sourceEventId": "0ba344ad-8121-5f87-abc5-58864df159db",
+        "signal": "flow.instant",
+        "value": "18.6",
+        "quality": "GOOD",
+        "eventTime": "2026-07-20T12:56:52.438+08:00"
+      },
+      {
+        "boundaryType": "END",
+        "sourceEventId": "69c1dd11-60c0-5cd4-92e5-01cce0d561d4",
+        "signal": "flow.instant",
+        "value": "0.2",
+        "quality": "GOOD",
+        "eventTime": "2026-07-20T13:00:28.902+08:00"
+      }
+    ]
+  },
+  "dataQualityResolution": {
+    "incidentId": "f235795b-2c6b-518f-bfc8-66329bcabba7",
+    "issueCode": "UNIT_MISMATCH",
+    "severity": "ERROR",
+    "eventCount": 5,
+    "initialState": "OPEN",
+    "initialRevision": 5,
+    "acknowledgedState": "ACKNOWLEDGED",
+    "acknowledgedRevision": 6,
+    "finalState": "RESOLVED",
+    "finalRevision": 7,
+    "rawEventCountAfterResolution": 5,
+    "lifecycle": [
+      "CREATED",
+      "ACKNOWLEDGED",
+      "RESOLVED"
+    ],
+    "browser": {
+      "acknowledgeStatus": 200,
+      "resolveStatus": 200,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0
+    }
+  },
+  "persistence": {
+    "tables": [
+      "public.wom_bpi_task_state_mappings",
+      "public.wom_bpi_production_context_outbox",
+      "public.properties_bpi_mqtt_pilot_product_01",
+      "public.device_log_bpi_mqtt_pilot_product_01",
+      "bpi.bpi_feature_flags",
+      "bpi.bpi_point_calibrations",
+      "bpi.bpi_topology_versions",
+      "bpi.bpi_rule_versions",
+      "bpi.bpi_rule_publication_outbox",
+      "bpi.bpi_rule_application_receipts",
+      "bpi.bpi_rule_runtime_readiness_receipts",
+      "bpi.bpi_batch_candidates",
+      "bpi.bpi_batch_instances",
+      "bpi.bpi_batch_state_events",
+      "bpi.bpi_boundary_evidence",
+      "bpi.bpi_data_quality_incidents",
+      "bpi.bpi_data_quality_incident_events",
+      "bpi.bpi_data_quality_incident_actions",
+      "bpi.bpi_inbox_events",
+      "bpi.bpi_audit_events"
+    ],
+    "verificationSql": {
+      "candidates": "SELECT id,boundary_type,order_id,state,revision,candidate_key,batch_id,boundary_time FROM bpi.bpi_batch_candidates WHERE id IN ('9b2aade2-a305-55c5-880c-b6a0be61349b','3ebc9c81-ec10-596d-9d77-990c83f963fa') ORDER BY boundary_time;",
+      "batch": "SELECT id,batch_no,order_id,state,revision,is_shadow,start_time,end_time FROM bpi.bpi_batch_instances WHERE id='52427282-eb88-5645-a246-b76fe6547038';",
+      "timeline": "SELECT revision,action,from_state,to_state,actor_id,event_time FROM bpi.bpi_batch_state_events WHERE batch_id='52427282-eb88-5645-a246-b76fe6547038' ORDER BY revision;",
+      "evidence": "SELECT boundary_type,source_event_id,signal,value_text,unit,quality,event_time,source FROM bpi.bpi_boundary_evidence WHERE batch_id='52427282-eb88-5645-a246-b76fe6547038' ORDER BY boundary_type,event_time;",
+      "womOutbox": "SELECT context_revision,active,source_state,publication_state,attempt_count,sent_at FROM public.wom_bpi_production_context_outbox WHERE order_id='BPI_LIVE_20260720_123058_TASK_TN' ORDER BY context_revision;",
+      "dataQuality": "SELECT id,issue_code,severity,state,revision,event_count,assignee,resolved_by,resolution_reason FROM bpi.bpi_data_quality_incidents WHERE id='f235795b-2c6b-518f-bfc8-66329bcabba7';"
+    }
+  },
+  "cleanup": {
+    "retiredRules": 2,
+    "inactiveRules": 2,
+    "revokedTestCalibrations": 1,
+    "activeFeatureOverrides": 0,
+    "womTaskRows": 0,
+    "womWaitRows": 0,
+    "telemetryFixtureRows": 0,
+    "goldenBoundaryFixtureRows": 0,
+    "pendingCandidates": 0,
+    "activeBatches": 0,
+    "retainedConfirmedCandidates": 2,
+    "retainedClosedShadowBatches": 1,
+    "retentionReason": "Confirmed candidates, the closed shadow batch, boundary evidence, state events and governance audit are immutable acceptance evidence."
+  },
+  "browserEvidence": {
+    "reports": [
+      "/tmp/BPI_LIVE_20260720_123058-feature-enable.json",
+      "/tmp/BPI_LIVE_20260720_123058-point-calibration.json",
+      "/tmp/BPI_LIVE_20260720_123058-topology-publish.json",
+      "/tmp/BPI_LIVE_20260720_123058-rule-start.json",
+      "/tmp/BPI_LIVE_20260720_123058-rule-end.json",
+      "/tmp/BPI_LIVE_20260720_123058-wom-start.json",
+      "/tmp/BPI_LIVE_20260720_123058-candidate-start-confirm.json",
+      "/tmp/BPI_LIVE_20260720_123058-candidate-end-confirm.json",
+      "/tmp/BPI_LIVE_20260720_123058-rules-retire.json",
+      "/tmp/BPI_LIVE_20260720_123058-point-calibration.json",
+      "/tmp/BPI_LIVE_20260720_123058-wom-stop.json",
+      "/tmp/BPI_LIVE_20260720_123058-feature-inherit.json",
+      "/tmp/BPI_LIVE_20260720_123058-unit-mismatch-resolve.json"
+    ],
+    "screenshots": [
+      "metadata/bpi-live-mqtt-wom-start-candidate.png",
+      "metadata/bpi-live-mqtt-wom-end-candidate.png",
+      "metadata/bpi-live-mqtt-wom-unit-mismatch-resolved.png"
+    ]
+  },
+  "remainingGates": [
+    "Repeat source epoch/sequence, reconnect and power-loss recovery with a physical DEVICE/GATEWAY.",
+    "Approve a real field calibration certificate that exactly matches the current catalog version.",
+    "Run the selected production line continuously for 7-14 days and measure boundary agreement, timing error, quantity deviation and data quality.",
+    "Keep QCS/WMS production writeback disabled until shadow thresholds and business sign-off pass.",
+    "Complete a production-equivalent whole-stack rollback under realistic load."
+  ]
+}

@@ -660,6 +660,28 @@ evidence。控制链通过，但现场没有真实遥测且校准未批准，因
 `metadata/bpi-mqtt-ingress-joint-acceptance.json`。本轮 candidate 和 batch 增量均为 0，WOM/QCS/WMS
 写入为 0。
 
+### BPI 真实 MQTT 与 WOM START/END 联合验收（2026-07-20）
+
+本节使用 marker `BPI_LIVE_20260720_123058`，将受控 MQTT 与真实 WOM 指令汇合到同一个
+START/END 影子批次。受控来源和测试校准只用于软件验收，不代表物理设备或现场计量证书。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 运行开关 | `/bpi/#/featureFlags` | 临时启用 LINE `bpi.commands`，收尾恢复继承 | `POST /bpi-api/feature-flags/bpi.commands` | SET true `200/r5`；INHERIT `200/r6`；console/page/request failure 为 0 | 最终覆盖 active=false，有效值恢复 GLOBAL false | `bpi_feature_flags`、audit/idempotency | PASS | 只在验收窗口开放人工确认；自动确认和 WMS 写回仍锁定 |
+| BPI 点位校准 | `/bpi/#/points` | 提交测试证据、同人审批负测、独立审批、规则退役后撤销 | calibration submit/approve/revoke | 同人审批预期 422；独立审批和撤销均 200；非预期错误 0 | `49dc2c36-ed03-42c9-97e2-ab8eadb46633` 从 PENDING/r1 -> APPROVED/r2 -> REVOKED/r3；目录 0 -> 1 -> 0 READY | `bpi_point_calibrations`、point catalog、audit/idempotency | PASS | 测试专用证据，不是现场证书 |
+| BPI 拓扑与规则 | `/bpi/#/rules` | 发布测试拓扑与 START/END 规则，等待 PUBLISHED/APPLIED/READY | topology/rule simulate/submit/publish APIs | 创建人发布预期 422；独立发布 200；两条 simulation 均 1 命中、0 漏检、0 误报、0 秒偏差；错误 0 | 拓扑 PUBLISHED/r3；两规则均 PUBLISHED/APPLIED/READY | topology/rule/outbox/receipt/audit 表 | PASS | 规则只服务本次 TEST-ONLY scope |
+| WOM 生产上下文 | `/msService/WOM/produceTask/produceTask/makeTaskList` | 对任务 `9007190226136424` 点击开始 | `POST .../updateTaskState`，`state=start` | 页面/API 200；console/page/request failure 为 0 | waitforrun inactive 与 runing active 两条 context 均 SENT/1 | `wom_bpi_production_context_outbox`、`wom_bpi_task_state_mappings` | PASS | WOM 指令是测试 fixture，之后按页面 stop 并清理 |
+| BPI START 候选 | `/bpi/#/candidates` | MQTT 上报 5 条 `18.6 m3/h`，打开候选并确认 | candidate confirm `9b2aade2-...` | MQTT 5/5 PUBACK；页面确认 200；candidate CONFIRMED/r2；浏览器错误 0 | 创建 batch `52427282-...`，状态 ACTIVE/r1；START evidence 为 18.6/GOOD | JetLinks 双表；candidate/batch/state/evidence/inbox/audit | PASS | 首轮因单位别名缺口失败，部署 `308cca82` 后复验通过 |
+| BPI END 候选 | `/bpi/#/candidates` | MQTT 上报 5 条 `0.2 m3/h`，打开候选并确认 | candidate confirm `3ebc9c81-...` | MQTT 5/5 PUBACK；页面确认 200；candidate CONFIRMED/r2；浏览器错误 0 | 同一 batch 变为 CLOSED_RAW/r2，start/end 时间与两条 evidence 可查 | 同上 | PASS | END 以 batch_id 关联；candidate.order_id 按契约为 NULL，batch 保留 WOM order_id |
+| BPI 数据质量 | `/bpi/#/dataQuality` | 分派并解决修复前 5 条 UNIT_MISMATCH | acknowledge/resolve | 两个命令均 200；最终页面 RESOLVED/r7；console/page/request failure 为 0 | 5 条 raw event 保留；生命周期 CREATED/ACKNOWLEDGED/RESOLVED | incident/events/actions/audit/idempotency | PASS | 缺陷根因是 Flink 对 `m3/h` 与 `m³/h` 的字面比较 |
+| 受控收尾 | WOM 页面、`/bpi/#/rules`、`/points`、`/featureFlags` | stop WOM、退役规则、撤销测试校准、恢复开关与 IoT 原映射 | WOM stop；RETIRE；revoke；INHERIT | 页面动作成功；两规则 INACTIVE；无非预期错误 | finished inactive context SENT；task/wait/fixture/pending candidate/active batch 均 0；Flink RUNNING 36/36、checkpoint 5533 | WOM/BPI 治理与运行时表 | PASS_CONTROLLED_RESTORED | 2 条 CONFIRMED candidate 和 CLOSED_RAW batch 作为不可变验收证据保留 |
+
+机器证据：`metadata/bpi-live-mqtt-wom-start-end-acceptance.json`；详细报告：
+`docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md`；页面截图：
+`metadata/bpi-live-mqtt-wom-start-candidate.png`、
+`metadata/bpi-live-mqtt-wom-end-candidate.png`、
+`metadata/bpi-live-mqtt-wom-unit-mismatch-resolved.png`。
+
 ### BPI 点位目录高基数分页（2026-07-19）
 
 本节使用目标环境 `10.11.100.17` 的真实 ADP 会话、adapter、Java 17 service、PostgreSQL 15.18

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T01:39:01.198Z",
-  "repoCommit": "6b53ecfcb499a2485e22b3aed782e20e0985518a+codex/bpi-source-sequence-evidence-v2",
+  "generatedAt": "2026-07-20T05:31:51.833Z",
+  "repoCommit": "f669bb1ee7460a167c52741a877bb8d7131e7396+codex/bpi-source-sequence-evidence-v2",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -132,8 +132,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 183,
-    "pass": 180,
+    "testedFeatures": 184,
+    "pass": 181,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3945,9 +3945,52 @@
       "issues": [
         "The OPEN warning intentionally remains for shadow observation. The data-quality consumer is enabled only for 1000/PLANT-01/LINE-S07-01; this is not production-wide enablement or production-system writeback."
       ]
+    },
+    {
+      "module": "BPI MQTT/WOM START-END 联合落库",
+      "route": "/msService/WOM/produceTask/produceTask/makeTaskList; /bpi/#/points; /bpi/#/rules; /bpi/#/candidates; /bpi/#/dataQuality; /bpi/#/featureFlags",
+      "operation": "在同一真实 WOM 指令上执行 start，使用测试专用校准和 START/END 规则接入受控 MQTT，页面确认两条候选使同一影子批次从 ACTIVE 进入 CLOSED_RAW，再执行数据质量处置、WOM stop、规则退役和配置恢复",
+      "api": "POST WOM updateTaskState; MQTT 3.1.1/QoS1; Kafka production context/telemetry/rule/candidate topics; BPI calibration/topology/rule/candidate/data-quality/feature-flag APIs",
+      "method": "POST/MQTT/KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "WOM PostgreSQL trigger -> context outbox dispatcher -> Kafka -> Flink context join; JetLinks MQTT -> exporter -> Kafka -> Flink evaluator -> candidate listener -> CandidateService/BpiPostgresRepository; browser governance commands -> BPI services/repositories",
+      "tables": [
+        "public.wom_bpi_task_state_mappings",
+        "public.wom_bpi_production_context_outbox",
+        "public.properties_bpi_mqtt_pilot_product_01",
+        "public.device_log_bpi_mqtt_pilot_product_01",
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_point_calibrations",
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_rule_publication_outbox",
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_boundary_evidence",
+        "bpi.bpi_data_quality_incidents",
+        "bpi.bpi_data_quality_incident_events",
+        "bpi.bpi_data_quality_incident_actions",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "BPI_LIVE_20260720_123058",
+      "verificationSql": "SELECT id,boundary_type,order_id,state,revision,candidate_key,batch_id,boundary_time FROM bpi.bpi_batch_candidates WHERE id IN ('9b2aade2-a305-55c5-880c-b6a0be61349b','3ebc9c81-ec10-596d-9d77-990c83f963fa') ORDER BY boundary_time; SELECT id,batch_no,order_id,state,revision,is_shadow,start_time,end_time FROM bpi.bpi_batch_instances WHERE id='52427282-eb88-5645-a246-b76fe6547038'; SELECT revision,action,from_state,to_state,event_time FROM bpi.bpi_batch_state_events WHERE batch_id='52427282-eb88-5645-a246-b76fe6547038' ORDER BY revision; SELECT context_revision,active,source_state,publication_state,attempt_count,sent_at FROM public.wom_bpi_production_context_outbox WHERE order_id='BPI_LIVE_20260720_123058_TASK_TN' ORDER BY context_revision; SELECT id,issue_code,state,revision,event_count,resolution_reason FROM bpi.bpi_data_quality_incidents WHERE id='f235795b-2c6b-518f-bfc8-66329bcabba7';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-live-mqtt-wom-start-end-acceptance.json. Real WOM page start produced inactive/active SENT contexts for task 9007190226136424. After stateful Flink upgrade commit 308cca82, MQTT epoch 20260720125701 sequences 1..5 at 18.6 generated START candidate 9b2aade2-a305-55c5-880c-b6a0be61349b; epoch 20260720130001 sequences 1..5 at 0.2 generated END candidate 3ebc9c81-ec10-596d-9d77-990c83f963fa. Both are CONFIRMED/r2 and link batch 52427282-eb88-5645-a246-b76fe6547038, which is CLOSED_RAW/r2 and retains WOM order BPI_LIVE_20260720_123058_TASK_TN. The pre-fix five-event UNIT_MISMATCH incident is RESOLVED/r7 with raw events preserved. Rules are RETIRED/INACTIVE, test calibration REVOKED, feature override inactive, WOM finished context SENT, and no pending candidate or active batch remains. Browser console/page/request failures are zero on final actions; Flink job ffe9ab719bbf7250b682f77f75641f17 is RUNNING 36/36 with checkpoint 5533.",
+      "issues": [
+        "The MQTT source is a controlled simulator and the approved calibration was test-only; physical DEVICE/GATEWAY proof and a field certificate remain required.",
+        "END candidate identity intentionally uses batch_id and stores order_id as NULL; the associated batch retains the WOM order_id.",
+        "QCS/WMS writeback remains disabled until physical-source and 7-14 day shadow gates pass."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "BPI_LIVE_20260720_123058",
+      "artifact": "metadata/bpi-live-mqtt-wom-start-end-acceptance.json",
+      "summary": "Real WOM start/stop, three SENT context revisions, test-only calibration with independent approval, START/END rules, controlled MQTT through JetLinks/Kafka/Flink, two confirmed candidates, one CLOSED_RAW shadow batch, unit-alias defect resolution and governed recovery passed on 10.11.100.17; physical source and production writeback remain out of scope."
+    },
     {
       "marker": "ADP_BPI_MQTT_20260720_0918",
       "artifact": "metadata/bpi-mqtt-ingress-joint-acceptance.json",

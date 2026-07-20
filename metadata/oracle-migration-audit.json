@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-20T02:18:03+00:00",
-  "repoCommit": "6b53ecfcb499a2485e22b3aed782e20e0985518a",
-  "findingCount": 1598,
+  "generatedAt": "2026-07-20T06:00:16+00:00",
+  "repoCommit": "f669bb1ee7460a167c52741a877bb8d7131e7396",
+  "findingCount": 1600,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 68,
+    "java-row-index-noise": 70,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 574,
@@ -22,7 +22,7 @@
     "from-dual": 140,
     "ojdbc": 15,
     "oracle-keyword": 638,
-    "rownum": 669,
+    "rownum": 671,
     "sysdate": 135
   },
   "topFiles": [
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 918,
+      "line": 919,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 919,
+      "line": 920,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 921,
+      "line": 922,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 922,
+      "line": 923,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 930,
+      "line": 931,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 931,
+      "line": 932,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 933,
+      "line": 934,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 934,
+      "line": 935,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -10090,7 +10090,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `183` 项，其中 `180 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `184` 项，其中 `181 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -11710,7 +11710,7 @@
     },
     {
       "file": "scripts/verify-bpi-streaming.py",
-      "line": 223,
+      "line": 245,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12462,7 +12462,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 108,
+      "line": 109,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12470,7 +12470,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 109,
+      "line": 110,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12478,7 +12478,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 128,
+      "line": 129,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12486,7 +12486,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 129,
+      "line": 130,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12494,7 +12494,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 175,
+      "line": 180,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12502,7 +12502,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 390,
+      "line": 395,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12510,7 +12510,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 438,
+      "line": 443,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12518,7 +12518,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 447,
+      "line": 452,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12526,7 +12526,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 451,
+      "line": 456,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12534,7 +12534,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 458,
+      "line": 463,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12542,7 +12542,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 466,
+      "line": 471,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12550,7 +12550,7 @@
     },
     {
       "file": "scripts/verify-sustainable-repo.py",
-      "line": 467,
+      "line": 472,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12718,7 +12718,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
-      "line": 77,
+      "line": 79,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12726,7 +12726,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
-      "line": 84,
+      "line": 86,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12734,11 +12734,27 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
-      "line": 95,
+      "line": 97,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
       "excerpt": "(rs, rowNum) -> map(rs));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
+      "line": 121,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> rs.getObject(\"id\", UUID.class)));"
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCalibrationPostgresRepository.java",
+      "line": 177,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> rs.getString(\"rule_reference\"));"
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/PointCatalogPostgresRepository.java",
@@ -12918,7 +12934,7 @@
     },
     {
       "file": "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiPointCalibrationPostgresAcceptanceTest.java",
-      "line": 352,
+      "line": 370,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",

@@ -2,7 +2,7 @@
 
 这是一个从 Windows ADP/MES 交付资产恢复、面向 Linux/Docker 和 PostgreSQL 持续演进的工程仓库，同时包含新建的智能批次与工艺数据中心（BPI）。仓库的目标不是让旧运行包“勉强启动”，而是逐步形成可编译、可测试、可部署、可落库验收、可回滚的 MES 产品代码基线。
 
-> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收。当前测试机运行 PostgreSQL Flyway V22；2026-07-20 又以两次独立 MQTT 3.1.1/QoS1 会话闭合 `JetLinks -> PostgreSQL -> durable spool -> Kafka -> Flink -> MES PostgreSQL -> 真实页面`。六条消息全部 PUBACK，Kafka offset 精确增加 6，来源序列在验收窗口内达到 `QUALIFIED`，点位仅因校准未批准保持 0 READY；六条数据质量原始证据也已落库并在真实页面复显。该证据来自受控模拟器且有 30 分钟 TTL，过期后按设计重新失败关闭，不能解释为现场设备或生产 READY。Flyway V20 影子验收、V21 运行开关与原生菜单门禁仍有效；WOM/QCS/WMS 自动写回保持关闭。真实物理设备、校准批准、同 scope END 边界、连续 7-14 天现场影子运行、真实负载整体回切和生产迁移条件尚未完成。PATROL、WOM、RM 与 EMS 的既有完成度和阻断边界保持不变。
+> **当前总状态：`IN_PROGRESS_NOT_COMPLETE`。** 仓库工程化和 BPI 受控 Phase 1 联合链路已经通过目标环境真实运行验收。当前测试机运行 PostgreSQL Flyway V22；2026-07-20 marker `BPI_LIVE_20260720_123058` 已在同一真实 WOM 指令上闭合 `WOM 页面 start -> PostgreSQL outbox -> Kafka/Flink -> 受控 MQTT/JetLinks -> START/END candidate -> 页面确认 -> CLOSED_RAW 影子批次 -> WOM stop/inactive context`。修复前发现的 `m3/h` 与 `m³/h` 运行时别名缺口已通过 savepoint 有状态升级修复，5 条原始错误事件随后在真实数据质量页面完成分派和解决。规则、测试校准和命令开关均已受控收尾，Flink 当前 `RUNNING 36/36`。该证据仍来自受控模拟器和测试专用校准，不是物理设备或现场计量证书；WOM/QCS/WMS 自动写回保持关闭。真实物理设备、正式校准、连续 7-14 天现场影子运行、真实负载整体回切和生产迁移条件尚未完成。PATROL、WOM、RM 与 EMS 的既有完成度和阻断边界保持不变。
 
 ## 项目定位
 
@@ -25,8 +25,8 @@
 | RM 批控配方 Web 编辑 | `PASS_WITH_EXTERNAL_DCS_BLOCKED` | `rm-formula-editor` 源码模块、迁移 190、可见 `Web编辑` 入口；marker `ADP_E2E_20260717120436_RM_WEB_FORMULA` 连续三轮完成桌面/移动页面、API、六表 PostgreSQL 回读、失败重试和清理 | 配置真实现场 Batch/DCS HTTPS 端点，加载生产主数据并完成投递确认与回滚签字 |
 | PATROL 共享巡检 | `TARGET_HIDDEN_DANGER_PASS_PARTIAL` | 455 个 Java 文件构建 PASS；目标 37 表、24 菜单、102 操作、2 工作流验收 PASS；EamMs JAR SHA `af01d6a7...97f753`；异常隐患 marker `ADP_E2E_20260717003024_PATROL_HIDDEN_DANGER` 为 45/45 PASS，明细关联、幂等和 EAM 来源“巡检”复显均有证据 | 继续统计监控；完整隐患治理需真实 SESH；目标回滚需维护窗口确认 |
 | EMS 能源管理 | `BLOCKED_MISSING_INDICATOR` | `supEMS`、`energyPlan`、`EnergyConBase`、`EnergyPred` 四个源码包和依赖关系已恢复 | 取得 Indicator `6.0.4.0` api/core，补 PostgreSQL 迁移，逐服务构建与验收 |
-| BPI 产品链 | `PARTIAL` | 契约、目标环境 Flyway V22、JetLinks 自动目录、受控 MQTT 双会话来源序列、校准治理、Flink 数据质量链、影子运行/四眼批准、MES Kafka 落库、拓扑/规则产品化、退役、savepoint、真实 PostgreSQL/Kafka/Flink 和 WOM context 均有可复验证据 | 受控序列证据会过期且校准仍未批准；物理设备、同 scope END 边界、连续 7-14 天现场影子运行、真实负载整体回切和 QCS/WMS 写回仍未完成 |
-| 目标测试环境 | `PASS_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER` | BPI 页面与真实 ADP 会话桥接、Flyway V22、三 broker Kafka、Flink/MinIO、JetLinks MQTT QoS1、双 PostgreSQL 落库、来源序列与数据质量页面、真实 WOM outbox/context join、受控遥测候选和时间压缩影子验收均已实测 | MQTT 输入来自受控模拟器，30 分钟来源证据和时间压缩都不是现场连续运行，该状态仍不是生产 READY |
+| BPI 产品链 | `PARTIAL` | 契约、Flyway V22、JetLinks 自动目录、受控 MQTT 来源序列、测试校准四眼审批、真实 WOM context、START/END 规则与候选、CLOSED_RAW 影子批次、数据质量处置、退役和 savepoint 均有目标环境证据 | 受控序列证据会过期；物理设备、正式计量证书、连续 7-14 天现场影子运行、真实负载整体回切和 QCS/WMS 写回仍未完成 |
+| 目标测试环境 | `PASS_CONTROLLED_MQTT_WOM_START_END` | 同一 marker 已闭合真实 ADP/WOM 页面、outbox、MQTT QoS1、JetLinks 双表、Kafka/Flink、START/END candidate、影子批次、三套 PostgreSQL 和页面处置 | MQTT 输入与校准证据仍为测试专用；该状态不是现场连续运行或生产 READY |
 | 生产迁移 | `BLOCKED` | 迁移、回滚和签字门禁已经建立 | 数据、MinIO、Keycloak、TLS、安全、license、回滚演练和业务签字均需 READY |
 
 权威状态以 [项目总目标验收总账](docs/project-goal-acceptance.md)、[目标缺口总账](docs/goal-gap-register.md)、[模块包缺口审计](docs/module-package-gap-audit.md)、[PATROL 恢复验收](docs/testing/patrol-module-recovery-acceptance.md) 和 [机器可读目标账本](metadata/project-goal-acceptance.json) 为准。当前模块包审计确认 PATROL 已从“部署中”进入“异常发现到 EAM 待治理台账 PASS、统计和完整 SESH 治理继续验收”；四个 EMS 源码包已恢复，但 `Indicator 6.0.4.0`、`packConfigManag`、`SESGISConfig` 仍是依赖缺口；WMS 与 ProcessAnalysis 已由可维护自研模块接续。README 是接手入口，不替代验收证据。
@@ -73,17 +73,17 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 -> candidate -> 浏览器确认 -> batch/evidence/audit
 ```
 
-这条链已使用唯一 `ADP_E2E_*` marker 在目标环境以受控 fixture 闭合。`MapleTcT/iot` 保留已验收的 JetLinks EventBus 链，并新增正式 MQTT 3.1.1/QoS1 受控入口、exporter、Kafka offset、JetLinks PostgreSQL 和 Flink source 证据；它从 JetLinks 权威注册/metadata 生成内容寻址点位快照和来源序列证据，经 Kafka 自动落入 BPI PostgreSQL。当前版本只有精确匹配目录绑定、来源为 DEVICE/GATEWAY、同 epoch 至少两次严格递增且证据未过期时才可进入 READY。当前仓库也已补 WOM PostgreSQL 同事务触发捕获、显式 scope/state 映射和 Java 8 Kafka 发布器。两条实时 source 边尚未用物理设备点位和同一生产上下文 marker 汇合为 candidate/batch，任何后续改动仍必须重复全链验证，分段测试、接口 `200` 或页面可见都不能替代完整闭环。
+这条链已使用唯一 marker 在目标环境以受控来源闭合。`MapleTcT/iot` 保留已验收的 JetLinks EventBus 链，并新增正式 MQTT 3.1.1/QoS1 受控入口、exporter、Kafka offset、JetLinks PostgreSQL 和 Flink source 证据；它从 JetLinks 权威注册/metadata 生成内容寻址点位快照和来源序列证据，经 Kafka 自动落入 BPI PostgreSQL。当前版本只有精确匹配目录绑定、来源为 DEVICE/GATEWAY、同 epoch 至少两次严格递增且证据未过期时才可进入 READY。当前仓库也已补 WOM PostgreSQL 同事务触发捕获、显式 scope/state 映射和 Java 8 Kafka 发布器。marker `BPI_LIVE_20260720_123058` 已把受控 MQTT 与真实 WOM context 汇合为同一 START/END 影子批次；下一步是用物理设备和正式证书重复同一链，而不是把本次测试专用证据升级为现场结论。
 
 ## 已实现的 BPI 能力
 
 - Java 8 旧平台认证适配器与 Java 17 BPI 服务边界。
 - OpenAPI、Protobuf 事件契约、兼容性基线和契约门禁。
 - `MapleTcT/iot` 已实现 JetLinks 解码后遥测 exporter、权威点位目录 publisher、来源序列证据 publisher 和受控 MQTT 接入：显式设备/测点映射、稳定身份、Redis 持久资格状态、磁盘缓冲、Kafka 幂等发送、内容寻址事件/目录 revision、Micrometer 指标和失败关闭。目标机两次独立 QoS1 会话已证明 `2026072003:5001..5003` 与重连后的 `2026072004:1..3`；六条 PUBACK、JetLinks 双表、Kafka `37 -> 43`、MES current/DQ 六条原始证据均已核对。只有 DEVICE/GATEWAY 同一 epoch 至少两次严格递增、绑定指纹匹配且证据未过期时才允许 QUALIFIED。
-- MES production context outbox 已实现 `176` 同事务捕获和 `177` 版本时钟下限、显式产线/状态映射、`BLOCKED_*` 失败关闭、Java 8 `SKIP LOCKED` 抢占、Kafka 幂等发送、重试/毒消息终止和 Micrometer 指标；目标机已通过真实 WOM `start/hold`、3 条 `SENT|1` 上下文、Flink join 和影子批次确认。
+- MES production context outbox 已实现 `176` 同事务捕获和 `177` 版本时钟下限、显式产线/状态映射、`BLOCKED_*` 失败关闭、Java 8 `SKIP LOCKED` 抢占、Kafka 幂等发送、重试/毒消息终止和 Micrometer 指标；目标机已通过真实 WOM `start/stop`、waitforrun/runing/finished 三条 `SENT|1` 上下文、Flink join 和 START/END 影子批次确认。启用脚本现在强制要求 `runing=active` 与 `finished=inactive` 两个映射同时存在。
 - PostgreSQL Flyway schema、遥测入库、规则/拓扑、回放模拟、候选确认、影子批次、证据和审计。
 - 拓扑/规则产品化：页面可新建或复制版本，拓扑发布前校验路径、环、JetLinks 产品/设备/属性、单位、校准和必需信号；独立管理员发布后版本不可变，规则草稿只能引用已发布拓扑及其绑定信号。Flyway V1-V9、真实 PostgreSQL marker 和 7 条浏览器 E2E 已通过；目标环境 marker `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` 又验证了真实 ADP 会话、V9 落库、创建人发布拒绝、独立发布和服务重启后读取。
-- 点位目录与校准准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；V17-V18 把来源校准声明与 MES 证据分开并增加稳定游标；V22 新增来源序列 current evidence、目录 origin/fingerprint 和精确 READY 联查。真实点位页可查看证书治理和来源序列证据抽屉。MQTT 验收快照 `c93a16dc...` 为 1 点/0 READY，来源序列在有效窗口内为 `QUALIFIED/DEVICE`，唯一阻断为校准未批准；30 分钟 TTL 到期后来源证据会重新失败关闭。
+- 点位目录与校准准入：Flyway V10-V12 保存不可变来源快照和源属性/规范属性身份；V17-V18 把来源校准声明与 MES 证据分开并增加稳定游标；V22 新增来源序列 current evidence、目录 origin/fingerprint 和精确 READY 联查。真实点位页已用测试校准闭合提交、同人审批 `422`、独立审批、1 READY、规则退役联锁和撤销；验收后目录恢复 `pilot-unverified-20260714`、0 READY。测试校准不等于现场计量证书，来源 TTL 到期后仍会失败关闭。
 - 规则运行时目录准入：规则发布 Protobuf 固化 `productId` 和 `calibrationVersion`，Java 服务在发布事务内重验当前目录；Flink 订阅 `iot.point-catalog.snapshot.v1`，仅把全部绑定 READY 的规则 UPSERT 到 evaluator。目录降级会 DELETE 规则并清空待决窗口，旧 timer 不再产候选，恢复后从新观测重新累积。控制面 `APPLIED/REJECTED` 与运行时 `READY/DEGRADED/INACTIVE` 已形成独立 Protobuf、Flink sink、Kafka source/DLQ、Flyway V15 字段和 UI 状态列；目标环境已完成 savepoint 有状态升级、规则 `READY -> INACTIVE`、回滚草稿及延迟候选落库复验。
 - 规则发布 transactional outbox、Kafka 投递状态、失败重试、乐观并发、规则应用回执和独立运行时就绪回执。
 - Flink 事件时间、生产上下文 join、规则生命周期、索引路由、边界计算和三个事务 sink。
@@ -95,10 +95,10 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 - Kafka 4.2 + Flink 2.2.1 MiniCluster 验收：成功 checkpoint 后 `APPLIED + READY` 可见、未完成事务不可见、停用提交 `APPLIED + INACTIVE`、TaskManager 重启恢复规则终态、同版本规则禁止重新启用且两类回执无重复。
 - 目标测试环境独立 BPI 运行栈：真实 ADP `suposTicket` 经可信网关校验，Java 8 适配器签发短期内部 JWT，Java 17 服务读取独立 PostgreSQL。
 - 目标测试环境独立流处理栈：三 broker Kafka、十个 BPI topic、Flink 2.2.1、两个 TaskManager、MinIO checkpoint、唯一 marker 回放和带负载 TaskManager 重启恢复。
-- 目标环境受控联合验收：真实浏览器模拟/发布规则，PostgreSQL outbox 投递，Flink 应用回执 `APPLIED`，上下文/遥测产生唯一候选，真实浏览器确认后形成影子批次、边界证据、状态事件和审计；验收后发布 typed inactive 规则、定向清理 marker，并恢复消费者默认关闭。
+- 目标环境受控联合验收：marker `BPI_LIVE_20260720_123058` 从真实 WOM start、三条 context outbox、受控 MQTT/JetLinks、Kafka/Flink `APPLIED+READY` 进入 START/END 两条候选；真实 BPI 页面确认后，同一批次从 `ACTIVE/r1` 进入 `CLOSED_RAW/r2`。验收后两条规则 `RETIRED/INACTIVE`、测试校准 `REVOKED`、命令开关恢复继承、WOM finished context 为 inactive/SENT，Flink 保持 `RUNNING 36/36`。
 - 非 HTTPS 测试入口写命令兼容：浏览器不支持 `crypto.randomUUID()` 时改用 `crypto.getRandomValues()` 生成 UUID v4，并有 E2E 覆盖。
 
-本地 MiniCluster、目标流处理集群、目标浏览器联合写链、JetLinks EventBus source marker 和 MES context outbox PostgreSQL 验收是相互独立的证据。目标环境 EventBus source 与 WOM context 两端均已真实执行，但尚未接入真实网关/协议设备点位，也未用同一 marker 汇合到 candidate/batch；不能把两个分段 PASS 升级为现场闭环。详细 marker、offset、目标表和清理结果分别记录在 MES 与 IoT 验收报告中。
+本地 MiniCluster、目标流处理集群、早期联合写链以及本轮 MQTT/WOM 联合链是不同证据等级。本轮已经把 JetLinks source 与真实 WOM context 用同一 marker 汇合到 START/END candidate 和 CLOSED_RAW batch，但来源仍是受控模拟器，不能升级为物理设备现场闭环。详细 marker、目标表、SQL、缺陷修复和恢复结果记录在 `docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md`。
 
 ## 目标测试环境（更新至 2026-07-20）
 
@@ -108,8 +108,8 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 |---|---|---|
 | 既有 ADP/MES + PATROL | `http://10.11.100.17:18080` | 当前公司内网入口；PATROL 配置、任务执行、异常结果、待治理隐患生成和 EAM 台账复显链 PASS |
 | BPI 操作台 | `http://10.11.100.17:18080/bpi/#/overview` | 复用真实 ADP 登录；规则和候选页面均已在当前地址复验 |
-| BPI Java/PostgreSQL | service `http://10.11.100.17:19091`；DB `ft_mes_bpi` | service `ft-mes-bpi-service:20260720-source-sequence-v22-6b2eb3e7`、adapter `ft-mes-bpi-adapter:20260720-shell-menu-df6fdb0e` 均 healthy；PostgreSQL 15.18/Flyway V22 |
-| Kafka/Flink/MinIO | `ft-mes-bpi-streaming`；REST `http://100.99.133.43:18081` | Kafka 4.2 三 broker；Flink 2.2.1 job `1e981b842f4693e49f3c3def0fb98cb6` 为 RUNNING/36-of-36 |
+| BPI Java/PostgreSQL | service `http://10.11.100.17:19091`；DB `ft_mes_bpi` | service `ft-mes-bpi-service:20260720-calibration-evidence-13b1296c`、adapter `ft-mes-bpi-adapter:20260720-shell-menu-df6fdb0e` 均 healthy；PostgreSQL 15.18/Flyway V22 |
+| Kafka/Flink/MinIO | `ft-mes-bpi-streaming`；REST `http://100.99.133.43:18081` | Kafka 4.2 三 broker；Flink 2.2.1 job `ffe9ab719bbf7250b682f77f75641f17` 为 RUNNING/36-of-36，最新复验 checkpoint `5533` |
 | 固定 marker 回放 | `ADP_E2E_20260714_071034_1503790` | 只产生 1 个候选，数据质量错误 0 |
 | TaskManager 恢复 | 带负载重启 1 个 TaskManager | 30/30 task 恢复，重启后继续完成 checkpoint |
 | 浏览器/Kafka/Flink/PostgreSQL 联合写链 | `ADP_E2E_20260714_091536_BPI_JOINT` | 规则发布与应用、唯一候选、影子批次、2 条证据、状态事件和审计全部 PASS |
@@ -118,6 +118,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 | 拓扑/规则产品化链 | `ADP_E2E_20260715_004849_BPI_PRODUCT_TARGET` | 真实页面拓扑创建/校验、创建人发布拒绝、独立管理员发布、规则草稿、PostgreSQL 审计/幂等及服务重启后读取全部 PASS |
 | 点位目录准入硬门禁 | `ADP_E2E_20260715_POINTCAT_02` | 真实页面导入和幂等重放 PASS；拓扑被四项硬错误阻断且重启后仍可读；试点设备状态保持 BLOCKED |
 | JetLinks MQTT、点位目录与序列证据 | `ADP_BPI_MQTT_20260720_0918_*` / `sha256:7ad962...94ab` | 两次独立 MQTT QoS1 会话 6/6 PUBACK；JetLinks 双表、Kafka `37 -> 43`、来源证据 consumer lag=0/DLQ=0、MES current 和 `/#/points` PASS；验收时 `QUALIFIED/DEVICE`，1 点/0 READY 仅受校准阻断，证据 TTL 后重新失败关闭 |
+| MQTT 与 WOM START/END 联合链 | `BPI_LIVE_20260720_123058` | 真实 WOM start/stop、三条 SENT context、测试校准四眼审批、START/END 规则、MQTT 5+5 PUBACK、两条 CONFIRMED candidate、同一 CLOSED_RAW batch、UNIT_MISMATCH 页面处置和受控恢复全部 PASS |
 | 规则版本比较与审批 | `ADP_E2E_20260718_023214_BPI_LIFECYCLE` | Flyway V14；真实页面比较/模拟/提交，同 actor 422，独立管理员批准/驳回，PostgreSQL 审计/幂等和清理 PASS |
 | 规则退役与延迟候选 | `ADP_E2E_20260718_065300_BPI_RETIRE_V15B` | Flyway V15；typed RETIRE、`APPLIED + INACTIVE`、savepoint、回滚草稿、退役后延迟候选恰好一次落库和真实候选页 PASS |
 | 点位校准稳定分页 | `ADP_E2E_CAL_PAGE_20260719_164813` | Flyway V18；真实 API 2+2 条同快照、HMAC 游标篡改/跨 scope `422`、页面增量加载/搜索保持和 PostgreSQL 只读直查 PASS |
@@ -129,7 +130,7 @@ BPI Phase 1 只有在选定产线连续运行 7-14 天，并通过边界人工�
 
 访问 BPI 前需要先在同一浏览器完成 ADP 登录，BPI 不保存或复制旧平台密码。适配器接受真实旧平台不透明会话票据，也保留严格 issuer/audience 校验的 JWT 路径；角色和租户/工厂/产线范围均由服务端映射，未配置映射时默认拒绝。
 
-详细证据和结论边界见 [MQTT 接入联合验收](docs/testing/bpi-mqtt-ingress-joint-acceptance.md)、[来源序列 V22 验收](docs/testing/bpi-source-sequence-readiness-acceptance.md)、[旧 MES 原生菜单验收](docs/testing/bpi-shell-menu-gate-acceptance.md)、[运行开关治理验收](docs/testing/bpi-feature-flag-governance-acceptance.md)、[影子运行验收](docs/testing/bpi-shadow-run-acceptance.md)、[规则运行时就绪回执验收](docs/testing/bpi-rule-runtime-readiness-acceptance.md)、[规则版本比较与审批验收](docs/testing/bpi-rule-version-lifecycle-acceptance.md)、[规则退役与延迟候选验收](docs/testing/bpi-rule-retirement-acceptance.md)、[点位校准分页验收](docs/testing/bpi-point-calibration-pagination-acceptance.md)、[点位目录自动同步验收](docs/testing/bpi-point-catalog-kafka-sync-acceptance.md)、[BPI 目标环境部署验收](docs/testing/bpi-test-environment-deployment-readiness.md)、[浏览器/Kafka/Flink/PostgreSQL 联合验收](docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md)、[真实 WOM production context 验收](docs/testing/bpi-mes-production-context-runtime-acceptance.md)和 [IoT 仓库 MQTT 接入验收](https://github.com/MapleTcT/iot/tree/main/docs/testing)。BPI 产品总目标仍为 `PARTIAL`，因为校准、物理设备来源序列、同 marker END 边界、连续 7-14 天现场影子运行、真实负载整体回切和生产写回尚未完成。
+详细证据和结论边界见 [MQTT 与 WOM START/END 联合验收](docs/testing/bpi-live-mqtt-wom-start-end-acceptance.md)、[MQTT 接入联合验收](docs/testing/bpi-mqtt-ingress-joint-acceptance.md)、[来源序列 V22 验收](docs/testing/bpi-source-sequence-readiness-acceptance.md)、[旧 MES 原生菜单验收](docs/testing/bpi-shell-menu-gate-acceptance.md)、[运行开关治理验收](docs/testing/bpi-feature-flag-governance-acceptance.md)、[影子运行验收](docs/testing/bpi-shadow-run-acceptance.md)、[规则运行时就绪回执验收](docs/testing/bpi-rule-runtime-readiness-acceptance.md)、[规则版本比较与审批验收](docs/testing/bpi-rule-version-lifecycle-acceptance.md)、[规则退役与延迟候选验收](docs/testing/bpi-rule-retirement-acceptance.md)、[点位校准分页验收](docs/testing/bpi-point-calibration-pagination-acceptance.md)、[点位目录自动同步验收](docs/testing/bpi-point-catalog-kafka-sync-acceptance.md)、[BPI 目标环境部署验收](docs/testing/bpi-test-environment-deployment-readiness.md)、[浏览器/Kafka/Flink/PostgreSQL 联合验收](docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md)、[真实 WOM production context 验收](docs/testing/bpi-mes-production-context-runtime-acceptance.md)和 [IoT 仓库 MQTT 接入验收](https://github.com/MapleTcT/iot/tree/main/docs/testing)。BPI 产品总目标仍为 `PARTIAL`，因为正式校准、物理设备来源序列、连续 7-14 天现场影子运行、真实负载整体回切和生产写回尚未完成。
 
 ## 第一次接手
 
@@ -288,7 +289,8 @@ Java 服务和 Web 默认分别只监听 `127.0.0.1:19091`、`127.0.0.1:18090`�
 | 目标环境规则版本、审批与退役 | [版本生命周期](metadata/bpi-rule-version-lifecycle-acceptance.json)、[退役与延迟候选](metadata/bpi-rule-retirement-acceptance.json) | Flyway V14/V15、真实页面、审批职责分离、typed inactive、savepoint、回滚草稿和延迟候选落库通过；不含现场 READY 和生产写回 |
 | IoT MQTT、exporter、目录与序列证据 | [MQTT 联合验收](metadata/bpi-mqtt-ingress-joint-acceptance.json) | 受控 MQTT 3.1.1/QoS1 双会话、JetLinks 双表、Kafka/Flink、MES current/DQ PostgreSQL 和真实页面已闭合；不含物理现场设备、校准批准或 candidate/batch |
 | MES production context 工程链 | [真实运行验收](docs/testing/bpi-mes-production-context-runtime-acceptance.md) | 目标机真实 WOM 页面、outbox、Kafka/Flink、候选确认、影子批次和收尾恢复通过 |
-| 现场真实链 | [项目总目标验收总账](docs/project-goal-acceptance.md) | 真实网关/协议设备点位的 IoT/MES 同 marker 候选/批次和 7-14 天影子运行未完成，BPI 总目标保持 `PARTIAL` |
+| MQTT/WOM START/END 联合链 | [机器证据](metadata/bpi-live-mqtt-wom-start-end-acceptance.json) | 同一真实 WOM 指令已闭合受控 MQTT、JetLinks、Kafka/Flink、两条候选和 CLOSED_RAW 影子批次；来源和校准仍为测试专用 |
+| 现场真实链 | [项目总目标验收总账](docs/project-goal-acceptance.md) | 物理设备、正式证书和连续 7-14 天现场影子运行未完成，BPI 总目标保持 `PARTIAL` |
 
 证据等级从低到高为：静态/单元测试、模拟浏览器、真实 PostgreSQL、本地 Kafka + PostgreSQL、本地 Flink + Kafka、目标集群全链路、现场影子运行。每一级只证明自己实际执行的边界，不能用两份分离测试冒充一条没有跑过的联合链路。
 
@@ -358,7 +360,7 @@ scripts/                       构建、恢复、审计和门禁脚本
 - 保持 Flyway V22、影子运行验收、点位目录与来源序列证据、拓扑/规则产品化、审批、退役、typed inactive、savepoint、延迟候选落库、真实 ADP 会话和 PostgreSQL marker 清理为每次发布回归基线。
 - 单 broker 故障和 service/adapter/Flink 组件回退已完成；下一步在生产等价维护窗口做带真实业务负载的跨组件整体回切与流量恢复。
 - 试点产品/设备、`instantFlow` metadata 和单位已注册激活；受控 MQTT 已证明双会话序列和重连 epoch 语义。下一步由现场计量人员提交与目录 `calibrationVersion` 精确匹配的真实证据，并用物理设备重复同一验收，禁止手工伪造 READY 快照。
-- 把 `MapleTcT/iot` exporter 与 WOM context 配到同一试点 scope，用物理设备替换受控 MQTT marker，并用同一生产指令闭合 START/END candidate/batch 后连续运行 7-14 天影子批次。
+- 保持已闭合的同一 WOM 指令 START/END candidate/batch 为发布回归，用物理设备和正式校准替换受控 MQTT/测试校准后重复整条链，并连续运行 7-14 天影子批次。
 - 使用已经通过软件闭环的影子验收工作台，在选定产线真实连续运行 7-14 天，采集人工边界认同率、累计量偏差、关键数据质量事件和停机/重连恢复证据。
 - QCS/WMS 幂等写回、异常补偿、谱系、完工入库闭环和后续训练数据产品。
 - 既有 MES 生产、质量、仓储主链剩余页面/API/落库阻断项。
