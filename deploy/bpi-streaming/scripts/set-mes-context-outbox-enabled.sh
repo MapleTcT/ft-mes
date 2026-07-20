@@ -25,13 +25,28 @@ if [ "$desired" = true ]; then
 SELECT
   (SELECT count(*) FROM public.wom_bpi_production_context_bindings WHERE enabled IS TRUE),
   (SELECT count(*) FROM public.wom_bpi_task_state_mappings WHERE enabled IS TRUE),
+  (SELECT count(*)
+     FROM public.wom_bpi_task_state_mappings
+    WHERE enabled IS TRUE
+      AND active IS TRUE
+      AND lower(btrim(wom_state_code)) = 'wom_runstate/runing'),
+  (SELECT count(*)
+     FROM public.wom_bpi_task_state_mappings
+    WHERE enabled IS TRUE
+      AND active IS FALSE
+      AND lower(btrim(wom_state_code)) = 'wom_runstate/finished'),
   (SELECT count(*) FROM public.wom_bpi_production_context_outbox WHERE publication_state = 'READY');
 SQL
   )
   bindings=$(printf '%s\n' "$readiness" | cut -d'|' -f1)
   states=$(printf '%s\n' "$readiness" | cut -d'|' -f2)
-  if [ "${bindings:-0}" -lt 1 ] || [ "${states:-0}" -lt 1 ]; then
-    echo "cannot enable: at least one explicit scope binding and state mapping are required" >&2
+  running_state=$(printf '%s\n' "$readiness" | cut -d'|' -f3)
+  finished_state=$(printf '%s\n' "$readiness" | cut -d'|' -f4)
+  if [ "${bindings:-0}" -lt 1 ] \
+    || [ "${states:-0}" -lt 2 ] \
+    || [ "${running_state:-0}" -ne 1 ] \
+    || [ "${finished_state:-0}" -ne 1 ]; then
+    echo "cannot enable: explicit enabled runing=active and finished=inactive WOM state mappings are required" >&2
     exit 1
   fi
 fi

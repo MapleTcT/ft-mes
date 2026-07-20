@@ -232,7 +232,7 @@ async function confirmCandidate(page, evidence) {
   evidence.candidateId = await row.getAttribute("data-candidate-id");
   await row.click();
   if (expectedBoundaryType === "END") {
-    await page.locator("#detail-drawer").getByText("END", { exact: true }).waitFor({ timeout: timeoutMs });
+    await page.locator("#detail-drawer").getByText("END 候选", { exact: true }).waitFor({ timeout: timeoutMs });
   }
   await page.locator("#open-confirm").click();
   await page.locator("#confirm-reason").fill(
@@ -266,7 +266,7 @@ async function readCandidate(page, evidence) {
   if (expectedBoundaryType === "START") {
     await drawer.getByText(orderId, { exact: true }).waitFor({ timeout: timeoutMs });
   } else {
-    await drawer.getByText("END", { exact: true }).waitFor({ timeout: timeoutMs });
+    await drawer.getByText("END 候选", { exact: true }).waitFor({ timeout: timeoutMs });
   }
   await page.waitForFunction(() => {
     const current = document.querySelector("#detail-drawer");

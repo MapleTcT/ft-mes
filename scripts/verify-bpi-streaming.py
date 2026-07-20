@@ -21,6 +21,7 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRoutingControlCodec.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java",
+    "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/UnitSymbolNormalizer.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogKafkaDecodeFunction.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/PointCatalogRuntimeValidator.java",
     "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/RuleRuntimeReadinessProjector.java",
@@ -51,6 +52,7 @@ REQUIRED_FILES = [
     "streaming/bpi-stream-engine/src/test/java/com/mapletct/ftmes/bpi/stream/BpiDataQualityFlinkReplayTest.java",
     "deploy/bpi-streaming/scripts/run-rule-application-flink-acceptance.sh",
     "deploy/bpi-streaming/scripts/run-data-quality-flink-replay.sh",
+    "deploy/bpi-streaming/scripts/set-mes-context-outbox-enabled.sh",
     "deploy/docker/scripts/adp-bpi-flink-data-quality-browser-acceptance.js",
     "docs/testing/bpi-flink-operator-acceptance.md",
     "docs/testing/bpi-rule-timing-acceptance.md",
@@ -149,9 +151,29 @@ def main() -> int:
             failures.append(f"BoundaryRulePublicationMapper is missing contract marker {marker!r}")
 
     router_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundarySignalRouter.java").read_text(encoding="utf-8")
-    for marker in ("UNIT_MISMATCH", "CONTEXT_NOT_EFFECTIVE", "getBatchId", "getSampleTimeMs"):
+    for marker in (
+        "UNIT_MISMATCH",
+        "CONTEXT_NOT_EFFECTIVE",
+        "getBatchId",
+        "getSampleTimeMs",
+        "UnitSymbolNormalizer.equivalent",
+    ):
         if marker not in router_source:
             failures.append(f"BoundarySignalRouter is missing routing marker {marker!r}")
+
+    context_enable_script = (
+        ROOT / "deploy/bpi-streaming/scripts/set-mes-context-outbox-enabled.sh"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "wom_runstate/runing",
+        "wom_runstate/finished",
+        "running_state",
+        "finished_state",
+    ):
+        if marker not in context_enable_script:
+            failures.append(
+                f"MES context enable gate is missing required state marker {marker!r}"
+            )
 
     timeline_source = (STREAMING / "bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/ProductionContextTimeline.java").read_text(encoding="utf-8")
     for marker in ("getContextRevision", "getEffectiveFromMs", "getEffectiveToMs", "getActive"):
