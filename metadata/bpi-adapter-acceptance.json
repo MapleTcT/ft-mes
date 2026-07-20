@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T05:10:26+08:00",
-  "repoCommit": "df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4",
+  "generatedAt": "2026-07-20T21:44:29Z",
+  "repoCommit": "1962f599b3ea90b1863548f45998f6e0fa89cc1d",
   "workingTree": "clean-after-implementation-commit",
   "scope": "Java 8 MES authentication adapter unit and proxy contract acceptance",
   "runtime": {
@@ -9,8 +9,8 @@
     "upstream": "Java 17 BPI service"
   },
   "summary": {
-    "tests": 29,
-    "pass": 29,
+    "tests": 31,
+    "pass": 31,
     "fail": 0,
     "errors": 0,
     "skipped": 0,
@@ -41,12 +41,12 @@
     {
       "id": "phase1-route-allowlist",
       "status": "PASS",
-      "evidence": "Only approved BPI reads and commands were allowed, including feature-flag list/change and shadow-run create/start/review/complete/approve/reject/cancel; delete, export, arbitrary subpaths, method changes and path traversal were denied."
+      "evidence": "Only approved BPI reads and commands were allowed, including exact batch force-close GET/POST, feature-flag list/change and shadow-run create/start/review/complete/approve/reject/cancel; delete, export, arbitrary nested paths, method changes and path traversal were denied."
     },
     {
       "id": "fixed-upstream-proxy",
       "status": "PASS",
-      "evidence": "Candidate/batch, feature-flag and shadow-run proxy tests replaced the legacy bearer, kept the fixed BPI upstream, forwarded query/body plus Idempotency-Key and If-Match, and ignored browser-owned scope headers."
+      "evidence": "Candidate/batch, force-close, feature-flag and shadow-run proxy tests replaced the legacy bearer, kept the fixed BPI upstream, forwarded query/body plus Idempotency-Key and If-Match, preserved force-close HTTP 202, and ignored browser-owned scope headers."
     },
     {
       "id": "old-mes-shell-menu-gate",
@@ -56,7 +56,7 @@
   ],
   "commands": [
     "make compose-config",
-    "make bpi-adapter-test",
+    "docker run --rm -v <exact-source>:/workspace -v /home/v6/.m2:/root/.m2 -w /workspace/backend/source-modules/batch-intelligence-adapter m.daocloud.io/docker.io/library/maven:3.9.9-eclipse-temurin-8 mvn -q test",
     "make bpi-ui-build",
     "java -jar backend/source-modules/batch-intelligence-adapter/target/batch-intelligence-adapter-0.1.0-SNAPSHOT.jar",
     "curl http://127.0.0.1:19082/actuator/health"
@@ -69,7 +69,7 @@
   "limitations": [
     "No live Keycloak JWKS request or real MES login token was used in this unit acceptance.",
     "The shell menu bridge is unit-tested here; its browser-to-adapter-to-Java17-to-PostgreSQL target acceptance is recorded separately.",
-    "Docker Compose rendered successfully; the adapter container image and healthcheck were not runtime-tested.",
+    "The force-close adapter image and healthcheck were target-tested separately in metadata/bpi-force-close-target-acceptance.json; the two generic smoke checks in this file remain non-authenticated local checks.",
     "The explicit admin/PLANT-01/LINE-S07-01 mapping is a test-environment default and must be replaced by reviewed production scope configuration.",
     "The internal token still uses the Phase 1 shared HS256 key; asymmetric signing and rotation remain pending."
   ]

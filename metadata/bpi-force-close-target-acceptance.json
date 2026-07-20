@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-20T21:35:04.217Z",
+  "status": "PASS_TARGET_CONTROLLED_BROWSER_API_POSTGRES_CLEANED",
+  "database": "PostgreSQL",
+  "target": {
+    "host": "10.11.100.17",
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "databaseVersion": "PostgreSQL 15.18",
+    "databaseName": "ft_mes_bpi",
+    "schema": "bpi",
+    "flywayVersion": 24
+  },
+  "source": {
+    "serviceImplementationCommit": "bcf40e2f91a18163fb8523598d06a980414d9ce6",
+    "adapterImplementationCommit": "1962f599b3ea90b1863548f45998f6e0fa89cc1d",
+    "branch": "codex/bpi-force-close"
+  },
+  "deployment": {
+    "strategy": "INTEGRATED_EXPAND_ONLY_V24_THEN_ADAPTER_ONLY_ROUTE_FIX",
+    "databaseMigration": "V23 -> V24",
+    "integratedUpgradeReport": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v24-bcf40e2f/bpi-integrated-upgrade-20260720T205209Z.json",
+    "adapterUpgradeReport": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-adapter-force-close-1962f599-20260720T212943Z/adapter-force-close-route-upgrade.json",
+    "adapterRollbackImage": "ft-mes-bpi-adapter:rollback-v24-pre-force-close-route-20260720T212943Z",
+    "otherBpiContainersRecreatedForRouteFix": false
+  },
+  "runtime": {
+    "java17ReactorTests": {
+      "tests": 115,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 43,
+      "note": "Environment-gated PostgreSQL suites were skipped in the clean container; this force-close scenario has separate real target PostgreSQL evidence below."
+    },
+    "service": {
+      "container": "adp-mes-newbase-bpi-service-1",
+      "image": "ft-mes-bpi-service:20260720t205209z-bcf40e2f91a1",
+      "revision": "bcf40e2f91a18163fb8523598d06a980414d9ce6",
+      "health": "healthy"
+    },
+    "adapter": {
+      "container": "adp-mes-newbase-bpi-adapter-1",
+      "image": "ft-mes-bpi-adapter:20260720T212943Z-1962f599b3ea",
+      "revision": "1962f599b3ea90b1863548f45998f6e0fa89cc1d",
+      "health": "healthy",
+      "java8Tests": {
+        "tests": 31,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "wmsAdapter": {
+      "container": "adp-mes-newbase-bpi-wms-adapter-1",
+      "image": "ft-mes-bpi-wms-adapter:20260720t205209z-bcf40e2f91a1",
+      "revision": "bcf40e2f91a18163fb8523598d06a980414d9ce6",
+      "health": "healthy"
+    }
+  },
+  "scenario": {
+    "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+    "route": "/bpi/#/batches",
+    "batchId": "b8d8a921-43f6-4a15-967a-4471bf14d16b",
+    "taskId": "48002dad-614b-4b3f-9740-a1c9646427f5",
+    "boundaryTime": "2026-07-20T21:31:53Z",
+    "requester": "legacy-ticket:admin",
+    "approver": "ADP_E2E_BPI_ADMIN_20260721053253",
+    "intent": "An ACTIVE shadow batch with missing automatic END evidence is force-closed only after an operator request and a different administrator approval."
+  },
+  "browser": {
+    "loginStatus": 200,
+    "unauthenticatedRead": {
+      "method": "GET",
+      "endpoint": "/bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "status": 401
+    },
+    "request": {
+      "method": "POST",
+      "endpoint": "/bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "status": 202,
+      "ifMatch": "1",
+      "idempotencyKey": "127eec8f-b61e-4371-8e7c-5bb827c87bc1",
+      "resultState": "PENDING_APPROVAL",
+      "taskRevision": 1,
+      "batchRevision": 2
+    },
+    "sameActorRejection": {
+      "method": "POST",
+      "endpoint": "/bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "status": 403,
+      "ifMatch": "2",
+      "detail": "Force-close approval must be completed by a different administrator.",
+      "expectedSecurityEvidence": true
+    },
+    "independentApproval": {
+      "method": "POST",
+      "endpoint": "/bpi/v1/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "status": 202,
+      "ifMatch": "2",
+      "idempotencyKey": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE-approve",
+      "resultState": "COMPLETED",
+      "taskRevision": 2,
+      "batchRevision": 3
+    },
+    "final": {
+      "batchState": "CLOSED_RAW",
+      "batchRevision": 3,
+      "taskState": "COMPLETED",
+      "taskRevision": 2,
+      "endTime": "2026-07-20T21:31:53Z",
+      "qualityGate": "NOT_APPLICABLE",
+      "wmsStatus": "NOT_REQUESTED",
+      "requestActionVisible": false,
+      "approvalActionVisible": false,
+      "timelineActions": [
+        "BATCH_FORCE_CLOSE_REQUESTED",
+        "BATCH_FORCE_CLOSED"
+      ]
+    },
+    "errors": {
+      "expectedConsoleErrors": 1,
+      "expectedBpiHttpErrors": 1,
+      "expectedStatus": 403,
+      "unexpectedConsoleErrors": 0,
+      "pageErrors": 0,
+      "requestFailures": 0,
+      "unexpectedBpiHttpErrors": 0
+    },
+    "geometry": {
+      "viewportWidth": 1600,
+      "documentWidth": 1600,
+      "viewportHeight": 1000,
+      "documentHeight": 1000,
+      "drawerWidth": 680
+    },
+    "screenshots": [
+      {
+        "state": "PENDING_APPROVAL",
+        "path": "metadata/bpi-force-close-pending-target.png",
+        "sha256": "b9e3c863719814441393d9840a4ec9338ba1a246098413f2bc5dfd6d5a922388"
+      },
+      {
+        "state": "COMPLETED",
+        "path": "metadata/bpi-force-close-completed-target.png",
+        "sha256": "8e9fa5517bd216092299b65a466e785a8d2e8acadcaf842ed1146152e23feeb1"
+      }
+    ]
+  },
+  "backend": {
+    "entry": "BpiProxyController -> BpiRoutePolicy -> BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository",
+    "adapterContract": {
+      "exactGetAllowed": "/batches/{uuid}/force-close",
+      "exactPostAllowed": "/batches/{uuid}/force-close",
+      "nestedRoutesRejected": [
+        "/batches/{uuid}/force-close/export",
+        "/batches/{uuid}/force-close/approve"
+      ],
+      "requestHeadersForwarded": [
+        "Idempotency-Key",
+        "If-Match"
+      ],
+      "acceptedStatusPreserved": 202
+    }
+  },
+  "postgres": {
+    "pendingVerificationScript": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql",
+    "finalVerificationScript": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql",
+    "cleanupScript": "deploy/docker/scripts/bpi-force-close-acceptance-cleanup.sql",
+    "tables": [
+      "bpi.bpi_batch_instances",
+      "bpi.bpi_batch_force_close_tasks",
+      "bpi.bpi_batch_state_events",
+      "bpi.bpi_audit_events",
+      "bpi.bpi_api_idempotency"
+    ],
+    "pending": {
+      "batchState": "ACTIVE",
+      "batchRevision": 2,
+      "batchEndTime": null,
+      "taskState": "PENDING_APPROVAL",
+      "taskRevision": 1,
+      "stateEvents": 1,
+      "auditEvents": 1,
+      "idempotencyRows": 1,
+      "qualityGateRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0
+    },
+    "final": {
+      "batchState": "CLOSED_RAW",
+      "batchRevision": 3,
+      "batchEndTime": "2026-07-21T05:31:53+08:00",
+      "taskState": "COMPLETED",
+      "taskRevision": 2,
+      "requesterDiffersFromApprover": true,
+      "stateEventRevisions": [
+        2,
+        3
+      ],
+      "auditRevisionTransitions": [
+        "1->2",
+        "2->3"
+      ],
+      "idempotencyRows": 2,
+      "qualityGateRows": 0,
+      "wmsLinkRows": 0,
+      "outboxRows": 0
+    },
+    "cleanup": {
+      "residualRows": 0,
+      "temporaryCommandsFlagDeleted": true,
+      "nonMarkerRowsDeleted": 0
+    }
+  },
+  "finalSafetyState": {
+    "BPI_PHASE2_INTEGRATION_ENABLED": false,
+    "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED": false,
+    "BPI_PHASE2_KAFKA_ENABLED": false,
+    "BPI_WMS_OUTBOX_ENABLED": false,
+    "BPI_WMS_ADAPTER_ENABLED": false,
+    "serviceHealth": "healthy",
+    "adapterHealth": "healthy",
+    "wmsAdapterHealth": "healthy"
+  },
+  "evidence": {
+    "remoteRoot": "/home/v6/adp-evidence/ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+    "browserReportSha256": "d7c579ff30d91bcf909dead3eb427420ad4c00226a892083febdd985fdd70d7c",
+    "pendingPostgresSha256": "bc55794c9a89be5dcd3685102230ad4d37b840b7bc7aabcfb5a677f7c8de4f16",
+    "finalPostgresSha256": "e96baa02f51cdddcf1239820625ec9fbc6e5372e5d2a9924e092d4ed18654690",
+    "fixtureSha256": "29d182ffe1a46d54bb29798142e8a77404058dc053683396d02a56a9fdc8a8c3",
+    "cleanupSha256": "86f7462ca487cd787491630ba23cd015e201f03d8b5d156340ebfd94ed672a8f",
+    "adapterUpgradeSha256": "1d5f2f113cbf9a8020cd68c621cd68a214a0cef8b00f34fc2802782b261ad814",
+    "runtimeImagesSha256": "c79efb251b521e1aae51c40bb576b485ef9d21b222e7300745e927fd51738720"
+  },
+  "scopeBoundary": {
+    "closed": "The controlled target path now proves real page request, independent approval, Java 8 adapter routing, Java 17 service state transitions, PostgreSQL persistence, audit/idempotency, layout, and marker cleanup.",
+    "notClosed": "This acceptance used an ACTIVE shadow fixture and a controlled internal BPI_ADMIN token. It does not replace physical END-boundary evidence, a production identity-provider approval session, 7-14 day field operation, external QCS, or external ERP/WMS acceptance. G-021 remains PARTIAL."
+  }
+}

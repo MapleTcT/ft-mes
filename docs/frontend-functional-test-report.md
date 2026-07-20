@@ -772,6 +772,23 @@ Kafka 投递失败和 DLQ，再恢复服务并从真实批次页执行“重新�
 `metadata/bpi-wms-outage-recovery-target.png`；详细报告：
 `docs/testing/bpi-wms-outage-recovery-acceptance.md`。
 
+### BPI 批次受控强制结束（2026-07-21）
+
+本节在当前唯一测试环境 `http://10.11.100.17:18080` 使用真实 ADP 登录、Java 8 adapter、
+Java 17 service 和 `ft_mes_bpi` PostgreSQL 15.18/Flyway V24。首次验收真实发现 adapter 未放行
+force-close 精确路由；修复提交 `1962f599b3ea90b1863548f45998f6e0fa89cc1d` 仅重建 adapter 后复验通过。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 批次人工兜底 | `http://10.11.100.17:18080/bpi/#/batches` | 打开 `ADP_E2E_20260721053253_BPI_FORCE_CLOSE`，提交原因和边界时间申请强制结束 | `GET/POST /bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close` | 登录 200，未认证 GET 401；页面 POST 202，显示 `PENDING_APPROVAL/r1`，批次仍为 `ACTIVE/r2`；待审批截图无溢出 | 创建唯一 task、REQUESTED state event/audit 和 1 条幂等记录；未写质量、WMS 或 outbox | `bpi_batch_instances`、`bpi_batch_force_close_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | PASS_TARGET_CONTROLLED | 首次 adapter 403 已修复并由 JDK 8 全量 `31/31` 回归覆盖 |
+| BPI 强制结束职责分离 | 同上 | 同一 `admin` 尝试批准，再由不同 `BPI_ADMIN` 批准 | 同一 POST；申请人走 adapter，独立管理员走 service 内部认证 | 同人批准得到预期 403；独立批准 202；最终页面为 `CLOSED_RAW/r3`、task `COMPLETED/r2`，申请/批准按钮消失，时间线两条；document/viewport `1600/1600` | `requested_by != decided_by`；批准边界成为 batch end_time；state event r2/r3、audit 1->2/2->3、幂等 2；QCS/WMS/outbox 仍为 0 | 同上 | PASS_SECURITY_AND_PERSISTENCE | 受控 403 对应 1 条预期 console/network 记录；非预期 console/page/request/BPI HTTP error 均为 0 |
+| BPI force-close marker 清理 | 不适用 | 删除 batch/task/event/audit/idempotency 和临时 commands 覆盖后复查 | cleanup SQL | 页面不再包含 marker | `residualRows=0`，没有删除非 marker 数据；五个 Phase 2/WMS 开关均恢复 false | 同上及 `bpi_feature_flags` | PASS_CLEANED | 不把受控影子夹具解释为现场自动边界已投产 |
+
+机器证据：`metadata/bpi-force-close-target-acceptance.json`；截图：
+`metadata/bpi-force-close-pending-target.png`、`metadata/bpi-force-close-completed-target.png`；
+完整请求、PostgreSQL 中间态、最终态、哈希和边界见
+`docs/testing/bpi-force-close-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

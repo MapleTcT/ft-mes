@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T17:32:31+08:00",
-  "repoCommit": "94e2b2288bf52966be58e9dda97039a5455466a8",
+  "generatedAt": "2026-07-21T05:48:15+08:00",
+  "repoCommit": "bcf40e2f91a18163fb8523598d06a980414d9ce6",
   "workingTree": "clean-at-source-commit",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 17,
-    "pass": 17,
+    "browserTests": 18,
+    "pass": 18,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -94,6 +94,29 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-batch-lifecycle.png"
+    },
+    {
+      "id": "desktop-batch-force-close",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "open an ACTIVE shadow batch without an automatic END boundary",
+        "request force-close with mandatory reason and explicit boundary time",
+        "verify the batch remains ACTIVE while the task is PENDING_APPROVAL",
+        "approve through a different BPI administrator",
+        "verify CLOSED_RAW revision 3, COMPLETED revision 2 and an append-only two-event timeline",
+        "verify request and approval commands disappear after completion"
+      ],
+      "apis": [
+        "GET /bpi/v1/batches/{id}/force-close",
+        "POST /bpi/v1/batches/{id}/force-close",
+        "GET /bpi/v1/batches/{id}",
+        "GET /bpi/v1/batches/{id}/timeline"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-force-close.png"
     },
     {
       "id": "mobile-navigation-and-overflow",
@@ -399,7 +422,7 @@
   "persistence": {
     "performed": false,
     "reason": "The browser suite uses the deterministic in-memory simulator and does not claim database persistence.",
-    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json, metadata/bpi-topology-rule-productization-acceptance.json and metadata/bpi-shadow-run-acceptance.json"
+    "separateEvidence": "metadata/bpi-phase1-persistence-acceptance.json, metadata/bpi-rule-management-acceptance.json, metadata/bpi-topology-rule-productization-acceptance.json, metadata/bpi-shadow-run-acceptance.json and metadata/bpi-force-close-target-acceptance.json"
   },
   "limitations": [
     "Browser APIs were served by the deterministic simulator, not the Java 17 BPI service.",

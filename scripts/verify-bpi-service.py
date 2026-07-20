@@ -173,6 +173,10 @@ REQUIRED_FILES = [
     "docs/testing/bpi-wms-outage-recovery-acceptance.md",
     "metadata/bpi-wms-outage-recovery-target-acceptance.json",
     "metadata/bpi-wms-outage-recovery-target.png",
+    "docs/testing/bpi-force-close-acceptance.md",
+    "metadata/bpi-force-close-target-acceptance.json",
+    "metadata/bpi-force-close-pending-target.png",
+    "metadata/bpi-force-close-completed-target.png",
     "metadata/bpi-shadow-run-acceptance.png",
     "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-data-quality-acceptance.json",
@@ -196,6 +200,10 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/bpi-wms-outage-recovery-cleanup.sql",
     "deploy/docker/scripts/bpi-wms-outage-recovery-material-verification.sql",
     "deploy/docker/scripts/bpi-wms-outage-recovery-material-cleanup.sql",
+    "deploy/docker/scripts/adp-bpi-force-close-acceptance.js",
+    "deploy/docker/scripts/bpi-force-close-acceptance-fixture.sql",
+    "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql",
+    "deploy/docker/scripts/bpi-force-close-acceptance-cleanup.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-fixture.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
@@ -1618,6 +1626,134 @@ def main() -> int:
             fail(f"BPI target screenshot is missing: {screenshot.get('path', '')}", failures)
         elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
             fail(f"BPI target screenshot hash does not match: {screenshot.get('path', '')}", failures)
+
+    force_close = json.loads(
+        (ROOT / "metadata/bpi-force-close-target-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    force_target = force_close.get("target", {})
+    force_source = force_close.get("source", {})
+    force_deployment = force_close.get("deployment", {})
+    force_runtime = force_close.get("runtime", {})
+    force_scenario = force_close.get("scenario", {})
+    if (force_close.get("status") != "PASS_TARGET_CONTROLLED_BROWSER_API_POSTGRES_CLEANED"
+            or force_close.get("database") != "PostgreSQL"
+            or force_target.get("host") != "10.11.100.17"
+            or force_target.get("composeProject") != "adp-mes-newbase"
+            or force_target.get("databaseName") != "ft_mes_bpi"
+            or force_target.get("schema") != "bpi"
+            or force_target.get("flywayVersion") != 24
+            or len(force_source.get("serviceImplementationCommit", "")) != 40
+            or len(force_source.get("adapterImplementationCommit", "")) != 40
+            or force_deployment.get("strategy") != (
+                "INTEGRATED_EXPAND_ONLY_V24_THEN_ADAPTER_ONLY_ROUTE_FIX")
+            or force_deployment.get("otherBpiContainersRecreatedForRouteFix") is not False
+            or not force_scenario.get("marker", "").startswith("ADP_E2E_")
+            or not force_scenario.get("batchId")
+            or not force_scenario.get("taskId")
+            or force_scenario.get("requester") == force_scenario.get("approver")):
+        fail("BPI force-close target, source, deployment, or actor evidence is incomplete", failures)
+    adapter_tests = force_runtime.get("adapter", {}).get("java8Tests", {})
+    java17_tests = force_runtime.get("java17ReactorTests", {})
+    if (force_runtime.get("service", {}).get("health") != "healthy"
+            or force_runtime.get("adapter", {}).get("health") != "healthy"
+            or force_runtime.get("wmsAdapter", {}).get("health") != "healthy"
+            or java17_tests.get("tests") != 115
+            or java17_tests.get("failures") != 0
+            or java17_tests.get("errors") != 0
+            or java17_tests.get("skipped") != 43
+            or adapter_tests.get("tests") != 31
+            or any(adapter_tests.get(key) != 0 for key in (
+                "failures", "errors", "skipped"))):
+        fail("BPI force-close runtime or Java 8 adapter test evidence is incomplete", failures)
+    force_browser = force_close.get("browser", {})
+    force_request = force_browser.get("request", {})
+    force_rejection = force_browser.get("sameActorRejection", {})
+    force_approval = force_browser.get("independentApproval", {})
+    force_final = force_browser.get("final", {})
+    force_errors = force_browser.get("errors", {})
+    force_geometry = force_browser.get("geometry", {})
+    if (force_browser.get("loginStatus") != 200
+            or force_browser.get("unauthenticatedRead", {}).get("status") != 401
+            or force_request.get("status") != 202
+            or force_request.get("resultState") != "PENDING_APPROVAL"
+            or force_request.get("taskRevision") != 1
+            or force_request.get("batchRevision") != 2
+            or force_rejection.get("status") != 403
+            or force_rejection.get("expectedSecurityEvidence") is not True
+            or force_approval.get("status") != 202
+            or force_approval.get("resultState") != "COMPLETED"
+            or force_approval.get("taskRevision") != 2
+            or force_approval.get("batchRevision") != 3
+            or force_final.get("batchState") != "CLOSED_RAW"
+            or force_final.get("batchRevision") != 3
+            or force_final.get("taskState") != "COMPLETED"
+            or force_final.get("taskRevision") != 2
+            or force_final.get("qualityGate") != "NOT_APPLICABLE"
+            or force_final.get("wmsStatus") != "NOT_REQUESTED"
+            or force_final.get("timelineActions") != [
+                "BATCH_FORCE_CLOSE_REQUESTED", "BATCH_FORCE_CLOSED"]
+            or force_errors.get("expectedConsoleErrors") != 1
+            or force_errors.get("expectedBpiHttpErrors") != 1
+            or force_errors.get("expectedStatus") != 403
+            or any(force_errors.get(key) != 0 for key in (
+                "unexpectedConsoleErrors", "pageErrors", "requestFailures",
+                "unexpectedBpiHttpErrors"))
+            or force_geometry.get("viewportWidth") != force_geometry.get("documentWidth")
+            or force_geometry.get("drawerWidth") != 680):
+        fail("BPI force-close browser, security, or final-state evidence is incomplete", failures)
+    force_postgres = force_close.get("postgres", {})
+    force_pending = force_postgres.get("pending", {})
+    force_persisted = force_postgres.get("final", {})
+    force_cleanup = force_postgres.get("cleanup", {})
+    if (force_pending.get("batchState") != "ACTIVE"
+            or force_pending.get("batchRevision") != 2
+            or force_pending.get("batchEndTime") is not None
+            or force_pending.get("taskState") != "PENDING_APPROVAL"
+            or force_pending.get("taskRevision") != 1
+            or force_pending.get("idempotencyRows") != 1
+            or any(force_pending.get(key) != 0 for key in (
+                "qualityGateRows", "wmsLinkRows", "outboxRows"))
+            or force_persisted.get("batchState") != "CLOSED_RAW"
+            or force_persisted.get("batchRevision") != 3
+            or force_persisted.get("taskState") != "COMPLETED"
+            or force_persisted.get("taskRevision") != 2
+            or force_persisted.get("requesterDiffersFromApprover") is not True
+            or force_persisted.get("stateEventRevisions") != [2, 3]
+            or force_persisted.get("auditRevisionTransitions") != ["1->2", "2->3"]
+            or force_persisted.get("idempotencyRows") != 2
+            or any(force_persisted.get(key) != 0 for key in (
+                "qualityGateRows", "wmsLinkRows", "outboxRows"))
+            or force_cleanup.get("residualRows") != 0
+            or force_cleanup.get("temporaryCommandsFlagDeleted") is not True
+            or force_cleanup.get("nonMarkerRowsDeleted") != 0):
+        fail("BPI force-close pending, final, or cleanup PostgreSQL evidence is incomplete", failures)
+    force_safety = force_close.get("finalSafetyState", {})
+    if (force_safety.get("BPI_PHASE2_INTEGRATION_ENABLED") is not False
+            or force_safety.get("BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED") is not False
+            or force_safety.get("BPI_PHASE2_KAFKA_ENABLED") is not False
+            or force_safety.get("BPI_WMS_OUTBOX_ENABLED") is not False
+            or force_safety.get("BPI_WMS_ADAPTER_ENABLED") is not False):
+        fail("BPI force-close final integration safety switches are not closed", failures)
+    force_evidence = force_close.get("evidence", {})
+    for key in (
+            "browserReportSha256", "pendingPostgresSha256", "finalPostgresSha256",
+            "fixtureSha256", "cleanupSha256", "adapterUpgradeSha256",
+            "runtimeImagesSha256"):
+        if len(force_evidence.get(key, "")) != 64:
+            fail(f"BPI force-close evidence hash is incomplete: {key}", failures)
+    force_screenshots = force_browser.get("screenshots", [])
+    if len(force_screenshots) != 2:
+        fail("BPI force-close target screenshots are incomplete", failures)
+    for screenshot in force_screenshots:
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(f"BPI force-close screenshot is missing: {screenshot.get('path', '')}", failures)
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
+            fail(f"BPI force-close screenshot hash does not match: {screenshot.get('path', '')}", failures)
+    if "G-021 remains PARTIAL" not in force_close.get("scopeBoundary", {}).get("notClosed", ""):
+        fail("BPI force-close evidence must retain the incomplete G-021 boundary", failures)
 
     outage_recovery = json.loads(
         (ROOT / "metadata/bpi-wms-outage-recovery-target-acceptance.json").read_text(

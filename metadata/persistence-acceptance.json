@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T19:34:01.326Z",
-  "repoCommit": "23e98051fc266c2d9653f4240b7327cb2607009b",
+  "generatedAt": "2026-07-20T21:35:04.217Z",
+  "repoCommit": "1962f599b3ea90b1863548f45998f6e0fa89cc1d",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -144,8 +144,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 192,
-    "pass": 189,
+    "testedFeatures": 196,
+    "pass": 193,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4198,9 +4198,101 @@
       "issues": [
         "This closes the controlled internal material-wms outage path only; external ERP/WMS lookup protocol, response loss, rejection, reversal and compensation remain untested."
       ]
+    },
+    {
+      "module": "BPI批次受控强制结束",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "操作员提交强制结束申请，并在批准前直查待审批中间态",
+      "api": "POST /bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BpiRoutePolicy -> BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_force_close_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+      "verificationSql": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql; verify batch ACTIVE/r2/end_time NULL, task PENDING_APPROVAL/r1, one REQUESTED event/audit, one idempotency row and zero QCS/WMS/outbox side effects",
+      "status": "PASS",
+      "evidence": "metadata/bpi-force-close-target-acceptance.json; real page POST 202, pending PostgreSQL snapshot SHA-256 bc55794c9a89be5dcd3685102230ad4d37b840b7bc7aabcfb5a677f7c8de4f16 and pending screenshot SHA-256 b9e3c863719814441393d9840a4ec9338ba1a246098413f2bc5dfd6d5a922388",
+      "issues": []
+    },
+    {
+      "module": "BPI强制结束职责分离",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "同一申请人尝试批准强制结束任务并验证失败关闭",
+      "api": "POST /bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BatchController.forceClose -> BatchCommandService actor-separation guard",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_force_close_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+      "verificationSql": "Compare the same pending verification snapshot after HTTP 403; no CLOSED event, approval audit or business side effect may exist",
+      "status": "PASS",
+      "evidence": "metadata/bpi-force-close-target-acceptance.json browser.sameActorRejection; HTTP 403 detail requires another administrator and is recorded as expected security evidence, not an unexpected browser failure",
+      "issues": []
+    },
+    {
+      "module": "BPI批次受控强制结束",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "不同BPI管理员批准待审批任务并按批准边界结束批次",
+      "api": "POST /bpi/v1/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_force_close_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency"
+      ],
+      "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+      "verificationSql": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql; verify batch CLOSED_RAW/r3/end_time=approved boundary, task COMPLETED/r2, requested_by<>decided_by, event revisions 2/3, audit revisions 1->2/2->3, idempotency=2 and QCS/WMS/outbox=0",
+      "status": "PASS",
+      "evidence": "metadata/bpi-force-close-target-acceptance.json; independent approval HTTP 202, final PostgreSQL SHA-256 e96baa02f51cdddcf1239820625ec9fbc6e5372e5d2a9924e092d4ed18654690 and completed screenshot SHA-256 8e9fa5517bd216092299b65a466e785a8d2e8acadcaf842ed1146152e23feeb1",
+      "issues": [
+        "Approval used a controlled internal BPI_ADMIN token; a production identity-provider second-user session remains a rollout gate."
+      ]
+    },
+    {
+      "module": "BPI强制结束marker清理",
+      "route": "不适用",
+      "operation": "删除强制结束夹具、任务、事件、审计、幂等和临时commands覆盖并复查运行保护",
+      "api": "deploy/docker/scripts/bpi-force-close-acceptance-cleanup.sql",
+      "method": "SQL",
+      "requiresPersistence": true,
+      "backendEntry": "Target PostgreSQL controlled cleanup transaction",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_force_close_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_feature_flags"
+      ],
+      "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+      "verificationSql": "Run bpi-force-close-acceptance-cleanup.sql and require residualRows=0; verify all five Phase 2/WMS environment switches remain false",
+      "status": "PASS",
+      "evidence": "metadata/bpi-force-close-target-acceptance.json; cleanup output SHA-256 86f7462ca487cd787491630ba23cd015e201f03d8b5d156340ebfd94ed672a8f, residualRows=0 and three BPI containers healthy",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721053253_BPI_FORCE_CLOSE",
+      "artifact": "metadata/bpi-force-close-target-acceptance.json",
+      "summary": "Real target page, Java 8 adapter, Java 17 service and PostgreSQL V24 proved request, pending-state persistence, same-actor 403, independent approval, exact boundary closure, audit/idempotency, zero QCS/WMS side effects, responsive drawer rendering and zero marker residue while all integration switches remained closed."
+    },
     {
       "marker": "ADP_E2E_20260720193226_WMS_OUTAGE",
       "artifact": "metadata/bpi-wms-outage-recovery-target-acceptance.json",

@@ -3303,6 +3303,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-force-close-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -3742,6 +3748,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/audit-postgres-mappings.py",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-force-close-acceptance-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-force-close-acceptance-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-force-close-acceptance-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5151,6 +5175,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-force-close-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-kafka-cluster-replay-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5542,6 +5572,24 @@
     {
       "ignored": false,
       "path": "metadata/bpi-flink-operator-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-force-close-completed-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-force-close-pending-target.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-force-close-target-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -7161,6 +7209,12 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/ForceCloseTaskView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/GoldenBoundary.java",
       "state": "tracked",
       "tracked": true
@@ -7767,6 +7821,18 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ForceCloseApprovalMode.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/ForceCloseCommand.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/interfaces/rest/InternalCandidateController.java",
       "state": "tracked",
       "tracked": true
@@ -7996,6 +8062,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/resources/db/migration/V23__bpi_quality_release_wms_inbound.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/resources/db/migration/V24__bpi_batch_force_close_workflow.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -9146,16 +9218,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 590
+      "tracked": 594
     },
     "docs": {
-      "tracked": 111
+      "tracked": 112
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 172
+      "tracked": 175
     },
     "package.json": {
       "tracked": 1
@@ -9167,7 +9239,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 287
+      "tracked": 291
     },
     "simulation": {
       "tracked": 4
@@ -9179,8 +9251,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1520,
-    "tracked": 1520,
+    "totalFiles": 1532,
+    "tracked": 1532,
     "untracked": 0
   },
   "untrackedByDirectory": []

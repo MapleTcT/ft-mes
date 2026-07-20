@@ -779,6 +779,23 @@ route 为 `_DENY_ALL_`、待发 WMS outbox 和 consumer lag 均为 0，再临时
 SQL 和边界见 `docs/testing/bpi-wms-outage-recovery-acceptance.md`。该项只关闭目标内部
 `material-wms` 宕机恢复，不代表外部 ERP/WMS 查单、响应丢失、冲销或补偿已完成。
 
+### BPI 批次受控强制结束（目标 PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260721053253_BPI_FORCE_CLOSE`，从真实 `/bpi/#/batches` 页面提交
+申请，在 PostgreSQL 中间态取证后再由不同管理员批准。Flyway V24、Java 8 adapter 精确路由和
+Java 17 service 均为目标运行组件；取证后 marker 与临时开关覆盖已定向清理。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 申请强制结束 | `/bpi/#/batches` 批次详情 | `POST /bpi-api/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close` | `BpiProxyController -> BpiRoutePolicy -> BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository` | `bpi_batch_instances`、`bpi_batch_force_close_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency` | `deploy/docker/scripts/bpi-force-close-acceptance-verification.sql`，按 batch id 查询 batch、task、state event、audit、幂等及 QCS/WMS/outbox 副作用 | HTTP 202；batch `ACTIVE/r2/end_time NULL`；task `PENDING_APPROVAL/r1`；REQUESTED event/audit 各 1，幂等 1；QCS/WMS/outbox 均 0 | PASS_TARGET_CONTROLLED |
+| 同一申请人批准失败关闭 | 同上 | 同一 POST，`approvalMode=APPROVE`、`If-Match: 2` | actor separation guard in `BatchCommandService` | 上述五表 | 同一 verification SQL 对比申请后快照 | HTTP 403，detail 明确要求不同管理员；没有形成 CLOSED event、第二条 audit 或业务副作用 | PASS_FAIL_CLOSED |
+| 不同管理员批准 | 同一批次详情；批准由独立 `BPI_ADMIN` 执行 | `POST /bpi/v1/batches/b8d8a921-43f6-4a15-967a-4471bf14d16b/force-close` | `BatchController.forceClose -> BatchCommandService.forceClose -> BpiPostgresRepository` | 同上 | 同一 verification SQL，核对 batch/task revision、actor、boundary、event/audit 和副作用 | HTTP 202；batch `CLOSED_RAW/r3`，`end_time=2026-07-21 05:31:53+08`；task `COMPLETED/r2`，申请人与审批人不同；event r2/r3、audit 1->2/2->3、幂等 2；QCS/WMS/outbox 仍为 0 | PASS_TARGET_CONTROLLED |
+| marker 定向清理与运行保护 | 不适用 | `bpi-force-close-acceptance-cleanup.sql` | PostgreSQL 单事务定向删除 | 上述表及临时 `bpi_feature_flags` | 清理输出和 marker 关联行复查 | `residualRows=0`、临时 commands 覆盖删除，非 marker 删除 0；五个 Phase 2/WMS 开关均为 false，三个 BPI 容器 healthy | PASS_CLEANED |
+
+机器证据：`metadata/bpi-force-close-target-acceptance.json`；完整页面/API/SQL/截图证据见
+`docs/testing/bpi-force-close-acceptance.md`。本项只证明异常人工兜底的受控合同，不替代物理 END
+边界、正式身份系统中的第二管理员会话或 7-14 天现场运行。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

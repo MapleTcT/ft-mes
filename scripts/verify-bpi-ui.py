@@ -66,8 +66,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must declare its deterministic simulator scope")
         summary = acceptance.get("summary", {})
         browser_tests = summary.get("browserTests", 0)
-        if browser_tests < 17 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
-            failures.append("BPI UI acceptance must record at least seventeen browser tests with every test passing")
+        if browser_tests < 18 or summary.get("pass") != browser_tests or summary.get("fail") != 0:
+            failures.append("BPI UI acceptance must record at least eighteen browser tests with every test passing")
         item_ids = {item.get("id") for item in acceptance.get("items", [])}
         if "desktop-topology-rule-productization" not in item_ids:
             failures.append("BPI UI acceptance must cover topology and rule productization")
@@ -85,6 +85,8 @@ def main() -> int:
             failures.append("BPI UI acceptance must cover scoped feature-flag governance")
         if "desktop-batch-quality-inventory" not in item_ids:
             failures.append("BPI UI acceptance must cover batch quality and WMS business states")
+        if "desktop-batch-force-close" not in item_ids:
+            failures.append("BPI UI acceptance must cover governed batch force-close")
         if "mobile-batch-release-partial-failure" not in item_ids:
             failures.append("BPI UI acceptance must cover local release failure and mobile recovery")
         rule_item = next(

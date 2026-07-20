@@ -131,6 +131,12 @@ function localDateTime(iso) {
     .slice(0, 19);
 }
 
+function sameInstant(left, right) {
+  return typeof left === "string"
+    && typeof right === "string"
+    && new Date(left).getTime() === new Date(right).getTime();
+}
+
 async function waitForPendingEvidenceGate() {
   if (!pendingReadyPath || !pendingContinuePath) return;
   fs.mkdirSync(path.dirname(pendingReadyPath), { recursive: true });
@@ -325,7 +331,8 @@ async function main() {
     assert(requestResponse.status() === 202,
       `browser request returned ${requestResponse.status()}: ${requestBody.text.slice(0, 500)}`);
     assert(requestBody.json?.data?.state === "PENDING_APPROVAL", "request did not enter PENDING_APPROVAL");
-    assert(requestBody.json?.data?.boundaryTime === boundaryTime, "request changed the approved boundary time");
+    assert(sameInstant(requestBody.json?.data?.boundaryTime, boundaryTime),
+      "request changed the approved boundary time");
     report.operations.request = operation(requestResponse, requestBody, {
       reason: requestReason,
       boundaryTime,
@@ -405,7 +412,8 @@ async function main() {
     assert(finalBatchResponse.status() === 200 && finalBatch.json?.data?.state === "CLOSED_RAW",
       "final API batch is not CLOSED_RAW");
     assert(finalBatch.json?.data?.revision === 3, "final API batch revision is not 3");
-    assert(finalBatch.json?.data?.endTime === boundaryTime, "final API batch endTime differs from the approved boundary");
+    assert(sameInstant(finalBatch.json?.data?.endTime, boundaryTime),
+      "final API batch endTime differs from the approved boundary");
     assert(finalTaskResponse.status() === 200 && finalTask.json?.data?.state === "COMPLETED",
       "final API force-close task is not COMPLETED");
     assert(finalTask.json?.data?.requestedBy !== finalTask.json?.data?.decidedBy,
