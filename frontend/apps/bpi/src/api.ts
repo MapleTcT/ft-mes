@@ -1,6 +1,7 @@
 import type {
   ApiEnvelope,
   Batch,
+  BatchRelease,
   Candidate,
   CandidateConfirmation,
   DataQualityIncident,
@@ -103,6 +104,7 @@ export const bpiApi = {
   batches: (plantId: string) =>
     request<Batch[]>(`/batches?plantId=${encodeURIComponent(plantId)}&limit=100`),
   batch: (id: string) => request<Batch>(`/batches/${encodeURIComponent(id)}`),
+  batchRelease: (id: string) => request<BatchRelease>(`/batches/${encodeURIComponent(id)}/release`),
   suspendBatch: (batch: Batch, reason: string, key: string) =>
     request<Batch>(`/batches/${encodeURIComponent(batch.id)}/suspend`, {
       method: 'POST',

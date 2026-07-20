@@ -51,6 +51,16 @@ async function assertDrawerSettled(page) {
   assert.ok(box.x + box.width <= viewport.width + 1, `detail drawer ends outside viewport: ${JSON.stringify({ box, viewport })}`);
 }
 
+async function prepareBatchReleaseScenario() {
+  let response = await fetch(`${simulatorUrl}/__simulation/reset`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  response = await fetch(`${simulatorUrl}/__simulation/prepare-batch-release`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  const prepared = await response.json();
+  assert.equal(prepared.preparedBatchCount, 6);
+  return prepared.batchIds;
+}
+
 async function stopChildProcess(child) {
   if (!child || child.exitCode !== null) return;
   const exited = once(child, 'exit');
@@ -204,6 +214,145 @@ test('shift lead suspends and resumes a batch from the detail drawer', async () 
   await page.screenshot({ path: '/tmp/bpi-console-batch-lifecycle.png', fullPage: true });
   assert.deepEqual(errors, []);
   await page.close();
+});
+
+test('batch detail presents quality release and WMS truth without inferring success from HTTP status', async () => {
+  const batchIds = await prepareBatchReleaseScenario();
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await context.newPage();
+  const errors = observe(page);
+  const releaseOperations = [];
+  page.on('response', (response) => {
+    if (response.url().endsWith('/release')) {
+      releaseOperations.push(response.headers()['x-bpi-operation-id'] || null);
+    }
+  });
+  await page.goto(`${APP_URL}/#/batches`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: '批次档案' }).waitFor();
+  assert.equal(await page.locator('[data-batch-id]').count(), 6);
+  const drawer = page.locator('#detail-drawer');
+
+  await page.locator(`[data-batch-id="${batchIds.closedRaw}"]`).click();
+  await drawer.getByText('尚未进入质量放行', { exact: true }).waitFor();
+  await drawer.getByText('尚未生成入库命令', { exact: true }).waitFor();
+  assert.equal(await drawer.getByText('已入库', { exact: true }).count(), 0);
+  await drawer.locator('[data-close-drawer]').first().click();
+
+  const waitingReleaseUrl = `**/bpi-api/batches/${batchIds.waiting}/release`;
+  await page.route(waitingReleaseUrl, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await route.continue();
+  });
+  await page.locator(`[data-batch-id="${batchIds.waiting}"]`).click();
+  await drawer.getByText('正在读取质量门和入库回执', { exact: true }).waitFor();
+  await drawer.getByText('等待 1 项必检项目完成', { exact: true }).waitFor();
+  await drawer.getByText('FG-MICRO', { exact: true }).waitFor();
+  await drawer.getByText('待判定 · 待最终确认', { exact: true }).waitFor();
+  assert.match(await drawer.textContent(), /QCS-GATE-ADP-E2E-002 · r1/);
+  await page.unroute(waitingReleaseUrl);
+  await drawer.locator('[data-close-drawer]').first().click();
+
+  await page.locator(`[data-batch-id="${batchIds.rejected}"]`).click();
+  await drawer.getByText('存在不合格必检项目', { exact: true }).waitFor();
+  await drawer.getByText('不合格 · 最终结果', { exact: true }).waitFor();
+  assert.equal(await drawer.getByText('已入库', { exact: true }).count(), 0);
+  await drawer.locator('[data-close-drawer]').first().click();
+
+  await page.locator(`[data-batch-id="${batchIds.wmsPending}"]`).click();
+  await drawer.getByText('入库处理中', { exact: true }).waitFor();
+  await drawer.getByText(`WMS-INBOUND-${batchIds.wmsPending}`, { exact: true }).waitFor();
+  assert.equal(await drawer.getByText('已入库', { exact: true }).count(), 0);
+  await drawer.locator('[data-close-drawer]').first().click();
+
+  await page.locator(`[data-batch-id="${batchIds.wmsFailed}"]`).click();
+  await drawer.getByText('入库失败', { exact: true }).waitFor();
+  await drawer.getByText('WMS_LOCATION_LOCKED', { exact: true }).waitFor();
+  await drawer.locator('[data-release-wms="REJECTED"] .release-summary p')
+    .getByText('目标成品库位正在盘点锁定，WMS 拒绝本次入库命令。', { exact: true }).waitFor();
+  assert.equal(await drawer.getByText('已入库', { exact: true }).count(), 0);
+  await drawer.locator('[data-close-drawer]').first().click();
+
+  await page.locator(`[data-batch-id="${batchIds.inbounded}"]`).click();
+  await drawer.getByText('已入库', { exact: true }).waitFor();
+  await drawer.locator('[data-release-wms="ACCEPTED"] .release-facts')
+    .getByText('WMS-IN-ADP-E2E-0001', { exact: true }).waitFor();
+  await drawer.locator('[data-release-stage="inbounded"]').getByText('WMS-IN-ADP-E2E-0001', { exact: true }).waitFor();
+  await assertDrawerSettled(page);
+  await page.screenshot({ path: '/tmp/bpi-console-batch-quality-inventory.png', fullPage: true });
+
+  await drawer.locator('[data-close-drawer]').first().click();
+  const closeRaceUrl = `**/bpi-api/batches/${batchIds.closedRaw}/release`;
+  await page.route(closeRaceUrl, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await route.continue();
+  }, { times: 1 });
+  await page.locator(`[data-batch-id="${batchIds.closedRaw}"]`).click();
+  await drawer.getByText('正在核对批次档案', { exact: true }).waitFor();
+  await drawer.locator('[data-close-drawer]').first().click();
+  await page.waitForTimeout(700);
+  assert.equal(await drawer.getAttribute('aria-hidden'), 'true');
+
+  assert.ok(releaseOperations.length >= 6);
+  assert.ok(releaseOperations.every((operation) => operation === 'getBatchRelease'));
+  assert.deepEqual(errors, []);
+  await context.close();
+});
+
+test('mobile batch detail keeps core facts visible when the release projection fails and recovers locally', async () => {
+  const batchIds = await prepareBatchReleaseScenario();
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  const page = await context.newPage();
+  const errors = observe(page);
+  const releaseUrl = `**/bpi-api/batches/${batchIds.wmsFailed}/release`;
+  await page.route(releaseUrl, async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: 'application/problem+json',
+      body: JSON.stringify({
+        title: 'Release Projection Unavailable',
+        status: 503,
+        detail: 'QCS/WMS 投影暂时不可用',
+        traceId: 'ADP-E2E-RELEASE-TRACE-503',
+      }),
+    });
+  });
+  await page.goto(`${APP_URL}/#/batches`, { waitUntil: 'networkidle' });
+  await page.locator(`[data-batch-id="${batchIds.wmsFailed}"]`).click();
+  const drawer = page.locator('#detail-drawer');
+  await drawer.getByText('质量与库存暂不可用', { exact: true }).waitFor();
+  await drawer.getByText('QCS/WMS 投影暂时不可用', { exact: true }).waitFor();
+  await drawer.getByText('traceId ADP-E2E-RELEASE-TRACE-503', { exact: true }).waitFor();
+  await drawer.getByText('2 START / 2 END', { exact: true }).waitFor();
+  await drawer.getByText('WMS_INBOUND_REJECTED', { exact: true }).waitFor();
+  assert.equal(await drawer.getByText('批次档案暂不可用', { exact: true }).count(), 0);
+
+  await page.unroute(releaseUrl);
+  await page.route(releaseUrl, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await route.continue();
+  }, { times: 1 });
+  await drawer.getByRole('button', { name: '重试' }).click();
+  await drawer.getByText('正在读取质量门和入库回执', { exact: true }).waitFor();
+  await drawer.getByText('入库失败', { exact: true }).waitFor();
+  await drawer.getByText('WMS_LOCATION_LOCKED', { exact: true }).waitFor();
+  await assertDrawerSettled(page);
+  const geometry = await drawer.evaluate((element) => ({
+    clientWidth: element.clientWidth,
+    scrollWidth: element.scrollWidth,
+    viewportWidth: window.innerWidth,
+  }));
+  assert.ok(geometry.scrollWidth <= geometry.clientWidth + 1, `drawer overflows horizontally: ${JSON.stringify(geometry)}`);
+  assert.ok(geometry.clientWidth <= geometry.viewportWidth, `drawer exceeds viewport: ${JSON.stringify(geometry)}`);
+  await drawer.locator('[data-release-wms="REJECTED"]').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '/tmp/bpi-console-batch-quality-inventory-mobile.png', fullPage: true });
+  const expectedFailures = errors.filter((error) => error.includes('503 (Service Unavailable)'));
+  assert.equal(expectedFailures.length, 1);
+  assert.deepEqual(errors.filter((error) => !error.includes('503 (Service Unavailable)')), []);
+  await context.close();
 });
 
 test('administrator governs scoped feature flags while phase locks remain read only', async () => {

@@ -254,6 +254,41 @@ test('batch lifecycle suspends and resumes with revision and append-only events'
   assert.equal(result.json.data.status, 'RUNNING');
 });
 
+test('batch release projection distinguishes quality and WMS business states', async () => {
+  let result = await request('POST', '/__simulation/reset');
+  assert.equal(result.response.status, 200);
+
+  result = await request('POST', '/__simulation/prepare-batch-release');
+  assert.equal(result.response.status, 200);
+  assert.equal(result.json.preparedBatchCount, 6);
+  const batchIds = result.json.batchIds;
+  const expected = {
+    closedRaw: { batch: 'CLOSED_RAW', gate: null, wms: null, document: null },
+    waiting: { batch: 'WAIT_QA', gate: 'WAITING', wms: null, document: null },
+    rejected: { batch: 'REJECTED', gate: 'REJECTED', wms: null, document: null },
+    wmsPending: { batch: 'RELEASED', gate: 'ACCEPTED', wms: 'PENDING', document: null },
+    wmsFailed: { batch: 'RELEASED', gate: 'ACCEPTED', wms: 'REJECTED', document: null },
+    inbounded: { batch: 'INBOUNDED', gate: 'ACCEPTED', wms: 'ACCEPTED', document: 'WMS-IN-ADP-E2E-0001' },
+  };
+
+  for (const [key, projection] of Object.entries(expected)) {
+    result = await request('GET', `/bpi/v1/batches/${batchIds[key]}/release`);
+    assert.equal(result.response.status, 200);
+    assert.equal(result.response.headers.get('x-bpi-operation-id'), 'getBatchRelease');
+    assert.equal(result.json.data.batch.state, projection.batch);
+    assert.equal(result.json.data.qualityGate?.state ?? null, projection.gate);
+    assert.equal(result.json.data.wmsInbound?.status ?? null, projection.wms);
+    assert.equal(result.json.data.wmsInbound?.documentId ?? null, projection.document);
+  }
+
+  result = await request('GET', `/bpi/v1/batches/${batchIds.waiting}/evidence`);
+  assert.equal(result.json.data.start.length, 2);
+  assert.equal(result.json.data.end.length, 2);
+  result = await request('GET', `/bpi/v1/batches/${batchIds.wmsFailed}/timeline`);
+  assert.equal(result.json.data.at(-1).action, 'WMS_INBOUND_REJECTED');
+  assert.equal(simulatorState.batchReleases.size, 6);
+});
+
 test('end candidate closes the matching shadow batch as CLOSED_RAW', async () => {
   let result = await request('POST', '/__simulation/reset');
   assert.equal(result.response.status, 200);

@@ -187,6 +187,49 @@ export interface Batch {
   topologyVersion: string;
 }
 
+export type QualityInspectionDisposition = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface QualityInspection {
+  inspectionCode: string;
+  inspectionRecordId: string;
+  required: boolean;
+  disposition: QualityInspectionDisposition;
+  finalResult: boolean;
+  observedAt: string;
+}
+
+export interface QualityGate {
+  id: string;
+  externalGateId: string;
+  externalRevision: number;
+  sourceEventId: string;
+  state: 'WAITING' | 'ACCEPTED' | 'REJECTED';
+  releaseQuantity?: number | null;
+  quantityUnit?: string | null;
+  materialCode?: string | null;
+  observedAt: string;
+  inspections: QualityInspection[];
+}
+
+export interface WmsInbound {
+  id: string;
+  commandEventId: string;
+  idempotencyKey: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  receiptEventId?: string | null;
+  documentId?: string | null;
+  errorCode?: string | null;
+  detail?: string | null;
+  observedAt?: string | null;
+  revision: number;
+}
+
+export interface BatchRelease {
+  batch: Batch;
+  qualityGate: QualityGate | null;
+  wmsInbound: WmsInbound | null;
+}
+
 export type ShadowRunState = 'DRAFT' | 'RUNNING' | 'EVALUATING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 export interface ShadowRunReadiness {

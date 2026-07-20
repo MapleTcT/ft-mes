@@ -30,6 +30,7 @@ import {
 import { ApiProblem, bpiApi } from './api';
 import type {
   Batch,
+  BatchRelease,
   Candidate,
   DataQualityIncident,
   DataQualityIncidentDetail,
@@ -111,6 +112,7 @@ const state = {
   loadingMoreCalibrations: false,
   selectedCandidate: null as Candidate | null,
   selectedBatch: null as Batch | null,
+  selectedBatchRelease: null as BatchRelease | null,
   selectedShadowRun: null as ShadowRun | null,
   selectedRule: null as RuleVersion | null,
   selectedTopology: null as TopologyVersion | null,
@@ -128,11 +130,15 @@ const state = {
   dataQualityCommand: null as 'acknowledge' | 'resolve' | null,
   featureFlagCommand: null as { mode: 'SET' | 'INHERIT'; enabled?: boolean } | null,
   batchEvidence: { start: [], end: [] } as { start: Evidence[]; end: Evidence[] },
+  batchReleaseLoading: false,
+  batchReleaseError: null as Error | null,
   timeline: [] as StateEvent[],
   error: null as Error | null,
 };
 
 let pointCatalogRequestGeneration = 0;
+let batchRequestGeneration = 0;
+let activeDrawerKey: string | null = null;
 let pointSearchTimer: number | null = null;
 
 function escapeHtml(value: unknown): string {
@@ -2697,24 +2703,208 @@ function renderBatches(): void {
   });
 }
 
-async function openBatch(batchId: string): Promise<void> {
+function releaseStageHtml(
+  key: string,
+  icon: string,
+  label: string,
+  detail: string,
+  stateName: 'idle' | 'active' | 'complete' | 'danger',
+): string {
+  return `<div class="release-stage release-stage--${stateName}" data-release-stage="${key}">
+    <i data-lucide="${icon}"></i><div><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detail)}</span></div>
+  </div>`;
+}
+
+function batchReleaseProgressHtml(release: BatchRelease): string {
+  const gate = release.qualityGate;
+  const inbound = release.wmsInbound;
+  const inbounded = inbound?.status === 'ACCEPTED' && Boolean(inbound.documentId);
+  const qualityState = gate?.state === 'ACCEPTED' ? 'complete'
+    : gate?.state === 'REJECTED' ? 'danger'
+      : gate?.state === 'WAITING' ? 'active' : 'idle';
+  const qualityDetail = gate?.state === 'ACCEPTED' ? '必检项目已合格'
+    : gate?.state === 'REJECTED' ? '存在不合格项'
+      : gate?.state === 'WAITING' ? '等待检验完成' : '尚未进入质量门';
+  const commandState = inbound?.status === 'REJECTED' ? 'danger'
+    : inbound?.status === 'PENDING' ? 'active'
+      : inbound?.status === 'ACCEPTED' ? 'complete' : 'idle';
+  const commandDetail = inbound?.status === 'REJECTED' ? '回执已拒绝'
+    : inbound?.status === 'PENDING' ? '等待仓储回执'
+      : inbound?.status === 'ACCEPTED' ? '仓储已接受' : '尚未生成命令';
+  const completionState = inbounded ? 'complete' : inbound?.status === 'REJECTED' ? 'danger' : 'idle';
+  const completionDetail = inbounded ? inbound?.documentId || '单据已生成'
+    : inbound?.status === 'REJECTED' ? '需要处理后重试' : '尚未完成';
+
+  return `<div class="release-progress" aria-label="质量与库存进度">
+    ${releaseStageHtml('batch', 'database', '原始批次', release.batch.endTime ? '生产事实已闭合' : '生产事实形成中', release.batch.endTime ? 'complete' : 'active')}
+    ${releaseStageHtml('quality', 'shield-check', '质量放行', qualityDetail, qualityState)}
+    ${releaseStageHtml('command', 'clock-3', '入库指令', commandDetail, commandState)}
+    ${releaseStageHtml('inbounded', 'boxes', '完工入库', completionDetail, completionState)}
+  </div>`;
+}
+
+function qualityReleaseHtml(release: BatchRelease): string {
+  const gate = release.qualityGate;
+  if (!gate) {
+    return `<div class="release-status-block" data-release-quality="NONE">
+      <div class="release-summary"><i data-lucide="shield-check"></i><div><span>质量放行</span><strong>尚未进入质量放行</strong><p>当前没有 QCS/LIMS 质量门投影，系统不会据此生成完工入库命令。</p></div>${statusChip('NOT_APPLICABLE')}</div>
+    </div>`;
+  }
+
+  const required = gate.inspections.filter((inspection) => inspection.required);
+  const pendingRequired = required.filter((inspection) => !inspection.finalResult || inspection.disposition === 'PENDING');
+  const title = gate.state === 'ACCEPTED' ? '全部必检项目已合格'
+    : gate.state === 'REJECTED' ? '存在不合格必检项目'
+      : `等待 ${pendingRequired.length} 项必检项目完成`;
+  const detail = gate.state === 'ACCEPTED'
+    ? '质量门已接受，可依据放行数量生成幂等入库命令。'
+    : gate.state === 'REJECTED'
+      ? '质量门已拒绝，后续入库动作必须保持阻断。'
+      : '仅展示 QCS/LIMS 返回的最终结果，不根据接口成功状态推断放行。';
+  const inspections = gate.inspections.map((inspection) => {
+    const label = inspection.disposition === 'ACCEPTED' ? '合格'
+      : inspection.disposition === 'REJECTED' ? '不合格' : '待判定';
+    return `<li data-inspection-code="${escapeHtml(inspection.inspectionCode)}">
+      <span class="evidence-state evidence-state--${inspection.disposition === 'ACCEPTED' ? 'ok' : inspection.disposition === 'REJECTED' ? 'bad' : 'pending'}"></span>
+      <div><strong>${escapeHtml(inspection.inspectionCode)}</strong><small>${escapeHtml(inspection.inspectionRecordId)} · ${formatTime(inspection.observedAt)}</small></div>
+      <em>${inspection.required ? '必检' : '参考'}</em><b>${escapeHtml(label)} · ${inspection.finalResult ? '最终结果' : '待最终确认'}</b>
+    </li>`;
+  }).join('');
+
+  return `<div class="release-status-block" data-release-quality="${escapeHtml(gate.state)}">
+    <div class="release-summary release-summary--${statusTone(gate.state)}"><i data-lucide="shield-check"></i><div><span>质量放行</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail)}</p></div>${statusChip(gate.state)}</div>
+    <div class="release-facts"><div><span>质量门 / 外部修订</span><b>${escapeHtml(gate.externalGateId)} · r${gate.externalRevision}</b></div><div><span>观测时间</span><b>${formatTime(gate.observedAt)}</b></div><div><span>放行物料</span><b>${escapeHtml(gate.materialCode || '-')}</b></div><div><span>放行数量</span><b>${gate.releaseQuantity == null ? '-' : `${number(gate.releaseQuantity, 3)} ${escapeHtml(gate.quantityUnit || '')}`}</b></div></div>
+    <div class="section-title release-subtitle"><h4>检验明细</h4><span>${required.length} 项必检 / ${pendingRequired.length} 项待完成</span></div>
+    <ul class="inspection-list">${inspections || '<li class="release-empty">暂无检验明细</li>'}</ul>
+    <dl class="release-technical"><div><dt>质量事件</dt><dd>${escapeHtml(gate.sourceEventId)}</dd></div><div><dt>投影 ID</dt><dd>${escapeHtml(gate.id)}</dd></div></dl>
+  </div>`;
+}
+
+function wmsReleaseHtml(release: BatchRelease): string {
+  const inbound = release.wmsInbound;
+  if (!inbound) {
+    return `<div class="release-status-block" data-release-wms="NONE">
+      <div class="release-summary"><i data-lucide="boxes"></i><div><span>完工入库</span><strong>尚未生成入库命令</strong><p>只有质量门明确接受后，BPI 才能形成带幂等键的 WMS 完工入库命令。</p></div>${statusChip('NOT_REQUESTED')}</div>
+    </div>`;
+  }
+
+  const inbounded = inbound.status === 'ACCEPTED' && Boolean(inbound.documentId);
+  const title = inbounded ? '已入库'
+    : inbound.status === 'ACCEPTED' ? '回执不完整'
+      : inbound.status === 'REJECTED' ? '入库失败' : '入库处理中';
+  const detail = inbounded ? `仓储单据 ${inbound.documentId} 已作为持久化回执返回。`
+    : inbound.status === 'ACCEPTED' ? 'WMS 返回 ACCEPTED 但缺少持久化单据号，系统按异常保持阻断。'
+      : inbound.status === 'REJECTED' ? (inbound.detail || '仓储系统拒绝了本次入库命令。')
+        : '命令已持久化并等待 WMS 返回最终回执，不能按 HTTP 200 推断已入库。';
+  const businessStatus = inbounded ? 'INBOUNDED' : inbound.status === 'ACCEPTED' ? 'BLOCKED' : inbound.status;
+
+  return `<div class="release-status-block" data-release-wms="${escapeHtml(inbound.status)}">
+    <div class="release-summary release-summary--${statusTone(businessStatus)}"><i data-lucide="boxes"></i><div><span>完工入库</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail)}</p></div>${statusChip(businessStatus)}</div>
+    <div class="release-facts"><div><span>仓储单据</span><b>${escapeHtml(inbound.documentId || '-')}</b></div><div><span>回执时间</span><b>${formatTime(inbound.observedAt)}</b></div><div><span>错误编码</span><b>${escapeHtml(inbound.errorCode || '-')}</b></div><div><span>回执修订</span><b>r${inbound.revision}</b></div></div>
+    <dl class="release-technical"><div><dt>命令事件</dt><dd>${escapeHtml(inbound.commandEventId)}</dd></div><div><dt>幂等键</dt><dd>${escapeHtml(inbound.idempotencyKey)}</dd></div><div><dt>回执事件</dt><dd>${escapeHtml(inbound.receiptEventId || '-')}</dd></div></dl>
+  </div>`;
+}
+
+function batchReleaseSectionHtml(): string {
+  if (state.batchReleaseLoading) {
+    return `<div class="drawer-section batch-release-section"><div class="section-title"><h3>质量与库存</h3><span>正在核对权威投影</span></div><div class="batch-detail-loading" role="status"><i data-lucide="refresh-cw"></i><div><strong>正在读取质量门和入库回执</strong><span>批次核心事实已保留，等待独立投影返回。</span></div></div></div>`;
+  }
+  if (state.batchReleaseError) {
+    const traceId = state.batchReleaseError instanceof ApiProblem ? state.batchReleaseError.problem.traceId : null;
+    return `<div class="drawer-section batch-release-section"><div class="section-title"><h3>质量与库存</h3><span>局部查询失败</span></div><div class="release-error" data-batch-release-error><i data-lucide="circle-alert"></i><div><strong>质量与库存暂不可用</strong><p>${escapeHtml(state.batchReleaseError.message)}</p>${traceId ? `<small>traceId ${escapeHtml(traceId)}</small>` : ''}</div><button class="button button--secondary button--compact" id="retry-batch-release"><i data-lucide="refresh-cw"></i>重试</button></div></div>`;
+  }
+  const release = state.selectedBatchRelease;
+  if (!release) return '';
+  return `<div class="drawer-section batch-release-section" data-batch-release>
+    <div class="section-title"><h3>质量与库存</h3><span>QCS/LIMS → BPI → WMS</span></div>
+    ${batchReleaseProgressHtml(release)}
+    <div class="release-status-flow">${qualityReleaseHtml(release)}${wmsReleaseHtml(release)}</div>
+  </div>`;
+}
+
+function renderBatchDrawer(): void {
+  const batch = state.selectedBatch;
+  if (!batch) return;
+  const evidence = [...state.batchEvidence.start, ...state.batchEvidence.end].map((item) => `<li><span class="evidence-state evidence-state--${item.satisfied ? 'ok' : 'bad'}"></span><div><strong>${escapeHtml(item.signal)}</strong><small>${escapeHtml(item.source)} · ${formatTime(item.eventTime)}</small></div><b>${escapeHtml(item.value)}${item.unit ? ` ${escapeHtml(item.unit)}` : ''}</b></li>`).join('');
+  const timeline = state.timeline.map((item) => `<li><i></i><div><strong>${escapeHtml(item.action)}</strong><span>${escapeHtml(item.reason || '-')}</span><small>${formatTime(item.at || item.eventTime)} · ${escapeHtml(item.actor || item.actorId || '-')}</small></div></li>`).join('');
+  const command = batch.state === 'ACTIVE'
+    ? '<button class="button button--danger" id="open-suspend">暂停自动处理</button>'
+    : batch.state === 'SUSPENDED'
+      ? '<button class="button button--primary" id="open-resume">恢复自动处理</button>'
+      : '';
+  openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div>${batchReleaseSectionHtml()}<div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline || '<li><i></i><div><strong>暂无状态事件</strong></div></li>'}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`, `batch:${batch.id}`);
+  document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
+  document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
+  document.querySelector('#retry-batch-release')?.addEventListener('click', () => void reloadBatchRelease(batch.id));
+}
+
+async function reloadBatchRelease(batchId: string): Promise<void> {
+  const generation = batchRequestGeneration;
+  state.batchReleaseLoading = true;
+  state.batchReleaseError = null;
+  renderBatchDrawer();
   try {
-    const [batchResponse, evidenceResponse, timelineResponse] = await Promise.all([bpiApi.batch(batchId), bpiApi.evidence(batchId), bpiApi.timeline(batchId)]);
+    const response = await bpiApi.batchRelease(batchId);
+    if (!batchDrawerIsCurrent(batchId, generation)) return;
+    state.selectedBatchRelease = response.data;
+    state.selectedBatch = response.data.batch;
+  } catch (error) {
+    if (!batchDrawerIsCurrent(batchId, generation)) return;
+    state.batchReleaseError = error instanceof Error ? error : new Error(String(error));
+  } finally {
+    if (batchDrawerIsCurrent(batchId, generation)) {
+      state.batchReleaseLoading = false;
+      renderBatchDrawer();
+    }
+  }
+}
+
+function batchDrawerIsCurrent(batchId: string, generation: number): boolean {
+  return generation === batchRequestGeneration
+    && state.selectedBatch?.id === batchId
+    && activeDrawerKey === `batch:${batchId}`;
+}
+
+async function openBatch(batchId: string): Promise<void> {
+  const generation = ++batchRequestGeneration;
+  const knownBatch = state.batches.find((batch) => batch.id === batchId) || null;
+  state.selectedBatch = knownBatch;
+  state.selectedBatchRelease = null;
+  state.batchReleaseLoading = true;
+  state.batchReleaseError = null;
+  state.batchEvidence = { start: [], end: [] };
+  state.timeline = [];
+  openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(knownBatch?.batchNo || '正在加载')}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-detail-loading batch-detail-loading--page" role="status"><i data-lucide="refresh-cw"></i><div><strong>正在核对批次档案</strong><span>同步读取批次事实、边界证据、质量门、入库回执和状态时间线。</span></div></div>`, `batch:${batchId}`);
+  try {
+    const releaseRequest = bpiApi.batchRelease(batchId)
+      .then((response) => ({ response, error: null as Error | null }))
+      .catch((error) => ({ response: null, error: error instanceof Error ? error : new Error(String(error)) }));
+    const [batchResponse, evidenceResponse, timelineResponse] = await Promise.all([
+      bpiApi.batch(batchId),
+      bpiApi.evidence(batchId),
+      bpiApi.timeline(batchId),
+    ]);
+    if (generation !== batchRequestGeneration || activeDrawerKey !== `batch:${batchId}`) return;
     state.selectedBatch = batchResponse.data;
     state.batchEvidence = evidenceResponse.data;
     state.timeline = timelineResponse.data;
-    const batch = state.selectedBatch;
-    const evidence = [...state.batchEvidence.start, ...state.batchEvidence.end].map((item) => `<li><span class="evidence-state evidence-state--${item.satisfied ? 'ok' : 'bad'}"></span><div><strong>${escapeHtml(item.signal)}</strong><small>${escapeHtml(item.source)} · ${formatTime(item.eventTime)}</small></div><b>${escapeHtml(item.value)}${item.unit ? ` ${escapeHtml(item.unit)}` : ''}</b></li>`).join('');
-    const timeline = state.timeline.map((item) => `<li><i></i><div><strong>${escapeHtml(item.action)}</strong><span>${escapeHtml(item.reason || '-')}</span><small>${formatTime(item.at || item.eventTime)} · ${escapeHtml(item.actor || item.actorId || '-')}</small></div></li>`).join('');
-    const command = batch.state === 'ACTIVE'
-      ? '<button class="button button--danger" id="open-suspend">暂停自动处理</button>'
-      : batch.state === 'SUSPENDED'
-        ? '<button class="button button--primary" id="open-resume">恢复自动处理</button>'
-        : '';
-    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div><div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li>暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`);
-    document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
-    document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
-  } catch (error) { showToast(error instanceof Error ? error.message : String(error), true); }
+    renderBatchDrawer();
+
+    const releaseResult = await releaseRequest;
+    if (!batchDrawerIsCurrent(batchId, generation)) return;
+    state.selectedBatchRelease = releaseResult.response?.data || null;
+    state.selectedBatch = releaseResult.response?.data.batch || batchResponse.data;
+    state.batchReleaseError = releaseResult.error;
+    state.batchReleaseLoading = false;
+    renderBatchDrawer();
+  } catch (error) {
+    if (generation !== batchRequestGeneration || activeDrawerKey !== `batch:${batchId}`) return;
+    const message = error instanceof Error ? error.message : String(error);
+    state.batchReleaseLoading = false;
+    openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(knownBatch?.batchNo || batchId)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="drawer-section"><div class="release-error release-error--page"><i data-lucide="circle-alert"></i><div><strong>批次档案暂不可用</strong><p>${escapeHtml(message)}</p></div><button class="button button--secondary button--compact" id="retry-batch-core"><i data-lucide="refresh-cw"></i>重试</button></div></div>`, `batch:${batchId}`);
+    document.querySelector('#retry-batch-core')?.addEventListener('click', () => void openBatch(batchId));
+    showToast(message, true);
+  }
 }
 
 function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
@@ -2773,8 +2963,9 @@ async function handleBatchCommand(): Promise<void> {
   }
 }
 
-function openDrawer(html: string): void {
+function openDrawer(html: string, drawerKey: string | null = null): void {
   const drawer = document.querySelector<HTMLElement>('#detail-drawer')!;
+  activeDrawerKey = drawerKey;
   drawer.innerHTML = html;
   drawer.classList.add('is-open');
   drawer.setAttribute('aria-hidden', 'false');
@@ -2784,6 +2975,7 @@ function openDrawer(html: string): void {
 
 function closeDrawer(): void {
   const drawer = document.querySelector<HTMLElement>('#detail-drawer');
+  activeDrawerKey = null;
   drawer?.classList.remove('is-open');
   drawer?.setAttribute('aria-hidden', 'true');
 }

@@ -314,8 +314,142 @@ function prepareShadowRunAcceptance(state) {
   });
   state.shadowRuns = [];
   state.shadowRunReviews = [];
+  state.batchEvents = [];
+  state.batchEventsById = new Map();
+  state.batchEvidenceById = new Map();
+  state.batchReleases = new Map();
   state.idempotency = new Map();
   return { ruleId: state.rule.id, preparedBatchCount: state.batches.length };
+}
+
+function prepareBatchReleaseAcceptance(state) {
+  const specs = [
+    { key: 'closedRaw', suffix: 'RAW', state: 'CLOSED_RAW', qualityGate: 'NOT_APPLICABLE', wmsStatus: 'NOT_REQUESTED', gate: null, inbound: null },
+    { key: 'waiting', suffix: 'WAIT-QA', state: 'WAIT_QA', qualityGate: 'WAITING', wmsStatus: 'NOT_REQUESTED', gate: 'WAITING', inbound: null },
+    { key: 'rejected', suffix: 'QA-REJECTED', state: 'REJECTED', qualityGate: 'REJECTED', wmsStatus: 'NOT_REQUESTED', gate: 'REJECTED', inbound: null },
+    { key: 'wmsPending', suffix: 'WMS-PENDING', state: 'RELEASED', qualityGate: 'ACCEPTED', wmsStatus: 'PENDING', gate: 'ACCEPTED', inbound: 'PENDING' },
+    { key: 'wmsFailed', suffix: 'WMS-FAILED', state: 'RELEASED', qualityGate: 'ACCEPTED', wmsStatus: 'FAILED', gate: 'ACCEPTED', inbound: 'REJECTED' },
+    { key: 'inbounded', suffix: 'INBOUNDED', state: 'INBOUNDED', qualityGate: 'ACCEPTED', wmsStatus: 'INBOUNDED', gate: 'ACCEPTED', inbound: 'ACCEPTED' },
+  ];
+  const releases = new Map();
+  const timelines = new Map();
+  const evidenceById = new Map();
+  const ids = {};
+  const batches = specs.map((spec, index) => {
+    const id = stableUuid(`batch-release-ui-${spec.key}`);
+    ids[spec.key] = id;
+    const start = new Date(Date.parse('2026-07-12T01:00:00.000Z') + index * 75 * 60 * 1000);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const observedAt = new Date(end.getTime() + 5 * 60 * 1000).toISOString();
+    const batch = {
+      id,
+      batchNo: `ADP-E2E-${spec.suffix}`,
+      tenantId: 'TENANT-01',
+      plantId: 'PLANT-01',
+      lineId: 'LINE-S07-01',
+      stageCode: 'FINISHED_PRODUCT',
+      orderId: `MO-ADP-E2E-${String(index + 1).padStart(3, '0')}`,
+      materialCode: 'MAT-SUGAR-FG-001',
+      state: spec.state,
+      revision: 2 + index,
+      shadow: false,
+      startTime: start.toISOString(),
+      endTime: end.toISOString(),
+      quantity: 42.125 + index,
+      quantityUnit: 't',
+      dryMatter: 41.7 + index,
+      qualityGate: spec.qualityGate,
+      wmsStatus: spec.wmsStatus,
+      ruleVersion: 'RULE-FG-BATCH@2.0.0',
+      topologyVersion: 'TOPO-FG@4',
+    };
+    let qualityGate = null;
+    if (spec.gate) {
+      const accepted = spec.gate === 'ACCEPTED';
+      const rejected = spec.gate === 'REJECTED';
+      qualityGate = {
+        id: stableUuid(`quality-gate-${spec.key}`),
+        externalGateId: `QCS-GATE-ADP-E2E-${String(index + 1).padStart(3, '0')}`,
+        externalRevision: rejected ? 2 : 1,
+        sourceEventId: `qcs-quality-gate-${spec.key}-event`,
+        state: spec.gate,
+        releaseQuantity: accepted ? batch.quantity : null,
+        quantityUnit: accepted ? batch.quantityUnit : null,
+        materialCode: accepted ? batch.materialCode : null,
+        observedAt,
+        inspections: spec.gate === 'WAITING' ? [
+          { inspectionCode: 'FG-BRIX', inspectionRecordId: `QCS-INSPECTION-${spec.key}-BRIX`, required: true, disposition: 'ACCEPTED', finalResult: true, observedAt },
+          { inspectionCode: 'FG-MICRO', inspectionRecordId: `QCS-INSPECTION-${spec.key}-MICRO`, required: true, disposition: 'PENDING', finalResult: false, observedAt },
+        ] : rejected ? [
+          { inspectionCode: 'FG-BRIX', inspectionRecordId: `QCS-INSPECTION-${spec.key}-BRIX`, required: true, disposition: 'ACCEPTED', finalResult: true, observedAt },
+          { inspectionCode: 'FG-MICRO', inspectionRecordId: `QCS-INSPECTION-${spec.key}-MICRO`, required: true, disposition: 'REJECTED', finalResult: true, observedAt },
+        ] : [
+          { inspectionCode: 'FG-BRIX', inspectionRecordId: `QCS-INSPECTION-${spec.key}-BRIX`, required: true, disposition: 'ACCEPTED', finalResult: true, observedAt },
+          { inspectionCode: 'FG-MICRO', inspectionRecordId: `QCS-INSPECTION-${spec.key}-MICRO`, required: true, disposition: 'ACCEPTED', finalResult: true, observedAt },
+        ],
+      };
+    }
+    let inbound = null;
+    if (spec.inbound) {
+      const commandEventId = stableUuid(`wms-command-${spec.key}`);
+      inbound = {
+        id: stableUuid(`wms-inbound-${spec.key}`),
+        commandEventId,
+        idempotencyKey: `WMS-INBOUND-${id}`,
+        status: spec.inbound,
+        receiptEventId: spec.inbound === 'PENDING' ? null : `wms-inbound-receipt-${spec.key}`,
+        documentId: spec.inbound === 'ACCEPTED' ? 'WMS-IN-ADP-E2E-0001' : null,
+        errorCode: spec.inbound === 'REJECTED' ? 'WMS_LOCATION_LOCKED' : null,
+        detail: spec.inbound === 'REJECTED' ? '目标成品库位正在盘点锁定，WMS 拒绝本次入库命令。' : null,
+        observedAt: spec.inbound === 'PENDING' ? null : new Date(end.getTime() + 8 * 60 * 1000).toISOString(),
+        revision: spec.inbound === 'PENDING' ? 0 : 1,
+      };
+    }
+    releases.set(id, { batch, qualityGate, wmsInbound: inbound });
+    const timeline = [
+      { revision: 1, action: 'START_BOUNDARY_CONFIRMED', at: start.toISOString(), actor: 'simulated.batch.engine', reason: '多信号边界证据达到启动阈值', fromState: null, toState: 'ACTIVE' },
+      { revision: 2, action: 'END_BOUNDARY_CONFIRMED', at: end.toISOString(), actor: 'simulated.batch.engine', reason: '流量归零且目标累计量完成', fromState: 'ACTIVE', toState: 'CLOSED_RAW' },
+    ];
+    if (spec.gate) timeline.push({
+      revision: timeline.length + 1,
+      action: `QUALITY_GATE_${spec.gate}`,
+      at: observedAt,
+      actor: 'qcs.integration',
+      reason: spec.gate === 'ACCEPTED' ? '全部必检项目最终合格' : spec.gate === 'REJECTED' ? '必检项目最终不合格' : '仍有必检项目等待最终结果',
+      fromState: 'CLOSED_RAW',
+      toState: spec.state,
+    });
+    if (spec.inbound) timeline.push({
+      revision: timeline.length + 1,
+      action: spec.inbound === 'PENDING' ? 'WMS_INBOUND_COMMAND_CREATED' : `WMS_INBOUND_${spec.inbound}`,
+      at: inbound.observedAt || new Date(end.getTime() + 6 * 60 * 1000).toISOString(),
+      actor: spec.inbound === 'PENDING' ? 'bpi.wms.outbox' : 'wms.integration',
+      reason: spec.inbound === 'ACCEPTED' ? 'WMS 返回持久化完工入库单据' : spec.inbound === 'REJECTED' ? inbound.detail : '幂等命令已持久化并等待回执',
+      fromState: 'RELEASED',
+      toState: spec.state,
+    });
+    timelines.set(id, timeline);
+    evidenceById.set(id, {
+      start: [
+        { eventId: `EVT-${spec.key}-START-FLOW`, signal: 'instantFlowAboveThreshold', classification: 'REQUIRED', satisfied: true, value: 18.4, unit: 't/h', quality: 'GOOD', eventTime: start.toISOString(), source: 'JetLinks' },
+        { eventId: `EVT-${spec.key}-START-ORDER`, signal: 'productionOrderReleased', classification: 'REQUIRED', satisfied: true, value: batch.orderId, unit: null, quality: 'GOOD', eventTime: start.toISOString(), source: 'WOM' },
+      ],
+      end: [
+        { eventId: `EVT-${spec.key}-END-FLOW`, signal: 'instantFlowBelowThreshold', classification: 'REQUIRED', satisfied: true, value: 0.08, unit: 't/h', quality: 'GOOD', eventTime: end.toISOString(), source: 'JetLinks' },
+        { eventId: `EVT-${spec.key}-END-TOTAL`, signal: 'targetQuantityCompleted', classification: 'QUORUM', satisfied: true, value: batch.quantity, unit: batch.quantityUnit, quality: 'GOOD', eventTime: end.toISOString(), source: 'BPI' },
+      ],
+    });
+    return batch;
+  });
+  state.batches = batches;
+  state.batchEvents = [];
+  state.batchEventsById = timelines;
+  state.batchEvidenceById = evidenceById;
+  state.batchReleases = releases;
+  state.shadowRuns = [];
+  state.shadowRunReviews = [];
+  state.idempotency = new Map();
+  return { preparedBatchCount: batches.length, batchIds: ids };
 }
 
 function endCandidateFromStart(candidate) {
@@ -697,6 +831,10 @@ function createHandler(state) {
         const prepared = prepareShadowRunAcceptance(state);
         return send(res, 200, { status: 'SHADOW_RUN_READY', ...prepared }, 'simulationPrepareShadowRun');
       }
+      if (req.method === 'POST' && path === '/__simulation/prepare-batch-release') {
+        const prepared = prepareBatchReleaseAcceptance(state);
+        return send(res, 200, { status: 'BATCH_RELEASE_READY', ...prepared }, 'simulationPrepareBatchRelease');
+      }
       if (req.method === 'POST' && path === '/__simulation/fail-rule-publication') {
         if (!['PUBLISHED', 'RETIRED'].includes(state.rule.state)
             || !['PENDING', 'DISPATCHING'].includes(state.rule.publicationStatus)) {
@@ -989,6 +1127,13 @@ function createHandler(state) {
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', 'getBatch'), 'getBatch');
         return send(res, 200, envelope('getBatch', batch), 'getBatch');
       }
+      ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/release$/);
+      if (req.method === 'GET' && ids) {
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', 'getBatchRelease'), 'getBatchRelease');
+        const release = state.batchReleases.get(batch.id) || { batch, qualityGate: null, wmsInbound: null };
+        return send(res, 200, envelope('getBatchRelease', release), 'getBatchRelease');
+      }
       ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/(suspend|resume)$/);
       if (req.method === 'POST' && ids) {
         const batch = state.batches.find((item) => item.id === ids[0]);
@@ -1036,13 +1181,13 @@ function createHandler(state) {
         const operationId = operationIds[ids[1]];
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
         const data = {
-          evidence: {
+          evidence: state.batchEvidenceById.get(batch.id) || {
             start: state.candidate.batchId === batch.id ? state.candidate.evidence : [],
             end: state.endCandidate?.batchId === batch.id ? state.endCandidate.evidence : [],
           },
           balance: { input: 12.4, output: 12.1, difference: 0.3, differencePercent: 2.42, status: 'WITHIN_TOLERANCE', allocations: [] },
           genealogy: { nodes: [{ id: batch.id, type: 'BATCH', label: batch.batchNo }], edges: [] },
-          timeline: state.batchEvents,
+          timeline: state.batchEventsById.get(batch.id) || state.batchEvents,
         }[ids[1]];
         return send(res, 200, envelope(operationId, data), operationId);
       }

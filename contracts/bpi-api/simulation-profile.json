@@ -16,6 +16,7 @@
     "getBatchBalance",
     "getBatchGenealogy",
     "getBatchTimeline",
+    "getBatchRelease",
     "suspendBatch",
     "resumeBatch",
     "listShadowRuns",
