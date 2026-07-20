@@ -124,6 +124,49 @@ public class BpiProxyControllerTest {
     }
 
     @Test
+    public void forwardsForceCloseReadAndCommandThroughTheFixedUpstream() {
+        BpiAdapterProperties properties = properties();
+        RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();
+        MockRestServiceServer upstream = MockRestServiceServer.bindTo(restTemplate).build();
+        String id = "9c392d57-7502-4cd8-bc37-e72961bb08b4";
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/batches/" + id + "/force-close"))
+                .andExpect(method(org.springframework.http.HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(withSuccess("{\"data\":null}", MediaType.APPLICATION_JSON));
+        upstream.expect(requestTo("http://bpi-service:19091/bpi/v1/batches/" + id + "/force-close"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andExpect(header("Idempotency-Key", "force-close-command-1"))
+                .andExpect(header("If-Match", "1"))
+                .andExpect(header(HttpHeaders.AUTHORIZATION,
+                        allOf(startsWith("Bearer "), not(startsWith("Bearer legacy-token")))))
+                .andRespond(org.springframework.test.web.client.response.MockRestResponseCreators
+                        .withStatus(HttpStatus.ACCEPTED)
+                        .body("{\"data\":{\"state\":\"PENDING_APPROVAL\"}}")
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        BpiProxyController controller = new BpiProxyController(properties, new BpiClaimsMapper(properties),
+                new InternalJwtIssuer(properties), new BpiRoutePolicy(), restTemplate);
+        MockHttpServletRequest read = new MockHttpServletRequest(
+                "GET", "/bpi-api/batches/" + id + "/force-close");
+        read.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        assertEquals(HttpStatus.OK, controller.proxy(jwt(), read, null).getStatusCode());
+
+        MockHttpServletRequest command = new MockHttpServletRequest(
+                "POST", "/bpi-api/batches/" + id + "/force-close");
+        command.addHeader(HttpHeaders.AUTHORIZATION, "Bearer legacy-token");
+        command.addHeader("Idempotency-Key", "force-close-command-1");
+        command.addHeader("If-Match", "1");
+        ResponseEntity<byte[]> response = controller.proxy(jwt(), command,
+                ("{\"reason\":\"controlled stop\",\"boundaryTime\":\"2026-07-20T21:10:28Z\","
+                        + "\"approvalMode\":\"REQUEST\"}")
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        upstream.verify();
+    }
+
+    @Test
     public void forwardsWmsReconciliationWithConcurrencyAndReplayHeaders() {
         BpiAdapterProperties properties = properties();
         RestTemplate restTemplate = new AdapterConfiguration().bpiRestTemplate();

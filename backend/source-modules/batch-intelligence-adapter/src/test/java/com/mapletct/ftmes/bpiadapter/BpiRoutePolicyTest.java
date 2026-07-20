@@ -15,10 +15,12 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.GET, "/overview"));
         assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/timeline"));
         assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/release"));
+        assertTrue(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertTrue(policy.allows(HttpMethod.POST, "/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/confirm"));
         assertTrue(policy.allows(HttpMethod.POST, "/candidates/9c392d57-7502-4cd8-bc37-e72961bb08b4/reject"));
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/suspend"));
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/resume"));
+        assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
         assertTrue(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/wms/reconcile"));
         assertTrue(policy.allows(HttpMethod.GET, "/shadow-runs"));
         assertTrue(policy.allows(HttpMethod.GET, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
@@ -63,7 +65,8 @@ public class BpiRoutePolicyTest {
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/drafts"));
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/validate"));
         assertTrue(policy.allows(HttpMethod.POST, "/topologies/TOPO-S07-3/publish"));
-        assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close"));
+        assertFalse(policy.allows(HttpMethod.GET, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close/export"));
+        assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/force-close/approve"));
         assertFalse(policy.allows(HttpMethod.POST, "/batches/9c392d57-7502-4cd8-bc37-e72961bb08b4/wms/reconcile/force"));
         assertFalse(policy.allows(HttpMethod.POST, "/candidates"));
         assertFalse(policy.allows(HttpMethod.DELETE, "/shadow-runs/9c392d57-7502-4cd8-bc37-e72961bb08b4"));
