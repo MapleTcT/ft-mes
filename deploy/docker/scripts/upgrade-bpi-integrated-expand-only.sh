@@ -62,6 +62,14 @@ env_value() {
     printf '%s' "${value:-$fallback}"
 }
 
+container_env_value() {
+    container_id=$1
+    key=$2
+    docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" \
+        | sed -n "s/^${key}=//p" \
+        | tail -1
+}
+
 compose() {
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" --profile bpi "$@"
 }
@@ -219,6 +227,9 @@ fi
 DATABASE_NAME=$(env_value BPI_DATABASE_NAME ft_mes_bpi)
 POSTGRES_USER=$(env_value POSTGRES_USER adp)
 MIGRATOR_PASSWORD=$(env_value BPI_MIGRATOR_PASSWORD '')
+if [ -z "$MIGRATOR_PASSWORD" ]; then
+    MIGRATOR_PASSWORD=$(container_env_value "$POSTGRES_ID" BPI_MIGRATOR_PASSWORD)
+fi
 FLYWAY_IMAGE=$(env_value BPI_FLYWAY_IMAGE m.daocloud.io/docker.io/flyway/flyway:11-alpine)
 if [ -z "$MIGRATOR_PASSWORD" ]; then
     printf 'ERROR: BPI_MIGRATOR_PASSWORD is missing\n' >&2
