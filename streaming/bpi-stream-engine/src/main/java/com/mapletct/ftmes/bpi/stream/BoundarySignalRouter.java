@@ -47,7 +47,7 @@ public final class BoundarySignalRouter {
                 continue;
             }
             if (!binding.getExpectedUnit().isBlank()
-                    && !binding.getExpectedUnit().equals(point.getUnit())) {
+                    && !UnitSymbolNormalizer.equivalent(binding.getExpectedUnit(), point.getUnit())) {
                 issues.add(issue(envelope, "UNIT_MISMATCH", point.getPropertyId(),
                         "point unit does not match the published binding"));
                 continue;
@@ -91,7 +91,7 @@ public final class BoundarySignalRouter {
             return new BoundaryRoutingResult(inputs, issues);
         }
         if (!binding.getExpectedUnit().isBlank()
-                && !binding.getExpectedUnit().equals(point.getUnit())) {
+                && !UnitSymbolNormalizer.equivalent(binding.getExpectedUnit(), point.getUnit())) {
             issues.add(issue(envelope, "UNIT_MISMATCH", point.getPropertyId(),
                     "point unit does not match the published binding"));
             return new BoundaryRoutingResult(inputs, issues);

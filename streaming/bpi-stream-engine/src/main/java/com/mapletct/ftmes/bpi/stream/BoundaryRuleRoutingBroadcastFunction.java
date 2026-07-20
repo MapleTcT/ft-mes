@@ -430,7 +430,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         }
         if (point.getUnit().isBlank()
                 || (!binding.getExpectedUnit().isBlank()
-                    && !point.getUnit().equalsIgnoreCase(binding.getExpectedUnit()))) {
+                    && !UnitSymbolNormalizer.equivalent(point.getUnit(), binding.getExpectedUnit()))) {
             return publicationIssue(
                     publication,
                     binding,
@@ -575,7 +575,7 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
         }
         if (point.getUnit().isBlank()
                 || (!binding.getExpectedUnit().isBlank()
-                    && !point.getUnit().equalsIgnoreCase(binding.getExpectedUnit()))) {
+                    && !UnitSymbolNormalizer.equivalent(point.getUnit(), binding.getExpectedUnit()))) {
             return issue(contextual, "POINT_UNIT_MISMATCH", "catalog unit does not match the published binding");
         }
         if (!binding.getCalibrationEvidenceId().isBlank()

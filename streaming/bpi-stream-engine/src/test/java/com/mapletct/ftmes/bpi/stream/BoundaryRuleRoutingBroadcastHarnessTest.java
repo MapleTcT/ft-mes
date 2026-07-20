@@ -199,6 +199,30 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
     }
 
     @Test
+    void canonicalUnitAliasKeepsRuntimeReadyAndRoutesTelemetry() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            BoundaryRulePublicationV1 base = publication("TENANT-A", "RULE-A", true, "sha:a");
+            BoundaryRulePublicationV1 publication = base.toBuilder()
+                    .setSignalBindings(0, base.getSignalBindings(0).toBuilder()
+                            .setExpectedUnit("m\u00b3/h"))
+                    .build();
+
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, publication);
+            harness.processElement(
+                    ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            assertEquals(BoundaryRuleRuntimeReadinessStatusV1.READY,
+                    runtimeReadiness(harness).get(0).getStatus());
+            assertTrue(harness.getOutput().stream().anyMatch(StreamRecord.class::isInstance));
+            assertTrue(harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES) == null
+                    || harness.getSideOutput(BoundaryRuleRoutingBroadcastFunction.ISSUES).isEmpty());
+        }
+    }
+
+    @Test
     void expiredMesCalibrationEvidenceDegradesRuntimeReadiness() throws Exception {
         try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
             harness.open();

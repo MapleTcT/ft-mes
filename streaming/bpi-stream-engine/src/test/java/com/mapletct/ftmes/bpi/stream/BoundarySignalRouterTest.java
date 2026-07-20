@@ -76,6 +76,23 @@ class BoundarySignalRouterTest {
     }
 
     @Test
+    void unicodeEquivalentUnitRoutesThePoint() {
+        BoundaryRulePublicationV1 publication = publication(BoundaryType.START, true).toBuilder()
+                .setSignalBindings(1, binding("flow", "feed.flow", "m\u00b3/h"))
+                .build();
+        PublishedBoundaryPlan plan = BoundaryRulePublicationMapper.map(publication);
+
+        BoundaryRoutingResult result = BoundarySignalRouter.route(
+                plan,
+                context("MO-1", ""),
+                telemetry(pointDouble("flow", 3.5, "m3/h", T0.plusSeconds(2))));
+
+        assertTrue(result.issues().isEmpty());
+        assertEquals(1, result.inputs().size());
+        assertEquals("feed.flow", result.inputs().get(0).observation().signal());
+    }
+
+    @Test
     void endRuleRequiresTypedBatchIdentity() {
         PublishedBoundaryPlan plan = BoundaryRulePublicationMapper.map(publication(BoundaryType.END, true));
 
