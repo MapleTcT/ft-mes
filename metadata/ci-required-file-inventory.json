@@ -3357,6 +3357,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-wms-reconciliation-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-business-dependency-readiness-smoke.js",
       "state": "tracked",
       "tracked": true
@@ -3772,6 +3778,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-reconciliation-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-reconciliation-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-reconciliation-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5241,6 +5265,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-wms-reconciliation-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/patrol-module-recovery-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5788,6 +5818,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-ui-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-wms-reconciliation-target-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-wms-reconciliation-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -7240,6 +7282,12 @@
     {
       "ignored": false,
       "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsInboundView.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/domain/WmsReconciliationTarget.java",
       "state": "tracked",
       "tracked": true
     },
@@ -9026,16 +9074,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 577
+      "tracked": 581
     },
     "docs": {
-      "tracked": 109
+      "tracked": 110
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 168
+      "tracked": 170
     },
     "package.json": {
       "tracked": 1
@@ -9047,7 +9095,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 286
+      "tracked": 287
     },
     "simulation": {
       "tracked": 4
@@ -9059,8 +9107,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1500,
-    "tracked": 1500,
+    "totalFiles": 1508,
+    "tracked": 1508,
     "untracked": 0
   },
   "untrackedByDirectory": []

@@ -743,6 +743,21 @@ material-wms -> receipt 全链落库，再由浏览器读取；取证后 marker 
 `metadata/bpi-quality-release-wms-live-target-bottom.png`。机器证据：
 `metadata/bpi-quality-release-wms-target-acceptance.json`。
 
+### BPI WMS 原单核对（2026-07-21）
+
+本节在当前唯一测试环境 `http://10.11.100.17:18080` 使用真实 ADP 登录、Java 8 adapter、
+Java 17 service 和 `ft_mes_bpi` PostgreSQL 15/Flyway V23。页面动作不是 mock；唯一 marker 在取证后
+已定向清理，五个 Phase 2/WMS 运行开关恢复为 false。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 完工入库 | `http://10.11.100.17:18080/bpi/#/batches` | 打开 `ADP_E2E_20260721_015610_WMS_RECON` 详情，点击“重新核对原单”，填写原因并确认 | `POST /bpi-api/batches/31176954-fd34-4f30-8610-1c4c18ba04ad/wms/reconcile` | 登录 200、命令 200，toast 显示原入库命令进入重新核对队列；console/page/request/BPI HTTP error 均为 0 | 原 command event 与 WMS 幂等键不变，link/outbox revision 均为 2，outbox 回到 PENDING，reconciliation count=1；批次保持 RELEASED | `bpi_batch_instances`、`bpi_wms_inbound_links`、`bpi_outbox_events`、`bpi_api_idempotency`、`bpi_audit_events` | PASS_TARGET_CONTROLLED_CLEANED | 未调用外部 ERP/WMS |
+| BPI 完工入库 | 同上 | 同一 API 幂等重放；再用旧 revision 提交 | 同上 | 同请求返回 200/`Idempotent-Replay: true`；旧 revision 返回 409/currentRevision=2 | 审计、幂等和 outbox 各 1，没有第二条业务命令；marker 清理残留 0 | 同上 | PASS_FAIL_CLOSED | 无 |
+
+机器证据：`metadata/bpi-wms-reconciliation-target-acceptance.json`；截图：
+`metadata/bpi-wms-reconciliation-target.png`；详细报告：
+`docs/testing/bpi-wms-reconciliation-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

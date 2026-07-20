@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-20T15:57:10+00:00",
-  "repoCommit": "ad36372936d99ca947d231fc552ae9c3e086c2cc",
-  "findingCount": 1605,
+  "generatedAt": "2026-07-20T18:24:05+00:00",
+  "repoCommit": "3a00d69274b0019a42edd30abf024bce406157bc",
+  "findingCount": 1606,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
     "documentation-or-workflow": 188,
     "frontend-row-index-noise": 4,
-    "java-row-index-noise": 75,
+    "java-row-index-noise": 76,
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 574,
@@ -22,7 +22,7 @@
     "from-dual": 140,
     "ojdbc": 15,
     "oracle-keyword": 638,
-    "rownum": 676,
+    "rownum": 677,
     "sysdate": 135
   },
   "topFiles": [
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 278,
+      "line": 279,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 279,
+      "line": 280,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 282,
+      "line": 283,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 283,
+      "line": 284,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 383,
+      "line": 384,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 937,
+      "line": 941,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 938,
+      "line": 942,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 940,
+      "line": 944,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 941,
+      "line": 945,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 949,
+      "line": 953,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 950,
+      "line": 954,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 952,
+      "line": 956,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 953,
+      "line": 957,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -11702,7 +11702,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 1004,
+      "line": 1011,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12598,7 +12598,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
-      "line": 54,
+      "line": 56,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12606,7 +12606,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
-      "line": 81,
+      "line": 93,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12614,7 +12614,15 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
-      "line": 277,
+      "line": 134,
+      "pattern": "rownum",
+      "category": "java-row-index-noise",
+      "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
+      "excerpt": "(rs, rowNum) -> new WmsReconciliationTarget("
+    },
+    {
+      "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
+      "line": 417,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",
@@ -12622,7 +12630,7 @@
     },
     {
       "file": "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/postgres/BatchReleasePostgresRepository.java",
-      "line": 338,
+      "line": 478,
       "pattern": "rownum",
       "category": "java-row-index-noise",
       "note": "Spring JDBC RowMapper rowNum parameter is not Oracle SQL ROWNUM.",

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T14:50:00Z",
-  "repoCommit": "ad36372936d99ca947d231fc552ae9c3e086c2cc",
+  "generatedAt": "2026-07-20T17:57:40.068Z",
+  "repoCommit": "3a00d69274b0019a42edd30abf024bce406157bc",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -135,11 +135,17 @@
       "marker": "ADP_E2E_20260720_215500_BPI_WMS; ADP_E2E_UI_20260720_222600_BPI_WMS",
       "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json; metadata/bpi-quality-release-wms-live-target.png; metadata/bpi-quality-release-wms-live-target-bottom.png",
       "assertions": "controlled authenticated QCS Protobuf 201; CLOSED_RAW/r1 -> WAIT_QA/r2 -> RELEASED/r3; one Kafka WMS command; query-first adapter created one material document/line/inventory transaction/stock with sourceSystem BPI and kg; durable receipt -> INBOUNDED/r4; identical QCS and forced Kafka command replay unchanged; five real browser APIs 200 and zero errors; Phase 2 switches false/deny-all; exact marker cleanup left material and BPI residual zero; external QCS and external ERP/WMS compensation remain pending"
+    },
+    "bpiWmsReconciliationTarget": {
+      "status": "PASS_TARGET_CONTROLLED_BROWSER_API_POSTGRES_CLEANED",
+      "marker": "ADP_E2E_20260721_015610_WMS_RECON",
+      "evidence": "metadata/bpi-wms-reconciliation-target-acceptance.json; metadata/bpi-wms-reconciliation-target.png",
+      "assertions": "real batch page action and POST 200; same command event and WMS idempotency key; link/outbox PENDING r2; API replay header true; stale revision 409/currentRevision=2; audit/idempotency/outbox 1/1/1; browser errors zero; marker residual zero; five Phase 2/WMS switches restored false; external ERP/WMS outage, reversal and compensation remain pending"
     }
   },
   "summary": {
-    "testedFeatures": 190,
-    "pass": 187,
+    "testedFeatures": 191,
+    "pass": 188,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4141,9 +4147,37 @@
       "issues": [
         "Marker was intentionally removed after screenshots and database evidence; rerun requires a new unique marker."
       ]
+    },
+    {
+      "module": "BPI WMS原单核对",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "管理员对已发布但未收到durable receipt的完工入库原命令执行核对与重新排队，并验证API幂等和旧revision冲突",
+      "api": "POST /bpi-api/batches/31176954-fd34-4f30-8610-1c4c18ba04ad/wms/reconcile",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BpiRoutePolicy -> BatchController.reconcileWmsInbound -> BatchReleaseService.reconcileWmsInbound -> BatchReleasePostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_E2E_20260721_015610_WMS_RECON",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-reconciliation-verification.sql; verify batch RELEASED/r3, link PENDING/r2, outbox PENDING/r2, manual_retry_count=1, original event/key unchanged and audit/idempotency/outbox=1/1/1; cleanup script requires residual_rows=0",
+      "status": "PASS",
+      "evidence": "metadata/bpi-wms-reconciliation-target-acceptance.json; real page POST 200, replay 200/Idempotent-Replay=true, stale revision 409/currentRevision=2, browser errors 0, target PostgreSQL rows matched and cleanup residual 0",
+      "issues": [
+        "The controlled target flow requeued the original internal outbox event; external ERP/WMS outage, lookup, reversal and compensation were not exercised."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721_015610_WMS_RECON",
+      "artifact": "metadata/bpi-wms-reconciliation-target-acceptance.json",
+      "summary": "Real target page, Java 8 adapter, Java 17 service and PostgreSQL proved original-event reconciliation, API replay, optimistic conflict, one audit/idempotency/outbox row, zero browser errors, zero marker residue and restored disabled Phase 2/WMS switches; external ERP/WMS compensation remains out of scope."
+    },
     {
       "marker": "ADP_E2E_20260720_BPI_QW_<four exact UUID tenants>",
       "artifact": "metadata/bpi-quality-release-wms-target-acceptance.json",

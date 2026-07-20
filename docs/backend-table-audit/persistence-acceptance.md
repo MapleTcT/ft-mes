@@ -746,6 +746,22 @@ QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 `material-wms` 已创建并直查真实完工入库单，且 Kafka/幂等/浏览器/清理闭环通过；它不证明外部 QCS
 主动事件、外部 ERP/WMS 单据所有权、业务冲销或宕机补偿，这些生产联合项仍为 `BLOCKED`。
 
+### BPI WMS 原命令核对与重新排队（目标 PostgreSQL）
+
+本节使用 marker `ADP_E2E_20260721_015610_WMS_RECON`，从真实 `/bpi/#/batches` 页面执行管理员
+动作并直查目标 `ft_mes_bpi`。核对前 outbox 为 PUBLISHED、WMS link 为 PENDING/r1，且已超过 5 分钟
+安全等待期。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 重新核对原 WMS 单据 | `/bpi/#/batches` 批次质量与库存详情 | `POST /bpi-api/batches/31176954-fd34-4f30-8610-1c4c18ba04ad/wms/reconcile` | `BpiProxyController -> BpiRoutePolicy -> BatchController.reconcileWmsInbound -> BatchReleaseService.reconcileWmsInbound -> BatchReleasePostgresRepository` | `bpi_batch_instances`、`bpi_wms_inbound_links`、`bpi_outbox_events`、`bpi_api_idempotency`、`bpi_audit_events` | `deploy/docker/scripts/bpi-wms-reconciliation-verification.sql`：按 batch/link/event/path 精确核对 state、revision、retry 和行数 | HTTP 200；原 event `354ba04c-...` 与原 WMS key 不变；link/outbox 为 PENDING/r2，manual retry=1，audit/idempotency/outbox 各 1；batch 仍 RELEASED/r3 | PASS_TARGET_CONTROLLED |
+| API 幂等重放 | 同上 | 同 endpoint、同 `Idempotency-Key`、同 payload、`If-Match: 1` | API idempotency replay -> 已保存响应 | idempotency、WMS link、outbox、audit | 比较 replay 前后 reconciliation count 与四表行数 | HTTP 200，`Idempotent-Replay: true`；count 仍 1，未重复排队 | PASS |
+| 旧 revision 并发冲突 | 同上 | 同 endpoint、新幂等键、旧 `If-Match: 1` | service optimistic concurrency guard | 同上 | 查询 current link revision 与 audit/idempotency/outbox 数量 | HTTP 409/currentRevision=2；无第二次业务更新 | PASS_FAIL_CLOSED |
+| marker 清理与安全恢复 | 不适用 | cleanup SQL；Compose service restart | 定向删除 + 环境备份恢复 | 上述表及两个临时 feature flag | `deploy/docker/scripts/bpi-wms-reconciliation-cleanup.sql` | residual rows=0；Phase 2、Protobuf、Kafka、WMS outbox/adapter 均为 false；service/adapter healthy | PASS_CLEANED |
+
+机器证据：`metadata/bpi-wms-reconciliation-target-acceptance.json`。本项仅关闭内部原命令核对的软件
+合同，不代表外部 ERP/WMS 查单、宕机、冲销或补偿已经完成。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

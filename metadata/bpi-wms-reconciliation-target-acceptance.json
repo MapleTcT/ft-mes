@@ -1,0 +1,164 @@
+{
+  "generatedAt": "2026-07-20T17:57:40.068Z",
+  "status": "PASS_TARGET_CONTROLLED_BROWSER_API_POSTGRES_CLEANED",
+  "target": {
+    "host": "10.11.100.17",
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "database": "PostgreSQL 15",
+    "databaseName": "ft_mes_bpi",
+    "schema": "bpi",
+    "flywayVersion": 23
+  },
+  "source": {
+    "implementationCommit": "fb93966f1802e8c8742824e1cb7e74247f24ec5d",
+    "adapterAndAcceptanceCommit": "3a00d69274b0019a42edd30abf024bce406157bc",
+    "branch": "codex/bpi-wms-reconciliation"
+  },
+  "runtime": {
+    "service": {
+      "container": "adp-mes-newbase-bpi-service-1",
+      "image": "ft-mes-bpi-service:20260720T171655Z-fb93966f1802",
+      "health": "healthy"
+    },
+    "adapter": {
+      "container": "adp-mes-newbase-bpi-adapter-1",
+      "image": "ft-mes-bpi-adapter:20260720T174831Z-3a00d692",
+      "health": "healthy",
+      "jarSha256": "69f6449b4b9282386dfadf297dc2fccb5e07355c412bdce81d1658ba02ef104a",
+      "previousImage": "ft-mes-bpi-adapter:20260720t103517z-2096a8cd6274",
+      "rollbackImage": "ft-mes-bpi-adapter:rollback-20260720T174831Z-3a00d692",
+      "environmentBackup": "/home/v6/adp-releases/bpi-wms-reconciliation-3a00d692/.env.before-adapter-20260720T174831Z"
+    }
+  },
+  "scenario": {
+    "marker": "ADP_E2E_20260721_015610_WMS_RECON",
+    "actor": "legacy-ticket:admin",
+    "route": "/bpi/#/batches",
+    "batchId": "31176954-fd34-4f30-8610-1c4c18ba04ad",
+    "batchStateBefore": "RELEASED",
+    "wmsLinkStatusBefore": "PENDING",
+    "outboxStatusBefore": "PUBLISHED",
+    "commandEventId": "354ba04c-6c11-48eb-923c-1fe17a2269a2",
+    "wmsIdempotencyKey": "ADP_E2E_20260721_015610_WMS_RECON|WMS|1",
+    "safetyDelay": "5m",
+    "intent": "A published completion-inbound command has no durable receipt; an administrator queries and requeues the original command instead of creating a new business command."
+  },
+  "browser": {
+    "loginStatus": 200,
+    "unauthenticatedReadBlocked": true,
+    "pageAction": "重新核对原单",
+    "dialogAction": "确认核对原单",
+    "command": {
+      "method": "POST",
+      "endpoint": "/bpi-api/batches/31176954-fd34-4f30-8610-1c4c18ba04ad/wms/reconcile",
+      "status": 200,
+      "request": {
+        "idempotencyKey": "cfc37798-4606-49bf-989c-8e1d9226dc62",
+        "ifMatch": "1",
+        "reason": "ADP_E2E_20260721_015610_WMS_RECON receipt timeout query-first reconciliation"
+      },
+      "response": {
+        "batchState": "RELEASED",
+        "batchRevision": 3,
+        "wmsStatus": "PENDING",
+        "wmsLinkRevision": 2,
+        "outboxStatus": "PENDING",
+        "reconciliationCount": 1,
+        "commandEventId": "354ba04c-6c11-48eb-923c-1fe17a2269a2",
+        "wmsIdempotencyKey": "ADP_E2E_20260721_015610_WMS_RECON|WMS|1"
+      }
+    },
+    "sameRequestReplay": {
+      "status": 200,
+      "idempotentReplayHeader": "true",
+      "reconciliationCount": 1
+    },
+    "staleRevision": {
+      "status": 409,
+      "currentRevision": 2,
+      "detail": "WMS completion-inbound revision is stale."
+    },
+    "errors": {
+      "console": 0,
+      "page": 0,
+      "requestFailures": 0,
+      "bpiHttpErrors": 0
+    },
+    "screenshot": {
+      "path": "metadata/bpi-wms-reconciliation-target.png",
+      "sha256": "6e127b38b83fa7052ddfdff5a3e2f0d5d5b40d8f54e334cad1eb8e5f4b8c2b8a"
+    }
+  },
+  "backend": {
+    "entry": "BpiProxyController -> BpiRoutePolicy -> BatchController.reconcileWmsInbound -> BatchReleaseService.reconcileWmsInbound -> BatchReleasePostgresRepository",
+    "repositoryActions": [
+      "lockWmsReconciliation",
+      "requeueWmsReconciliation",
+      "insertWmsReconciliationAudit"
+    ],
+    "adapterContract": {
+      "exactRouteAllowed": "/batches/{uuid}/wms/reconcile",
+      "nestedRouteRejected": "/batches/{uuid}/wms/reconcile/force",
+      "requestHeadersForwarded": [
+        "Idempotency-Key",
+        "If-Match"
+      ],
+      "responseHeadersForwarded": [
+        "Idempotent-Replay"
+      ],
+      "java8Tests": {
+        "tests": 30,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "postgres": {
+    "verificationScript": "deploy/docker/scripts/bpi-wms-reconciliation-verification.sql",
+    "cleanupScript": "deploy/docker/scripts/bpi-wms-reconciliation-cleanup.sql",
+    "tables": [
+      "bpi.bpi_batch_instances",
+      "bpi.bpi_wms_inbound_links",
+      "bpi.bpi_outbox_events",
+      "bpi.bpi_api_idempotency",
+      "bpi.bpi_audit_events"
+    ],
+    "result": {
+      "batchState": "RELEASED",
+      "batchRevision": 3,
+      "wmsStatus": "PENDING",
+      "linkStatus": "PENDING",
+      "linkRevision": 2,
+      "outboxStatus": "PENDING",
+      "outboxRevision": 2,
+      "manualRetryCount": 1,
+      "totalAttemptCount": 1,
+      "auditRows": 1,
+      "idempotencyRows": 1,
+      "outboxRows": 1,
+      "sameCommandEvent": true,
+      "sameWmsIdempotencyKey": true
+    },
+    "cleanup": {
+      "residualRows": 0,
+      "temporaryFeatureFlagsDeleted": 2,
+      "nonMarkerRowsDeleted": 0
+    }
+  },
+  "finalSafetyState": {
+    "BPI_PHASE2_INTEGRATION_ENABLED": false,
+    "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED": false,
+    "BPI_PHASE2_KAFKA_ENABLED": false,
+    "BPI_WMS_OUTBOX_ENABLED": false,
+    "BPI_WMS_ADAPTER_ENABLED": false,
+    "serviceHealth": "healthy",
+    "adapterHealth": "healthy"
+  },
+  "scopeBoundary": {
+    "closed": "The real page, Java 8 adapter, Java 17 service, API idempotency, optimistic concurrency, PostgreSQL requeue, audit and marker cleanup are accepted for original-command reconciliation.",
+    "notClosed": "No external ERP/WMS outage, external document lookup, reversal, compensation, or production traffic was exercised; G-021 remains PARTIAL."
+  }
+}
