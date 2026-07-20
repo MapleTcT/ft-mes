@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-07-20T08:01:39Z",
-  "generatedFromCommit": "22ddadebd20ed9ed5d7efd19c3c0ed49967b9c90+codex/bpi-phase2-quality-wms-contracts",
+  "generatedFromCommit": "94e2b2288bf52966be58e9dda97039a5455466a8+codex/bpi-phase2-release-ui",
   "overallStatus": "IN_PROGRESS_NOT_COMPLETE",
   "databaseDefault": "PostgreSQL",
   "summary": {
@@ -36,7 +36,7 @@
         "make ci passed on 2026-06-15 after commit d13b817",
         "make sustainable-check now validates generated-artifact ignore rules and blocks tracked __pycache__, pyc, target, node_modules, dist, class and log artifacts except narrow runtime patch class allowlist with adjacent source.",
         "make ci now includes runtime-smoke-reports-check so committed runtime smoke reports are checked for schema, PASS status, current host, expected checks, and secret hygiene.",
-        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1467 CI/governance/runtime assets, 1467 tracked, 0 untracked, and 0 missing references. The inventory includes all maintainable source modules, PostgreSQL migrations, runtime and browser acceptance assets, BPI event/API contracts, Flyway V20-V23, the Java 17/PostgreSQL shadow service, and the disabled-by-default QCS quality-release/WMS completion-inbound contract slice; target QCS/WMS activation remains blocked until real integration and browser acceptance are complete.",
+        "make ci includes ci-required-file-inventory-check and ci-required-file-strict-check; metadata/ci-required-file-inventory.json currently records 1469 CI/governance/runtime assets, 1469 tracked, 0 untracked, and 0 missing references. The inventory includes all maintainable source modules, PostgreSQL migrations, runtime and browser acceptance assets, BPI event/API contracts, Flyway V20-V23, the Java 17/PostgreSQL shadow service, the disabled-by-default QCS quality-release/WMS completion-inbound contract slice, and its deterministic quality/inventory browser acceptance; target QCS/WMS activation remains blocked until real integration and target browser acceptance are complete.",
         "make ci now includes goal-gap-register-check; metadata/goal-gap-register.json and docs/goal-gap-register.md are generated from the project goal ledger, production blockers, backlog, dependency readiness, export readiness and production migration ledgers so open gaps cannot be hidden by localized PASS evidence.",
         "make ci-required-file-strict-check now passes and scripts/verify-project-goal-acceptance.py rejects G-001 READY if the strict inventory is not clean or if the inventory generator/report artifacts are not tracked."
       ],
@@ -1026,6 +1026,8 @@
         "docs/backend-table-audit/bpi-quality-release-wms-inbound.md",
         "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
         "metadata/bpi-quality-release-wms-inbound-acceptance.json",
+        "docs/testing/bpi-quality-inventory-ui-acceptance.md",
+        "metadata/bpi-quality-inventory-ui-acceptance.json",
         "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/application/SourceSequenceEvidenceIngestionService.java",
         "services/bpi-service/app/src/main/java/com/mapletct/ftmes/bpi/infrastructure/sourcesequence/SourceSequenceEvidenceKafkaRecordProcessor.java",
         "services/bpi-service/app/src/test/java/com/mapletct/ftmes/bpi/BpiSourceSequenceKafkaPostgresAcceptanceTest.java",
@@ -1103,13 +1105,14 @@
         "2026-07-20 来源序列 V22 已在目标唯一 ADP 环境完成真实验收：新目录 snapshot c6c09084-82dd-46f8-81e4-98b336b46e65 携带 GATEWAY origin 和 binding fingerprint；PostgreSQL current evidence 为 DISABLED/r2、inbox=2、首次状态审计=1、candidate=0、batch=0。真实 /bpi/#/points API 200，证据抽屉显示 DISABLED/BLOCKED/r2，console/page error 为 0；MES 旧镜像与 V22 数据库健康兼容并已回到新镜像。证据记录在 metadata/bpi-source-sequence-readiness-acceptance.json。",
         "2026-07-20 受控 MQTT 双会话以 2026072003:5001..5003 和重连后的 2026072004:1..3 完成 6/6 PUBACK、JetLinks 双表、exporter +6、Kafka 37 -> 43、Flink RUNNING 36/36、MES 来源序列 current、六条数据质量 raw event 和真实点位/数据质量页面联合验收；验收窗口内为 QUALIFIED/DEVICE，点位仅因 calibrationVersion pilot-unverified-20260714 未批准保持 0 READY，candidate/batch=0。证据记录在 metadata/bpi-mqtt-ingress-joint-acceptance.json；来源为受控模拟器且 30 分钟证据窗口已过期，不构成现场生产 READY。",
         "2026-07-20 marker BPI_LIVE_20260720_123058 使用真实 WOM task 9007190226136424 的 start/stop 与三个 SENT context revision、测试专用独立审批校准、START/END 规则、受控 MQTT epoch 20260720125701/20260720130001，闭合 JetLinks -> Kafka -> Flink -> PostgreSQL -> 浏览器。候选 9b2aade2-a305-55c5-880c-b6a0be61349b 与 3ebc9c81-ec10-596d-9d77-990c83f963fa 均为 CONFIRMED/r2，同一影子批次 52427282-eb88-5645-a246-b76fe6547038 从 ACTIVE 进入 CLOSED_RAW/r2；修复前 UNIT_MISMATCH incident f235795b-2c6b-518f-bfc8-66329bcabba7 保留 5 条 raw event 并由真实页面处置为 RESOLVED/r7。规则均 RETIRED/INACTIVE、测试校准 REVOKED、开关覆盖 inactive、WOM finished context SENT；Flink job ffe9ab719bbf7250b682f77f75641f17 为 RUNNING 36/36，checkpoint 5533 为 36/36。证据 metadata/bpi-live-mqtt-wom-start-end-acceptance.json；来源和校准仍为测试专用，不构成现场生产 READY。",
-        "2026-07-20 源码提交 22ddadebd20ed9ed5d7efd19c3c0ed49967b9c90 新增 Flyway V23、QCS required-inspection snapshot、CLOSED_RAW -> WAIT_QA -> RELEASED/REJECTED、WMS transactional outbox、PUBLISHED 后 durable document receipt、未知 WMS 状态 fail-closed、影子批次双层阻断和默认关闭的 Phase 2 合同。全新 PostgreSQL 16.13 从 V1-V23 迁移通过，定向 PostgreSQL/API 验收 4/4、完整后端回归 76 项 0 失败；机器证据为 metadata/bpi-quality-release-wms-inbound-acceptance.json。该证据仅代表本地软件合同通过，真实 QCS/WMS、目标部署和浏览器页仍为 BLOCKED。"
+        "2026-07-20 源码提交 22ddadebd20ed9ed5d7efd19c3c0ed49967b9c90 新增 Flyway V23、QCS required-inspection snapshot、CLOSED_RAW -> WAIT_QA -> RELEASED/REJECTED、WMS transactional outbox、PUBLISHED 后 durable document receipt、未知 WMS 状态 fail-closed、影子批次双层阻断和默认关闭的 Phase 2 合同。全新 PostgreSQL 16.13 从 V1-V23 迁移通过，定向 PostgreSQL/API 验收 4/4、完整后端回归 76 项 0 失败；机器证据为 metadata/bpi-quality-release-wms-inbound-acceptance.json。该证据仅代表本地软件合同通过，真实 QCS/WMS 和目标部署仍为 BLOCKED。",
+        "2026-07-20 源码提交 94e2b2288bf52966be58e9dda97039a5455466a8 接入 GET /bpi/v1/batches/{batchId}/release，并在批次详情形成质量门、必检项目、WMS 命令/幂等键、拒绝详情和 durable document 的业务视图。确定性模拟器覆盖 CLOSED_RAW 空态、WAIT_QA、质量拒绝、WMS PENDING/REJECTED 和 INBOUNDED 六态；局部 503 保持批次事实/证据/时间线可见并可重试，慢响应关闭竞态和 390x844 无溢出通过。完整浏览器回归 17/17、模拟器 12/12、API/UI 门禁通过；证据为 metadata/bpi-quality-inventory-ui-acceptance.json。该证据不是目标 Java/PostgreSQL/QCS/WMS 联合验收，Phase 2 保持默认关闭。"
     ],
     "blockingIssues": [
-        "拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、点位校准治理、Flyway V20 影子运行验收、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、前端状态列、有状态 savepoint 恢复、Flink 自动数据质量 producer、单 broker 故障恢复、service/adapter/Flink 应用组件回退以及受控同指令 START/END 均已在目标环境通过。V23 QCS 放行/WMS 入库软件合同已在本地 PostgreSQL/API 通过但仍默认关闭；尚缺真实连续 7-14 天、物理设备来源、真实业务负载下的跨组件整体回切，以及真实 QCS/WMS、目标部署和浏览器验收。",
+        "拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、点位校准治理、Flyway V20 影子运行验收、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、前端状态列、有状态 savepoint 恢复、Flink 自动数据质量 producer、单 broker 故障恢复、service/adapter/Flink 应用组件回退以及受控同指令 START/END 均已在目标环境通过。V23 QCS 放行/WMS 入库软件合同已在本地 PostgreSQL/API 通过，质量与库存产品页已完成确定性浏览器六态和错误恢复，但 Phase 2 仍默认关闭；尚缺真实连续 7-14 天、物理设备来源、真实业务负载下的跨组件整体回切，以及真实 QCS/WMS 和目标部署验收。",
         "JetLinks 试点产品、设备、instantFlow metadata 和标准单位已经注册激活并自动落入 MES 目录，MES 校准证据提交/四眼审批/驳回/撤销工作流及受控 MQTT + MES 同一生产指令 START/END candidate/batch 已完成。当前仍缺与目录 calibrationVersion 精确匹配的真实现场证书、物理 DEVICE/GATEWAY epoch/sequence、断电恢复及同等整链复验；测试专用校准和模拟器不能替代现场证据。",
         "Phase 1 的影子任务、10 批人工复核、19/20 边界认同、累计量偏差 0%、关键数据质量阻断和四眼批准已通过受控时间压缩验收；仍缺选定产线使用真实来源数据连续运行 7-14 天，以及真实工况下的边界认同率和累计量偏差证据。",
-        "Phase 2 的 QCS 放行、WMS 完工入库、幂等 outbox/receipt、异常拒绝和影子批次阻断已在本地 V23 PostgreSQL/API 软件链通过；真实 QCS/WMS 事件源、Java 8 入口适配、目标部署、浏览器验收、现场补偿演练和受控开关激活仍未完成。Phase 3/4 训练数据与建议型模型也未开始。"
+        "Phase 2 的 QCS 放行、WMS 完工入库、幂等 outbox/receipt、异常拒绝和影子批次阻断已在本地 V23 PostgreSQL/API 软件链通过，质量与库存页面的六态、局部失败和移动端也已通过确定性浏览器验收；真实 QCS/WMS 事件源、Java 8 入口适配、目标 V23/静态包部署、真实页面/API/PostgreSQL/单据联合验收、现场补偿演练和受控开关激活仍未完成。Phase 3/4 训练数据与建议型模型也未开始。"
       ],
       "nextActions": [
         "把已通过的 BPI_LIVE_20260720_123058 同一 WOM 指令 START/END 真实浏览器/API/JetLinks/Kafka/Flink/PostgreSQL 联合验收、自动数据质量链和 Flyway V20 影子运行闭环，固定为每次 BPI 发布前的目标环境回归基线；保持 V23 的 QCS/WMS 开关关闭，先在选定产线真实连续运行 7-14 天，再接入真实 QCS/WMS 做 marker、补偿和浏览器验收。",

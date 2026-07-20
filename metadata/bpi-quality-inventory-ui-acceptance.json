@@ -1,0 +1,146 @@
+{
+  "generatedAt": "2026-07-20T17:32:31+08:00",
+  "repoCommit": "94e2b2288bf52966be58e9dda97039a5455466a8",
+  "status": "PASS_DETERMINISTIC_BROWSER_NOT_TARGET_ACTIVATED",
+  "scope": "BPI batch quality release and WMS inbound deterministic browser acceptance",
+  "database": "NOT_APPLICABLE_IN_UI_SUITE",
+  "phase1Mode": "SHADOW_ONLY",
+  "phase2Mode": "DISABLED_BY_DEFAULT",
+  "summary": {
+    "browserTests": 2,
+    "browserPass": 2,
+    "browserFail": 0,
+    "stateCases": 6,
+    "stateCasesPass": 6,
+    "unexpectedConsoleErrors": 0,
+    "expectedInjected503ConsoleErrors": 1,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "horizontalOverflowFailures": 0
+  },
+  "api": {
+    "method": "GET",
+    "endpoint": "/bpi/v1/batches/{batchId}/release",
+    "operationId": "getBatchRelease",
+    "clientMethod": "bpiApi.batchRelease"
+  },
+  "stateMatrix": [
+    {
+      "id": "closed-raw-empty",
+      "batchState": "CLOSED_RAW",
+      "qualityGate": null,
+      "wmsInbound": null,
+      "expectedBusinessState": "尚未进入质量放行 / 尚未生成入库命令",
+      "status": "PASS"
+    },
+    {
+      "id": "quality-waiting",
+      "batchState": "WAIT_QA",
+      "qualityGate": "WAITING",
+      "wmsInbound": null,
+      "expectedBusinessState": "等待 1 项必检项目完成",
+      "status": "PASS"
+    },
+    {
+      "id": "quality-rejected",
+      "batchState": "REJECTED",
+      "qualityGate": "REJECTED",
+      "wmsInbound": null,
+      "expectedBusinessState": "存在不合格必检项目",
+      "status": "PASS"
+    },
+    {
+      "id": "wms-pending",
+      "batchState": "RELEASED",
+      "qualityGate": "ACCEPTED",
+      "wmsInbound": "PENDING",
+      "expectedBusinessState": "入库处理中",
+      "status": "PASS"
+    },
+    {
+      "id": "wms-rejected",
+      "batchState": "RELEASED",
+      "qualityGate": "ACCEPTED",
+      "wmsInbound": "REJECTED",
+      "expectedBusinessState": "入库失败 / WMS_LOCATION_LOCKED",
+      "status": "PASS"
+    },
+    {
+      "id": "wms-inbounded",
+      "batchState": "INBOUNDED",
+      "qualityGate": "ACCEPTED",
+      "wmsInbound": "ACCEPTED",
+      "documentId": "WMS-IN-ADP-E2E-0001",
+      "expectedBusinessState": "已入库",
+      "status": "PASS"
+    }
+  ],
+  "browserScenarios": [
+    {
+      "id": "desktop-quality-inventory-six-state",
+      "route": "/bpi/#/batches",
+      "viewport": "1440x900",
+      "operations": [
+        "open six deterministic batch projections",
+        "verify release loading remains local to the quality and inventory section",
+        "verify quality inspection records and external revision",
+        "verify WMS command event, idempotency key, rejection and durable document id",
+        "close the drawer during a delayed response and verify it stays closed"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-batch-quality-inventory.png"
+    },
+    {
+      "id": "mobile-release-partial-failure-retry",
+      "route": "/bpi/#/batches",
+      "viewport": "390x844",
+      "operations": [
+        "inject one HTTP 503 release projection response",
+        "verify batch facts, boundary evidence and timeline remain visible",
+        "verify local trace id and retry control",
+        "retry and recover the rejected WMS projection",
+        "verify no drawer horizontal overflow"
+      ],
+      "status": "PASS",
+      "expectedFailureEvidence": "one Chromium 503 network console message",
+      "evidence": "/tmp/bpi-console-batch-quality-inventory-mobile.png"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "/tmp/bpi-console-batch-quality-inventory.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "de2ff01ee89566c14775b713ac279192e01a90f3ded9464ccb81f0604d78d646"
+    },
+    {
+      "path": "/tmp/bpi-console-batch-quality-inventory-mobile.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "966dd0816e1ab7c0c3cf85ef48ad4068ef34dfab77525a08677096dd4bb7c2c4"
+    }
+  ],
+  "sourceFiles": [
+    "frontend/apps/bpi/src/types.ts",
+    "frontend/apps/bpi/src/api.ts",
+    "frontend/apps/bpi/src/main.ts",
+    "frontend/apps/bpi/src/styles.css",
+    "frontend/apps/bpi/tests/bpi-console.e2e.cjs",
+    "simulation/bpi/scenario.js",
+    "simulation/bpi/server.js",
+    "simulation/bpi/bpi-simulation.test.js",
+    "contracts/bpi-api/simulation-profile.json"
+  ],
+  "persistence": {
+    "performed": false,
+    "reason": "The browser suite uses the deterministic simulator and does not claim database persistence.",
+    "separateEvidence": "metadata/bpi-quality-release-wms-inbound-acceptance.json"
+  },
+  "limitations": [
+    "The browser API was served by the deterministic simulator, not the target Java 17 BPI service.",
+    "No real QCS or WMS target system was invoked.",
+    "No target PostgreSQL marker or WMS document was created by this UI suite.",
+    "Flyway V23 and the UI bundle have not been deployed to the target environment.",
+    "No production feature flag was enabled and no claim of production readiness is made."
+  ]
+}

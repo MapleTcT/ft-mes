@@ -231,6 +231,15 @@ adapter 的回退演练仍返回 gateway 的 28 个原菜单，恢复后 adapter
 该闭环只完成导航治理，不改变现场连续影子运行和生产写回仍未完成的结论；G-021 继续保持 `PARTIAL`。
 证据见 [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)。
 
+同日提交 `94e2b2288bf52966be58e9dda97039a5455466a8` 完成批次详情“质量与库存”产品页，接入
+`GET /bpi/v1/batches/{batchId}/release`，以确定性模拟器覆盖 `CLOSED_RAW` 空态、`WAIT_QA`、
+质量拒绝、WMS `PENDING/REJECTED` 和带 durable document 的 `INBOUNDED` 六态。页面在 release
+投影慢响应或局部 `503` 时仍先显示批次事实、边界证据和时间线，并可局部重试；关闭竞态、390x844
+移动布局和“HTTP 200 不等于已入库”的失败关闭规则均通过。完整浏览器回归为 17/17，模拟器回归为
+12/12。该证据只证明产品页与合同的确定性行为，不证明目标环境 Flyway V23、真实 QCS/WMS 或业务单据；
+Phase 2 继续默认关闭，G-021 保持 `PARTIAL`。证据见
+[BPI 批次质量与库存页面验收](testing/bpi-quality-inventory-ui-acceptance.md)。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -249,6 +258,7 @@ adapter 的回退演练仍返回 gateway 的 28 个原菜单，恢复后 adapter
 - [BPI 影子运行与人工验收闭环](testing/bpi-shadow-run-acceptance.md)
 - [BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)
 - [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)
+- [BPI 批次质量与库存页面验收](testing/bpi-quality-inventory-ui-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标

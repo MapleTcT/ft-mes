@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-20T03:17:27+08:00",
-  "repoCommit": "c96bd912b663d42de8ff1de670520e59283c0490",
-  "workingTree": "uncommitted",
+  "generatedAt": "2026-07-20T17:32:31+08:00",
+  "repoCommit": "94e2b2288bf52966be58e9dda97039a5455466a8",
+  "workingTree": "clean-at-source-commit",
   "scope": "deterministic BPI simulator browser acceptance",
   "application": {
     "path": "frontend/apps/bpi",
@@ -10,8 +10,8 @@
     "productionRewrite": "/bpi/v1"
   },
   "summary": {
-    "browserTests": 15,
-    "pass": 15,
+    "browserTests": 17,
+    "pass": 17,
     "fail": 0,
     "blocked": 0,
     "consoleErrors": 0,
@@ -348,6 +348,52 @@
       ],
       "status": "PASS",
       "evidence": "/tmp/bpi-console-feature-flags.png"
+    },
+    {
+      "id": "desktop-batch-quality-inventory",
+      "viewport": "1440x900",
+      "routes": [
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "open CLOSED_RAW, WAIT_QA, REJECTED, WMS PENDING, WMS REJECTED and INBOUNDED projections",
+        "verify required inspection disposition, final-result state and external quality revision",
+        "verify WMS command event, idempotency key, rejection detail and durable document id",
+        "prove HTTP 200 alone never renders an inbounded business conclusion",
+        "render batch facts before a delayed release projection",
+        "close the drawer during a delayed response and verify stale data does not reopen it"
+      ],
+      "apis": [
+        "GET /bpi/v1/batches/{id}",
+        "GET /bpi/v1/batches/{id}/evidence",
+        "GET /bpi/v1/batches/{id}/timeline",
+        "GET /bpi/v1/batches/{id}/release"
+      ],
+      "status": "PASS",
+      "evidence": "/tmp/bpi-console-batch-quality-inventory.png"
+    },
+    {
+      "id": "mobile-batch-release-partial-failure",
+      "viewport": "390x844",
+      "routes": [
+        "/bpi/#/batches"
+      ],
+      "operations": [
+        "inject one controlled HTTP 503 for the release projection",
+        "keep batch facts, boundary evidence and timeline visible",
+        "show the local trace id and retry only the failed projection",
+        "recover the WMS rejection view after retry",
+        "verify drawer scroll width does not exceed its client width"
+      ],
+      "apis": [
+        "GET /bpi/v1/batches/{id}",
+        "GET /bpi/v1/batches/{id}/evidence",
+        "GET /bpi/v1/batches/{id}/timeline",
+        "GET /bpi/v1/batches/{id}/release"
+      ],
+      "status": "PASS",
+      "expectedFailureEvidence": "one controlled Chromium 503 network console message; zero unexpected errors",
+      "evidence": "/tmp/bpi-console-batch-quality-inventory-mobile.png"
     }
   ],
   "persistence": {
@@ -360,7 +406,7 @@
     "No browser-to-PostgreSQL end-to-end persistence was performed in this UI suite; START-to-END closure used the deterministic simulator.",
     "The Java 8 authentication adapter and ADP session bridge have separate target evidence; this deterministic browser suite did not retest the target environment.",
     "Target MES shell, PostgreSQL and RBAC persistence acceptance are tracked separately and are not implied by these simulator results.",
-    "Flink application, runtime readiness and the time-compressed 7-day shadow-run clock were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
+    "Flink application, runtime readiness, the time-compressed 7-day shadow-run clock, and the quality/WMS release projections were exercised through deterministic simulator controls; no real IoT, Kafka, Flink, WOM, QCS or WMS integration was exercised in this browser suite.",
     "No real mobile device, weak-network or accessibility acceptance was performed."
   ]
 }

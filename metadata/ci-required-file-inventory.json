@@ -5127,6 +5127,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-quality-inventory-ui-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5548,6 +5554,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-production-context-join-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-inventory-ui-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8831,13 +8843,13 @@
       "tracked": 574
     },
     "docs": {
-      "tracked": 108
+      "tracked": 109
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 163
+      "tracked": 164
     },
     "package.json": {
       "tracked": 1
@@ -8861,8 +8873,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1467,
-    "tracked": 1467,
+    "totalFiles": 1469,
+    "tracked": 1469,
     "untracked": 0
   },
   "untrackedByDirectory": []
