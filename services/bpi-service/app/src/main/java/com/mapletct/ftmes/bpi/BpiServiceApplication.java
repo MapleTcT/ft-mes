@@ -9,6 +9,8 @@ import com.mapletct.ftmes.bpi.infrastructure.application.BpiRuleApplicationKafka
 import com.mapletct.ftmes.bpi.infrastructure.pointcatalog.BpiPointCatalogKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.dataquality.BpiDataQualityKafkaProperties;
 import com.mapletct.ftmes.bpi.infrastructure.sourcesequence.BpiSourceSequenceKafkaProperties;
+import com.mapletct.ftmes.bpi.infrastructure.integration.BpiPhase2IntegrationProperties;
+import com.mapletct.ftmes.bpi.infrastructure.integration.BpiWmsOutboxProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,7 +25,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         BpiPointCatalogKafkaProperties.class,
         BpiSourceSequenceKafkaProperties.class,
         BpiRuleApplicationKafkaProperties.class,
-        RulePublicationOutboxProperties.class
+        RulePublicationOutboxProperties.class,
+        BpiPhase2IntegrationProperties.class,
+        BpiWmsOutboxProperties.class
 })
 public class BpiServiceApplication {
 

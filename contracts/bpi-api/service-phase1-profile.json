@@ -1,6 +1,6 @@
 {
   "profile": "phase-1-java17-shadow-service",
-  "description": "Public OpenAPI operations and trusted internal ingestion endpoints implemented by the real Java 17/PostgreSQL service through Flyway V21.",
+  "description": "Public OpenAPI operations and trusted internal ingestion endpoints implemented by the real Java 17/PostgreSQL service through Flyway V23; Phase 2 integrations remain independently disabled by default.",
   "operationIds": [
     "getBpiOverview",
     "listFeatureFlags",

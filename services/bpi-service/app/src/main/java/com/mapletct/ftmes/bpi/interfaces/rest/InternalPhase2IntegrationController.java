@@ -1,0 +1,90 @@
+package com.mapletct.ftmes.bpi.interfaces.rest;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.mapletct.ftmes.bpi.application.ActorContext;
+import com.mapletct.ftmes.bpi.application.ActorContextFactory;
+import com.mapletct.ftmes.bpi.application.BatchReleaseService;
+import com.mapletct.ftmes.bpi.application.Checksums;
+import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
+import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
+import com.mapletct.ftmes.bpi.contract.v1.QcsQualityGateV1;
+import com.mapletct.ftmes.bpi.contract.v1.WmsCompletionInboundReceiptV1;
+import com.mapletct.ftmes.bpi.domain.BatchReleaseView;
+import com.mapletct.ftmes.bpi.infrastructure.integration.BpiPhase2IntegrationProperties;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class InternalPhase2IntegrationController {
+    private static final String PROTOBUF_MEDIA_TYPE = "application/x-protobuf";
+
+    private final ActorContextFactory actorContextFactory;
+    private final BatchReleaseService batchReleaseService;
+    private final BpiPhase2IntegrationProperties properties;
+
+    public InternalPhase2IntegrationController(
+            ActorContextFactory actorContextFactory,
+            BatchReleaseService batchReleaseService,
+            BpiPhase2IntegrationProperties properties) {
+        this.actorContextFactory = actorContextFactory;
+        this.batchReleaseService = batchReleaseService;
+        this.properties = properties;
+    }
+
+    @PostMapping(path = "/internal/bpi/v1/qcs-quality-gates", consumes = PROTOBUF_MEDIA_TYPE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('BPI_INTEGRATION_INGEST', 'BPI_ADMIN')")
+    public ApiResponse<BatchReleaseView> qualityGate(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody byte[] payload,
+            HttpServletRequest request) {
+        assertIngress(payload);
+        QcsQualityGateV1 event;
+        try {
+            event = QcsQualityGateV1.parseFrom(payload);
+        } catch (InvalidProtocolBufferException error) {
+            throw new BpiValidationException("Payload is not valid QcsQualityGateV1 Protobuf.");
+        }
+        ActorContext actor = actorContextFactory.from(jwt);
+        return ApiResponse.of(
+                batchReleaseService.applyQualityGate(actor, event, Checksums.sha256(payload)),
+                request);
+    }
+
+    @PostMapping(path = "/internal/bpi/v1/wms-inbound-receipts", consumes = PROTOBUF_MEDIA_TYPE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('BPI_INTEGRATION_INGEST', 'BPI_ADMIN')")
+    public ApiResponse<BatchReleaseView> wmsReceipt(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody byte[] payload,
+            HttpServletRequest request) {
+        assertIngress(payload);
+        WmsCompletionInboundReceiptV1 event;
+        try {
+            event = WmsCompletionInboundReceiptV1.parseFrom(payload);
+        } catch (InvalidProtocolBufferException error) {
+            throw new BpiValidationException(
+                    "Payload is not valid WmsCompletionInboundReceiptV1 Protobuf.");
+        }
+        ActorContext actor = actorContextFactory.from(jwt);
+        return ApiResponse.of(
+                batchReleaseService.applyWmsReceipt(actor, event, Checksums.sha256(payload)),
+                request);
+    }
+
+    private void assertIngress(byte[] payload) {
+        if (!properties.enabled() || !properties.protobufHttpIngressEnabled()) {
+            throw new BpiForbiddenException("BPI Phase 2 Protobuf HTTP ingress is disabled.");
+        }
+        if (payload.length == 0 || payload.length > properties.maxPayloadBytes()) {
+            throw new BpiValidationException("Phase 2 integration payload size is invalid.");
+        }
+    }
+}

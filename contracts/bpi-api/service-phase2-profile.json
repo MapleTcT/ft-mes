@@ -1,0 +1,42 @@
+{
+  "profile": "phase-2-quality-release-wms-inbound",
+  "description": "Dormant-by-default QCS quality-gate and WMS completion-inbound integration implemented behind independent code, scope and feature gates.",
+  "mode": "DISABLED_BY_DEFAULT",
+  "readOperationIds": ["getBatchRelease"],
+  "internalEndpoints": [
+    {
+      "method": "POST",
+      "path": "/internal/bpi/v1/qcs-quality-gates",
+      "message": "QcsQualityGateV1",
+      "purpose": "Controlled Protobuf bridge for QCS quality-gate acceptance; Kafka is the production path"
+    },
+    {
+      "method": "POST",
+      "path": "/internal/bpi/v1/wms-inbound-receipts",
+      "message": "WmsCompletionInboundReceiptV1",
+      "purpose": "Controlled Protobuf bridge for WMS receipt acceptance; Kafka is the production path"
+    }
+  ],
+  "inboundTopics": [
+    {"topic": "qcs.batch.quality-gate.v1", "message": "QcsQualityGateV1"},
+    {"topic": "wms.completion-inbound.receipt.v1", "message": "WmsCompletionInboundReceiptV1"}
+  ],
+  "outboundTopics": [
+    {"topic": "bpi.wms.completion-inbound-command.v1", "message": "WmsCompletionInboundCommandV1"}
+  ],
+  "activationGates": [
+    "BPI_PHASE2_INTEGRATION_ENABLED=true",
+    "bpi.qcs-link=true at the exact tenant/plant/line scope",
+    "bpi.wms-link=true at the exact tenant/plant/line scope",
+    "batch.is_shadow=false before a WMS command can be inserted",
+    "BPI_WMS_OUTBOX_ENABLED=true only after broker/topic/consumer readiness"
+  ],
+  "safetyInvariants": [
+    "Phase 1 service profile remains SHADOW_ONLY",
+    "QCS and WMS integration flags remain phase-locked in the runtime UI",
+    "Every inbound event is inbox-idempotent and payload-checksummed",
+    "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
+    "A WMS receipt cannot precede durable outbox publication",
+    "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED"
+  ]
+}

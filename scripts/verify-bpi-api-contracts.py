@@ -11,6 +11,7 @@ OPENAPI = ROOT / "contracts/bpi-api/openapi.json"
 ASYNCAPI = ROOT / "contracts/bpi-api/asyncapi.json"
 PROFILE = ROOT / "contracts/bpi-api/simulation-profile.json"
 SERVICE_PROFILE = ROOT / "contracts/bpi-api/service-phase1-profile.json"
+PHASE2_PROFILE = ROOT / "contracts/bpi-api/service-phase2-profile.json"
 CATALOG = ROOT / "docs/api/bpi-api-catalog.md"
 INTERACTION = ROOT / "docs/designs/bpi-interaction-design.md"
 
@@ -24,6 +25,11 @@ REQUIRED_TOPICS = {
     "bpi.boundary.rule-runtime-readiness.dlq.v1": "BoundaryRuleRuntimeReadinessV1",
     "bpi.batch.candidate.v1": "BatchCandidateV1",
     "bpi.data-quality.v1": "DataQualityEventV1",
+    "qcs.batch.quality-gate.v1": "QcsQualityGateV1",
+    "qcs.batch.quality-gate.dlq.v1": "QcsQualityGateV1",
+    "bpi.wms.completion-inbound-command.v1": "WmsCompletionInboundCommandV1",
+    "wms.completion-inbound.receipt.v1": "WmsCompletionInboundReceiptV1",
+    "wms.completion-inbound.receipt.dlq.v1": "WmsCompletionInboundReceiptV1",
     "bpi.batch.fact.v1": "BatchFactV1",
     "bpi.training.snapshot.v1": "TrainingSnapshotV1",
 }
@@ -52,6 +58,7 @@ def main() -> int:
         asyncapi = load_json(ASYNCAPI)
         profile = load_json(PROFILE)
         service_profile = load_json(SERVICE_PROFILE)
+        phase2_profile = load_json(PHASE2_PROFILE)
     except ValueError as exc:
         print(exc, file=sys.stderr)
         return 1
@@ -125,6 +132,61 @@ def main() -> int:
     ):
         failures.append("candidate Protobuf HTTP ingress must remain explicitly marked as a short-lived bridge")
 
+    phase2_reads = phase2_profile.get("readOperationIds", [])
+    if len(phase2_reads) != len(set(phase2_reads)):
+        failures.append("service-phase2-profile.json contains duplicate readOperationIds")
+    unknown_phase2_reads = sorted(set(phase2_reads) - set(operations))
+    if unknown_phase2_reads:
+        failures.append(
+            "service Phase 2 profile references unknown read operations: "
+            + ", ".join(unknown_phase2_reads)
+        )
+    if phase2_profile.get("mode") != "DISABLED_BY_DEFAULT":
+        failures.append("service-phase2-profile.json must remain DISABLED_BY_DEFAULT")
+    phase2_endpoints = {
+        (item.get("method"), item.get("path"), item.get("message"))
+        for item in phase2_profile.get("internalEndpoints", [])
+        if isinstance(item, dict)
+    }
+    required_phase2_endpoints = {
+        ("POST", "/internal/bpi/v1/qcs-quality-gates", "QcsQualityGateV1"),
+        ("POST", "/internal/bpi/v1/wms-inbound-receipts", "WmsCompletionInboundReceiptV1"),
+    }
+    if phase2_endpoints != required_phase2_endpoints:
+        failures.append("service Phase 2 profile must expose only the approved QCS and WMS bridges")
+    phase2_topics = {
+        (item.get("topic"), item.get("message"))
+        for field in ("inboundTopics", "outboundTopics")
+        for item in phase2_profile.get(field, [])
+        if isinstance(item, dict)
+    }
+    required_phase2_topics = {
+        ("qcs.batch.quality-gate.v1", "QcsQualityGateV1"),
+        ("bpi.wms.completion-inbound-command.v1", "WmsCompletionInboundCommandV1"),
+        ("wms.completion-inbound.receipt.v1", "WmsCompletionInboundReceiptV1"),
+    }
+    if phase2_topics != required_phase2_topics:
+        failures.append("service Phase 2 profile topic/message bindings changed unexpectedly")
+    required_phase2_gates = {
+        "BPI_PHASE2_INTEGRATION_ENABLED=true",
+        "bpi.qcs-link=true at the exact tenant/plant/line scope",
+        "bpi.wms-link=true at the exact tenant/plant/line scope",
+        "batch.is_shadow=false before a WMS command can be inserted",
+        "BPI_WMS_OUTBOX_ENABLED=true only after broker/topic/consumer readiness",
+    }
+    if set(phase2_profile.get("activationGates", [])) != required_phase2_gates:
+        failures.append("service Phase 2 activation gates must remain explicit and complete")
+    required_phase2_invariants = {
+        "Phase 1 service profile remains SHADOW_ONLY",
+        "QCS and WMS integration flags remain phase-locked in the runtime UI",
+        "Every inbound event is inbox-idempotent and payload-checksummed",
+        "Batch transition, integration projection, outbox and audit rows share one PostgreSQL transaction",
+        "A WMS receipt cannot precede durable outbox publication",
+        "Only an accepted WMS receipt with document_id can transition RELEASED to INBOUNDED",
+    }
+    if set(phase2_profile.get("safetyInvariants", [])) != required_phase2_invariants:
+        failures.append("service Phase 2 safety invariants changed unexpectedly")
+
     channels = asyncapi.get("channels", {})
     messages = asyncapi.get("components", {}).get("messages", {})
     address_to_message: dict[str, str] = {}
@@ -169,7 +231,8 @@ def main() -> int:
     print(
         "BPI API contract verification passed "
         f"(operations={len(operations)}, simulated={len(simulated)}, "
-        f"implemented={len(implemented)}, topics={len(REQUIRED_TOPICS)})."
+        f"implemented={len(implemented)}, phase2Reads={len(phase2_reads)}, "
+        f"topics={len(REQUIRED_TOPICS)})."
     )
     return 0
 

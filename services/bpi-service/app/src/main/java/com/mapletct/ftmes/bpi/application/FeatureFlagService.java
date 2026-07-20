@@ -45,6 +45,10 @@ public class FeatureFlagService {
                     "CRITICAL", "PHASE_LOCKED", false,
                     "未完成真实 7-14 天影子验收，Phase 2 自动确认门禁未开放。"),
             new Definition(
+                    "bpi.qcs-link", "QCS 质量门联动", "允许 BPI 接收 QCS 质量门快照并推进批次放行状态。",
+                    "CRITICAL", "PHASE_LOCKED", false,
+                    "QCS Phase 2 契约和真实写回验收尚未完成。"),
+            new Definition(
                     "bpi.wms-link", "WMS 完工入库联动", "允许 BPI 发起幂等 WMS 完工入库命令。",
                     "CRITICAL", "PHASE_LOCKED", false,
                     "QCS/WMS Phase 2 契约和真实写回验收尚未完成。"));

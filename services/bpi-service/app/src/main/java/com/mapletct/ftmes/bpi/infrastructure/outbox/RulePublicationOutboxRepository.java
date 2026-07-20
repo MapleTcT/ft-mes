@@ -85,6 +85,8 @@ public class RulePublicationOutboxRepository {
                        next_attempt_at = now(), updated_at = now(),
                        last_error = 'Recovered stale dispatcher claim', revision = revision + 1
                  WHERE status = 'DISPATCHING'
+                   AND aggregate_type = 'RULE_VERSION'
+                   AND event_type = 'BOUNDARY_RULE_PUBLISHED'
                    AND (claimed_at IS NULL
                         OR claimed_at < now() - (:claimTimeoutMs * interval '1 millisecond'))
                 """, new MapSqlParameterSource()
@@ -94,7 +96,10 @@ public class RulePublicationOutboxRepository {
                 WITH selected AS (
                     SELECT id
                       FROM bpi.bpi_outbox_events
-                     WHERE status = 'PENDING' AND next_attempt_at <= now()
+                     WHERE status = 'PENDING'
+                       AND aggregate_type = 'RULE_VERSION'
+                       AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                       AND next_attempt_at <= now()
                      ORDER BY created_at, id
                      FOR UPDATE SKIP LOCKED
                      LIMIT :batchSize
@@ -127,7 +132,11 @@ public class RulePublicationOutboxRepository {
                    SET status = 'PUBLISHED', published_at = now(),
                        claim_token = NULL, claimed_at = NULL, last_error = NULL,
                        revision = revision + 1, updated_at = now()
-                 WHERE id = :id AND claim_token = :claimToken AND status = 'DISPATCHING'
+                 WHERE id = :id
+                   AND claim_token = :claimToken
+                   AND status = 'DISPATCHING'
+                   AND aggregate_type = 'RULE_VERSION'
+                   AND event_type = 'BOUNDARY_RULE_PUBLISHED'
                 """, new MapSqlParameterSource().addValue("id", id)
                 .addValue("claimToken", claimToken)) == 1;
     }
@@ -149,7 +158,11 @@ public class RulePublicationOutboxRepository {
                    SET status = :status, claim_token = NULL, claimed_at = NULL,
                        next_attempt_at = now() + (:retryDelayMs * interval '1 millisecond'),
                        last_error = :lastError, revision = revision + 1, updated_at = now()
-                 WHERE id = :id AND claim_token = :claimToken AND status = 'DISPATCHING'
+                 WHERE id = :id
+                   AND claim_token = :claimToken
+                   AND status = 'DISPATCHING'
+                   AND aggregate_type = 'RULE_VERSION'
+                   AND event_type = 'BOUNDARY_RULE_PUBLISHED'
                 """, new MapSqlParameterSource()
                 .addValue("status", terminal ? "FAILED" : "PENDING")
                 .addValue("retryDelayMs", delay)

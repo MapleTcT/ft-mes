@@ -105,6 +105,36 @@ bpi:
     poll-delay: ${BPI_RULE_PUBLICATION_POLL_DELAY:1s}
     claim-timeout: ${BPI_RULE_PUBLICATION_CLAIM_TIMEOUT:2m}
     retry-backoff: ${BPI_RULE_PUBLICATION_RETRY_BACKOFF:2s}
+  phase2-integration:
+    enabled: ${BPI_PHASE2_INTEGRATION_ENABLED:false}
+    protobuf-http-ingress-enabled: ${BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false}
+    kafka-enabled: ${BPI_PHASE2_KAFKA_ENABLED:false}
+    max-payload-bytes: ${BPI_PHASE2_MAX_PAYLOAD_BYTES:1048576}
+    bootstrap-servers: ${BPI_PHASE2_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    qcs-topic: ${BPI_PHASE2_QCS_TOPIC:qcs.batch.quality-gate.v1}
+    qcs-dlq-topic: ${BPI_PHASE2_QCS_DLQ_TOPIC:qcs.batch.quality-gate.dlq.v1}
+    wms-receipt-topic: ${BPI_PHASE2_WMS_RECEIPT_TOPIC:wms.completion-inbound.receipt.v1}
+    wms-receipt-dlq-topic: ${BPI_PHASE2_WMS_RECEIPT_DLQ_TOPIC:wms.completion-inbound.receipt.dlq.v1}
+    group-id: ${BPI_PHASE2_KAFKA_GROUP_ID:ft-mes-bpi-phase2-integrations-v1}
+    client-id: ${BPI_PHASE2_KAFKA_CLIENT_ID:ft-mes-bpi-phase2-integrations}
+    qcs-actor-id: ${BPI_PHASE2_QCS_ACTOR_ID:qcs-adapter}
+    wms-actor-id: ${BPI_PHASE2_WMS_ACTOR_ID:wms-adapter}
+    allowed-tenant-ids: ${BPI_PHASE2_ALLOWED_TENANT_IDS:_DENY_ALL_}
+    allowed-plant-ids: ${BPI_PHASE2_ALLOWED_PLANT_IDS:_DENY_ALL_}
+    allowed-line-ids: ${BPI_PHASE2_ALLOWED_LINE_IDS:_DENY_ALL_}
+    concurrency: ${BPI_PHASE2_KAFKA_CONCURRENCY:2}
+    max-attempts: ${BPI_PHASE2_KAFKA_MAX_ATTEMPTS:4}
+    retry-backoff: ${BPI_PHASE2_KAFKA_RETRY_BACKOFF:2s}
+  wms-outbox:
+    enabled: ${BPI_WMS_OUTBOX_ENABLED:false}
+    bootstrap-servers: ${BPI_WMS_OUTBOX_BOOTSTRAP_SERVERS:127.0.0.1:29092}
+    topic: ${BPI_WMS_OUTBOX_TOPIC:bpi.wms.completion-inbound-command.v1}
+    client-id: ${BPI_WMS_OUTBOX_CLIENT_ID:ft-mes-bpi-wms-outbox}
+    batch-size: ${BPI_WMS_OUTBOX_BATCH_SIZE:50}
+    max-attempts: ${BPI_WMS_OUTBOX_MAX_ATTEMPTS:20}
+    poll-delay: ${BPI_WMS_OUTBOX_POLL_DELAY:1s}
+    claim-timeout: ${BPI_WMS_OUTBOX_CLAIM_TIMEOUT:2m}
+    retry-backoff: ${BPI_WMS_OUTBOX_RETRY_BACKOFF:2s}
   rule-application-kafka:
     enabled: ${BPI_RULE_APPLICATION_KAFKA_ENABLED:false}
     bootstrap-servers: ${BPI_RULE_APPLICATION_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}

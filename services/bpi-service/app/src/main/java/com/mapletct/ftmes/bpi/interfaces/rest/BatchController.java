@@ -4,8 +4,10 @@ import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.ActorContextFactory;
 import com.mapletct.ftmes.bpi.application.BatchCommandService;
 import com.mapletct.ftmes.bpi.application.BatchQueryService;
+import com.mapletct.ftmes.bpi.application.BatchReleaseService;
 import com.mapletct.ftmes.bpi.application.CommandResult;
 import com.mapletct.ftmes.bpi.domain.BatchInstance;
+import com.mapletct.ftmes.bpi.domain.BatchReleaseView;
 import com.mapletct.ftmes.bpi.domain.BatchStateEvent;
 import com.mapletct.ftmes.bpi.domain.EvidenceView;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,14 +34,17 @@ public class BatchController {
     private final ActorContextFactory actorContextFactory;
     private final BatchQueryService batchQueryService;
     private final BatchCommandService batchCommandService;
+    private final BatchReleaseService batchReleaseService;
 
     public BatchController(
             ActorContextFactory actorContextFactory,
             BatchQueryService batchQueryService,
-            BatchCommandService batchCommandService) {
+            BatchCommandService batchCommandService,
+            BatchReleaseService batchReleaseService) {
         this.actorContextFactory = actorContextFactory;
         this.batchQueryService = batchQueryService;
         this.batchCommandService = batchCommandService;
+        this.batchReleaseService = batchReleaseService;
     }
 
     @GetMapping("/bpi/v1/batches")
@@ -76,6 +81,14 @@ public class BatchController {
             @PathVariable UUID batchId,
             HttpServletRequest request) {
         return ApiResponse.of(batchQueryService.timeline(actorContextFactory.from(jwt), batchId), request);
+    }
+
+    @GetMapping("/bpi/v1/batches/{batchId}/release")
+    public ApiResponse<BatchReleaseView> release(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            HttpServletRequest request) {
+        return ApiResponse.of(batchReleaseService.get(actorContextFactory.from(jwt), batchId), request);
     }
 
     @PostMapping("/bpi/v1/batches/{batchId}/suspend")

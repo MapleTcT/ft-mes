@@ -71,6 +71,37 @@
       "messages": {"quality": {"$ref": "#/components/messages/DataQualityEventV1"}},
       "description": "Point/envelope quality events keyed by source+propertyId"
     },
+    "qcsQualityGate": {
+      "address": "qcs.batch.quality-gate.v1",
+      "messages": {"qualityGate": {"$ref": "#/components/messages/QcsQualityGateV1"}},
+      "description": "Authoritative revisioned QCS gate snapshots keyed by batchId+qualityGateId",
+      "x-phase": "2",
+      "x-default-enabled": false
+    },
+    "qcsQualityGateDlq": {
+      "address": "qcs.batch.quality-gate.dlq.v1",
+      "messages": {"qualityGate": {"$ref": "#/components/messages/QcsQualityGateV1"}},
+      "description": "Rejected or retry-exhausted QCS quality-gate snapshots"
+    },
+    "wmsCompletionInboundCommand": {
+      "address": "bpi.wms.completion-inbound-command.v1",
+      "messages": {"command": {"$ref": "#/components/messages/WmsCompletionInboundCommandV1"}},
+      "description": "Deterministic completion-inbound commands keyed by tenantId+plantId+batchId",
+      "x-phase": "2",
+      "x-default-enabled": false
+    },
+    "wmsCompletionInboundReceipt": {
+      "address": "wms.completion-inbound.receipt.v1",
+      "messages": {"receipt": {"$ref": "#/components/messages/WmsCompletionInboundReceiptV1"}},
+      "description": "Durable WMS document receipts keyed by commandEventId",
+      "x-phase": "2",
+      "x-default-enabled": false
+    },
+    "wmsCompletionInboundReceiptDlq": {
+      "address": "wms.completion-inbound.receipt.dlq.v1",
+      "messages": {"receipt": {"$ref": "#/components/messages/WmsCompletionInboundReceiptV1"}},
+      "description": "Rejected or retry-exhausted WMS completion-inbound receipts"
+    },
     "trainingSnapshot": {
       "address": "bpi.training.snapshot.v1",
       "messages": {"snapshot": {"$ref": "#/components/messages/TrainingSnapshotV1"}},
@@ -93,6 +124,11 @@
     "publishRejectedBatchCandidate": {"action": "send", "channel": {"$ref": "#/channels/batchCandidateDlq"}, "messages": [{"$ref": "#/channels/batchCandidateDlq/messages/candidate"}]},
     "publishBatchFact": {"action": "send", "channel": {"$ref": "#/channels/batchFact"}, "messages": [{"$ref": "#/channels/batchFact/messages/fact"}]},
     "consumeDataQuality": {"action": "receive", "channel": {"$ref": "#/channels/dataQuality"}, "messages": [{"$ref": "#/channels/dataQuality/messages/quality"}]},
+    "consumeQcsQualityGate": {"action": "receive", "channel": {"$ref": "#/channels/qcsQualityGate"}, "messages": [{"$ref": "#/channels/qcsQualityGate/messages/qualityGate"}]},
+    "publishRejectedQcsQualityGate": {"action": "send", "channel": {"$ref": "#/channels/qcsQualityGateDlq"}, "messages": [{"$ref": "#/channels/qcsQualityGateDlq/messages/qualityGate"}]},
+    "publishWmsCompletionInboundCommand": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundCommand"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundCommand/messages/command"}]},
+    "consumeWmsCompletionInboundReceipt": {"action": "receive", "channel": {"$ref": "#/channels/wmsCompletionInboundReceipt"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReceipt/messages/receipt"}]},
+    "publishRejectedWmsCompletionInboundReceipt": {"action": "send", "channel": {"$ref": "#/channels/wmsCompletionInboundReceiptDlq"}, "messages": [{"$ref": "#/channels/wmsCompletionInboundReceiptDlq/messages/receipt"}]},
     "publishTrainingSnapshot": {"action": "send", "channel": {"$ref": "#/channels/trainingSnapshot"}, "messages": [{"$ref": "#/channels/trainingSnapshot/messages/snapshot"}]}
   },
   "components": {
@@ -105,6 +141,9 @@
       "BoundaryRuleRuntimeReadinessV1": {"name": "BoundaryRuleRuntimeReadinessV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/RuleRuntimeReadinessKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1"}}},
       "BatchCandidateV1": {"name": "BatchCandidateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/CandidateKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.BatchCandidateV1"}}},
       "DataQualityEventV1": {"name": "DataQualityEventV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/EventHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.DataQualityEventV1"}}},
+      "QcsQualityGateV1": {"name": "QcsQualityGateV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.QcsQualityGateV1"}}},
+      "WmsCompletionInboundCommandV1": {"name": "WmsCompletionInboundCommandV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundCommandV1"}}},
+      "WmsCompletionInboundReceiptV1": {"name": "WmsCompletionInboundReceiptV1", "contentType": "application/x-protobuf", "headers": {"$ref": "#/components/schemas/IntegrationKafkaHeaders"}, "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-protobuf-file": "contracts/bpi-events/src/main/proto/bpi_events_v1.proto", "x-protobuf-message": "ftmes.bpi.contract.v1.WmsCompletionInboundReceiptV1"}}},
       "BatchFactV1": {"name": "BatchFactV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "2", "x-status": "RESERVED_NOT_IMPLEMENTED"}}},
       "TrainingSnapshotV1": {"name": "TrainingSnapshotV1", "contentType": "application/x-protobuf", "payload": {"schemaFormat": "application/vnd.google.protobuf;version=3", "schema": {"x-phase": "3", "x-status": "RESERVED_NOT_IMPLEMENTED"}}}
     },
@@ -113,7 +152,8 @@
       "CandidateKafkaHeaders": {"type": "object", "required": ["event_id", "candidate_key", "tenant_id", "schema_version"], "properties": {"event_id": {"type": "string"}, "candidate_key": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "schema_version": {"const": "v1"}}},
       "PointCatalogKafkaHeaders": {"type": "object", "required": ["event_id", "tenant_id", "source_revision", "schema_version"], "properties": {"event_id": {"type": "string"}, "tenant_id": {"type": "string"}, "source_revision": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "schema_version": {"const": "v1"}}},
       "RuleApplicationKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["APPLIED", "REJECTED"]}, "schema_version": {"const": "v1"}}},
-      "RuleRuntimeReadinessKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["READY", "DEGRADED", "INACTIVE"]}, "schema_version": {"const": "v1"}}}
+      "RuleRuntimeReadinessKafkaHeaders": {"type": "object", "required": ["event_id", "publication_event_id", "tenant_id", "status", "schema_version"], "properties": {"event_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "publication_event_id": {"type": "string", "format": "uuid"}, "tenant_id": {"type": "string"}, "status": {"enum": ["READY", "DEGRADED", "INACTIVE"]}, "schema_version": {"const": "v1"}}},
+      "IntegrationKafkaHeaders": {"type": "object", "required": ["event_id", "idempotency_key", "tenant_id", "schema_version"], "properties": {"event_id": {"type": "string"}, "idempotency_key": {"type": "string"}, "tenant_id": {"type": "string"}, "schema_version": {"const": "v1"}, "trace_id": {"type": "string"}}}
     }
   }
 }

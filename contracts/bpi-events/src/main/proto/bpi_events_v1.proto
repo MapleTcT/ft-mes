@@ -343,3 +343,83 @@ enum BoundaryRuleRuntimeReadinessStatusV1 {
   DEGRADED = 2;
   INACTIVE = 3;
 }
+
+// QCS publishes an authoritative, revisioned snapshot for one batch quality gate.
+// BPI never infers a release from an HTTP 200 or a partial inspection result: every
+// required inspection must be final and accepted in the same snapshot.
+message QcsQualityGateV1 {
+  string event_id = 1;
+  string idempotency_key = 2;
+  string tenant_id = 3;
+  string plant_id = 4;
+  string line_id = 5;
+  string batch_id = 6;
+  string quality_gate_id = 7;
+  uint64 quality_gate_revision = 8;
+  repeated QcsInspectionResultV1 inspections = 9;
+  string release_quantity_decimal = 10;
+  string quantity_unit = 11;
+  string material_code = 12;
+  int64 observed_at_ms = 13;
+  map<string, string> headers = 14;
+}
+
+message QcsInspectionResultV1 {
+  string inspection_code = 1;
+  string inspection_record_id = 2;
+  bool required = 3;
+  QcsInspectionDispositionV1 disposition = 4;
+  bool final_result = 5;
+  int64 observed_at_ms = 6;
+}
+
+enum QcsInspectionDispositionV1 {
+  QCS_INSPECTION_DISPOSITION_UNSPECIFIED = 0;
+  QCS_INSPECTION_PENDING = 1;
+  QCS_INSPECTION_ACCEPTED = 2;
+  QCS_INSPECTION_REJECTED = 3;
+}
+
+// BPI emits exactly one deterministic completion-inbound command after a real
+// (non-shadow) batch reaches RELEASED and both Phase 2 gates are enabled.
+message WmsCompletionInboundCommandV1 {
+  string event_id = 1;
+  string idempotency_key = 2;
+  string tenant_id = 3;
+  string plant_id = 4;
+  string line_id = 5;
+  string batch_id = 6;
+  string batch_no = 7;
+  string order_id = 8;
+  string material_code = 9;
+  string quantity_decimal = 10;
+  string quantity_unit = 11;
+  string quality_gate_id = 12;
+  uint64 quality_gate_revision = 13;
+  int64 requested_at_ms = 14;
+  map<string, string> headers = 15;
+}
+
+// WMS returns the durable document identity for the exact command. A successful
+// receipt is the only event that may move RELEASED to INBOUNDED.
+message WmsCompletionInboundReceiptV1 {
+  string event_id = 1;
+  string idempotency_key = 2;
+  string command_event_id = 3;
+  string tenant_id = 4;
+  string plant_id = 5;
+  string line_id = 6;
+  string batch_id = 7;
+  WmsCompletionInboundStatusV1 status = 8;
+  string document_id = 9;
+  string error_code = 10;
+  string detail = 11;
+  int64 observed_at_ms = 12;
+  map<string, string> headers = 13;
+}
+
+enum WmsCompletionInboundStatusV1 {
+  WMS_COMPLETION_INBOUND_STATUS_UNSPECIFIED = 0;
+  WMS_COMPLETION_INBOUND_ACCEPTED = 1;
+  WMS_COMPLETION_INBOUND_REJECTED = 2;
+}
