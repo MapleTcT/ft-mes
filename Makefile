@@ -156,7 +156,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -188,6 +188,7 @@ help:
 	@printf '%s\n' '  make bpi-stream-postgres-replay Require Kafka/Flink candidate, PostgreSQL 1/1 rows and unchanged DLQ'
 	@printf '%s\n' '  make bpi-runtime-upgrade-expand-only Back up PostgreSQL, migrate forward and retain a rollback image'
 	@printf '%s\n' '  make bpi-integrated-upgrade-expand-only Upgrade BPI inside the single ADP Compose stack with protected backups'
+	@printf '%s\n' '  make acceptance-bpi-quality-release-target Test the real ADP batch release page and adapter boundary'
 	@printf '%s\n' '  make bpi-stream-capture-savepoint Capture a non-cancelling canonical upgrade savepoint'
 	@printf '%s\n' '  make bpi-stream-restore-savepoint Recreate only Flink from the persisted savepoint path'
 	@printf '%s\n' '  make bpi-stream-verify-savepoint Verify restored state, new operators, topics and checkpoint'
@@ -417,6 +418,7 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js
 	$(PYTHON) -m py_compile scripts/verify-bpi-stream-deployment.py
 	$(PYTHON) -m py_compile scripts/verify-bpi-feature-flag-governance.py
@@ -698,6 +700,9 @@ bpi-runtime-upgrade-expand-only: bpi-service-package
 
 bpi-integrated-upgrade-expand-only:
 	sh deploy/docker/scripts/upgrade-bpi-integrated-expand-only.sh
+
+acceptance-bpi-quality-release-target:
+	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js
 
 bpi-stream-test:
 	$(MVN) -f streaming/pom.xml -pl bpi-stream-engine -am test

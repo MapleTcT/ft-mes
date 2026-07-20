@@ -108,6 +108,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 LINE_ID, "ADP_E2E_ORDER_" + batchId, MATERIAL_CODE, topologyId, ruleId);
         integrationToken = token(List.of("BPI_INTEGRATION_INGEST"));
         viewerToken = token(List.of("BPI_VIEWER"));
+        System.out.printf("BPI_PHASE2_ACCEPTANCE_MARKER tenant=%s batchId=%s%n", tenantId, batchId);
     }
 
     @AfterEach
@@ -125,6 +126,20 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         jdbc.update("DELETE FROM bpi.bpi_feature_flags WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
+        long residual = count("bpi_quality_links")
+                + count("bpi_wms_inbound_links")
+                + count("bpi_quality_gates")
+                + count("bpi_outbox_events")
+                + count("bpi_audit_events")
+                + count("bpi_batch_state_events")
+                + count("bpi_api_idempotency")
+                + count("bpi_inbox_events")
+                + count("bpi_batch_instances")
+                + count("bpi_feature_flags")
+                + count("bpi_rule_versions")
+                + count("bpi_topology_versions");
+        assertThat(residual).isZero();
+        System.out.printf("BPI_PHASE2_ACCEPTANCE_CLEANUP tenant=%s residualRows=%d%n", tenantId, residual);
     }
 
     @Test

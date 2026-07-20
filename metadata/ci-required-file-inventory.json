@@ -3309,6 +3309,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js",
+      "state": "untracked",
+      "tracked": false
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -4120,8 +4126,8 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/upgrade-bpi-integrated-expand-only.sh",
-      "state": "untracked",
-      "tracked": false
+      "state": "tracked",
+      "tracked": true
     },
     {
       "ignored": false,
@@ -8846,7 +8852,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 574,
+      "tracked": 575,
       "untracked": 1
     },
     "docs": {
@@ -8880,8 +8886,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1470,
-    "tracked": 1469,
+    "totalFiles": 1471,
+    "tracked": 1470,
     "untracked": 1
   },
   "untrackedByDirectory": [
