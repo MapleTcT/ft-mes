@@ -643,6 +643,23 @@ evidence。控制链通过，但现场没有真实遥测且校准未批准，因
 `metadata/bpi-source-sequence-evidence-v22.png`；完整实现、查库和回滚证据见
 `docs/testing/bpi-source-sequence-readiness-acceptance.md`。
 
+### BPI 受控 MQTT 跨仓库浏览器验收（2026-07-20）
+
+本节不是沿用早期 `DISABLED/r2` 快照，而是从目标机回环 MQTT 端口执行两次独立 QoS1 会话，
+再用真实 ADP 登录读取同一批消息形成的点位来源证据和数据质量记录。受控证据有 30 分钟 TTL，
+且校准保持 `UNVERIFIED`；本节不声明现场设备或生产 READY。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 点位来源证据 | `http://10.11.100.17:18080/bpi/#/points` | 真实 ADP 登录，筛选 `bpi-mqtt-pilot-device-01`，打开来源证据抽屉并核对 epoch/sequence | `GET /bpi-api/point-catalog/current?plantId=PLANT-01&lineId=LINE-S07-01`；`GET /bpi-api/point-calibrations?...` | 页面 1 行；ACTIVE，验收窗口内来源序列 `QUALIFIED/DEVICE/2026072004/1..3/count 3`，0 READY 且唯一阻断为校准；两个 API 200，console/page/request failure 均为 0 | MQTT 6/6 PUBACK；JetLinks 双表各有 6 条；Kafka `37 -> 43`；MES current/inbox/audit 已更新，来源 consumer lag 0、DLQ 0 | JetLinks `properties_bpi_mqtt_pilot_product_01`、`device_log_bpi_mqtt_pilot_product_01`；MES `bpi_source_sequence_evidence_current`、`bpi_point_catalog_snapshots`、`bpi_point_catalog_entries`、`bpi_inbox_events`、`bpi_audit_events` | PASS_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER | 来源证据 30 分钟后过期并重新失败关闭；物理设备和校准尚未验收 |
+| BPI 数据质量 | `http://10.11.100.17:18080/bpi/#/dataQuality` | 筛选受控点位，打开 `POINT_QUALITY_UNCERTAIN` 详情并核对两个 epoch 的六条序列 | `GET /bpi-api/data-quality/incidents`；`GET /summary`；`GET /incidents/357c519f-b6e9-5528-a9ad-c63c4dbc2a1c` | 页面显示 1 条 OPEN/WARNING；详情包含 `2026072003:5001..5003` 与 `2026072004:1..3`；5 个页面/API 请求均 200，console/page/request failure 均为 0 | 受控 scope consumer 启用后追平；incident r11/event_count 11，其中本轮六条 raw event 精确可查；历史 DLQ 基线 4，本轮新增 0 | `bpi_data_quality_incidents`、`bpi_data_quality_incident_events`、`bpi_inbox_events` | PASS | 输入质量故意为 `UNCERTAIN`；该 WARNING 未解决，用于继续影子观测 |
+
+浏览器报告 `/tmp/bpi-mqtt-ingress-browser-20260720.json` 的 SHA-256 为
+`7faff9a1bf9ddf3850ad79ed5ab797f18e6a1f578690e821a170146a09e2c26d`。专项报告：
+`docs/testing/bpi-mqtt-ingress-joint-acceptance.md`；机器记录：
+`metadata/bpi-mqtt-ingress-joint-acceptance.json`。本轮 candidate 和 batch 增量均为 0，WOM/QCS/WMS
+写入为 0。
+
 ### BPI 点位目录高基数分页（2026-07-19）
 
 本节使用目标环境 `10.11.100.17` 的真实 ADP 会话、adapter、Java 17 service、PostgreSQL 15.18

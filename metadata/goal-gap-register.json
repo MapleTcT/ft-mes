@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-20T00:18:31+00:00",
-  "repoCommit": "52eb162b812a9d754970ea80bc31281aa93b1990",
+  "generatedAt": "2026-07-20T02:13:59+00:00",
+  "repoCommit": "6b53ecfcb499a2485e22b3aed782e20e0985518a",
   "database": "PostgreSQL",
   "status": "IN_PROGRESS_NOT_COMPLETE",
   "sourceLedgers": {
@@ -414,7 +414,7 @@
         "production module test matrix has 44 cases: 44 PASS, 0 BLOCKED, 0 NOT_RUN",
         "production module blocker ledger is checked by make production-blocker-check and currently tracks 0 BLOCKED cases from the production test matrix.",
         "production module backlog ledger is checked by make production-module-backlog-check and currently tracks 1 unresolved public produceTaskCreated product-decision item; independent bad-quantity reporting, WOM QR, visible WOM manual production-task entry and RM Web formula editing are closed.",
-        "persistence acceptance ledger has 181 tested features: 178 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE",
+        "persistence acceptance ledger has 183 tested features: 180 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE",
         "business dependency contracts now define the required material-service and process-analysis intake evidence before blocked production cases can move to PASS: package candidate, PostgreSQL default runtime, Oracle legacy-only policy, rendered Nacos config, Docker/production service registration, runtime patch manifest, rollback/disable plan, Nacos health, endpoint probes, backend trace, runtime/menu/table evidence and PostgreSQL marker verification.",
         "production export readiness smoke was refreshed at 2026-07-17T04:53:37.777Z: API base 和 browser base 均为 http://10.11.100.17:18080; pagePass=6, visibleExportActions=6, runtimeExportActions=6, nonEmptyDownloads=1, backendQueryExportWorkbooks=6, backendQueryExportErrors=0, verifiedDataExports=6 and targetExportMatches=10. All 6 targets are READY with real browser file responses; RM returns RM_batchFormulaList.xlsx and reconciles 231 valid PostgreSQL rows to 232 worksheet rows including the header. Evidence: metadata/production-export-readiness-smoke.json.",
         "2026-06-21 production module browser/API smoke and marker persistence evidence added to docs/frontend-functional-test-report.md, docs/backend-table-audit/persistence-acceptance.md, and metadata/persistence-acceptance.json latestRevalidation.",
@@ -435,7 +435,8 @@
         "metadata/wom-manual-task-entry-acceptance.json marker ADP_E2E_20260717101030_WOM_MANUAL_ENTRY passed 9/9: visible list entry, desktop/mobile form rendering, PostgreSQL-backed option references, create, same-request replay, duplicate-batch rejection, partial unique active-batch index verification, pending open, submit, soft delete and marker cleanup, with zero browser errors.",
         "metadata/rm-web-formula-editor-acceptance.json marker ADP_E2E_20260717120436_RM_WEB_FORMULA passed three consecutive visible browser/API/PostgreSQL runs: create, idempotent replay, two revisions, immutable delivery snapshot, fail-first retry, six-table readback, desktop/mobile rendering, 64-bit identifier string safety and marker cleanup.",
         "metadata/wom-quality-quantity-persistence-acceptance.json marker ADP_E2E_20260717141017_WOM_BAD_QTY passed the real WOM and QCS entries, exact report-line binding, idempotent report and quality allocation, WMS available/hold split, immutable event ledger, reversal and marker cleanup with zero browser errors.",
-        "metadata/bpi-source-sequence-readiness-acceptance.json records the 2026-07-20 target V22 source-sequence chain: JetLinks emitted two content-addressed DISABLED heartbeats, Kafka and the MES consumer reached offset 2/2 with lag 0 and zero DLQ, PostgreSQL stored current revision 2 plus two inbox rows and one state-change audit, and the real ADP point page rendered DISABLED/BLOCKED with zero browser errors and no candidate or batch."
+        "metadata/bpi-source-sequence-readiness-acceptance.json records the 2026-07-20 target V22 source-sequence chain: JetLinks emitted two content-addressed DISABLED heartbeats, Kafka and the MES consumer reached offset 2/2 with lag 0 and zero DLQ, PostgreSQL stored current revision 2 plus two inbox rows and one state-change audit, and the real ADP point page rendered DISABLED/BLOCKED with zero browser errors and no candidate or batch.",
+        "2026-07-20 两次独立 MQTT 3.1.1 QoS1 会话以 ADP_BPI_MQTT_20260720_0918_EPOCH3 和 ADP_BPI_MQTT_20260720_0918_EPOCH4 完成 6/6 PUBACK、JetLinks properties/device_log 双表、exporter received/enqueued/published +6、Kafka 37 -> 43、Flink RUNNING 36/36、MES source-sequence current、六条 data-quality raw event 以及真实点位/数据质量页面联合验收；点位因校准未批准保持 0 READY，candidate/batch=0，且证据只代表受控模拟窗口。"
       ],
       "blockingIssues": [
         "生产矩阵 44 条已全部 PASS；public produceTaskCreated 产品范围、现场 Batch/DCS 切换确认及业务负责人签字仍未完成。PATROL Kafka/认证/TagManagement 技术链已闭合，但采集误差分析仍需真实误差基准项、测点历史和非空 gather_data，GIS 定位/轨迹依赖缺失的 SESGISConfig，完整隐患整改/复查/销项依赖尚未安装的真实 SESH；ProcessAnalysis 和独立不良数量闭环已闭合。"
@@ -515,7 +516,7 @@
       "scope": "每个缺表、缺列、类型不兼容和 Oracle 方言残留进入 init SQL 或 backlog。",
       "currentEvidence": [
         "oracle audit, postgres migration inventory, oracle replacement status and mapper audit are part of make ci",
-        "metadata/persistence-acceptance.json currently has 181 tested features: 178 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 0 FAIL_BACKLOG and 1 BLOCKED.",
+        "metadata/persistence-acceptance.json currently has 183 tested features: 180 PASS, 0 FAIL, 1 BLOCKED, 2 NOT_APPLICABLE; metadata/production-module-backlog.json covers unresolved persistence rows and product-scope blockers with 1 active backlog item, 0 FAIL_BACKLOG and 1 BLOCKED.",
         "metadata/postgres-migration-inventory.json currently has 191 scripts, highRiskStatementCount=0, watchStatementCount=73, watchSafetyIssueCount=0, with no missing, duplicate, or invalid migration numbers.",
         "PATROL migration 186 restores the hidden-danger/EAM risk projection and repairs supfusion_i18n_resource.modifier from the legacy varchar shape to the java.util.Date-compatible PostgreSQL timestamp shape; target migration, i18n restart, browser/API and PostgreSQL marker verification passed.",
         "metadata/persistence-acceptance.json currently has 0 FAIL and 1 BLOCKED rows",
@@ -527,7 +528,8 @@
         "2026-07-17 ProcessAnalysis and WOM printManage QR are maintained source modules with marker acceptance; QR persistence uses the idempotent 188 migration and is no longer a runtime endpoint backlog.",
         "真实候选包准入报告 metadata/module-intake-latest-basic-modules.json 现在记录 scanPolicy/scanCoverage：2026-06-22 复扫 /Users/zhangchu/Documents/MES包/最新基础模块 为 report-only，fileCount=13996、nestedFileCount=13990、maxArchiveDepthSeen=2、textScanned=9784/9806、textSkippedLarge=22、unsupportedArchiveCount=1；3 个阻断项仍是 1 个 7z 不可检查包和 DataSet DbUtils.java 两处 jdbc:oracle:thin，由 make module-intake-candidate-report-check 和 make module-intake-precheck-regression-check 校验。",
         "2026-07-17 material/WMS, ProcessAnalysis, WOM QR, the visible WOM manual production-task entry and independent bad-quantity reporting are resolved by source modules and PostgreSQL marker acceptance; migration 191 adds WOM report/event ledgers, WMS allocation/event ledgers, line quantity splits and visible WOM/QCS entries; active backlog now contains only the public produceTaskCreated product-scope item.",
-        "2026-07-20 BPI Flyway V22 added the PostgreSQL source-sequence current evidence table and exact readiness join; target JetLinks/Kafka/MES/PostgreSQL/browser acceptance is recorded in metadata/bpi-source-sequence-readiness-acceptance.json and deliberately remains DISABLED/BLOCKED until real monotonic telemetry and approved calibration exist."
+        "2026-07-20 BPI Flyway V22 added the PostgreSQL source-sequence current evidence table and exact readiness join; target JetLinks/Kafka/MES/PostgreSQL/browser acceptance is recorded in metadata/bpi-source-sequence-readiness-acceptance.json and deliberately remains DISABLED/BLOCKED until real monotonic telemetry and approved calibration exist.",
+        "2026-07-20 controlled MQTT ingress acceptance added two independent QoS1 sessions and six exact JetLinks/MES persistence rows without adding an Oracle path or ADP init migration; metadata/bpi-mqtt-ingress-joint-acceptance.json records the PostgreSQL verification SQL, source-sequence current state and data-quality raw-event evidence."
       ],
       "blockingIssues": [
         "只能证明当前已登记项受门禁约束，不能证明未来功能测试发现项已自动闭环。"
@@ -729,18 +731,19 @@
         "2026-07-20 Flyway V20 影子运行验收工作台已在目标环境闭合。marker ADP_E2E_SHADOW_20260720_0152_V20 经真实 ADP 登录和 /bpi/#/shadowRuns 页面完成 DRAFT/r1 -> RUNNING/r2 -> EVALUATING/r13 -> APPROVED/r14；10 个 CLOSED_RAW 批次形成 19/20 边界认同、累计量偏差 0%，未解决 CRITICAL 数据质量事件返回 422，处置后由 legacy-ticket:admin 独立批准。57 个浏览器 BPI 响应全部 2xx，浏览器错误为 0，16 条审计和 10 条 COMPLETED/200 幂等准确，WOM/QCS/WMS 状态未改变，最终 10 类 marker 残留均为 0。8 天为数据库受控时间压缩，只证明软件门槛，不构成现场连续运行证据；证据记录在 metadata/bpi-shadow-run-acceptance.json。",
         "2026-07-20 Flyway V21 运行开关治理已在目标环境 10.11.100.17 闭合。marker ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838 经真实 ADP 登录和 /bpi/#/featureFlags 页面完成 LINE 级 SET false 与 INHERIT；PostgreSQL 开关/审计/幂等为 1/2/2，定向清理后 0/0/0，全局 6 个种子与既有 bpi.rule-management LINE 覆盖保留。桌面/移动页面均显示 6 个开关和 8 个导航项，BPI console/page/request/HTTP error 为 0。bpi.commands 与 bpi.rule-management 在后端执行点强制生效；在该次历史验收时 bpi.ui 仍为 PENDING_SHELL_INTEGRATION，shadow-only=true、auto-confirm=false、wms-link=false 为 Phase 1 锁定，WOM/QCS/WMS/PLC/DCS 写入为 0。证据记录在 metadata/bpi-feature-flag-governance-acceptance.json。",
         "2026-07-20 提交 df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4 已在目标环境关闭 bpi.ui 的旧 MES 原生菜单执行缺口。marker ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e 从真实 /bpi/#/featureFlags 页面执行 ENABLE、DISABLE、INHERIT，原生菜单同步为 28/0 -> 29/1 -> 28/0，并通过正常菜单点击进入 BPI iframe；PostgreSQL 开关/审计/幂等为 1/3/3，单事务清理后 0/0/0。只停止 adapter 时 Nginx 回退 gateway 的 28 个原菜单，恢复后 adapter healthy。最终测试环境又从真实页面保留 LINE bpi.ui=true/active/r1，桌面/移动 BPI 动作错误为 0，Flink job 保持 RUNNING 36/36，WOM/QCS/WMS/PLC/DCS 写入为 0。旧 portal userPortal 401 作为独立既有问题保留。证据记录在 metadata/bpi-shell-menu-gate-acceptance.json；G-021 因现场 READY、实时 candidate/batch、连续 7-14 天和 QCS/WMS 写回仍未完成而继续保持 PARTIAL。",
-        "2026-07-20 来源序列 V22 已在目标唯一 ADP 环境完成真实验收：新目录 snapshot c6c09084-82dd-46f8-81e4-98b336b46e65 携带 GATEWAY origin 和 binding fingerprint；PostgreSQL current evidence 为 DISABLED/r2、inbox=2、首次状态审计=1、candidate=0、batch=0。真实 /bpi/#/points API 200，证据抽屉显示 DISABLED/BLOCKED/r2，console/page error 为 0；MES 旧镜像与 V22 数据库健康兼容并已回到新镜像。证据记录在 metadata/bpi-source-sequence-readiness-acceptance.json。"
+        "2026-07-20 来源序列 V22 已在目标唯一 ADP 环境完成真实验收：新目录 snapshot c6c09084-82dd-46f8-81e4-98b336b46e65 携带 GATEWAY origin 和 binding fingerprint；PostgreSQL current evidence 为 DISABLED/r2、inbox=2、首次状态审计=1、candidate=0、batch=0。真实 /bpi/#/points API 200，证据抽屉显示 DISABLED/BLOCKED/r2，console/page error 为 0；MES 旧镜像与 V22 数据库健康兼容并已回到新镜像。证据记录在 metadata/bpi-source-sequence-readiness-acceptance.json。",
+        "2026-07-20 受控 MQTT 双会话以 2026072003:5001..5003 和重连后的 2026072004:1..3 完成 6/6 PUBACK、JetLinks 双表、exporter +6、Kafka 37 -> 43、Flink RUNNING 36/36、MES 来源序列 current、六条数据质量 raw event 和真实点位/数据质量页面联合验收；验收窗口内为 QUALIFIED/DEVICE，点位仅因 calibrationVersion pilot-unverified-20260714 未批准保持 0 READY，candidate/batch=0。证据记录在 metadata/bpi-mqtt-ingress-joint-acceptance.json；来源为受控模拟器且 30 分钟证据窗口已过期，不构成现场生产 READY。"
       ],
       "blockingIssues": [
         "拓扑/规则产品化、稳定版本比较、规则 simulation 证明、职责分离审批、受控退役、退役后延迟 candidate 持久化、JetLinks 自动点位目录同步、点位校准治理、Flyway V20 影子运行验收、独立 APPLIED 与 READY/DEGRADED/INACTIVE 回执、前端状态列、有状态 savepoint 恢复、Flink 自动数据质量 producer、单 broker 故障恢复和 service/adapter/Flink 应用组件回退均已在目标环境通过。V20 的 8 天受控时间压缩已证明 10 批复核、19/20 边界认同、累计量偏差 0%、关键事件阻断和四眼批准，但不构成现场连续运行证据；尚缺真实连续 7-14 天、同 scope 实时 candidate/batch、真实设备来源以及真实业务负载下的跨组件整体回切。",
-        "JetLinks 试点产品、设备、instantFlow metadata 和标准单位已经注册激活并自动落入 MES 目录，MES 校准证据提交/四眼审批/驳回/撤销工作流也已可用；当前仍缺与目录 calibrationVersion 精确匹配的真实现场证书、强制 source sequence 映射和连续单调 DEVICE/GATEWAY 运行证据。实时 IoT 遥测与 MES production context 的同一试点 scope marker candidate/batch 仍未完成现场联调。",
+        "JetLinks 试点产品、设备、instantFlow metadata 和标准单位已经注册激活并自动落入 MES 目录，MES 校准证据提交/四眼审批/驳回/撤销工作流也已可用；受控模拟器已证明 MQTT 重连 epoch 和连续单调 DEVICE sequence，但证据窗口已经过期，当前仍缺与目录 calibrationVersion 精确匹配的真实现场证书、物理 DEVICE/GATEWAY 同等序列及断电恢复证据。实时 IoT 遥测与 MES production context 的同一生产指令 START/END candidate/batch 仍未完成现场联调。",
         "Phase 1 的影子任务、10 批人工复核、19/20 边界认同、累计量偏差 0%、关键数据质量阻断和四眼批准已通过受控时间压缩验收；仍缺选定产线使用真实来源数据连续运行 7-14 天，以及真实工况下的边界认同率和累计量偏差证据。",
         "Phase 2 的 QCS/WMS 幂等写回、异常补偿、谱系和完工入库闭环，以及 Phase 3/4 训练数据与建议型模型均未完成。"
       ],
       "nextActions": [
         "把已通过的同一 marker 真实浏览器/API/Kafka/Flink/PostgreSQL 联合验收、selected telemetry -> Flink data quality -> Kafka -> PostgreSQL -> browser 自动质量链和 Flyway V20 影子运行闭环，固定为每次 BPI 发布前的目标环境回归基线；随后使用影子运行工作台在选定产线真实连续运行 7-14 天，再决定是否进入 QCS/WMS 写回。",
         "保持目标环境 Flyway V22、来源序列证据与点位目录自动同步、运行开关治理、影子运行准入/复核/批准、点位校准治理与稳定游标分页、受控退役、退役后延迟 candidate、typed inactive、savepoint 恢复、单 broker 故障、service/adapter/Flink 应用组件回退、真实 ADP 页面拓扑创建/校验、稳定版本比较、规则 simulation 证明、职责分离审批、PostgreSQL revision 和重启读取为发布回归；禁止通过直接改表绕过开关层级、revision、审计和幂等，下一步在生产等价维护窗口补 BPI 跨组件整体回切和真实业务负载演练。",
-        "平台注册、设备激活、instantFlow metadata、单位和校准治理工作台已完成；下一步由现场计量人员提交真实证书和校验和，由独立管理员审核其与当前目录 calibrationVersion 精确匹配，同时把映射切为 requireSourceSequence=true，并用真实 DEVICE/GATEWAY epoch + 连续单调 sequence 形成未过期运行证据。等待自动同步生成 READY revision 后，再与 MES production context 用同一 marker 闭合 Kafka/Flink/candidate/batch/browser 证据链，禁止手工伪造 READY 快照。",
+        "平台注册、设备激活、instantFlow metadata、单位、MQTT ingress 和校准治理工作台已完成；下一步由现场计量人员提交真实证书和校验和，由独立管理员审核其与当前目录 calibrationVersion 精确匹配，并用物理 DEVICE/GATEWAY epoch + 连续单调 sequence + 断电恢复形成未过期运行证据。等待自动同步生成 READY revision 后，再与 MES production context 用同一生产指令 START/END marker 闭合 Kafka/Flink/candidate/batch/browser 证据链，禁止手工伪造 READY 快照。",
         "使用已通过软件验收的影子运行工作台执行真实连续 7-14 天现场运行；达到真实边界人工认同率、累计量偏差和数据质量门槛后再进入 QCS/WMS 生产写回，禁止提前改变既有生产状态。"
       ],
       "artifacts": [
@@ -904,7 +907,10 @@
         "metadata/bpi-shell-menu-gate-feature-flag.png",
         "metadata/bpi-shell-menu-gate-mobile.png",
         "metadata/bpi-source-sequence-evidence-v22.png",
-        "scripts/verify-bpi-shell-menu-gate.py"
+        "scripts/verify-bpi-shell-menu-gate.py",
+        "deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js",
+        "docs/testing/bpi-mqtt-ingress-joint-acceptance.md",
+        "metadata/bpi-mqtt-ingress-joint-acceptance.json"
       ]
     }
   ],

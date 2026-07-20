@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-19T23:50:34.000Z",
-  "repoCommit": "52eb162b812a9d754970ea80bc31281aa93b1990+codex/bpi-source-sequence-evidence-v2",
+  "generatedAt": "2026-07-20T01:39:01.198Z",
+  "repoCommit": "6b53ecfcb499a2485e22b3aed782e20e0985518a+codex/bpi-source-sequence-evidence-v2",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -123,11 +123,17 @@
       "marker": "ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e",
       "evidence": "metadata/bpi-shell-menu-gate-acceptance.json",
       "assertions": "real old MES native menu and direct recovery page; ENABLE/DISABLE/INHERIT; menu 28/0 -> 29/1 -> 28/0; iframe overview; PostgreSQL feature/audit/idempotency 1/3/3 before cleanup and 0/0/0 after cleanup; adapter-down Nginx fallback; final LINE bpi.ui active/enabled r1; no production-system writes"
+    },
+    "bpiMqttIngressJoint": {
+      "status": "PASS_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER",
+      "marker": "ADP_BPI_MQTT_20260720_0918",
+      "evidence": "metadata/bpi-mqtt-ingress-joint-acceptance.json",
+      "assertions": "two independent MQTT 3.1.1 QoS1 sessions; 6/6 PUBACK; JetLinks property/log persistence; exporter received/enqueued/published +6 with zero failures; Kafka 37->43; Flink RUNNING 36/36; MES source sequence QUALIFIED during TTL; six exact data-quality raw events; real point/data-quality pages with seven 200 BPI responses and zero console/page/request failures; candidate and batch delta zero"
     }
   },
   "summary": {
-    "testedFeatures": 181,
-    "pass": 178,
+    "testedFeatures": 183,
+    "pass": 180,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3891,9 +3897,62 @@
       "issues": [
         "Real pilot telemetry has not supplied monotonic device or gateway sequences and calibration remains UNVERIFIED, so the current status is deliberately DISABLED/BLOCKED; this PASS covers the evidence pipeline and fail-closed guard, not production readiness."
       ]
+    },
+    {
+      "module": "BPI 受控 MQTT 来源序列联合落库",
+      "route": "/bpi/#/points",
+      "operation": "通过两次独立 MQTT 3.1.1 QoS1 会话发送两个 epoch 的严格递增序列，并从真实点位页读取来源证据",
+      "api": "MQTT QoS1; Kafka iot.telemetry.selected.v1 and iot.source-sequence.evidence.v1; GET /bpi-api/point-catalog/current; GET /bpi-api/point-calibrations",
+      "method": "MQTT/KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "JetLinks MQTT gateway -> device message persistence -> TemplateTelemetryExportSubscriber -> TelemetrySpool -> Kafka/Flink; KafkaSourceSequenceEvidencePublisher -> SourceSequenceEvidenceKafkaListener -> SourceSequenceEvidenceIngestionService -> SourceSequenceEvidencePostgresRepository",
+      "tables": [
+        "public.properties_bpi_mqtt_pilot_product_01",
+        "public.device_log_bpi_mqtt_pilot_product_01",
+        "bpi.bpi_source_sequence_evidence_current",
+        "bpi.bpi_point_catalog_snapshots",
+        "bpi.bpi_point_catalog_entries",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_audit_events"
+      ],
+      "marker": "ADP_BPI_MQTT_20260720_0918",
+      "verificationSql": "JetLinks: SELECT deviceId/createTime/property/numberValue from properties_bpi_mqtt_pilot_product_01 and extract messageId/sourceEpoch/sourceSequence from device_log_bpi_mqtt_pilot_product_01 for ADP_BPI_MQTT_20260720_0918. MES: SELECT status,sequence_origin,source_epoch,first_sequence,last_sequence,observation_count,valid_until,revision FROM bpi.bpi_source_sequence_evidence_current WHERE tenant_id='1000' AND plant_id='PLANT-01' AND line_id='LINE-S07-01' AND device_id='bpi-mqtt-pilot-device-01'.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-mqtt-ingress-joint-acceptance.json. EPOCH3 sequences 5001..5003 and a new-connection EPOCH4 sequence 1..3 received 6/6 PUBACK. JetLinks property and device-log tables contained all six facts; exporter received/enqueued/published rose by six with zero failures and empty pending spool; Kafka telemetry total end offset changed 37->43. The real point page read ACTIVE, QUALIFIED/DEVICE/2026072004/1..3/count 3 during the 30-minute evidence window, while calibration kept the point at zero READY. All BPI browser responses were 200 with zero console/page/request failures.",
+      "issues": [
+        "Controlled simulator only. The source evidence expires fail-closed after 30 minutes; physical device proof, independent calibration, production context, END boundary and 7-14 day shadow operation remain incomplete."
+      ]
+    },
+    {
+      "module": "BPI MQTT 数据质量联合落库",
+      "route": "/bpi/#/dataQuality",
+      "operation": "从真实数据质量页面读取受控 MQTT 六条 UNCERTAIN 流量事件形成的聚合事件和原始证据",
+      "api": "Kafka data-quality transaction/control topics; GET /bpi-api/data-quality/incidents; GET /bpi-api/data-quality/summary; GET /bpi-api/data-quality/incidents/357c519f-b6e9-5528-a9ad-c63c4dbc2a1c",
+      "method": "KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "Flink data-quality sink -> Kafka -> DataQualityKafkaListener -> DataQualityKafkaRecordProcessor -> DataQualityIngestionService -> DataQualityPostgresRepository",
+      "tables": [
+        "bpi.bpi_data_quality_incidents",
+        "bpi.bpi_data_quality_incident_events",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_candidates",
+        "bpi.bpi_batch_instances"
+      ],
+      "marker": "ADP_BPI_MQTT_20260720_0918",
+      "verificationSql": "SELECT id,issue_code,severity,state,revision,event_count FROM bpi.bpi_data_quality_incidents WHERE tenant_id='1000' AND device_id='bpi-mqtt-pilot-device-01' AND property_id='flow.instant'; SELECT source_event_id,headers->>'source_epoch',headers->>'sequence',headers->>'sequence_origin',headers->>'quality_code',detected_at FROM bpi.bpi_data_quality_incident_events WHERE incident_id='357c519f-b6e9-5528-a9ad-c63c4dbc2a1c' AND headers->>'source_epoch' IN ('2026072003','2026072004') ORDER BY detected_at; SELECT count(*) FROM bpi.bpi_batch_candidates WHERE created_at >= TIMESTAMPTZ '2026-07-20 09:17:00+08'; SELECT count(*) FROM bpi.bpi_batch_instances WHERE created_at >= TIMESTAMPTZ '2026-07-20 09:17:00+08';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-mqtt-ingress-joint-acceptance.json. The controlled-scope consumer caught up with lag zero after its disabled/deny-all target configuration was corrected. Incident 357c519f-b6e9-5528-a9ad-c63c4dbc2a1c was OPEN/WARNING/r11 with 11 aggregate events; the exact six current MQTT sequence keys 2026072003:5001..5003 and 2026072004:1..3 were present as immutable DEVICE/UNCERTAIN raw facts. Historical DLQ baseline remained four with no new DLQ record. The real detail drawer rendered the six records with all APIs 200 and no browser errors. Candidate and batch deltas were both zero.",
+      "issues": [
+        "The OPEN warning intentionally remains for shadow observation. The data-quality consumer is enabled only for 1000/PLANT-01/LINE-S07-01; this is not production-wide enablement or production-system writeback."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_BPI_MQTT_20260720_0918",
+      "artifact": "metadata/bpi-mqtt-ingress-joint-acceptance.json",
+      "summary": "Two independent MQTT QoS1 sessions closed 6/6 PUBACK, JetLinks dual-table persistence, durable-spool and Kafka +6, Flink, MES qualified source-sequence evidence during TTL, six exact data-quality raw events, real point/data-quality browser views and fail-closed zero candidate/batch behavior without production writeback."
+    },
     {
       "marker": "source-sequence-evidence-131c777051feb15ff81af2d4a1918a28b551ebafcc9e53b46fcf65a11edbf67d",
       "artifact": "metadata/bpi-source-sequence-readiness-acceptance.json",

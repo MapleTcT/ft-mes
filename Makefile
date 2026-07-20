@@ -411,6 +411,7 @@ runtime-script-check:
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-joint-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-rule-retirement-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-runtime-image-rollback-rehearsal.js
 	$(NODE) --check deploy/docker/scripts/adp-rm-web-formula-editor-persistence-acceptance.js

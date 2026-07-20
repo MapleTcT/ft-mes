@@ -680,6 +680,23 @@ WMS、PLC/DCS 写入均为 0，Phase 1 三个写回/自动化门禁保持锁定�
 Flink job `1e981b842f4693e49f3c3def0fb98cb6` 未重启且为 `RUNNING 36/36`。WOM、QCS、WMS、
 PLC/DCS 写入均为 0。
 
+### BPI MQTT 接入与数据质量联合落库（目标 PostgreSQL）
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 两次独立 MQTT QoS1 会话上报瞬时流量 | 目标机回环 MQTT；结果由 `/bpi/#/points` 读取 | MQTT 3.1.1/QoS1；JetLinks product/device 官方认证 | JetLinks MQTT network/gateway -> protocol decode -> device message persistence -> `TemplateTelemetryExportSubscriber -> TelemetrySpool` | JetLinks `public.properties_bpi_mqtt_pilot_product_01`、`public.device_log_bpi_mqtt_pilot_product_01` | 按 device/property 查询属性表；按 `content LIKE '%ADP_BPI_MQTT_20260720_0918%'` 从设备日志 JSON 提取 `messageId/sourceEpoch/sourceSequence` | `EPOCH3` 的 `5001..5003` 和重连后 `EPOCH4` 的 `1..3` 共 6 条全部 PUBACK；属性表 6 条 `instantFlow=12.5`，设备日志精确 6 条 marker | PASS |
+| durable spool 发送 Kafka 并生成来源序列 current | `http://10.11.100.17:18080/bpi/#/points` | Kafka `iot.telemetry.selected.v1`、`iot.source-sequence.evidence.v1`；`GET /bpi-api/point-catalog/current` | `TelemetrySpool -> KafkaTemplateTelemetryPublisher -> Flink`；`KafkaSourceSequenceEvidencePublisher -> SourceSequenceEvidenceKafkaListener -> SourceSequenceEvidenceIngestionService -> SourceSequenceEvidencePostgresRepository` | `bpi.bpi_source_sequence_evidence_current`、`bpi.bpi_inbox_events`、`bpi.bpi_audit_events`、`bpi.bpi_point_catalog_snapshots`、`bpi.bpi_point_catalog_entries` | 查询 current 的 `status/sequence_origin/source_epoch/first_sequence/last_sequence/observation_count/valid_until/revision`，并核对 consumer lag/DLQ | exporter received/enqueued/published 均 `+6`、failure 0、spool pending 0；telemetry offset `37 -> 43`；浏览器验收快照为 `QUALIFIED/DEVICE/2026072004/1..3/count 3/r6`，来源 consumer lag 0、DLQ 0 | PASS_CONTROLLED_WITH_TTL |
+| Flink 数据质量事件进入 MES 聚合与原始证据表 | `http://10.11.100.17:18080/bpi/#/dataQuality` | Kafka data-quality transaction/control topics；`GET /bpi-api/data-quality/incidents`、`/summary`、`/incidents/{id}` | Flink data-quality sink -> Kafka -> `DataQualityKafkaListener -> DataQualityKafkaRecordProcessor -> DataQualityIngestionService -> DataQualityPostgresRepository` | `bpi.bpi_data_quality_incidents`、`bpi.bpi_data_quality_incident_events`、`bpi.bpi_inbox_events` | 按 device/property 查询 incident；按 incident id 从 raw event `headers` 提取 `source_epoch/sequence/sequence_origin/quality_code` | incident `357c519f-b6e9-5528-a9ad-c63c4dbc2a1c` 为 OPEN/WARNING/r11/event_count 11；本轮六条序列全部存在且均为 DEVICE/UNCERTAIN；consumer lag 0，历史 DLQ 4、本轮新增 0 | PASS |
+| 校准和生产上下文缺失时禁止生成候选/批次 | 点位页显示 0 READY；候选页无本轮记录 | 不适用；运行时 readiness/context join 失败关闭 | `PointCatalogService` readiness + Flink production-context join | `bpi.bpi_batch_candidates`、`bpi.bpi_batch_instances` | 查询 `created_at >= TIMESTAMPTZ '2026-07-20 09:17:00+08'` 的 candidate 和 batch 计数 | 两表增量均为 0；`bpi_feature_flags` 未开放 WOM/QCS/WMS 外部写开关 | PASS_FAIL_CLOSED |
+
+受控 marker：`ADP_BPI_MQTT_20260720_0918_EPOCH3`、
+`ADP_BPI_MQTT_20260720_0918_EPOCH4`。数据质量 consumer 的目标环境配置曾为 disabled/deny-all，
+现仅为 `1000 / PLANT-01 / LINE-S07-01` 开放并保留；修改前 `.env` 已备份到
+`/home/v6/adp-deploy-backups/20260720-0935-bpi-data-quality-consumer/.env-before`，只重建了 BPI service。
+机器记录：`metadata/bpi-mqtt-ingress-joint-acceptance.json`；详细报告：
+`docs/testing/bpi-mqtt-ingress-joint-acceptance.md`。来源证据 TTL 为 30 分钟，过期后不能继续解释为
+QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

@@ -3261,6 +3261,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-point-calibration-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -5031,6 +5037,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-mqtt-ingress-joint-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-pilot-platform-prerequisites-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5392,6 +5404,12 @@
     {
       "ignored": false,
       "path": "metadata/bpi-mes-production-context-runtime-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-mqtt-ingress-joint-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -8612,16 +8630,16 @@
       "tracked": 19
     },
     "deploy": {
-      "tracked": 570
+      "tracked": 571
     },
     "docs": {
-      "tracked": 104
+      "tracked": 105
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 157
+      "tracked": 158
     },
     "package.json": {
       "tracked": 1
@@ -8645,8 +8663,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1431,
-    "tracked": 1431,
+    "totalFiles": 1434,
+    "tracked": 1434,
     "untracked": 0
   },
   "untrackedByDirectory": []

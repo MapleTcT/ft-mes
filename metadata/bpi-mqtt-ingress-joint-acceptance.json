@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-20T09:39:01+08:00",
+  "status": "PASS_CONTROLLED_MQTT_KAFKA_POSTGRES_BROWSER",
+  "repository": {
+    "name": "MapleTcT/ft-mes",
+    "branch": "codex/bpi-source-sequence-evidence-v2",
+    "baseCommit": "6b53ecfcb499a2485e22b3aed782e20e0985518a"
+  },
+  "database": "PostgreSQL",
+  "scope": {
+    "tenantId": "1000",
+    "plantId": "PLANT-01",
+    "lineId": "LINE-S07-01",
+    "sourceInstance": "jetlinks-pilot-node-01",
+    "productId": "bpi-mqtt-pilot-product-01",
+    "deviceId": "bpi-mqtt-pilot-device-01",
+    "sourcePropertyId": "instantFlow",
+    "propertyId": "flow.instant"
+  },
+  "source": {
+    "controlledSimulator": true,
+    "fieldDeviceClaimed": false,
+    "sessions": [
+      {
+        "marker": "ADP_BPI_MQTT_20260720_0918_EPOCH3",
+        "sourceEpoch": 2026072003,
+        "sequenceFirst": 5001,
+        "sequenceLast": 5003,
+        "pubAckCount": 3
+      },
+      {
+        "marker": "ADP_BPI_MQTT_20260720_0918_EPOCH4",
+        "sourceEpoch": 2026072004,
+        "sequenceFirst": 1,
+        "sequenceLast": 3,
+        "pubAckCount": 3,
+        "newConnection": true
+      }
+    ]
+  },
+  "runtime": {
+    "host": "10.11.100.17",
+    "adpRoute": "http://10.11.100.17:18080",
+    "bpiServiceImage": "ft-mes-bpi-service:20260720-source-sequence-v22-6b2eb3e7",
+    "iotImage": "mapletct/jetlinks-bpi-pilot:20260720-mqtt-qos1-decoupled",
+    "flywayVersion": 22,
+    "flinkJobId": "1e981b842f4693e49f3c3def0fb98cb6",
+    "flinkState": "RUNNING",
+    "flinkTasks": "36/36"
+  },
+  "telemetry": {
+    "topic": "iot.telemetry.selected.v1",
+    "totalEndOffsetBefore": 37,
+    "totalEndOffsetAfter": 43,
+    "delta": 6,
+    "exporterReceivedDelta": 6,
+    "exporterEnqueuedDelta": 6,
+    "exporterPublishedDelta": 6,
+    "exporterPublishFailures": 0,
+    "spoolPendingEvents": 0
+  },
+  "pointCatalog": {
+    "snapshotId": "c93a16dc-17a2-4dd0-8e10-c18f94b442da",
+    "pointId": "ca69a739-e580-4b2d-bc4a-c343ea0952ad",
+    "sourceRevision": "sha256:7ad9627544e3a7cf67d8a64464f40f319e51e2c0bb6eea7433edaf65840694ab",
+    "pointCount": 1,
+    "readyPointCount": 0,
+    "registered": true,
+    "propertyPresent": true,
+    "deviceState": "ACTIVE",
+    "calibrationStatus": "UNVERIFIED",
+    "readinessIssuesAtBrowserAcceptance": [
+      "CALIBRATION_NOT_VERIFIED"
+    ]
+  },
+  "sourceSequence": {
+    "statusAtBrowserAcceptance": "QUALIFIED",
+    "qualifiedAtBrowserAcceptance": true,
+    "origin": "DEVICE",
+    "sourceEpoch": 2026072004,
+    "firstSequence": 1,
+    "lastSequence": 3,
+    "observationCount": 3,
+    "validUntil": "2026-07-20T09:48:00.852+08:00",
+    "browserEvidenceRevision": 6,
+    "browserEvidenceEventId": "source-sequence-evidence-5574e4cef5f3899c5d9349df56960676d9a9183d2083644d9b59893bcc3f0637",
+    "consumerLag": 0,
+    "dlqTotalOffsets": 0,
+    "expiresFailClosed": true
+  },
+  "dataQuality": {
+    "consumerEnabledForControlledScope": true,
+    "incidentId": "357c519f-b6e9-5528-a9ad-c63c4dbc2a1c",
+    "issueCode": "POINT_QUALITY_UNCERTAIN",
+    "severity": "WARNING",
+    "state": "OPEN",
+    "revision": 11,
+    "eventCount": 11,
+    "acceptedCurrentMqttEvents": 6,
+    "acceptedSequenceKeys": [
+      "2026072003:5001",
+      "2026072003:5002",
+      "2026072003:5003",
+      "2026072004:1",
+      "2026072004:2",
+      "2026072004:3"
+    ],
+    "consumerLag": 0,
+    "preExistingDlqOffsets": 4,
+    "newDlqRecords": 0,
+    "configBackup": "/home/v6/adp-deploy-backups/20260720-0935-bpi-data-quality-consumer/.env-before"
+  },
+  "persistence": {
+    "jetlinksTables": [
+      "public.properties_bpi_mqtt_pilot_product_01",
+      "public.device_log_bpi_mqtt_pilot_product_01"
+    ],
+    "mesTables": [
+      "bpi.bpi_source_sequence_evidence_current",
+      "bpi.bpi_point_catalog_snapshots",
+      "bpi.bpi_point_catalog_entries",
+      "bpi.bpi_data_quality_incidents",
+      "bpi.bpi_data_quality_incident_events",
+      "bpi.bpi_inbox_events",
+      "bpi.bpi_audit_events"
+    ],
+    "candidateRowsCreated": 0,
+    "batchRowsCreated": 0
+  },
+  "browser": {
+    "status": "PASS",
+    "loginStatus": 200,
+    "pointRows": 1,
+    "dataQualityRows": 1,
+    "bpiApiResponses": 7,
+    "non200BpiResponses": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "report": "/tmp/bpi-mqtt-ingress-browser-20260720.json",
+    "reportSha256": "7faff9a1bf9ddf3850ad79ed5ab797f18e6a1f578690e821a170146a09e2c26d",
+    "pointScreenshotSha256": "72da03c897fba89d66b76f20382407b15f93c44cf65702c20ed040a3279bc4e2",
+    "dataQualityScreenshotSha256": "41af6c6307f7bbf42a5c212300cdf1cdec2b73f34779c8fa3a69e3d80d48c262"
+  },
+  "safety": {
+    "automaticBatchEnabled": false,
+    "candidateCreated": false,
+    "batchCreated": false,
+    "womWritebackEnabled": false,
+    "qcsWritebackEnabled": false,
+    "wmsWritebackEnabled": false,
+    "productionReadyClaimed": false
+  },
+  "remainingBlockers": [
+    "independent real calibration approval and certificate",
+    "physical DEVICE or GATEWAY proof",
+    "same-scope live MES production context and END boundary",
+    "7-14 day shadow run",
+    "production-equivalent load, backpressure and rollback rehearsal",
+    "business sign-off before QCS or WMS writeback"
+  ],
+  "issues": []
+}

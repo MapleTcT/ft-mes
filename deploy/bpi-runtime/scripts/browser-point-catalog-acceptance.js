@@ -41,7 +41,7 @@ const pointIssueLabels = {
   DEVICE_NOT_ACTIVE: "设备未激活",
   PROPERTY_NOT_AVAILABLE: "设备属性不可用",
   UNIT_MISSING: "单位缺失",
-  CALIBRATION_NOT_VERIFIED: "标定未验证",
+  CALIBRATION_NOT_VERIFIED: "校准证据未批准或已失效",
   SOURCE_SEQUENCE_DISABLED: "来源序列未启用",
 };
 const expectedAutomaticPointIssues = process.env.BPI_EXPECTED_POINT_ISSUES
@@ -56,7 +56,7 @@ const expectedPointLabels = [
   "设备未注册",
   "设备未激活",
   "设备属性不可用",
-  "标定未验证",
+  "校准证据未批准或已失效",
   "来源序列未启用",
 ];
 const expectedTopologyErrors = [
