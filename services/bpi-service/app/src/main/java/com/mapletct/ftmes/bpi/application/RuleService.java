@@ -486,12 +486,14 @@ public class RuleService {
             throw new BpiValidationException(
                     "Rule publication requires current READY point catalog bindings: " + codes + ".");
         }
+        Instant publicationTime = Instant.now();
+        pointCatalogService.lockAdmissionEvidence(actor, catalog, publicationTime);
         repository.lockRuleCodeScope(actor, rule);
         repository.assertRulePublicationHandoffReady(actor, rule);
         UUID publicationEventId = UUID.randomUUID();
         var publication = publicationFactory.create(
-                actor, rule, topology, definition, publicationEventId, Instant.now(),
-                outboxProperties.topic(), traceId);
+                actor, rule, topology, definition, publicationEventId, publicationTime,
+                outboxProperties.topic(), traceId, catalog);
         repository.approveRule(actor, rule, approval, command.reason());
         outboxRepository.insertPublication(actor, rule, publication);
         repository.insertRuleAudit(
@@ -665,12 +667,11 @@ public class RuleService {
         }
 
         repository.lockRuleCodeScope(actor, rule);
-        BoundaryRuleDefinition definition = definitionParser.parse(rule);
-        TopologyVersionView topology = repository.findTopologyForRule(actor, rule.id());
         UUID retirementEventId = UUID.randomUUID();
-        var retirement = publicationFactory.create(
-                actor, rule, topology, definition, retirementEventId, Instant.now(),
-                outboxProperties.topic(), traceId, false);
+        byte[] activationPayload = outboxRepository.findActivationPayload(actor, rule.id());
+        var retirement = publicationFactory.retire(
+                actor, rule, activationPayload, retirementEventId, Instant.now(),
+                outboxProperties.topic(), traceId);
         repository.retireRule(actor, rule);
         outboxRepository.insertPublication(actor, rule, retirement, "RETIRE", false);
         repository.insertRuleAudit(

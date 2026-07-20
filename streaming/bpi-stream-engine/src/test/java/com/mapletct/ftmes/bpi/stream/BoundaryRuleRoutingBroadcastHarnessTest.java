@@ -169,6 +169,60 @@ class BoundaryRuleRoutingBroadcastHarnessTest {
     }
 
     @Test
+    void authoritativeMesCalibrationEvidenceOverridesUntrustedSourceAssertion() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            PointCatalogSnapshotV1 sourceCatalog = readyCatalog("TENANT-A", true, "CAL-1", T0);
+            sourceCatalog = sourceCatalog.toBuilder()
+                    .setPoints(0, sourceCatalog.getPoints(0).toBuilder()
+                            .setCalibrationStatus(PointCalibrationStatusV1.POINT_CALIBRATION_UNVERIFIED))
+                    .build();
+            BoundaryRulePublicationV1 base = publication("TENANT-A", "RULE-A", true, "sha:a");
+            BoundaryRulePublicationV1 publication = base.toBuilder()
+                    .setPointCatalogSnapshotId("31fb4fba-9c73-4a31-af2a-c380e8d12dd5")
+                    .setPointCatalogChecksum("sha256:mes-admission")
+                    .setSignalBindings(0, base.getSignalBindings(0).toBuilder()
+                            .setCalibrationEvidenceId("1f9497af-76ad-41ce-8d0d-a7b33fba3aaf")
+                            .setCalibrationValidUntilMs(System.currentTimeMillis() + 60_000))
+                    .build();
+
+            catalog(harness, sourceCatalog);
+            rule(harness, publication);
+            harness.processElement(
+                    ContextualTelemetryPointCodec.encode(contextual("TENANT-A")),
+                    T0.plusSeconds(1).toEpochMilli());
+
+            assertEquals(BoundaryRuleRuntimeReadinessStatusV1.READY,
+                    runtimeReadiness(harness).get(0).getStatus());
+            assertTrue(harness.getOutput().stream().anyMatch(StreamRecord.class::isInstance));
+        }
+    }
+
+    @Test
+    void expiredMesCalibrationEvidenceDegradesRuntimeReadiness() throws Exception {
+        try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
+            harness.open();
+            long now = System.currentTimeMillis();
+            BoundaryRulePublicationV1 base = publication("TENANT-A", "RULE-A", true, "sha:a");
+            BoundaryRulePublicationV1 publication = base.toBuilder()
+                    .setPublishedAtMs(now - 2_000)
+                    .setPointCatalogSnapshotId("31fb4fba-9c73-4a31-af2a-c380e8d12dd5")
+                    .setPointCatalogChecksum("sha256:mes-admission")
+                    .setSignalBindings(0, base.getSignalBindings(0).toBuilder()
+                            .setCalibrationEvidenceId("1f9497af-76ad-41ce-8d0d-a7b33fba3aaf")
+                            .setCalibrationValidUntilMs(now - 1_000))
+                    .build();
+
+            catalog(harness, readyCatalog("TENANT-A", true, "CAL-1", T0));
+            rule(harness, publication);
+
+            BoundaryRuleRuntimeReadinessV1 receipt = runtimeReadiness(harness).get(0);
+            assertEquals(BoundaryRuleRuntimeReadinessStatusV1.DEGRADED, receipt.getStatus());
+            assertEquals("POINT_CALIBRATION_EVIDENCE_EXPIRED", receipt.getReasonCode());
+        }
+    }
+
+    @Test
     void readinessReceiptTracksCatalogRevisionAndSuppressesExactReplay() throws Exception {
         try (BroadcastOperatorTestHarness<byte[], byte[], BoundaryStreamInput> harness = harness()) {
             harness.open();

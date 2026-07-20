@@ -16,6 +16,9 @@ const goldenSetId = process.env.BPI_ACCEPTANCE_GOLDEN_SET_ID || "";
 const boundaryTime = process.env.BPI_ACCEPTANCE_BOUNDARY_TIME || "";
 const orderId = process.env.BPI_ACCEPTANCE_ORDER_ID || `MO-${marker}`;
 const expectedLineId = process.env.BPI_ACCEPTANCE_LINE_ID || "";
+const expectedBoundaryType = (process.env.BPI_ACCEPTANCE_BOUNDARY_TYPE || "START")
+  .trim()
+  .toUpperCase();
 const expectedRuntimeStatus = (process.env.BPI_ACCEPTANCE_EXPECTED_RUNTIME_STATUS || "")
   .trim()
   .toUpperCase();
@@ -41,6 +44,9 @@ if (!Number.isInteger(expectedPublishStatus) || expectedPublishStatus < 200 || e
 }
 if (expectedPublishStatus !== 200 && expectedRuntimeStatus) {
   throw new Error("a blocked publication cannot assert a runtime status");
+}
+if (!new Set(["START", "END"]).has(expectedBoundaryType)) {
+  throw new Error("BPI_ACCEPTANCE_BOUNDARY_TYPE must be START or END");
 }
 if (action === "rule-read" && (!ruleCode || !expectedRuntimeStatus)) {
   throw new Error("rule-read requires a rule code and expected runtime status");
@@ -214,17 +220,32 @@ async function readRuleRuntime(page, evidence) {
 async function confirmCandidate(page, evidence) {
   await page.goto(`${bpiBaseUrl}/#/candidates`, { waitUntil: "networkidle", timeout: timeoutMs });
   await page.getByRole("heading", { name: "候选批次" }).waitFor({ timeout: timeoutMs });
-  const row = page.locator("[data-candidate-id]").filter({ hasText: orderId });
-  if (await row.count() !== 1) throw new Error(`expected one candidate row for ${orderId}`);
+  let row = page.locator("[data-candidate-id]");
+  if (expectedBoundaryType === "START") row = row.filter({ hasText: orderId });
+  else {
+    if (expectedLineId) row = row.filter({ hasText: expectedLineId });
+    row = row.filter({ hasText: "END" });
+  }
+  if (await row.count() !== 1) {
+    throw new Error(`expected one ${expectedBoundaryType} candidate row for ${expectedLineId || orderId}`);
+  }
   evidence.candidateId = await row.getAttribute("data-candidate-id");
   await row.click();
+  if (expectedBoundaryType === "END") {
+    await page.locator("#detail-drawer").getByText("END", { exact: true }).waitFor({ timeout: timeoutMs });
+  }
   await page.locator("#open-confirm").click();
-  await page.locator("#confirm-reason").fill(`现场复核 marker ${marker} 的指令、泵状态和瞬时流量证据`);
+  await page.locator("#confirm-reason").fill(
+    `现场复核 marker ${marker} 的 ${expectedBoundaryType} 生产上下文和瞬时流量证据`,
+  );
   await page.locator("#confirm-submit").click();
   await page.getByRole("heading", { name: "批次档案" }).waitFor({ timeout: timeoutMs });
   await page.getByText("SHADOW", { exact: true }).last().waitFor({ timeout: timeoutMs });
+  const expectedBatchState = expectedBoundaryType === "END" ? "CLOSED_RAW" : "ACTIVE";
+  await page.getByText(expectedBatchState, { exact: true }).last().waitFor({ timeout: timeoutMs });
   evidence.candidateState = "CONFIRMED";
-  evidence.batchState = "ACTIVE";
+  evidence.boundaryType = expectedBoundaryType;
+  evidence.batchState = expectedBatchState;
   evidence.shadow = true;
   await page.screenshot({ path: screenshotPath, fullPage: true });
 }
@@ -242,7 +263,11 @@ async function readCandidate(page, evidence) {
   if (expectedLineId) {
     await drawer.getByRole("heading", { name: expectedLineId, exact: true }).waitFor({ timeout: timeoutMs });
   }
-  await drawer.getByText(orderId, { exact: true }).waitFor({ timeout: timeoutMs });
+  if (expectedBoundaryType === "START") {
+    await drawer.getByText(orderId, { exact: true }).waitFor({ timeout: timeoutMs });
+  } else {
+    await drawer.getByText("END", { exact: true }).waitFor({ timeout: timeoutMs });
+  }
   await page.waitForFunction(() => {
     const current = document.querySelector("#detail-drawer");
     if (!current) return false;
@@ -306,6 +331,7 @@ async function main() {
     action,
     marker,
     orderId,
+    expectedBoundaryType,
     expectedRuntimeStatus: expectedRuntimeStatus || null,
     expectedPublishStatus,
     expectedPublishDetail: expectedPublishDetail || null,
@@ -326,7 +352,7 @@ async function main() {
   try {
     const auth = await login(api);
     report.loginStatus = auth.loginStatus;
-    browser = await chromium.launch({ headless });
+    browser = await chromium.launch({ headless, args: ["--no-proxy-server"] });
     const context = await browser.newContext({
       ignoreHTTPSErrors: true,
       extraHTTPHeaders: { Authorization: `Bearer ${auth.ticket}` },

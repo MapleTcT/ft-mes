@@ -91,7 +91,16 @@ const outputPath =
 // Keep marker rows above older seed data but below Number.MAX_SAFE_INTEGER for legacy frontend JSON handling.
 // Keep the short-lived marker above historical 9.0e15 fixtures while staying
 // below Number.MAX_SAFE_INTEGER because the generated grid parses ids as JS numbers.
-const idBase = 9007190000000000n + BigInt(Date.now() % 100000000) * 10n + BigInt(process.pid % 10);
+const configuredIdBase = (process.env.ADP_WOM_ID_BASE || "").trim();
+if (configuredIdBase && !/^[1-9][0-9]{0,15}$/.test(configuredIdBase)) {
+  throw new Error("ADP_WOM_ID_BASE must be a positive integer with at most 16 digits");
+}
+const idBase = configuredIdBase
+  ? BigInt(configuredIdBase)
+  : 9007190000000000n + BigInt(Date.now() % 100000000) * 10n + BigInt(process.pid % 10);
+if (idBase + 6n > BigInt(Number.MAX_SAFE_INTEGER)) {
+  throw new Error("ADP_WOM_ID_BASE leaves generated ids outside JavaScript's safe integer range");
+}
 const ids = {
   material: idBase + 1n,
   formula: idBase + 2n,
@@ -967,7 +976,7 @@ async function runStopTransition(page, config, selection, evidence, transition =
 }
 
 async function runBrowser(ticket, evidence) {
-  const browser = await chromium.launch({ headless });
+  const browser = await chromium.launch({ headless, args: ["--no-proxy-server"] });
   try {
     const context = await browser.newContext({
       baseURL: browserBaseUrl,

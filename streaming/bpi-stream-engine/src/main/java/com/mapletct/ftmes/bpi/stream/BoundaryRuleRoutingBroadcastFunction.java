@@ -437,7 +437,16 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                     "POINT_UNIT_MISMATCH",
                     "catalog unit does not match the published binding");
         }
-        if (point.getCalibrationStatus() != PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED) {
+        if (!binding.getCalibrationEvidenceId().isBlank()
+                && binding.getCalibrationValidUntilMs() <= System.currentTimeMillis()) {
+            return publicationIssue(
+                    publication,
+                    binding,
+                    "POINT_CALIBRATION_EVIDENCE_EXPIRED",
+                    "authoritative MES calibration evidence has expired");
+        }
+        if (binding.getCalibrationEvidenceId().isBlank()
+                && point.getCalibrationStatus() != PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED) {
             return publicationIssue(
                     publication,
                     binding,
@@ -569,7 +578,13 @@ public final class BoundaryRuleRoutingBroadcastFunction extends BroadcastProcess
                     && !point.getUnit().equalsIgnoreCase(binding.getExpectedUnit()))) {
             return issue(contextual, "POINT_UNIT_MISMATCH", "catalog unit does not match the published binding");
         }
-        if (point.getCalibrationStatus() != PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED) {
+        if (!binding.getCalibrationEvidenceId().isBlank()
+                && binding.getCalibrationValidUntilMs() <= System.currentTimeMillis()) {
+            return issue(contextual, "POINT_CALIBRATION_EVIDENCE_EXPIRED",
+                    "authoritative MES calibration evidence has expired");
+        }
+        if (binding.getCalibrationEvidenceId().isBlank()
+                && point.getCalibrationStatus() != PointCalibrationStatusV1.POINT_CALIBRATION_VERIFIED) {
             return issue(contextual, "POINT_CALIBRATION_NOT_VERIFIED", "catalog calibration is not verified");
         }
         if (!point.getCalibrationVersion().equals(binding.getCalibrationVersion())) {

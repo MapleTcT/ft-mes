@@ -167,6 +167,13 @@ public class PointCalibrationService {
 
         PointCalibrationView locked = repository.lock(actor, calibrationId);
         assertRevisionAndState(locked, expectedRevision, "APPROVED");
+        repository.findUnsafeRuntimeRuleDependency(actor, locked).ifPresent(ruleReference -> {
+            throw new BpiConflictException(
+                    "Point calibration is referenced by rule " + ruleReference
+                            + "; retire the rule and wait for Kafka PUBLISHED, Flink APPLIED"
+                            + " and runtime INACTIVE before revocation.",
+                    locked.revision());
+        });
         repository.revoke(actor, calibrationId, expectedRevision, command.reason());
         PointCalibrationView revoked = repository.find(actor, calibrationId);
         repository.insertAudit(actor, revoked, "POINT_CALIBRATION_REVOKED",

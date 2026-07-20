@@ -87,6 +87,7 @@ class BpiPointCalibrationPostgresAcceptanceTest {
         if (tenantId == null) return;
         jdbc.update("DELETE FROM bpi.bpi_audit_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_api_idempotency WHERE tenant_id = ?", tenantId);
+        jdbc.update("DELETE FROM bpi.bpi_outbox_events WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_rule_versions WHERE tenant_id = ?", tenantId);
         jdbc.update("DELETE FROM bpi.bpi_topology_versions WHERE tenant_id = ?", tenantId);
         SourceSequenceEvidenceTestFixture.cleanup(jdbc, tenantId);
@@ -242,6 +243,23 @@ class BpiPointCalibrationPostgresAcceptanceTest {
                  WHERE tenant_id = ? AND id = ?
                 """, tenantId, calibrationId);
         assertCurrentReadiness(1, "VERIFIED", calibrationId.toString());
+
+        String dependencyReference = createPublishedRuleDependency(topologyId);
+        mockMvc.perform(post("/bpi/v1/point-calibrations/{id}/revoke", calibrationId)
+                        .header("Authorization", "Bearer " + reviewerToken)
+                        .header("Idempotency-Key", "calibration-active-rule-revoke-" + tenantId)
+                        .header("If-Match", "2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reason("规则仍在运行时生效期间不得撤销校准证据")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail", containsString(dependencyReference)))
+                .andExpect(jsonPath("$.detail", containsString("runtime INACTIVE")));
+        assertThat(jdbc.queryForObject("""
+                SELECT state || '|' || revision
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, calibrationId)).isEqualTo("APPROVED|2");
+        completeRuleRetirement(dependencyReference.substring(0, dependencyReference.indexOf('@')));
 
         mockMvc.perform(post("/bpi/v1/point-calibrations/{id}/revoke", calibrationId)
                         .header("Authorization", "Bearer " + reviewerToken)
@@ -515,6 +533,60 @@ class BpiPointCalibrationPostgresAcceptanceTest {
                                         "requiredSignals", List.of("feed.flow"))))))
                 .andExpect(status().isOk()).andReturn();
         return UUID.fromString(response(result).path("data").path("id").asText());
+    }
+
+    private String createPublishedRuleDependency(UUID topologyId) {
+        String ruleCode = tenantId + "_CALIBRATION_DEPENDENCY";
+        UUID ruleId = UUID.randomUUID();
+        jdbc.update("""
+                UPDATE bpi.bpi_topology_versions
+                   SET state = 'PUBLISHED', updated_by = 'acceptance', updated_at = now()
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, topologyId);
+        jdbc.update("""
+                INSERT INTO bpi.bpi_rule_versions
+                    (id, tenant_id, rule_code, version, topology_version_id, state,
+                     checksum, definition, revision, created_by, plant_id, line_id, updated_by)
+                VALUES (?, ?, ?, '1.0.0', ?, 'PUBLISHED', ?, '{}'::jsonb, 1,
+                        'acceptance', ?, ?, 'acceptance')
+                """, ruleId, tenantId, ruleCode, topologyId, "b".repeat(64), PLANT_ID, LINE_ID);
+        insertRuleLifecycle(ruleId, "ACTIVATE", 1, true, "READY");
+        return ruleCode + "@1.0.0";
+    }
+
+    private void completeRuleRetirement(String ruleCode) {
+        UUID ruleId = jdbc.queryForObject("""
+                SELECT id
+                  FROM bpi.bpi_rule_versions
+                 WHERE tenant_id = ? AND rule_code = ?
+                """, UUID.class, tenantId, ruleCode);
+        jdbc.update("""
+                UPDATE bpi.bpi_rule_versions
+                   SET state = 'RETIRED', revision = revision + 1,
+                       updated_by = 'acceptance', updated_at = now()
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, ruleId);
+        insertRuleLifecycle(ruleId, "RETIRE", 2, false, "INACTIVE");
+    }
+
+    private void insertRuleLifecycle(
+            UUID ruleId,
+            String lifecycleAction,
+            long lifecycleSequence,
+            boolean lifecycleActive,
+            String runtimeReadinessStatus) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_outbox_events
+                    (id, tenant_id, plant_id, line_id, aggregate_type, aggregate_id,
+                     event_type, topic, partition_key, payload, headers, status,
+                     application_status, runtime_readiness_status,
+                     lifecycle_action, lifecycle_sequence, lifecycle_active)
+                VALUES (?, ?, ?, ?, 'RULE_VERSION', ?, 'BOUNDARY_RULE_PUBLISHED',
+                        'bpi.boundary.rule-publication.v1', ?, ?, '{}'::jsonb, 'PUBLISHED',
+                        'APPLIED', ?, ?, ?, ?)
+                """, UUID.randomUUID(), tenantId, PLANT_ID, LINE_ID, ruleId,
+                tenantId + "|" + ruleId, new byte[] {1}, runtimeReadinessStatus,
+                lifecycleAction, lifecycleSequence, lifecycleActive);
     }
 
     private void assertCurrentReadiness(int count, String statusValue, String evidenceId) throws Exception {

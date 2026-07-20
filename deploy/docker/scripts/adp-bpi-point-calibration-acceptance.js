@@ -15,7 +15,12 @@ const password = required("ADP_PASSWORD");
 const internalSecret = required("BPI_INTERNAL_JWT_SECRET");
 const plantId = process.env.BPI_PLANT_ID || "PLANT-01";
 const lineId = process.env.BPI_LINE_ID || "LINE-S07-01";
-const calibrationVersion = `${marker}_NON_MATCHING`;
+const calibrationVersion = (process.env.BPI_CALIBRATION_VERSION || `${marker}_NON_MATCHING`).trim();
+const calibrationExpectation = (process.env.BPI_CALIBRATION_EXPECTATION || "NON_MATCHING")
+  .trim()
+  .toUpperCase();
+const releaseFile = (process.env.BPI_CALIBRATION_RELEASE_FILE || "").trim();
+const releaseTimeoutMs = Number(process.env.BPI_CALIBRATION_RELEASE_TIMEOUT_MS || 1_800_000);
 const reviewer = `${marker}_REVIEWER`;
 const timeoutMs = Number(process.env.BPI_BROWSER_TIMEOUT_MS || 120_000);
 const headless = process.env.BPI_HEADLESS !== "false";
@@ -31,6 +36,15 @@ if (!/^[A-Za-z0-9_-]{8,80}$/.test(marker)) {
 }
 if (Buffer.byteLength(internalSecret, "utf8") < 32) {
   throw new Error("BPI_INTERNAL_JWT_SECRET must contain at least 32 UTF-8 bytes");
+}
+if (!new Set(["MATCHING", "NON_MATCHING"]).has(calibrationExpectation)) {
+  throw new Error("BPI_CALIBRATION_EXPECTATION must be MATCHING or NON_MATCHING");
+}
+if (!Number.isInteger(releaseTimeoutMs) || releaseTimeoutMs < 1_000) {
+  throw new Error("BPI_CALIBRATION_RELEASE_TIMEOUT_MS must be an integer of at least 1000");
+}
+if (releaseFile && !path.isAbsolute(releaseFile)) {
+  throw new Error("BPI_CALIBRATION_RELEASE_FILE must be an absolute path");
 }
 
 function required(key) {
@@ -117,6 +131,15 @@ function localDateTime(value) {
   return date.toISOString().slice(0, 19);
 }
 
+async function waitForRelease(filePath, timeout) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (fs.existsSync(filePath)) return;
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+  throw new Error(`calibration release file was not created before timeout: ${filePath}`);
+}
+
 async function adapterGet(api, ticket, route) {
   const response = await api.get(`${adpBaseUrl}/bpi-api${route}`, {
     headers: { Authorization: `Bearer ${ticket}` },
@@ -166,6 +189,17 @@ async function main() {
     assert(initialCatalog.data.snapshot.readyPointCount === 0,
       `target pilot must remain blocked before acceptance, got ${initialCatalog.data.snapshot.readyPointCount} READY`);
     const initialPoint = initialCatalog.data.points[0];
+    if (calibrationExpectation === "MATCHING") {
+      assert(calibrationVersion === initialPoint.calibrationVersion,
+        `matching calibration must use catalog version ${initialPoint.calibrationVersion}`);
+    } else {
+      assert(calibrationVersion !== initialPoint.calibrationVersion,
+        "non-matching calibration unexpectedly equals the catalog version");
+    }
+    if (releaseFile) {
+      assert(!fs.existsSync(releaseFile),
+        `calibration release file already exists before approval: ${releaseFile}`);
+    }
     report.evidence.before = {
       snapshotId: initialCatalog.data.snapshot.id,
       sourceRevision: initialCatalog.data.snapshot.sourceRevision,
@@ -180,7 +214,7 @@ async function main() {
       readinessIssues: initialPoint.readinessIssues,
     };
 
-    browser = await chromium.launch({ headless });
+    browser = await chromium.launch({ headless, args: ["--no-proxy-server"] });
     const context = await browser.newContext({
       ignoreHTTPSErrors: true,
       viewport: { width: 1440, height: 900 },
@@ -244,7 +278,8 @@ async function main() {
       });
     });
 
-    await page.goto(bpiBaseUrl, { waitUntil: "networkidle" });
+    await page.goto(`${bpiBaseUrl.replace(/\/+$/, "")}/#/points`, { waitUntil: "networkidle" });
+    await page.getByRole("heading", { name: "点位目录" }).waitFor();
     const pointRow = page.locator(`[data-point-id="${initialPoint.id}"]`);
     await pointRow.waitFor();
     await pointRow.getByText("BLOCKED", { exact: true }).waitFor();
@@ -259,7 +294,9 @@ async function main() {
     await page.locator("#calibration-checksum").fill(checksum);
     await page.locator("#calibration-valid-from").fill(localDateTime(Date.now() - 86_400_000));
     await page.locator("#calibration-valid-until").fill(localDateTime(Date.now() + 30 * 86_400_000));
-    await page.locator("#calibration-reason").fill(`${marker} 提交非匹配版本证据验证四眼复核，不放行真实点位`);
+    await page.locator("#calibration-reason").fill(calibrationExpectation === "MATCHING"
+      ? `${marker} TEST-ONLY 匹配版本证据，用于受控联合验收并在结束后撤销`
+      : `${marker} 提交非匹配版本证据验证四眼复核，不放行真实点位`);
     const submitResponsePromise = page.waitForResponse((response) =>
       response.request().method() === "POST" && /\/bpi-api\/point-calibrations$/.test(response.url()));
     await page.getByRole("button", { name: "提交复核" }).click();
@@ -347,17 +384,50 @@ async function main() {
     calibrationRow = page.locator("[data-calibration-row]").filter({ hasText: calibrationVersion });
     await calibrationRow.getByText("APPROVED", { exact: true }).waitFor();
     await calibrationRow.getByText("EFFECTIVE", { exact: true }).waitFor();
-    await pointRow.getByText("BLOCKED", { exact: true }).waitFor();
-
     const approvedCatalog = await adapterGet(
       api,
       auth.ticket,
       `/point-catalog/current?plantId=${encodeURIComponent(plantId)}&lineId=${encodeURIComponent(lineId)}`,
     );
-    assert(approvedCatalog.data.snapshot.readyPointCount === 0,
-      "non-matching calibration version unexpectedly made a real point READY");
-    assert(approvedCatalog.data.points[0].calibrationEvidenceId == null,
-      "non-matching calibration evidence unexpectedly attached to the real point");
+    const approvedPoint = approvedCatalog.data.points[0];
+    if (calibrationExpectation === "MATCHING") {
+      assert(approvedPoint.calibrationEvidenceId === calibrationId,
+        "matching calibration evidence did not attach to the target point");
+      assert(approvedPoint.calibrationStatus === "VERIFIED",
+        `matching calibration did not verify the target point: ${approvedPoint.calibrationStatus}`);
+    } else {
+      assert(approvedCatalog.data.snapshot.readyPointCount === 0,
+        "non-matching calibration version unexpectedly made a real point READY");
+      assert(approvedPoint.calibrationEvidenceId == null,
+        "non-matching calibration evidence unexpectedly attached to the real point");
+    }
+    report.evidence.approvedCatalog = {
+      readyPointCount: approvedCatalog.data.snapshot.readyPointCount,
+      calibrationStatus: approvedPoint.calibrationStatus,
+      calibrationEvidenceId: approvedPoint.calibrationEvidenceId,
+      readinessIssues: approvedPoint.readinessIssues,
+    };
+
+    if (releaseFile) {
+      report.status = "WAITING_FOR_RELEASE";
+      report.evidence.releaseGate = {
+        status: "WAITING",
+        releaseFile,
+        timeoutMs: releaseTimeoutMs,
+      };
+      report.generatedAt = new Date().toISOString();
+      fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+      console.log(JSON.stringify({
+        status: "CALIBRATION_APPROVED_WAITING",
+        marker,
+        calibrationId,
+        calibrationVersion,
+        releaseFile,
+      }));
+      await waitForRelease(releaseFile, releaseTimeoutMs);
+      report.evidence.releaseGate.status = "RELEASED";
+      report.evidence.releaseGate.releasedAt = new Date().toISOString();
+    }
 
     await calibrationRow.getByRole("button", { name: "撤销", exact: true }).click();
     await page.locator("#confirm-reason").fill(`${marker} 验收完成后撤销 marker 证据`);

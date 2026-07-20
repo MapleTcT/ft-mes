@@ -7,11 +7,16 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryConditionOperatorV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceClassV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryEvidenceConditionV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRulePublicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleApplicationV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessStatusV1;
 import com.mapletct.ftmes.bpi.contract.v1.BoundaryRuleRuntimeReadinessV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundarySignalBindingV1;
+import com.mapletct.ftmes.bpi.contract.v1.BoundaryType;
 import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.Checksums;
 import com.mapletct.ftmes.bpi.application.RuleApplicationReceiptService;
@@ -442,7 +447,8 @@ class BpiRulePostgresAcceptanceTest {
                         'ACTIVATE', 1, true)
                 """, activationEventId, tenantId, ruleId,
                 tenantId + ":LINE-S07-01:RULE-S07-START:1.2.0",
-                new byte[] {1, 2, 3}, "{\"lifecycle_action\":\"ACTIVATE\"}");
+                activationPublication(activationEventId).toByteArray(),
+                "{\"lifecycle_action\":\"ACTIVATE\"}");
         UUID replacementRuleId = UUID.randomUUID();
         jdbc.update("""
                 INSERT INTO bpi.bpi_rule_versions
@@ -527,6 +533,15 @@ class BpiRulePostgresAcceptanceTest {
         assertThat(retirement.getActive()).isFalse();
         assertThat(retirement.getRuleCode()).isEqualTo("RULE-S07-START");
         assertThat(retirement.getRuleVersion()).isEqualTo("1.2.0");
+        assertThat(retirement.getPointCatalogSnapshotId()).isNotBlank();
+        assertThat(retirement.getPointCatalogChecksum()).hasSize(64);
+        assertThat(retirement.getSignalBindingsList())
+                .hasSize(2)
+                .allSatisfy(binding -> {
+                    assertThat(binding.getCalibrationEvidenceId()).isNotBlank();
+                    assertThat(binding.getCalibrationValidUntilMs())
+                            .isEqualTo(Instant.parse("2027-07-12T00:00:00Z").toEpochMilli());
+                });
         assertThatThrownBy(() -> ruleRepository.assertRulePublicationHandoffReady(
                 replacementActor, replacementRule))
                 .isInstanceOf(BpiConflictException.class)
@@ -1087,6 +1102,80 @@ class BpiRulePostgresAcceptanceTest {
                 .setPointCatalogEventId(pointCatalogEventId)
                 .setPointCatalogSourceRevision(pointCatalogSourceRevision)
                 .putHeaders("trace_id", "TRACE-READINESS-" + publicationId)
+                .build();
+    }
+
+    private BoundaryRulePublicationV1 activationPublication(UUID eventId) {
+        Map<String, Object> snapshot = jdbc.queryForMap("""
+                SELECT id, checksum
+                  FROM bpi.bpi_point_catalog_snapshots
+                 WHERE tenant_id = ? AND plant_id = 'PLANT-01' AND line_id = 'LINE-S07-01'
+                 ORDER BY observed_at DESC, imported_at DESC
+                 LIMIT 1
+                """, tenantId);
+        return BoundaryRulePublicationV1.newBuilder()
+                .setEventId(eventId.toString())
+                .setTenantId(tenantId)
+                .setPlantId("PLANT-01")
+                .setLineId("LINE-S07-01")
+                .setLocalityGroup("LOCALITY-S07-EVAP")
+                .setTopologyCode("TOPO-S07")
+                .setTopologyVersion("3")
+                .setRuleCode("RULE-S07-START")
+                .setRuleVersion("1.2.0")
+                .setBoundaryType(BoundaryType.START)
+                .setQuorumMinimum(2)
+                .setMinimumConfidence(0.80)
+                .setMaxCompositePenalty(0.80)
+                .setAllowedLatenessMs(0)
+                .setWatermarkDelayMs(0)
+                .setEvaluationTimeoutMs(Duration.ofMinutes(5).toMillis())
+                .addConditions(BoundaryEvidenceConditionV1.newBuilder()
+                        .setSignal("flow.instant")
+                        .setOperator(BoundaryConditionOperatorV1.GREATER_THAN)
+                        .setThresholdDecimal("10")
+                        .setHoldForMs(0)
+                        .setMaxSilenceMs(Duration.ofMinutes(1).toMillis())
+                        .setClassification(BoundaryEvidenceClassV1.QUORUM)
+                        .setWeight(50))
+                .addConditions(BoundaryEvidenceConditionV1.newBuilder()
+                        .setSignal("pump.running")
+                        .setOperator(BoundaryConditionOperatorV1.EQUALS_TRUE)
+                        .setHoldForMs(0)
+                        .setMaxSilenceMs(Duration.ofMinutes(1).toMillis())
+                        .setClassification(BoundaryEvidenceClassV1.QUORUM)
+                        .setWeight(50))
+                .addSignalBindings(activationBinding("flow.instant", "t/h"))
+                .addSignalBindings(activationBinding("pump.running", "bool"))
+                .setActive(true)
+                .setPublishedAtMs(boundaryTime.plusSeconds(1).toEpochMilli())
+                .setChecksum("r".repeat(64))
+                .setPointCatalogSnapshotId(snapshot.get("id").toString())
+                .setPointCatalogChecksum(snapshot.get("checksum").toString())
+                .putHeaders("schema_version", "1")
+                .putHeaders("event_type", "BOUNDARY_RULE_PUBLISHED")
+                .putHeaders("lifecycle_action", "ACTIVATE")
+                .build();
+    }
+
+    private BoundarySignalBindingV1 activationBinding(String propertyId, String expectedUnit) {
+        UUID evidenceId = jdbc.queryForObject("""
+                SELECT id
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = ? AND plant_id = 'PLANT-01' AND line_id = 'LINE-S07-01'
+                   AND product_id = 'PRODUCT-SUGAR' AND device_id = 'DEVICE-S07-01'
+                   AND property_id = ? AND calibration_version = 'CAL-1'
+                   AND state = 'APPROVED'
+                """, UUID.class, tenantId, propertyId);
+        return BoundarySignalBindingV1.newBuilder()
+                .setProductId("PRODUCT-SUGAR")
+                .setDeviceId("DEVICE-S07-01")
+                .setPropertyId(propertyId)
+                .setSignal(propertyId)
+                .setExpectedUnit(expectedUnit)
+                .setCalibrationVersion("CAL-1")
+                .setCalibrationEvidenceId(evidenceId.toString())
+                .setCalibrationValidUntilMs(Instant.parse("2027-07-12T00:00:00Z").toEpochMilli())
                 .build();
     }
 

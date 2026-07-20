@@ -24,12 +24,15 @@ REQUIRED_FILES = [
     "deploy/bpi-streaming/scripts/restore-from-savepoint.sh",
     "deploy/bpi-streaming/scripts/verify-savepoint-restore.sh",
     "deploy/bpi-runtime/scripts/browser-joint-acceptance.js",
+    "deploy/bpi-runtime/scripts/browser-live-batch-governance-acceptance.js",
     "deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js",
     "deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js",
     "deploy/bpi-runtime/scripts/upgrade-expand-only.sh",
     "deploy/bpi-runtime/sql/joint-acceptance-seed.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-verify.sql",
     "deploy/bpi-runtime/sql/joint-acceptance-cleanup.sql",
+    "deploy/bpi-runtime/sql/live-batch-rule-simulation-seed.sql",
+    "deploy/bpi-runtime/sql/live-batch-rule-simulation-cleanup.sql",
     "docs/testing/bpi-test-environment-deployment-readiness.md",
     "docs/testing/bpi-browser-kafka-postgres-joint-acceptance.md",
     "docs/testing/bpi-kafka-postgres-replay-acceptance.md",
@@ -391,6 +394,67 @@ def main() -> int:
     ):
         if marker not in joint_browser:
             failures.append(f"BPI joint browser acceptance is missing marker: {marker}")
+
+    live_batch_browser = (
+        ROOT / "deploy/bpi-runtime/scripts/browser-live-batch-governance-acceptance.js"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "feature-enable",
+        "feature-inherit",
+        "topology-publish",
+        "rule-publish",
+        "rules-retire",
+        "independentToken",
+        "creator topology publication was not rejected",
+        "PUBLISHED/APPLIED/READY",
+        "运行时 INACTIVE",
+        "consoleErrors",
+        "requestFailures",
+    ):
+        if marker not in live_batch_browser:
+            failures.append(f"BPI live-batch browser acceptance is missing marker: {marker}")
+
+    live_batch_seed = (
+        ROOT / "deploy/bpi-runtime/sql/live-batch-rule-simulation-seed.sql"
+    ).read_text(encoding="utf-8")
+    live_batch_cleanup = (
+        ROOT / "deploy/bpi-runtime/sql/live-batch-rule-simulation-cleanup.sql"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "BEGIN;",
+        "duplicate_marker_guard",
+        "TEST_ONLY_RULE_QUALIFICATION",
+        "acceptance_marker",
+        "COMMIT;",
+    ):
+        if marker not in live_batch_seed:
+            failures.append(f"BPI live-batch simulation seed is missing marker: {marker}")
+    for marker in (
+        "BEGIN;",
+        "created_by = :'marker'",
+        "TEST_ONLY_RULE_QUALIFICATION",
+        "remaining",
+        "COMMIT;",
+    ):
+        if marker not in live_batch_cleanup:
+            failures.append(f"BPI live-batch simulation cleanup is missing marker: {marker}")
+
+    runtime_admission = (
+        ROOT
+        / "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRulePublicationMapper.java"
+    ).read_text(encoding="utf-8")
+    runtime_admission += (
+        ROOT
+        / "streaming/bpi-stream-engine/src/main/java/com/mapletct/ftmes/bpi/stream/BoundaryRuleRoutingBroadcastFunction.java"
+    ).read_text(encoding="utf-8")
+    for marker in (
+        "getPointCatalogSnapshotId",
+        "getCalibrationEvidenceId",
+        "getCalibrationValidUntilMs",
+        "POINT_CALIBRATION_EVIDENCE_EXPIRED",
+    ):
+        if marker not in runtime_admission:
+            failures.append(f"BPI runtime admission is missing MES evidence marker: {marker}")
 
     joint_verify = (
         ROOT / "deploy/bpi-runtime/sql/joint-acceptance-verify.sql"

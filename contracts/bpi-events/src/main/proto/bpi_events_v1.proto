@@ -241,6 +241,11 @@ message BoundaryRulePublicationV1 {
   int64 published_at_ms = 20;
   string checksum = 21;
   map<string, string> headers = 22;
+  // Authoritative MES snapshot used during the final publication gate. The
+  // source catalog event id is separate and remains available in runtime
+  // readiness receipts.
+  string point_catalog_snapshot_id = 23;
+  string point_catalog_checksum = 24;
 }
 
 message BoundaryEvidenceConditionV1 {
@@ -264,6 +269,10 @@ message BoundarySignalBindingV1 {
   // Immutable calibration version approved with the topology. Runtime telemetry
   // and the latest point catalog must both match this value.
   string calibration_version = 6;
+  // MES-owned approval evidence captured at publication time. A source-system
+  // calibration assertion never populates these fields.
+  string calibration_evidence_id = 7;
+  int64 calibration_valid_until_ms = 8;
 }
 
 enum BoundaryConditionOperatorV1 {

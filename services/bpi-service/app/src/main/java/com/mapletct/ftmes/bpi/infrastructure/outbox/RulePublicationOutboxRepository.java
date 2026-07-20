@@ -182,6 +182,31 @@ public class RulePublicationOutboxRepository {
         }
     }
 
+    public byte[] findActivationPayload(ActorContext actor, UUID ruleId) {
+        try {
+            byte[] payload = jdbc.queryForObject("""
+                    SELECT payload
+                      FROM bpi.bpi_outbox_events
+                     WHERE tenant_id = :tenantId
+                       AND aggregate_type = 'RULE_VERSION'
+                       AND aggregate_id = :ruleId
+                       AND event_type = 'BOUNDARY_RULE_PUBLISHED'
+                       AND lifecycle_action = 'ACTIVATE'
+                     ORDER BY lifecycle_sequence DESC
+                     LIMIT 1
+                    """, new MapSqlParameterSource()
+                    .addValue("tenantId", actor.tenantId())
+                    .addValue("ruleId", ruleId),
+                    byte[].class);
+            if (payload == null || payload.length == 0) {
+                throw new BpiNotFoundException("Rule activation event not found.");
+            }
+            return payload;
+        } catch (EmptyResultDataAccessException exception) {
+            throw new BpiNotFoundException("Rule activation event not found.");
+        }
+    }
+
     public RulePublicationView requeueFailed(
             ActorContext actor,
             UUID ruleId,

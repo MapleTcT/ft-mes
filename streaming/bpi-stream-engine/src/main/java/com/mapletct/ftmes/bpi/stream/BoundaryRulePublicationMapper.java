@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public final class BoundaryRulePublicationMapper {
 
@@ -88,12 +89,42 @@ public final class BoundaryRulePublicationMapper {
         }
         Set<String> boundSignals = new HashSet<>();
         Map<String, BoundarySignalBindingV1> result = new HashMap<>();
+        boolean hasAdmissionSnapshot = !publication.getPointCatalogSnapshotId().isBlank()
+                || !publication.getPointCatalogChecksum().isBlank();
+        if (hasAdmissionSnapshot) {
+            require(publication.getPointCatalogSnapshotId(), "point_catalog_snapshot_id");
+            require(publication.getPointCatalogChecksum(), "point_catalog_checksum");
+            uuid(publication.getPointCatalogSnapshotId(), "point_catalog_snapshot_id");
+        }
         for (BoundarySignalBindingV1 binding : publication.getSignalBindingsList()) {
             require(binding.getProductId(), "binding.product_id");
             require(binding.getDeviceId(), "binding.device_id");
             require(binding.getPropertyId(), "binding.property_id");
             require(binding.getSignal(), "binding.signal");
             require(binding.getCalibrationVersion(), "binding.calibration_version");
+            boolean hasCalibrationEvidence = !binding.getCalibrationEvidenceId().isBlank()
+                    || binding.getCalibrationValidUntilMs() > 0;
+            if (publication.getActive() && hasAdmissionSnapshot && !hasCalibrationEvidence) {
+                throw new IllegalArgumentException(
+                        "active admission snapshot requires calibration evidence on every binding");
+            }
+            if (hasCalibrationEvidence) {
+                if (!hasAdmissionSnapshot) {
+                    throw new IllegalArgumentException(
+                            "binding calibration evidence requires a point catalog admission snapshot");
+                }
+                require(binding.getCalibrationEvidenceId(), "binding.calibration_evidence_id");
+                uuid(binding.getCalibrationEvidenceId(), "binding.calibration_evidence_id");
+                if (binding.getCalibrationValidUntilMs() <= 0) {
+                    throw new IllegalArgumentException(
+                            "binding.calibration_valid_until_ms must be positive");
+                }
+                if (publication.getActive()
+                        && binding.getCalibrationValidUntilMs() <= publication.getPublishedAtMs()) {
+                    throw new IllegalArgumentException(
+                            "binding.calibration_valid_until_ms must be later than published_at_ms");
+                }
+            }
             if (!configuredSignals.contains(binding.getSignal())) {
                 throw new IllegalArgumentException(
                         "binding references a signal that is absent from conditions: " + binding.getSignal());
@@ -169,6 +200,14 @@ public final class BoundaryRulePublicationMapper {
     private static void require(String value, String field) {
         if (value == null || value.isBlank() || value.indexOf('|') >= 0) {
             throw new IllegalArgumentException(field + " must be nonblank and cannot contain '|'");
+        }
+    }
+
+    private static void uuid(String value, String field) {
+        try {
+            UUID.fromString(value);
+        } catch (IllegalArgumentException error) {
+            throw new IllegalArgumentException(field + " must be a UUID", error);
         }
     }
 }

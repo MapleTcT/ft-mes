@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -97,6 +99,83 @@ public class PointCalibrationPostgresRepository {
                 .orElseThrow(() -> new BpiNotFoundException("Point calibration not found."));
         assertScope(actor, value);
         return value;
+    }
+
+    public Set<UUID> lockEffectiveEvidence(
+            ActorContext actor,
+            Set<UUID> calibrationIds,
+            Instant requiredAt) {
+        if (calibrationIds.isEmpty()) return Set.of();
+        return Set.copyOf(jdbc.query("""
+                SELECT id
+                  FROM bpi.bpi_point_calibrations
+                 WHERE tenant_id = :tenantId
+                   AND id IN (:calibrationIds)
+                   AND state = 'APPROVED'
+                   AND valid_from <= :requiredAt
+                   AND valid_until > :requiredAt
+                 FOR SHARE
+                """, new MapSqlParameterSource("tenantId", actor.tenantId())
+                .addValue("calibrationIds", calibrationIds)
+                .addValue("requiredAt", Timestamp.from(requiredAt)),
+                (rs, rowNum) -> rs.getObject("id", UUID.class)));
+    }
+
+    public Optional<String> findUnsafeRuntimeRuleDependency(
+            ActorContext actor,
+            PointCalibrationView calibration) {
+        List<String> dependencies = jdbc.query("""
+                SELECT rule.rule_code || '@' || rule.version AS rule_reference
+                  FROM bpi.bpi_rule_versions rule
+                  JOIN bpi.bpi_topology_versions topology
+                    ON topology.tenant_id = rule.tenant_id
+                   AND topology.id = rule.topology_version_id
+                  CROSS JOIN LATERAL jsonb_array_elements(
+                      CASE
+                          WHEN jsonb_typeof(topology.definition -> 'bindings') = 'array'
+                              THEN topology.definition -> 'bindings'
+                          ELSE '[]'::jsonb
+                      END
+                  ) binding
+                  LEFT JOIN LATERAL (
+                      SELECT lifecycle_event.lifecycle_action,
+                             lifecycle_event.status,
+                             lifecycle_event.application_status,
+                             lifecycle_event.runtime_readiness_status
+                        FROM bpi.bpi_outbox_events lifecycle_event
+                       WHERE lifecycle_event.tenant_id = rule.tenant_id
+                         AND lifecycle_event.aggregate_type = 'RULE_VERSION'
+                         AND lifecycle_event.aggregate_id = rule.id
+                         AND lifecycle_event.event_type = 'BOUNDARY_RULE_PUBLISHED'
+                       ORDER BY lifecycle_event.lifecycle_sequence DESC
+                       LIMIT 1
+                  ) lifecycle ON true
+                 WHERE rule.tenant_id = :tenantId
+                   AND COALESCE(rule.plant_id, topology.plant_id) = :plantId
+                   AND COALESCE(rule.line_id, topology.line_id) = :lineId
+                   AND rule.state IN ('PUBLISHED', 'RETIRED')
+                   AND binding ->> 'productId' = :productId
+                   AND binding ->> 'deviceId' = :deviceId
+                   AND binding ->> 'propertyId' = :propertyId
+                   AND binding ->> 'calibrationVersion' = :calibrationVersion
+                   AND (
+                       rule.state = 'PUBLISHED'
+                       OR lifecycle.lifecycle_action IS DISTINCT FROM 'RETIRE'
+                       OR lifecycle.status IS DISTINCT FROM 'PUBLISHED'
+                       OR lifecycle.application_status IS DISTINCT FROM 'APPLIED'
+                       OR lifecycle.runtime_readiness_status IS DISTINCT FROM 'INACTIVE'
+                   )
+                 ORDER BY rule.created_at, rule.id
+                 LIMIT 1
+                """, new MapSqlParameterSource("tenantId", actor.tenantId())
+                .addValue("plantId", calibration.plantId())
+                .addValue("lineId", calibration.lineId())
+                .addValue("productId", calibration.productId())
+                .addValue("deviceId", calibration.deviceId())
+                .addValue("propertyId", calibration.propertyId())
+                .addValue("calibrationVersion", calibration.calibrationVersion()),
+                (rs, rowNum) -> rs.getString("rule_reference"));
+        return dependencies.stream().findFirst();
     }
 
     public void insertPending(

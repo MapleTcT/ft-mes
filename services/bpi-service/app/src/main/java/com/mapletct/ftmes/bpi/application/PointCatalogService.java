@@ -14,6 +14,7 @@ import com.mapletct.ftmes.bpi.domain.TopologyValidationIssue;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.PointCatalogPostgresRepository;
+import com.mapletct.ftmes.bpi.infrastructure.postgres.PointCalibrationPostgresRepository;
 import com.mapletct.ftmes.bpi.interfaces.rest.PointCatalogPointCommand;
 import com.mapletct.ftmes.bpi.interfaces.rest.PointCatalogSnapshotCommand;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class PointCatalogService {
     private static final int MAX_PAGE_SIZE = 200;
 
     private final PointCatalogPostgresRepository repository;
+    private final PointCalibrationPostgresRepository calibrationRepository;
     private final BpiPostgresRepository sharedRepository;
     private final CanonicalJson canonicalJson;
     private final ObjectMapper objectMapper;
@@ -43,11 +45,13 @@ public class PointCatalogService {
 
     public PointCatalogService(
             PointCatalogPostgresRepository repository,
+            PointCalibrationPostgresRepository calibrationRepository,
             BpiPostgresRepository sharedRepository,
             CanonicalJson canonicalJson,
             ObjectMapper objectMapper,
             PointCatalogCursorCodec cursorCodec) {
         this.repository = repository;
+        this.calibrationRepository = calibrationRepository;
         this.sharedRepository = sharedRepository;
         this.canonicalJson = canonicalJson;
         this.objectMapper = objectMapper;
@@ -167,7 +171,7 @@ public class PointCatalogService {
                     null, null,
                     List.of(issue("POINT_CATALOG_SNAPSHOT_MISSING", "/bindings", "ERROR",
                             "No point catalog snapshot exists for the topology scope.")),
-                    List.of());
+                    List.of(), Map.of());
         }
 
         PointCatalogSnapshotView snapshot = current.get();
@@ -179,6 +183,7 @@ public class PointCatalogService {
         JsonNode bindings = objectMapper.valueToTree(definition).path("bindings");
         List<TopologyValidationIssue> errors = new ArrayList<>();
         List<TopologyValidationIssue> warnings = new ArrayList<>();
+        Map<String, BindingAdmissionEvidence> admissionEvidence = new LinkedHashMap<>();
         if (bindings.isArray()) {
             for (int index = 0; index < bindings.size(); index++) {
                 JsonNode binding = bindings.get(index);
@@ -193,6 +198,13 @@ public class PointCatalogService {
                             "The product/device/property binding does not exist in point catalog snapshot "
                                     + snapshot.id() + "."));
                     continue;
+                }
+                String signal = text(binding, "signal");
+                if (!signal.isBlank()
+                        && point.calibrationEvidenceId() != null
+                        && point.calibrationValidUntil() != null) {
+                    admissionEvidence.put(signal, new BindingAdmissionEvidence(
+                            point.calibrationEvidenceId(), point.calibrationValidUntil()));
                 }
                 if (!point.registered()) {
                     errors.add(issue("POINT_DEVICE_NOT_REGISTERED", path + "/deviceId", "ERROR",
@@ -230,7 +242,24 @@ public class PointCatalogService {
             }
         }
         return new BindingValidationResult(
-                snapshot.id(), snapshot.checksum(), List.copyOf(errors), List.copyOf(warnings));
+                snapshot.id(), snapshot.checksum(), List.copyOf(errors), List.copyOf(warnings),
+                Map.copyOf(admissionEvidence));
+    }
+
+    public void lockAdmissionEvidence(
+            ActorContext actor,
+            BindingValidationResult validation,
+            Instant publicationTime) {
+        Set<UUID> requiredEvidence = validation.admissionEvidence().values().stream()
+                .map(BindingAdmissionEvidence::calibrationEvidenceId)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        Set<UUID> lockedEvidence = calibrationRepository.lockEffectiveEvidence(
+                actor, requiredEvidence, publicationTime);
+        if (!lockedEvidence.equals(requiredEvidence)) {
+            throw new BpiConflictException(
+                    "Point calibration evidence changed during rule publication; retry with the current point catalog.",
+                    null);
+        }
     }
 
     private Map<String, Object> catalogPayload(PointCatalogSnapshotCommand command) {
@@ -369,6 +398,12 @@ public class PointCatalogService {
             UUID snapshotId,
             String snapshotChecksum,
             List<TopologyValidationIssue> errors,
-            List<TopologyValidationIssue> warnings) {
+            List<TopologyValidationIssue> warnings,
+            Map<String, BindingAdmissionEvidence> admissionEvidence) {
+    }
+
+    public record BindingAdmissionEvidence(
+            UUID calibrationEvidenceId,
+            Instant calibrationValidUntil) {
     }
 }

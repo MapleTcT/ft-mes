@@ -127,6 +127,27 @@ class BoundarySignalRouterTest {
         assertThrows(IllegalArgumentException.class, () -> BoundaryRulePublicationMapper.map(missingNumericUnit));
     }
 
+    @Test
+    void activeMesAdmissionSnapshotRequiresCalibrationEvidenceOnEveryBinding() {
+        BoundaryRulePublicationV1 base = publication(BoundaryType.START, true).toBuilder()
+                .setPointCatalogSnapshotId("93bfef6d-c189-47ec-902f-dfc54bbcfc70")
+                .setPointCatalogChecksum("a".repeat(64))
+                .build();
+        BoundaryRulePublicationV1 partial = base.toBuilder()
+                .setSignalBindings(0, base.getSignalBindings(0).toBuilder()
+                        .setCalibrationEvidenceId("006287de-10aa-42dd-950a-704e57acb214")
+                        .setCalibrationValidUntilMs(T0.plus(Duration.ofDays(365)).toEpochMilli()))
+                .build();
+        BoundaryRulePublicationV1 complete = partial.toBuilder()
+                .setSignalBindings(1, partial.getSignalBindings(1).toBuilder()
+                        .setCalibrationEvidenceId("7aaf266c-7564-421c-be5b-c18f900bcaf7")
+                        .setCalibrationValidUntilMs(T0.plus(Duration.ofDays(365)).toEpochMilli()))
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> BoundaryRulePublicationMapper.map(partial));
+        assertEquals(2, BoundaryRulePublicationMapper.map(complete).bindings().size());
+    }
+
     private static BoundaryRulePublicationV1 publication(BoundaryType boundaryType, boolean active) {
         return BoundaryRulePublicationV1.newBuilder()
                 .setEventId("RULE-EVENT-1")

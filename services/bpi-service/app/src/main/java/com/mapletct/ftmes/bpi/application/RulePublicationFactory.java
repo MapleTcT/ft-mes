@@ -39,11 +39,12 @@ public class RulePublicationFactory {
             UUID eventId,
             Instant publishedAt,
             String topic,
-            String traceId) {
-        return create(actor, rule, topology, definition, eventId, publishedAt, topic, traceId, true);
+            String traceId,
+            PointCatalogService.BindingValidationResult catalog) {
+        return create(actor, rule, topology, definition, eventId, publishedAt, topic, traceId, catalog, true);
     }
 
-    public RulePublicationEnvelope create(
+    private RulePublicationEnvelope create(
             ActorContext actor,
             RuleVersionView rule,
             TopologyVersionView topology,
@@ -52,6 +53,7 @@ public class RulePublicationFactory {
             Instant publishedAt,
             String topic,
             String traceId,
+            PointCatalogService.BindingValidationResult catalog,
             boolean active) {
         try {
             if (!"PUBLISHED".equals(topology.state())) {
@@ -84,9 +86,28 @@ public class RulePublicationFactory {
                     .putHeaders("event_type", "BOUNDARY_RULE_PUBLISHED")
                     .putHeaders("lifecycle_action", active ? "ACTIVATE" : "RETIRE")
                     .putHeaders("trace_id", traceId == null ? "" : traceId);
+            if (active) {
+                if (catalog == null || catalog.snapshotId() == null
+                        || catalog.snapshotChecksum() == null || catalog.snapshotChecksum().isBlank()) {
+                    throw new BpiValidationException(
+                            "Active rule publication requires authoritative MES point admission evidence.");
+                }
+                publication
+                        .setPointCatalogSnapshotId(catalog.snapshotId().toString())
+                        .setPointCatalogChecksum(catalog.snapshotChecksum());
+            }
             for (EvidenceCondition condition : definition.conditions()) {
                 publication.addConditions(condition(condition));
-                publication.addSignalBindings(binding(condition, bindings.get(condition.signal())));
+                PointCatalogService.BindingAdmissionEvidence evidence = active
+                        ? catalog.admissionEvidence().get(condition.signal())
+                        : null;
+                if (active && evidence == null) {
+                    throw new BpiValidationException(
+                            "Published signal has no authoritative MES calibration evidence: "
+                                    + condition.signal());
+                }
+                publication.addSignalBindings(binding(
+                        condition, bindings.get(condition.signal()), evidence));
             }
             String partitionKey = String.join(
                     ":", actor.tenantId(), rule.lineId(), rule.code(), rule.version());
@@ -101,6 +122,51 @@ public class RulePublicationFactory {
             throw exception;
         } catch (Exception exception) {
             throw new BpiValidationException("Rule publication payload is invalid: " + exception.getMessage());
+        }
+    }
+
+    public RulePublicationEnvelope retire(
+            ActorContext actor,
+            RuleVersionView rule,
+            byte[] activationPayload,
+            UUID eventId,
+            Instant publishedAt,
+            String topic,
+            String traceId) {
+        try {
+            BoundaryRulePublicationV1 activation = BoundaryRulePublicationV1.parseFrom(activationPayload);
+            if (!activation.getActive()
+                    || !activation.getTenantId().equals(actor.tenantId())
+                    || !activation.getPlantId().equals(rule.plantId())
+                    || !activation.getLineId().equals(rule.lineId())
+                    || !activation.getRuleCode().equals(rule.code())
+                    || !activation.getRuleVersion().equals(rule.version())) {
+                throw new BpiValidationException(
+                        "Rule activation payload does not match the version being retired.");
+            }
+            BoundaryRulePublicationV1 retirement = activation.toBuilder()
+                    .setEventId(eventId.toString())
+                    .setActive(false)
+                    .setPublishedAtMs(publishedAt.toEpochMilli())
+                    .putHeaders("schema_version", "1")
+                    .putHeaders("event_type", "BOUNDARY_RULE_PUBLISHED")
+                    .putHeaders("lifecycle_action", "RETIRE")
+                    .putHeaders("trace_id", traceId == null ? "" : traceId)
+                    .build();
+            String partitionKey = String.join(
+                    ":", actor.tenantId(), rule.lineId(), rule.code(), rule.version());
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("schema_version", "1");
+            headers.put("event_type", "BOUNDARY_RULE_PUBLISHED");
+            headers.put("lifecycle_action", "RETIRE");
+            headers.put("trace_id", traceId == null ? "" : traceId);
+            return new RulePublicationEnvelope(
+                    eventId, topic, partitionKey, retirement.toByteArray(), headers);
+        } catch (BpiValidationException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new BpiValidationException(
+                    "Rule retirement payload is invalid: " + exception.getMessage());
         }
     }
 
@@ -133,7 +199,10 @@ public class RulePublicationFactory {
         return result.build();
     }
 
-    private BoundarySignalBindingV1 binding(EvidenceCondition condition, JsonNode binding) {
+    private BoundarySignalBindingV1 binding(
+            EvidenceCondition condition,
+            JsonNode binding,
+            PointCatalogService.BindingAdmissionEvidence evidence) {
         if (binding == null) {
             throw new BpiValidationException("Rule signal has no topology binding: " + condition.signal());
         }
@@ -141,14 +210,19 @@ public class RulePublicationFactory {
         if (numeric(condition.operator()) && expectedUnit.isBlank()) {
             throw new BpiValidationException("Numeric signal binding requires expectedUnit: " + condition.signal());
         }
-        return BoundarySignalBindingV1.newBuilder()
+        BoundarySignalBindingV1.Builder result = BoundarySignalBindingV1.newBuilder()
                 .setProductId(required(binding, "productId"))
                 .setDeviceId(required(binding, "deviceId"))
                 .setPropertyId(required(binding, "propertyId"))
                 .setSignal(condition.signal())
                 .setExpectedUnit(expectedUnit)
-                .setCalibrationVersion(required(binding, "calibrationVersion"))
-                .build();
+                .setCalibrationVersion(required(binding, "calibrationVersion"));
+        if (evidence != null) {
+            result
+                    .setCalibrationEvidenceId(evidence.calibrationEvidenceId().toString())
+                    .setCalibrationValidUntilMs(evidence.calibrationValidUntil().toEpochMilli());
+        }
+        return result.build();
     }
 
     private BoundaryConditionOperatorV1 operator(ConditionOperator operator) {

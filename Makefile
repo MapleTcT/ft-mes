@@ -409,6 +409,7 @@ runtime-script-check:
 	sh -n deploy/bpi-runtime/scripts/smoke.sh
 	sh -n deploy/bpi-runtime/scripts/upgrade-expand-only.sh
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-joint-acceptance.js
+	$(NODE) --check deploy/bpi-runtime/scripts/browser-live-batch-governance-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-topology-rule-acceptance.js
 	$(NODE) --check deploy/bpi-runtime/scripts/browser-point-catalog-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-mqtt-ingress-browser-acceptance.js
