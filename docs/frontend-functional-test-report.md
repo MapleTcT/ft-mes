@@ -727,6 +727,22 @@ service 和 PostgreSQL 15.18/Flyway V23，不使用前端模拟器。页面只�
 `metadata/bpi-quality-release-wms-target.png`。目标 PostgreSQL 4/4 marker 事务验收和 12 表零残留见
 `docs/backend-table-audit/persistence-acceptance.md`；不能由本节只读页面结论外推真实 QCS/WMS 联调完成。
 
+### BPI 受控质量放行与完工入库真实页面（2026-07-20）
+
+本节在同一目标环境使用真实 ADP `admin` 会话、Java 8 adapter、Java 17 service、三 broker Kafka、
+`bpi-wms-adapter`、`material-wms` 和 PostgreSQL 15.18。受控 marker 先完成 QCS -> BPI -> Kafka ->
+material-wms -> receipt 全链落库，再由浏览器读取；取证后 marker 已定向清理，所有 Phase 2 开关已关闭。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 批次质量与库存 | `http://10.11.100.17:18080/bpi/#/batches` | 登录，按 marker `ADP_E2E_UI_20260720_222600_BPI_WMS` 定位批次并打开详情 | `GET /bpi-api/batches?plantId=PLANT-E2E-01&limit=100`；`GET /bpi-api/batches/a1d4d46f-f34d-4a4a-94f7-91e7b715acfe`；同 batch 的 `/release`、`/evidence`、`/timeline` | 五个请求均为 200；页面显示质量门 `ACCEPTED`、库存 `INBOUNDED`、检验、WMS command/receipt、durable 单号 `CIN-87e78aaf-e4d4-57ad-8902-ad0d3b3c144a-WARE-E2E` 和状态时间线；console/page/request/BPI HTTP error 均为 0 | 受控 QCS 事件已使批次按 `CLOSED_RAW/r1 -> WAIT_QA/r2 -> RELEASED/r3 -> INBOUNDED/r4` 迁移；目标 material-wms 对该 marker 创建唯一单据/明细/事务/库存 | BPI batch/gate/quality link/WMS link/outbox/inbox/state/audit；material `wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`、`wms_batch_stocks` | PASS_TARGET_CONTROLLED_CLEANED | QCS 输入为受控内部 Protobuf，不是外部 QCS 主动事件；外部 ERP/WMS 冲销/宕机补偿未验收 |
+| BPI 证据空态布局 | 同上 | 展开无证据的事件区并测量文本容器 | 同上 `/evidence` | 修复后 DOM 使用 `evidence-empty`，空态为 `639x58` 水平居中，无纵向逐字挤压；本地浏览器回归 17/17，目标 cache-bust 复验通过 | 只读，不改变业务数据 | 不落库 | PASS | 浏览器旧缓存可能短暂保留旧 CSS，发布时应继续使用带 hash 资源 |
+| BPI marker 退场 | 不适用 | 关闭 ingress/Kafka/outbox/adapter，恢复 deny-all，再定向删除两个 marker | 关闭后认证 ingress 探针 | 返回 403；业务页面回到无验收 marker 的正常数据集 | material 四表残留 `0/0/0/0`，BPI 五类 marker 残留 `0/0/0/0/0` | 上述 BPI/material 表 | PASS_CLEANED | 不删除非 marker 业务行 |
+
+截图：`metadata/bpi-quality-release-wms-live-target.png`、
+`metadata/bpi-quality-release-wms-live-target-bottom.png`。机器证据：
+`metadata/bpi-quality-release-wms-target-acceptance.json`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

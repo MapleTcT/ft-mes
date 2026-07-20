@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T11:10:09Z",
-  "repoCommit": "0c8c391291152d41dfcdf1e6fe2a3387be7944ce",
+  "generatedAt": "2026-07-20T14:50:00Z",
+  "repoCommit": "ad36372936d99ca947d231fc552ae9c3e086c2cc",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -131,15 +131,15 @@
       "assertions": "two independent MQTT 3.1.1 QoS1 sessions; 6/6 PUBACK; JetLinks property/log persistence; exporter received/enqueued/published +6 with zero failures; Kafka 37->43; Flink RUNNING 36/36; MES source sequence QUALIFIED during TTL; six exact data-quality raw events; real point/data-quality pages with seven 200 BPI responses and zero console/page/request failures; candidate and batch delta zero"
     },
     "bpiQualityReleaseWmsTarget": {
-      "status": "PASS_TARGET_V23_CONTROLLED_CONTRACTS_EXTERNAL_QCS_WMS_BLOCKED",
-      "marker": "ADP_E2E_20260720_BPI_QW_<four exact UUID tenants>",
-      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json",
-      "assertions": "protected expand-only V22->V23; service/adapter healthy; real batch release page and API before/after restart; unauthenticated 401; nested route 403; PostgreSQL target tests 4/4; four marker cleanup assertions and independent twelve-table zero-residue query; global Phase 2 flags unchanged and external QCS/WMS still blocked"
+      "status": "PASS_TARGET_CONTROLLED_QCS_EVENT_KAFKA_WMS_POSTGRES_BROWSER_CLEANED",
+      "marker": "ADP_E2E_20260720_215500_BPI_WMS; ADP_E2E_UI_20260720_222600_BPI_WMS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json; metadata/bpi-quality-release-wms-live-target.png; metadata/bpi-quality-release-wms-live-target-bottom.png",
+      "assertions": "controlled authenticated QCS Protobuf 201; CLOSED_RAW/r1 -> WAIT_QA/r2 -> RELEASED/r3; one Kafka WMS command; query-first adapter created one material document/line/inventory transaction/stock with sourceSystem BPI and kg; durable receipt -> INBOUNDED/r4; identical QCS and forced Kafka command replay unchanged; five real browser APIs 200 and zero errors; Phase 2 switches false/deny-all; exact marker cleanup left material and BPI residual zero; external QCS and external ERP/WMS compensation remain pending"
     }
   },
   "summary": {
-    "testedFeatures": 186,
-    "pass": 183,
+    "testedFeatures": 190,
+    "pass": 187,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4041,6 +4041,105 @@
       "issues": [
         "Real QCS inspection events and real WMS documents were not invoked; those two external-system integrations remain BLOCKED.",
         "The controlled test temporarily seeds tenant-scoped qcs-link/wms-link rows only inside its fixture and deletes them after every test; global and runtime switches remain disabled."
+      ]
+    },
+    {
+      "module": "BPI质量放行与material/WMS完工入库",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "受控required检验合格后发布WMS命令，创建真实完工入库单并以durable回执推进INBOUNDED",
+      "api": "POST /internal/bpi/v1/qcs-quality-gates; Kafka bpi.wms.completion-inbound-command.v1; GET/POST /material/wms/completion-inbounds; Kafka wms.completion-inbound.receipt.v1",
+      "method": "POST/KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "InternalPhase2IntegrationController -> BatchReleaseService -> BatchReleasePostgresRepository/outbox publisher -> WmsCommandKafkaListener/WmsCommandProcessor -> MaterialWmsHttpClient -> MaterialWmsController -> MaterialInventoryService -> MaterialWmsRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_E2E_20260720_215500_BPI_WMS",
+      "verificationSql": "SELECT state,revision,quality_gate,wms_status FROM bpi.bpi_batch_instances WHERE tenant_id=:tenant AND id=:batch_id; SELECT document_no,source_system,idempotency_key FROM public.wms_stock_documents WHERE tenant_id=:tenant AND source_system='BPI'; SELECT quantity,quantity_unit FROM public.wms_stock_document_lines WHERE tenant_id=:tenant; SELECT quantity,quantity_unit FROM public.wms_inventory_transactions WHERE tenant_id=:tenant; SELECT held_quantity,available_quantity,quantity_unit FROM public.wms_batch_stocks WHERE tenant_id=:tenant AND batch_no=:batch_no;",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json; docs/testing/bpi-quality-release-wms-inbound-acceptance.md; target-acceptance-before-cleanup.log sha256 cae56a218242ba1831dd8c58f62ad444462ac5396e1a559873fdaa2eca115bef",
+      "issues": [
+        "QCS输入为受控内部Protobuf marker，不是外部QCS实例主动事件。",
+        "外部ERP/WMS冲销、宕机与补偿演练仍待生产等价联合环境。"
+      ]
+    },
+    {
+      "module": "BPI质量放行幂等",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "完全相同QCS Protobuf事件重放",
+      "api": "POST /internal/bpi/v1/qcs-quality-gates",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "InternalPhase2IntegrationController -> BatchReleaseService inbox checksum/idempotency -> BatchReleasePostgresRepository",
+      "tables": [
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_wms_inbound_links",
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_E2E_20260720_215500_BPI_WMS_QCS_REPLAY",
+      "verificationSql": "Compare exact tenant/batch/event/idempotency row counts and stock quantity before and after replay; batch must remain INBOUNDED/r4.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json latestLiveAcceptance.idempotency.identicalQcsReplay",
+      "issues": []
+    },
+    {
+      "module": "BPI WMS Kafka幂等",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "重置consumer offset后强制重放同一WMS command",
+      "api": "Kafka bpi.wms.completion-inbound-command.v1; GET /material/wms/completion-inbounds/by-idempotency",
+      "method": "KAFKA/GET",
+      "requiresPersistence": true,
+      "backendEntry": "WmsCommandKafkaListener -> WmsCommandProcessor query-first -> MaterialWmsHttpClient -> MaterialWmsRepository",
+      "tables": [
+        "public.wms_stock_documents",
+        "public.wms_stock_document_lines",
+        "public.wms_inventory_transactions",
+        "public.wms_batch_stocks"
+      ],
+      "marker": "ADP_E2E_20260720_215500_BPI_WMS_KAFKA_REPLAY",
+      "verificationSql": "SELECT count(*) FROM each material table WHERE tenant_id=:tenant; SELECT held_quantity,available_quantity,quantity_unit FROM public.wms_batch_stocks WHERE tenant_id=:tenant AND batch_no=:batch_no;",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json; wms-command-replay.log; consumer offset 1->0->1; all four row counts remained one and quantity remained 12.345 kg",
+      "issues": []
+    },
+    {
+      "module": "BPI质量与库存真实页面",
+      "route": "http://10.11.100.17:18080/bpi/#/batches",
+      "operation": "登录并读取ACCEPTED、INBOUNDED、durable单据、证据和时间线，复验空证据布局",
+      "api": "GET /bpi-api/batches; GET /bpi-api/batches/{id}; GET /release; GET /evidence; GET /timeline",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "Java 8 batch-intelligence-adapter -> Java 17 BPI query controllers/repositories",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_wms_inbound_links"
+      ],
+      "marker": "ADP_E2E_UI_20260720_222600_BPI_WMS_BROWSER",
+      "verificationSql": "Read-only browser projection; underlying marker was directly verified before cleanup and all marker rows were verified zero after evidence capture.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-live-target.png; metadata/bpi-quality-release-wms-live-target-bottom.png; five APIs HTTP 200; console/page/request/BPI HTTP errors 0; empty evidence box 639x58",
+      "issues": [
+        "Marker was intentionally removed after screenshots and database evidence; rerun requires a new unique marker."
       ]
     }
   ],

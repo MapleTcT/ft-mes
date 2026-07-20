@@ -251,6 +251,21 @@ Phase 2 继续默认关闭，G-021 保持 `PARTIAL`。证据见
 [BPI 质量放行与完工入库验收](testing/bpi-quality-release-wms-inbound-acceptance.md) 和
 `metadata/bpi-quality-release-wms-target-acceptance.json`。
 
+同日晚些时候，实现提交 `1ce3cb996ff81556763283a5401f7c19554099c2` 继续关闭“目标 WMS 没有
+可维护适配器和真实落单”缺口：material 迁移 192 增加 `sourceSystem/idempotencyKey/unit` 合同与精确
+唯一索引，受 API key 保护的查单接口和 query-first WMS adapter 均进入 Docker 编排。受控认证 QCS
+marker `ADP_E2E_20260720_215500_BPI_WMS` 经 BPI 事务 outbox、目标三 broker Kafka 和 adapter，
+在目标 `material-wms` 真实写入唯一完工入库单、明细、库存事务和批次库存 `12.345 kg`；durable receipt
+使批次进入 `INBOUNDED/r4`。完全相同 QCS 重放和强制 Kafka offset `1 -> 0 -> 1` 重放均未增加
+单据、明细、事务或库存。浏览器 marker `ADP_E2E_UI_20260720_222600_BPI_WMS` 又通过五个 200 API
+显示 `ACCEPTED/INBOUNDED`、单据和时间线，提交
+`ad36372936d99ca947d231fc552ae9c3e086c2cc` 修复空证据文本纵向挤压。取证后两个 marker 在 BPI
+与 material 表均清理为 0，Phase 2/WMS 开关全关、allowlist/route 恢复 deny-all。
+
+因此 G-021 的当前剩余缺口不再包括“内部 material-wms 未落单”或“Kafka command 未重放”；仍保留
+外部 QCS 实例主动事件与真实检验记录所有权联接、外部 ERP/WMS 冲销/宕机补偿、物理设备与正式校准、
+连续 7-14 天现场运行和真实负载跨组件整体回切，目标状态继续为 `PARTIAL`，不能标记生产 READY。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)

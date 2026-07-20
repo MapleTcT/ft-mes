@@ -333,6 +333,12 @@
     },
     {
       "ignored": false,
+      "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/support/BpiIntegrationKeyVerifier.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "backend/source-modules/material-wms/src/main/java/com/mapletct/ftmes/materialwms/support/TenantResolver.java",
       "state": "tracked",
       "tracked": true
@@ -340,6 +346,12 @@
     {
       "ignored": false,
       "path": "backend/source-modules/material-wms/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "backend/source-modules/material-wms/src/test/java/com/mapletct/ftmes/materialwms/MaterialInventoryServiceTest.java",
       "state": "tracked",
       "tracked": true
     },
@@ -3267,6 +3279,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/postgres/init/192-material-wms-bpi-idempotency.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-auth-user-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -5578,6 +5596,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-quality-release-wms-inbound-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-release-wms-live-target-bottom.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-release-wms-live-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8223,6 +8253,138 @@
     },
     {
       "ignored": false,
+      "path": "services/bpi-service/wms-adapter/Dockerfile",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/Dockerfile.runtime",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/pom.xml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/BpiWmsAdapterApplication.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/BpiWmsAdapterProperties.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/KafkaWmsReceiptPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsBusinessException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsCreateRequest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsDocument.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsGateway.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClient.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsTransientException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsAdapterKafkaConfiguration.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandKafkaListener.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessor.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandRejectedException.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsReceiptPublisher.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/java/com/mapletct/ftmes/bpiwmsadapter/WmsRoute.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/main/resources/application.yml",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/BpiWmsAdapterApplicationContextTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/MaterialWmsHttpClientTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "services/bpi-service/wms-adapter/src/test/java/com/mapletct/ftmes/bpiwmsadapter/WmsCommandProcessorTest.java",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "simulation/bpi/README.md",
       "state": "tracked",
       "tracked": true
@@ -8858,13 +9020,13 @@
       "tracked": 3
     },
     "backend": {
-      "tracked": 162
+      "tracked": 164
     },
     "contracts": {
       "tracked": 20
     },
     "deploy": {
-      "tracked": 576
+      "tracked": 577
     },
     "docs": {
       "tracked": 109
@@ -8873,7 +9035,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 166
+      "tracked": 168
     },
     "package.json": {
       "tracked": 1
@@ -8885,7 +9047,7 @@
       "tracked": 55
     },
     "services": {
-      "tracked": 264
+      "tracked": 286
     },
     "simulation": {
       "tracked": 4
@@ -8897,8 +9059,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1473,
-    "tracked": 1473,
+    "totalFiles": 1500,
+    "tracked": 1500,
     "untracked": 0
   },
   "untrackedByDirectory": []

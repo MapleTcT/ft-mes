@@ -730,6 +730,10 @@ QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 | WMS 合法拒绝与未知枚举 | 同上 | 同上 | `BatchReleaseService.applyWmsReceipt` | WMS link、batch/state/audit/inbox | 查询 link `status/error_code`、batch state 和 marker 行数 | 合法拒绝将 link 标为 `REJECTED`、批次保持 `RELEASED` 且 wms status 为 `FAILED`；未知状态 99 返回 422 并完全回滚 | PASS_TARGET_CONTROLLED |
 | 影子批次尝试生成 WMS 命令 | 无写入页面；服务不允许该动作 | service invariant + PostgreSQL trigger | `BatchReleaseService.createWmsCommand` + `reject_shadow_wms_command` | `bpi_batch_instances`、`bpi_outbox_events` | 查询 marker outbox count；另尝试直接 SQL insert | Java 侧不生成命令，绕过服务的 SQL 也被 trigger 拒绝，outbox 为 0 | PASS_TARGET_CONTROLLED |
 | marker 清理与运行基线保护 | 不适用 | 不适用 | `@AfterEach` 定向删除 + 独立 `psql` 查询 | 12 张 BPI 验收相关表 | `WHERE tenant_id LIKE 'ADP_E2E_20260720_BPI_QW_%'` 分表计数；另查全局开关和真实 batch | 四个 marker 分别打印 residualRows=0；独立复查 12/12 表均为 0。真实 batch `52427282-...` 仍为 `CLOSED_RAW/r2/SHADOW/NOT_APPLICABLE/NOT_REQUESTED`，四个全局开关未变化 | PASS_CLEANED |
+| 受控 QCS 放行并驱动内部 WMS 完工入库 | `/bpi/#/batches` 质量/库存详情 | `POST /internal/bpi/v1/qcs-quality-gates`；Kafka command/receipt；material REST | `InternalPhase2IntegrationController -> BatchReleaseService -> outbox publisher -> WmsCommandConsumer -> MaterialWmsClient -> MaterialWmsController/MaterialInventoryService/MaterialWmsRepository` | BPI batch/gate/link/WMS/outbox/inbox/state/audit；`wms_stock_documents`、`wms_stock_document_lines`、`wms_inventory_transactions`、`wms_batch_stocks` | 按 tenant/batch/event/idempotency/source system 精确查询两库 | marker `ADP_E2E_20260720_215500_BPI_WMS` 形成唯一单据/明细/事务/库存，数量 `12.345 kg`、`sourceSystem=BPI`；durable receipt 后批次为 `INBOUNDED/r4` | PASS_TARGET_CONTROLLED_CLEANED |
+| 相同 QCS 事件精确重放 | 同上 | 同一 Protobuf payload 再次 POST | inbox checksum + quality projection | BPI 质量、批次、outbox、WMS link 及 material 四表 | 比较重放前后逐表计数、状态、revision 和数量 | HTTP 201；批次仍 `INBOUNDED/r4`，所有计数与库存数量不变 | PASS_TARGET_CONTROLLED_CLEANED |
+| Kafka WMS command 强制重放 | 同上 | 停 adapter，将 consumer partition 1 offset `1 -> 0`，重启消费至 1 | query-first `GET .../by-idempotency`；不存在才 POST；创建后精确复查 | material document/line/transaction/stock | 重放前后按 idempotency/source line/event key/batch stock 查询 | document/line/transaction/stock 始终各 1，库存仍 `12.345 kg` | PASS_TARGET_CONTROLLED_CLEANED |
+| 真实页面读取和 marker 清理 | `http://10.11.100.17:18080/bpi/#/batches` | 打开 marker 详情，取证后关闭开关并定向清理 | batch list/detail/release/evidence/timeline 五个 GET；关闭后 ingress 探针 | 上述 BPI/material 表 | 页面 API 200；清理前查真实单据，清理后复查 marker 行数 | 页面显示 `ACCEPTED/INBOUNDED` 和 durable 单号，浏览器错误 0；material `0/0/0/0`、BPI `0/0/0/0/0`，关闭探针 403 | PASS_TARGET_CONTROLLED_CLEANED |
 
 四个精确 marker：
 
@@ -738,8 +742,9 @@ QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 - `ADP_E2E_20260720_BPI_QW_f119ce8206674ef4b282dc144c948217`
 - `ADP_E2E_20260720_BPI_QW_f7a77465fe7e42eab34d1c7dc6876e49`
 
-机器证据：`metadata/bpi-quality-release-wms-target-acceptance.json`。这证明目标运行栈的软件合同和
-PostgreSQL 事务边界，不证明真实 QCS 检验单或 WMS 入库单；两个外部系统仍为 `BLOCKED`。
+机器证据：`metadata/bpi-quality-release-wms-target-acceptance.json`。最新证据证明目标栈内部
+`material-wms` 已创建并直查真实完工入库单，且 Kafka/幂等/浏览器/清理闭环通过；它不证明外部 QCS
+主动事件、外部 ERP/WMS 单据所有权、业务冲销或宕机补偿，这些生产联合项仍为 `BLOCKED`。
 
 ## 证据要求
 

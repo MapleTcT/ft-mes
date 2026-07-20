@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "migrationDirectory": "deploy/docker/postgres/init",
-  "migrationCount": 191,
+  "migrationCount": 192,
   "firstNumber": 1,
-  "lastNumber": 191,
+  "lastNumber": 192,
   "missingNumbers": [],
   "duplicateNumbers": [],
   "invalidNames": [],
@@ -12,9 +12,9 @@
   "watchStatementCount": 73,
   "watchSafetyIssueCount": 0,
   "statementTotals": {
-    "alter-table": 10813,
+    "alter-table": 10818,
     "create-function": 88,
-    "create-index": 996,
+    "create-index": 999,
     "create-table": 578,
     "create-view": 142,
     "insert": 11011,
@@ -23,8 +23,8 @@
   "idempotencySignalTotals": {
     "create-or-replace": 227,
     "do-block": 392,
-    "if-exists": 113,
-    "if-not-exists": 13016,
+    "if-exists": 114,
+    "if-not-exists": 13024,
     "on-conflict": 10949,
     "to-regclass": 219,
     "where-not-exists": 44
@@ -34,7 +34,7 @@
     "business": 34,
     "compatibility": 76,
     "configuration": 42,
-    "general": 33,
+    "general": 34,
     "notification": 9,
     "platform": 54,
     "workflow": 21
@@ -7213,6 +7213,39 @@
         "to-regclass": 0,
         "create-or-replace": 1,
         "where-not-exists": 1
+      },
+      "highRiskStatements": [],
+      "watchStatements": [],
+      "unguardedStructuralStatements": []
+    },
+    {
+      "file": "deploy/docker/postgres/init/192-material-wms-bpi-idempotency.sql",
+      "name": "192-material-wms-bpi-idempotency.sql",
+      "number": 192,
+      "slug": "material-wms-bpi-idempotency",
+      "validName": true,
+      "tags": [
+        "general"
+      ],
+      "lineCount": 29,
+      "sha256": "aa0c80a0b21c1cf53e3ea542089ef1c1b9827275f4e95452d8245c58043a0ce2",
+      "statementCounts": {
+        "create-table": 0,
+        "create-view": 0,
+        "create-function": 0,
+        "create-index": 3,
+        "alter-table": 5,
+        "insert": 0,
+        "update": 0
+      },
+      "idempotencySignals": {
+        "if-exists": 1,
+        "if-not-exists": 8,
+        "on-conflict": 0,
+        "do-block": 0,
+        "to-regclass": 0,
+        "create-or-replace": 0,
+        "where-not-exists": 0
       },
       "highRiskStatements": [],
       "watchStatements": [],

@@ -5,8 +5,8 @@
 ## 摘要
 
 - 目录：`deploy/docker/postgres/init`。
-- 脚本数量：`191`。
-- 编号范围：`001` 到 `191`。
+- 脚本数量：`192`。
+- 编号范围：`001` 到 `192`。
 - 缺失编号：`[]`。
 - 重复编号：`[]`。
 - 高风险语句：`0`。
@@ -24,7 +24,7 @@
 | business | 34 |
 | compatibility | 76 |
 | configuration | 42 |
-| general | 33 |
+| general | 34 |
 | notification | 9 |
 | platform | 54 |
 | workflow | 21 |
@@ -33,9 +33,9 @@
 
 | Statement | Count |
 | --- | --- |
-| alter-table | 10813 |
+| alter-table | 10818 |
 | create-function | 88 |
-| create-index | 996 |
+| create-index | 999 |
 | create-table | 578 |
 | create-view | 142 |
 | insert | 11011 |
@@ -47,8 +47,8 @@
 | --- | --- |
 | create-or-replace | 227 |
 | do-block | 392 |
-| if-exists | 113 |
-| if-not-exists | 13016 |
+| if-exists | 114 |
+| if-not-exists | 13024 |
 | on-conflict | 10949 |
 | to-regclass | 219 |
 | where-not-exists | 44 |
@@ -248,6 +248,7 @@
 | 189 | 189-wom-manual-task-entry.sql | general | 243 | create-table:1, create-function:1, create-index:4, insert:2, update:5 | 10 | watch:1 |
 | 190 | 190-rm-web-formula-editor.sql | general | 195 | create-table:3, create-function:1, create-index:4, update:2 | 13 | watch:1 |
 | 191 | 191-wom-quality-quantity-reporting.sql | general | 482 | create-table:4, create-function:1, create-index:9, alter-table:16, insert:1, update:4 | 25 | - |
+| 192 | 192-material-wms-bpi-idempotency.sql | general | 29 | create-index:3, alter-table:5 | 9 | - |
 
 ## 规则
 

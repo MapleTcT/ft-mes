@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-20T11:46:47+00:00",
-  "repoCommit": "0c8c391291152d41dfcdf1e6fe2a3387be7944ce",
+  "generatedAt": "2026-07-20T15:57:25+00:00",
+  "repoCommit": "ad36372936d99ca947d231fc552ae9c3e086c2cc",
   "generatedFrom": [
     "metadata/current-content-inventory.json",
     "metadata/backend-module-dependency-inventory.json",
@@ -24,7 +24,7 @@
     "sourceModuleOraclePolicyPass": true,
     "oracleBacklogReferenceCount": 1605,
     "directOracleDependencyCount": 2,
-    "postgresMigrationCount": 191,
+    "postgresMigrationCount": 192,
     "postgresMigrationHighRiskCount": 0,
     "postgresMapperAuditErrorCount": 0,
     "postgresMapperAuditWarningCount": 0,
@@ -39,7 +39,7 @@
     "decompiledServices": 23,
     "frontendSourceMaps": 366,
     "frontendRecoveredFiles": 991,
-    "composeServices": 63,
+    "composeServices": 64,
     "businessRuntimeServices": 20
   },
   "composeDefaults": {
@@ -82,8 +82,8 @@
     "topFiles": []
   },
   "oracleMigrationAudit": {
-    "generatedAt": "2026-07-20T11:46:34+00:00",
-    "repoCommit": "0c8c391291152d41dfcdf1e6fe2a3387be7944ce",
+    "generatedAt": "2026-07-20T15:57:10+00:00",
+    "repoCommit": "ad36372936d99ca947d231fc552ae9c3e086c2cc",
     "findingCount": 1605,
     "categoryTotal": 1605,
     "unclassifiedReferenceCount": 0
@@ -178,7 +178,7 @@
       "id": "oracle-audit-current-and-classified",
       "title": "Oracle migration audit 可追溯且无未分类引用",
       "status": "pass",
-      "evidence": "generatedAt=2026-07-20T11:46:34+00:00, repoCommit=0c8c391291152d41dfcdf1e6fe2a3387be7944ce, unclassified=0, findingCount=1605, categoryTotal=1605",
+      "evidence": "generatedAt=2026-07-20T15:57:10+00:00, repoCommit=ad36372936d99ca947d231fc552ae9c3e086c2cc, unclassified=0, findingCount=1605, categoryTotal=1605",
       "nextAction": "先运行 `make oracle-audit`；新增 Oracle 引用必须分类到 backlog、legacy、tooling 或文档路径。",
       "blocking": false
     },
@@ -202,7 +202,7 @@
       "id": "postgres-migration-governance",
       "title": "PostgreSQL 初始化脚本可审计",
       "status": "pass",
-      "evidence": "191 scripts, range=001-191, highRisk=0, watch=73",
+      "evidence": "192 scripts, range=001-192, highRisk=0, watch=73",
       "nextAction": "新增 SQL 只能追加编号并保持幂等；watch 语句在 PR 中解释。",
       "blocking": false
     },
@@ -210,7 +210,7 @@
       "id": "recovered-source-inventory",
       "title": "当前恢复内容有机器库存",
       "status": "pass",
-      "evidence": "250 source jars, 991 frontend files, 63 compose services.",
+      "evidence": "250 source jars, 991 frontend files, 64 compose services.",
       "nextAction": "新增包、服务或 source map 后运行 `make inventory`。",
       "blocking": false
     },

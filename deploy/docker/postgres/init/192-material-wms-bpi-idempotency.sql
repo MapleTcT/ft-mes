@@ -13,7 +13,7 @@ ALTER TABLE wms_stock_document_lines
     ADD COLUMN IF NOT EXISTS unit_code VARCHAR(64) NOT NULL DEFAULT '';
 
 DROP INDEX IF EXISTS uk_wms_stock_document_lines_source;
-CREATE UNIQUE INDEX uk_wms_stock_document_lines_source
+CREATE UNIQUE INDEX IF NOT EXISTS uk_wms_stock_document_lines_source
     ON wms_stock_document_lines (
         tenant_id, document_type, source_system, source_line_id
     );
