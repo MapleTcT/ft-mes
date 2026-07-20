@@ -105,6 +105,14 @@ export const bpiApi = {
     request<Batch[]>(`/batches?plantId=${encodeURIComponent(plantId)}&limit=100`),
   batch: (id: string) => request<Batch>(`/batches/${encodeURIComponent(id)}`),
   batchRelease: (id: string) => request<BatchRelease>(`/batches/${encodeURIComponent(id)}/release`),
+  reconcileWmsInbound: (release: BatchRelease, reason: string, key: string) => {
+    if (!release.wmsInbound) throw new Error('当前批次没有可核对的 WMS 入库命令。');
+    return request<BatchRelease>(`/batches/${encodeURIComponent(release.batch.id)}/wms/reconcile`, {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key, 'If-Match': String(release.wmsInbound.revision) },
+      body: JSON.stringify({ reason }),
+    });
+  },
   suspendBatch: (batch: Batch, reason: string, key: string) =>
     request<Batch>(`/batches/${encodeURIComponent(batch.id)}/suspend`, {
       method: 'POST',

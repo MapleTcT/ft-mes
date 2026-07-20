@@ -20,12 +20,14 @@ public record BpiWmsOutboxProperties(
         @Min(1) @Max(100) int maxAttempts,
         @NotNull Duration pollDelay,
         @NotNull Duration claimTimeout,
-        @NotNull Duration retryBackoff) {
+        @NotNull Duration retryBackoff,
+        @NotNull Duration reconciliationDelay) {
 
     public BpiWmsOutboxProperties {
         positive(pollDelay, "pollDelay");
         positive(claimTimeout, "claimTimeout");
         positive(retryBackoff, "retryBackoff");
+        positive(reconciliationDelay, "reconciliationDelay");
     }
 
     private static void positive(Duration value, String field) {

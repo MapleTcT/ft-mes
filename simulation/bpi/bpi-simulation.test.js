@@ -281,6 +281,37 @@ test('batch release projection distinguishes quality and WMS business states', a
     assert.equal(result.json.data.wmsInbound?.documentId ?? null, projection.document);
   }
 
+  const pendingBefore = { ...simulatorState.batchReleases.get(batchIds.wmsPending).wmsInbound };
+  const reconcileHeaders = commandHeaders('wms-reconcile-same-command-0001', pendingBefore.revision);
+  result = await request('POST', `/bpi/v1/batches/${batchIds.wmsPending}/wms/reconcile`, {
+    headers: reconcileHeaders,
+    body: { reason: '回执超时，按原命令和幂等键重新核对 WMS 单据' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.response.headers.get('x-bpi-operation-id'), 'reconcileWmsInbound');
+  assert.equal(result.json.data.wmsInbound.commandEventId, pendingBefore.commandEventId);
+  assert.equal(result.json.data.wmsInbound.idempotencyKey, pendingBefore.idempotencyKey);
+  assert.equal(result.json.data.wmsInbound.outboxStatus, 'PENDING');
+  assert.equal(result.json.data.wmsInbound.reconciliationCount, 1);
+  assert.equal(result.json.data.wmsInbound.revision, pendingBefore.revision + 1);
+  assert.equal(result.json.data.wmsInbound.reconciliationAllowed, false);
+  assert.equal(result.json.data.wmsInbound.reconciliationBlockedReason, 'OUTBOX_BUSY');
+
+  result = await request('POST', `/bpi/v1/batches/${batchIds.wmsPending}/wms/reconcile`, {
+    headers: reconcileHeaders,
+    body: { reason: '回执超时，按原命令和幂等键重新核对 WMS 单据' },
+  });
+  assert.equal(result.response.status, 200);
+  assert.equal(result.response.headers.get('idempotent-replay'), 'true');
+  assert.equal(result.json.data.wmsInbound.reconciliationCount, 1);
+
+  result = await request('POST', `/bpi/v1/batches/${batchIds.wmsPending}/wms/reconcile`, {
+    headers: commandHeaders('wms-reconcile-stale-revision-0002', pendingBefore.revision),
+    body: { reason: '旧投影版本不得重复排队' },
+  });
+  assert.equal(result.response.status, 409);
+  assert.equal(result.json.currentRevision, pendingBefore.revision + 1);
+
   result = await request('GET', `/bpi/v1/batches/${batchIds.waiting}/evidence`);
   assert.equal(result.json.data.start.length, 2);
   assert.equal(result.json.data.end.length, 2);

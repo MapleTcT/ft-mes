@@ -1,7 +1,10 @@
 package com.mapletct.ftmes.bpi.application;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
 import com.mapletct.ftmes.bpi.application.error.BpiForbiddenException;
+import com.mapletct.ftmes.bpi.application.error.BpiPreconditionRequiredException;
 import com.mapletct.ftmes.bpi.application.error.BpiValidationException;
 import com.mapletct.ftmes.bpi.contract.v1.QcsInspectionDispositionV1;
 import com.mapletct.ftmes.bpi.contract.v1.QcsInspectionResultV1;
@@ -16,10 +19,14 @@ import com.mapletct.ftmes.bpi.domain.QualityGateState;
 import com.mapletct.ftmes.bpi.domain.QualityGateView;
 import com.mapletct.ftmes.bpi.domain.QualityInspectionView;
 import com.mapletct.ftmes.bpi.domain.WmsInboundTarget;
+import com.mapletct.ftmes.bpi.domain.WmsInboundView;
+import com.mapletct.ftmes.bpi.domain.WmsReconciliationTarget;
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiPhase2IntegrationProperties;
 import com.mapletct.ftmes.bpi.infrastructure.integration.BpiWmsOutboxProperties;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BatchReleasePostgresRepository;
 import com.mapletct.ftmes.bpi.infrastructure.postgres.BpiPostgresRepository;
+import com.mapletct.ftmes.bpi.infrastructure.postgres.IdempotencyRecord;
+import com.mapletct.ftmes.bpi.interfaces.rest.ReasonCommand;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,9 +38,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class BatchReleaseService {
+    private static final Pattern REVISION_HEADER = Pattern.compile("^(?:W/)?\\\"?(\\d+)\\\"?$");
     private static final UUID QCS_INBOX_NAMESPACE =
             UUID.fromString("bb11eddd-a04b-517e-9883-e98468f5cd3b");
     private static final UUID QUALITY_GATE_NAMESPACE =
@@ -51,16 +61,19 @@ public class BatchReleaseService {
     private final BatchReleasePostgresRepository releaseRepository;
     private final BpiPhase2IntegrationProperties integrationProperties;
     private final BpiWmsOutboxProperties wmsOutboxProperties;
+    private final ObjectMapper objectMapper;
 
     public BatchReleaseService(
             BpiPostgresRepository repository,
             BatchReleasePostgresRepository releaseRepository,
             BpiPhase2IntegrationProperties integrationProperties,
-            BpiWmsOutboxProperties wmsOutboxProperties) {
+            BpiWmsOutboxProperties wmsOutboxProperties,
+            ObjectMapper objectMapper) {
         this.repository = repository;
         this.releaseRepository = releaseRepository;
         this.integrationProperties = integrationProperties;
         this.wmsOutboxProperties = wmsOutboxProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -68,6 +81,77 @@ public class BatchReleaseService {
         BatchInstance batch = repository.findBatch(actor, batchId);
         assertScope(actor, batch);
         return view(actor, batch);
+    }
+
+    @Transactional(timeout = 15)
+    public CommandResult<BatchReleaseView> reconcileWmsInbound(
+            ActorContext actor,
+            UUID batchId,
+            String idempotencyKey,
+            String ifMatch,
+            ReasonCommand command,
+            String traceId) {
+        validateCommandHeaders(idempotencyKey, ifMatch);
+        if (!actor.roles().contains("BPI_ADMIN")) {
+            throw new BpiForbiddenException("BPI_ADMIN role is required for WMS reconciliation.");
+        }
+        assertPhase2Enabled();
+        long expectedRevision = parseRevision(ifMatch);
+        BatchInstance visibleBatch = repository.findBatch(actor, batchId);
+        assertScope(actor, visibleBatch);
+        assertWmsReconciliationSwitches(actor, visibleBatch);
+
+        String path = "/bpi/v1/batches/" + batchId + "/wms/reconcile";
+        String checksum = Checksums.sha256(
+                batchId + "|" + expectedRevision + "|" + writeJson(command));
+        boolean owner = repository.reserveIdempotency(
+                UUID.randomUUID(), actor.tenantId(), idempotencyKey, "POST", path, checksum);
+        if (!owner) {
+            IdempotencyRecord previous = repository.lockIdempotency(actor.tenantId(), idempotencyKey);
+            assertIdempotencyReplay(previous, "POST", path, checksum);
+            if ("COMPLETED".equals(previous.state()) && previous.responseBody() != null) {
+                BatchReleaseView response = repository.readJson(
+                        previous.responseBody(), new TypeReference<BatchReleaseView>() {});
+                return new CommandResult<>(response, true);
+            }
+            throw new BpiConflictException("The command is still processing.", null);
+        }
+
+        BatchInstance batch = repository.lockBatch(actor, batchId);
+        assertScope(actor, batch);
+        assertWmsReconciliationSwitches(actor, batch);
+        WmsReconciliationTarget target = releaseRepository.lockWmsReconciliation(
+                actor.tenantId(), batchId);
+        if (target.linkRevision() != expectedRevision) {
+            throw new BpiConflictException(
+                    "WMS completion-inbound revision is stale.", target.linkRevision());
+        }
+        if (batch.state() != BatchState.RELEASED) {
+            throw new BpiConflictException(
+                    "Batch must be RELEASED before WMS reconciliation.", target.linkRevision());
+        }
+        if (!"PENDING".equals(target.linkStatus())) {
+            throw new BpiConflictException(
+                    "Only a PENDING WMS completion-inbound command can be reconciled.",
+                    target.linkRevision());
+        }
+        if (!Set.of("PUBLISHED", "FAILED").contains(target.outboxStatus())) {
+            throw new BpiConflictException(
+                    "WMS command is already queued or dispatching.", target.linkRevision());
+        }
+        Instant reconcileAfter = target.lastActivityAt().plus(wmsOutboxProperties.reconciliationDelay());
+        if (Instant.now().isBefore(reconcileAfter)) {
+            throw new BpiConflictException(
+                    "WMS command is still inside the reconciliation safety delay.",
+                    target.linkRevision());
+        }
+
+        releaseRepository.requeueWmsReconciliation(actor, batchId, target);
+        releaseRepository.insertWmsReconciliationAudit(
+                actor, batch, target, command.reason(), traceId);
+        BatchReleaseView response = view(actor, repository.findBatch(actor, batchId));
+        repository.completeIdempotency(actor.tenantId(), idempotencyKey, 200, writeJson(response));
+        return new CommandResult<>(response, false);
     }
 
     @Transactional(timeout = 15)
@@ -423,10 +507,47 @@ public class BatchReleaseService {
     }
 
     private BatchReleaseView view(ActorContext actor, BatchInstance batch) {
+        WmsInboundView inbound = releaseRepository.findWmsInbound(actor, batch.id());
         return new BatchReleaseView(
                 batch,
                 releaseRepository.findQualityGate(actor, batch.id()),
-                releaseRepository.findWmsInbound(actor, batch.id()));
+                decorateWmsInbound(actor, batch, inbound));
+    }
+
+    private WmsInboundView decorateWmsInbound(
+            ActorContext actor,
+            BatchInstance batch,
+            WmsInboundView inbound) {
+        if (inbound == null) return null;
+        Instant reconcileAfter = inbound.reconcileAfter().plus(wmsOutboxProperties.reconciliationDelay());
+        String blockedReason = reconciliationBlockedReason(actor, batch, inbound, reconcileAfter);
+        return new WmsInboundView(
+                inbound.id(), inbound.commandEventId(), inbound.idempotencyKey(), inbound.status(),
+                inbound.receiptEventId(), inbound.documentId(), inbound.errorCode(), inbound.detail(),
+                inbound.observedAt(), inbound.revision(), inbound.outboxStatus(),
+                inbound.deliveryAttemptCount(), inbound.reconciliationCount(),
+                inbound.commandPublishedAt(), inbound.lastReconciledAt(), inbound.lastReconciledBy(),
+                reconcileAfter, blockedReason == null, blockedReason);
+    }
+
+    private String reconciliationBlockedReason(
+            ActorContext actor,
+            BatchInstance batch,
+            WmsInboundView inbound,
+            Instant reconcileAfter) {
+        if (batch.state() != BatchState.RELEASED) return "BATCH_NOT_RELEASED";
+        if (!"PENDING".equals(inbound.status())) return "WMS_RECEIPT_TERMINAL";
+        if (!actor.roles().contains("BPI_ADMIN")) return "ADMIN_ROLE_REQUIRED";
+        if (!integrationProperties.enabled()) return "PHASE2_DISABLED";
+        if (!repository.commandsEnabled(actor, batch)) return "COMMANDS_DISABLED";
+        if (!repository.featureEnabled(actor, batch.plantId(), batch.lineId(), "bpi.wms-link")) {
+            return "WMS_LINK_DISABLED";
+        }
+        if (!Set.of("PUBLISHED", "FAILED").contains(inbound.outboxStatus())) {
+            return "OUTBOX_BUSY";
+        }
+        if (Instant.now().isBefore(reconcileAfter)) return "SAFETY_DELAY_ACTIVE";
+        return null;
     }
 
     private void assertPhase2Enabled() {
@@ -439,6 +560,59 @@ public class BatchReleaseService {
         if (!actor.roles().contains("BPI_INTEGRATION_INGEST")
                 && !actor.roles().contains("BPI_ADMIN")) {
             throw new BpiForbiddenException("BPI_INTEGRATION_INGEST role is required.");
+        }
+    }
+
+    private void assertWmsReconciliationSwitches(ActorContext actor, BatchInstance batch) {
+        if (!repository.commandsEnabled(actor, batch)) {
+            throw new BpiForbiddenException("BPI commands are disabled for this scope.");
+        }
+        if (!repository.featureEnabled(actor, batch.plantId(), batch.lineId(), "bpi.wms-link")) {
+            throw new BpiForbiddenException("WMS completion-inbound integration is disabled for this scope.");
+        }
+    }
+
+    private void assertIdempotencyReplay(
+            IdempotencyRecord previous,
+            String method,
+            String path,
+            String checksum) {
+        if (!method.equals(previous.method())
+                || !path.equals(previous.resourcePath())
+                || !checksum.equals(previous.requestChecksum())) {
+            throw new BpiConflictException(
+                    "Idempotency-Key was reused with a different request.", null);
+        }
+    }
+
+    private void validateCommandHeaders(String idempotencyKey, String ifMatch) {
+        if (idempotencyKey == null || idempotencyKey.length() < 8 || ifMatch == null) {
+            throw new BpiPreconditionRequiredException("Idempotency-Key and If-Match are required.");
+        }
+        if (idempotencyKey.length() > 128) {
+            throw new BpiValidationException("Idempotency-Key must not exceed 128 characters.");
+        }
+    }
+
+    private long parseRevision(String header) {
+        Matcher matcher = REVISION_HEADER.matcher(header);
+        if (!matcher.matches()) {
+            throw new BpiPreconditionRequiredException(
+                    "If-Match must contain a numeric entity revision.");
+        }
+        try {
+            return Long.parseLong(matcher.group(1));
+        } catch (NumberFormatException exception) {
+            throw new BpiPreconditionRequiredException(
+                    "If-Match revision is outside the supported range.");
+        }
+    }
+
+    private String writeJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Could not persist idempotent response", exception);
         }
     }
 

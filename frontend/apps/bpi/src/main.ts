@@ -61,6 +61,7 @@ import type {
   TopologyVersion,
   TopologyDraftCommand,
   VersionComparison,
+  WmsInbound,
 } from './types';
 import './styles.css';
 
@@ -122,7 +123,7 @@ const state = {
   selectedDataQualityDetail: null as DataQualityIncidentDetail | null,
   selectedFeatureFlag: null as FeatureFlag | null,
   candidateCommand: null as 'confirm' | 'reject' | null,
-  batchCommand: null as 'suspend' | 'resume' | null,
+  batchCommand: null as 'suspend' | 'resume' | 'reconcileWms' | null,
   shadowRunCommand: null as 'start' | 'complete' | 'approve' | 'reject' | 'cancel' | null,
   ruleCommand: null as 'submit' | 'approve' | 'reject' | 'retry' | 'retire' | null,
   topologyCommand: null as 'validate' | 'publish' | null,
@@ -2780,6 +2781,20 @@ function qualityReleaseHtml(release: BatchRelease): string {
   </div>`;
 }
 
+function wmsReconciliationBlockedLabel(reason: WmsInbound['reconciliationBlockedReason']): string {
+  const labels: Partial<Record<NonNullable<WmsInbound['reconciliationBlockedReason']>, string>> = {
+    BATCH_NOT_RELEASED: '批次不在待入库状态',
+    WMS_RECEIPT_TERMINAL: 'WMS 已返回终态回执',
+    ADMIN_ROLE_REQUIRED: '仅 BPI 管理员可发起核对',
+    PHASE2_DISABLED: '质量与仓储联动当前已关闭',
+    COMMANDS_DISABLED: '人工命令开关当前已关闭',
+    WMS_LINK_DISABLED: 'WMS 联动开关当前已关闭',
+    OUTBOX_BUSY: '原命令正在队列中处理',
+    SAFETY_DELAY_ACTIVE: '仍在回执安全等待期',
+  };
+  return reason ? labels[reason] || '当前不可重新核对' : '';
+}
+
 function wmsReleaseHtml(release: BatchRelease): string {
   const inbound = release.wmsInbound;
   if (!inbound) {
@@ -2795,13 +2810,22 @@ function wmsReleaseHtml(release: BatchRelease): string {
   const detail = inbounded ? `仓储单据 ${inbound.documentId} 已作为持久化回执返回。`
     : inbound.status === 'ACCEPTED' ? 'WMS 返回 ACCEPTED 但缺少持久化单据号，系统按异常保持阻断。'
       : inbound.status === 'REJECTED' ? (inbound.detail || '仓储系统拒绝了本次入库命令。')
-        : '命令已持久化并等待 WMS 返回最终回执，不能按 HTTP 200 推断已入库。';
+        : inbound.outboxStatus === 'FAILED' ? '原命令派发失败，尚未产生终态回执；重新核对仍会沿用同一命令和幂等键。'
+          : inbound.outboxStatus === 'PENDING' || inbound.outboxStatus === 'DISPATCHING'
+            ? '原命令正在安全队列中处理，系统不会创建第二张入库单。'
+            : '命令已持久化并等待 WMS 返回最终回执，不能按 HTTP 200 推断已入库。';
   const businessStatus = inbounded ? 'INBOUNDED' : inbound.status === 'ACCEPTED' ? 'BLOCKED' : inbound.status;
+  const reconcileAction = inbound.reconciliationAllowed
+    ? `<div class="release-reconciliation"><div><strong>回执长时间未闭合</strong><span>重新核对会查询并重放原命令，不会生成新的入库指令。</span></div><button class="button button--secondary button--compact" id="open-wms-reconcile"><i data-lucide="refresh-cw"></i>重新核对原单</button></div>`
+    : inbound.status === 'PENDING'
+      ? `<div class="release-reconciliation release-reconciliation--blocked"><i data-lucide="clock-3"></i><span>${escapeHtml(wmsReconciliationBlockedLabel(inbound.reconciliationBlockedReason))}${inbound.reconciliationBlockedReason === 'SAFETY_DELAY_ACTIVE' ? `，${formatTime(inbound.reconcileAfter)} 后可操作` : ''}</span></div>`
+      : '';
 
   return `<div class="release-status-block" data-release-wms="${escapeHtml(inbound.status)}">
     <div class="release-summary release-summary--${statusTone(businessStatus)}"><i data-lucide="boxes"></i><div><span>完工入库</span><strong>${escapeHtml(title)}</strong><p>${escapeHtml(detail)}</p></div>${statusChip(businessStatus)}</div>
-    <div class="release-facts"><div><span>仓储单据</span><b>${escapeHtml(inbound.documentId || '-')}</b></div><div><span>回执时间</span><b>${formatTime(inbound.observedAt)}</b></div><div><span>错误编码</span><b>${escapeHtml(inbound.errorCode || '-')}</b></div><div><span>回执修订</span><b>r${inbound.revision}</b></div></div>
+    <div class="release-facts"><div><span>仓储单据</span><b>${escapeHtml(inbound.documentId || '-')}</b></div><div><span>回执时间</span><b>${formatTime(inbound.observedAt)}</b></div><div><span>消息状态</span><b>${escapeHtml(inbound.outboxStatus)}</b></div><div><span>投递 / 人工核对</span><b>${inbound.deliveryAttemptCount} / ${inbound.reconciliationCount}</b></div><div><span>错误编码</span><b>${escapeHtml(inbound.errorCode || '-')}</b></div><div><span>回执修订</span><b>r${inbound.revision}</b></div></div>
     <dl class="release-technical"><div><dt>命令事件</dt><dd>${escapeHtml(inbound.commandEventId)}</dd></div><div><dt>幂等键</dt><dd>${escapeHtml(inbound.idempotencyKey)}</dd></div><div><dt>回执事件</dt><dd>${escapeHtml(inbound.receiptEventId || '-')}</dd></div></dl>
+    ${reconcileAction}
   </div>`;
 }
 
@@ -2835,6 +2859,7 @@ function renderBatchDrawer(): void {
   openDrawer(`<header><div><span>批次档案</span><h2>${escapeHtml(batch.batchNo)}</h2></div><button class="icon-button" data-close-drawer aria-label="关闭"><i data-lucide="x"></i></button></header><div class="batch-state-band"><div>${statusChip(batch.state)}${batch.shadow ? '<span class="shadow-label">SHADOW</span>' : ''}</div><span>revision ${batch.revision}</span></div><div class="drawer-section facts-grid"><div><span>产线 / 工段</span><b>${escapeHtml(batch.lineId)} / ${escapeHtml(batch.stageCode)}</b></div><div><span>生产指令</span><b>${escapeHtml(batch.orderId || '-')}</b></div><div><span>开始时间</span><b>${formatTime(batch.startTime)}</b></div><div><span>结束时间</span><b>${formatTime(batch.endTime)}</b></div><div><span>累计量</span><b>${number(batch.quantity)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>干物量</span><b>${number(batch.dryMatter)} ${escapeHtml(batch.quantityUnit)}</b></div><div><span>质量门</span>${statusChip(batch.qualityGate)}</div><div><span>库存状态</span>${statusChip(batch.wmsStatus)}</div></div>${batchReleaseSectionHtml()}<div class="drawer-section"><div class="section-title"><h3>边界证据</h3><span>${state.batchEvidence.start.length} START / ${state.batchEvidence.end.length} END</span></div><ul class="evidence-list evidence-list--compact">${evidence || '<li class="evidence-empty">暂无证据</li>'}</ul></div><div class="drawer-section"><h3>状态时间线</h3><ol class="timeline">${timeline || '<li><i></i><div><strong>暂无状态事件</strong></div></li>'}</ol></div><footer class="drawer-actions"><button class="button button--secondary" data-close-drawer>关闭</button>${command}</footer>`, `batch:${batch.id}`);
   document.querySelector('#open-suspend')?.addEventListener('click', () => openBatchCommandDialog('suspend'));
   document.querySelector('#open-resume')?.addEventListener('click', () => openBatchCommandDialog('resume'));
+  document.querySelector('#open-wms-reconcile')?.addEventListener('click', () => openBatchCommandDialog('reconcileWms'));
   document.querySelector('#retry-batch-release')?.addEventListener('click', () => void reloadBatchRelease(batch.id));
 }
 
@@ -2907,25 +2932,36 @@ async function openBatch(batchId: string): Promise<void> {
   }
 }
 
-function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
+function openBatchCommandDialog(command: 'suspend' | 'resume' | 'reconcileWms'): void {
   const batch = state.selectedBatch;
   if (!batch) return;
   const isSuspend = command === 'suspend';
+  const isReconciliation = command === 'reconcileWms';
+  const inbound = state.selectedBatchRelease?.wmsInbound;
+  if (isReconciliation && (!inbound || !inbound.reconciliationAllowed)) return;
   state.candidateCommand = null;
   state.batchCommand = command;
   state.ruleCommand = null;
   state.topologyCommand = null;
   state.calibrationCommand = null;
-  document.querySelector('#command-kicker')!.textContent = '批次运行控制';
-  document.querySelector('#command-title')!.textContent = isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
-  document.querySelector('#command-reason-label')!.textContent = isSuspend ? '暂停原因' : '恢复原因';
-  document.querySelector('#command-summary')!.innerHTML = `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
+  document.querySelector('#command-kicker')!.textContent = isReconciliation ? '完工入库核对' : '批次运行控制';
+  document.querySelector('#command-title')!.textContent = isReconciliation
+    ? '重新核对原 WMS 单据'
+    : isSuspend ? '暂停批次自动处理' : '恢复批次自动处理';
+  document.querySelector('#command-reason-label')!.textContent = isReconciliation
+    ? '核对原因'
+    : isSuspend ? '暂停原因' : '恢复原因';
+  document.querySelector('#command-summary')!.innerHTML = isReconciliation && inbound
+    ? `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>命令事件</span><b>${escapeHtml(inbound.commandEventId)}</b></div><div><span>处理策略</span><b>先查原单 · 同一幂等键</b></div><div><span>入库投影版本</span><b>r${inbound.revision}</b></div>`
+    : `<div><span>批次</span><b>${escapeHtml(batch.batchNo)}</b></div><div><span>产线</span><b>${escapeHtml(batch.lineId)}</b></div><div><span>状态变化</span><b>${isSuspend ? 'ACTIVE → SUSPENDED' : 'SUSPENDED → ACTIVE'}</b></div><div><span>版本</span><b>r${batch.revision}</b></div>`;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!;
   reason.value = '';
-  reason.placeholder = isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
+  reason.placeholder = isReconciliation
+    ? '填写回执超时、消息失败或人工查单依据'
+    : isSuspend ? '填写上下文过期、数据冲突或现场处置依据' : '填写上下文恢复或人工复核依据';
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.className = `button ${isSuspend ? 'button--danger' : 'button--primary'}`;
-  button.textContent = isSuspend ? '确认暂停' : '确认恢复';
+  button.textContent = isReconciliation ? '确认核对原单' : isSuspend ? '确认暂停' : '确认恢复';
   document.querySelector<HTMLDialogElement>('#confirm-dialog')!.showModal();
   reason.focus();
 }
@@ -2933,33 +2969,43 @@ function openBatchCommandDialog(command: 'suspend' | 'resume'): void {
 async function handleBatchCommand(): Promise<void> {
   const batch = state.selectedBatch;
   const command = state.batchCommand;
+  const release = state.selectedBatchRelease;
   const reason = document.querySelector<HTMLTextAreaElement>('#confirm-reason')!.value.trim();
-  if (!batch || !command || reason.length < 3) return;
+  if (!batch || !command || reason.length < 3 || (command === 'reconcileWms' && !release)) return;
   const button = document.querySelector<HTMLButtonElement>('#confirm-submit')!;
   button.disabled = true;
-  button.textContent = command === 'suspend' ? '暂停中...' : '恢复中...';
+  button.textContent = command === 'reconcileWms' ? '核对排队中...' : command === 'suspend' ? '暂停中...' : '恢复中...';
   try {
-    const response = command === 'suspend'
-      ? await bpiApi.suspendBatch(batch, reason, commandId())
-      : await bpiApi.resumeBatch(batch, reason, commandId());
-    state.selectedBatch = response.data;
-    state.batches = state.batches.map((item) => item.id === response.data.id ? response.data : item);
-    state.lines = state.lines.map((line) => line.lineId === response.data.lineId
-      ? { ...line, status: command === 'suspend' ? 'BLOCKED' : 'RUNNING' }
-      : line);
+    if (command === 'reconcileWms') {
+      const response = await bpiApi.reconcileWmsInbound(release!, reason, commandId());
+      state.selectedBatchRelease = response.data;
+      state.selectedBatch = response.data.batch;
+      state.batches = state.batches.map((item) => item.id === response.data.batch.id ? response.data.batch : item);
+    } else {
+      const response = command === 'suspend'
+        ? await bpiApi.suspendBatch(batch, reason, commandId())
+        : await bpiApi.resumeBatch(batch, reason, commandId());
+      state.selectedBatch = response.data;
+      state.batches = state.batches.map((item) => item.id === response.data.id ? response.data : item);
+      state.lines = state.lines.map((line) => line.lineId === response.data.lineId
+        ? { ...line, status: command === 'suspend' ? 'BLOCKED' : 'RUNNING' }
+        : line);
+    }
     document.querySelector<HTMLDialogElement>('#confirm-dialog')!.close();
-    showToast(command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
+    showToast(command === 'reconcileWms'
+      ? '原入库命令已进入重新核对队列'
+      : command === 'suspend' ? '批次自动处理已暂停' : '批次自动处理已恢复');
     await loadView(true);
-    await openBatch(response.data.id);
+    await openBatch(batch.id);
   } catch (error) {
     if (error instanceof ApiProblem && error.problem.status === 409) {
-      showToast(`批次已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
+      showToast(`${command === 'reconcileWms' ? '入库投影' : '批次'}已变化，服务器版本 r${error.problem.currentRevision ?? '-'}`, true);
       await openBatch(batch.id);
     } else showToast(error instanceof Error ? error.message : String(error), true);
   } finally {
     button.disabled = false;
     button.className = `button ${command === 'suspend' ? 'button--danger' : 'button--primary'}`;
-    button.textContent = command === 'suspend' ? '确认暂停' : '确认恢复';
+    button.textContent = command === 'reconcileWms' ? '确认核对原单' : command === 'suspend' ? '确认暂停' : '确认恢复';
   }
 }
 

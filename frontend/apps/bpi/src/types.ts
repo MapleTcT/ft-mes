@@ -222,6 +222,17 @@ export interface WmsInbound {
   detail?: string | null;
   observedAt?: string | null;
   revision: number;
+  outboxStatus: 'PENDING' | 'DISPATCHING' | 'PUBLISHED' | 'FAILED';
+  deliveryAttemptCount: number;
+  reconciliationCount: number;
+  commandPublishedAt?: string | null;
+  lastReconciledAt?: string | null;
+  lastReconciledBy?: string | null;
+  reconcileAfter: string;
+  reconciliationAllowed: boolean;
+  reconciliationBlockedReason?: 'BATCH_NOT_RELEASED' | 'WMS_RECEIPT_TERMINAL'
+    | 'ADMIN_ROLE_REQUIRED' | 'PHASE2_DISABLED' | 'COMMANDS_DISABLED'
+    | 'WMS_LINK_DISABLED' | 'OUTBOX_BUSY' | 'SAFETY_DELAY_ACTIVE' | null;
 }
 
 export interface BatchRelease {

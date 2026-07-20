@@ -91,6 +91,25 @@ public class BatchController {
         return ApiResponse.of(batchReleaseService.get(actorContextFactory.from(jwt), batchId), request);
     }
 
+    @PostMapping("/bpi/v1/batches/{batchId}/wms/reconcile")
+    @PreAuthorize("hasRole('BPI_ADMIN')")
+    public ResponseEntity<ApiResponse<BatchReleaseView>> reconcileWmsInbound(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID batchId,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @RequestHeader(value = "If-Match", required = false) String ifMatch,
+            @Valid @RequestBody ReasonCommand command,
+            HttpServletRequest request) {
+        CommandResult<BatchReleaseView> result = batchReleaseService.reconcileWmsInbound(
+                actorContextFactory.from(jwt), batchId, idempotencyKey, ifMatch,
+                command, traceId(request));
+        ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+        if (result.replayed()) {
+            response.header("Idempotent-Replay", "true");
+        }
+        return response.body(ApiResponse.of(result.data(), request));
+    }
+
     @PostMapping("/bpi/v1/batches/{batchId}/suspend")
     @PreAuthorize("hasAnyRole('BPI_SHIFT_LEAD', 'BPI_ADMIN')")
     public ResponseEntity<ApiResponse<BatchInstance>> suspend(

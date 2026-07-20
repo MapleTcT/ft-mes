@@ -63,6 +63,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
         registry.add("bpi.phase2-integration.allowed-tenant-ids", () -> "*");
         registry.add("bpi.phase2-integration.allowed-plant-ids", () -> "*");
         registry.add("bpi.phase2-integration.allowed-line-ids", () -> "*");
+        registry.add("bpi.wms-outbox.reconciliation-delay", () -> "1ms");
     }
 
     @Autowired MockMvc mockMvc;
@@ -76,6 +77,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     private UUID batchId;
     private String integrationToken;
     private String viewerToken;
+    private String adminToken;
 
     @BeforeEach
     void seedClosedRawBatchAndPhase2Flags() throws Exception {
@@ -95,6 +97,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 """, ruleId, tenantId, topologyId);
         seedFlag("bpi.qcs-link", true);
         seedFlag("bpi.wms-link", true);
+        seedFlag("bpi.commands", true);
         jdbc.update("""
                 INSERT INTO bpi.bpi_batch_instances
                     (id, tenant_id, plant_id, batch_no, line_id, stage_code, order_id,
@@ -108,6 +111,7 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 LINE_ID, "ADP_E2E_ORDER_" + batchId, MATERIAL_CODE, topologyId, ruleId);
         integrationToken = token(List.of("BPI_INTEGRATION_INGEST"));
         viewerToken = token(List.of("BPI_VIEWER"));
+        adminToken = token(List.of("BPI_ADMIN"));
         System.out.printf("BPI_PHASE2_ACCEPTANCE_MARKER tenant=%s batchId=%s%n", tenantId, batchId);
     }
 
@@ -252,6 +256,159 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
     }
 
     @Test
+    void adminReconcilesTheSamePublishedWmsCommandExactlyOnceBeforeReceiptClosesTheBatch()
+            throws Exception {
+        postQcs(qualityGate(
+                "ADP_E2E_GATE_WMS_RECONCILE_" + batchId, 1,
+                "QCS-WMS-RECONCILE-" + batchId,
+                QcsInspectionDispositionV1.QCS_INSPECTION_ACCEPTED, true))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.batch.state").value("RELEASED"));
+
+        OutboxEventClaim firstClaim = wmsOutboxRepository
+                .claimPending(10, Duration.ofMinutes(1)).get(0);
+        assertThat(wmsOutboxRepository.markPublished(
+                firstClaim.id(), firstClaim.claimToken())).isTrue();
+        ageWmsReconciliation(firstClaim.id());
+
+        byte[] originalPayload = jdbc.queryForObject("""
+                SELECT payload FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, byte[].class, tenantId, firstClaim.id());
+        String originalIdentity = jdbc.queryForObject("""
+                SELECT command_event_id || '|' || idempotency_key
+                  FROM bpi.bpi_wms_inbound_links
+                 WHERE tenant_id = ? AND batch_id = ?
+                """, String.class, tenantId, batchId);
+
+        mockMvc.perform(get("/bpi/v1/batches/{id}/release", batchId)
+                        .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationAllowed").value(false))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationBlockedReason")
+                        .value("ADMIN_ROLE_REQUIRED"));
+        postWmsReconciliation(
+                viewerToken, "WMS-RECONCILE-VIEWER-" + batchId, 1,
+                "viewer must not requeue inventory commands")
+                .andExpect(status().isForbidden());
+
+        String commandKey = "WMS-RECONCILE-ADMIN-" + batchId;
+        postWmsReconciliation(
+                adminToken, commandKey, 1,
+                "WMS receipt timeout requires query-first reconciliation")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.batch.state").value("RELEASED"))
+                .andExpect(jsonPath("$.data.wmsInbound.status").value("PENDING"))
+                .andExpect(jsonPath("$.data.wmsInbound.outboxStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationCount").value(1))
+                .andExpect(jsonPath("$.data.wmsInbound.revision").value(2))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationAllowed").value(false))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationBlockedReason")
+                        .value("OUTBOX_BUSY"));
+
+        postWmsReconciliation(
+                adminToken, commandKey, 1,
+                "WMS receipt timeout requires query-first reconciliation")
+                .andExpect(status().isOk())
+                .andExpect(result -> assertThat(
+                        result.getResponse().getHeader("Idempotent-Replay")).isEqualTo("true"))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationCount").value(1));
+        postWmsReconciliation(
+                adminToken, commandKey, 2,
+                "same key cannot be reused with a different command")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value(
+                        org.hamcrest.Matchers.containsString("different request")));
+        postWmsReconciliation(
+                adminToken, "WMS-RECONCILE-STALE-" + batchId, 1,
+                "stale link revision must not requeue again")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.currentRevision").value(2));
+
+        assertThat(count("bpi_outbox_events")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT command_event_id || '|' || idempotency_key
+                  FROM bpi.bpi_wms_inbound_links
+                 WHERE tenant_id = ? AND batch_id = ?
+                """, String.class, tenantId, batchId)).isEqualTo(originalIdentity);
+        assertThat(jdbc.queryForObject("""
+                SELECT payload FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, byte[].class, tenantId, firstClaim.id())).isEqualTo(originalPayload);
+        assertThat(jdbc.queryForObject("""
+                SELECT status || '|' || manual_retry_count || '|' || last_requeued_by
+                  FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, firstClaim.id()))
+                .isEqualTo("PENDING|1|phase2-acceptance-user");
+
+        OutboxEventClaim replayClaim = wmsOutboxRepository
+                .claimPending(10, Duration.ofMinutes(1)).get(0);
+        assertThat(replayClaim.id()).isEqualTo(firstClaim.id());
+        assertThat(replayClaim.payload()).isEqualTo(originalPayload);
+        assertThat(wmsOutboxRepository.markPublished(
+                replayClaim.id(), replayClaim.claimToken())).isTrue();
+
+        postWmsReceipt(receipt(
+                firstClaim.id(), "WMS-RECONCILED-ACCEPTED-" + batchId,
+                WmsCompletionInboundStatusV1.WMS_COMPLETION_INBOUND_ACCEPTED,
+                "WMS-IN-RECONCILED-" + batchId, ""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.batch.state").value("INBOUNDED"))
+                .andExpect(jsonPath("$.data.batch.wmsStatus").value("INBOUNDED"))
+                .andExpect(jsonPath("$.data.wmsInbound.documentId")
+                        .value("WMS-IN-RECONCILED-" + batchId))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationCount").value(1));
+        postWmsReconciliation(
+                adminToken, "WMS-RECONCILE-TERMINAL-" + batchId, 3,
+                "terminal receipt must never be requeued")
+                .andExpect(status().isConflict());
+
+        assertThat(batchProjection()).isEqualTo("INBOUNDED|4|ACCEPTED|INBOUNDED");
+        assertThat(count("bpi_audit_events")).isEqualTo(4);
+        assertThat(jdbc.queryForObject("""
+                SELECT count(*) FROM bpi.bpi_audit_events
+                 WHERE tenant_id = ?
+                   AND object_type = 'WMS_INBOUND_LINK'
+                   AND action = 'WMS_INBOUND_RECONCILIATION_QUEUED'
+                """, Long.class, tenantId)).isEqualTo(1L);
+    }
+
+    @Test
+    void terminalOutboxFailureCanRequeueOnlyTheOriginalWmsCommand() throws Exception {
+        postQcs(qualityGate(
+                "ADP_E2E_GATE_WMS_FAILED_" + batchId, 1,
+                "QCS-WMS-FAILED-" + batchId,
+                QcsInspectionDispositionV1.QCS_INSPECTION_ACCEPTED, true))
+                .andExpect(status().isCreated());
+        OutboxEventClaim claim = wmsOutboxRepository
+                .claimPending(10, Duration.ofMinutes(1)).get(0);
+        byte[] payload = claim.payload();
+        assertThat(wmsOutboxRepository.markFailed(
+                claim.id(), claim.claimToken(), claim.attemptCount(), 1,
+                Duration.ofSeconds(1), "simulated broker outage")).isTrue();
+        assertThat(outboxStatus(claim.id())).isEqualTo("FAILED");
+        ageWmsReconciliation(claim.id());
+
+        postWmsReconciliation(
+                adminToken, "WMS-RECONCILE-FAILED-" + batchId, 1,
+                "terminal broker failure requires controlled requeue")
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.wmsInbound.outboxStatus").value("PENDING"))
+                .andExpect(jsonPath("$.data.wmsInbound.reconciliationCount").value(1));
+
+        assertThat(count("bpi_outbox_events")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT payload FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, byte[].class, tenantId, claim.id())).isEqualTo(payload);
+        assertThat(jdbc.queryForObject("""
+                SELECT last_error FROM bpi.bpi_outbox_events
+                 WHERE tenant_id = ? AND id = ?
+                """, String.class, tenantId, claim.id())).isNull();
+    }
+
+    @Test
     void rejectedRequiredInspectionRejectsBatchWithoutCreatingWmsCommand() throws Exception {
         postQcs(qualityGate(
                 "ADP_E2E_GATE_REJECT_" + batchId, 1, "QCS-REJECTED-" + batchId,
@@ -366,6 +523,33 @@ class BpiQualityReleaseWmsPostgresAcceptanceTest {
                 .header("Authorization", "Bearer " + integrationToken)
                 .contentType(PROTOBUF)
                 .content(event.toByteArray()));
+    }
+
+    private ResultActions postWmsReconciliation(
+            String token,
+            String idempotencyKey,
+            long revision,
+            String reason) throws Exception {
+        return mockMvc.perform(post("/bpi/v1/batches/{id}/wms/reconcile", batchId)
+                .header("Authorization", "Bearer " + token)
+                .header("Idempotency-Key", idempotencyKey)
+                .header("If-Match", Long.toString(revision))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"reason\":\"" + reason + "\"}"));
+    }
+
+    private void ageWmsReconciliation(UUID commandEventId) {
+        jdbc.update("""
+                UPDATE bpi.bpi_outbox_events
+                   SET published_at = COALESCE(published_at, now()) - interval '10 minutes',
+                       updated_at = now() - interval '10 minutes'
+                 WHERE tenant_id = ? AND id = ?
+                """, tenantId, commandEventId);
+        jdbc.update("""
+                UPDATE bpi.bpi_wms_inbound_links
+                   SET updated_at = now() - interval '10 minutes'
+                 WHERE tenant_id = ? AND command_event_id = ?
+                """, tenantId, commandEventId);
     }
 
     private QcsQualityGateV1 qualityGate(

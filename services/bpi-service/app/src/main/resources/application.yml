@@ -135,6 +135,7 @@ bpi:
     poll-delay: ${BPI_WMS_OUTBOX_POLL_DELAY:1s}
     claim-timeout: ${BPI_WMS_OUTBOX_CLAIM_TIMEOUT:2m}
     retry-backoff: ${BPI_WMS_OUTBOX_RETRY_BACKOFF:2s}
+    reconciliation-delay: ${BPI_WMS_RECONCILIATION_DELAY:5m}
   rule-application-kafka:
     enabled: ${BPI_RULE_APPLICATION_KAFKA_ENABLED:false}
     bootstrap-servers: ${BPI_RULE_APPLICATION_KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:29092}

@@ -51,6 +51,7 @@
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/genealogy` | `getBatchGenealogy` | SIMULATED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/timeline` | `getBatchTimeline` | SERVICE_IMPLEMENTED |
 | 批次档案 | GET | `/bpi/v1/batches/{batchId}/release` | `getBatchRelease` | SERVICE_IMPLEMENTED；读取 QCS gate/inspection snapshot 与 WMS command/receipt projection，Phase 2 写入口仍默认关闭 |
+| 批次档案 | POST | `/bpi/v1/batches/{batchId}/wms/reconcile` | `reconcileWmsInbound` | SERVICE_IMPLEMENTED；仅 BPI_ADMIN，可对超出安全等待期的 PENDING 原命令执行 query-first 同指令重排，event/payload/WMS 幂等键不可变 |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/suspend` | `suspendBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/resume` | `resumeBatch` | SERVICE_IMPLEMENTED |
 | 批次档案 | POST | `/bpi/v1/batches/{batchId}/force-close` | `forceCloseBatch` | CONTRACT_ONLY |
@@ -175,7 +176,10 @@ QCS/WMS 两个 flag 都启用时，RELEASED 事务才会追加一个确定性 WM
 代码、本地 PostgreSQL V23 及目标受控链均已验收。目标链使用认证内部 QCS Protobuf marker、三 broker
 Kafka、query-first WMS adapter 和目标 `material-wms`，完成真实单据/明细/库存事务/批次库存落表、
 durable receipt、`INBOUNDED/r4`、相同 QCS 重放、强制 Kafka command 重放和真实浏览器读取。验收后
-所有 Phase 2 开关和 allowlist 均恢复关闭；外部 QCS 主动事件、外部 ERP/WMS 冲销与宕机补偿仍未激活。
+所有 Phase 2 开关和 allowlist 均恢复关闭。`reconcileWmsInbound` 只处理“单据可能已创建但回执未知”或
+outbox 终态失败：复用原 `commandEventId`、protobuf payload 和 WMS 幂等键，受管理员权限、
+`Idempotency-Key`、WMS link `If-Match`、安全等待期和审计保护；它不是红字冲销，也不能重试 WMS
+明确 `REJECTED` 的业务回执。外部 QCS 主动事件、外部 ERP/WMS 冲销与真实宕机补偿验收仍未激活。
 
 ## 3. 内部受信接入 API
 

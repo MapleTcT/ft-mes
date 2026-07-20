@@ -402,7 +402,16 @@ function prepareBatchReleaseAcceptance(state) {
         errorCode: spec.inbound === 'REJECTED' ? 'WMS_LOCATION_LOCKED' : null,
         detail: spec.inbound === 'REJECTED' ? '目标成品库位正在盘点锁定，WMS 拒绝本次入库命令。' : null,
         observedAt: spec.inbound === 'PENDING' ? null : new Date(end.getTime() + 8 * 60 * 1000).toISOString(),
-        revision: spec.inbound === 'PENDING' ? 0 : 1,
+        revision: 1,
+        outboxStatus: 'PUBLISHED',
+        deliveryAttemptCount: 1,
+        reconciliationCount: 0,
+        commandPublishedAt: new Date(end.getTime() + 6 * 60 * 1000).toISOString(),
+        lastReconciledAt: null,
+        lastReconciledBy: null,
+        reconcileAfter: new Date(end.getTime() + 11 * 60 * 1000).toISOString(),
+        reconciliationAllowed: spec.inbound === 'PENDING',
+        reconciliationBlockedReason: spec.inbound === 'PENDING' ? null : 'WMS_RECEIPT_TERMINAL',
       };
     }
     releases.set(id, { batch, qualityGate, wmsInbound: inbound });
@@ -1133,6 +1142,54 @@ function createHandler(state) {
         if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', 'getBatchRelease'), 'getBatchRelease');
         const release = state.batchReleases.get(batch.id) || { batch, qualityGate: null, wmsInbound: null };
         return send(res, 200, envelope('getBatchRelease', release), 'getBatchRelease');
+      }
+      ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/wms\/reconcile$/);
+      if (req.method === 'POST' && ids) {
+        const batch = state.batches.find((item) => item.id === ids[0]);
+        const operationId = 'reconcileWmsInbound';
+        if (!batch) return send(res, 404, problem(404, 'Not Found', 'Batch not found.', operationId), operationId);
+        const release = state.batchReleases.get(batch.id);
+        const inbound = release?.wmsInbound;
+        if (!inbound) return send(res, 404, problem(404, 'Not Found', 'WMS command not found.', operationId), operationId);
+        const context = commandContext(req, res, operationId, inbound.revision, state, path);
+        if (!context) return;
+        const body = await readJson(req);
+        if (!body.reason || String(body.reason).trim().length < 3) {
+          const response = problem(422, 'Validation Failed', 'A reason of at least 3 characters is required.', operationId);
+          return rememberAndSend(state, context, res, 422, response, operationId);
+        }
+        if (batch.state !== 'RELEASED' || inbound.status !== 'PENDING'
+            || !['PUBLISHED', 'FAILED'].includes(inbound.outboxStatus)
+            || !inbound.reconciliationAllowed) {
+          const response = problem(
+            409,
+            'WMS Reconciliation Conflict',
+            'Only an eligible PENDING WMS command can be reconciled.',
+            operationId,
+            inbound.revision,
+          );
+          return rememberAndSend(state, context, res, 409, response, operationId);
+        }
+        inbound.outboxStatus = 'PENDING';
+        inbound.reconciliationCount += 1;
+        inbound.lastReconciledAt = FIXED_TIME;
+        inbound.lastReconciledBy = 'simulated.bpi.admin';
+        inbound.reconcileAfter = new Date(Date.parse(FIXED_TIME) + 5 * 60 * 1000).toISOString();
+        inbound.reconciliationAllowed = false;
+        inbound.reconciliationBlockedReason = 'OUTBOX_BUSY';
+        inbound.revision += 1;
+        const timeline = state.batchEventsById.get(batch.id) || [];
+        timeline.push({
+          revision: inbound.revision,
+          action: 'WMS_INBOUND_RECONCILIATION_QUEUED',
+          at: FIXED_TIME,
+          actor: 'simulated.bpi.admin',
+          reason: body.reason,
+          fromState: 'RELEASED',
+          toState: 'RELEASED',
+        });
+        state.batchEventsById.set(batch.id, timeline);
+        return rememberAndSend(state, context, res, 200, envelope(operationId, release), operationId);
       }
       ids = match(path, /^\/bpi\/v1\/batches\/([^/]+)\/(suspend|resume)$/);
       if (req.method === 'POST' && ids) {

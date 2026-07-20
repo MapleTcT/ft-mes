@@ -13,5 +13,14 @@ public record WmsInboundView(
         String errorCode,
         String detail,
         Instant observedAt,
-        long revision) {
+        long revision,
+        String outboxStatus,
+        int deliveryAttemptCount,
+        int reconciliationCount,
+        Instant commandPublishedAt,
+        Instant lastReconciledAt,
+        String lastReconciledBy,
+        Instant reconcileAfter,
+        boolean reconciliationAllowed,
+        String reconciliationBlockedReason) {
 }

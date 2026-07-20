@@ -212,6 +212,15 @@
         "responses": {"200": {"description": "批次质量门、检验明细和 WMS 入库回执", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchReleaseResponse"}}}}}
       }
     },
+    "/bpi/v1/batches/{batchId}/wms/reconcile": {
+      "post": {
+        "tags": ["Batches"], "operationId": "reconcileWmsInbound", "summary": "按原命令和幂等键重新核对 WMS 完工入库结果",
+        "description": "仅管理员可对超出安全等待期且仍为 PENDING 的原命令执行。服务只重放同一 commandEventId、payload 和 idempotencyKey；WMS 适配器必须先按幂等键查单，禁止生成第二张入库单。",
+        "parameters": [{"$ref": "#/components/parameters/BatchId"}, {"$ref": "#/components/parameters/IdempotencyKey"}, {"$ref": "#/components/parameters/IfMatch"}],
+        "requestBody": {"$ref": "#/components/requestBodies/ReasonCommand"},
+        "responses": {"200": {"description": "原 WMS 命令已进入重新核对队列", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/BatchReleaseResponse"}}}}, "409": {"$ref": "#/components/responses/Conflict"}, "428": {"$ref": "#/components/responses/PreconditionRequired"}}
+      }
+    },
     "/bpi/v1/batches/{batchId}/suspend": {
       "post": {
         "tags": ["Batches"], "operationId": "suspendBatch", "summary": "暂停批次自动处理",
@@ -969,7 +978,7 @@
       },
       "WmsInbound": {
         "type": "object",
-        "required": ["id", "commandEventId", "idempotencyKey", "status", "revision"],
+        "required": ["id", "commandEventId", "idempotencyKey", "status", "revision", "outboxStatus", "deliveryAttemptCount", "reconciliationCount", "reconcileAfter", "reconciliationAllowed"],
         "properties": {
           "id": {"type": "string", "format": "uuid"},
           "commandEventId": {"type": "string", "format": "uuid"},
@@ -980,7 +989,16 @@
           "errorCode": {"type": ["string", "null"]},
           "detail": {"type": ["string", "null"]},
           "observedAt": {"type": ["string", "null"], "format": "date-time"},
-          "revision": {"type": "integer", "format": "int64", "minimum": 0}
+          "revision": {"type": "integer", "format": "int64", "minimum": 1},
+          "outboxStatus": {"type": "string", "enum": ["PENDING", "DISPATCHING", "PUBLISHED", "FAILED"]},
+          "deliveryAttemptCount": {"type": "integer", "minimum": 0},
+          "reconciliationCount": {"type": "integer", "minimum": 0},
+          "commandPublishedAt": {"type": ["string", "null"], "format": "date-time"},
+          "lastReconciledAt": {"type": ["string", "null"], "format": "date-time"},
+          "lastReconciledBy": {"type": ["string", "null"]},
+          "reconcileAfter": {"type": "string", "format": "date-time"},
+          "reconciliationAllowed": {"type": "boolean"},
+          "reconciliationBlockedReason": {"type": ["string", "null"], "enum": ["BATCH_NOT_RELEASED", "WMS_RECEIPT_TERMINAL", "ADMIN_ROLE_REQUIRED", "PHASE2_DISABLED", "COMMANDS_DISABLED", "WMS_LINK_DISABLED", "OUTBOX_BUSY", "SAFETY_DELAY_ACTIVE", null]}
         }
       },
       "BatchRelease": {

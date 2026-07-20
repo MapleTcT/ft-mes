@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mapletct.ftmes.bpi.application.ActorContext;
 import com.mapletct.ftmes.bpi.application.error.BpiConflictException;
 import com.mapletct.ftmes.bpi.application.error.BpiNotFoundException;
+import com.mapletct.ftmes.bpi.domain.BatchInstance;
 import com.mapletct.ftmes.bpi.domain.BatchState;
 import com.mapletct.ftmes.bpi.domain.QualityGateState;
 import com.mapletct.ftmes.bpi.domain.QualityGateView;
 import com.mapletct.ftmes.bpi.domain.QualityInspectionView;
 import com.mapletct.ftmes.bpi.domain.WmsInboundTarget;
 import com.mapletct.ftmes.bpi.domain.WmsInboundView;
+import com.mapletct.ftmes.bpi.domain.WmsReconciliationTarget;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -71,10 +73,20 @@ public class BatchReleasePostgresRepository {
 
     public WmsInboundView findWmsInbound(ActorContext actor, UUID batchId) {
         List<WmsInboundView> matches = jdbc.query("""
-                SELECT id, command_event_id, idempotency_key, status, receipt_event_id,
-                       document_id, error_code, detail, observed_at, revision
-                  FROM bpi.bpi_wms_inbound_links
-                 WHERE tenant_id = :tenantId AND batch_id = :batchId
+                SELECT link.id, link.command_event_id, link.idempotency_key, link.status,
+                       link.receipt_event_id, link.document_id, link.error_code, link.detail,
+                       link.observed_at, link.revision, event.status AS outbox_status,
+                       event.total_attempt_count AS delivery_attempt_count,
+                       event.manual_retry_count AS reconciliation_count,
+                       event.published_at AS command_published_at,
+                       event.last_requeued_at AS last_reconciled_at,
+                       event.last_requeued_by AS last_reconciled_by,
+                       GREATEST(link.updated_at, event.updated_at) AS reconciliation_reference_at
+                  FROM bpi.bpi_wms_inbound_links link
+                  JOIN bpi.bpi_outbox_events event
+                    ON event.tenant_id = link.tenant_id
+                   AND event.id = link.command_event_id
+                 WHERE link.tenant_id = :tenantId AND link.batch_id = :batchId
                 """, new MapSqlParameterSource()
                 .addValue("tenantId", actor.tenantId())
                 .addValue("batchId", batchId),
@@ -88,8 +100,136 @@ public class BatchReleasePostgresRepository {
                         rs.getString("error_code"),
                         rs.getString("detail"),
                         nullableInstant(rs.getTimestamp("observed_at")),
-                        rs.getLong("revision")));
+                        rs.getLong("revision"),
+                        rs.getString("outbox_status"),
+                        rs.getInt("delivery_attempt_count"),
+                        rs.getInt("reconciliation_count"),
+                        nullableInstant(rs.getTimestamp("command_published_at")),
+                        nullableInstant(rs.getTimestamp("last_reconciled_at")),
+                        rs.getString("last_reconciled_by"),
+                        nullableInstant(rs.getTimestamp("reconciliation_reference_at")),
+                        false,
+                        null));
         return matches.isEmpty() ? null : matches.get(0);
+    }
+
+    public WmsReconciliationTarget lockWmsReconciliation(String tenantId, UUID batchId) {
+        try {
+            return jdbc.queryForObject("""
+                    SELECT link.id, link.command_event_id, link.idempotency_key,
+                           link.status AS link_status, link.revision AS link_revision,
+                           event.status AS outbox_status, event.revision AS outbox_revision,
+                           event.manual_retry_count AS reconciliation_count,
+                           GREATEST(link.updated_at, event.updated_at) AS last_activity_at
+                      FROM bpi.bpi_wms_inbound_links link
+                      JOIN bpi.bpi_outbox_events event
+                        ON event.tenant_id = link.tenant_id
+                       AND event.id = link.command_event_id
+                     WHERE link.tenant_id = :tenantId
+                       AND link.batch_id = :batchId
+                     FOR UPDATE OF link, event
+                    """, new MapSqlParameterSource()
+                    .addValue("tenantId", tenantId)
+                    .addValue("batchId", batchId),
+                    (rs, rowNum) -> new WmsReconciliationTarget(
+                            rs.getObject("id", UUID.class),
+                            rs.getObject("command_event_id", UUID.class),
+                            rs.getString("idempotency_key"),
+                            rs.getString("link_status"),
+                            rs.getLong("link_revision"),
+                            rs.getString("outbox_status"),
+                            rs.getLong("outbox_revision"),
+                            rs.getInt("reconciliation_count"),
+                            rs.getTimestamp("last_activity_at").toInstant()));
+        } catch (EmptyResultDataAccessException error) {
+            throw new BpiNotFoundException("WMS completion-inbound command not found.");
+        }
+    }
+
+    public void requeueWmsReconciliation(
+            ActorContext actor,
+            UUID batchId,
+            WmsReconciliationTarget target) {
+        int outboxUpdated = jdbc.update("""
+                UPDATE bpi.bpi_outbox_events
+                   SET status = 'PENDING', attempt_count = 0,
+                       manual_retry_count = manual_retry_count + 1,
+                       next_attempt_at = now(), claim_token = NULL, claimed_at = NULL,
+                       published_at = NULL, last_error = NULL,
+                       last_requeued_at = now(), last_requeued_by = :actorId,
+                       revision = revision + 1, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :commandEventId
+                   AND aggregate_type = 'BATCH_INSTANCE'
+                   AND aggregate_id = :batchId
+                   AND event_type = 'WMS_COMPLETION_INBOUND_COMMAND'
+                   AND status IN ('PUBLISHED', 'FAILED')
+                   AND revision = :outboxRevision
+                """, new MapSqlParameterSource()
+                .addValue("actorId", actor.userId())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("commandEventId", target.commandEventId())
+                .addValue("batchId", batchId)
+                .addValue("outboxRevision", target.outboxRevision()));
+        if (outboxUpdated != 1) {
+            throw new BpiConflictException(
+                    "WMS completion-inbound command can no longer be reconciled.",
+                    target.linkRevision());
+        }
+
+        int linkUpdated = jdbc.update("""
+                UPDATE bpi.bpi_wms_inbound_links
+                   SET revision = revision + 1, updated_at = now()
+                 WHERE tenant_id = :tenantId
+                   AND id = :linkId
+                   AND batch_id = :batchId
+                   AND command_event_id = :commandEventId
+                   AND status = 'PENDING'
+                   AND revision = :linkRevision
+                """, new MapSqlParameterSource()
+                .addValue("tenantId", actor.tenantId())
+                .addValue("linkId", target.linkId())
+                .addValue("batchId", batchId)
+                .addValue("commandEventId", target.commandEventId())
+                .addValue("linkRevision", target.linkRevision()));
+        if (linkUpdated != 1) {
+            throw new BpiConflictException(
+                    "WMS completion-inbound status changed concurrently.",
+                    target.linkRevision());
+        }
+    }
+
+    public void insertWmsReconciliationAudit(
+            ActorContext actor,
+            BatchInstance batch,
+            WmsReconciliationTarget target,
+            String reason,
+            String traceId) {
+        jdbc.update("""
+                INSERT INTO bpi.bpi_audit_events
+                    (id, tenant_id, plant_id, line_id, object_type, object_id, action, actor_id,
+                     before_revision, after_revision, reason, trace_id, detail)
+                VALUES (:id, :tenantId, :plantId, :lineId, 'WMS_INBOUND_LINK', :objectId,
+                        'WMS_INBOUND_RECONCILIATION_QUEUED', :actorId, :beforeRevision,
+                        :afterRevision, :reason, :traceId, CAST(:detail AS jsonb))
+                """, new MapSqlParameterSource()
+                .addValue("id", UUID.randomUUID())
+                .addValue("tenantId", actor.tenantId())
+                .addValue("plantId", batch.plantId())
+                .addValue("lineId", batch.lineId())
+                .addValue("objectId", target.linkId())
+                .addValue("actorId", actor.userId())
+                .addValue("beforeRevision", target.linkRevision())
+                .addValue("afterRevision", target.linkRevision() + 1)
+                .addValue("reason", reason)
+                .addValue("traceId", traceId)
+                .addValue("detail", writeJson(Map.of(
+                        "batchId", batch.id(),
+                        "commandEventId", target.commandEventId(),
+                        "idempotencyKey", target.idempotencyKey(),
+                        "previousOutboxStatus", target.outboxStatus(),
+                        "reconciliationCount", target.reconciliationCount() + 1,
+                        "strategy", "QUERY_FIRST_SAME_COMMAND"))));
     }
 
     public void saveQualityGate(

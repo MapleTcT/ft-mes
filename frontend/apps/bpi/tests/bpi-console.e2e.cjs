@@ -270,6 +270,20 @@ test('batch detail presents quality release and WMS truth without inferring succ
   await drawer.getByText('入库处理中', { exact: true }).waitFor();
   await drawer.getByText(`WMS-INBOUND-${batchIds.wmsPending}`, { exact: true }).waitFor();
   assert.equal(await drawer.getByText('已入库', { exact: true }).count(), 0);
+  const originalCommandEventId = await drawer.locator('.release-technical dd').first().textContent();
+  await drawer.getByRole('button', { name: '重新核对原单' }).click();
+  await page.getByRole('heading', { name: '重新核对原 WMS 单据' }).waitFor();
+  await page.getByText('先查原单 · 同一幂等键', { exact: true }).waitFor();
+  await page.locator('#confirm-reason').fill('WMS 回执超时，管理员确认按原命令查单');
+  await page.getByRole('button', { name: '确认核对原单' }).click();
+  await page.getByText('原入库命令已进入重新核对队列', { exact: true }).waitFor();
+  await drawer.getByText('原命令正在队列中处理', { exact: true }).waitFor();
+  assert.equal(await drawer.locator('.release-technical dd').first().textContent(), originalCommandEventId);
+  const reconciledRelease = await fetch(`${simulatorUrl}/bpi/v1/batches/${batchIds.wmsPending}/release`)
+    .then((response) => response.json());
+  assert.equal(reconciledRelease.data.wmsInbound.outboxStatus, 'PENDING');
+  assert.equal(reconciledRelease.data.wmsInbound.reconciliationCount, 1);
+  assert.equal(reconciledRelease.data.wmsInbound.revision, 2);
   await drawer.locator('[data-close-drawer]').first().click();
 
   await page.locator(`[data-batch-id="${batchIds.wmsFailed}"]`).click();
