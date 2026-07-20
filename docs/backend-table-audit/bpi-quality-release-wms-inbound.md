@@ -16,10 +16,16 @@ CLOSED_RAW
   -> INBOUNDED
 ```
 
-该结论是 **`PASS_LOCAL_POSTGRES_CONTRACTS_NOT_TARGET_ACTIVATED`**，不是生产上线结论。
+该本地结论是 **`PASS_LOCAL_POSTGRES_CONTRACTS_NOT_TARGET_ACTIVATED`**，不是生产上线结论。
 `BPI_PHASE2_INTEGRATION_ENABLED`、`BPI_WMS_OUTBOX_ENABLED`、`bpi.qcs-link` 和
-`bpi.wms-link` 默认均关闭；Phase 1 仍为 `SHADOW_ONLY`。尚未连接真实 QCS/WMS broker、
-真实目标单据或浏览器产品页，因此目标环境联合验收为 `BLOCKED`。
+`bpi.wms-link` 默认均关闭；Phase 1 仍为 `SHADOW_ONLY`。
+
+目标增量已在 `10.11.100.17` 以
+**`PASS_TARGET_V23_CONTROLLED_CONTRACTS_EXTERNAL_QCS_WMS_BLOCKED`** 完成：PostgreSQL 15.18
+expand-only 升级至 V23，Java 8 release 路由和批次质量/库存产品页已部署；真实页面/API 在
+service/adapter 重启前后通过。4 个唯一 marker 在目标库执行同一测试类 4/4，随后独立复查 12 张表
+残留均为 0。该结果仍未连接真实 QCS/WMS broker 或创建真实业务单据，所以外部系统联合验收继续
+为 `BLOCKED`。机器记录为 `metadata/bpi-quality-release-wms-target-acceptance.json`。
 
 ## 表与所有权
 
@@ -41,15 +47,15 @@ outbox，只要目标批次为 `is_shadow=true`，PostgreSQL 也会拒绝 WMS �
 
 | 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
 |---|---|---|---|---|---|---|---|
-| QCS 待定快照 | 批次质量与库存区，页面待实现 | `POST /internal/bpi/v1/qcs-quality-gates` | `InternalPhase2IntegrationController -> BatchReleaseService.applyQualityGate` | quality gate/link、batch、state、audit、inbox | 按 tenant+batch 查 state/revision/gate/link | `CLOSED_RAW/r1 -> WAIT_QA/r2`，1 个 required PENDING | PASS |
-| QCS 精确重放 | 同上 | 同上 | inbox checksum | inbox、quality gate/link | 按 source/event/idempotency 计数 | 所有业务表仍各 1 份 | PASS |
-| QCS 冲突重放 | 同上 | 同上 | inbox checksum | 无新增 | 比较冲突前后计数 | 返回 409，事务回滚 | PASS |
-| QCS 全部必检合格 | 同上 | 同上 | quality evaluator + transactional outbox | quality gate/link、batch、state、audit、outbox、WMS link | 解码 outbox Protobuf 并查状态 | `WAIT_QA -> RELEASED`，恰好 1 个 WMS command | PASS |
-| WMS 提前回执 | 页面待实现 | `POST /internal/bpi/v1/wms-inbound-receipts` | `BatchReleaseService.applyWmsReceipt` | 无新增 | 查 outbox status 与 inbox 计数 | outbox 未 PUBLISHED 时 409，inbox 写入回滚 | PASS |
-| WMS 入库成功 | 页面待实现 | 同上 | WMS receipt transaction | WMS link、batch、state、audit、inbox | 查 document_id/state/wms_status/revision | accepted receipt + document id 后 `INBOUNDED/r4` | PASS |
-| 必检不合格 | 批次质量与库存区，页面待实现 | QCS endpoint | quality evaluator | quality gate/link、batch、state、audit | 查 batch state 和 outbox 计数 | `REJECTED/r3`，WMS outbox 0 | PASS |
-| 影子批次阻断 | 无生产入口 | QCS endpoint + DB trigger | Java invariant + PostgreSQL trigger | batch，禁止 outbox | 直接尝试插入 WMS outbox | Java 不发命令，数据库直插也拒绝 | PASS |
-| WMS 未知/拒绝状态 | 页面待实现 | WMS receipt endpoint | receipt validation + transaction | WMS link、batch、state、audit、inbox | 查错误响应及拒绝前后 projection | 未知枚举值 `99` 返回 422 且事务无残留；合法 rejected 回执使 batch 保持 `RELEASED/r4`、`wmsStatus=FAILED` | PASS |
+| QCS 待定快照 | `/bpi/#/batches` 批次质量与库存区 | `POST /internal/bpi/v1/qcs-quality-gates` | `InternalPhase2IntegrationController -> BatchReleaseService.applyQualityGate` | quality gate/link、batch、state、audit、inbox | 按 tenant+batch 查 state/revision/gate/link | `CLOSED_RAW/r1 -> WAIT_QA/r2`，1 个 required PENDING | PASS_TARGET_CONTROLLED |
+| QCS 精确重放 | 同上 | 同上 | inbox checksum | inbox、quality gate/link | 按 source/event/idempotency 计数 | 所有业务表仍各 1 份 | PASS_TARGET_CONTROLLED |
+| QCS 冲突重放 | 同上 | 同上 | inbox checksum | 无新增 | 比较冲突前后计数 | 返回 409，事务回滚 | PASS_TARGET_CONTROLLED |
+| QCS 全部必检合格 | 同上 | 同上 | quality evaluator + transactional outbox | quality gate/link、batch、state、audit、outbox、WMS link | 解码 outbox Protobuf 并查状态 | `WAIT_QA -> RELEASED`，恰好 1 个 WMS command | PASS_TARGET_CONTROLLED |
+| WMS 提前回执 | `/bpi/#/batches` 批次质量与库存区 | `POST /internal/bpi/v1/wms-inbound-receipts` | `BatchReleaseService.applyWmsReceipt` | 无新增 | 查 outbox status 与 inbox 计数 | outbox 未 PUBLISHED 时 409，inbox 写入回滚 | PASS_TARGET_CONTROLLED |
+| WMS 入库成功 | 同上 | 同上 | WMS receipt transaction | WMS link、batch、state、audit、inbox | 查 document_id/state/wms_status/revision | accepted receipt + document id 后 `INBOUNDED/r4` | PASS_TARGET_CONTROLLED |
+| 必检不合格 | `/bpi/#/batches` 批次质量与库存区 | QCS endpoint | quality evaluator | quality gate/link、batch、state、audit | 查 batch state 和 outbox 计数 | `REJECTED/r3`，WMS outbox 0 | PASS_TARGET_CONTROLLED |
+| 影子批次阻断 | 无生产入口 | QCS endpoint + DB trigger | Java invariant + PostgreSQL trigger | batch，禁止 outbox | 直接尝试插入 WMS outbox | Java 不发命令，数据库直插也拒绝 | PASS_TARGET_CONTROLLED |
+| WMS 未知/拒绝状态 | `/bpi/#/batches` 批次质量与库存区 | WMS receipt endpoint | receipt validation + transaction | WMS link、batch、state、audit、inbox | 查错误响应及拒绝前后 projection | 未知枚举值 `99` 返回 422 且事务无残留；合法 rejected 回执使 batch 保持 `RELEASED/r4`、`wmsStatus=FAILED` | PASS_TARGET_CONTROLLED |
 | 真实 QCS/WMS 联合链 | 目标环境页面 | Kafka topics + 目标系统 API | adapters/broker/target systems | 目标 QCS/WMS 单据 | 需要目标 marker 和单据直查 | 未激活、未执行 | BLOCKED |
 
 ## 复验 SQL
@@ -85,15 +91,17 @@ WHERE tenant_id = :tenant_marker AND batch_id = :batch_id
 ORDER BY revision;
 ```
 
-最终干净库证据：Flyway `23/23`；全局 `bpi.qcs-link=false`、`bpi.wms-link=false`；
-动态 marker `ADP_E2E_20260720_BPI_QW_<UUID>` 在 batch、quality gate、WMS link、outbox、
-inbox 五类表中的剩余行均为 0。
+最终目标库证据：PostgreSQL 15.18/Flyway V23；全局 `bpi.auto-confirm=false`、
+`bpi.qcs-link=false`、`bpi.shadow-only=true`、`bpi.wms-link=false`；4 个精确
+`ADP_E2E_20260720_BPI_QW_*` marker 在 batch、quality、WMS、outbox、inbox、audit、state、
+idempotency、feature、rule 和 topology 共 12 张表中的剩余行均为 0。既有真实 batch
+`52427282-eb88-5645-a246-b76fe6547038` 仍保持 `CLOSED_RAW/r2/SHADOW`。
 
 ## 已知边界
 
-- 当前没有新增浏览器页面；仅提供 `GET /bpi/v1/batches/{batchId}/release` 供后续批次详情页读取。
+- 批次详情质量/库存区与目标 release 读取链已部署并通过；真实外部状态仍为空态，不能用模拟六态冒充目标单据。
 - Kafka producer/consumer 配置和 DLQ 已接线但默认关闭，本轮没有冒充真实 broker 联合验收。
 - 真实 WMS 必须返回 durable `document_id` 才能进入 `INBOUNDED`；HTTP/Kafka 成功本身不算入库。
 - WMS receipt 状态仅接受合同内的 `ACCEPTED/REJECTED`；未知 Protobuf 枚举不会降级成业务拒绝。
 - 旧本地测试库的 V19 checksum 与当前仓库不一致，本轮未执行 `flyway repair`，而是使用新数据库从零迁移。
-- 激活前必须完成目标环境 QCS/WMS adapter、topic ACL、消费积压、重放、超时、查单和补偿演练。
+- 激活前必须完成真实 QCS/WMS adapter、topic ACL、消费积压、重放、超时、查单和补偿演练。

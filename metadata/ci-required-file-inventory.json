@@ -3310,8 +3310,8 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js",
-      "state": "untracked",
-      "tracked": false
+      "state": "tracked",
+      "tracked": true
     },
     {
       "ignored": false,
@@ -5578,6 +5578,18 @@
     {
       "ignored": false,
       "path": "metadata/bpi-quality-release-wms-inbound-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-release-wms-target-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-quality-release-wms-target.png",
       "state": "tracked",
       "tracked": true
     },
@@ -8852,8 +8864,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 575,
-      "untracked": 1
+      "tracked": 576
     },
     "docs": {
       "tracked": 109
@@ -8862,7 +8873,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 164
+      "tracked": 166
     },
     "package.json": {
       "tracked": 1
@@ -8886,14 +8897,9 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1471,
-    "tracked": 1470,
-    "untracked": 1
+    "totalFiles": 1473,
+    "tracked": 1473,
+    "untracked": 0
   },
-  "untrackedByDirectory": [
-    {
-      "count": 1,
-      "pathPrefix": "deploy/docker"
-    }
-  ]
+  "untrackedByDirectory": []
 }

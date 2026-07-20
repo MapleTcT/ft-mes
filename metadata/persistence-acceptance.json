@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-20T05:31:51.833Z",
-  "repoCommit": "f669bb1ee7460a167c52741a877bb8d7131e7396+codex/bpi-source-sequence-evidence-v2",
+  "generatedAt": "2026-07-20T11:10:09Z",
+  "repoCommit": "0c8c391291152d41dfcdf1e6fe2a3387be7944ce",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -129,11 +129,17 @@
       "marker": "ADP_BPI_MQTT_20260720_0918",
       "evidence": "metadata/bpi-mqtt-ingress-joint-acceptance.json",
       "assertions": "two independent MQTT 3.1.1 QoS1 sessions; 6/6 PUBACK; JetLinks property/log persistence; exporter received/enqueued/published +6 with zero failures; Kafka 37->43; Flink RUNNING 36/36; MES source sequence QUALIFIED during TTL; six exact data-quality raw events; real point/data-quality pages with seven 200 BPI responses and zero console/page/request failures; candidate and batch delta zero"
+    },
+    "bpiQualityReleaseWmsTarget": {
+      "status": "PASS_TARGET_V23_CONTROLLED_CONTRACTS_EXTERNAL_QCS_WMS_BLOCKED",
+      "marker": "ADP_E2E_20260720_BPI_QW_<four exact UUID tenants>",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json",
+      "assertions": "protected expand-only V22->V23; service/adapter healthy; real batch release page and API before/after restart; unauthenticated 401; nested route 403; PostgreSQL target tests 4/4; four marker cleanup assertions and independent twelve-table zero-residue query; global Phase 2 flags unchanged and external QCS/WMS still blocked"
     }
   },
   "summary": {
-    "testedFeatures": 184,
-    "pass": 181,
+    "testedFeatures": 186,
+    "pass": 183,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -3983,9 +3989,67 @@
         "END candidate identity intentionally uses batch_id and stores order_id as NULL; the associated batch retains the WOM order_id.",
         "QCS/WMS writeback remains disabled until physical-source and 7-14 day shadow gates pass."
       ]
+    },
+    {
+      "module": "BPI V23 批次质量与库存目标页面",
+      "route": "/bpi/#/batches",
+      "operation": "真实登录后读取既有 CLOSED_RAW 影子批次的 release 投影，执行未认证和嵌套路由负测，并在 service/adapter 重启后复验页面",
+      "api": "GET /bpi-api/batches/52427282-eb88-5645-a246-b76fe6547038/release",
+      "method": "GET",
+      "requiresPersistence": false,
+      "backendEntry": "Nginx /bpi-api -> Java 8 BpiProxyController/BpiRoutePolicy -> Java 17 BatchReleaseController -> BatchReleaseService -> BatchReleasePostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_wms_inbound_links"
+      ],
+      "marker": "BPI-LINES0701-20260720-6B74EB1A / 52427282-eb88-5645-a246-b76fe6547038",
+      "verificationSql": "SELECT id,batch_no,state,revision,is_shadow,quality_gate,wms_status FROM bpi.bpi_batch_instances WHERE id='52427282-eb88-5645-a246-b76fe6547038';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json. Target login and release GET were 200 before and after service/adapter restart; the page rendered CLOSED_RAW/r2/SHADOW, 尚未进入质量放行 and 尚未生成入库命令. Unauthenticated GET returned 401 and nested /release/export returned 403. Console/page/request/BPI HTTP errors were zero and the baseline PostgreSQL batch stayed unchanged. Screenshot: metadata/bpi-quality-release-wms-target.png.",
+      "issues": [
+        "This is a real target read path over an existing shadow batch, not a real QCS or WMS transaction."
+      ]
+    },
+    {
+      "module": "BPI V23 质量放行与完工入库目标落库",
+      "route": "/bpi/#/batches (projection); internal Phase 2 controller exercised by target PostgreSQL acceptance",
+      "operation": "用四个唯一 tenant/batch marker 验收 QCS pending/accepted/rejected、重放冲突、WMS publication 门禁、accepted/rejected/unknown 回执和影子批次双层阻断，并逐表清理复查",
+      "api": "POST /internal/bpi/v1/qcs-quality-gates; POST /internal/bpi/v1/wms-inbound-receipts; GET /bpi/v1/batches/{batchId}/release",
+      "method": "POST/GET",
+      "requiresPersistence": true,
+      "backendEntry": "InternalPhase2IntegrationController -> BatchReleaseService -> BatchReleasePostgresRepository/WmsInboundOutboxRepository",
+      "tables": [
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_feature_flags",
+        "bpi.bpi_inbox_events",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_quality_gates",
+        "bpi.bpi_quality_links",
+        "bpi.bpi_rule_versions",
+        "bpi.bpi_topology_versions",
+        "bpi.bpi_wms_inbound_links"
+      ],
+      "marker": "ADP_E2E_20260720_BPI_QW_6a9a47a9fd3c48f7aa17e18e92262fbc; ADP_E2E_20260720_BPI_QW_2bf472b54fcb44b7a97622f2d388bf45; ADP_E2E_20260720_BPI_QW_f119ce8206674ef4b282dc144c948217; ADP_E2E_20260720_BPI_QW_f7a77465fe7e42eab34d1c7dc6876e49",
+      "verificationSql": "SELECT table_name,count(*) FROM each acceptance table WHERE tenant_id LIKE 'ADP_E2E_20260720_BPI_QW_%'; SELECT flag_key,enabled FROM bpi.bpi_feature_flags WHERE scope_type='GLOBAL'; SELECT state,revision,is_shadow,quality_gate,wms_status FROM bpi.bpi_batch_instances WHERE id='52427282-eb88-5645-a246-b76fe6547038';",
+      "status": "PASS",
+      "evidence": "metadata/bpi-quality-release-wms-target-acceptance.json. PostgreSQL 15.18/Flyway V23 target test ran 4/4 with zero failures/errors/skips. Each marker printed residualRows=0 after cleanup; an independent psql query returned zero rows for all twelve marker table counts. The four global guards remained auto-confirm=false, qcs-link=false, shadow-only=true and wms-link=false; a valid internal JWT probe confirmed disabled Phase 2 ingress returns 403.",
+      "issues": [
+        "Real QCS inspection events and real WMS documents were not invoked; those two external-system integrations remain BLOCKED.",
+        "The controlled test temporarily seeds tenant-scoped qcs-link/wms-link rows only inside its fixture and deletes them after every test; global and runtime switches remain disabled."
+      ]
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260720_BPI_QW_<four exact UUID tenants>",
+      "artifact": "metadata/bpi-quality-release-wms-target-acceptance.json",
+      "summary": "Protected target V23 upgrade, Java 8 route, real batch quality/inventory page before and after restart, four PostgreSQL contract markers, independent twelve-table zero cleanup and unchanged global write guards passed on 10.11.100.17; real QCS/WMS external systems remain blocked."
+    },
     {
       "marker": "BPI_LIVE_20260720_123058",
       "artifact": "metadata/bpi-live-mqtt-wom-start-end-acceptance.json",

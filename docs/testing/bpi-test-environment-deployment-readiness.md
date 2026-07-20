@@ -12,7 +12,7 @@
 `:18091` 页面入口不再作为当前地址。Kafka/Flink/MinIO 继续由隔离的 `ft-mes-bpi-streaming`
 Compose 承载。
 
-当前环境结论为 **PASS_PHASE1_NATIVE_SHELL_GOVERNANCE**：既有真实浏览器、Kafka/Flink、PostgreSQL、
+当前环境结论为 **PASS_PHASE1_NATIVE_SHELL_GOVERNANCE_AND_V23_CONTROLLED_RELEASE_READINESS**：既有真实浏览器、Kafka/Flink、PostgreSQL、
 故障恢复和应用组件回退证据继续有效；源码
 `df6fdb0e5ddb929626dd0ea3c81b170afbaa62a4` 在 Flyway V21 上把 `bpi.ui` 接到旧 MES
 原生菜单读取点，并通过真实页面完成启用、禁用、恢复继承、审计、幂等、marker 清理、iframe 进入和
@@ -21,7 +21,14 @@ adapter 故障回退。最终测试环境保留 LINE `bpi.ui=true/active/r1`，F
 内容寻址点位目录和来源序列证据接入 Kafka；MES Flyway V22 消费证据并落入 PostgreSQL。目标机当前
 真实 evidence 为 `DISABLED / r2`，目录仍是 1 点/0 READY，浏览器证据抽屉明确显示失败关闭；来源序列
 READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在未过期的 `30m` Redis 证据。该结论只覆盖受控 Phase 1 技术链；
-不代表真实网关/协议设备连续单调序列、IoT + MES context 同 marker 候选/批次、连续影子运行或生产投用完成。
+不代表真实网关/协议设备连续单调序列、物理来源与 MES context 的同 marker 候选/批次、连续影子运行或生产投用完成。
+
+2026-07-20 已进一步用受保护的 expand-only 脚本把唯一 `adp-mes-newbase` 运行栈从 Flyway V22
+升级到 V23。service、Java 8 adapter 与质量/库存静态页均已部署且 healthy；真实
+`/bpi/#/batches` 页面、release API、认证/路由负测和 service/adapter 重启后读取通过。目标
+PostgreSQL 15.18 上 4 组唯一 marker 验收为 4/4，12 张相关表清理后均为 0。该增量只关闭
+“V23/adapter/UI 未部署”和“目标软件合同未验收”缺口，真实 QCS/WMS 外部系统与业务单据仍为
+`BLOCKED`；`bpi.qcs-link=false`、`bpi.wms-link=false` 和 Phase 2 ingress/outbox 默认关闭。
 
 早期部署基线见 [`metadata/bpi-test-environment-acceptance.json`](../../metadata/bpi-test-environment-acceptance.json)；
 当前原生菜单增量验收见
@@ -43,11 +50,13 @@ READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在�
 
 | 验收项 | 实际结果 | 状态 |
 |---|---|---|
-| Runtime smoke | Java 服务 `UP`、Web `UP`、adapter `UP`；数据库 `ft_mes_bpi` 当前为 Flyway V21 | PASS |
+| Runtime smoke | Java 服务 `UP`、Web `UP`、adapter `UP`；数据库 `ft_mes_bpi` 当前为 PostgreSQL 15.18/Flyway V23 | PASS |
 | 真实浏览器 | ADP 登录 `200`，`suposTicket` cookie 存在；BPI 页面 `200`，标题/品牌/概览/空态/SHADOW 均可见 | PASS |
 | 浏览器 API | `GET /bpi-api/overview?plantId=PLANT-01&onlyAbnormal=false` 返回 `200`；console/page/request error 均为 0 | PASS |
 | 运行开关治理 | `ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838` 在 `/bpi/#/featureFlags` 完成 LINE 禁用和恢复继承；PostgreSQL 清理前 `1/2/2`、清理后 `0/0/0`，桌面/移动 BPI 错误为 0 | PASS_TARGET_GOVERNED_CLEANED |
 | 旧 MES 原生菜单门禁 | `ADP_E2E_BPI_SHELL_20260720_050100_df6fdb0e` 从真实页面完成 `ENABLE -> DISABLE -> INHERIT`；菜单 `28/0 -> 29/1 -> 28/0`，iframe 显示“实时生产态势”；PostgreSQL 清理前 `1/3/3`、后 `0/0/0`；adapter 停止时 Nginx 回退 gateway 原菜单，最终测试配置为 LINE active/enabled r1 | PASS_TARGET_NATIVE_SHELL_GOVERNED |
+| V23 质量/库存只读页 | 真实 batch `52427282-eb88-5645-a246-b76fe6547038` 的 release API 为 200，页面显示 `CLOSED_RAW/r2/SHADOW`、质量与入库空态；未登录 401、嵌套路由 403；重启 service/adapter 后复验一致，浏览器错误 0 | PASS_TARGET_RESTARTED |
+| V23 质量放行/WMS 受控落库 | 目标 `ft_mes_bpi` 执行 4 个精确 tenant/batch marker，`BpiQualityReleaseWmsPostgresAcceptanceTest` 4/4；独立 `psql` 复查 12 表残留 0、原真实批次和四个全局开关不变 | PASS_TARGET_CONTROLLED |
 | 认证桥接 | 旧平台不透明票据经可信 gateway 验证，服务端映射角色和 tenant/plant/line，再签发短期内部 JWT | PASS |
 | Kafka | 3 broker、12 个配置内 BPI 业务 topic，副本 3，`min.insync.replicas=2`；另保留 1 个 broker-chaos 验收 topic | PASS |
 | Flink | `ft-mes-bpi-batch-boundary-v1` 当前为 `RUNNING`、36/36 task；`100.99.133.43:18081/jobs/overview` 复查通过。历史应用回滚的 33-task checkpoint 证据继续保留 | PASS |
@@ -70,7 +79,7 @@ READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在�
 | 产品级回切 | 规则/拓扑版本比较、审批、受控退役以及 service/adapter/Flink 应用组件回退已通过；尚未在真实业务负载下执行跨组件同时回切和流量恢复 | 在生产等价维护窗口用受控业务 marker 演练 runtime、Flink、Kafka consumers 和入口流量的编排回切，并完成业务签字 |
 | 现场数据 | exporter、自动点位目录与 WOM context 已分别在目标机通过；试点产品/设备、`instantFlow` metadata 和单位已注册激活，但真实证书匹配、连续单调来源序列及两端同 marker candidate/batch 尚未完成 | 由现场计量人员提交与当前目录 calibrationVersion 精确匹配的真实证书；启用强制来源序列并用多条真实 DEVICE/GATEWAY 事件证明 `source_epoch + sequence` 连续单调和重连语义，等待自动新 revision 通过准入后闭合 IoT + MES context 联合链 |
 | 影子运行 | 尚未连续运行 7-14 天 | 达到边界人工认同率、累计量偏差和数据质量门槛 |
-| 生产写回 | Phase 1 不允许直接写 WOM/QCS/WMS | 影子运行门槛通过后，再设计幂等写回、补偿和回滚验收 |
+| 生产写回 | V23 合同、Java 8 路由、目标页面与目标 PostgreSQL 受控事务已通过，但真实 QCS/WMS 适配、单据和补偿未执行 | 真实影子运行门槛通过后，用同一业务 marker 接入真实 QCS/WMS，完成查单、补偿、重放和回滚验收再申请开关激活 |
 
 ## 下一步验收顺序
 
@@ -80,7 +89,7 @@ READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在�
 4. 把 `MapleTcT/iot@beefd1d5` 接到真实网关/协议设备点位，补齐真实标定，并用多条真实事件证明持久来源序列连续单调和重连换 epoch 语义，等待自动目录生成新 revision；禁止手工伪造 READY。
 5. 用同一 marker 闭合真实设备 EventBus、exporter、Kafka、Flink、BPI PostgreSQL candidate/batch 和浏览器证据链。
 6. 连续运行 7-14 天并达到边界认同率、累计量偏差和数据质量门槛。
-7. 门槛通过后再设计 QCS/WMS 幂等写回、补偿和回滚，禁止提前改写生产状态。
+7. 保持 V23、Java 8 adapter 和质量/库存页为发布基线；门槛通过后接入真实 QCS/WMS，补齐同一 marker 的业务单据、查单、幂等重放、补偿和回滚，禁止提前打开 Phase 2。
 
 ## 原始报告位置
 
@@ -107,6 +116,8 @@ READY 仍要求最近匹配配置的遥测先进入持久化 spool，并存在�
 - `/home/v6/adp-evidence/BPI_SHELL_MENU_FINAL_20260720_df6fdb0e_PASS.txt`
 - `/home/v6/bpi-deploy-backups/20260720-044859-shell-menu-df6fdb0e`
 - `/home/v6/adp-deploy-backups/20260720-073058-source-sequence-v22`
+- `/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/bpi-integrated-upgrade-20260720T103517Z.json`
+- `/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/phase2-postgres-target-test-exact-markers.log`
 
 本地浏览器报告包括 `/tmp/bpi-target-browser-smoke.json`、`/tmp/bpi-joint-browser-publish.json`、
 `/tmp/bpi-joint-browser-confirm.json`、`/tmp/bpi-joint-browser-read-after-cleanup.json`、

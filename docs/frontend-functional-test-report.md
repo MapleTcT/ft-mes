@@ -712,6 +712,21 @@ marker：`ADP_E2E_BPI_FLAGS_20260720_034527_0cf61838`。机器证据：
 `metadata/bpi-feature-flag-governance-acceptance.json`；详细报告：
 `docs/testing/bpi-feature-flag-governance-acceptance.md`。
 
+### BPI V23 质量放行与库存目标页面（2026-07-20）
+
+本节使用当前唯一测试环境 `http://10.11.100.17:18080`、真实 ADP 登录、Java 8 adapter、Java 17
+service 和 PostgreSQL 15.18/Flyway V23，不使用前端模拟器。页面只读取既有影子批次；Phase 2
+开关保持关闭，没有向真实 QCS/WMS 写业务数据。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 批次质量与库存 | `http://10.11.100.17:18080/bpi/#/batches` | 登录，定位批次 `BPI-LINES0701-20260720-6B74EB1A`，打开详情并读取质量/库存区；随后重启 service/adapter 再重复操作 | `GET /bpi-api/batches/52427282-eb88-5645-a246-b76fe6547038/release` | 两轮均显示 `CLOSED_RAW/r2/SHADOW`、`尚未进入质量放行`、`尚未生成入库命令`；视口/document 为 `1600/1600`、抽屉宽 680；console/page/request/BPI HTTP error 全部为 0 | 两轮均 HTTP 200，返回真实 PostgreSQL 批次投影；重启后 service/adapter healthy | 只读 `bpi_batch_instances`、`bpi_quality_gates`、`bpi_quality_links`、`bpi_wms_inbound_links` | PASS_TARGET_RESTARTED | 真实 QCS/WMS 数据尚未接入，空态是当前正确业务状态 |
+| BPI release 路由门禁 | 同上 | 未登录直接调用 release；调用伪造嵌套路由 `/release/export` | 同一 release API 与嵌套路由 | 未登录请求不进入页面数据；嵌套路由不被通配代理放行 | 分别返回 `401` 和 `403` | 不落库 | PASS | 无 |
+
+机器记录：`metadata/bpi-quality-release-wms-target-acceptance.json`；重启后截图：
+`metadata/bpi-quality-release-wms-target.png`。目标 PostgreSQL 4/4 marker 事务验收和 12 表零残留见
+`docs/backend-table-audit/persistence-acceptance.md`；不能由本节只读页面结论外推真实 QCS/WMS 联调完成。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

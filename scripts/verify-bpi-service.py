@@ -149,6 +149,8 @@ REQUIRED_FILES = [
     "docs/backend-table-audit/bpi-quality-release-wms-inbound.md",
     "docs/testing/bpi-quality-release-wms-inbound-acceptance.md",
     "metadata/bpi-quality-release-wms-inbound-acceptance.json",
+    "metadata/bpi-quality-release-wms-target-acceptance.json",
+    "metadata/bpi-quality-release-wms-target.png",
     "metadata/bpi-shadow-run-acceptance.png",
     "docs/testing/bpi-flink-data-quality-acceptance.md",
     "metadata/bpi-flink-data-quality-acceptance.json",
@@ -158,6 +160,7 @@ REQUIRED_FILES = [
     "deploy/docker/scripts/adp-bpi-point-catalog-pagination-acceptance.js",
     "deploy/docker/scripts/adp-bpi-data-quality-acceptance.js",
     "deploy/docker/scripts/adp-bpi-shadow-run-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-quality-release-target-acceptance.js",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-fixture.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-verification.sql",
     "deploy/docker/scripts/bpi-shadow-run-acceptance-cleanup.sql",
@@ -1390,6 +1393,80 @@ def main() -> int:
         fail("BPI QCS/WMS marker cleanup must leave zero fixture rows", failures)
     if len(quality_wms_acceptance.get("repoCommit", "")) != 40:
         fail("BPI QCS/WMS acceptance must point to the exact source commit", failures)
+
+    quality_wms_target = json.loads(
+        (ROOT / "metadata/bpi-quality-release-wms-target-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if quality_wms_target.get("status") != (
+            "PASS_TARGET_V23_CONTROLLED_CONTRACTS_EXTERNAL_QCS_WMS_BLOCKED"):
+        fail("BPI target QCS/WMS acceptance must retain its external-system blockers", failures)
+    target = quality_wms_target.get("target", {})
+    source = quality_wms_target.get("source", {})
+    upgrade = quality_wms_target.get("upgrade", {})
+    if (target.get("host") != "10.11.100.17"
+            or target.get("database") != "PostgreSQL 15.18"
+            or target.get("databaseName") != "ft_mes_bpi"
+            or target.get("schema") != "bpi"
+            or len(source.get("acceptanceCommit", "")) != 40
+            or len(source.get("deployedImageCommit", "")) != 40
+            or upgrade.get("strategy") != "INTEGRATED_EXPAND_ONLY"
+            or upgrade.get("beforeFlywayVersion") != 22
+            or upgrade.get("afterFlywayVersion") != 23
+            or upgrade.get("schemaDowngradeAllowed") is not False):
+        fail("BPI target V23 source, database, or expand-only evidence is incomplete", failures)
+    runtime = quality_wms_target.get("runtime", {})
+    if (runtime.get("service", {}).get("health") != "healthy"
+            or runtime.get("adapter", {}).get("health") != "healthy"
+            or not runtime.get("uiIndexSha256")):
+        fail("BPI target V23 runtime evidence is incomplete", failures)
+    safety = quality_wms_target.get("safety", {})
+    flags = safety.get("featureFlags", {})
+    if (safety.get("phase2IntegrationEnabled") is not False
+            or safety.get("wmsOutboxEnabled") is not False
+            or flags.get("bpi.auto-confirm") is not False
+            or flags.get("bpi.qcs-link") is not False
+            or flags.get("bpi.shadow-only") is not True
+            or flags.get("bpi.wms-link") is not False
+            or safety.get("disabledIngressProbe", {}).get("authenticatedStatus") != 403):
+        fail("BPI target Phase 2 activation guards are incomplete", failures)
+    browser = quality_wms_target.get("browser", {})
+    if (browser.get("loginStatus") != 200
+            or browser.get("releaseRequest", {}).get("status") != 200
+            or browser.get("negativeChecks", {}).get("unauthenticatedStatus") != 401
+            or browser.get("negativeChecks", {}).get("nestedRouteStatus") != 403
+            or browser.get("beforeRestart") != "PASS"
+            or browser.get("afterServiceAdapterRestart") != "PASS"
+            or any(browser.get(key) != 0 for key in (
+                "consoleErrors", "pageErrors", "requestFailures", "bpiHttpErrors"))):
+        fail("BPI target batch-release browser evidence is incomplete", failures)
+    postgres = quality_wms_target.get("postgresAcceptance", {})
+    markers = postgres.get("markers", [])
+    if (postgres.get("tests") != 4
+            or any(postgres.get(key) != 0 for key in ("failures", "errors", "skipped"))
+            or len(markers) != 4
+            or any(marker.get("residualRows") != 0 for marker in markers)
+            or len(postgres.get("tablesCheckedAfterCleanup", [])) != 12
+            or postgres.get("postTestResidualRows") != 0
+            or postgres.get("baselineBatchUnchanged", {}).get("revision") != 2):
+        fail("BPI target PostgreSQL marker or cleanup evidence is incomplete", failures)
+    target_summary = quality_wms_target.get("summary", {})
+    target_items = quality_wms_target.get("items", [])
+    if (target_summary.get("testedFeatures") != 10
+            or target_summary.get("pass") != 8
+            or target_summary.get("fail") != 0
+            or target_summary.get("blocked") != 2
+            or len(target_items) != 10
+            or sum(item.get("status") == "PASS" for item in target_items) != 8
+            or sum(item.get("status") == "BLOCKED" for item in target_items) != 2):
+        fail("BPI target QCS/WMS summary must preserve eight passes and two blockers", failures)
+    target_screenshot = ROOT / browser.get("screenshot", "")
+    if not target_screenshot.is_file():
+        fail("BPI target QCS/WMS screenshot is missing", failures)
+    elif hashlib.sha256(target_screenshot.read_bytes()).hexdigest() != browser.get(
+            "screenshotSha256"):
+        fail("BPI target QCS/WMS screenshot hash does not match", failures)
 
     if failures:
         print("\n".join(f"ERROR: {item}" for item in failures), file=sys.stderr)

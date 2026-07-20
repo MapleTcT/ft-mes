@@ -714,6 +714,33 @@ QUALIFIED；本项不声明现场设备、生产 READY 或任何业务写回。
 `order_id=NULL`；同一 batch 保留 WOM order_id，因此不属于上下文丢失。来源与校准均为测试专用，
 本项不声明物理设备、现场证书、7-14 天连续运行或生产写回。
 
+### BPI V23 质量放行与完工入库（目标 PostgreSQL）
+
+本节在目标 `10.11.100.17` 的 `ft_mes_bpi`（PostgreSQL 15.18/Flyway V23）执行，不使用内存库或 mock。
+测试类直接调用真实 controller/service/repository，并在同一目标库事务中核对状态和行数；
+四个唯一 tenant/batch marker 在每个测试后清理，随后又由独立 `psql` 前缀查询复查 12 张表。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| required 请检快照、精确重放和冲突重放 | `/bpi/#/batches` 质量区；目标浏览器只读投影另验 | `POST /internal/bpi/v1/qcs-quality-gates` | `InternalPhase2IntegrationController -> BatchReleaseService.applyQualityGate -> BatchReleasePostgresRepository` | `bpi_quality_gates`、`bpi_quality_links`、`bpi_inbox_events`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events` | 按 tenant/batch 查询 `state/revision/quality_gate` 及 inbox/link/gate 计数 | PENDING 使批次进入 `WAIT_QA`；完全相同事件不重复；同幂等键不同 checksum 返回 409 且事务回滚 | PASS_TARGET_CONTROLLED |
+| 全部 required ACCEPTED 并生成唯一 WMS 命令 | 同上 | 同上 | `BatchReleaseService.applyQualityGate -> BatchReleasePostgresRepository.insertWmsCommand` | 上述质量表、`bpi_outbox_events`、`bpi_wms_inbound_links` | 查询 batch `state/wms_status`、outbox payload/status 和 WMS link | `WAIT_QA -> RELEASED`，同事务仅生成 1 个确定性 WMS outbox/link | PASS_TARGET_CONTROLLED |
+| required REJECTED | 同上 | 同上 | `BatchReleaseService.gateState` | 质量表、batch/state/audit | 查询 batch state/revision 与 WMS outbox count | 批次进入 `REJECTED`，WMS outbox 为 0 | PASS_TARGET_CONTROLLED |
+| PUBLISHED 前 WMS 回执 | `/bpi/#/batches` 库存区 | `POST /internal/bpi/v1/wms-inbound-receipts` | `InternalPhase2IntegrationController -> BatchReleaseService.applyWmsReceipt` | `bpi_outbox_events`、`bpi_inbox_events` | 查询 outbox status 与 inbox 计数 | PENDING outbox 收到回执返回 409；尝试写入的 inbox 一并回滚 | PASS_TARGET_CONTROLLED |
+| accepted WMS durable document | 同上 | 同上 | `BatchReleaseService.applyWmsReceipt -> BatchReleasePostgresRepository.updateWmsReceipt` | `bpi_wms_inbound_links`、`bpi_batch_instances`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_inbox_events` | 查询 WMS link `status/document_id` 与 batch `state/revision` | PUBLISHED 后 accepted 回执保存 durable document id，批次 `RELEASED -> INBOUNDED` | PASS_TARGET_CONTROLLED |
+| WMS 合法拒绝与未知枚举 | 同上 | 同上 | `BatchReleaseService.applyWmsReceipt` | WMS link、batch/state/audit/inbox | 查询 link `status/error_code`、batch state 和 marker 行数 | 合法拒绝将 link 标为 `REJECTED`、批次保持 `RELEASED` 且 wms status 为 `FAILED`；未知状态 99 返回 422 并完全回滚 | PASS_TARGET_CONTROLLED |
+| 影子批次尝试生成 WMS 命令 | 无写入页面；服务不允许该动作 | service invariant + PostgreSQL trigger | `BatchReleaseService.createWmsCommand` + `reject_shadow_wms_command` | `bpi_batch_instances`、`bpi_outbox_events` | 查询 marker outbox count；另尝试直接 SQL insert | Java 侧不生成命令，绕过服务的 SQL 也被 trigger 拒绝，outbox 为 0 | PASS_TARGET_CONTROLLED |
+| marker 清理与运行基线保护 | 不适用 | 不适用 | `@AfterEach` 定向删除 + 独立 `psql` 查询 | 12 张 BPI 验收相关表 | `WHERE tenant_id LIKE 'ADP_E2E_20260720_BPI_QW_%'` 分表计数；另查全局开关和真实 batch | 四个 marker 分别打印 residualRows=0；独立复查 12/12 表均为 0。真实 batch `52427282-...` 仍为 `CLOSED_RAW/r2/SHADOW/NOT_APPLICABLE/NOT_REQUESTED`，四个全局开关未变化 | PASS_CLEANED |
+
+四个精确 marker：
+
+- `ADP_E2E_20260720_BPI_QW_6a9a47a9fd3c48f7aa17e18e92262fbc`
+- `ADP_E2E_20260720_BPI_QW_2bf472b54fcb44b7a97622f2d388bf45`
+- `ADP_E2E_20260720_BPI_QW_f119ce8206674ef4b282dc144c948217`
+- `ADP_E2E_20260720_BPI_QW_f7a77465fe7e42eab34d1c7dc6876e49`
+
+机器证据：`metadata/bpi-quality-release-wms-target-acceptance.json`。这证明目标运行栈的软件合同和
+PostgreSQL 事务边界，不证明真实 QCS 检验单或 WMS 入库单；两个外部系统仍为 `BLOCKED`。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

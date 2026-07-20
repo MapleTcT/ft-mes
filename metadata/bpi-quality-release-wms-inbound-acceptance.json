@@ -181,8 +181,9 @@
     "outboxRows": 0,
     "inboxRows": 0
   },
+  "targetAcceptance": "metadata/bpi-quality-release-wms-target-acceptance.json",
   "limitations": [
-    "No browser UI was implemented or accepted in this slice",
+    "The original slice was local-only; target V23 browser and controlled PostgreSQL acceptance is recorded separately and does not activate external integration",
     "No real QCS or WMS target system was invoked",
     "No production feature flag was enabled",
     "No claim of production readiness is made"

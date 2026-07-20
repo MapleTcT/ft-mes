@@ -1,0 +1,210 @@
+{
+  "generatedAt": "2026-07-20T11:10:09Z",
+  "status": "PASS_TARGET_V23_CONTROLLED_CONTRACTS_EXTERNAL_QCS_WMS_BLOCKED",
+  "target": {
+    "host": "10.11.100.17",
+    "baseUrl": "http://10.11.100.17:18080",
+    "composeProject": "adp-mes-newbase",
+    "runtimeRoot": "/home/v6/adp-mes-docker-newbase-20260611-181921",
+    "database": "PostgreSQL 15.18",
+    "databaseName": "ft_mes_bpi",
+    "schema": "bpi"
+  },
+  "source": {
+    "acceptanceCommit": "0c8c391291152d41dfcdf1e6fe2a3387be7944ce",
+    "deployedImageCommit": "2096a8cd6274712657f8e4ffeb5e4ce40f72dc2f",
+    "targetCheckout": "/home/v6/ft-mes-bpi-release-v23-1187d1da"
+  },
+  "upgrade": {
+    "strategy": "INTEGRATED_EXPAND_ONLY",
+    "beforeFlywayVersion": 22,
+    "afterFlywayVersion": 23,
+    "schemaDowngradeAllowed": false,
+    "report": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/bpi-integrated-upgrade-20260720T103517Z.json",
+    "databaseBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/ft_mes_bpi-before-v23-20260720T103517Z.dump",
+    "environmentBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/adp-compose-before-v23-20260720T103517Z.env",
+    "uiBackup": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/bpi-ui-before-v23-20260720T103517Z.tar.gz",
+    "rollbackMethod": "Restore the recorded service and adapter images plus the UI backup; keep the expanded V23 schema."
+  },
+  "runtime": {
+    "service": {
+      "container": "adp-mes-newbase-bpi-service-1",
+      "containerId": "ca9e643316e0e1e72287b395a14c8f98c1ae7ce09b05a8d37f98df6b7416846b",
+      "image": "ft-mes-bpi-service:20260720t103517z-2096a8cd6274",
+      "imageId": "sha256:63323db84f54d84c9d877e09f0f59f81a55e12a8d9d1c70423bd198b2563ca5a",
+      "health": "healthy"
+    },
+    "adapter": {
+      "container": "adp-mes-newbase-bpi-adapter-1",
+      "containerId": "c8065e8b7cfe68f012e8f13b169330afe673d152e001ca518f64255472d75201",
+      "image": "ft-mes-bpi-adapter:20260720t103517z-2096a8cd6274",
+      "imageId": "sha256:033bbb00c619ca3d69764ad14bf57e372ab08238111ed99262a33ed133af639a",
+      "health": "healthy"
+    },
+    "uiIndexSha256": "147dea25e42e3b90877a0cafe0b2114c8da40ca112033601521332216ea70c3e"
+  },
+  "safety": {
+    "phase2IntegrationEnabled": false,
+    "wmsOutboxEnabled": false,
+    "featureFlags": {
+      "bpi.auto-confirm": false,
+      "bpi.qcs-link": false,
+      "bpi.shadow-only": true,
+      "bpi.wms-link": false
+    },
+    "disabledIngressProbe": {
+      "method": "POST",
+      "endpoint": "/internal/bpi/v1/qcs-quality-gates",
+      "authenticatedStatus": 403,
+      "response": "BPI Phase 2 Protobuf HTTP ingress is disabled.",
+      "traceId": "949c346b-c086-4aeb-af95-a1719489dccb"
+    }
+  },
+  "browser": {
+    "route": "/bpi/#/batches",
+    "batchId": "52427282-eb88-5645-a246-b76fe6547038",
+    "batchNo": "BPI-LINES0701-20260720-6B74EB1A",
+    "loginStatus": 200,
+    "releaseRequest": {
+      "method": "GET",
+      "endpoint": "/bpi-api/batches/52427282-eb88-5645-a246-b76fe6547038/release",
+      "status": 200,
+      "state": "CLOSED_RAW",
+      "revision": 2,
+      "shadow": true,
+      "qualityGate": "NOT_APPLICABLE",
+      "wmsStatus": "NOT_REQUESTED"
+    },
+    "negativeChecks": {
+      "unauthenticatedStatus": 401,
+      "nestedRouteStatus": 403
+    },
+    "page": {
+      "title": "智能批次",
+      "qualityText": "尚未进入质量放行",
+      "wmsText": "尚未生成入库命令",
+      "viewportWidth": 1600,
+      "documentWidth": 1600,
+      "drawerWidth": 680
+    },
+    "beforeRestart": "PASS",
+    "afterServiceAdapterRestart": "PASS",
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "requestFailures": 0,
+    "bpiHttpErrors": 0,
+    "screenshot": "metadata/bpi-quality-release-wms-target.png",
+    "screenshotSha256": "2e3332d24bcd38445ddf2adeb156ebfc03bea8ffcec8af4f3da91cfc44202ec4"
+  },
+  "postgresAcceptance": {
+    "testClass": "BpiQualityReleaseWmsPostgresAcceptanceTest",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "log": "/home/v6/adp-mes-docker-newbase-20260611-181921/backups/bpi-v23-1187d1da/phase2-postgres-target-test-exact-markers.log",
+    "markers": [
+      {
+        "tenant": "ADP_E2E_20260720_BPI_QW_6a9a47a9fd3c48f7aa17e18e92262fbc",
+        "batchId": "7329ef82-bdb0-4853-a53f-c2718b473e7a",
+        "residualRows": 0
+      },
+      {
+        "tenant": "ADP_E2E_20260720_BPI_QW_2bf472b54fcb44b7a97622f2d388bf45",
+        "batchId": "cf86de23-202c-46f6-ba98-f5fd973be9b0",
+        "residualRows": 0
+      },
+      {
+        "tenant": "ADP_E2E_20260720_BPI_QW_f119ce8206674ef4b282dc144c948217",
+        "batchId": "ac6b7438-a6c5-4cd9-9c3e-b16ab0d0ae57",
+        "residualRows": 0
+      },
+      {
+        "tenant": "ADP_E2E_20260720_BPI_QW_f7a77465fe7e42eab34d1c7dc6876e49",
+        "batchId": "785038f0-63bf-4057-86a8-f8cba7c064ae",
+        "residualRows": 0
+      }
+    ],
+    "tablesCheckedAfterCleanup": [
+      "bpi_api_idempotency",
+      "bpi_audit_events",
+      "bpi_batch_instances",
+      "bpi_batch_state_events",
+      "bpi_feature_flags",
+      "bpi_inbox_events",
+      "bpi_outbox_events",
+      "bpi_quality_gates",
+      "bpi_quality_links",
+      "bpi_rule_versions",
+      "bpi_topology_versions",
+      "bpi_wms_inbound_links"
+    ],
+    "postTestResidualRows": 0,
+    "baselineBatchUnchanged": {
+      "id": "52427282-eb88-5645-a246-b76fe6547038",
+      "state": "CLOSED_RAW",
+      "revision": 2,
+      "shadow": true,
+      "qualityGate": "NOT_APPLICABLE",
+      "wmsStatus": "NOT_REQUESTED"
+    },
+    "verificationSql": "SELECT table_name, count(*) FROM each V23 acceptance table WHERE tenant_id LIKE 'ADP_E2E_20260720_BPI_QW_%'; SELECT flag_key, enabled FROM bpi.bpi_feature_flags WHERE scope_type='GLOBAL'; SELECT state, revision, is_shadow, quality_gate, wms_status FROM bpi.bpi_batch_instances WHERE id='52427282-eb88-5645-a246-b76fe6547038';"
+  },
+  "summary": {
+    "testedFeatures": 10,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 2,
+    "notApplicable": 0
+  },
+  "items": [
+    {
+      "operation": "Protected expand-only V22 to V23 upgrade with database, environment and UI backups",
+      "status": "PASS"
+    },
+    {
+      "operation": "Authenticated target batch release projection through Nginx and the Java 8 adapter",
+      "status": "PASS"
+    },
+    {
+      "operation": "Unauthenticated and nested-route access rejection",
+      "status": "PASS"
+    },
+    {
+      "operation": "Real batch page quality and WMS empty-state rendering before and after service/adapter restart",
+      "status": "PASS"
+    },
+    {
+      "operation": "QCS pending, accepted, rejected and replay/idempotency PostgreSQL contracts",
+      "status": "PASS"
+    },
+    {
+      "operation": "WMS pre-publication rejection, accepted document, legal rejection and unknown-status rollback",
+      "status": "PASS"
+    },
+    {
+      "operation": "Shadow-batch Java and PostgreSQL write guards",
+      "status": "PASS"
+    },
+    {
+      "operation": "Four unique target markers and independent twelve-table zero-residue verification",
+      "status": "PASS"
+    },
+    {
+      "operation": "Real QCS event source and target inspection record join",
+      "status": "BLOCKED",
+      "issue": "No real QCS target event or inspection marker was invoked; integration remains disabled."
+    },
+    {
+      "operation": "Real WMS completion inbound document and compensation drill",
+      "status": "BLOCKED",
+      "issue": "No real WMS document was created; adapter, ACL, query-by-idempotency and compensation remain pending."
+    }
+  ],
+  "limitations": [
+    "The target browser and PostgreSQL software contracts passed, but no real QCS or WMS target system was invoked.",
+    "No Phase 2 feature flag or WMS publication switch was enabled.",
+    "The four acceptance tenants were controlled fixtures and were deleted after each test.",
+    "This evidence does not claim production readiness."
+  ]
+}

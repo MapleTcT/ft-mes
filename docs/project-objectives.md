@@ -240,6 +240,17 @@ adapter 的回退演练仍返回 gateway 的 28 个原菜单，恢复后 adapter
 Phase 2 继续默认关闭，G-021 保持 `PARTIAL`。证据见
 [BPI 批次质量与库存页面验收](testing/bpi-quality-inventory-ui-acceptance.md)。
 
+同日又以 `2096a8cd6274712657f8e4ffeb5e4ce40f72dc2f` 镜像源码和
+`0c8c391291152d41dfcdf1e6fe2a3387be7944ce` 验收源码，将唯一 `adp-mes-newbase` 测试运行栈
+受保护地从 Flyway V22 expand-only 升级到 V23。真实 Java 8 adapter 已精确放行
+`GET /bpi-api/batches/{batchId}/release` 并拒绝嵌套路由；真实批次页在 service/adapter 重启前后均
+为 200、浏览器错误 0。目标 PostgreSQL 15.18 又执行 4 个唯一 tenant/batch marker，4/4 事务测试和
+独立 12 表零残留查询通过，原影子批次与全局关闭开关不变。由此“Java 8 入口适配、目标 V23/静态包
+部署、目标页面/API/PostgreSQL 软件合同验收”已退出 G-021 阻断项；真实 QCS 检验单、WMS 入库单、
+外部查单/补偿和开关激活仍未完成，G-021 继续保持 `PARTIAL`。证据见
+[BPI 质量放行与完工入库验收](testing/bpi-quality-release-wms-inbound-acceptance.md) 和
+`metadata/bpi-quality-release-wms-target-acceptance.json`。
+
 权威设计和验收入口：
 
 - [BPI 总设计](designs/batch-process-intelligence.md)
@@ -259,6 +270,7 @@ Phase 2 继续默认关闭，G-021 保持 `PARTIAL`。证据见
 - [BPI 运行开关治理目标验收](testing/bpi-feature-flag-governance-acceptance.md)
 - [BPI 旧 MES 原生菜单开关目标验收](testing/bpi-shell-menu-gate-acceptance.md)
 - [BPI 批次质量与库存页面验收](testing/bpi-quality-inventory-ui-acceptance.md)
+- [BPI 质量放行与完工入库验收](testing/bpi-quality-release-wms-inbound-acceptance.md)
 - `metadata/project-goal-acceptance.json` 中的 `G-021`
 
 ## 非目标
