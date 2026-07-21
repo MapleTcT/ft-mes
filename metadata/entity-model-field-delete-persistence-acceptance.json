@@ -1,0 +1,1895 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-21T10:13:00.755Z",
+  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
+  "database": "PostgreSQL",
+  "module": "basic-config",
+  "actionId": "entity-model-postgres-field-delete",
+  "areaId": "configuration-physical-model-field",
+  "goalId": "G-012",
+  "status": "PASS",
+  "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
+  "route": "/msService/ec/engine/msManage",
+  "apiEndpoints": [
+    "POST /msService/ec/entity/save",
+    "POST /msService/ec/model/save",
+    "POST /msService/ec/property/save",
+    "POST /msService/ec/property/ordinaryDelete",
+    "POST /msService/ec/property/delete"
+  ],
+  "summary": {
+    "testedChecks": 18,
+    "pass": 18,
+    "fail": 0,
+    "blocked": 0,
+    "status": "PASS"
+  },
+  "identifiers": {
+    "entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+    "modelCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+    "tableName": "DS_E2D_101217",
+    "probeId": 1784628737575,
+    "inherentIdCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+    "dependencyView": "V_E2D_101217",
+    "rollbackFunction": "FN_E2D_101217",
+    "rollbackTrigger": "TR_E2D_101217",
+    "fields": {
+      "softHard": {
+        "key": "softHard",
+        "name": "softHard101217",
+        "columnName": "DEL_MAIN_101217",
+        "type": "TEXT",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "propertyCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217"
+      },
+      "dependency": {
+        "key": "dependency",
+        "name": "dependency101217",
+        "columnName": "DEL_DEP_101217",
+        "type": "TEXT",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "propertyCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217"
+      },
+      "rollback": {
+        "key": "rollback",
+        "name": "rollback101217",
+        "columnName": "DEL_RB_101217",
+        "type": "TEXT",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "propertyCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217"
+      },
+      "drift": {
+        "key": "drift",
+        "name": "drift101217",
+        "columnName": "DEL_DRF_101217",
+        "type": "TEXT",
+        "fieldType": "TEXTFIELD",
+        "format": "TEXT",
+        "propertyCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217"
+      },
+      "attachment": {
+        "key": "attachment",
+        "name": "attachment101217",
+        "columnName": "DEL_ATT_101217",
+        "type": "PROPERTYATTACHMENT",
+        "fieldType": "PROPERTYATTACHMENT",
+        "format": "SELECTCOMP",
+        "propertyCode": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217"
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "marker-clean-before-test",
+      "status": "PASS",
+      "evidence": "before={\"property\":0,\"model\":0,\"entity\":0,\"physicalTable\":0,\"dependencyView\":0,\"rollbackFunction\":0}"
+    },
+    {
+      "name": "real-entity-model-page-loaded",
+      "status": "PASS",
+      "evidence": "engine=200; entityConfig=200; modelManage=200; visibleError=null"
+    },
+    {
+      "name": "irreversible-delete-warning-visible",
+      "status": "PASS",
+      "evidence": "warning=删除字段会永久删除对应物理列及该字段的全部已有数据，且无法撤销。确认继续？"
+    },
+    {
+      "name": "entity-model-and-five-properties-created",
+      "status": "PASS",
+      "evidence": "metadata=[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DEP_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_RB_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_MAIN_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard\"}]; columns=[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_main_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_dep_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_rb_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_drf_101217\",\"dataType\":\"character varying\"}]"
+    },
+    {
+      "name": "marker-row-round-trip",
+      "status": "PASS",
+      "evidence": "row={\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_dep_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"del_main_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard\",\"delete_staff_id\":null,\"modify_staff_id\":null}"
+    },
+    {
+      "name": "ordinary-delete-succeeds",
+      "status": "PASS",
+      "evidence": "response=200; body={\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}"
+    },
+    {
+      "name": "ordinary-delete-preserves-column-and-data",
+      "status": "PASS",
+      "evidence": "metadata={\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217\",\"valid\":\"0\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_MAIN_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard\"}; row={\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_dep_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"del_main_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard\",\"delete_staff_id\":null,\"modify_staff_id\":null}"
+    },
+    {
+      "name": "explicit-delete-removes-metadata-column-and-data",
+      "status": "PASS",
+      "evidence": "response=200; metadata=[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DEP_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_RB_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\"}]; row={\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_dep_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null}"
+    },
+    {
+      "name": "database-dependency-blocks-restrict-delete",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterDependencyBlocked\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DEP_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_RB_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_dep_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_rb_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_drf_101217\",\"dataType\":\"character varying\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_dep_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null},\"dependencyViewCount\":1,\"rollbackTriggerCount\":0}"
+    },
+    {
+      "name": "database-dependency-retry-deletes-after-explicit-release",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterDependencyRetry\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_RB_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_rb_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_drf_101217\",\"dataType\":\"character varying\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null},\"dependencyViewCount\":0,\"rollbackTriggerCount\":0}"
+    },
+    {
+      "name": "metadata-delete-failure-rolls-back-ddl-and-data",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterTransactionRollback\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_RB_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_rb_101217\",\"dataType\":\"character varying\"},{\"columnName\":\"del_drf_101217\",\"dataType\":\"character varying\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_rb_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback\",\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null},\"dependencyViewCount\":0,\"rollbackTriggerCount\":1}"
+    },
+    {
+      "name": "transaction-retry-deletes-after-blocker-release",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterTransactionRetry\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_drf_101217\",\"dataType\":\"character varying\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"del_drf_101217\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\",\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null},\"dependencyViewCount\":0,\"rollbackTriggerCount\":0}"
+    },
+    {
+      "name": "physical-column-drift-fails-closed",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterDriftBlocked\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"TEXT\",\"columnName\":\"DEL_DRF_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"},{\"columnName\":\"del_drf_101217_x\",\"dataType\":\"character varying\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null,\"del_drf_101217_x\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_drift\"},\"dependencyViewCount\":0,\"rollbackTriggerCount\":0}"
+    },
+    {
+      "name": "physical-column-drift-repair-allows-delete",
+      "status": "PASS",
+      "evidence": "response=200; state={\"label\":\"afterDriftRetry\",\"tableExists\":1,\"metadata\":[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217\",\"valid\":\"1\",\"isInherent\":\"0\",\"isPk\":\"0\",\"type\":\"PROPERTYATTACHMENT\",\"columnName\":\"DEL_ATT_101217\",\"version\":\"0\",\"description\":\"ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment\"},{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"}],\"columns\":[{\"columnName\":\"id\",\"dataType\":\"bigint\"},{\"columnName\":\"version\",\"dataType\":\"integer\"},{\"columnName\":\"delete_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"modify_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"create_time\",\"dataType\":\"timestamp without time zone\"},{\"columnName\":\"delete_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"modify_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"create_staff_id\",\"dataType\":\"bigint\"},{\"columnName\":\"valid\",\"dataType\":\"integer\"},{\"columnName\":\"cid\",\"dataType\":\"bigint\"},{\"columnName\":\"sort\",\"dataType\":\"integer\"}],\"rowJson\":{\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null},\"dependencyViewCount\":0,\"rollbackTriggerCount\":0}"
+    },
+    {
+      "name": "attachment-metadata-delete-without-physical-column",
+      "status": "PASS",
+      "evidence": "response=200; metadata=[{\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"}]"
+    },
+    {
+      "name": "inherent-primary-key-delete-rejected",
+      "status": "PASS",
+      "evidence": "response=200; metadata={\"code\":\"DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id\",\"valid\":\"1\",\"isInherent\":\"1\",\"isPk\":\"1\",\"type\":\"LONG\",\"columnName\":\"ID\",\"version\":\"0\",\"description\":\"Primary Key\"}; row={\"id\":1784628737575,\"cid\":null,\"sort\":null,\"valid\":1,\"version\":0,\"create_time\":null,\"delete_time\":null,\"modify_time\":null,\"create_staff_id\":null,\"delete_staff_id\":null,\"modify_staff_id\":null}"
+    },
+    {
+      "name": "browser-has-no-unexpected-errors",
+      "status": "PASS",
+      "evidence": "network=[]; pageErrors=[]; requestFailures=[]"
+    },
+    {
+      "name": "controlled-cleanup",
+      "status": "PASS",
+      "evidence": "cleanup={\"property\":0,\"model\":0,\"entity\":0,\"physicalTable\":0,\"dependencyView\":0,\"rollbackFunction\":0}"
+    }
+  ],
+  "browser": {
+    "engineUrl": "http://10.11.100.17:18080/msService/ec/engine/msManage",
+    "engineNavigationStatus": 200,
+    "entityConfigUrl": "http://10.11.100.17:18080/msService/ec/entity/config?entity.code=DataSet_1.0.0_E2eDelEnt101217",
+    "entityConfigNavigationStatus": 200,
+    "modelManageUrl": "http://10.11.100.17:18080/msService/ec/model/manage?entity.code=DataSet_1.0.0_E2eDelEnt101217",
+    "modelManageNavigationStatus": 200,
+    "deleteWarningVisible": true,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "requestFailures": [],
+    "networkErrors": [],
+    "visibleError": null
+  },
+  "requests": {
+    "entityCreate": {
+      "method": "POST",
+      "url": "/msService/ec/entity/save",
+      "requestPayload": {
+        "entity.version": "0",
+        "entity.code": "DataSet_1.0.0_E2eDelEnt101217",
+        "entity.module.code": "DataSet_1.0.0",
+        "entity.isControl": "false",
+        "entity.payCloseAttention": "false",
+        "entity.crossCompanyFlag": "false",
+        "entity.mobile": "false",
+        "entity.enableRest": "false",
+        "entity.enableWs": "false",
+        "entity.enableFieldsPermissionConf": "false",
+        "entity.entityName": "E2eDelEnt101217",
+        "entity.prefix": "E2D",
+        "entity.name": "ADP_E2E_20260721101217_PG_FIELD_DELETE entity",
+        "entity.isBase": "true",
+        "entity.groupEnabled": "false",
+        "entity.workflowEnabled": "false",
+        "entity.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_ENTITY"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "modelCreate": {
+      "method": "POST",
+      "url": "/msService/ec/model/save",
+      "requestPayload": {
+        "model.version": "0",
+        "model.code": "",
+        "entity.code": "DataSet_1.0.0_E2eDelEnt101217",
+        "model.entity.code": "DataSet_1.0.0_E2eDelEnt101217",
+        "model.moduleCode": "DataSet_1.0.0",
+        "model.orgTableName": "",
+        "model.modelName": "E2eDelMod101217",
+        "model.tableName": "DS_E2D_101217",
+        "model.name": "ADP_E2E_20260721101217_PG_FIELD_DELETE model",
+        "model.dataType": "1",
+        "model.isMain": "false",
+        "model.isExtraCol": "false",
+        "model.isCache": "false",
+        "model.enableSync": "false",
+        "model.type": "0",
+        "model.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_MODEL"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "propertyCreate": {
+      "softHard": {
+        "method": "POST",
+        "url": "/msService/ec/property/save",
+        "requestPayload": {
+          "property.version": "0",
+          "property.sort": "1",
+          "property.model.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+          "model.enableDataAudit": "false",
+          "property.entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+          "property.moduleCode": "DataSet_1.0.0",
+          "property.code": "",
+          "property.defaultValue": "",
+          "property.fillcontent": "",
+          "property.attributes": "",
+          "property.isControl": "false",
+          "property.isUnique": "false",
+          "property.isHidden": "false",
+          "property.nullable": "true",
+          "property.multable": "false",
+          "property.seniorSystemCode": "false",
+          "property.sensitive": "false",
+          "property.stretch": "false",
+          "property.isBussinessKey": "false",
+          "property.isUsedMneCode": "false",
+          "property.isIndex": "false",
+          "property.orgColumnName": "",
+          "property.isGroupObject": "false",
+          "property.onlyLeaf": "false",
+          "property.isUsedForList": "true",
+          "property.isCustom": "false",
+          "property.isUsedForSearch": "false",
+          "property.isIgnoreAudit": "false",
+          "property.noAnalyzer": "false",
+          "property.isMainAssociated": "false",
+          "property.isMainDisplay": "false",
+          "property.name": "softHard101217",
+          "property.columnName": "DEL_MAIN_101217",
+          "property.displayName": "ADP_E2E_20260721101217_PG_FIELD_DELETE softHard",
+          "property.type": "TEXT",
+          "property.fieldType": "TEXTFIELD",
+          "property.format": "TEXT",
+          "property.maxLength": "64",
+          "property.fetchMode": "SELECT",
+          "property.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard"
+        },
+        "responseStatus": 200,
+        "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+        "json": {
+          "success": true,
+          "items": {},
+          "actionErrors": [],
+          "exceptionMsg": null,
+          "data": null
+        }
+      },
+      "dependency": {
+        "method": "POST",
+        "url": "/msService/ec/property/save",
+        "requestPayload": {
+          "property.version": "0",
+          "property.sort": "1",
+          "property.model.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+          "model.enableDataAudit": "false",
+          "property.entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+          "property.moduleCode": "DataSet_1.0.0",
+          "property.code": "",
+          "property.defaultValue": "",
+          "property.fillcontent": "",
+          "property.attributes": "",
+          "property.isControl": "false",
+          "property.isUnique": "false",
+          "property.isHidden": "false",
+          "property.nullable": "true",
+          "property.multable": "false",
+          "property.seniorSystemCode": "false",
+          "property.sensitive": "false",
+          "property.stretch": "false",
+          "property.isBussinessKey": "false",
+          "property.isUsedMneCode": "false",
+          "property.isIndex": "false",
+          "property.orgColumnName": "",
+          "property.isGroupObject": "false",
+          "property.onlyLeaf": "false",
+          "property.isUsedForList": "true",
+          "property.isCustom": "false",
+          "property.isUsedForSearch": "false",
+          "property.isIgnoreAudit": "false",
+          "property.noAnalyzer": "false",
+          "property.isMainAssociated": "false",
+          "property.isMainDisplay": "false",
+          "property.name": "dependency101217",
+          "property.columnName": "DEL_DEP_101217",
+          "property.displayName": "ADP_E2E_20260721101217_PG_FIELD_DELETE dependency",
+          "property.type": "TEXT",
+          "property.fieldType": "TEXTFIELD",
+          "property.format": "TEXT",
+          "property.maxLength": "64",
+          "property.fetchMode": "SELECT",
+          "property.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency"
+        },
+        "responseStatus": 200,
+        "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+        "json": {
+          "success": true,
+          "items": {},
+          "actionErrors": [],
+          "exceptionMsg": null,
+          "data": null
+        }
+      },
+      "rollback": {
+        "method": "POST",
+        "url": "/msService/ec/property/save",
+        "requestPayload": {
+          "property.version": "0",
+          "property.sort": "1",
+          "property.model.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+          "model.enableDataAudit": "false",
+          "property.entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+          "property.moduleCode": "DataSet_1.0.0",
+          "property.code": "",
+          "property.defaultValue": "",
+          "property.fillcontent": "",
+          "property.attributes": "",
+          "property.isControl": "false",
+          "property.isUnique": "false",
+          "property.isHidden": "false",
+          "property.nullable": "true",
+          "property.multable": "false",
+          "property.seniorSystemCode": "false",
+          "property.sensitive": "false",
+          "property.stretch": "false",
+          "property.isBussinessKey": "false",
+          "property.isUsedMneCode": "false",
+          "property.isIndex": "false",
+          "property.orgColumnName": "",
+          "property.isGroupObject": "false",
+          "property.onlyLeaf": "false",
+          "property.isUsedForList": "true",
+          "property.isCustom": "false",
+          "property.isUsedForSearch": "false",
+          "property.isIgnoreAudit": "false",
+          "property.noAnalyzer": "false",
+          "property.isMainAssociated": "false",
+          "property.isMainDisplay": "false",
+          "property.name": "rollback101217",
+          "property.columnName": "DEL_RB_101217",
+          "property.displayName": "ADP_E2E_20260721101217_PG_FIELD_DELETE rollback",
+          "property.type": "TEXT",
+          "property.fieldType": "TEXTFIELD",
+          "property.format": "TEXT",
+          "property.maxLength": "64",
+          "property.fetchMode": "SELECT",
+          "property.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        },
+        "responseStatus": 200,
+        "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+        "json": {
+          "success": true,
+          "items": {},
+          "actionErrors": [],
+          "exceptionMsg": null,
+          "data": null
+        }
+      },
+      "drift": {
+        "method": "POST",
+        "url": "/msService/ec/property/save",
+        "requestPayload": {
+          "property.version": "0",
+          "property.sort": "1",
+          "property.model.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+          "model.enableDataAudit": "false",
+          "property.entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+          "property.moduleCode": "DataSet_1.0.0",
+          "property.code": "",
+          "property.defaultValue": "",
+          "property.fillcontent": "",
+          "property.attributes": "",
+          "property.isControl": "false",
+          "property.isUnique": "false",
+          "property.isHidden": "false",
+          "property.nullable": "true",
+          "property.multable": "false",
+          "property.seniorSystemCode": "false",
+          "property.sensitive": "false",
+          "property.stretch": "false",
+          "property.isBussinessKey": "false",
+          "property.isUsedMneCode": "false",
+          "property.isIndex": "false",
+          "property.orgColumnName": "",
+          "property.isGroupObject": "false",
+          "property.onlyLeaf": "false",
+          "property.isUsedForList": "true",
+          "property.isCustom": "false",
+          "property.isUsedForSearch": "false",
+          "property.isIgnoreAudit": "false",
+          "property.noAnalyzer": "false",
+          "property.isMainAssociated": "false",
+          "property.isMainDisplay": "false",
+          "property.name": "drift101217",
+          "property.columnName": "DEL_DRF_101217",
+          "property.displayName": "ADP_E2E_20260721101217_PG_FIELD_DELETE drift",
+          "property.type": "TEXT",
+          "property.fieldType": "TEXTFIELD",
+          "property.format": "TEXT",
+          "property.maxLength": "64",
+          "property.fetchMode": "SELECT",
+          "property.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        "responseStatus": 200,
+        "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+        "json": {
+          "success": true,
+          "items": {},
+          "actionErrors": [],
+          "exceptionMsg": null,
+          "data": null
+        }
+      },
+      "attachment": {
+        "method": "POST",
+        "url": "/msService/ec/property/save",
+        "requestPayload": {
+          "property.version": "0",
+          "property.sort": "1",
+          "property.model.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217",
+          "model.enableDataAudit": "false",
+          "property.entityCode": "DataSet_1.0.0_E2eDelEnt101217",
+          "property.moduleCode": "DataSet_1.0.0",
+          "property.code": "",
+          "property.defaultValue": "",
+          "property.fillcontent": "",
+          "property.attributes": "",
+          "property.isControl": "false",
+          "property.isUnique": "false",
+          "property.isHidden": "false",
+          "property.nullable": "true",
+          "property.multable": "false",
+          "property.seniorSystemCode": "false",
+          "property.sensitive": "false",
+          "property.stretch": "false",
+          "property.isBussinessKey": "false",
+          "property.isUsedMneCode": "false",
+          "property.isIndex": "false",
+          "property.orgColumnName": "",
+          "property.isGroupObject": "false",
+          "property.onlyLeaf": "false",
+          "property.isUsedForList": "true",
+          "property.isCustom": "false",
+          "property.isUsedForSearch": "false",
+          "property.isIgnoreAudit": "false",
+          "property.noAnalyzer": "false",
+          "property.isMainAssociated": "false",
+          "property.isMainDisplay": "false",
+          "property.name": "attachment101217",
+          "property.columnName": "DEL_ATT_101217",
+          "property.displayName": "ADP_E2E_20260721101217_PG_FIELD_DELETE attachment",
+          "property.type": "PROPERTYATTACHMENT",
+          "property.fieldType": "PROPERTYATTACHMENT",
+          "property.format": "SELECTCOMP",
+          "property.maxLength": "",
+          "property.fetchMode": "SELECT",
+          "property.description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        "responseStatus": 200,
+        "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+        "json": {
+          "success": true,
+          "items": {},
+          "actionErrors": [],
+          "exceptionMsg": null,
+          "data": null
+        }
+      }
+    },
+    "softDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/ordinaryDelete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "hardDeleteAfterSoft": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "dependencyBlockedDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":false,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":\"[\\\"字段被数据库视图或其他对象引用，无法删除，请先解除依赖。\\\"]\",\"data\":null}",
+      "json": {
+        "success": false,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": "[\"字段被数据库视图或其他对象引用，无法删除，请先解除依赖。\"]",
+        "data": null
+      }
+    },
+    "dependencyRetryDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "transactionRollbackDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":false,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":\"[\\\"字段删除失败，数据库变更已回滚，数据未被修改。\\\"]\",\"data\":null}",
+      "json": {
+        "success": false,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": "[\"字段删除失败，数据库变更已回滚，数据未被修改。\"]",
+        "data": null
+      }
+    },
+    "transactionRetryDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "driftBlockedDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":false,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":\"[\\\"字段元数据与数据库物理结构不一致，已停止删除，请联系管理员修复。\\\"]\",\"data\":null}",
+      "json": {
+        "success": false,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": "[\"字段元数据与数据库物理结构不一致，已停止删除，请联系管理员修复。\"]",
+        "data": null
+      }
+    },
+    "driftRetryDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "attachmentDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":true,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":null,\"data\":null}",
+      "json": {
+        "success": true,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": null,
+        "data": null
+      }
+    },
+    "inherentDelete": {
+      "method": "POST",
+      "url": "/msService/ec/property/delete",
+      "requestPayload": {
+        "property.code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+        "property.version": "0"
+      },
+      "responseStatus": 200,
+      "text": "{\"success\":false,\"items\":{},\"actionErrors\":[],\"exceptionMsg\":\"[\\\"id是固有字段不可删除!\\\"]\",\"data\":null}",
+      "json": {
+        "success": false,
+        "items": {},
+        "actionErrors": [],
+        "exceptionMsg": "[\"id是固有字段不可删除!\"]",
+        "data": null
+      }
+    }
+  },
+  "states": {
+    "before": {
+      "property": 0,
+      "model": 0,
+      "entity": 0,
+      "physicalTable": 0,
+      "dependencyView": 0,
+      "rollbackFunction": 0
+    },
+    "afterCreate": {
+      "label": "afterCreate",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DEP_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_MAIN_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_main_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_dep_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_dep_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "del_main_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard",
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterSoftDelete": {
+      "label": "afterSoftDelete",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DEP_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217",
+          "valid": "0",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_MAIN_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_main_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_dep_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_dep_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "del_main_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_softHard",
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterHardDelete": {
+      "label": "afterHardDelete",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DEP_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_dep_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_dep_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterDependencyBlocked": {
+      "label": "afterDependencyBlocked",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DEP_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_dep_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_dep_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_dependency",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 1,
+      "rollbackTriggerCount": 0
+    },
+    "afterDependencyRetry": {
+      "label": "afterDependencyRetry",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterTransactionRollback": {
+      "label": "afterTransactionRollback",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_RB_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_rb_101217",
+          "dataType": "character varying"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_rb_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_rollback",
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 1
+    },
+    "afterTransactionRetry": {
+      "label": "afterTransactionRetry",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_drf_101217",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "del_drf_101217": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift",
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterDriftBlocked": {
+      "label": "afterDriftBlocked",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "TEXT",
+          "columnName": "DEL_DRF_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "del_drf_101217_x",
+          "dataType": "character varying"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null,
+        "del_drf_101217_x": "ADP_E2E_20260721101217_PG_FIELD_DELETE_drift"
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "afterDriftRetry": {
+      "label": "afterDriftRetry",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217",
+          "valid": "1",
+          "isInherent": "0",
+          "isPk": "0",
+          "type": "PROPERTYATTACHMENT",
+          "columnName": "DEL_ATT_101217",
+          "version": "0",
+          "description": "ADP_E2E_20260721101217_PG_FIELD_DELETE_attachment"
+        },
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    },
+    "final": {
+      "label": "final",
+      "tableExists": 1,
+      "metadata": [
+        {
+          "code": "DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id",
+          "valid": "1",
+          "isInherent": "1",
+          "isPk": "1",
+          "type": "LONG",
+          "columnName": "ID",
+          "version": "0",
+          "description": "Primary Key"
+        }
+      ],
+      "columns": [
+        {
+          "columnName": "id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "version",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "delete_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "modify_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "create_time",
+          "dataType": "timestamp without time zone"
+        },
+        {
+          "columnName": "delete_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "modify_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "create_staff_id",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "valid",
+          "dataType": "integer"
+        },
+        {
+          "columnName": "cid",
+          "dataType": "bigint"
+        },
+        {
+          "columnName": "sort",
+          "dataType": "integer"
+        }
+      ],
+      "rowJson": {
+        "id": 1784628737575,
+        "cid": null,
+        "sort": null,
+        "valid": 1,
+        "version": 0,
+        "create_time": null,
+        "delete_time": null,
+        "modify_time": null,
+        "create_staff_id": null,
+        "delete_staff_id": null,
+        "modify_staff_id": null
+      },
+      "dependencyViewCount": 0,
+      "rollbackTriggerCount": 0
+    }
+  },
+  "cleanup": {
+    "property": 0,
+    "model": 0,
+    "entity": 0,
+    "physicalTable": 0,
+    "dependencyView": 0,
+    "rollbackFunction": 0
+  },
+  "backendTrace": {
+    "softDelete": "PropertyController.ordinaryDelete -> ModelServiceImpl.deleteProperty -> persisted ec_property valid=false",
+    "explicitDelete": "PropertyController.delete -> ModelServiceImpl.deletePropertyPhysical(deleteType=false, ignoreCheck=false) -> FieldSyncDBUtils.deleteFieldFromDb -> PostgresFieldSyncSupport.delete -> ALTER TABLE DROP COLUMN RESTRICT -> propertyDao.deletePhysical",
+    "transactionBoundary": "PostgreSQL DROP COLUMN and ec_property physical delete share ModelServiceImpl's Spring transaction; a marker BEFORE DELETE trigger proves DDL and row data are restored on metadata failure",
+    "destructivePolicy": "No automatic column deletion on property save, ordinaryDelete, model bulk delete or SQL-model reconciliation. Only the explicit property delete endpoint drops a PostgreSQL column, never uses CASCADE, rejects inherent/primary-key fields and fails closed on missing tables, missing columns or external dependencies."
+  },
+  "verificationSql": {
+    "metadata": "select code::text, coalesce(valid::text,''), coalesce(is_inherent::text,''), coalesce(is_pk::text,''), coalesce(type::text,''), coalesce(column_name::text,''), coalesce(version::text,'0'), coalesce(description::text,'') from public.ec_property where code in ('DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_softHard101217','DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_dependency101217','DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_rollback101217','DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_drift101217','DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_attachment101217','DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217_id') order by code;",
+    "markerRow": "select to_jsonb(t)::text from public.\"ds_e2d_101217\" t where id=1784628737575;",
+    "dependencyFixture": "create view public.\"v_e2d_101217\" as select id, \"del_dep_101217\" from public.\"ds_e2d_101217\";",
+    "transactionRollbackFixture": "create trigger \"tr_e2d_101217\" before delete on public.ec_property for each row execute function public.\"fn_e2d_101217\"();",
+    "driftFixture": "alter table public.\"ds_e2d_101217\" rename column \"del_drf_101217\" to \"del_drf_101217_x\";",
+    "cleanup": "begin; drop view if exists public.\"v_e2d_101217\"; drop function if exists public.\"fn_e2d_101217\"() cascade; delete from public.ec_property where model_code='DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217' or entity_code='DataSet_1.0.0_E2eDelEnt101217'; delete from public.ec_model where code='DataSet_1.0.0_E2eDelEnt101217_E2eDelMod101217' or entity_code='DataSet_1.0.0_E2eDelEnt101217'; delete from public.ec_entity where code='DataSet_1.0.0_E2eDelEnt101217'; drop table if exists public.\"ds_e2d_101217\" cascade; commit;"
+  },
+  "fatalError": null
+}

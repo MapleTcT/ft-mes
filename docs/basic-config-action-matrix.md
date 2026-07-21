@@ -11,7 +11,7 @@ make basic-config-action-matrix-check
 make entity-model-config-crud-readiness-check
 ```
 
-当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及 TEXT 字段新增/索引/重命名/安全扩容/幂等与危险转换回滚已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
+当前结论：基础配置动作矩阵仍是 `PARTIAL`。系统编码、普通 app 系统配置、低代码自定义字段模型映射、实体/模型元数据 CRUD、PostgreSQL 基础物理模型表生命周期，以及字段约束、23 类标量、`OBJECT` 关联和显式受控删列已完成写入验收；身份、授权、凭证和密码策略目录只能由只读 smoke 观察；QCS/RM/BaseSet
 运行配置后续新改动仍必须另做专用 marker、before/after SQL、回滚和业务回归；Nacos/Keycloak 生产迁移仍是计划项。
 
 | 动作 | 状态 | 写入策略 | 证据 | 完成前还需要 |
@@ -30,7 +30,8 @@ make entity-model-config-crud-readiness-check
 | 实体/模型配置编辑 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/runtime-configuration-readiness-smoke.json` | 7 个写请求均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model marker、物理表重命名、`extra_col` 和幂等重复保存 |
 | 实体/模型配置删除/禁用 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-config-crud-persistence-acceptance.js`、`metadata/entity-model-config-crud-readiness-probe.json` | model/entity `ordinaryDelete` 均 `HTTP 200/success=true`，PostgreSQL 证明 entity/model/property 软删并受控清理为 0 |
 | 实体/模型 PostgreSQL 物理表自动创建 | PASS | dedicated-marker-required | `metadata/entity-model-config-crud-persistence-acceptance.json`、`metadata/basic-config-coverage.json` | `ModelSyncDBUtils -> PostgresModelSyncSupport` 已通过真实页面/API/PG 验证创建、重命名、`extra_col` 扩展、12 列幂等重复保存、软删保留和受控清理 |
-| 实体/模型 PostgreSQL 自定义字段同步 | PASS | dedicated-marker-required | `metadata/entity-model-field-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js`、`metadata/entity-model-field-type-matrix-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js`、`metadata/entity-model-object-association-acceptance.json`、`deploy/docker/scripts/adp-entity-model-object-association-acceptance.js`、`metadata/persistence-acceptance.json` | `PG_FIELD` marker 以 `33/33 PASS` 证明索引/唯一/nullable 生命周期；`PG_TYPE_MATRIX` 以 `36/36 PASS` 证明全部 23 类标量；`ADP_E2E_20260721084718_PG_OBJECT_ASSOC` 以 `10/10 PASS` 证明一对一/多对一 `OBJECT`、LONG/TEXT/BAPCODE 目标键、两种参数格式、逻辑 join、幂等重放、非法目标回滚和零清理。自动删列仍关闭 |
+| 实体/模型 PostgreSQL 自定义字段同步 | PASS | dedicated-marker-required | `metadata/entity-model-field-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js`、`metadata/entity-model-field-type-matrix-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js`、`metadata/entity-model-object-association-acceptance.json`、`deploy/docker/scripts/adp-entity-model-object-association-acceptance.js`、`metadata/persistence-acceptance.json` | `PG_FIELD` marker 以 `33/33 PASS` 证明索引/唯一/nullable 生命周期；`PG_TYPE_MATRIX` 以 `36/36 PASS` 证明全部 23 类标量；`ADP_E2E_20260721084718_PG_OBJECT_ASSOC` 以 `10/10 PASS` 证明一对一/多对一 `OBJECT`、LONG/TEXT/BAPCODE 目标键、两种参数格式、逻辑 join、幂等重放、非法目标回滚和零清理 |
+| 实体/模型 PostgreSQL 受控字段删除 | PASS | dedicated-marker-required | `metadata/entity-model-field-delete-persistence-acceptance.json`、`deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js`、`metadata/persistence-acceptance.json` | Marker `ADP_E2E_20260721101217_PG_FIELD_DELETE` 已 `18/18 PASS`：普通删除保留物理列和数据；显式确认才执行 `DROP COLUMN RESTRICT`；外部视图依赖、元数据删除失败和结构漂移均 fail closed；DDL/元数据同事务回滚；附件字段只删元数据；固有主键受保护；三类受控失败均为 HTTP 200 业务错误；浏览器错误和清理残留均为 0 |
 | Nacos 生产配置 export/diff | PLANNED | production-evidence-required | `metadata/nacos-config-drift-smoke.json`、`deploy/nacos/production-migration/nacos-runtime-patch-evidence.example.json` | 生产 export/diff、漂移审阅、签名 patch、回退演练 |
 | Keycloak 生产 realm 迁移 | PLANNED | production-evidence-required | `metadata/keycloak-jwt-runtime-smoke.json`、`deploy/keycloak/production-migration/keycloak-migration-evidence.example.json` | realm inventory、数据库恢复演练、secret 轮换、JWT/Nacos 同步、登录 smoke、回滚 |
 
@@ -46,7 +47,9 @@ make entity-model-config-crud-readiness-check
 
 独立双模型 marker `ADP_E2E_20260721084718_PG_OBJECT_ASSOC` 又完成 `10/10`。一对一和多对一 `OBJECT` 都在真实页面/API 上创建，关联目标覆盖 `LONG/TEXT/BAPCODE`，同时验证 dotted 与 legacy underscore 参数。PostgreSQL 证明 `associated_property_code/associated_type`、`bigint/varchar(48)/varchar(4000)` 物理列和四次逻辑 join；重复保存不重复建列，缺失目标返回预期 `500` 并使元数据/DDL 同事务回滚，且不额外发明物理 FK。受控清理及独立复查均为 `0/0/0/0`，证据见 `metadata/entity-model-object-association-acceptance.json`。
 
-边界仍要说清：当前已经关闭字段约束、23 类标量字段和 `OBJECT` 关联字段的已定义范围。自动 `DROP COLUMN` 仍明确关闭，关联关系仍沿用元数据驱动语义，不自动创建 PostgreSQL 外键。
+显式删除 marker `ADP_E2E_20260721101217_PG_FIELD_DELETE` 在实体配置父页面中通过真实 AJAX 打开模型字段面板并完成 `18/18`。`ordinaryDelete` 只把 `ec_property.valid` 置为 false，列和 marker 数据保持；用户确认的 `/ec/property/delete` 才通过 `FieldSyncDBUtils -> PostgresFieldSyncSupport.delete` 执行 `DROP COLUMN RESTRICT`。依赖视图阻断、元数据删除触发器阻断和物理列漂移均保持元数据、列和数据原状，修复后重试成功；附件字段不建/不删物理列，固有主键拒绝删除。三类数据库阻断统一返回 `HTTP 200/success=false` 的中文业务提示，浏览器 console/page/request/network error 全部为 0，清理 property/model/entity/table/view/function 为 `0/0/0/0/0/0`。证据见 `metadata/entity-model-field-delete-persistence-acceptance.json`，实现提交 `31baf5d0`。
+
+边界仍要说清：当前已经关闭字段约束、23 类标量、`OBJECT` 关联和“显式确认后的受控物理删列”。保存字段、普通软删、模型批量删除和 SQL 模型对账中的自动 `DROP COLUMN` 仍明确禁用；关联关系仍沿用元数据驱动语义，不自动创建 PostgreSQL 外键。
 
 2026-06-22 新增 `make smoke-entity-model-config-crud-readiness` 和
 `make entity-model-config-crud-readiness-check`。该 probe 会登录测试环境，打开

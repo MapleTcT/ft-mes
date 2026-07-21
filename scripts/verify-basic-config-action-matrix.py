@@ -18,6 +18,7 @@ ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persis
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
+ENTITY_MODEL_FIELD_DELETE_PATH = ROOT / "metadata/entity-model-field-delete-persistence-acceptance.json"
 PRODUCTION_MATRIX_PATH = ROOT / "metadata/production-module-test-cases.json"
 
 ALLOWED_STATUSES = {
@@ -50,6 +51,7 @@ REQUIRED_ACTION_IDS = {
     "entity-model-delete",
     "entity-model-postgres-physical-table-autocreate",
     "entity-model-postgres-field-sync",
+    "entity-model-postgres-field-delete",
     "nacos-production-export-diff",
     "keycloak-production-realm-migration",
 }
@@ -1177,6 +1179,174 @@ def check_entity_model_field_acceptance(
         fail(failures, "OBJECT association cleanup must leave all marker counts at 0")
     if object_association.get("fatalError") is not None:
         fail(failures, "OBJECT association fatalError must be null")
+
+    delete_action_id = "entity-model-postgres-field-delete"
+    delete_action = actions.get(delete_action_id)
+    if not delete_action:
+        return
+    for key, expected in (
+        ("status", "PASS"),
+        ("areaId", area_id),
+        ("route", "/msService/ec/engine/msManage"),
+        ("requiresPersistence", True),
+    ):
+        if delete_action.get(key) != expected:
+            fail(failures, f"{delete_action_id} {key} must be {expected}")
+    delete_refs = set(as_list(delete_action.get("evidenceRefs")))
+    for required_ref in (
+        "metadata/entity-model-field-delete-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "metadata/basic-config-coverage.json",
+    ):
+        if required_ref not in delete_refs:
+            fail(failures, f"{delete_action_id} evidenceRefs must include {required_ref}")
+    delete_tables = set(str(table) for table in as_list(delete_action.get("tables")))
+    for required_table in (
+        "ec_property",
+        "information_schema.columns",
+        "generated_model_physical_table",
+    ):
+        if required_table not in delete_tables:
+            fail(failures, f"{delete_action_id} tables must include {required_table}")
+    delete_contract = (
+        delete_action.get("acceptanceContract")
+        if isinstance(delete_action.get("acceptanceContract"), dict)
+        else {}
+    )
+    if delete_contract.get("targetActionId") != delete_action_id:
+        fail(failures, f"{delete_action_id} acceptanceContract.targetActionId must match")
+    if as_list(delete_contract.get("currentGaps")):
+        fail(failures, f"{delete_action_id} acceptanceContract.currentGaps must be empty after PASS")
+    if as_list(delete_action.get("remainingGaps")):
+        fail(failures, f"{delete_action_id} remainingGaps must be empty after PASS")
+
+    delete_report = read_json(
+        ENTITY_MODEL_FIELD_DELETE_PATH,
+        failures,
+        "entity/model PostgreSQL field delete acceptance report",
+    )
+    if not delete_report:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", delete_action_id),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if delete_report.get(key) != expected:
+            fail(failures, f"field delete report {key} must be {expected}")
+    delete_marker = str(delete_report.get("marker", ""))
+    if not delete_marker.startswith("ADP_E2E_") or "PG_FIELD_DELETE" not in delete_marker:
+        fail(failures, "field delete marker must be ADP_E2E_*_PG_FIELD_DELETE")
+    delete_summary = (
+        delete_report.get("summary")
+        if isinstance(delete_report.get("summary"), dict)
+        else {}
+    )
+    for key, expected in (
+        ("testedChecks", 18),
+        ("pass", 18),
+        ("fail", 0),
+        ("blocked", 0),
+        ("status", "PASS"),
+    ):
+        if delete_summary.get(key) != expected:
+            fail(failures, f"field delete summary.{key} must be {expected}")
+    required_delete_checks = {
+        "real-entity-model-page-loaded",
+        "irreversible-delete-warning-visible",
+        "ordinary-delete-preserves-column-and-data",
+        "explicit-delete-removes-metadata-column-and-data",
+        "database-dependency-blocks-restrict-delete",
+        "metadata-delete-failure-rolls-back-ddl-and-data",
+        "physical-column-drift-fails-closed",
+        "attachment-metadata-delete-without-physical-column",
+        "inherent-primary-key-delete-rejected",
+        "browser-has-no-unexpected-errors",
+        "controlled-cleanup",
+    }
+    passed_delete_checks = {
+        str(item.get("name"))
+        for item in as_list(delete_report.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    missing_delete_checks = sorted(required_delete_checks - passed_delete_checks)
+    if missing_delete_checks:
+        fail(failures, "field delete missing PASS checks: " + ", ".join(missing_delete_checks))
+    delete_requests = (
+        delete_report.get("requests")
+        if isinstance(delete_report.get("requests"), dict)
+        else {}
+    )
+    for request_key in (
+        "softDelete",
+        "hardDeleteAfterSoft",
+        "dependencyRetryDelete",
+        "transactionRetryDelete",
+        "driftRetryDelete",
+        "attachmentDelete",
+    ):
+        request = delete_requests.get(request_key)
+        response = request.get("json") if isinstance(request, dict) and isinstance(request.get("json"), dict) else {}
+        if not isinstance(request, dict) or request.get("responseStatus") != 200 or response.get("success") is not True:
+            fail(failures, f"field delete request {request_key} must return HTTP 200/success=true")
+    rejected_messages = {
+        "dependencyBlockedDelete": "数据库视图或其他对象引用",
+        "transactionRollbackDelete": "数据库变更已回滚",
+        "driftBlockedDelete": "物理结构不一致",
+        "inherentDelete": "固有字段不可删除",
+    }
+    for request_key, message in rejected_messages.items():
+        request = delete_requests.get(request_key)
+        response = request.get("json") if isinstance(request, dict) and isinstance(request.get("json"), dict) else {}
+        if (
+            not isinstance(request, dict)
+            or request.get("responseStatus") != 200
+            or response.get("success") is not False
+            or message not in str(response.get("exceptionMsg", ""))
+        ):
+            fail(failures, f"field delete request {request_key} must return the structured rejection: {message}")
+    delete_browser = (
+        delete_report.get("browser")
+        if isinstance(delete_report.get("browser"), dict)
+        else {}
+    )
+    for key in ("engineNavigationStatus", "entityConfigNavigationStatus", "modelManageNavigationStatus"):
+        if delete_browser.get(key) != 200:
+            fail(failures, f"field delete browser {key} must be 200")
+    if delete_browser.get("deleteWarningVisible") is not True or delete_browser.get("visibleError"):
+        fail(failures, "field delete browser must show the irreversible warning without a visible error")
+    for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors"):
+        if as_list(delete_browser.get(key)):
+            fail(failures, f"field delete browser {key} must be empty")
+    delete_trace = json.dumps(delete_report.get("backendTrace", {}), ensure_ascii=False)
+    for fragment in (
+        "ordinaryDelete",
+        "deletePropertyPhysical",
+        "FieldSyncDBUtils",
+        "PostgresFieldSyncSupport",
+        "DROP COLUMN RESTRICT",
+        "Spring transaction",
+    ):
+        if fragment not in delete_trace:
+            fail(failures, f"field delete backendTrace missing {fragment}")
+    delete_sql = json.dumps(delete_report.get("verificationSql", {}), ensure_ascii=False)
+    for fragment in ("ec_property", "to_jsonb", "create view", "create trigger", "rename column", "drop table"):
+        if fragment not in delete_sql.lower():
+            fail(failures, f"field delete verificationSql missing {fragment}")
+    delete_cleanup = (
+        delete_report.get("cleanup")
+        if isinstance(delete_report.get("cleanup"), dict)
+        else {}
+    )
+    for key in ("property", "model", "entity", "physicalTable", "dependencyView", "rollbackFunction"):
+        if delete_cleanup.get(key) != 0:
+            fail(failures, f"field delete cleanup.{key} must be 0")
+    if delete_report.get("fatalError") is not None:
+        fail(failures, "field delete fatalError must be null")
 
 
 def production_case_statuses(failures: list[str]) -> dict[str, str]:

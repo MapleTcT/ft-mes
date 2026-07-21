@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-21T08:47:33.358Z",
-  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
+  "generatedAt": "2026-07-21T10:13:00.755Z",
+  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_WOM_QCS_BAD_QUANTITY_PASS_AND_ONE_EXPLICIT_DISABLED_PUBLIC_ENDPOINT",
   "latestRevalidation": {
@@ -172,11 +172,17 @@
       "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
       "evidence": "metadata/entity-model-object-association-acceptance.json",
       "assertions": "10/10; real /msService/ec/engine/msManage page; one-to-one and many-to-one OBJECT fields; LONG/TEXT/BAPCODE target keys; dotted and legacy underscore request parameters; bigint/varchar(48)/varchar(4000) physical columns; four logical joins; idempotent replay; invalid target HTTP 500 with metadata/DDL rollback; no synthetic PostgreSQL foreign key; cleanup and independent query 0/0/0/0"
+    },
+    "configurationFieldDelete": {
+      "status": "PASS_TARGET_POSTGRES_CONTROLLED_FIELD_DELETE_CLEANED",
+      "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
+      "evidence": "metadata/entity-model-field-delete-persistence-acceptance.json",
+      "assertions": "18/18; real entity configuration parent page and model-field AJAX panel; irreversible warning visible; ordinaryDelete preserved column/data; explicit delete used DROP COLUMN RESTRICT; dependency, metadata-failure rollback and drift fail-closed paths returned HTTP 200/success=false messages; retries passed after repair; PROPERTYATTACHMENT metadata-only; inherent primary key protected; zero browser errors; cleanup 0/0/0/0/0/0"
     }
   },
   "summary": {
-    "testedFeatures": 203,
-    "pass": 200,
+    "testedFeatures": 204,
+    "pass": 201,
     "fail": 0,
     "blocked": 1,
     "notApplicable": 2
@@ -4492,9 +4498,37 @@
       "status": "PASS",
       "evidence": "metadata/entity-model-object-association-acceptance.json; 10/10 PASS on 10.11.100.17 at implementation commit 3650f817; real page navigation 200; all normal entity/model/target/object/replay requests returned 200; PostgreSQL verified one-to-one and many-to-one OBJECT metadata, LONG bigint, TEXT varchar(48), BAPCODE varchar(4000), dotted and legacy underscore parameters, four logical joins and idempotent replay; invalid target returned expected HTTP 500 with metadata/DDL rollback; no synthetic physical FK; cleanup and independent remote query property/model/entity/table=0/0/0/0",
       "issues": []
+    },
+    {
+      "module": "基础配置-实体模型 PostgreSQL 受控字段删除",
+      "route": "/msService/ec/engine/msManage",
+      "operation": "通过真实实体配置父页验证普通软删、显式物理删列、依赖阻断、元数据失败回滚、物理列漂移修复、附件字段删除、固有主键保护和受控清理",
+      "api": "POST /msService/ec/property/ordinaryDelete; POST /msService/ec/property/delete",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "PropertyController.ordinaryDelete/delete -> ModelServiceImpl.deleteProperty/deletePropertyPhysical -> FieldSyncDBUtils.deleteFieldFromDb -> PostgresFieldSyncSupport.delete -> ALTER TABLE DROP COLUMN RESTRICT -> propertyDao.deletePhysical",
+      "tables": [
+        "public.ec_entity",
+        "public.ec_model",
+        "public.ec_property",
+        "information_schema.columns",
+        "public.ds_e2d_101217",
+        "public.v_e2d_101217",
+        "pg_trigger"
+      ],
+      "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
+      "verificationSql": "Query public.ec_property metadata and information_schema.columns after every stage; read the generated row through to_jsonb; create a dependent view to verify DROP COLUMN RESTRICT; create a BEFORE DELETE trigger to prove DDL and metadata deletion share one rollback boundary; rename the physical column to verify drift fails closed; after controlled cleanup verify property/model/entity/table/view/function counts are 0/0/0/0/0/0.",
+      "status": "PASS",
+      "evidence": "metadata/entity-model-field-delete-persistence-acceptance.json; 18/18 PASS on 10.11.100.17 at implementation commit 31baf5d0; real entity configuration parent page and model AJAX panel returned 200 with the irreversible warning visible; ordinaryDelete preserved the column and marker data; explicit delete removed metadata/column/data through DROP COLUMN RESTRICT; dependency, metadata-delete failure and drift paths returned HTTP 200/success=false structured messages and preserved state; retries passed after repair; PROPERTYATTACHMENT was metadata-only; inherent primary key was protected; browser errors and cleanup residuals were zero",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_E2E_20260721101217_PG_FIELD_DELETE",
+      "artifact": "metadata/entity-model-field-delete-persistence-acceptance.json",
+      "summary": "Real entity-model parent page, soft-delete and explicit-delete APIs, PostgreSQL metadata/column/data checks, RESTRICT dependency protection, transaction rollback, drift repair, protected fields, structured business errors and zero cleanup passed 18/18 on 10.11.100.17."
+    },
     {
       "marker": "ADP_E2E_20260721084718_PG_OBJECT_ASSOC",
       "artifact": "metadata/entity-model-object-association-acceptance.json",

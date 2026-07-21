@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T08:47:33.358Z",
-  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
+  "generatedAt": "2026-07-21T10:13:00.755Z",
+  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
@@ -347,18 +347,26 @@
         "a dedicated dual-model fixture covered one-to-one and many-to-one OBJECT associations against LONG, TEXT and BAPCODE target keys",
         "dotted and legacy underscore association parameters persisted associated_property_code and associated_type",
         "four logical marker joins passed, replay stayed idempotent, invalid targets rolled metadata plus DDL back, and no synthetic PostgreSQL foreign key was added",
+        "ordinary property deletion soft-disabled metadata while preserving the physical column and marker data",
+        "explicit confirmed deletion used DROP COLUMN RESTRICT and removed metadata, the physical column and field data",
+        "dependent views, metadata-delete failures and physical-column drift failed closed without data loss; retries succeeded only after explicit repair",
+        "PROPERTYATTACHMENT remained metadata-only, inherent primary keys were protected, all controlled rejections were HTTP 200 business responses, and browser errors stayed at zero",
         "controlled cleanup left property/model/entity/physical table counts at zero"
       ],
       "apis": [
         "POST /msService/ec/entity/save",
         "POST /msService/ec/model/save",
-        "POST /msService/ec/property/save"
+        "POST /msService/ec/property/save",
+        "POST /msService/ec/property/ordinaryDelete",
+        "POST /msService/ec/property/delete"
       ],
       "tables": [
         "ec_property",
         "information_schema.columns",
         "pg_index",
         "pg_constraint",
+        "pg_class",
+        "pg_trigger",
         "generated_model_physical_table"
       ],
       "evidenceRefs": [
@@ -368,6 +376,8 @@
         "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/entity-model-object-association-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
+        "metadata/entity-model-field-delete-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
         "metadata/persistence-acceptance.json",
         "docs/backend-table-audit/persistence-acceptance.md",
         "docs/frontend-functional-test-report.md",
@@ -379,12 +389,13 @@
         "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_ACCEPTANCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
         "make acceptance-entity-model-field-type-matrix ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT=metadata/entity-model-field-type-matrix-acceptance.json",
         "make acceptance-entity-model-object-association ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_OBJECT_ASSOCIATION_OUTPUT=metadata/entity-model-object-association-acceptance.json",
+        "make acceptance-entity-model-field-delete-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_DELETE_OUTPUT=metadata/entity-model-field-delete-persistence-acceptance.json",
         "make basic-config-action-matrix-check",
         "make basic-config-coverage-check"
       ],
       "remainingGaps": [],
       "notes": [
-        "This PASS covers TEXT constraints, all 23 scalar DbColumnTypes and the accepted one-to-one/many-to-one OBJECT association fixture. Automatic DROP COLUMN remains disabled, and associations remain metadata-driven without synthetic PostgreSQL foreign keys."
+        "This PASS covers TEXT constraints, all 23 scalar DbColumnTypes, the accepted one-to-one/many-to-one OBJECT fixture, metadata soft deletion and explicitly confirmed DROP COLUMN RESTRICT. Automatic deletion during save, soft delete, bulk model delete or SQL-model reconciliation remains disabled by design."
       ]
     },
     {

@@ -27,6 +27,7 @@ ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persis
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
+ENTITY_MODEL_FIELD_DELETE_PATH = ROOT / "metadata/entity-model-field-delete-persistence-acceptance.json"
 TEST_ENVIRONMENT_SMOKE_PATH = ROOT / "metadata/test-environment-smoke.json"
 POSTGRES_RUNTIME_SMOKE_PATH = ROOT / "metadata/postgres-runtime-smoke.json"
 NACOS_CONFIG_SMOKE_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
@@ -1111,6 +1112,8 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "metadata/entity-model-field-persistence-acceptance.json",
             "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
             "metadata/entity-model-field-type-matrix-acceptance.json",
+            "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
+            "metadata/entity-model-field-delete-persistence-acceptance.json",
             "metadata/persistence-acceptance.json",
             "metadata/systemconfig-persistence-acceptance.json",
             "docs/backend-table-audit/persistence-acceptance.md",
@@ -1262,6 +1265,58 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
         cleanup = object_association.get("cleanup") if isinstance(object_association.get("cleanup"), dict) else {}
         if any(cleanup.get(key) != 0 for key in ("property", "model", "entity", "physicalTable")):
             fail(failures, "G-012 OBJECT association cleanup must leave property/model/entity/table at zero")
+    field_delete = read_json_file(
+        ENTITY_MODEL_FIELD_DELETE_PATH,
+        failures,
+        "entity/model PostgreSQL field delete acceptance report",
+    )
+    if field_delete:
+        if field_delete.get("status") != "PASS" or field_delete.get("database") != "PostgreSQL":
+            fail(failures, "G-012 PostgreSQL field delete acceptance must PASS")
+        marker = str(field_delete.get("marker", ""))
+        evidence_text = "\n".join(str(item) for item in as_list(g012.get("currentEvidence")))
+        if not marker or marker not in evidence_text:
+            fail(failures, "G-012 currentEvidence must include the PostgreSQL field delete marker")
+        if "metadata/entity-model-field-delete-persistence-acceptance.json" not in evidence_text:
+            fail(failures, "G-012 currentEvidence must cite the PostgreSQL field delete report")
+        summary = field_delete.get("summary") if isinstance(field_delete.get("summary"), dict) else {}
+        if (
+            summary.get("testedChecks") != 18
+            or summary.get("pass") != 18
+            or summary.get("fail") != 0
+            or summary.get("blocked") != 0
+        ):
+            fail(failures, "G-012 PostgreSQL field delete acceptance must retain 18/18 PASS")
+        required_delete_checks = {
+            "ordinary-delete-preserves-column-and-data",
+            "explicit-delete-removes-metadata-column-and-data",
+            "database-dependency-blocks-restrict-delete",
+            "metadata-delete-failure-rolls-back-ddl-and-data",
+            "physical-column-drift-fails-closed",
+            "inherent-primary-key-delete-rejected",
+            "browser-has-no-unexpected-errors",
+            "controlled-cleanup",
+        }
+        passed_delete_checks = {
+            str(item.get("name"))
+            for item in as_list(field_delete.get("checks"))
+            if isinstance(item, dict) and item.get("status") == "PASS"
+        }
+        missing_delete_checks = sorted(required_delete_checks - passed_delete_checks)
+        if missing_delete_checks:
+            fail(failures, "G-012 field delete missing PASS checks: " + ", ".join(missing_delete_checks))
+        browser = field_delete.get("browser") if isinstance(field_delete.get("browser"), dict) else {}
+        if browser.get("deleteWarningVisible") is not True or any(
+            as_list(browser.get(key))
+            for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors")
+        ):
+            fail(failures, "G-012 field delete browser must show the warning with zero browser errors")
+        cleanup = field_delete.get("cleanup") if isinstance(field_delete.get("cleanup"), dict) else {}
+        if any(
+            cleanup.get(key) != 0
+            for key in ("property", "model", "entity", "physicalTable", "dependencyView", "rollbackFunction")
+        ):
+            fail(failures, "G-012 field delete cleanup must leave all marker fixtures at zero")
     if action_matrix:
         if action_matrix.get("database") != "PostgreSQL":
             fail(failures, "G-012 action matrix database must remain PostgreSQL")
@@ -1291,6 +1346,7 @@ def check_basic_config_alignment(items_by_id: dict[str, dict[str, Any]], failure
             "entity-model-delete",
             "entity-model-postgres-physical-table-autocreate",
             "entity-model-postgres-field-sync",
+            "entity-model-postgres-field-delete",
             "nacos-production-export-diff",
             "keycloak-production-realm-migration",
         }

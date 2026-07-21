@@ -17,7 +17,7 @@
 
 功能验收和后端落库验收必须遵循 [功能验收与落库验收规则](functional-persistence-acceptance.md)。后续不能只补治理层、只跑静态检查或只看代码推断功能可用；涉及写业务数据的前端动作必须用唯一 marker 通过 PostgreSQL 查询证明真实落库。
 
-2026-07-21 基础配置的 PostgreSQL 实体模型路径已继续闭合：字段约束生命周期 `33/33`、23 类标量字段矩阵 `36/36`，以及双模型 `OBJECT` 关联 fixture `10/10` 均通过真实 `/msService/ec/engine/msManage` 页面、API、PostgreSQL marker、失败回滚和受控清理。`OBJECT` 已覆盖一对一/多对一、`LONG/TEXT/BAPCODE` 目标键及两种 legacy 参数格式；证据为 `metadata/entity-model-object-association-acceptance.json`。自动删列仍保持关闭，不能把这一结论外推到尚未验收的删除策略。
+2026-07-21 基础配置的 PostgreSQL 实体模型路径已继续闭合：字段约束生命周期 `33/33`、23 类标量字段矩阵 `36/36`、双模型 `OBJECT` 关联 fixture `10/10`，以及字段删除 `18/18` 均通过真实 `/msService/ec/engine/msManage` 父页面、API、PostgreSQL marker、失败回滚和受控清理。删除契约现已明确：普通删除只软删元数据并保留列/数据；只有不可撤销警告后的显式删除才执行 `DROP COLUMN RESTRICT`，并对依赖、事务失败、结构漂移、附件字段和固有主键 fail closed。证据为 `metadata/entity-model-object-association-acceptance.json` 和 `metadata/entity-model-field-delete-persistence-acceptance.json`；保存、软删、模型批删和 SQL 模型对账中的自动删列继续按设计禁用。
 
 总目标完成状态见 [项目总目标验收总账](project-goal-acceptance.md)。该总账把可持续开发仓库、Oracle 替换、平台验证、生产模块完整验证、PostgreSQL 缺口治理和生产迁移前置项统一到机器可读账本 `metadata/project-goal-acceptance.json`，并由 `make project-goal-acceptance-check` 校验。总账为 `IN_PROGRESS_NOT_COMPLETE` 时，不能宣称当前目标已全部完成。
 

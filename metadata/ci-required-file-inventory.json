@@ -3651,6 +3651,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-entity-model-field-persistence-acceptance.js",
       "state": "tracked",
       "tracked": true
@@ -6286,6 +6292,12 @@
     {
       "ignored": false,
       "path": "metadata/entity-model-config-crud-readiness-probe.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/entity-model-field-delete-persistence-acceptance.json",
       "state": "tracked",
       "tracked": true
     },
@@ -9572,7 +9584,7 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 610
+      "tracked": 611
     },
     "docs": {
       "tracked": 113
@@ -9581,7 +9593,7 @@
       "tracked": 11
     },
     "metadata": {
-      "tracked": 188
+      "tracked": 189
     },
     "package.json": {
       "tracked": 1
@@ -9605,8 +9617,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1591,
-    "tracked": 1591,
+    "totalFiles": 1593,
+    "tracked": 1593,
     "untracked": 0
   },
   "untrackedByDirectory": []

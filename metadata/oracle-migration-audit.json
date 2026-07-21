@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T09:03:32+00:00",
-  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
+  "generatedAt": "2026-07-21T10:25:48+00:00",
+  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
   "findingCount": 1608,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
@@ -238,7 +238,7 @@
     },
     {
       "file": "Makefile",
-      "line": 157,
+      "line": 158,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 293,
+      "line": 295,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 294,
+      "line": 296,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 297,
+      "line": 299,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 298,
+      "line": 300,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 398,
+      "line": 400,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 992,
+      "line": 995,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 993,
+      "line": 996,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 995,
+      "line": 998,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 996,
+      "line": 999,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1004,
+      "line": 1007,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1005,
+      "line": 1008,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1007,
+      "line": 1010,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1008,
+      "line": 1011,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -878,7 +878,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
-      "line": 66,
+      "line": 80,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -886,7 +886,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
-      "line": 95,
+      "line": 109,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -894,7 +894,7 @@
     },
     {
       "file": "backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java",
-      "line": 123,
+      "line": 137,
       "pattern": "oracle-keyword",
       "category": "recovered-source-backlog",
       "note": "Recovered source contains Oracle-specific branch or keyword; verify during module promotion.",
@@ -9622,7 +9622,7 @@
     },
     {
       "file": "docs/frontend-functional-test-report.md",
-      "line": 279,
+      "line": 280,
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
@@ -10098,7 +10098,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `203` 项，其中 `200 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `204` 项，其中 `201 PASS / 0 FAIL / 1 BLOCKED / 2 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -12014,7 +12014,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 41,
+      "line": 42,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12022,7 +12022,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 42,
+      "line": 43,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12030,7 +12030,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 204,
+      "line": 205,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12038,7 +12038,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 521,
+      "line": 522,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12046,7 +12046,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 526,
+      "line": 527,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12054,7 +12054,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 531,
+      "line": 532,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12062,7 +12062,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 535,
+      "line": 536,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12070,7 +12070,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 539,
+      "line": 540,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12078,7 +12078,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 548,
+      "line": 549,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12086,7 +12086,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 555,
+      "line": 556,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12094,7 +12094,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 561,
+      "line": 562,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12102,7 +12102,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 572,
+      "line": 573,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12110,7 +12110,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 573,
+      "line": 574,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12118,7 +12118,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 581,
+      "line": 582,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12126,7 +12126,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 582,
+      "line": 583,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12134,7 +12134,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 583,
+      "line": 584,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12142,19 +12142,11 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 584,
-      "pattern": "oracle-keyword",
-      "category": "tooling-or-audit-code",
-      "note": "Tooling may mention Oracle to detect or convert legacy references.",
-      "excerpt": "\"docs/oracle-migration-backlog.md\","
-    },
-    {
-      "file": "scripts/verify-project-goal-acceptance.py",
       "line": 585,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
-      "excerpt": "\"metadata/oracle-migration-audit.json\","
+      "excerpt": "\"docs/oracle-migration-backlog.md\","
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
@@ -12162,7 +12154,7 @@
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
-      "excerpt": "\"scripts/generate-oracle-migration-audit.py\","
+      "excerpt": "\"metadata/oracle-migration-audit.json\","
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
@@ -12170,11 +12162,19 @@
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
+      "excerpt": "\"scripts/generate-oracle-migration-audit.py\","
+    },
+    {
+      "file": "scripts/verify-project-goal-acceptance.py",
+      "line": 588,
+      "pattern": "oracle-keyword",
+      "category": "tooling-or-audit-code",
+      "note": "Tooling may mention Oracle to detect or convert legacy references.",
       "excerpt": "\"deploy/docker/.env.oracle-legacy.example\","
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 596,
+      "line": 597,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12182,7 +12182,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 602,
+      "line": 603,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12190,7 +12190,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 603,
+      "line": 604,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12198,7 +12198,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 606,
+      "line": 607,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12206,7 +12206,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 610,
+      "line": 611,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12214,7 +12214,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 613,
+      "line": 614,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12222,7 +12222,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 625,
+      "line": 626,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12230,7 +12230,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 641,
+      "line": 642,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12238,7 +12238,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 644,
+      "line": 645,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12246,7 +12246,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 646,
+      "line": 647,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12254,7 +12254,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 648,
+      "line": 649,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12262,7 +12262,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 652,
+      "line": 653,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12270,7 +12270,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 654,
+      "line": 655,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12278,7 +12278,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 656,
+      "line": 657,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12286,7 +12286,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 658,
+      "line": 659,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12294,7 +12294,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 664,
+      "line": 665,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12302,7 +12302,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 730,
+      "line": 731,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",
@@ -12310,7 +12310,7 @@
     },
     {
       "file": "scripts/verify-project-goal-acceptance.py",
-      "line": 731,
+      "line": 732,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

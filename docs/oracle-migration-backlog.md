@@ -6,8 +6,8 @@
 
 ## 摘要
 
-- Generated At：`2026-07-21T09:03:32+00:00`。
-- Repo Commit：`3650f817f5510c6cfe3a756cd8d4fc410676b287`。
+- Generated At：`2026-07-21T10:25:48+00:00`。
+- Repo Commit：`31baf5d01fc13f5fa917e6deb663d67118413cbe`。
 - 总引用数：`1608`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
@@ -133,9 +133,9 @@
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 29 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 37 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 51 | recovered-source-backlog | oracle-keyword | }else if (dbName.startsWith("oracle")) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 66 | recovered-source-backlog | oracle-keyword | if (dbType.startsWith("oracle")) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 95 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
-| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 123 | recovered-source-backlog | oracle-keyword | }else if (dbName.startsWith("oracle")) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 80 | recovered-source-backlog | oracle-keyword | if (dbType.startsWith("oracle")) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 109 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
+| backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/FieldSyncDBUtils.java | 137 | recovered-source-backlog | oracle-keyword | }else if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java | 18 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java | 47 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |
 | backend/modules/com/supcon/supfusion/configuration/configuration-services-service/1.0.0-SNAPSHOT/com/supcon/supfusion/configuration/services/utils/ModelSyncDBUtils.java | 887 | recovered-source-backlog | oracle-keyword | if (dbName.startsWith("oracle")) { |

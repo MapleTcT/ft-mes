@@ -19,6 +19,7 @@ ENTITY_MODEL_PERSISTENCE_PATH = ROOT / "metadata/entity-model-config-crud-persis
 ENTITY_MODEL_FIELD_PERSISTENCE_PATH = ROOT / "metadata/entity-model-field-persistence-acceptance.json"
 ENTITY_MODEL_FIELD_TYPE_MATRIX_PATH = ROOT / "metadata/entity-model-field-type-matrix-acceptance.json"
 ENTITY_MODEL_OBJECT_ASSOCIATION_PATH = ROOT / "metadata/entity-model-object-association-acceptance.json"
+ENTITY_MODEL_FIELD_DELETE_PATH = ROOT / "metadata/entity-model-field-delete-persistence-acceptance.json"
 NACOS_CONFIG_PATH = ROOT / "metadata/nacos-config-drift-smoke.json"
 KEYCLOAK_JWT_PATH = ROOT / "metadata/keycloak-jwt-runtime-smoke.json"
 
@@ -786,6 +787,8 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
         "deploy/docker/scripts/adp-entity-model-field-type-matrix-acceptance.js",
         "metadata/entity-model-object-association-acceptance.json",
         "deploy/docker/scripts/adp-entity-model-object-association-acceptance.js",
+        "metadata/entity-model-field-delete-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
         "metadata/basic-config-action-matrix.json",
     ):
         if required_ref not in refs:
@@ -1002,6 +1005,69 @@ def check_physical_model_field_acceptance(area: dict[str, Any], failures: list[s
         fail(failures, "OBJECT association browser evidence contains unexpected errors")
     if object_association.get("fatalError") is not None:
         fail(failures, "OBJECT association fatalError must be null")
+
+    field_delete = read_json(
+        ENTITY_MODEL_FIELD_DELETE_PATH,
+        failures,
+        "entity/model PostgreSQL field delete acceptance report",
+    )
+    if not field_delete:
+        return
+    for key, expected in (
+        ("database", "PostgreSQL"),
+        ("module", "basic-config"),
+        ("actionId", "entity-model-postgres-field-delete"),
+        ("areaId", area_id),
+        ("status", "PASS"),
+        ("route", "/msService/ec/engine/msManage"),
+    ):
+        if field_delete.get(key) != expected:
+            fail(failures, f"field delete report {key} must be {expected}")
+    marker = str(field_delete.get("marker", ""))
+    if not marker.startswith("ADP_E2E_") or "PG_FIELD_DELETE" not in marker:
+        fail(failures, "field delete marker must be ADP_E2E_*_PG_FIELD_DELETE")
+    delete_summary = field_delete.get("summary") if isinstance(field_delete.get("summary"), dict) else {}
+    for key, expected in (("testedChecks", 18), ("pass", 18), ("fail", 0), ("blocked", 0), ("status", "PASS")):
+        if delete_summary.get(key) != expected:
+            fail(failures, f"field delete summary.{key} must be {expected}")
+    required_delete_checks = {
+        "ordinary-delete-preserves-column-and-data",
+        "explicit-delete-removes-metadata-column-and-data",
+        "database-dependency-blocks-restrict-delete",
+        "metadata-delete-failure-rolls-back-ddl-and-data",
+        "physical-column-drift-fails-closed",
+        "attachment-metadata-delete-without-physical-column",
+        "inherent-primary-key-delete-rejected",
+        "browser-has-no-unexpected-errors",
+        "controlled-cleanup",
+    }
+    passed_delete_checks = {
+        str(item.get("name"))
+        for item in as_list(field_delete.get("checks"))
+        if isinstance(item, dict) and item.get("status") == "PASS"
+    }
+    missing_delete_checks = sorted(required_delete_checks - passed_delete_checks)
+    if missing_delete_checks:
+        fail(failures, "field delete missing PASS checks: " + ", ".join(missing_delete_checks))
+    browser = field_delete.get("browser") if isinstance(field_delete.get("browser"), dict) else {}
+    if (
+        browser.get("engineNavigationStatus") != 200
+        or browser.get("entityConfigNavigationStatus") != 200
+        or browser.get("modelManageNavigationStatus") != 200
+        or browser.get("deleteWarningVisible") is not True
+        or browser.get("visibleError")
+    ):
+        fail(failures, "field delete browser must load the real model page and irreversible warning")
+    if any(as_list(browser.get(key)) for key in ("consoleErrors", "pageErrors", "requestFailures", "networkErrors")):
+        fail(failures, "field delete browser evidence must contain zero console/page/request/network errors")
+    cleanup = field_delete.get("cleanup") if isinstance(field_delete.get("cleanup"), dict) else {}
+    if any(
+        cleanup.get(key) != 0
+        for key in ("property", "model", "entity", "physicalTable", "dependencyView", "rollbackFunction")
+    ):
+        fail(failures, "field delete cleanup must leave metadata, table and blocker fixtures at zero")
+    if field_delete.get("fatalError") is not None:
+        fail(failures, "field delete fatalError must be null")
 
 
 def check_coverage(data: dict[str, Any], failures: list[str]) -> None:

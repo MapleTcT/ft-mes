@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T08:47:33.358Z",
-  "repoCommit": "3650f817f5510c6cfe3a756cd8d4fc410676b287",
+  "generatedAt": "2026-07-21T10:13:00.755Z",
+  "repoCommit": "31baf5d01fc13f5fa917e6deb663d67118413cbe",
   "database": "PostgreSQL",
   "module": "basic-config",
   "goalId": "G-012",
   "overallStatus": "PARTIAL",
   "summary": {
-    "totalActions": 17,
-    "pass": 8,
+    "totalActions": 18,
+    "pass": 9,
     "readOnlyGuarded": 4,
     "controlledMarkerRequired": 3,
     "planned": 2,
@@ -880,6 +880,103 @@
           "make acceptance-entity-model-field-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ENTITY_MODEL_FIELD_ACCEPTANCE_OUTPUT=metadata/entity-model-field-persistence-acceptance.json",
           "make acceptance-entity-model-field-type-matrix ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_TYPE_MATRIX_OUTPUT=metadata/entity-model-field-type-matrix-acceptance.json",
           "make acceptance-entity-model-object-association ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_OBJECT_ASSOCIATION_OUTPUT=metadata/entity-model-object-association-acceptance.json",
+          "make basic-config-action-matrix-check",
+          "make basic-config-coverage-check"
+        ],
+        "currentGaps": []
+      },
+      "remainingGaps": []
+    },
+    {
+      "id": "entity-model-postgres-field-delete",
+      "areaId": "configuration-physical-model-field",
+      "title": "实体/模型配置 PostgreSQL 受控字段删除",
+      "status": "PASS",
+      "mutationPolicy": "dedicated-marker-required",
+      "riskLevel": "critical",
+      "route": "/msService/ec/engine/msManage",
+      "requiresPersistence": true,
+      "markerPattern": "ADP_E2E_*_PG_FIELD_DELETE",
+      "tables": [
+        "ec_property",
+        "information_schema.columns",
+        "generated_model_physical_table",
+        "pg_class",
+        "pg_trigger"
+      ],
+      "requiredBeforeMutation": [
+        "dedicated-marker",
+        "explicit-user-confirmation",
+        "before-after-sql",
+        "rollback-plan",
+        "field-delete-postgresql-branch",
+        "runtime-page-regression"
+      ],
+      "evidenceRefs": [
+        "metadata/entity-model-field-delete-persistence-acceptance.json",
+        "deploy/docker/scripts/adp-entity-model-field-delete-persistence-acceptance.js",
+        "metadata/persistence-acceptance.json",
+        "docs/backend-table-audit/persistence-acceptance.md",
+        "docs/frontend-functional-test-report.md",
+        "metadata/basic-config-coverage.json",
+        "docs/basic-config-coverage.md",
+        "docs/basic-config-action-matrix.md"
+      ],
+      "acceptedOperations": [
+        "the real entity/model parent page loaded the model field panel and displayed the irreversible-delete warning",
+        "ordinaryDelete soft-disabled ec_property while preserving the PostgreSQL column and marker data",
+        "explicit property delete removed ec_property metadata, the physical column and its data",
+        "DROP COLUMN RESTRICT blocked a dependent PostgreSQL view without changing metadata, column or data",
+        "removing the external dependency allowed an explicit retry to delete the field",
+        "a marker BEFORE DELETE trigger proved metadata failure rolls PostgreSQL DDL and row data back in the same Spring transaction",
+        "physical-column drift failed closed until the column name was repaired",
+        "PROPERTYATTACHMENT deleted metadata without attempting to drop a physical column",
+        "inherent primary-key deletion was rejected",
+        "all controlled rejections returned HTTP 200/success=false with user-readable messages and zero browser errors",
+        "controlled cleanup removed metadata, table, view, function and trigger fixtures"
+      ],
+      "acceptanceContract": {
+        "targetActionId": "entity-model-postgres-field-delete",
+        "scope": "verify metadata soft deletion and explicitly confirmed PostgreSQL physical-column deletion with RESTRICT, transaction rollback, drift protection, protected fields and zero-residue cleanup",
+        "requiredTables": [
+          "ec_property",
+          "information_schema.columns",
+          "generated_model_physical_table",
+          "pg_class",
+          "pg_trigger"
+        ],
+        "frontendRequirement": "The entity configuration parent page must load the model panel, display the irreversible data-loss warning and finish with zero console, page, request or network errors.",
+        "apiEvidenceRequired": [
+          "POST /msService/ec/property/ordinaryDelete request and response",
+          "POST /msService/ec/property/delete request and response",
+          "HTTP 200/success=false structured responses for dependency, rollback, drift and protected-field rejections"
+        ],
+        "backendTraceRequired": [
+          "PropertyController.ordinaryDelete and PropertyController.delete",
+          "ModelServiceImpl.deleteProperty and deletePropertyPhysical",
+          "FieldSyncDBUtils.deleteFieldFromDb",
+          "PostgresFieldSyncSupport.delete",
+          "ALTER TABLE DROP COLUMN RESTRICT in the same Spring transaction as ec_property deletion"
+        ],
+        "persistenceRequirement": "Use ADP_E2E_*_PG_FIELD_DELETE; verify ec_property, information_schema.columns and marker rows after every soft-delete, explicit-delete and rejection stage before controlled cleanup.",
+        "minimumPassConditions": [
+          "ordinary delete preserves the physical column and existing data",
+          "explicit confirmed delete removes metadata, column and field data",
+          "external dependencies block through RESTRICT and survive unchanged",
+          "metadata failure restores DDL and row data in the same transaction",
+          "missing physical columns fail closed until repaired",
+          "PROPERTYATTACHMENT remains metadata-only and inherent primary keys cannot be deleted",
+          "controlled rejections are business responses rather than HTTP 500 errors",
+          "browser errors and cleanup residual counts are all zero"
+        ],
+        "rollbackPlan": [
+          "Restore only the marker field's dependency or drift fixture before retry",
+          "Use the shared transaction to roll back DDL when metadata deletion fails",
+          "Drop only marker-created tables, views, trigger functions and metadata during cleanup",
+          "Verify ec_property, generated table, dependency view and rollback function counts are zero"
+        ],
+        "recheckCommands": [
+          "make acceptance-entity-model-field-delete-persistence ADP_BASE_URL=http://10.11.100.17:18080 ADP_BROWSER_BASE_URL=http://10.11.100.17:18080 ADP_SSH_HOST=10.11.100.17 ENTITY_MODEL_FIELD_DELETE_OUTPUT=metadata/entity-model-field-delete-persistence-acceptance.json",
           "make basic-config-action-matrix-check",
           "make basic-config-coverage-check"
         ],
