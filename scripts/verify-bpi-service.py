@@ -171,6 +171,15 @@ REQUIRED_FILES = [
     "metadata/bpi-quality-release-wms-inbound-acceptance.json",
     "docs/testing/bpi-wms-inbound-reversal-acceptance.md",
     "metadata/bpi-wms-inbound-reversal-acceptance.json",
+    "docs/testing/bpi-formal-identity-wms-reversal-acceptance.md",
+    "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
+    "metadata/bpi-formal-identity-wms-reversal-pending.png",
+    "metadata/bpi-formal-identity-wms-reversal-approved.png",
+    "deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js",
+    "deploy/docker/scripts/adp-bpi-wms-inbound-reversal-target-acceptance.js",
+    "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-fixture.sql",
+    "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-verification.sql",
+    "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-cleanup.sql",
     "metadata/bpi-quality-release-wms-target-acceptance.json",
     "metadata/bpi-quality-release-wms-target.png",
     "metadata/bpi-quality-release-wms-live-target.png",
@@ -1639,6 +1648,269 @@ def main() -> int:
         fail("BPI WMS reversal activation defaults must remain false", failures)
     if any(reversal_acceptance.get("cleanup", {}).values()):
         fail("BPI WMS reversal cleanup must leave zero fixture rows", failures)
+
+    formal_reversal = json.loads(
+        (ROOT / "metadata/bpi-formal-identity-wms-reversal-acceptance.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    formal_target = formal_reversal.get("target", {})
+    formal_scope = formal_reversal.get("scope", {})
+    formal_identity = formal_reversal.get("identity", {})
+    formal_safety = formal_reversal.get("safety", {})
+    expected_disabled_phase2 = (
+        "BPI_PHASE2_INTEGRATION_ENABLED:false,"
+        "BPI_PHASE2_PROTOBUF_HTTP_INGRESS_ENABLED:false,"
+        "BPI_PHASE2_KAFKA_ENABLED:false,"
+        "BPI_WMS_OUTBOX_ENABLED:false,"
+        "BPI_WMS_ADAPTER_ENABLED:false,"
+        "QCS_BPI_OUTBOX_ENABLED:false,"
+    )
+    expected_active_phase2 = expected_disabled_phase2.replace(
+        "BPI_PHASE2_INTEGRATION_ENABLED:false,",
+        "BPI_PHASE2_INTEGRATION_ENABLED:true,",
+        1,
+    )
+    if (formal_reversal.get("status") != (
+            "PASS_TARGET_FORMAL_IDENTITY_WMS_REVERSAL_TWO_BROWSER_SESSIONS_CLEANED")
+            or formal_reversal.get("database") != "PostgreSQL"
+            or formal_reversal.get("repoCommit")
+                != "80cf094a415c4ae33541f08da8b640fc15c52098"
+            or not formal_reversal.get("marker", "").startswith(
+                "ADP_BPI_FORMAL_WMS_REVERSAL_")
+            or formal_target.get("sshHost") != "10.11.100.17"
+            or formal_target.get("adpBaseUrl") != "http://10.11.100.17:18080"
+            or formal_scope != {
+                "tenantId": "1000",
+                "plantId": "PLANT-01",
+                "lineId": "LINE-S07-01",
+            }):
+        fail("BPI formal WMS reversal target, source, or scope evidence is incomplete", failures)
+    formal_current_user = formal_identity.get("currentUser", {})
+    if (formal_identity.get("requesterLogin") != "admin"
+            or formal_identity.get("requesterSubject") != "legacy-ticket:admin"
+            or formal_identity.get("approverLogin") == "admin"
+            or formal_identity.get("approverSubject")
+                == formal_identity.get("requesterSubject")
+            or formal_identity.get("roleCode") != "systemRole"
+            or formal_identity.get("password") != "REDACTED"
+            or formal_current_user.get("loginStatus") != 200
+            or formal_current_user.get("currentUserStatus") != 200
+            or formal_current_user.get("username")
+                != formal_identity.get("approverLogin")
+            or formal_current_user.get("cid") != 1000
+            or "systemRole" not in formal_current_user.get("roles", [])
+            or formal_current_user.get("ticketMode") != "LEGACY_UUID"):
+        fail("BPI formal WMS reversal identity evidence is incomplete", failures)
+    if (formal_safety.get("temporaryFormalIdentity") is not True
+            or formal_safety.get("adapterScopeUsesIsolatedComposeOverride") is not True
+            or formal_safety.get("baseRuntimeEnvEdited") is not False
+            or formal_safety.get("adapterImageMustRemainExact") is not True
+            or formal_safety.get("watchdogSeconds") != 900
+            or formal_safety.get("phase2BaseExpectedEnabled") is not False
+            or formal_safety.get("phase2CommandGateTemporarilyEnabled") is not True
+            or formal_safety.get("kafkaIngressExpectedEnabled") is not False
+            or formal_safety.get("wmsOutboxExpectedEnabled") is not False
+            or formal_safety.get("externalWmsReceiptExpected") is not False
+            or formal_safety.get("cleanupByMarkerAndIdentityOnly") is not True):
+        fail("BPI formal WMS reversal safety boundary is incomplete", failures)
+
+    formal_stages = formal_reversal.get("stages", {})
+    formal_precheck = formal_stages.get("adapterPrecheck", {})
+    formal_activated = formal_stages.get("adapterActivated", {})
+    formal_restored = formal_stages.get("adapterRestored", {})
+    if (formal_precheck != formal_restored
+            or formal_precheck.get("adapterHealth") != "healthy"
+            or formal_precheck.get("serviceHealth") != "healthy"
+            or formal_precheck.get("phase2State") != expected_disabled_phase2
+            or formal_activated.get("phase2State") != expected_active_phase2
+            or formal_activated.get("adapterImageId")
+                != formal_precheck.get("adapterImageId")
+            or formal_activated.get("serviceImageId")
+                != formal_precheck.get("serviceImageId")
+            or formal_identity.get("approverLogin", "")
+                not in formal_activated.get("adapterSubjectScopeRules", "")):
+        fail("BPI formal WMS reversal isolated activation or restoration is incomplete", failures)
+
+    formal_operations = formal_reversal.get("operations", {})
+    identity_operations = formal_operations.get("identityProvisioning", {})
+    reversal_operations = formal_operations.get("reversal", {})
+    formal_request = reversal_operations.get("request", {})
+    formal_rejection = reversal_operations.get("sameActorRejection", {})
+    formal_approval = reversal_operations.get("approval", {})
+    request_result = formal_request.get("response", {})
+    approval_result = formal_approval.get("response", {})
+    if (any(identity_operations.get(key, {}).get("status") != 200
+            for key in ("person", "user", "role"))
+            or identity_operations.get("user", {}).get("password") != "REDACTED"
+            or reversal_operations.get("unauthenticatedRead", {}).get("status") != 401
+            or formal_request.get("status") != 202
+            or formal_request.get("request", {}).get("payload", {}).get("approvalMode")
+                != "REQUEST"
+            or formal_request.get("request", {}).get("ifMatch") != "4"
+            or request_result.get("state") != "PENDING_APPROVAL"
+            or request_result.get("revision") != 1
+            or request_result.get("batchRevision") != 5
+            or request_result.get("requestedBy") != formal_identity.get("requesterSubject")
+            or formal_rejection.get("status") != 403
+            or formal_rejection.get("request", {}).get("payload", {}).get("approvalMode")
+                != "APPROVE"
+            or "different administrator" not in formal_rejection.get(
+                "response", {}).get("detail", "")
+            or formal_approval.get("status") != 202
+            or formal_approval.get("request", {}).get("payload", {}).get("approvalMode")
+                != "APPROVE"
+            or formal_approval.get("request", {}).get("ifMatch") != "5"
+            or approval_result.get("state") != "PENDING_WMS"
+            or approval_result.get("revision") != 2
+            or approval_result.get("batchRevision") != 6
+            or approval_result.get("requestedBy") != formal_identity.get("requesterSubject")
+            or approval_result.get("decidedBy") != formal_identity.get("approverSubject")
+            or approval_result.get("requestedBy") == approval_result.get("decidedBy")
+            or approval_result.get("outboxStatus") != "PENDING"):
+        fail("BPI formal WMS reversal browser command or four-eye evidence is incomplete", failures)
+
+    formal_browser = formal_reversal.get("browser", {})
+    formal_browser_runtime = formal_browser.get("browser", {})
+    formal_browser_geometry = formal_browser_runtime.get("geometry", {})
+    if (formal_browser.get("status") != "PASS"
+            or formal_browser.get("database") != "PostgreSQL"
+            or formal_browser.get("marker") != formal_reversal.get("marker")
+            or formal_browser.get("loginStatus") != 200
+            or formal_browser.get("approverLoginStatus") != 200
+            or formal_browser.get("actors", {}).get("requesterSubject")
+                != formal_identity.get("requesterSubject")
+            or formal_browser.get("actors", {}).get("approverSubject")
+                != formal_identity.get("approverSubject")
+            or formal_browser.get("operations") != reversal_operations
+            or len(formal_browser_runtime.get("consoleErrors", [])) != 1
+            or len(formal_browser_runtime.get("bpiHttpErrors", [])) != 1
+            or formal_browser_runtime.get("bpiHttpErrors", [{}])[0].get("status") != 403
+            or any(formal_browser_runtime.get(key) for key in (
+                "pageErrors", "requestFailures", "unexpectedBpiHttpErrors"))
+            or formal_browser_geometry.get("viewportWidth")
+                != formal_browser_geometry.get("documentWidth")
+            or formal_browser_geometry.get("drawerWidth") != 680
+            or formal_browser.get("error") is not None):
+        fail("BPI formal WMS reversal browser, expected 403, or layout evidence is incomplete", failures)
+
+    formal_postgres = formal_reversal.get("postgres", {})
+    formal_fixture = formal_postgres.get("fixture", {})
+    formal_pending = formal_postgres.get("pending", {})
+    formal_approved = formal_postgres.get("approved", {})
+    pending_batch = formal_pending.get("batch", {})
+    pending_task = formal_pending.get("reversalTask", {})
+    pending_blue = formal_pending.get("originalInbound", {})
+    approved_batch = formal_approved.get("batch", {})
+    approved_task = formal_approved.get("reversalTask", {})
+    approved_blue = formal_approved.get("originalInbound", {})
+    approved_red = formal_approved.get("reversalOutbox", {})
+    if (formal_fixture.get("batchState") != "INBOUNDED"
+            or formal_fixture.get("batchRevision") != 4
+            or formal_fixture.get("commandsEnabled") is not True
+            or formal_fixture.get("wmsLinkEnabled") is not True
+            or pending_batch.get("state") != "INBOUNDED"
+            or pending_batch.get("revision") != 5
+            or pending_batch.get("wmsStatus") != "INBOUNDED"
+            or pending_batch.get("isShadow") is not False
+            or pending_task.get("state") != "PENDING_APPROVAL"
+            or pending_task.get("revision") != 1
+            or pending_task.get("requestedBy") != formal_identity.get("requesterSubject")
+            or pending_task.get("decidedBy") is not None
+            or formal_pending.get("reversalOutbox") is not None
+            or formal_pending.get("idempotencyRows") != 1
+            or formal_pending.get("reversalOutboxRows") != 0
+            or formal_pending.get("reversalInboxRows") != 0
+            or approved_batch.get("state") != "INBOUND_REVERSING"
+            or approved_batch.get("revision") != 6
+            or approved_batch.get("wmsStatus") != "REVERSAL_PENDING"
+            or approved_task.get("state") != "PENDING_WMS"
+            or approved_task.get("revision") != 2
+            or approved_task.get("requestedBy") != formal_identity.get("requesterSubject")
+            or approved_task.get("decidedBy") != formal_identity.get("approverSubject")
+            or formal_approved.get("idempotencyRows") != 2
+            or formal_approved.get("reversalOutboxRows") != 1
+            or formal_approved.get("reversalInboxRows") != 0):
+        fail("BPI formal WMS reversal pending or approved PostgreSQL projection is incomplete", failures)
+    if (pending_blue != approved_blue
+            or pending_blue.get("commandEventId")
+                != formal_fixture.get("originalCommandEventId")
+            or pending_blue.get("documentId")
+                != formal_fixture.get("originalDocumentId")
+            or pending_blue.get("payloadSha256")
+                != formal_fixture.get("originalPayloadSha256")
+            or request_result.get("originalCommandEventId")
+                != formal_fixture.get("originalCommandEventId")
+            or approval_result.get("originalCommandEventId")
+                != formal_fixture.get("originalCommandEventId")
+            or request_result.get("originalDocumentId")
+                != formal_fixture.get("originalDocumentId")
+            or approval_result.get("originalDocumentId")
+                != formal_fixture.get("originalDocumentId")):
+        fail("BPI formal WMS reversal original blue document is not proven immutable", failures)
+    if (approved_red.get("id") != approval_result.get("reversalCommandEventId")
+            or approved_red.get("id") == formal_fixture.get("originalCommandEventId")
+            or approved_red.get("eventType")
+                != "WMS_COMPLETION_INBOUND_REVERSAL_COMMAND"
+            or approved_red.get("topic")
+                != "bpi.wms.completion-inbound-reversal-command.v1"
+            or approved_red.get("status") != "PENDING"
+            or approved_red.get("revision") != 1
+            or approved_red.get("attemptCount") != 0
+            or approved_red.get("payloadBytes") != 994
+            or approved_red.get("headers", {}).get("event_id") != approved_red.get("id")
+            or approved_red.get("headers", {}).get("idempotency_key")
+                != approval_result.get("reversalIdempotencyKey")):
+        fail("BPI formal WMS reversal append-only red command evidence is incomplete", failures)
+    if ([event.get("action") for event in formal_approved.get("stateEvents", [])] != [
+            "WMS_INBOUND_REVERSAL_REQUESTED", "WMS_INBOUND_REVERSAL_APPROVED"]
+            or [event.get("revision") for event in formal_approved.get("stateEvents", [])]
+                != [5, 6]
+            or [event.get("action") for event in formal_approved.get("auditEvents", [])]
+                != ["WMS_INBOUND_REVERSAL_REQUESTED", "WMS_INBOUND_REVERSAL_APPROVED"]):
+        fail("BPI formal WMS reversal state and audit history is incomplete", failures)
+
+    formal_identity_final = formal_postgres.get("identityFinal", {})
+    if (formal_identity_final.get("person", {}).get("valid") != 0
+            or formal_identity_final.get("user", {}).get("valid") != 0
+            or formal_identity_final.get("roleUser") is not None
+            or formal_identity_final.get("authRoles") != []):
+        fail("BPI formal WMS reversal temporary identity cleanup is incomplete", failures)
+    formal_checks = {
+        check.get("name"): check for check in formal_reversal.get("checks", [])
+    }
+    required_formal_checks = {
+        "requester persisted a pending reversal without creating a red command",
+        "pending state preserves the accepted blue document byte-for-byte",
+        "formal approver used a separate ADP browser session through the adapter",
+        "PostgreSQL records distinct requester and approver identities",
+        "approval appends one durable red command without mutating the blue document",
+        "temporary formal identity has no active residual binding",
+        "BPI marker cleanup has zero residual rows",
+        "adapter scope and image restored exactly",
+        "Phase 2 and write-back switches remain disabled",
+    }
+    marker_cleanup = formal_checks.get(
+        "BPI marker cleanup has zero residual rows", {}).get("detail", {})
+    restore_detail = formal_checks.get(
+        "adapter scope and image restored exactly", {}).get("detail", {})
+    if (len(formal_checks) != 20
+            or not required_formal_checks.issubset(formal_checks)
+            or any(check.get("passed") is not True for check in formal_checks.values())
+            or any(value != 0 for value in marker_cleanup.values())
+            or restore_detail.get("before") != restore_detail.get("restored")
+            or formal_reversal.get("issues") != []
+            or not any("residualRows=0" in line
+                       for line in formal_reversal.get("cleanup", {}).get("bpi", []))
+            or formal_reversal.get("cleanup", {}).get("adapter", {}).get(
+                "watchdogRestored") != "false"):
+        fail("BPI formal WMS reversal cleanup or final checks are incomplete", failures)
+    for screenshot in formal_browser.get("screenshots", {}).values():
+        screenshot_path = ROOT / screenshot.get("path", "")
+        if not screenshot_path.is_file():
+            fail(f"BPI formal WMS reversal screenshot is missing: {screenshot.get('path', '')}", failures)
+        elif hashlib.sha256(screenshot_path.read_bytes()).hexdigest() != screenshot.get("sha256"):
+            fail(f"BPI formal WMS reversal screenshot hash does not match: {screenshot.get('path', '')}", failures)
 
     quality_wms_target = json.loads(
         (ROOT / "metadata/bpi-quality-release-wms-target-acceptance.json").read_text(

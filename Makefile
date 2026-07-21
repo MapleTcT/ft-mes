@@ -170,7 +170,7 @@ BPI_STREAM_COMPOSE ?= docker compose --env-file $(BPI_STREAM_COMPOSE_ENV) -f $(B
 .PHONY: wom-print-test wom-print-package wom-print-stage-runtime acceptance-wom-qrcode-persistence acceptance-wom-qrcode-browser
 .PHONY: rm-formula-editor-test rm-formula-editor-package rm-formula-editor-stage-runtime acceptance-rm-web-formula-editor-persistence rm-web-formula-editor-acceptance-check
 .PHONY: wom-quality-reporting-test wom-quality-reporting-package wom-quality-reporting-stage-runtime acceptance-wom-quality-quantity-persistence
-.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target acceptance-bpi-formal-identity-force-close-target acceptance-qcs-bpi-quality-gate-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test qcs-quality-gate-outbox-test qcs-quality-gate-outbox-postgres-test qcs-quality-gate-outbox-package up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
+.PHONY: bpi-api-contract-check bpi-simulation-test bpi-service-static-check bpi-service-test bpi-service-package bpi-wms-adapter-test bpi-wms-adapter-package bpi-wms-outage-fixture-test bpi-runtime-upgrade-expand-only bpi-integrated-upgrade-expand-only acceptance-bpi-quality-release-target acceptance-bpi-wms-reconciliation-target acceptance-bpi-wms-outage-recovery-target acceptance-bpi-force-close-target acceptance-bpi-formal-identity-force-close-target acceptance-bpi-formal-identity-wms-reversal-target acceptance-qcs-bpi-quality-gate-target rehearse-bpi-wms-outage-recovery-target bpi-stream-static-check bpi-stream-test bpi-stream-package bpi-stream-deployment-check bpi-stream-compose-config bpi-stream-deploy-preflight bpi-stream-cluster-smoke bpi-stream-broker-failure-recovery bpi-stream-flink-rollback-rehearsal bpi-stream-cluster-replay bpi-stream-data-quality-replay bpi-stream-joint-replay bpi-stream-rule-deactivate bpi-stream-rule-lifecycle-evidence bpi-stream-postgres-replay bpi-stream-capture-savepoint bpi-stream-restore-savepoint bpi-stream-verify-savepoint bpi-rule-application-flink-acceptance bpi-production-context-test bpi-production-context-postgres-test qcs-quality-gate-outbox-test qcs-quality-gate-outbox-postgres-test qcs-quality-gate-outbox-package up-bpi-stream down-bpi-stream bpi-runtime-replay-test bpi-adapter-static-check bpi-adapter-test bpi-adapter-package bpi-ui-static-check bpi-ui-build bpi-ui-test bpi-feature-flag-governance-acceptance-check bpi-shell-menu-gate-acceptance-check up-bpi
 
 help:
 	@printf '%s\n' 'FT MES development commands:'
@@ -217,6 +217,7 @@ help:
 	@printf '%s\n' '  make acceptance-bpi-wms-outage-recovery-target Test browser recovery after material-wms command DLQ'
 	@printf '%s\n' '  make acceptance-bpi-force-close-target Test governed batch force-close through the real page and API'
 	@printf '%s\n' '  make acceptance-bpi-formal-identity-force-close-target Test two real ADP administrator sessions and PostgreSQL persistence'
+	@printf '%s\n' '  make acceptance-bpi-formal-identity-wms-reversal-target Test governed WMS reversal with two ADP sessions and PostgreSQL evidence'
 	@printf '%s\n' '  make rehearse-bpi-wms-outage-recovery-target Run the guarded target outage, recovery and cleanup rehearsal'
 	@printf '%s\n' '  make bpi-stream-capture-savepoint Capture a non-cancelling canonical upgrade savepoint'
 	@printf '%s\n' '  make bpi-stream-restore-savepoint Recreate only Flink from the persisted savepoint path'
@@ -576,6 +577,9 @@ runtime-script-check:
 	$(NODE) --check deploy/docker/scripts/adp-bpi-force-close-acceptance.js
 	$(NODE) --check deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js
 	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js --print-remote-script | sh -n
+	$(NODE) --check deploy/docker/scripts/adp-bpi-wms-inbound-reversal-target-acceptance.js
+	$(NODE) --check deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js
+	ADP_BASE_URL=http://127.0.0.1 ADP_USERNAME=static ADP_PASSWORD=static NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" $(NODE) deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js --print-remote-script | sh -n
 	$(NODE) --check deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	$(NODE) deploy/docker/scripts/test-adp-production-export-readiness-smoke.js
 	mkdir -p /tmp/adp-rm-export-compat-check
@@ -772,6 +776,9 @@ acceptance-bpi-force-close-target:
 
 acceptance-bpi-formal-identity-force-close-target:
 	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-formal-identity-force-close-acceptance.js
+
+acceptance-bpi-formal-identity-wms-reversal-target:
+	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js
 
 acceptance-qcs-bpi-quality-gate-target:
 	NODE_PATH="$(CURDIR)/frontend/apps/bpi/node_modules" node deploy/docker/scripts/run-qcs-bpi-quality-gate-target.js

@@ -862,6 +862,23 @@ controller/service/repository 则单独连接 PostgreSQL 16.13/Flyway V25 验证
 机器证据：`metadata/bpi-wms-inbound-reversal-acceptance.json`；桌面/移动截图哈希、API 操作、
 PostgreSQL SQL 与边界见 `docs/testing/bpi-wms-inbound-reversal-acceptance.md`。
 
+### BPI V25 正式身份完工入库冲销（2026-07-22）
+
+本节在唯一目标环境 `http://10.11.100.17:18080` 使用真实 ADP 页面、两个独立身份会话、
+Java 8 adapter、Java 17 service 和 PostgreSQL 15.18/Flyway V25。marker、临时身份和隔离运行覆盖
+在取证后全部清理，基础运行配置恢复。
+
+| 模块 | 页面/路由 | 操作 | API | 前端结果 | 后端结果 | 数据库表 | 验收状态 | 问题 |
+|---|---|---|---|---|---|---|---|---|
+| BPI 入库冲销申请 | `http://10.11.100.17:18080/bpi/#/batches` | `admin` 打开 `ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536`，点击“申请入库冲销”，填写依据并提交 | `GET/POST /bpi-api/batches/446cd29f-3f9a-48ef-ab4d-5372cbbfa5bb/wms/reversal` | 未认证 GET 401；页面 POST 202，显示 `PENDING_APPROVAL`、原蓝单和“四眼审批待办”；截图无横向溢出 | batch `INBOUNDED/r4 -> INBOUNDED/r5`；task `PENDING_APPROVAL/r1`；state/audit/idempotency 各 1；红 outbox 0；蓝单 ID/单号/payload SHA 不变 | `bpi_batch_instances`、`bpi_wms_inbound_reversal_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency`、`bpi_wms_inbound_links`、`bpi_outbox_events` | PASS_TARGET_FORMAL_IDENTITY | 无 |
+| BPI 入库冲销职责分离 | 同上 | 申请人尝试自批，再由独立 `systemRole` ADP 会话打开同一页面批准 | 同一 POST | 同人审批得到预期 403；第二账号登录 200、批准 202；页面显示 `PENDING_WMS`、申请人/审批人、红单事件和“原蓝单只读保留”；除预期 403 console 记录外无 page/request/非预期 HTTP error | task `PENDING_WMS/r2`；batch `INBOUND_REVERSING/r6`、`REVERSAL_PENDING`；追加 1 条 994 字节 `PENDING` 红单命令；event/audit/idempotency 为 2/2/2；蓝单事实逐字段不变 | 同上及红单 `bpi_outbox_events` | PASS_SECURITY_AND_PERSISTENCE | 外部 WMS 未启用，所以正确终态停在 `PENDING_WMS` |
+| 验收退场 | 不适用 | 清理 marker、临时 person/user/RBAC、PLANT flags，恢复隔离 Compose override | cleanup SQL；ADP DELETE API | marker 不再出现在页面；临时密码未进入证据 | BPI 11 类 marker/flag 行均 0；临时 identity active binding 为 0；service/adapter 镜像 ID 与 scope 精确恢复；六个集成开关最终均为 false | 上述表及 ADP `org_person`、`auth_user`、`rbac_roleuser`、`auth_user_role` | PASS_CLEANED | 无 |
+
+机器证据：`metadata/bpi-formal-identity-wms-reversal-acceptance.json`；截图：
+`metadata/bpi-formal-identity-wms-reversal-pending.png`、
+`metadata/bpi-formal-identity-wms-reversal-approved.png`；详细报告：
+`docs/testing/bpi-formal-identity-wms-reversal-acceptance.md`。
+
 ## 未完成范围
 
 - 人员勾选创建账号、独立用户管理账号新增/编辑/锁定/解锁/删除、RBAC 角色/角色用户/角色权限/用户权限、RBAC 数据资源权限已完成真实前端和 PostgreSQL 落库验收。

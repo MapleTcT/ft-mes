@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T16:52:52+00:00",
-  "repoCommit": "c7286a825be56bd0922f6d388c69c8ba3ccfe8a7",
-  "findingCount": 1609,
+  "generatedAt": "2026-07-21T18:16:03+00:00",
+  "repoCommit": "80cf094a415c4ae33541f08da8b640fc15c52098",
+  "findingCount": 1610,
   "categoryCounts": {
     "allowed-legacy-contract": 6,
     "decompiled-runtime-backlog": 16,
@@ -12,13 +12,13 @@
     "legacy-ojdbc-dependency": 6,
     "legacy-oracle-sql-resource": 160,
     "postgres-compat-reference": 575,
-    "postgres-conversion-tooling": 45,
+    "postgres-conversion-tooling": 46,
     "recovered-source-backlog": 253,
     "runtime-patch-backlog": 9,
     "tooling-or-audit-code": 269
   },
   "patternCounts": {
-    "decode-sql": 2,
+    "decode-sql": 3,
     "from-dual": 140,
     "ojdbc": 15,
     "oracle-keyword": 637,
@@ -246,7 +246,7 @@
     },
     {
       "file": "Makefile",
-      "line": 306,
+      "line": 307,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -254,7 +254,7 @@
     },
     {
       "file": "Makefile",
-      "line": 307,
+      "line": 308,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -262,7 +262,7 @@
     },
     {
       "file": "Makefile",
-      "line": 310,
+      "line": 311,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -270,7 +270,7 @@
     },
     {
       "file": "Makefile",
-      "line": 311,
+      "line": 312,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -278,7 +278,7 @@
     },
     {
       "file": "Makefile",
-      "line": 411,
+      "line": 412,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -286,7 +286,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1013,
+      "line": 1020,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -294,7 +294,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1014,
+      "line": 1021,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -302,7 +302,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1016,
+      "line": 1023,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -310,7 +310,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1017,
+      "line": 1024,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -318,7 +318,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1025,
+      "line": 1032,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -326,7 +326,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1026,
+      "line": 1033,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -334,7 +334,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1028,
+      "line": 1035,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -342,7 +342,7 @@
     },
     {
       "file": "Makefile",
-      "line": 1029,
+      "line": 1036,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to generate or check migration audit outputs.",
@@ -9069,6 +9069,14 @@
       "excerpt": "'bpi.boundary.rule-publication.v1', :'marker' || '_RULE_KEY', decode('010203', 'hex'),"
     },
     {
+      "file": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-fixture.sql",
+      "line": 60,
+      "pattern": "decode-sql",
+      "category": "postgres-conversion-tooling",
+      "note": "Runtime conversion script; Oracle references should convert away from Oracle defaults.",
+      "excerpt": "decode(:'payload_base64', 'base64'), CAST(:'headers_json' AS jsonb),"
+    },
+    {
       "file": "deploy/docker/scripts/bpi-wms-outage-recovery-fixture.sql",
       "line": 59,
       "pattern": "decode-sql",
@@ -10090,7 +10098,7 @@
       "pattern": "oracle-keyword",
       "category": "documentation-or-workflow",
       "note": "Documentation/template reference; keep wording aligned with PostgreSQL-first policy.",
-      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `210` 项，其中 `207 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
+      "excerpt": "| G-019 | PostgreSQL 缺口进入幂等 SQL/backlog | PARTIAL | Oracle/PostgreSQL 审计、init SQL、backlog 和 watch rationale 已纳入 CI；`metadata/persistence-acceptance.json` 当前有 `213` 项，其中 `210 PASS / 0 FAIL / 0 BLOCKED / 3 NOT_APPLICABLE`；"
     },
     {
       "file": "docs/project-objectives.md",
@@ -11702,7 +11710,7 @@
     },
     {
       "file": "scripts/verify-bpi-service.py",
-      "line": 1145,
+      "line": 1154,
       "pattern": "oracle-keyword",
       "category": "tooling-or-audit-code",
       "note": "Tooling may mention Oracle to detect or convert legacy references.",

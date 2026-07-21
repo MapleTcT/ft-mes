@@ -869,6 +869,22 @@ controller/service/repository。浏览器交互由独立 Playwright simulator �
 默认值和未完成边界见 `docs/testing/bpi-wms-inbound-reversal-acceptance.md`。目标 ADP V25 部署与外部
 ERP/WMS 红字单据联合验收仍未执行。
 
+### BPI V25 正式身份完工入库冲销（目标 PostgreSQL）
+
+本节使用 marker `ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536`，在唯一目标 ADP 环境通过两个
+独立正式身份浏览器会话、Java 8 Adapter、Java 17 Service 和 PostgreSQL 15.18/Flyway V25 验收。
+
+| 业务动作 | 前端入口 | API endpoint | 后端入口 | 目标表 | 验收 SQL | 实际结果 | 状态 |
+|---|---|---|---|---|---|---|---|
+| 正式申请人提交入库冲销 | `/bpi/#/batches`，`admin` 会话 | `POST /bpi-api/batches/446cd29f-3f9a-48ef-ab4d-5372cbbfa5bb/wms/reversal`，`approvalMode=REQUEST` | `BpiProxyController -> BpiRoutePolicy/LegacyTicketVerifier -> BatchController.wmsInboundReversal -> WmsInboundReversalService -> WmsInboundReversalPostgresRepository` | `bpi_batch_instances`、`bpi_wms_inbound_reversal_tasks`、`bpi_batch_state_events`、`bpi_audit_events`、`bpi_api_idempotency`、`bpi_wms_inbound_links`、`bpi_outbox_events` | `bpi-wms-inbound-reversal-acceptance-verification.sql`，按 tenant、batch 和 marker 核对 batch/task、原蓝单、事件、审计、幂等及红单计数 | HTTP 202；`INBOUNDED/r4 -> INBOUNDED/r5`，task `PENDING_APPROVAL/r1`，state/audit/idempotency `1/1/1`，红单 0；原蓝单 event、document 和 payload SHA 不变 | PASS_TARGET_FORMAL_IDENTITY |
+| 同申请人审批失败关闭 | 同一页面和 `admin` 会话 | 同一 POST，`approvalMode=APPROVE` | `WmsInboundReversalService` 职责分离校验 | 上述表 | 对比申请后与拒绝后的同一 verification 快照 | HTTP 403，明确要求不同管理员；batch/task revision、红单、审计和幂等均未形成第二次业务变化 | PASS_FAIL_CLOSED |
+| 正式第二管理员批准并追加红单 | 同一页面，独立 `bpi_reviewer_20260721175536` ADP 会话 | 同一 POST，`approvalMode=APPROVE` | 同上，经 Adapter 正式 ticket 鉴权和 `systemRole -> BPI_ADMIN` 映射 | 上述表 | 同一 verification SQL；对比 fixture/pending/approved 三个原蓝单投影，并读取 reversal outbox | HTTP 202；task `PENDING_WMS/r2`，batch `INBOUND_REVERSING/r6`、`REVERSAL_PENDING`；申请人与审批人不同；恰好追加 1 条 994 字节 `PENDING` 红单，state/audit/idempotency `2/2/2`；原蓝单逐字段不变 | PASS_SECURITY_AND_PERSISTENCE |
+| marker、临时身份和运行覆盖退场 | 不适用 | identity DELETE API；cleanup SQL；隔离 Compose override restore | 受保护 runner `finally` 与 900 秒 watchdog | BPI marker 表、临时 feature flag、ADP `org_person`、`auth_user`、`rbac_roleuser`、`auth_user_role` | cleanup 输出及 marker/identity/scope/image/六开关终态查询 | BPI marker/flag 关联行 0，临时身份 active binding 0；service/adapter 镜像和 Adapter scope 精确恢复；六个集成开关均为 false，watchdog 未触发 | PASS_CLEANED |
+
+机器证据：`metadata/bpi-formal-identity-wms-reversal-acceptance.json`；专项报告：
+`docs/testing/bpi-formal-identity-wms-reversal-acceptance.md`。外部 ERP/WMS 未启用，故本轮正确终态为
+`PENDING_WMS`；外部红单消费、查单、响应丢失、拒绝、补偿和 durable receipt 仍是开放验收边界。
+
 ## 证据要求
 
 - 每个写操作必须带唯一 marker，例如 `ADP_E2E_YYYYMMDD_HHMMSS_xxx`。

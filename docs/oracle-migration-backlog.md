@@ -6,9 +6,9 @@
 
 ## 摘要
 
-- Generated At：`2026-07-21T16:52:52+00:00`。
-- Repo Commit：`c7286a825be56bd0922f6d388c69c8ba3ccfe8a7`。
-- 总引用数：`1609`。
+- Generated At：`2026-07-21T18:16:03+00:00`。
+- Repo Commit：`80cf094a415c4ae33541f08da8b640fc15c52098`。
+- 总引用数：`1610`。
 - 未分类引用数：`0`；新增未分类 Oracle 引用会让生成器失败。
 - 默认运行路径仍以 PostgreSQL 为准；Oracle 只能作为显式 legacy 路径。
 - 机器可读报告：`metadata/oracle-migration-audit.json`。
@@ -25,7 +25,7 @@
 | legacy-ojdbc-dependency | 6 | Recovered module POM declares Oracle JDBC and needs module-level replacement. |
 | legacy-oracle-sql-resource | 160 | Recovered Oracle SQL/mapper resource; keep as reference until PostgreSQL module migration is complete. |
 | postgres-compat-reference | 575 | PostgreSQL compatibility SQL may mention Oracle as source context. |
-| postgres-conversion-tooling | 45 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
+| postgres-conversion-tooling | 46 | Runtime conversion script; Oracle references should convert away from Oracle defaults. |
 | recovered-source-backlog | 253 | Recovered source contains Oracle-specific branch or keyword; verify during module promotion. |
 | runtime-patch-backlog | 9 | Runtime patch still contains Oracle branch logic that should be retired after source promotion. |
 | tooling-or-audit-code | 269 | Tooling may mention Oracle to generate or check migration audit outputs. |

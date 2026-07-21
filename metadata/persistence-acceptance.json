@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T16:06:01.000Z",
-  "repoCommit": "c7286a825be56bd0922f6d388c69c8ba3ccfe8a7+wms-inbound-reversal-worktree",
+  "generatedAt": "2026-07-21T17:57:08.442Z",
+  "repoCommit": "80cf094a415c4ae33541f08da8b640fc15c52098+target-formal-wms-reversal-acceptance",
   "database": "PostgreSQL",
   "status": "PARTIAL_ACCEPTANCE_WITH_NO_FAIL_OR_BLOCKED_PERSISTENCE_ROWS",
   "latestRevalidation": {
-    "generatedAt": "2026-07-21T16:06:01.000Z",
+    "generatedAt": "2026-07-21T17:57:08.442Z",
     "coreFlow": {
       "status": "PASS",
       "evidence": "metadata/core-flow-regression-20260712.json"
@@ -32,10 +32,10 @@
       "evidence": "metadata/core-flow-regression-20260712.json"
     },
     "bpiWmsInboundReversal": {
-      "status": "PASS_LOCAL_BROWSER_API_POSTGRES_PROTOCOL_ONLY",
-      "marker": "ADP_E2E_20260720_BPI_QW_<UUID>",
-      "evidence": "metadata/bpi-wms-inbound-reversal-acceptance.json",
-      "assertions": "browser REQUEST/APPROVE/final states and desktop/mobile layout passed; PostgreSQL V25 request/four-eye/red-command/accepted/rejected/retry/replay tests passed; cleanup 0/0/0/0/0; target deployment and external ERP/WMS remain open"
+      "status": "PASS_TARGET_FORMAL_IDENTITY_PENDING_EXTERNAL_WMS",
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
+      "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
+      "assertions": "target PostgreSQL 15.18/Flyway V25, two real ADP sessions, REQUEST 202, same-actor 403, independent APPROVE 202, immutable blue document, one 994-byte PENDING red outbox, exact identity/marker/runtime cleanup and six restored false switches passed; external ERP/WMS receipt remains open"
     },
     "bpiPointCatalogReadiness": {
       "status": "PASS_CONTROL_WITH_BLOCKED_SOURCE",
@@ -199,8 +199,8 @@
     }
   },
   "summary": {
-    "testedFeatures": 210,
-    "pass": 207,
+    "testedFeatures": 213,
+    "pass": 210,
     "fail": 0,
     "blocked": 0,
     "notApplicable": 3
@@ -4664,9 +4664,82 @@
       "status": "PASS",
       "evidence": "metadata/bpi-wms-inbound-reversal-acceptance.json; WMS_REVERSAL_PERIOD_CLOSED restored INBOUNDED/r7 with REVERSAL_FAILED and preserved the FAILED task; a second request plus independent approval created a second distinct red command and INBOUND_REVERSING/r9 with one active task; cleanup left the five reported marker categories at zero; target deployment and external ERP/WMS remain explicitly outside this PASS",
       "issues": []
+    },
+    {
+      "module": "BPI 目标正式身份完工入库冲销申请",
+      "route": "/bpi/#/batches",
+      "operation": "admin 真实 ADP 浏览器会话对 durable INBOUNDED 批次提交冲销申请并核对待审批中间态、原蓝单不可变和零红单",
+      "api": "POST /bpi-api/batches/446cd29f-3f9a-48ef-ab4d-5372cbbfa5bb/wms/reversal approvalMode=REQUEST",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> BpiRoutePolicy/LegacyTicketVerifier -> BatchController.wmsInboundReversal -> WmsInboundReversalService -> WmsInboundReversalPostgresRepository",
+      "tables": [
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_wms_inbound_links",
+        "bpi.bpi_outbox_events"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-verification.sql verifies INBOUNDED/r5, PENDING_APPROVAL/r1, requested_by legacy-ticket:admin, one state/audit/idempotency row, zero reversal outbox, and the original blue command/document/payload SHA unchanged from the fixture.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json and pending screenshot; unauthenticated read 401, requester login/current page 200, request 202; target PostgreSQL changed INBOUNDED/r4 to INBOUNDED/r5 and persisted PENDING_APPROVAL/r1 with counts 1/1/1 and zero red outbox",
+      "issues": []
+    },
+    {
+      "module": "BPI 目标正式身份完工入库冲销职责分离",
+      "route": "/bpi/#/batches",
+      "operation": "申请人自批失败关闭后，由独立 systemRole ADP 浏览器会话批准，追加唯一红单并冻结原蓝单事实",
+      "api": "POST /bpi-api/batches/446cd29f-3f9a-48ef-ab4d-5372cbbfa5bb/wms/reversal approvalMode=APPROVE",
+      "method": "POST",
+      "requiresPersistence": true,
+      "backendEntry": "BpiProxyController -> LegacyTicketVerifier -> WmsInboundReversalService.approve -> WmsInboundReversalPostgresRepository.approveAndInsertCommand",
+      "tables": [
+        "bpi.bpi_wms_inbound_reversal_tasks",
+        "bpi.bpi_outbox_events",
+        "bpi.bpi_batch_instances",
+        "bpi.bpi_batch_state_events",
+        "bpi.bpi_audit_events",
+        "bpi.bpi_api_idempotency",
+        "bpi.bpi_wms_inbound_links"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
+      "verificationSql": "Compare the pending and approved output of bpi-wms-inbound-reversal-acceptance-verification.sql: same-actor 403 leaves the pending projection unchanged; independent approval requires INBOUND_REVERSING/r6, PENDING_WMS/r2, distinct requested_by/decided_by, one 994-byte PENDING reversal outbox and unchanged original link/document/payload SHA.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json and approved screenshot; same actor returned expected 403 with rollback, independent approver login 200 and approval 202; PostgreSQL state/audit/idempotency 2/2/2, one red outbox event abf196c7-2aa0-56d8-86b0-66d9a6d32878 and no reversal inbox because external WMS remained disabled",
+      "issues": []
+    },
+    {
+      "module": "BPI 目标正式身份冲销验收退场",
+      "route": "/bpi/#/batches",
+      "operation": "定向清理 BPI marker、临时正式身份和 PLANT 覆盖，并精确恢复 Adapter scope、镜像和六个集成开关",
+      "api": "ADP identity DELETE APIs; BPI cleanup SQL; isolated Compose override restore",
+      "method": "DELETE/SQL/COMPOSE",
+      "requiresPersistence": true,
+      "backendEntry": "protected acceptance runner finally block and 900-second watchdog",
+      "tables": [
+        "bpi marker tables",
+        "bpi.bpi_feature_flags",
+        "public.org_person",
+        "public.auth_user",
+        "public.rbac_roleuser",
+        "public.auth_user_role"
+      ],
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
+      "verificationSql": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-cleanup.sql plus final marker, identity, image, scope and environment-switch queries require zero active residual bindings, zero BPI marker/flag rows and exact runtime restoration.",
+      "status": "PASS",
+      "evidence": "metadata/bpi-formal-identity-wms-reversal-acceptance.json; BPI cleanup residualRows=0, person/user soft-deleted, active RBAC/auth bindings 0, service/adapter image IDs and base scope restored exactly, all six integration/write-back switches false, watchdog did not fire",
+      "issues": []
     }
   ],
   "evidence": [
+    {
+      "marker": "ADP_BPI_FORMAL_WMS_REVERSAL_20260721175536",
+      "artifact": "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
+      "summary": "Target PostgreSQL 15.18/Flyway V25, real BPI page and two independent ADP sessions closed request, expected same-actor rejection and independent approval; PostgreSQL proved immutable blue document, one append-only PENDING red command, exact identity/marker cleanup and restored disabled integration controls. External ERP/WMS consumption and durable receipt remain open."
+    },
     {
       "marker": "ADP_E2E_20260720_BPI_QW_<UUID>",
       "artifact": "metadata/bpi-wms-inbound-reversal-acceptance.json",

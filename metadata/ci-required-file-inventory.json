@@ -3555,6 +3555,12 @@
     },
     {
       "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-formal-identity-wms-reversal-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-integrated-rollback-rehearsal.js",
       "state": "tracked",
       "tracked": true
@@ -3610,6 +3616,12 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/adp-bpi-version-lifecycle-acceptance.js",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/adp-bpi-wms-inbound-reversal-target-acceptance.js",
       "state": "tracked",
       "tracked": true
     },
@@ -4084,6 +4096,24 @@
     {
       "ignored": false,
       "path": "deploy/docker/scripts/bpi-version-lifecycle-verification.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-cleanup.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-fixture.sql",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "deploy/docker/scripts/bpi-wms-inbound-reversal-acceptance-verification.sql",
       "state": "tracked",
       "tracked": true
     },
@@ -5487,6 +5517,12 @@
     },
     {
       "ignored": false,
+      "path": "docs/testing/bpi-formal-identity-wms-reversal-acceptance.md",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
       "path": "docs/testing/bpi-integrated-rollback-acceptance.md",
       "state": "tracked",
       "tracked": true
@@ -5944,6 +5980,24 @@
     {
       "ignored": false,
       "path": "metadata/bpi-formal-identity-force-close-pending.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-reversal-acceptance.json",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-reversal-approved.png",
+      "state": "tracked",
+      "tracked": true
+    },
+    {
+      "ignored": false,
+      "path": "metadata/bpi-formal-identity-wms-reversal-pending.png",
       "state": "tracked",
       "tracked": true
     },
@@ -9788,16 +9842,16 @@
       "tracked": 20
     },
     "deploy": {
-      "tracked": 615
+      "tracked": 620
     },
     "docs": {
-      "tracked": 118
+      "tracked": 119
     },
     "frontend": {
       "tracked": 11
     },
     "metadata": {
-      "tracked": 200
+      "tracked": 203
     },
     "package.json": {
       "tracked": 1
@@ -9821,8 +9875,8 @@
   "summary": {
     "ignored": 0,
     "missingReferences": 0,
-    "totalFiles": 1627,
-    "tracked": 1627,
+    "totalFiles": 1636,
+    "tracked": 1636,
     "untracked": 0
   },
   "untrackedByDirectory": []
